@@ -5,7 +5,7 @@ export const paths = (function () {
 
   const sdk_eth = path.join(__dirname, "../../../sdk/ewallet_sdk_eth/");
 
-  const sdk_cosmos = path.join(__dirname, "../../../sdk/ewallet_sdk_eth/");
+  const sdk_cosmos = path.join(__dirname, "../../../sdk/ewallet_sdk_cosmos/");
 
   return {
     sdk_core,
