@@ -1,7 +1,6 @@
 import { createPgDatabase } from "@keplr-ewallet-cv-server/database";
 import { makeApp } from "@keplr-ewallet-cv-server/app";
 import { Envs } from "@keplr-ewallet-cv-server/envs";
-import { localPorts } from "@keplr-ewallet/dev-env";
 
 async function main() {
   const createPostgresRes = await createPgDatabase({
@@ -18,10 +17,8 @@ async function main() {
     return createPostgresRes;
   }
 
-  const port =
-    Envs.COMMITTEE_ID === 1
-      ? localPorts.credential_vault
-      : localPorts.credential_vault_2;
+  // @TODO: move to envs
+  const port = Envs.COMMITTEE_ID === 1 ? 4201 : 4202;
 
   const app = makeApp();
 

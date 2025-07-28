@@ -13,8 +13,7 @@
       "sdk/ewallet_sdk_eth",
       "sdk/sandboxes/sandbox_evm",
       "sdk/sandboxes/sandbox_osmosis",
-      "crypto/bytes",
-      "crypto/sha"
+      "crypto/bytes"
     ]
   },
   "packageManager": "yarn@4.7.0",
