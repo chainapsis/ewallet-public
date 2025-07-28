@@ -20,6 +20,9 @@ export async function signArbitrary(
     const signDocHash = sha256(serializeSignDoc(signDoc));
     const origin = this.eWallet.origin;
 
+    const chainInfoList = await this.getCosmosChainInfoList();
+    const chainInfo = chainInfoList.find((info) => info.chainId === chainId);
+
     const msg: EWalletMsg = {
       msg_type: "show_modal",
       payload: {
@@ -30,9 +33,9 @@ export async function signArbitrary(
           payload: {
             chain_info: {
               chain_id: chainId,
-              chain_name: "cosmos",
+              chain_name: chainInfo?.chainName ?? "",
               chain_symbol_image_url:
-                "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/cosmoshub/uatom.png",
+                chainInfo?.stakeCurrency?.coinImageUrl ?? "",
             },
             signer,
             data,
