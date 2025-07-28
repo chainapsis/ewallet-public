@@ -11,7 +11,6 @@ export interface OtherModalPayload {
 
 export type MakeSignatureModalPayload = {
   modal_type: "make_signature";
-  is_demo: boolean;
   data: MakeCosmosSigData | MakeEthereumSigData;
 };
 

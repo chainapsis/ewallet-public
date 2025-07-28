@@ -28,7 +28,6 @@ export async function makeSignature<M extends EthSignMethod>(
         msg_type: "show_modal",
         payload: {
           modal_type: "make_signature",
-          is_demo: true,
           data: {
             chain_type: "eth",
             sign_type: "tx",
@@ -92,7 +91,6 @@ export async function makeSignature<M extends EthSignMethod>(
         msg_type: "show_modal",
         payload: {
           modal_type: "make_signature",
-          is_demo: true,
           data: {
             chain_type: "eth",
             sign_type: "arbitrary",
@@ -149,7 +147,6 @@ export async function makeSignature<M extends EthSignMethod>(
         msg_type: "show_modal",
         payload: {
           modal_type: "make_signature",
-          is_demo: true,
           data: {
             chain_type: "eth",
             sign_type: "eip712",
