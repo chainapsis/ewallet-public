@@ -3140,7 +3140,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keplr-ewallet/ewallet-sdk-core@npm:0.0.5-rc.0, @keplr-ewallet/ewallet-sdk-core@workspace:*, @keplr-ewallet/ewallet-sdk-core@workspace:sdk/ewallet_sdk_core":
+"@keplr-ewallet/ewallet-sdk-core@npm:^0.0.5-rc.1, @keplr-ewallet/ewallet-sdk-core@workspace:*, @keplr-ewallet/ewallet-sdk-core@workspace:sdk/ewallet_sdk_core":
   version: 0.0.0-use.local
   resolution: "@keplr-ewallet/ewallet-sdk-core@workspace:sdk/ewallet_sdk_core"
   dependencies:
@@ -3160,7 +3160,7 @@ __metadata:
   dependencies:
     "@cosmjs/amino": "npm:^0.33.1"
     "@cosmjs/proto-signing": "npm:^0.33.1"
-    "@keplr-ewallet/ewallet-sdk-core": "npm:0.0.5-rc.0"
+    "@keplr-ewallet/ewallet-sdk-core": "npm:^0.0.5-rc.1"
     "@keplr-wallet/common": "npm:^0.12.253"
     "@keplr-wallet/cosmos": "npm:^0.12.253"
     "@keplr-wallet/crypto": "npm:^0.12.253"
@@ -3187,7 +3187,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@keplr-ewallet/ewallet-sdk-eth@workspace:sdk/ewallet_sdk_eth"
   dependencies:
-    "@keplr-ewallet/ewallet-sdk-core": "npm:0.0.5-rc.0"
+    "@keplr-ewallet/ewallet-sdk-core": "npm:^0.0.5-rc.1"
     "@types/jest": "npm:*"
     "@types/node": "npm:*"
     "@typescript-eslint/eslint-plugin": "npm:*"
