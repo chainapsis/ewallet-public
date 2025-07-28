@@ -31,9 +31,6 @@ export function loadEnvs(): EnvType {
     process.env.COMMITTEE_ID === "1" ? "" : `_${process.env.COMMITTEE_ID}`;
   const envFileName = `${ENV_FILE_NAME_STEM}${committeeIdSuffix}.env`;
   const envPath = path.join(os.homedir(), ".keplr_ewallet", envFileName);
-  if (!fs.existsSync(envPath)) {
-    throw new Error(`Env file does not exists, path: ${envPath}`);
-  }
 
   dotenv.config({
     path: envPath,
