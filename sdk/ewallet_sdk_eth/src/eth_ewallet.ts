@@ -4,7 +4,6 @@ import { publicKeyToAddress } from "viem/accounts";
 import { base, mainnet, optimism } from "viem/chains";
 
 import type { EIP1193Provider } from "@keplr-ewallet-sdk-eth/provider";
-import type { IEthEWallet } from "@keplr-ewallet-sdk-eth/types";
 import {
   getPublicKey,
   makeSignature,
@@ -16,15 +15,21 @@ import {
 
 const SUPPORTED_CHAINS = [mainnet, base, optimism];
 
-export class EthEWallet implements IEthEWallet {
+export class EthEWallet {
   readonly eWallet: KeplrEWallet;
-  private _cachedProvider: EIP1193Provider | null = null;
-  private _address: Address | null = null;
-  private _activeChainId: number = 1; // TODO: get active chain id from ewallet
-  private readonly _chains = SUPPORTED_CHAINS;
+  private _cachedProvider: EIP1193Provider | null;
+  private _address: Address | null;
+
+  // TODO: get active chain id from ewallet
+  private _activeChainId: number;
+  private readonly _chains;
 
   constructor(eWallet: KeplrEWallet) {
     this.eWallet = eWallet;
+    this._cachedProvider = null;
+    this._address = null;
+    this._activeChainId = 1;
+    this._chains = SUPPORTED_CHAINS;
   }
 
   async initialize(initialChainId?: string | number): Promise<void> {
@@ -51,26 +56,26 @@ export class EthEWallet implements IEthEWallet {
     if (this._address === null) {
       throw new Error("EthEWallet not initialized. Call initialize() first.");
     }
-    return this._address;
+    return this.address;
   }
 
-  protected get cachedProvider(): EIP1193Provider | null {
+  get cachedProvider(): EIP1193Provider | null {
     return this._cachedProvider;
   }
 
-  protected set cachedProvider(provider: EIP1193Provider | null) {
+  set cachedProvider(provider: EIP1193Provider | null) {
     this._cachedProvider = provider;
   }
 
-  protected get activeChainId(): number {
+  get activeChainId(): number {
     return this._activeChainId;
   }
 
-  protected set activeChainId(chainId: number) {
+  set activeChainId(chainId: number) {
     this._activeChainId = chainId;
   }
 
-  protected get chains() {
+  get chains() {
     return this._chains;
   }
 
