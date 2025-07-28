@@ -1,10 +1,11 @@
+import type { Hex } from "viem";
 import type { KeplrEWallet } from "@keplr-ewallet/ewallet-sdk-core";
 
 import { EthEWallet } from "@keplr-ewallet-sdk-eth/eth_ewallet";
 
 export interface InitEthEWalletArgs {
   eWallet: KeplrEWallet | null;
-  initialChainId?: string | number;
+  initialChainId?: Hex | number;
 }
 
 export async function initEthEWallet({

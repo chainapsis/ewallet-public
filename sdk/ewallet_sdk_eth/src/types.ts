@@ -8,8 +8,6 @@ import type {
   TransactionSerializable,
 } from "viem";
 
-import type { EIP1193Provider } from "@keplr-ewallet-sdk-eth/provider";
-
 export interface EthSignMethodMap {
   sign_transaction: {
     params: {

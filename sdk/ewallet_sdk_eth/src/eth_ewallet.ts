@@ -1,5 +1,5 @@
 import type { KeplrEWallet } from "@keplr-ewallet/ewallet-sdk-core";
-import { type Address } from "viem";
+import type { Address, Hex } from "viem";
 import { publicKeyToAddress } from "viem/accounts";
 import { base, mainnet, optimism } from "viem/chains";
 
@@ -13,14 +13,13 @@ import {
   toViemAccount,
 } from "@keplr-ewallet-sdk-eth/api";
 
+// TODO: define supported chains in ewallet
 const SUPPORTED_CHAINS = [mainnet, base, optimism];
 
 export class EthEWallet {
   readonly eWallet: KeplrEWallet;
   private _cachedProvider: EIP1193Provider | null;
   private _address: Address | null;
-
-  // TODO: get active chain id from ewallet
   private _activeChainId: number;
   private readonly _chains;
 
@@ -32,16 +31,26 @@ export class EthEWallet {
     this._chains = SUPPORTED_CHAINS;
   }
 
-  async initialize(initialChainId?: string | number): Promise<void> {
-    // check if already initialized
-    if (this._address !== null) {
+  async initialize(initialChainId?: Hex | number): Promise<void> {
+    const isInitialized =
+      this._address !== null && this._cachedProvider !== null;
+    if (isInitialized) {
       return;
     }
 
     const publicKey = await this.getPublicKey();
     this._address = publicKeyToAddress(publicKey);
 
-    // init provider with initial chain id
+    const provider = await this.getEthereumProvider();
+    this.cachedProvider = provider;
+
+    if (initialChainId) {
+      try {
+        await this.switchChain(initialChainId);
+      } catch (error) {
+        console.error("Failed to switch chain", error);
+      }
+    }
   }
 
   get type(): "ethereum" {
@@ -56,14 +65,14 @@ export class EthEWallet {
     if (this._address === null) {
       throw new Error("EthEWallet not initialized. Call initialize() first.");
     }
-    return this.address;
+    return this._address;
   }
 
   get cachedProvider(): EIP1193Provider | null {
     return this._cachedProvider;
   }
 
-  set cachedProvider(provider: EIP1193Provider | null) {
+  protected set cachedProvider(provider: EIP1193Provider | null) {
     this._cachedProvider = provider;
   }
 
@@ -71,7 +80,7 @@ export class EthEWallet {
     return this._activeChainId;
   }
 
-  set activeChainId(chainId: number) {
+  protected set activeChainId(chainId: number) {
     this._activeChainId = chainId;
   }
 
