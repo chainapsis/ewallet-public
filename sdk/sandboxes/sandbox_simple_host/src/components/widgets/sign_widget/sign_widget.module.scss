@@ -1,0 +1,59 @@
+.container {
+  display: flex;
+  padding: var(--spacing-3xl, 24px);
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: stretch;
+}
+
+.chainBadge {
+  display: flex;
+  padding: 4px 8px;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  border-radius: 16px;
+  border: 1px solid var(--border-primary);
+  background: var(--bg-primary);
+  width: auto;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  align-self: stretch;
+  padding: 0;
+  margin-bottom: var(--Spacing-Block-1rem, 16px);
+}
+
+.infoBox {
+  padding: var(--spacing-xl, 16px);
+  width: 100%;
+  border-radius: 16px;
+  background: var(--bg-secondary);
+  margin-bottom: 20px;
+
+  .infoParagraph {
+    display: flex;
+    gap: 10px;
+  }
+
+  .infoList {
+    list-style-type: disc;
+    padding-left: 39px;
+  }
+}
+
+.onchainTest {
+  margin-bottom: var(--Spacing-Block-125rem, 20px);
+}
+
+.loading {
+  display: flex;
+  width: 100%;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: var(--Spacing-Block-125rem, 20px);
+}

@@ -1,0 +1,108 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 24px 24px 24px;
+}
+
+.logoWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  height: 120px;
+  gap: 10px;
+}
+
+.dividerRow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+  align-self: stretch;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.line {
+  flex: 1 0 0;
+  height: 1px;
+  background: var(--fg-disabled-subtle);
+}
+
+.dividerText {
+  text-align: center;
+}
+
+.walletBoxRow {
+  display: flex;
+  align-items: flex-start;
+  align-self: stretch;
+  gap: 12px;
+  opacity: 0.6;
+}
+
+.signingInWrapper {
+  display: flex;
+  padding: var(--spacing-4xl, 32px) var(--spacing-3xl, 24px)
+    var(--spacing-3xl, 24px) var(--spacing-3xl, 24px);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.googleCircle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 3px solid #e9eaeb;
+  background: #fff;
+  margin-bottom: 20px;
+}
+
+.signingInText {
+  text-align: center;
+}
+
+.loginInfoContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+
+  gap: 20px;
+
+  .loginInfoRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    align-self: stretch;
+
+    .signOutButton {
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+  }
+
+  .publicKeyRow {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    align-self: stretch;
+
+    gap: 8px;
+
+    .label {
+      flex-shrink: 0;
+    }
+    .publicKey {
+      word-break: break-all;
+    }
+  }
+}

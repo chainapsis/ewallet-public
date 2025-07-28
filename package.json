@@ -13,6 +13,7 @@
       "sdk/ewallet_sdk_eth",
       "sdk/sandboxes/sandbox_evm",
       "sdk/sandboxes/sandbox_osmosis",
+      "sdk/sandboxes/sandbox_simple_host",
       "crypto/bytes"
     ]
   },
@@ -50,6 +51,7 @@
     "lerna": "8.2.3",
     "prettier": "^3.6.2",
     "tsc-alias": "^1.8.16",
-    "typescript": "^5"
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
   }
 }

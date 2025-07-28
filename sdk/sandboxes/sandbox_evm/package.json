@@ -1,6 +1,5 @@
 {
   "name": "sandbox-evm",
-  "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "tsx launch.ts",
