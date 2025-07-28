@@ -1,6 +1,6 @@
 import { execSync, spawnSync } from "node:child_process";
 
-import { paths } from "../paths.ts";
+import { paths } from "../paths";
 
 export async function buildSDK(..._args: any[]) {
   console.info("Start building SDKs...");
