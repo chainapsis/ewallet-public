@@ -1,6 +1,37 @@
+import type {
+  SignableMessage,
+  TransactionSerializable,
+  TypedDataDefinition,
+  Signature,
+  Hex,
+} from "viem";
+import {
+  serializeTransaction,
+  hashMessage,
+  hashTypedData,
+  keccak256,
+  toBytes,
+  pad,
+  hexToBigInt,
+} from "viem";
 import type { SignOutput } from "@keplr-ewallet/ewallet-sdk-core";
-import { type Hex, type Signature, pad, hexToBigInt } from "viem";
 import { secp256k1 } from "@noble/curves/secp256k1";
+
+export const hashEthereumMessage = (message: SignableMessage): Uint8Array => {
+  return toBytes(hashMessage(message));
+};
+
+export const hashEthereumTransaction = (
+  transaction: TransactionSerializable,
+): Uint8Array => {
+  return toBytes(keccak256(serializeTransaction(transaction)));
+};
+
+export const hashEthereumTypedData = (
+  typedData: TypedDataDefinition,
+): Uint8Array => {
+  return toBytes(hashTypedData(typedData));
+};
 
 // ref: fullSignatureToEvmSig in cait_sith_keplr_addon/src/tests/eth_tx_sign.test.ts
 export const encodeEthereumSignature = (

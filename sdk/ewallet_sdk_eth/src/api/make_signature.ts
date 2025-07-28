@@ -10,8 +10,8 @@ import {
   hashEthereumMessage,
   hashEthereumTransaction,
   hashEthereumTypedData,
-} from "@keplr-ewallet-sdk-eth/hash";
-import { encodeEthereumSignature } from "@keplr-ewallet-sdk-eth/encode";
+  encodeEthereumSignature,
+} from "@keplr-ewallet-sdk-eth/utils";
 import type { EthEWallet } from "@keplr-ewallet-sdk-eth/eth_ewallet";
 
 export async function makeSignature<M extends EthSignMethod>(
