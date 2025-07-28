@@ -1,8 +1,14 @@
 import { publicKeyToAddress, serializeSignature } from "viem/accounts";
-import { encodeEthereumSignature, publicKeyToEthereumAddress } from "./utils";
 import { recoverPublicKey } from "viem";
 
+import { publicKeyToEthereumAddress } from "./utils";
+import { encodeEthereumSignature } from "./signature";
+
 describe("encodeEthereumSignature", () => {
+  it("t_111", async () => {
+    console.log(123);
+  });
+
   it("should encode the signature correctly", async () => {
     const publicKey =
       "0268d39a99cf77adba08a28877900023513f6e49b702901fb53a90d9c1187e1aa4";
