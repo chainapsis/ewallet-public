@@ -3041,6 +3041,21 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@keplr-ewallet/credential-vault-interface@workspace:credential_vault/cv_interface":
+  version: 0.0.0-use.local
+  resolution: "@keplr-ewallet/credential-vault-interface@workspace:credential_vault/cv_interface"
+  dependencies:
+    "@types/jest": "npm:*"
+    "@types/node": "npm:*"
+    "@typescript-eslint/eslint-plugin": "npm:*"
+    "@typescript-eslint/parser": "npm:*"
+    jest: "npm:*"
+    ts-jest: "npm:*"
+    tsx: "npm:*"
+    typescript: "npm:*"
+  languageName: unknown
+  linkType: soft
+
 "@keplr-ewallet/credential-vault-pg-interface@workspace:*, @keplr-ewallet/credential-vault-pg-interface@workspace:credential_vault/pg_interface":
   version: 0.0.0-use.local
   resolution: "@keplr-ewallet/credential-vault-pg-interface@workspace:credential_vault/pg_interface"
@@ -3064,7 +3079,6 @@ __metadata:
   resolution: "@keplr-ewallet/credential-vault-server@workspace:credential_vault/server"
   dependencies:
     "@keplr-ewallet/credential-vault-pg-interface": "workspace:*"
-    "@keplr-ewallet/tecdsa-interface": "workspace:*"
     "@types/cors": "npm:^2.8.17"
     "@types/express": "npm:^4.17.20"
     "@types/jest": "npm:^29.5.13"
@@ -3157,7 +3171,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keplr-ewallet/tecdsa-interface@workspace:*, @keplr-ewallet/tecdsa-interface@workspace:crypto/tecdsa/tecdsa_interface":
+"@keplr-ewallet/tecdsa-interface@workspace:crypto/tecdsa/tecdsa_interface":
   version: 0.0.0-use.local
   resolution: "@keplr-ewallet/tecdsa-interface@workspace:crypto/tecdsa/tecdsa_interface"
   dependencies:

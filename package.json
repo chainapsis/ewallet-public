@@ -5,6 +5,7 @@
       "internals/ci",
       "credential_vault/pg_interface",
       "credential_vault/server",
+      "credential_vault/cv_interface",
       "crypto/tecdsa/tecdsa_interface",
       "sdk/ewallet_sdk_core",
       "sdk/ewallet_sdk_cosmos",
