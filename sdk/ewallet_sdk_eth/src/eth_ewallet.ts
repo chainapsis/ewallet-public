@@ -1,5 +1,5 @@
 import type { KeplrEWallet } from "@keplr-ewallet/ewallet-sdk-core";
-import { type Hex } from "viem";
+import { type Address } from "viem";
 import { publicKeyToAddress } from "viem/accounts";
 import { base, mainnet, optimism } from "viem/chains";
 
@@ -19,7 +19,7 @@ const SUPPORTED_CHAINS = [mainnet, base, optimism];
 export class EthEWallet implements IEthEWallet {
   readonly eWallet: KeplrEWallet;
   private _cachedProvider: EIP1193Provider | null = null;
-  private _address: Hex | null = null;
+  private _address: Address | null = null;
   private _activeChainId: number = 1; // TODO: get active chain id from ewallet
   private readonly _chains = SUPPORTED_CHAINS;
 
@@ -28,12 +28,15 @@ export class EthEWallet implements IEthEWallet {
   }
 
   async initialize(initialChainId?: string | number): Promise<void> {
-    if (this._address === null) {
-      const publicKey = await this.getPublicKey();
-      this._address = publicKeyToAddress(publicKey);
+    // check if already initialized
+    if (this._address !== null) {
+      return;
     }
 
-    // TODO: get supported chains from keplr registry
+    const publicKey = await this.getPublicKey();
+    this._address = publicKeyToAddress(publicKey);
+
+    // init provider with initial chain id
   }
 
   get type(): "ethereum" {
@@ -44,7 +47,7 @@ export class EthEWallet implements IEthEWallet {
     return `eip155:${this._activeChainId}`;
   }
 
-  get address(): Hex {
+  get address(): Address {
     if (this._address === null) {
       throw new Error("EthEWallet not initialized. Call initialize() first.");
     }

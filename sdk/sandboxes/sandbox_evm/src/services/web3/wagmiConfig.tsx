@@ -1,5 +1,19 @@
-import { Chain, createClient, fallback, getAddress, http, toHex } from "viem";
+import {
+  Chain,
+  createClient,
+  fallback,
+  getAddress,
+  hashMessage,
+  hashTypedData,
+  Hex,
+  http,
+  keccak256,
+  parseSignature,
+  serializeTransaction,
+  toHex,
+} from "viem";
 import { hardhat, mainnet } from "viem/chains";
+import { privateKeyToAccount } from "viem/accounts";
 import { createConfig, CreateConnectorFn, createConnector } from "wagmi";
 import {
   connectorsForWallets,
@@ -10,11 +24,14 @@ import { coinbaseWallet, metaMaskWallet } from "@rainbow-me/rainbowkit/wallets";
 import { toPrivyWallet } from "@privy-io/cross-app-connect/rainbow-kit";
 import { KeplrEWallet } from "@keplr-ewallet/ewallet-sdk-core";
 import {
-  createEthLocalSigner,
   type EIP1193Provider,
   EthEWallet,
+  EthSigner,
+  EthSignMethod,
   initEthEWallet,
   initEWalletEIP1193Provider,
+  SignFunctionParams,
+  SignFunctionResult,
 } from "@keplr-ewallet/ewallet-sdk-eth";
 
 import { getAlchemyHttpUrl } from "@keplr-ewallet-sandbox-evm/utils/scaffold-eth";
@@ -41,6 +58,58 @@ export const enabledChains = targetNetworks.find(
 )
   ? targetNetworks
   : ([...targetNetworks, mainnet] as const);
+
+export const createEthLocalSigner = (
+  privateKey: Hex,
+): EthSigner & { signHash: ({ hash }: { hash: Hex }) => Promise<Hex> } => {
+  const account = privateKeyToAccount(privateKey);
+  return {
+    address: account.address,
+    sign: async function <M extends EthSignMethod>(
+      parameters: SignFunctionParams<M>,
+    ): Promise<SignFunctionResult<M>> {
+      switch (parameters.type) {
+        case "sign_transaction": {
+          const { transaction } = parameters.data;
+          const serializedTx = serializeTransaction(transaction);
+          const hash = keccak256(serializedTx);
+          const signature = await account.sign({ hash });
+          const signedTransaction = serializeTransaction(
+            transaction,
+            parseSignature(signature),
+          );
+          return {
+            type: "signed_transaction",
+            signedTransaction,
+          };
+        }
+        case "personal_sign": {
+          const { message } = parameters.data;
+          const hash = hashMessage(message);
+          const signature = await account.sign({ hash });
+          return {
+            type: "signature",
+            signature,
+          };
+        }
+        case "sign_typedData_v4": {
+          const { message } = parameters.data;
+          const hash = hashTypedData(message);
+          const signature = await account.sign({ hash });
+          return {
+            type: "signature",
+            signature,
+          };
+        }
+        default:
+          throw new Error(`Unknown sign type: ${(parameters as any).type}`);
+      }
+    },
+    signHash: async ({ hash }: { hash: Hex }): Promise<Hex> => {
+      return await account.sign({ hash });
+    },
+  };
+};
 
 export interface WalletConnectOptions {
   projectId: string;
