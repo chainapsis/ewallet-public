@@ -2,6 +2,7 @@
   "name": "@keplr-ewallet/bytes",
   "type": "module",
   "main": "./src/index.ts",
+  "version": "0.0.1",
   "packageManager": "yarn@4.7.0",
   "dependencies": {
     "@keplr-ewallet/stdlib-js": "workspace:*"

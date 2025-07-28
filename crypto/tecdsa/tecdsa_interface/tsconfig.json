@@ -9,7 +9,6 @@
     "sourceMap": true,
     "outDir": "./dist",
     "removeComments": true,
-    "noEmit": true,
     "noImplicitAny": true,
     "strict": true,
     "noImplicitThis": true,

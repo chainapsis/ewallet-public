@@ -1,4 +1,5 @@
 {
+  "private": true,
   "name": "@keplr-ewallet/ci",
   "packageManager": "yarn@4.7.0",
   "scripts": {
