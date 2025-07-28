@@ -6,5 +6,6 @@
     "crypto/bytes",
     "tecdsa/tecdsa_interface"
   ],
-  "version": "independent"
+  "version": "independent",
+  "npmClient": "yarn"
 }
