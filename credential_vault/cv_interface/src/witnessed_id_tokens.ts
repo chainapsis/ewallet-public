@@ -1,4 +1,4 @@
-import type { Bytes32, Bytes33 } from "@keplr-ewallet/crypto-js";
+import type { Bytes32, Bytes33 } from "@keplr-ewallet/bytes";
 
 export interface WitnessedIdToken {
   witness_id: string;

@@ -3072,6 +3072,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@keplr-ewallet/credential-vault-interface@workspace:credential_vault/cv_interface"
   dependencies:
+    "@keplr-ewallet/bytes": "workspace:*"
     "@types/jest": "npm:*"
     "@types/node": "npm:*"
     "@typescript-eslint/eslint-plugin": "npm:*"
