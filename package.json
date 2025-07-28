@@ -14,7 +14,8 @@
       "sdk/sandboxes/sandbox_evm",
       "sdk/sandboxes/sandbox_osmosis",
       "crypto/bytes",
-      "crypto/sha"
+      "credential_vault/sha",
+      "stdlib_js"
     ]
   },
   "packageManager": "yarn@4.7.0",
