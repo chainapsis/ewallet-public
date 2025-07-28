@@ -30,16 +30,6 @@ export type EWalletMsgGetEmailAck = {
   payload: string | null;
 };
 
-export type EWalletMsgSetCustomerId = {
-  msg_type: "set_customer_id";
-  payload: string;
-};
-
-export type EWalletMsgSetCustomerIdAck = {
-  msg_type: "set_customer_id_ack";
-  payload: boolean;
-};
-
 export type EWalletMsgSetOAuthNonce = {
   msg_type: "set_oauth_nonce";
   payload: any;
@@ -55,6 +45,7 @@ export type EWalletMsgOAuthSignIn = {
   payload: {
     access_token: string;
     id_token: string;
+    customer_id: string;
     target_origin: string;
   };
 };
@@ -123,8 +114,6 @@ export type EWalletMsg =
   | EWalletMsgInitAck
   | EWalletMsgGetPublicKey
   | EWalletMsgGetPublicKeyAck
-  | EWalletMsgSetCustomerId
-  | EWalletMsgSetCustomerIdAck
   | EWalletMsgSetOAuthNonce
   | EWalletMsgSetOAuthNonceAck
   | EWalletMsgOAuthSignIn

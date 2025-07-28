@@ -1,5 +1,8 @@
 import { KeplrEWallet } from "@keplr-ewallet-sdk-core/keplr_ewallet";
-import { RedirectUriSearchParamsKey } from "@keplr-ewallet-sdk-core/oauth";
+import {
+  type OAuthState,
+  RedirectUriSearchParamsKey,
+} from "@keplr-ewallet-sdk-core/oauth";
 
 const GoogleClientId =
   "239646646986-8on7ql1vmbcshbjk12bdtopmto99iipm.apps.googleusercontent.com";
@@ -17,11 +20,6 @@ export async function tryGoogleSignIn(
   console.log("window host: %s", window.location.host);
   console.log("redirectUri: %s", redirectUri);
 
-  const setCustomerIdAckPromise = sendMsgToIframe({
-    msg_type: "set_customer_id",
-    payload: customerId,
-  });
-
   const nonce = Array.from(crypto.getRandomValues(new Uint8Array(8)))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
@@ -34,6 +32,14 @@ export async function tryGoogleSignIn(
     payload: nonce,
   });
 
+  const oauthState: OAuthState = {
+    customerId,
+    targetOrigin: window.location.origin,
+  };
+  const oauthStateString = JSON.stringify(oauthState);
+
+  console.log("oauthStateString: %s", oauthStateString);
+
   const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
   authUrl.searchParams.set("client_id", clientId);
   authUrl.searchParams.set("redirect_uri", redirectUri);
@@ -45,10 +51,7 @@ export async function tryGoogleSignIn(
   authUrl.searchParams.set("scope", "openid email profile");
   authUrl.searchParams.set("prompt", "login");
   authUrl.searchParams.set("nonce", nonce);
-  authUrl.searchParams.set(
-    RedirectUriSearchParamsKey.STATE,
-    window.location.origin,
-  );
+  authUrl.searchParams.set(RedirectUriSearchParamsKey.STATE, oauthStateString);
 
   const popup = window.open(
     authUrl.toString(),
@@ -58,13 +61,6 @@ export async function tryGoogleSignIn(
 
   if (!popup) {
     throw new Error("Failed to open new window for google oauth sign in");
-  }
-
-  // TODO: set customer id on init and remove this
-  const setCustomerIdAck = await setCustomerIdAckPromise;
-  if (!setCustomerIdAck.payload) {
-    popup.close();
-    throw new Error("Failed to set customer id for google oauth sign in");
   }
 
   const ack = await ackPromise;
