@@ -1,7 +1,10 @@
 import { sha256 } from "@noble/hashes/sha2";
-import { SignDoc } from "cosmjs-types/cosmos/tx/v1beta1/tx";
-import type { DirectSignResponse } from "@cosmjs/proto-signing";
-import type { KeplrSignOptions } from "@keplr-wallet/types";
+import { SignDoc as ProtoSignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
+import type {
+  DirectSignResponse,
+  KeplrSignOptions,
+  SignDoc,
+} from "@keplr-wallet/types";
 import { SignDocWrapper } from "@keplr-wallet/cosmos";
 
 import { CosmosEWallet } from "@keplr-ewallet-sdk-cosmos/cosmos_ewallet";
@@ -16,7 +19,11 @@ export async function signDirect(
   signOptions?: KeplrSignOptions,
 ): Promise<DirectSignResponse> {
   try {
-    const signBytes = SignDoc.encode(signDoc).finish();
+    const compatibleSignDoc = {
+      ...signDoc,
+      accountNumber: signDoc.accountNumber.toString(),
+    };
+    const signBytes = ProtoSignDoc.encode(compatibleSignDoc).finish();
     const signDocHash = sha256(signBytes);
     const publicKey = await this.getPublicKey();
     const origin = this.eWallet.origin;
