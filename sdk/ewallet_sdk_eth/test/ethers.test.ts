@@ -13,11 +13,6 @@ import {
 } from "ethers";
 import { isAddressEqual } from "viem";
 import { mainnet } from "viem/chains";
-import type { EthSigner } from "@keplr-ewallet/ewallet-sdk-eth";
-import {
-  EWalletEIP1193Provider,
-  initEWalletEIP1193Provider,
-} from "@keplr-ewallet/ewallet-sdk-eth";
 
 import {
   createChainParam,
@@ -35,6 +30,11 @@ import {
   createEthersTransactionHelper,
   createEthersContractHelper,
 } from "./utils/ethersHelpers";
+import {
+  initEWalletEIP1193Provider,
+  type EWalletEIP1193Provider,
+} from "@keplr-ewallet-sdk-eth/provider";
+import type { EthSigner } from "@keplr-ewallet-sdk-eth/types";
 
 describe("EWallet Provider - Ethers.js Integration", () => {
   describe("BrowserProvider - Live RPC", () => {

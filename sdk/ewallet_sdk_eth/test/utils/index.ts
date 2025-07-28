@@ -9,16 +9,16 @@ import {
 } from "viem";
 import { mainnet } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
-import type {
-  EthSigner,
-  SignFunctionParams,
-  SignFunction,
-  EthSignMethod,
-  SignFunctionResult,
-} from "@keplr-ewallet/ewallet-sdk-eth";
-import { VERSION } from "@keplr-ewallet/ewallet-sdk-eth";
 
 import { hardhat } from "../hardhat";
+import { VERSION } from "@keplr-ewallet-sdk-eth/provider";
+import type {
+  EthSigner,
+  EthSignMethod,
+  SignFunction,
+  SignFunctionParams,
+  SignFunctionResult,
+} from "@keplr-ewallet-sdk-eth/types";
 
 export * from "./viemHelpers";
 export * from "./ethersHelpers";

@@ -1,8 +1,12 @@
-import { execSync, spawnSync } from "node:child_process";
+import { execSync } from "node:child_process";
 
 import { paths } from "../paths";
 
-export async function buildSDK(..._args: any[]) {
+export function buildSDK(..._args: any[]) {
+  doBuildSDK();
+}
+
+export function doBuildSDK() {
   console.info("Start building SDKs...");
 
   console.info("Build sdk-core, path: %s", paths.sdk_core);

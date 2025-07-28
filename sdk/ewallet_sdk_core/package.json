@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "clean": "del-cli dist",
-    "build": "tsc && tsc-alias"
+    "build": "tsc --build --force && tsc-alias"
   },
   "publishConfig": {
     "access": "public"
