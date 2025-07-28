@@ -41,7 +41,6 @@ export async function signDirect(
       msg_type: "show_modal",
       payload: {
         modal_type: "make_signature",
-        is_demo: true,
         data: {
           chain_type: "cosmos",
           sign_type: "tx",
