@@ -7,9 +7,9 @@ import type {
 } from "@keplr-wallet/types";
 import { SignDocWrapper } from "@keplr-wallet/cosmos";
 
+import type { EWalletMsg } from "@keplr-ewallet-sdk-core/types";
 import { CosmosEWallet } from "@keplr-ewallet-sdk-cosmos/cosmos_ewallet";
 import { encodeCosmosSignature } from "@keplr-ewallet-sdk-cosmos/utils/sign";
-import type { EWalletMsg } from "@keplr-ewallet-sdk-core/types";
 
 export async function signDirect(
   this: CosmosEWallet,
@@ -34,6 +34,9 @@ export async function signDirect(
       accountNumber: signDoc.accountNumber.toString(),
     });
 
+    const chainInfoList = await this.getCosmosChainInfoList();
+    const chainInfo = chainInfoList.find((info) => info.chainId === chainId);
+
     const msg: EWalletMsg = {
       msg_type: "show_modal",
       payload: {
@@ -45,9 +48,9 @@ export async function signDirect(
           payload: {
             chain_info: {
               chain_id: chainId,
-              chain_name: "cosmos",
+              chain_name: chainInfo?.chainName ?? "",
               chain_symbol_image_url:
-                "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/cosmoshub/uatom.png",
+                chainInfo?.stakeCurrency?.coinImageUrl ?? "",
             },
             signer,
             msgs: [],
