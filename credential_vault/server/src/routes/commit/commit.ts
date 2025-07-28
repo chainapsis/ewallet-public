@@ -2,10 +2,7 @@ import type { Router, Request, Response } from "express";
 import type { CommitIdTokenRequest } from "@keplr-ewallet/credential-vault-interface";
 
 import { commitIdTokenWithUserSessionPublicKey } from "@keplr-ewallet-cv-server/apis/commit";
-import {
-  type AuthenticatedRequest,
-  bearerTokenMiddleware,
-} from "@keplr-ewallet-cv-server/middlewares";
+import { bearerTokenMiddleware } from "@keplr-ewallet-cv-server/middlewares";
 
 export function setCommitRoutes(router: Router) {
   router.post(

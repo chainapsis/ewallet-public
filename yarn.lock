@@ -3091,8 +3091,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@keplr-ewallet/credential-vault-server@workspace:credential_vault/server"
   dependencies:
+    "@keplr-ewallet/bytes": "workspace:*"
     "@keplr-ewallet/credential-vault-interface": "workspace:*"
     "@keplr-ewallet/credential-vault-pg-interface": "workspace:*"
+    "@keplr-ewallet/sha": "workspace:*"
     "@types/cors": "npm:^2.8.17"
     "@types/express": "npm:^4.17.20"
     "@types/jest": "npm:^29.5.13"
@@ -3182,6 +3184,19 @@ __metadata:
     typescript: "npm:*"
     uuid: "npm:*"
     viem: "npm:*"
+  languageName: unknown
+  linkType: soft
+
+"@keplr-ewallet/sha@workspace:*, @keplr-ewallet/sha@workspace:crypto/sha":
+  version: 0.0.0-use.local
+  resolution: "@keplr-ewallet/sha@workspace:crypto/sha"
+  dependencies:
+    "@jest/globals": "npm:*"
+    "@keplr-ewallet/bytes": "workspace:*"
+    "@types/jest": "npm:*"
+    "@types/node": "npm:*"
+    ts-jest: "npm:*"
+    typescript: "npm:*"
   languageName: unknown
   linkType: soft
 
