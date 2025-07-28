@@ -6,6 +6,16 @@ import fs from "node:fs";
 
 const ENV_FILE_NAME_STEM = "credential_vault";
 
+export interface EnvType {
+  COMMITTEE_ID: number;
+  DB_HOST: string;
+  DB_PORT: number;
+  DB_USER: string;
+  DB_PASSWORD: string;
+  DB_NAME: string;
+  DB_SSL: boolean;
+}
+
 const envSchema = z.object({
   COMMITTEE_ID: z.number().min(1),
   DB_HOST: z.string().min(1, "DB_HOST is required"),
@@ -16,15 +26,11 @@ const envSchema = z.object({
   DB_SSL: z.boolean(),
 });
 
-export function loadEnvs() {
+export function loadEnvs(): EnvType {
   const committeeIdSuffix =
     process.env.COMMITTEE_ID === "1" ? "" : `_${process.env.COMMITTEE_ID}`;
-
   const envFileName = `${ENV_FILE_NAME_STEM}${committeeIdSuffix}.env`;
-
   const envPath = path.join(os.homedir(), ".keplr_ewallet", envFileName);
-  console.info("Loading env file, path: %s", envPath);
-
   if (!fs.existsSync(envPath)) {
     throw new Error(`Env file does not exists, path: ${envPath}`);
   }
@@ -34,7 +40,7 @@ export function loadEnvs() {
     override: false,
   });
 
-  const rawEnv = {
+  const rawEnv: EnvType = {
     COMMITTEE_ID: parseInt(process.env.COMMITTEE_ID || "1", 10),
     DB_HOST: process.env.DB_HOST || "localhost",
     DB_PORT: parseInt(process.env.DB_PORT || "5432", 10),

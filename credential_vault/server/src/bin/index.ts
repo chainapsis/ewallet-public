@@ -1,15 +1,17 @@
 import { createPgDatabase } from "@keplr-ewallet-cv-server/database";
 import { makeApp } from "@keplr-ewallet-cv-server/app";
-import { Envs } from "@keplr-ewallet-cv-server/envs";
+import { loadEnvs } from "@keplr-ewallet-cv-server/envs";
 
 async function main() {
+  const env = loadEnvs();
+
   const createPostgresRes = await createPgDatabase({
-    database: Envs.DB_NAME,
-    host: Envs.DB_HOST,
-    password: Envs.DB_PASSWORD,
-    user: Envs.DB_USER,
-    port: Envs.DB_PORT,
-    ssl: Envs.DB_SSL,
+    database: env.DB_NAME,
+    host: env.DB_HOST,
+    password: env.DB_PASSWORD,
+    user: env.DB_USER,
+    port: env.DB_PORT,
+    ssl: env.DB_SSL,
   });
 
   if (createPostgresRes.success === false) {
@@ -18,12 +20,13 @@ async function main() {
   }
 
   // @TODO: move to envs
-  const port = Envs.COMMITTEE_ID === 1 ? 4201 : 4202;
+  const port = env.COMMITTEE_ID === 1 ? 4201 : 4202;
 
   const app = makeApp();
 
   app.locals = {
     db: createPostgresRes.data,
+    env,
   };
 
   app.listen(port, () => {
