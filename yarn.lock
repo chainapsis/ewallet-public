@@ -3136,6 +3136,7 @@ __metadata:
     ts-jest: "npm:*"
     tsx: "npm:*"
     typescript: "npm:*"
+    zod: "npm:^4.0.5"
   languageName: unknown
   linkType: soft
 
@@ -18760,6 +18761,7 @@ __metadata:
     lerna: "npm:8.2.3"
     prettier: "npm:^3.6.2"
     tsc-alias: "npm:^1.8.16"
+    tsx: "npm:^4.20.3"
     typescript: "npm:^5"
     uuid: "npm:^11.1.0"
     viem: "npm:^2.31.7"
@@ -21624,6 +21626,13 @@ __metadata:
   version: 3.22.4
   resolution: "zod@npm:3.22.4"
   checksum: 10c0/7578ab283dac0eee66a0ad0fc4a7f28c43e6745aadb3a529f59a4b851aa10872b3890398b3160f257f4b6817b4ce643debdda4fb21a2c040adda7862cab0a587
+  languageName: node
+  linkType: hard
+
+"zod@npm:^4.0.5":
+  version: 4.0.10
+  resolution: "zod@npm:4.0.10"
+  checksum: 10c0/8d1145e767c22b571a7967c198632f69ef15ce571b5021cdba84cf31d9af2ca40b033ea2fcbe5797cfd2da9c67b3a6ebe435938eabfbb1d1f3ab2f17f00f443b
   languageName: node
   linkType: hard
 
