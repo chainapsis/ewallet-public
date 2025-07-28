@@ -14,9 +14,9 @@ import type {
   KeplrSignOptions,
   Key,
   SettledResponses,
+  SignDoc,
 } from "@keplr-wallet/types";
 import { type KeplrEWallet } from "@keplr-ewallet/ewallet-sdk-core";
-import type { SignDoc } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 
 import type { CosmosEWallet } from "@keplr-ewallet-sdk-cosmos/cosmos_ewallet";
 
