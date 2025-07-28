@@ -1,4 +1,13 @@
 {
-  "name": "bytes",
-  "packageManager": "yarn@4.7.0"
+  "name": "@keplr-ewallet/bytes",
+  "type": "module",
+  "main": "./src/index.ts",
+  "packageManager": "yarn@4.7.0",
+  "devDependencies": {
+    "@jest/globals": "*",
+    "@types/jest": "*",
+    "@types/node": "*",
+    "ts-jest": "*",
+    "typescript": "*"
+  }
 }

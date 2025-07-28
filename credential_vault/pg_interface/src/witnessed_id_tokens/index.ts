@@ -1,12 +1,12 @@
 import { Pool } from "pg";
-import { Bytes } from "@keplr-ewallet/crypto-js";
-import type { Bytes32, Bytes33 } from "@keplr-ewallet/crypto-js";
-import type { Result } from "@keplr-ewallet/stdlib-js";
+import { Bytes, type Bytes32, type Bytes33 } from "@keplr-ewallet/bytes";
 import type {
   CommitIdTokenRequest,
   IdTokenStatus,
   WitnessedIdToken,
 } from "@keplr-ewallet/credential-vault-interface";
+
+import type { Result } from "@keplr-ewallet-credential-vault-pg-interface/utils";
 
 export async function commitIdToken(
   db: Pool,

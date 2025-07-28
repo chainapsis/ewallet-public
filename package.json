@@ -11,7 +11,8 @@
       "sdk/ewallet_sdk_cosmos",
       "sdk/ewallet_sdk_eth",
       "sdk/sandboxes/sandbox_evm",
-      "sdk/sandboxes/sandbox_osmosis"
+      "sdk/sandboxes/sandbox_osmosis",
+      "crypto/bytes"
     ]
   },
   "packageManager": "yarn@4.7.0",

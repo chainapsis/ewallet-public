@@ -2809,7 +2809,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jest/globals@npm:30.0.5, @jest/globals@npm:^30.0.4":
+"@jest/globals@npm:*, @jest/globals@npm:30.0.5, @jest/globals@npm:^30.0.4":
   version: 30.0.5
   resolution: "@jest/globals@npm:30.0.5"
   dependencies:
@@ -3025,6 +3025,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@keplr-ewallet/bytes@workspace:*, @keplr-ewallet/bytes@workspace:crypto/bytes":
+  version: 0.0.0-use.local
+  resolution: "@keplr-ewallet/bytes@workspace:crypto/bytes"
+  dependencies:
+    "@jest/globals": "npm:*"
+    "@types/jest": "npm:*"
+    "@types/node": "npm:*"
+    ts-jest: "npm:*"
+    typescript: "npm:*"
+  languageName: unknown
+  linkType: soft
+
 "@keplr-ewallet/ci@workspace:internals/ci":
   version: 0.0.0-use.local
   resolution: "@keplr-ewallet/ci@workspace:internals/ci"
@@ -3060,6 +3072,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@keplr-ewallet/credential-vault-pg-interface@workspace:credential_vault/pg_interface"
   dependencies:
+    "@keplr-ewallet/bytes": "workspace:*"
     "@types/jest": "npm:*"
     "@types/node": "npm:*"
     "@typescript-eslint/eslint-plugin": "npm:*"

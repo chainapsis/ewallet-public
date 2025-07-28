@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@keplr-ewallet/bytes": "workspace:*",
     "pg": "*",
     "pgsql-parser": "^17.7.8",
     "uuid": "*"

@@ -4,8 +4,7 @@ import {
   getCommittedIdTokenByUserSessionPublicKeyAndThreshold,
   revealIdToken,
 } from "@keplr-ewallet/credential-vault-pg-interface";
-import { hashIdTokenWithUserSessionPublicKey } from "@keplr-ewallet/crypto-js";
-import type { Bytes33 } from "@keplr-ewallet/crypto-js";
+import type { Bytes33 } from "@keplr-ewallet/bytes";
 
 import type { ErrorResponse } from "@keplr-ewallet-cv-server/error";
 import type { Result } from "@keplr-ewallet-cv-server/utils";
