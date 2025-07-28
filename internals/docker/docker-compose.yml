@@ -1,0 +1,42 @@
+services:
+  cv_pg:
+    image: postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: credential_vault_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      TZ: "UTC"
+      PGTZ: "UTC"
+    volumes:
+      - cv_pg_data:/var/lib/postgresql/data
+
+  credential_vault_1:
+    build:
+      context: ../../
+      dockerfile: internals/docker/dockerfiles/credential_vault.Dockerfile
+    ports:
+      - "4201:4201"
+    platform: linux/amd64
+    restart: unless-stopped
+    volumes:
+      - ../../credential_vault/server/credential_vault.env.example:/home/node/.keplr_ewallet/credential_vault.env:ro
+    depends_on:
+      - cv_pg
+
+  credential_vault_2:
+    build:
+      context: ../../
+      dockerfile: internals/docker/dockerfiles/credential_vault.Dockerfile
+    ports:
+      - "4202:4202"
+    platform: linux/amd64
+    volumes:
+      - ../../credential_vault/server/credential_vault_2.env.example:/home/node/.keplr_ewallet/credential_vault.env:ro
+    depends_on:
+      - cv_pg
+
+volumes:
+  cv_pg_data:
