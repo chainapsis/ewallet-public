@@ -13,8 +13,8 @@
       "sdk/ewallet_sdk_eth",
       "sdk/sandboxes/sandbox_evm",
       "sdk/sandboxes/sandbox_osmosis",
-      "crypto/bytes",
-      "crypto/sha"
+      "sdk/sandboxes/sandbox_simple_host",
+      "crypto/bytes"
     ]
   },
   "packageManager": "yarn@4.7.0",
@@ -25,6 +25,7 @@
     "ci": "yarn --cwd ./internals/ci run start"
   },
   "dependencies": {
+    "tsx": "^4.20.3",
     "uuid": "^11.1.0",
     "viem": "^2.31.7"
   },
@@ -47,8 +48,10 @@
     "@typescript-eslint/parser": "^8.35.1",
     "del-cli": "^6.0.0",
     "hardhat": "^2.25.0",
+    "lerna": "8.2.3",
     "prettier": "^3.6.2",
     "tsc-alias": "^1.8.16",
-    "typescript": "^5"
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
   }
 }

@@ -14,12 +14,12 @@ import {
 } from "viem";
 import { sepolia, mainnet } from "viem/chains";
 import { hashAuthorization } from "viem/utils";
-import type { EthSigner } from "@keplr-ewallet/ewallet-sdk-eth";
-import {
-  EWalletEIP1193Provider,
-  initEWalletEIP1193Provider,
-  ErrorCodes,
-} from "@keplr-ewallet/ewallet-sdk-eth";
+// import type { EthSigner } from "@keplr-ewallet/ewallet-sdk-eth";
+// import {
+//   EWalletEIP1193Provider,
+//   initEWalletEIP1193Provider,
+//   ErrorCodes,
+// } from "@keplr-ewallet/ewallet-sdk-eth";
 
 import { hardhatAlt, hardhatAccounts, hardhatNodeAlt } from "./hardhat";
 import {
@@ -34,6 +34,12 @@ import {
   generateInvalidBytecode,
   createEthSigner,
 } from "./utils";
+import {
+  initEWalletEIP1193Provider,
+  type EWalletEIP1193Provider,
+} from "@keplr-ewallet-sdk-eth/provider";
+import { ErrorCodes } from "@keplr-ewallet-sdk-eth/errors";
+import type { EthSigner } from "@keplr-ewallet-sdk-eth/types";
 
 describe("EWallet Provider - Viem Integration", () => {
   describe("Public Client - Live RPC", () => {

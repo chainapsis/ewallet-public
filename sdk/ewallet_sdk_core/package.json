@@ -1,11 +1,11 @@
 {
   "name": "@keplr-ewallet/ewallet-sdk-core",
-  "version": "0.0.4-rc.2",
+  "version": "0.0.6-rc.0",
   "packageManager": "yarn@4.7.0",
   "type": "module",
   "scripts": {
     "clean": "del-cli dist",
-    "build": "tsc && tsc-alias"
+    "build": "tsc --build --force && tsc-alias"
   },
   "publishConfig": {
     "access": "public"
@@ -34,7 +34,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/chainapsis/keplr-ewallet.git",
+    "url": "https://github.com/chainapsis/ewallet-public.git",
     "directory": "sdk/ewallet_sdk_core"
   },
   "devDependencies": {
@@ -45,5 +45,6 @@
     "ts-jest": "*",
     "tsc-alias": "*",
     "typescript": "*"
-  }
+  },
+  "gitHead": "5c82fc2b9b670d82a53e5aef0d8550537a03dccc"
 }

@@ -21,11 +21,12 @@
     "experimentalDecorators": true,
     "resolveJsonModule": true,
     "baseUrl": ".",
+    "rootDir": "./src",
     "paths": {
       "@keplr-ewallet-sdk-eth/*": ["./src/*"],
       "@keplr-ewallet-sdk-core/*": ["../ewallet_sdk_core/src/*"]
     }
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*", "test/**/*"],
+  "exclude": ["node_modules", "dist", "test/**/*"]
 }

@@ -1,0 +1,34 @@
+{
+  "name": "sandbox_simple_host",
+  "packageManager": "yarn@4.7.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx launch.ts",
+    "build": "next build",
+    "start": "next dev",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@keplr-ewallet/ewallet-sdk-core": "workspace:*",
+    "@keplr-ewallet/ewallet-sdk-cosmos": "workspace:*",
+    "@keplr-ewallet/ewallet-sdk-eth": "workspace:*",
+    "next": "^15.3.5",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "sass": "^1.89.2"
+  },
+  "devDependencies": {
+    "@types/jest": "*",
+    "@types/node": "*",
+    "@types/react": "*",
+    "@types/react-dom": "*",
+    "@typescript-eslint/eslint-plugin": "*",
+    "@typescript-eslint/parser": "*",
+    "del-cli": "*",
+    "jest": "*",
+    "ts-jest": "*",
+    "tsc-alias": "*",
+    "tsx": "*",
+    "typescript": "*"
+  }
+}

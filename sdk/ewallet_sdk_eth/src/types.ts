@@ -8,8 +8,6 @@ import type {
   TransactionSerializable,
 } from "viem";
 
-import type { EIP1193Provider } from "@keplr-ewallet-sdk-eth/provider";
-
 export interface EthSignMethodMap {
   sign_transaction: {
     params: {
@@ -86,26 +84,26 @@ export type EWalletAccount<
   }
 >;
 
-export interface IEthEWallet {
-  type: "ethereum";
-  chainId: string; // CAIP-2 formatting
-  address: Hex;
-  /**
-   * @returns EIP-1193 compatible Ethereum provider
-   */
-  getEthereumProvider: () => Promise<EIP1193Provider>;
-  /**
-   * Execute `personal_sign` operation with user wallet
-   *
-   * @param msg - Message to sign in hex format
-   * @returns Signature of the message in hex format
-   */
-  sign: (msg: string) => Promise<Hex>;
-  /**
-   * Switch to the specified chain
-   * The chain must be supported by the wallet
-   *
-   * @param chainId - Chain ID to switch to in hex string or number
-   */
-  switchChain: (chainId: `0x${string}` | number) => Promise<void>;
-}
+// export interface IEthEWallet {
+//   type: "ethereum";
+//   chainId: string; // CAIP-2 formatting
+//   address: Hex;
+//   /**
+//    * @returns EIP-1193 compatible Ethereum provider
+//    */
+//   getEthereumProvider: () => Promise<EIP1193Provider>;
+//   /**
+//    * Execute `personal_sign` operation with user wallet
+//    *
+//    * @param msg - Message to sign in hex format
+//    * @returns Signature of the message in hex format
+//    */
+//   sign: (msg: string) => Promise<Hex>;
+//   /**
+//    * Switch to the specified chain
+//    * The chain must be supported by the wallet
+//    *
+//    * @param chainId - Chain ID to switch to in hex string or number
+//    */
+//   switchChain: (chainId: `0x${string}` | number) => Promise<void>;
+// }

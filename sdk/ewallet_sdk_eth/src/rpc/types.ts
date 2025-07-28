@@ -22,7 +22,7 @@ import type {
   TypedDataDefinition,
 } from "viem";
 
-import type { ErrorObject } from "../errors";
+import type { ErrorObject } from "@keplr-ewallet-sdk-eth/errors";
 
 export type RpcResponse<
   result = RpcResponseData<RpcMethod>,
@@ -122,13 +122,13 @@ type EthCall = {
   Req: {
     method: "eth_call";
     params:
-    | [transaction: ExactPartial<RpcTransactionRequest>]
-    | [transaction: ExactPartial<RpcTransactionRequest>, block: RpcBlockRef]
-    | [
-      transaction: ExactPartial<RpcTransactionRequest>,
-      block: RpcBlockRef,
-      stateOverrides: RpcStateOverride,
-    ];
+      | [transaction: ExactPartial<RpcTransactionRequest>]
+      | [transaction: ExactPartial<RpcTransactionRequest>, block: RpcBlockRef]
+      | [
+          transaction: ExactPartial<RpcTransactionRequest>,
+          block: RpcBlockRef,
+          stateOverrides: RpcStateOverride,
+        ];
   };
   Res: Hex;
 };
@@ -153,16 +153,16 @@ type EthEstimateGas = {
   Req: {
     method: "eth_estimateGas";
     params:
-    | [transaction: RpcTransactionRequest]
-    | [
-      transaction: RpcTransactionRequest,
-      block: Exclude<RpcBlockRef, RpcBlockIdentifier>,
-    ]
-    | [
-      transaction: RpcTransactionRequest,
-      block: Exclude<RpcBlockRef, RpcBlockIdentifier>,
-      stateOverrides: RpcStateOverride,
-    ];
+      | [transaction: RpcTransactionRequest]
+      | [
+          transaction: RpcTransactionRequest,
+          block: Exclude<RpcBlockRef, RpcBlockIdentifier>,
+        ]
+      | [
+          transaction: RpcTransactionRequest,
+          block: Exclude<RpcBlockRef, RpcBlockIdentifier>,
+          stateOverrides: RpcStateOverride,
+        ];
   };
   Res: Quantity;
 };
@@ -394,15 +394,15 @@ type EthGetLogs = {
       topics?: LogTopic[] | undefined;
     } & (
       | {
-        fromBlock?: Exclude<RpcBlockRef, RpcBlockIdentifier> | undefined;
-        toBlock?: Exclude<RpcBlockRef, RpcBlockIdentifier> | undefined;
-        blockHash?: undefined;
-      }
+          fromBlock?: Exclude<RpcBlockRef, RpcBlockIdentifier> | undefined;
+          toBlock?: Exclude<RpcBlockRef, RpcBlockIdentifier> | undefined;
+          blockHash?: undefined;
+        }
       | {
-        fromBlock?: undefined;
-        toBlock?: undefined;
-        blockHash?: Hash | undefined;
-      }
+          fromBlock?: undefined;
+          toBlock?: undefined;
+          blockHash?: Hash | undefined;
+        }
     );
   };
   Res: RpcLog[];
@@ -538,7 +538,7 @@ export interface WalletRpcMethodMap {
   wallet_switchEthereumChain: WalletSwitchEthereumChain;
 }
 
-export interface RpcMethodMap extends PublicRpcMethodMap, WalletRpcMethodMap { }
+export interface RpcMethodMap extends PublicRpcMethodMap, WalletRpcMethodMap {}
 
 export type PublicRpcMethod = keyof PublicRpcMethodMap;
 export type WalletRpcMethod = keyof WalletRpcMethodMap;
@@ -560,13 +560,13 @@ export type UnsupportedRpcMethod =
 
 export type RpcRequestArgs<M extends RpcMethod> =
   RpcMethodMap[M]["Req"]["params"] extends undefined
-  ? {
-    method: M;
-    params?: undefined;
-  }
-  : {
-    method: M;
-    params: RpcMethodMap[M]["Req"]["params"];
-  };
+    ? {
+        method: M;
+        params?: undefined;
+      }
+    : {
+        method: M;
+        params: RpcMethodMap[M]["Req"]["params"];
+      };
 
 export type RpcResponseData<M extends RpcMethod> = RpcMethodMap[M]["Res"];

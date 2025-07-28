@@ -1,9 +1,9 @@
 import { Pool } from "pg";
 import type { CommitIdTokenRequest } from "@keplr-ewallet/credential-vault-interface";
 import { commitIdToken } from "@keplr-ewallet/credential-vault-pg-interface";
+import type { Result } from "@keplr-ewallet/stdlib-js";
 
 import type { ErrorResponse } from "@keplr-ewallet-cv-server/error";
-import type { Result } from "@keplr-ewallet-cv-server/utils";
 
 export async function commitIdTokenWithUserSessionPublicKey(
   db: Pool,

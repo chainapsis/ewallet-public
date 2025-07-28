@@ -1,7 +1,6 @@
 import { spawnSync } from "node:child_process";
 
-import { paths } from "../paths.ts";
-import { exitCode } from "node:process";
+import { paths } from "../paths";
 
 export async function typeCheck(..._args: any[]) {
   const pkgPaths = [paths.sdk_core, paths.sdk_cosmos, paths.sdk_eth];

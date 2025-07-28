@@ -1,12 +1,6 @@
 import type { AddEthereumChainParameter } from "viem";
 import { toHex } from "viem";
 import { sepolia, mainnet } from "viem/chains";
-import {
-  EWalletEIP1193Provider,
-  initEWalletEIP1193Provider,
-  ProviderEventEmitter,
-  ErrorCodes,
-} from "@keplr-ewallet/ewallet-sdk-eth";
 
 import {
   createChainParam,
@@ -20,6 +14,12 @@ import {
   createMockRpcServer,
   mockMainnetRpc,
 } from "./mock";
+import {
+  EWalletEIP1193Provider,
+  initEWalletEIP1193Provider,
+  ProviderEventEmitter,
+} from "@keplr-ewallet-sdk-eth/provider";
+import { ErrorCodes } from "@keplr-ewallet-sdk-eth/errors";
 
 describe("EWallet Provider - Base", () => {
   describe("Basic Properties", () => {

@@ -39,14 +39,14 @@ export class EWalletEIP1193Provider
   extends ProviderEventEmitter
   implements EIP1193Provider
 {
-  protected isInitialized: boolean = false;
+  protected isInitialized: boolean;
 
   protected signer: EWalletEIP1193ProviderOptions["signer"];
 
   protected activeChain: Chain;
-  protected addedChains: ChainWithStatus[] = [];
+  protected addedChains: ChainWithStatus[];
 
-  private lastConnectedEmittedEvent: "connect" | "disconnect" | null = null;
+  private lastConnectedEmittedEvent: "connect" | "disconnect" | null;
 
   public readonly isEWallet: true = true;
   public readonly version: string = VERSION;
@@ -58,10 +58,7 @@ export class EWalletEIP1193Provider
     super();
 
     this.isInitialized = false;
-
-    this.request = this.request.bind(this);
-    this.on = this.on.bind(this);
-    this.removeListener = this.removeListener.bind(this);
+    this.lastConnectedEmittedEvent = null;
 
     // Initialize chains / active chain (without validation for now)
     this.addedChains = options.chains.map((chain) => ({
@@ -74,6 +71,10 @@ export class EWalletEIP1193Provider
 
     // Start initialization immediately and store the promise
     this.ready = this._init(options);
+
+    this.request = this.request.bind(this);
+    this.on = this.on.bind(this);
+    this.removeListener = this.removeListener.bind(this);
   }
 
   get chainId(): string {
@@ -572,7 +573,7 @@ export class EWalletEIP1193Provider
    * Initialize the provider asynchronously
    */
   protected async _init(options: EWalletEIP1193ProviderOptions): Promise<void> {
-    const { signer, chains } = options;
+    const { signer } = options;
 
     // Set up signer
     if (signer) {
@@ -585,6 +586,25 @@ export class EWalletEIP1193Provider
       }
 
       this.signer = signer;
+    }
+
+    if (options.skipChainValidation) {
+      this.addedChains.forEach((chain, idx) => {
+        chain.validationStatus = "valid";
+        chain.connected = idx === 0; // set the first chain as connected
+      });
+
+      this.activeChain = this.addedChains[0];
+
+      this.isInitialized = true;
+      this.emit<any>("_initialized", {});
+
+      this._handleChainChanged(this.activeChain.chainId);
+      this._handleConnected(true, { chainId: this.activeChain.chainId });
+      if (this.signer && isAddress(this.signer.address)) {
+        this._handleAccountsChanged(this.signer.address);
+      }
+      return;
     }
 
     await Promise.all(

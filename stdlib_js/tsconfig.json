@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../tsconfig.json",
   "compilerOptions": {
     "outDir": "dist",
     "sourceMap": true,
@@ -15,7 +15,7 @@
     "skipLibCheck": true,
     "noEmit": true,
     "paths": {
-      "@keplr-ewallet-sha/*": ["./src/*"]
+      "@keplr-ewallet-stdlib-js/*": ["./src/*"]
     }
   },
   "include": ["./*.js", "src/**/*.ts", "tests/**/*.ts"],

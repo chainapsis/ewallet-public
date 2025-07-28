@@ -14,10 +14,10 @@ export async function getEthereumProvider(
     return this.cachedProvider;
   }
 
-  // initial chain should be added first, as first chain is active by default on init provider
   const activeChain =
-    this.chains.find((chain) => chain.id === this.activeChainId) ??
-    this.chains[0];
+    this.chains.find(
+      (chain) => chain.id === this.activeChainId || chain.id === 1,
+    ) ?? this.chains[0];
 
   const addEthereumChainParameters = [
     activeChain,
@@ -35,24 +35,26 @@ export async function getEthereumProvider(
   const providerId = uuidv4();
   const hasSigner = isAddress(this.address);
 
-  if (hasSigner) {
-    const sign = this.makeSignature;
-    this.cachedProvider = await initEWalletEIP1193Provider({
-      id: providerId,
-      signer: {
-        sign,
-        address: this.address,
-      },
-      chains: addEthereumChainParameters,
-    });
-  } else {
+  if (!hasSigner) {
     // if signer is not available, only handle public rpc requests
     // don't cache public rpc provider
     return await initEWalletEIP1193Provider({
       id: providerId,
       chains: addEthereumChainParameters,
+      skipChainValidation: true,
     });
   }
+
+  const sign = this.makeSignature;
+  this.cachedProvider = await initEWalletEIP1193Provider({
+    id: providerId,
+    signer: {
+      sign,
+      address: this.address,
+    },
+    chains: addEthereumChainParameters,
+    skipChainValidation: true, // skip chain validation as the chains are already validated
+  });
 
   return this.cachedProvider;
 }

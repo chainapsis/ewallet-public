@@ -1,0 +1,11 @@
+{
+  "packages": [
+    "sdk/ewallet_sdk_core",
+    "sdk/ewallet_sdk_cosmos",
+    "sdk/ewallet_sdk_eth",
+    "crypto/bytes",
+    "tecdsa/tecdsa_interface"
+  ],
+  "version": "independent",
+  "npmClient": "yarn"
+}

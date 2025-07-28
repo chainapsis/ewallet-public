@@ -9,11 +9,6 @@ import {
   parseEther,
 } from "viem";
 import { sepolia, mainnet } from "viem/chains";
-import type { EthSigner } from "@keplr-ewallet/ewallet-sdk-eth";
-import {
-  initEWalletEIP1193Provider,
-  ErrorCodes,
-} from "@keplr-ewallet/ewallet-sdk-eth";
 
 import { hardhatAccounts } from "./hardhat";
 import {
@@ -29,6 +24,9 @@ import {
   mockSepoliaRpc,
   mockFailingRpc,
 } from "./mock";
+import type { EthSigner } from "@keplr-ewallet-sdk-eth/types";
+import { initEWalletEIP1193Provider } from "@keplr-ewallet-sdk-eth/provider";
+import { ErrorCodes } from "@keplr-ewallet-sdk-eth/errors";
 
 describe("EWallet Provider - Mock RPC Testing", () => {
   let mockServer: MockRpcServer;

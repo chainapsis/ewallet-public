@@ -1,5 +1,6 @@
 import { toHex } from "viem";
-import type { EthSigner } from "@keplr-ewallet/ewallet-sdk-eth";
+
+import type { EthSigner } from "@keplr-ewallet-sdk-eth/types";
 
 // Mock signer for testing wallet methods
 export function createMockSigner(): EthSigner {

@@ -1,0 +1,26 @@
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 8px;
+  align-self: stretch;
+  border-radius: 8px;
+  height: 46px;
+  background: var(--bg-tertiary);
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #ebebeb;
+  }
+
+  &:active {
+    background: #dedede;
+  }
+}
+
+.icons {
+  display: flex;
+  gap: 0;
+}

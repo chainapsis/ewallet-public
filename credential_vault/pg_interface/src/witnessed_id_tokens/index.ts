@@ -5,8 +5,7 @@ import type {
   IdTokenStatus,
   WitnessedIdToken,
 } from "@keplr-ewallet/credential-vault-interface";
-
-import type { Result } from "@keplr-ewallet-credential-vault-pg-interface/utils";
+import type { Result } from "@keplr-ewallet/stdlib-js";
 
 export async function commitIdToken(
   db: Pool,

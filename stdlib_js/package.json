@@ -1,5 +1,6 @@
 {
   "name": "@keplr-ewallet/stdlib-js",
+  "private": true,
   "type": "module",
   "main": "./src/index.ts",
   "packageManager": "yarn@4.7.0",

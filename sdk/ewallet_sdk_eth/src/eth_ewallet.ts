@@ -1,10 +1,22 @@
 import type { KeplrEWallet } from "@keplr-ewallet/ewallet-sdk-core";
-import { type Hex } from "viem";
+import type { Address, Chain, Hex } from "viem";
 import { publicKeyToAddress } from "viem/accounts";
-import { base, mainnet, optimism } from "viem/chains";
+import {
+  arbitrum,
+  avalanche,
+  base,
+  berachain,
+  blast,
+  citreaTestnet,
+  forma,
+  mainnet,
+  optimism,
+  polygon,
+  sepolia,
+  unichain,
+} from "viem/chains";
 
 import type { EIP1193Provider } from "@keplr-ewallet-sdk-eth/provider";
-import type { IEthEWallet } from "@keplr-ewallet-sdk-eth/types";
 import {
   getPublicKey,
   makeSignature,
@@ -14,26 +26,56 @@ import {
   toViemAccount,
 } from "@keplr-ewallet-sdk-eth/api";
 
-const SUPPORTED_CHAINS = [mainnet, base, optimism];
+const SUPPORTED_CHAINS = [
+  mainnet,
+  base,
+  optimism,
+  arbitrum,
+  blast,
+  avalanche,
+  unichain,
+  polygon,
+  forma,
+  berachain,
+  sepolia,
+  citreaTestnet,
+];
 
-export class EthEWallet implements IEthEWallet {
+export class EthEWallet {
   readonly eWallet: KeplrEWallet;
-  private _cachedProvider: EIP1193Provider | null = null;
-  private _address: Hex | null = null;
-  private _activeChainId: number = 1; // TODO: get active chain id from ewallet
-  private readonly _chains = SUPPORTED_CHAINS;
+  private _cachedProvider: EIP1193Provider | null;
+  private _address: Address | null;
+  private _activeChainId: number;
+  private readonly _chains: Chain[];
 
   constructor(eWallet: KeplrEWallet) {
     this.eWallet = eWallet;
+    this._cachedProvider = null;
+    this._address = null;
+    this._activeChainId = 1;
+    this._chains = SUPPORTED_CHAINS;
   }
 
-  async initialize(initialChainId?: string | number): Promise<void> {
-    if (this._address === null) {
-      const publicKey = await this.getPublicKey();
-      this._address = publicKeyToAddress(publicKey);
+  async initialize(initialChainId?: Hex | number): Promise<void> {
+    const isInitialized =
+      this._address !== null && this._cachedProvider !== null;
+    if (isInitialized) {
+      return;
     }
 
-    // TODO: get supported chains from keplr registry
+    const publicKey = await this.getPublicKey();
+    this._address = publicKeyToAddress(publicKey);
+
+    const provider = await this.getEthereumProvider();
+    this.cachedProvider = provider;
+
+    if (initialChainId) {
+      try {
+        await this.switchChain(initialChainId);
+      } catch (error) {
+        console.error("Failed to switch chain", error);
+      }
+    }
   }
 
   get type(): "ethereum" {
@@ -44,14 +86,14 @@ export class EthEWallet implements IEthEWallet {
     return `eip155:${this._activeChainId}`;
   }
 
-  get address(): Hex {
+  get address(): Address {
     if (this._address === null) {
       throw new Error("EthEWallet not initialized. Call initialize() first.");
     }
     return this._address;
   }
 
-  protected get cachedProvider(): EIP1193Provider | null {
+  get cachedProvider(): EIP1193Provider | null {
     return this._cachedProvider;
   }
 
@@ -59,7 +101,7 @@ export class EthEWallet implements IEthEWallet {
     this._cachedProvider = provider;
   }
 
-  protected get activeChainId(): number {
+  get activeChainId(): number {
     return this._activeChainId;
   }
 
@@ -67,7 +109,11 @@ export class EthEWallet implements IEthEWallet {
     this._activeChainId = chainId;
   }
 
-  protected get chains() {
+  get activeChain(): Chain | undefined {
+    return this._chains.find((chain) => chain.id === this._activeChainId);
+  }
+
+  get chains() {
     return this._chains;
   }
 

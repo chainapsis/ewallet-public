@@ -3,6 +3,9 @@
   "packageManager": "yarn@4.7.0",
   "type": "module",
   "main": "./src/index.ts",
+  "dependencies": {
+    "@keplr-ewallet/bytes": "workspace:*"
+  },
   "devDependencies": {
     "@types/jest": "*",
     "@types/node": "*",

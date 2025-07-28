@@ -1,4 +1,5 @@
 import type { SignableMessage } from "viem";
+import type { StdSignDoc } from "@cosmjs/amino";
 
 export type ShowModalPayload = MakeSignatureModalPayload | OtherModalPayload;
 
@@ -11,7 +12,6 @@ export interface OtherModalPayload {
 
 export type MakeSignatureModalPayload = {
   modal_type: "make_signature";
-  is_demo: boolean;
   data: MakeCosmosSigData | MakeEthereumSigData;
 };
 
@@ -45,6 +45,7 @@ export type CosmosArbitrarySignPayload = {
   chain_info: ChainInfoForAttachedModal;
   signer: string;
   data: string | Uint8Array;
+  signDoc: StdSignDoc;
   origin: string;
 };
 

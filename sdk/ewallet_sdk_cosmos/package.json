@@ -1,6 +1,6 @@
 {
   "name": "@keplr-ewallet/ewallet-sdk-cosmos",
-  "version": "0.0.4-rc.2",
+  "version": "0.0.6-rc.1",
   "packageManager": "yarn@4.7.0",
   "type": "module",
   "publishConfig": {
@@ -36,13 +36,13 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/chainapsis/keplr-ewallet.git",
+    "url": "https://github.com/chainapsis/ewallet-public.git",
     "directory": "sdk/ewallet_sdk_cosmos"
   },
   "dependencies": {
     "@cosmjs/amino": "^0.33.1",
     "@cosmjs/proto-signing": "^0.33.1",
-    "@keplr-ewallet/ewallet-sdk-core": "workspace:*",
+    "@keplr-ewallet/ewallet-sdk-core": "0.0.6-rc.0",
     "@keplr-wallet/common": "^0.12.253",
     "@keplr-wallet/cosmos": "^0.12.253",
     "@keplr-wallet/crypto": "^0.12.253",
@@ -51,8 +51,7 @@
     "@noble/curves": "^1.9.2",
     "@noble/hashes": "^1.8.0",
     "bech32": "^2.0.0",
-    "bitcoinjs-lib": "^6.1.7",
-    "cosmjs-types": "^0.9.0"
+    "bitcoinjs-lib": "^6.1.7"
   },
   "devDependencies": {
     "@types/jest": "*",
@@ -64,5 +63,6 @@
     "ts-jest": "*",
     "tsc-alias": "*",
     "typescript": "*"
-  }
+  },
+  "gitHead": "2ecb7098bf93b0cdb2258931a221e47c2df86ed6"
 }

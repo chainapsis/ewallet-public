@@ -12,9 +12,9 @@ import type {
   GetKeyShareResponse,
   RegisterKeyShareRequest,
 } from "@keplr-ewallet/credential-vault-interface";
+import type { Result } from "@keplr-ewallet/stdlib-js";
 
 import type { ErrorResponse } from "@keplr-ewallet-cv-server/error";
-import type { Result } from "@keplr-ewallet-cv-server/utils";
 
 export async function registerKeyShare(
   db: Pool,

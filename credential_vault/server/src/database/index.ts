@@ -1,6 +1,5 @@
 import { Pool, type PoolClient } from "pg";
-
-import type { Result } from "@keplr-ewallet-cv-server/utils";
+import type { Result } from "@keplr-ewallet/stdlib-js";
 
 export type PgDatabaseConfig = {
   database: string;

@@ -1,0 +1,32 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@keplr-ewallet-demo-web/*": ["./src/*"],
+      "@keplr-ewallet-sdk-core/*": ["../ewallet_sdk_core/src/*"],
+      "@keplr-ewallet-sdk-eth/*": ["../ewallet_sdk_variants/eth/src/*"],
+      "@keplr-ewallet-sdk-cosmos/*": ["../ewallet_sdk_variants/cosmos/src/*"],
+      "@keplr-ewallet-common-ui/*": ["../ewallet_common_ui/src/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}

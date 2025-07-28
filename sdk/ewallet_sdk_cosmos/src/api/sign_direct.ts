@@ -1,12 +1,15 @@
 import { sha256 } from "@noble/hashes/sha2";
-import { SignDoc } from "cosmjs-types/cosmos/tx/v1beta1/tx";
-import type { DirectSignResponse } from "@cosmjs/proto-signing";
-import type { KeplrSignOptions } from "@keplr-wallet/types";
+import { SignDoc as ProtoSignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
+import type {
+  DirectSignResponse,
+  KeplrSignOptions,
+  SignDoc,
+} from "@keplr-wallet/types";
 import { SignDocWrapper } from "@keplr-wallet/cosmos";
 
+import type { EWalletMsg } from "@keplr-ewallet-sdk-core/types";
 import { CosmosEWallet } from "@keplr-ewallet-sdk-cosmos/cosmos_ewallet";
 import { encodeCosmosSignature } from "@keplr-ewallet-sdk-cosmos/utils/sign";
-import type { EWalletMsg } from "@keplr-ewallet-sdk-core/types";
 
 export async function signDirect(
   this: CosmosEWallet,
@@ -16,7 +19,11 @@ export async function signDirect(
   signOptions?: KeplrSignOptions,
 ): Promise<DirectSignResponse> {
   try {
-    const signBytes = SignDoc.encode(signDoc).finish();
+    const compatibleSignDoc = {
+      ...signDoc,
+      accountNumber: signDoc.accountNumber.toString(),
+    };
+    const signBytes = ProtoSignDoc.encode(compatibleSignDoc).finish();
     const signDocHash = sha256(signBytes);
     const publicKey = await this.getPublicKey();
     const origin = this.eWallet.origin;
@@ -27,20 +34,22 @@ export async function signDirect(
       accountNumber: signDoc.accountNumber.toString(),
     });
 
+    const chainInfoList = await this.getCosmosChainInfoList();
+    const chainInfo = chainInfoList.find((info) => info.chainId === chainId);
+
     const msg: EWalletMsg = {
       msg_type: "show_modal",
       payload: {
         modal_type: "make_signature",
-        is_demo: true,
         data: {
           chain_type: "cosmos",
           sign_type: "tx",
           payload: {
             chain_info: {
               chain_id: chainId,
-              chain_name: "cosmos",
+              chain_name: chainInfo?.chainName ?? "",
               chain_symbol_image_url:
-                "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/cosmoshub/uatom.png",
+                chainInfo?.stakeCurrency?.coinImageUrl ?? "",
             },
             signer,
             msgs: [],
