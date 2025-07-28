@@ -7,6 +7,9 @@
   "dependencies": {
     "@keplr-ewallet/stdlib-js": "workspace:*"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/chainapsis/ewallet-public.git",
