@@ -47,6 +47,7 @@
     "@typescript-eslint/parser": "^8.35.1",
     "del-cli": "^6.0.0",
     "hardhat": "^2.25.0",
+    "lerna": "8.2.3",
     "prettier": "^3.6.2",
     "tsc-alias": "^1.8.16",
     "typescript": "^5"
