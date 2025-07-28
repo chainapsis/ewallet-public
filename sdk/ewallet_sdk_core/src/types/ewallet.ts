@@ -1,3 +1,5 @@
-export interface KeplrEwalletInitArgs { }
+export interface KeplrEwalletInitArgs {
+  customerId: string;
+}
 
-export interface InitMsgHandlerArgs { }
+export interface InitMsgHandlerArgs {}

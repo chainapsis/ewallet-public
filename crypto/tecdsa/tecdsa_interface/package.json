@@ -1,0 +1,10 @@
+{
+  "name": "@keplr-ewallet/tecdsa-interface",
+  "packageManager": "yarn@4.7.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "devDependencies": {
+    "@types/node": "*",
+    "typescript": "*"
+  }
+}

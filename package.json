@@ -3,11 +3,18 @@
   "workspaces": {
     "packages": [
       "internals/ci",
+      "stdlib_js",
+      "credential_vault/pg_interface",
+      "credential_vault/server",
+      "credential_vault/cv_interface",
+      "crypto/tecdsa/tecdsa_interface",
       "sdk/ewallet_sdk_core",
       "sdk/ewallet_sdk_cosmos",
       "sdk/ewallet_sdk_eth",
       "sdk/sandboxes/sandbox_evm",
-      "sdk/sandboxes/sandbox_osmosis"
+      "sdk/sandboxes/sandbox_osmosis",
+      "crypto/bytes",
+      "crypto/sha"
     ]
   },
   "packageManager": "yarn@4.7.0",
@@ -18,6 +25,7 @@
     "ci": "yarn --cwd ./internals/ci run start"
   },
   "dependencies": {
+    "uuid": "^11.1.0",
     "viem": "^2.31.7"
   },
   "devDependencies": {

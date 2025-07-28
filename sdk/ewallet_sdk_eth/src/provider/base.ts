@@ -4,21 +4,22 @@ import type {
   TypedDataDefinition,
 } from "viem";
 import { hexToString, isAddress, isAddressEqual } from "viem";
+import { v4 as uuidv4 } from "uuid";
 
-import { ErrorCodes, standardError } from "../errors";
+import { ErrorCodes, standardError } from "@keplr-ewallet-sdk-eth/errors";
 import type {
   RpcMethod,
   RpcRequestArgs,
   RpcResponseData,
   PublicRpcMethod,
   WalletRpcMethod,
-} from "../rpc";
+} from "@keplr-ewallet-sdk-eth/rpc";
 import {
   RpcResponse,
   RpcError,
   UNSUPPORTED_RPC_METHODS,
   PUBLIC_RPC_METHODS,
-} from "../rpc";
+} from "@keplr-ewallet-sdk-eth/rpc";
 import type {
   EIP1193Provider,
   EWalletEIP1193ProviderOptions,
@@ -36,7 +37,8 @@ import { VERSION } from "./constants";
 
 export class EWalletEIP1193Provider
   extends ProviderEventEmitter
-  implements EIP1193Provider {
+  implements EIP1193Provider
+{
   protected isInitialized: boolean = false;
 
   protected signer: EWalletEIP1193ProviderOptions["signer"];
@@ -167,7 +169,7 @@ export class EWalletEIP1193Provider
         const requestBody = {
           ...args,
           jsonrpc: "2.0",
-          id: `${Date.now()}-${Math.random()}`,
+          id: uuidv4(),
         };
 
         const res = await fetch(rpcUrl, {
@@ -486,7 +488,7 @@ export class EWalletEIP1193Provider
     const requestBody = {
       method: "eth_chainId",
       jsonrpc: "2.0",
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: uuidv4(),
     };
 
     const res = await fetch(rpcUrl, {

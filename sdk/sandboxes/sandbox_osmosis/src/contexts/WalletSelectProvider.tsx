@@ -76,48 +76,62 @@ export const WalletSelectProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
   }, []);
 
-  const handleWalletSelect = useCallback(async (wallet: WalletConfig) => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      await useAccountStore.getState().connectWallet(wallet);
-      walletSelectParams?.onConnect?.({ walletType: "cosmos" });
-      onCloseWalletSelect();
-    } catch (error) {
-      console.error(`Failed to connect ${wallet.name}:`, error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      setError(errorMessage);
-      walletSelectParams?.onError?.(error instanceof Error ? error : new Error(errorMessage));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [walletSelectParams, onCloseWalletSelect]);
+  const handleWalletSelect = useCallback(
+    async (wallet: WalletConfig) => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        await useAccountStore.getState().connectWallet(wallet);
+        walletSelectParams?.onConnect?.({ walletType: "cosmos" });
+        onCloseWalletSelect();
+      } catch (error) {
+        console.error(`Failed to connect ${wallet.name}:`, error);
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+        setError(errorMessage);
+        walletSelectParams?.onError?.(
+          error instanceof Error ? error : new Error(errorMessage),
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [walletSelectParams, onCloseWalletSelect],
+  );
 
   // Keep the legacy method for backward compatibility
-  const handleEwalletConnect = useCallback(async (method: "google") => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      await useAccountStore.getState().connectEWallet(method);
-      walletSelectParams?.onConnect?.({ walletType: "cosmos" });
-      onCloseWalletSelect();
-    } catch (error) {
-      console.error("Failed to connect eWallet:", error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      setError(errorMessage);
-      walletSelectParams?.onError?.(error instanceof Error ? error : new Error(errorMessage));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [walletSelectParams, onCloseWalletSelect]);
+  const handleEwalletConnect = useCallback(
+    async (method: "google") => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        await useAccountStore.getState().connectEWallet(method);
+        walletSelectParams?.onConnect?.({ walletType: "cosmos" });
+        onCloseWalletSelect();
+      } catch (error) {
+        console.error("Failed to connect eWallet:", error);
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+        setError(errorMessage);
+        walletSelectParams?.onError?.(
+          error instanceof Error ? error : new Error(errorMessage),
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [walletSelectParams, onCloseWalletSelect],
+  );
 
   // eWallet initialization and AccountStore connection
   useEffect(() => {
     const initEwallet = async () => {
       try {
-        const result = await initKeplrEwalletCore({});
+        const result = await initKeplrEwalletCore({
+          customerId: "afb0afd1-d66d-4531-981c-cbf3fb1507b9", // TODO: replace with actual customerId
+        });
         if (result.success) {
           setEWallet(result.data);
           setIsEwalletInitialized(true);

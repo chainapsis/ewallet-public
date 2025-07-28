@@ -52,7 +52,9 @@ export const KeplrEwalletProvider = ({
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    initKeplrEwalletCore({}).then((result) => {
+    initKeplrEwalletCore({
+      customerId: "afb0afd1-d66d-4531-981c-cbf3fb1507b9", // TODO: replace with actual customerId
+    }).then((result) => {
       if (result.success) {
         setEWallet(result.data);
         setIsInitialized(true);

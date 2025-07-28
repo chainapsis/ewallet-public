@@ -7,11 +7,17 @@ import { getEmail } from "./api/get_email";
 import { hideModal } from "./api/hide_modal";
 
 export class KeplrEWallet {
+  customerId: string; // CHECK: would be better to name it appId?
   iframe: HTMLIFrameElement;
   attachedEndpoint: string;
   origin: string;
 
-  public constructor(iframe: HTMLIFrameElement, attachedEndpoint: string) {
+  public constructor(
+    customerId: string,
+    iframe: HTMLIFrameElement,
+    attachedEndpoint: string,
+  ) {
+    this.customerId = customerId;
     this.iframe = iframe;
     this.attachedEndpoint = attachedEndpoint;
     this.origin = window.location.origin;

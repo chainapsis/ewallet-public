@@ -1,11 +1,39 @@
 {
   "name": "@keplr-ewallet/ewallet-sdk-eth",
-  "version": "0.0.3",
+  "version": "0.0.4-rc.2",
   "packageManager": "yarn@4.7.0",
   "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "type": "module",
   "publishConfig": {
     "access": "public"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/types/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "keplr",
+    "ewallet",
+    "ethereum",
+    "blockchain",
+    "wallet",
+    "evm",
+    "viem"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chainapsis/keplr-ewallet.git",
+    "directory": "sdk/ewallet_sdk_eth"
   },
   "scripts": {
     "clean": "del-cli dist",
@@ -19,6 +47,7 @@
   "dependencies": {
     "@keplr-ewallet/ewallet-sdk-core": "workspace:*",
     "eventemitter3": "^5.0.1",
+    "uuid": "*",
     "viem": "*"
   },
   "devDependencies": {

@@ -20,7 +20,7 @@ export async function initKeplrEwalletCore(
   }
 
   if (window.__keplr_ewallet) {
-    const el = document.getElementById(KEPLR_EWALLET_ELEM_ID);
+    const el = document.getElementById(KEPLR_EWALLET_ELEM_ID); // CHECK: replace with appId
     if (el !== null) {
       return {
         success: false,
@@ -44,7 +44,11 @@ export async function initKeplrEwalletCore(
   // Wait till the "init" message is sent from the being-loaded iframe document.
   await registering;
 
-  const ewalletCore = new KeplrEWallet(iframe, EWALLET_ATTACHED_ENDPOINT_LOCAL);
+  const ewalletCore = new KeplrEWallet(
+    args.customerId,
+    iframe,
+    EWALLET_ATTACHED_ENDPOINT_LOCAL,
+  );
 
   window.__keplr_ewallet = ewalletCore;
 

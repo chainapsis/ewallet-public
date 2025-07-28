@@ -1,0 +1,16 @@
+{
+  "name": "@keplr-ewallet/credential-vault-interface",
+  "packageManager": "yarn@4.7.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "devDependencies": {
+    "@types/jest": "*",
+    "@types/node": "*",
+    "@typescript-eslint/eslint-plugin": "*",
+    "@typescript-eslint/parser": "*",
+    "jest": "*",
+    "ts-jest": "*",
+    "tsx": "*",
+    "typescript": "*"
+  }
+}

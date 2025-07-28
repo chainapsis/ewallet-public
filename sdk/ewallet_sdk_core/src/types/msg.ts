@@ -45,6 +45,7 @@ export type EWalletMsgOAuthSignIn = {
   payload: {
     access_token: string;
     id_token: string;
+    customer_id: string;
     target_origin: string;
   };
 };

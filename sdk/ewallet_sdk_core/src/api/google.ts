@@ -1,5 +1,8 @@
 import { KeplrEWallet } from "@keplr-ewallet-sdk-core/keplr_ewallet";
-import { RedirectUriSearchParamsKey } from "@keplr-ewallet-sdk-core/oauth";
+import {
+  type OAuthState,
+  RedirectUriSearchParamsKey,
+} from "@keplr-ewallet-sdk-core/oauth";
 
 const GoogleClientId =
   "239646646986-8on7ql1vmbcshbjk12bdtopmto99iipm.apps.googleusercontent.com";
@@ -8,6 +11,7 @@ const GoogleClientId =
 const IframeOrigin = "http://localhost:3201/";
 
 export async function tryGoogleSignIn(
+  customerId: string,
   sendMsgToIframe: KeplrEWallet["sendMsgToIframe"],
 ) {
   const clientId = GoogleClientId;
@@ -28,6 +32,14 @@ export async function tryGoogleSignIn(
     payload: nonce,
   });
 
+  const oauthState: OAuthState = {
+    customerId,
+    targetOrigin: window.location.origin,
+  };
+  const oauthStateString = JSON.stringify(oauthState);
+
+  console.log("oauthStateString: %s", oauthStateString);
+
   const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
   authUrl.searchParams.set("client_id", clientId);
   authUrl.searchParams.set("redirect_uri", redirectUri);
@@ -39,10 +51,7 @@ export async function tryGoogleSignIn(
   authUrl.searchParams.set("scope", "openid email profile");
   authUrl.searchParams.set("prompt", "login");
   authUrl.searchParams.set("nonce", nonce);
-  authUrl.searchParams.set(
-    RedirectUriSearchParamsKey.STATE,
-    window.location.origin,
-  );
+  authUrl.searchParams.set(RedirectUriSearchParamsKey.STATE, oauthStateString);
 
   const popup = window.open(
     authUrl.toString(),

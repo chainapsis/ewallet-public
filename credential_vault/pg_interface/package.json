@@ -1,0 +1,28 @@
+{
+  "name": "@keplr-ewallet/credential-vault-pg-interface",
+  "packageManager": "yarn@4.7.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "migrate": "MIGRATE_MODE=all COMMITTEE_COUNT=2 tsx ./migrate/index.ts",
+    "migrate_1": "MIGRATE_MODE=one COMMITTEE_ID=1 tsx ./migrate/index.ts",
+    "migrate_2": "MIGRATE_MODE=one COMMITTEE_ID=2 tsx ./migrate/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@keplr-ewallet/bytes": "workspace:*",
+    "pg": "*",
+    "pgsql-parser": "^17.7.8",
+    "uuid": "*"
+  },
+  "devDependencies": {
+    "@types/jest": "*",
+    "@types/node": "*",
+    "@typescript-eslint/eslint-plugin": "*",
+    "@typescript-eslint/parser": "*",
+    "jest": "*",
+    "ts-jest": "*",
+    "tsx": "*",
+    "typescript": "*"
+  }
+}
