@@ -3089,6 +3089,7 @@ __metadata:
   resolution: "@keplr-ewallet/credential-vault-pg-interface@workspace:credential_vault/pg_interface"
   dependencies:
     "@keplr-ewallet/bytes": "workspace:*"
+    "@keplr-ewallet/stdlib-js": "workspace:*"
     "@types/jest": "npm:*"
     "@types/node": "npm:*"
     "@typescript-eslint/eslint-plugin": "npm:*"

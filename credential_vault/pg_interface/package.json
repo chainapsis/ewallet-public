@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@keplr-ewallet/bytes": "workspace:*",
+    "@keplr-ewallet/stdlib-js": "workspace:*",
     "pg": "*",
     "pgsql-parser": "^17.7.8",
     "uuid": "*"
