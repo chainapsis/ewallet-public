@@ -13,5 +13,6 @@
     "@types/node": "*",
     "ts-jest": "*",
     "typescript": "*"
-  }
+  },
+  "gitHead": "dcca806c481a5c7cafee1729052a9502dd91d85e"
 }

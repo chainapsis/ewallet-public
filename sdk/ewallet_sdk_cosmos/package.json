@@ -42,7 +42,7 @@
   "dependencies": {
     "@cosmjs/amino": "^0.33.1",
     "@cosmjs/proto-signing": "^0.33.1",
-    "@keplr-ewallet/ewallet-sdk-core": "workspace:*",
+    "@keplr-ewallet/ewallet-sdk-core": "0.0.5-rc.0",
     "@keplr-wallet/common": "^0.12.253",
     "@keplr-wallet/cosmos": "^0.12.253",
     "@keplr-wallet/crypto": "^0.12.253",
@@ -64,5 +64,6 @@
     "ts-jest": "*",
     "tsc-alias": "*",
     "typescript": "*"
-  }
+  },
+  "gitHead": "dcca806c481a5c7cafee1729052a9502dd91d85e"
 }

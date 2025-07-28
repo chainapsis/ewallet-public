@@ -45,7 +45,7 @@
     "hardhat": "npx hardhat node"
   },
   "dependencies": {
-    "@keplr-ewallet/ewallet-sdk-core": "workspace:*",
+    "@keplr-ewallet/ewallet-sdk-core": "0.0.5-rc.0",
     "eventemitter3": "^5.0.1",
     "uuid": "*",
     "viem": "*"
@@ -62,5 +62,6 @@
     "ts-jest": "*",
     "tsc-alias": "*",
     "typescript": "*"
-  }
+  },
+  "gitHead": "dcca806c481a5c7cafee1729052a9502dd91d85e"
 }
