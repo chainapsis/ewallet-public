@@ -3152,6 +3152,7 @@ __metadata:
     ts-jest: "npm:*"
     tsc-alias: "npm:*"
     typescript: "npm:*"
+    uuid: "npm:*"
     viem: "npm:*"
   languageName: unknown
   linkType: soft
@@ -16072,6 +16073,7 @@ __metadata:
     prettier: "npm:^3.6.2"
     tsc-alias: "npm:^1.8.16"
     typescript: "npm:^5"
+    uuid: "npm:^11.1.0"
     viem: "npm:^2.31.7"
   languageName: unknown
   linkType: soft

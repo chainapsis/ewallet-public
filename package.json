@@ -21,6 +21,7 @@
     "ci": "yarn --cwd ./internals/ci run start"
   },
   "dependencies": {
+    "uuid": "^11.1.0",
     "viem": "^2.31.7"
   },
   "devDependencies": {

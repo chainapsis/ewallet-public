@@ -47,6 +47,7 @@
   "dependencies": {
     "@keplr-ewallet/ewallet-sdk-core": "workspace:*",
     "eventemitter3": "^5.0.1",
+    "uuid": "*",
     "viem": "*"
   },
   "devDependencies": {

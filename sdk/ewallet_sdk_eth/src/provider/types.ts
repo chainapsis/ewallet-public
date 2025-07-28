@@ -1,9 +1,13 @@
 import { EventEmitter } from "eventemitter3";
 import type { Address, AddEthereumChainParameter as Chain } from "viem";
 
-import type { RpcMethod, RpcRequestArgs, RpcResponseData } from "../rpc";
-import { RpcError } from "../rpc";
-import type { EthSigner } from "../types";
+import type {
+  RpcMethod,
+  RpcRequestArgs,
+  RpcResponseData,
+} from "@keplr-ewallet-sdk-eth/rpc";
+import { RpcError } from "@keplr-ewallet-sdk-eth/rpc";
+import type { EthSigner } from "@keplr-ewallet-sdk-eth/types";
 
 export interface ProviderConnectInfo {
   chainId: string;

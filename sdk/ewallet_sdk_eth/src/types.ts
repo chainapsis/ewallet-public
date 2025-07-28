@@ -1,50 +1,14 @@
 import type {
-  // Basic types
   Address,
   CustomSource,
-  Hash,
   Hex,
   Prettify,
-  ByteArray,
   SignableMessage,
-
-  // Chain and network types
-  AddEthereumChainParameter,
-  BlockTag,
-  Quantity,
-  NetworkSync,
-
-  // Transaction types
-  RpcTransactionRequest,
-  RpcTransaction,
-  RpcTransactionReceipt,
-
-  // Block and log types
-  RpcBlock,
-  RpcBlockIdentifier,
-  RpcLog,
-  LogTopic,
-
-  // Typed data and utility types
   TypedDataDefinition,
-  ExactPartial,
-
-  // Utility functions
   TransactionSerializable,
 } from "viem";
-import {
-  toHex,
-  isAddress,
-  isAddressEqual,
-  hashMessage,
-  hashTypedData,
-  hexToString,
-  keccak256,
-  parseSignature,
-  serializeTransaction,
-} from "viem";
 
-import type { EIP1193Provider } from "./provider";
+import type { EIP1193Provider } from "@keplr-ewallet-sdk-eth/provider";
 
 export interface EthSignMethodMap {
   sign_transaction: {
@@ -122,7 +86,7 @@ export type EWalletAccount<
   }
 >;
 
-export interface EthEWallet {
+export interface IEthEWallet {
   type: "ethereum";
   chainId: string; // CAIP-2 formatting
   address: Hex;
@@ -145,55 +109,3 @@ export interface EthEWallet {
    */
   switchChain: (chainId: `0x${string}` | number) => Promise<void>;
 }
-
-// Re-export commonly used viem types and utilities
-export type {
-  // Basic types
-  Address,
-  Hash,
-  Hex,
-  CustomSource,
-  Prettify,
-  ByteArray,
-  SignableMessage,
-
-  // Chain and network types
-  AddEthereumChainParameter,
-  BlockTag,
-  Quantity,
-  NetworkSync,
-
-  // Transaction types
-  RpcTransactionRequest,
-  RpcTransaction,
-  RpcTransactionReceipt,
-
-  // Block and log types
-  RpcBlock,
-  RpcBlockIdentifier,
-  RpcLog,
-  LogTopic,
-
-  // Typed data and utility types
-  TypedDataDefinition,
-  ExactPartial,
-};
-
-export {
-  // Address utilities
-  isAddress,
-  isAddressEqual,
-
-  // Conversion utilities
-  toHex,
-  hexToString,
-
-  // Hashing utilities
-  hashMessage,
-  hashTypedData,
-  keccak256,
-
-  // Transaction utilities
-  parseSignature,
-  serializeTransaction,
-};

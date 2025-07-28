@@ -1,7 +1,6 @@
 import type { KeplrEWallet } from "@keplr-ewallet/ewallet-sdk-core";
 import {
   isAddress,
-  toHex,
   hashMessage,
   keccak256,
   serializeTransaction,
@@ -10,20 +9,16 @@ import {
 } from "viem";
 import type { Address, Hex, TypedDataDefinition } from "viem";
 import { privateKeyToAccount, publicKeyToAddress } from "viem/accounts";
-import { base, mainnet, optimism } from "viem/chains";
 
-import { makeGetPublicKey, makeSign } from "./api";
+import { makeGetPublicKey, makeSign } from "@keplr-ewallet-sdk-eth/api";
 import type {
-  EthEWallet,
   EthSigner,
   EWalletAccount,
   SignFunctionParams,
   SignFunctionResult,
   EthSignMethod,
-} from "./types";
-import { initEWalletEIP1193Provider } from "./provider";
-
-const SUPPORTED_CHAINS = [mainnet, base, optimism];
+} from "@keplr-ewallet-sdk-eth/types";
+import { EthEWallet } from "@keplr-ewallet-sdk-eth/eth_ewallet";
 
 export interface InitEthEWalletArgs {
   eWallet: KeplrEWallet | null;
@@ -36,96 +31,15 @@ export async function initEthEWallet({
     return null;
   }
 
-  const getPublicKey = makeGetPublicKey(eWallet);
-
-  const publicKey = await getPublicKey();
-  const address = publicKeyToAddress(publicKey as `0x${string}`);
-
-  const sign = makeSign(eWallet);
-
-  // TODO: add supported chains list for the wallet
-  // how to get chain list? hardcoding or get from sdk?
-  let activeChainId = 1; // ethereum mainnet
-  const chains = SUPPORTED_CHAINS;
-
-  const obj: EthEWallet = {
-    type: "ethereum",
-    chainId: `eip155:${activeChainId}`,
-    address,
-    getEthereumProvider: async () => {
-      // initial chain should be added first, as first chain is active by default on init provider
-      const activeChain =
-        chains.find((chain) => chain.id === activeChainId) ?? chains[0];
-
-      const addEthereumChainParameters = [
-        activeChain,
-        ...chains.filter((chain) => chain.id !== activeChainId),
-      ].map((chain) => ({
-        chainId: toHex(chain.id),
-        chainName: chain.name,
-        rpcUrls: chain.rpcUrls.default.http,
-        nativeCurrency: chain.nativeCurrency,
-        blockExplorerUrls: chain.blockExplorers?.default.url
-          ? [chain.blockExplorers.default.url]
-          : [],
-      }));
-
-      const providerId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      const hasSigner = isAddress(address);
-
-      if (hasSigner) {
-        return await initEWalletEIP1193Provider({
-          id: providerId,
-          signer: {
-            sign,
-            address,
-          },
-          chains: addEthereumChainParameters,
-        });
-      }
-
-      // if signer is not available, only handle public rpc requests
-      return await initEWalletEIP1193Provider({
-        id: providerId,
-        chains: addEthereumChainParameters,
-      });
-    },
-    sign: async (message: string): Promise<Hex> => {
-      const result = await sign<"personal_sign">({
-        type: "personal_sign",
-        data: {
-          address,
-          message,
-        },
-      });
-
-      return result.signature;
-    },
-    switchChain: async (chainId: `0x${string}` | number): Promise<void> => {
-      const chainIdNumber =
-        typeof chainId === "string" ? parseInt(chainId, 16) : chainId;
-
-      // TODO: send request to ewallet to switch chain
-      const chain = chains.find((chain) => chain.id === chainIdNumber);
-      if (!chain) {
-        throw new Error(`Chain with id ${chainId} not found`);
-      }
-
-      activeChainId = chainIdNumber;
-    },
-  };
-
-  return obj;
+  const ethEWallet = new EthEWallet(eWallet);
+  await ethEWallet.initialize();
+  return ethEWallet;
 }
 
 export async function toViemAccount(
   eWallet: KeplrEWallet,
 ): Promise<EWalletAccount<"ewallet", Hex>> {
-  // TODO: check if eWallet is initialized
-  // eWallet.isInitialized()
-
   const getPublicKey = makeGetPublicKey(eWallet);
-
   const publicKey = await getPublicKey();
   const address = publicKeyToAddress(publicKey as `0x${string}`);
 

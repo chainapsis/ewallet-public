@@ -1,6 +1,5 @@
 import type { SignOutput } from "@keplr-ewallet/ewallet-sdk-core";
-import type { Hex, Signature } from "viem";
-import { pad, hexToBigInt } from "viem";
+import { type Hex, type Signature, pad, hexToBigInt } from "viem";
 import { secp256k1 } from "@noble/curves/secp256k1";
 
 // ref: fullSignatureToEvmSig in cait_sith_keplr_addon/src/tests/eth_tx_sign.test.ts
