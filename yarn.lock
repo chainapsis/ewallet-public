@@ -3200,6 +3200,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@keplr-ewallet/stdlib-js@workspace:stdlib_js":
+  version: 0.0.0-use.local
+  resolution: "@keplr-ewallet/stdlib-js@workspace:stdlib_js"
+  dependencies:
+    "@jest/globals": "npm:*"
+    "@types/jest": "npm:*"
+    "@types/node": "npm:*"
+    ts-jest: "npm:*"
+    typescript: "npm:*"
+  languageName: unknown
+  linkType: soft
+
 "@keplr-ewallet/tecdsa-interface@workspace:crypto/tecdsa/tecdsa_interface":
   version: 0.0.0-use.local
   resolution: "@keplr-ewallet/tecdsa-interface@workspace:crypto/tecdsa/tecdsa_interface"

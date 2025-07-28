@@ -1,4 +1,4 @@
-import type { Result } from "@keplr-ewallet-bytes/utils";
+import type { Result } from "@keplr-ewallet/stdlib-js";
 
 const HEX_STRING_REGEX = new RegExp("^[0-9a-fA-F]*$");
 

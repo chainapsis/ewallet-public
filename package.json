@@ -3,6 +3,7 @@
   "workspaces": {
     "packages": [
       "internals/ci",
+      "stdlib_js",
       "credential_vault/pg_interface",
       "credential_vault/server",
       "credential_vault/cv_interface",

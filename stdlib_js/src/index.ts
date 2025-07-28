@@ -1,7 +1,5 @@
 export type Result<T, E> = SuccessResult<T> | ErrorResult<E>;
 
-// @TODO temp
-
 export interface SuccessResult<T> {
   success: true;
   data: T;
