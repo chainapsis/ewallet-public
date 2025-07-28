@@ -11,12 +11,12 @@ import {
   ContractFactory,
   Contract,
 } from "ethers";
+import { isAddressEqual } from "viem";
 import { mainnet } from "viem/chains";
 import type { EthSigner } from "@keplr-ewallet/ewallet-sdk-eth";
 import {
   EWalletEIP1193Provider,
   initEWalletEIP1193Provider,
-  isAddressEqual,
 } from "@keplr-ewallet/ewallet-sdk-eth";
 
 import {

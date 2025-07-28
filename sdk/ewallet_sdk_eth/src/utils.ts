@@ -13,6 +13,7 @@ import {
   toBytes,
   pad,
   hexToBigInt,
+  toHex,
 } from "viem";
 import type { SignOutput } from "@keplr-ewallet/ewallet-sdk-core";
 import { secp256k1 } from "@noble/curves/secp256k1";
@@ -40,22 +41,17 @@ export const encodeEthereumSignature = (
 ): Signature => {
   const { sig, is_high } = signOutput;
 
-  // 1) Decompress R
-  const bigRHex = "0x" + sig.big_r.replace(/^0x/, "");
-  // CHECK: dependency on noble/curves seems to be a mass
-  // Secp256k1.uncompressPubkey(bigRHex) could work, though it's cosmosjs dependency...
-  const uncompressed = secp256k1.getPublicKey(bigRHex, false);
+  // 1) Decompress R which is compressed public key
+  const bigRHexWithout0x = sig.big_r.replace(/^0x/, "");
 
-  // 2) Extract x and y
-  const xHex = ("0x" + uncompressed.slice(4, 68)) as Hex;
-  const yHex = ("0x" + uncompressed.slice(68, 132)) as Hex;
+  // 2) Parse the compressed public key point
+  const point = secp256k1.Point.fromHex(bigRHexWithout0x);
 
   // 3) Pad x to 32 bytes → r
-  const r = pad(xHex, { dir: "left", size: 32 });
+  const r = pad(toHex(point.x), { dir: "left", size: 32 });
 
   // 4) Determine v from y parity (odd = 28, even = 27)
-  const yBigInt = hexToBigInt(yHex);
-  const isYOdd = yBigInt % BigInt(2) === BigInt(1);
+  const isYOdd = point.y % BigInt(2) === BigInt(1);
   let v = isYOdd ? 28 : 27;
 
   // 5) Flip v if s was normalized (low-s rule)
