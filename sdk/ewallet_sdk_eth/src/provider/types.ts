@@ -95,4 +95,5 @@ export type EWalletEIP1193ProviderOptions = {
   id: string;
   chains: Chain[];
   signer?: EthSigner;
+  skipChainValidation?: boolean;
 };

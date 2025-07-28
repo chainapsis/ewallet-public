@@ -41,6 +41,7 @@ export async function getEthereumProvider(
     return await initEWalletEIP1193Provider({
       id: providerId,
       chains: addEthereumChainParameters,
+      skipChainValidation: true,
     });
   }
 
@@ -52,6 +53,7 @@ export async function getEthereumProvider(
       address: this.address,
     },
     chains: addEthereumChainParameters,
+    skipChainValidation: true, // skip chain validation as the chains are already validated
   });
 
   return this.cachedProvider;
