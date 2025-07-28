@@ -5,8 +5,9 @@ import { paths } from "../paths";
 export async function version(..._args: any[]) {
   console.info("Start publishing packages...");
 
-  console.info(`Ensure you have "npm login"-ed in the first place. \
+  console.info(`1. Ensure you have "npm login"-ed in the first place. \
 It's "npm login", not "yarn npm login".
+2. git remote "origin" needs to be set up in case you use an alias.
 `);
 
   execSync("yarn lerna version --no-private", {
