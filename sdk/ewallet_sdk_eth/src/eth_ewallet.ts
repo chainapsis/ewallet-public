@@ -11,6 +11,7 @@ import {
   getEthereumProvider,
   personalSign,
   switchChain,
+  toViemAccount,
 } from "@keplr-ewallet-sdk-eth/api";
 
 const SUPPORTED_CHAINS = [mainnet, base, optimism];
@@ -26,7 +27,7 @@ export class EthEWallet implements IEthEWallet {
     this.eWallet = eWallet;
   }
 
-  async initialize(): Promise<void> {
+  async initialize(initialChainId?: string | number): Promise<void> {
     if (this._address === null) {
       const publicKey = await this.getPublicKey();
       this._address = publicKeyToAddress(publicKey);
@@ -73,6 +74,7 @@ export class EthEWallet implements IEthEWallet {
   getEthereumProvider = getEthereumProvider.bind(this);
   sign = personalSign.bind(this);
   switchChain = switchChain.bind(this);
+  toViemAccount = toViemAccount.bind(this);
   protected getPublicKey = getPublicKey.bind(this);
   protected makeSignature = makeSignature.bind(this);
 }
