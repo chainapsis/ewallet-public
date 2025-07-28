@@ -2,7 +2,7 @@ import { execSync, spawnSync } from "node:child_process";
 
 import { paths } from "../paths";
 
-export async function publish(..._args: any[]) {
+export async function version(..._args: any[]) {
   console.info("Start publishing packages...");
 
   console.info(`Ensure you have "npm login"-ed in the first place. \
