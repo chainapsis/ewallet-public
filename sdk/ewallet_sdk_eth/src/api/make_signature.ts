@@ -1,5 +1,10 @@
-import type { EWalletMsg } from "@keplr-ewallet/ewallet-sdk-core";
-import { serializeSignature, serializeTransaction } from "viem";
+import type { EWalletMsg, KeplrEWallet } from "@keplr-ewallet/ewallet-sdk-core";
+import {
+  serializeSignature,
+  serializeTransaction,
+  type Signature,
+  type TransactionSerializable,
+} from "viem";
 
 import type {
   EthSignMethod,
@@ -14,185 +19,148 @@ import {
 } from "@keplr-ewallet-sdk-eth/utils";
 import type { EthEWallet } from "@keplr-ewallet-sdk-eth/eth_ewallet";
 
+// TODO: get chain info from ewallet
+const DEFAULT_CHAIN_INFO = {
+  chain_id: "1",
+  chain_name: "ethereum",
+  chain_symbol_image_url:
+    "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
+} as const;
+
+const signTypeConfig: Record<
+  EthSignMethod,
+  {
+    sign_type: "tx" | "arbitrary" | "eip712";
+    hashFunction: (data: any) => Uint8Array;
+    processResult: (
+      signature: Signature,
+      data?: any,
+    ) => SignFunctionResult<EthSignMethod>;
+  }
+> = {
+  sign_transaction: {
+    sign_type: "tx",
+    hashFunction: hashEthereumTransaction,
+    processResult: (
+      signature: Signature,
+      transaction: TransactionSerializable,
+    ) => {
+      const signedTransaction = serializeTransaction(transaction, signature);
+      return {
+        type: "signed_transaction",
+        signedTransaction,
+      };
+    },
+  },
+  personal_sign: {
+    sign_type: "arbitrary",
+    hashFunction: hashEthereumMessage,
+    processResult: (signature: Signature) => ({
+      type: "signature",
+      signature: serializeSignature(signature),
+    }),
+  },
+  sign_typedData_v4: {
+    sign_type: "eip712",
+    hashFunction: hashEthereumTypedData,
+    processResult: (signature: Signature) => ({
+      type: "signature",
+      signature: serializeSignature(signature),
+    }),
+  },
+};
+
+// Helper function to handle the common signing flow
+async function handleSigningFlow<M extends EthSignMethod>(
+  eWallet: KeplrEWallet,
+  config: (typeof signTypeConfig)[M],
+  signer: string,
+  data: any,
+  origin: string,
+): Promise<SignFunctionResult<M>> {
+  const msg: EWalletMsg = {
+    msg_type: "show_modal",
+    payload: {
+      modal_type: "make_signature",
+      data: {
+        chain_type: "eth",
+        sign_type: config.sign_type,
+        payload: {
+          chain_info: DEFAULT_CHAIN_INFO,
+          signer,
+          data,
+          origin,
+        },
+      },
+    },
+  };
+
+  const openModalAck = await eWallet.showModal(msg);
+
+  if (openModalAck.msg_type !== "show_modal_ack") {
+    throw new Error("Unreachable");
+  }
+
+  await eWallet.hideModal();
+
+  if (openModalAck.payload === "reject") {
+    throw new Error("User rejected the signature request");
+  }
+
+  const msgHash = config.hashFunction(data);
+
+  const res = await eWallet.sendMsgToIframe({
+    msg_type: "make_signature",
+    payload: {
+      msg: msgHash,
+    },
+  });
+
+  const signature = encodeEthereumSignature(res.payload.sign_output);
+  return config.processResult(signature, data);
+}
+
 export async function makeSignature<M extends EthSignMethod>(
   this: EthEWallet,
   parameters: SignFunctionParams<M>,
 ): Promise<SignFunctionResult<M>> {
+  const origin = this.eWallet.origin;
+
   switch (parameters.type) {
     case "sign_transaction": {
-      const origin = this.eWallet.origin;
-
       // TODO: simulate the tx and get the estimated fee
+      // TODO: receive the simulated tx from the attached side (this is not required for the MVP)
+      // we cannot estimate the fee here and just pass it to the attached side
 
-      const msg: EWalletMsg = {
-        msg_type: "show_modal",
-        payload: {
-          modal_type: "make_signature",
-          data: {
-            chain_type: "eth",
-            sign_type: "tx",
-            payload: {
-              // TODO: get chain info from ewallet or
-              // there needs to be a public client on the attached side
-              // for chain info management and tx simulation
-              chain_info: {
-                chain_id: "1",
-                chain_name: "ethereum",
-                chain_symbol_image_url:
-                  "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
-              },
-              signer: parameters.data.address,
-              data: parameters.data.transaction,
-              origin,
-            },
-          },
-        },
-      };
-
-      const openModalAck = await this.eWallet.showModal(msg);
-      if (openModalAck.msg_type === "show_modal_ack") {
-        await this.eWallet.hideModal();
-
-        if (openModalAck.payload === "approve") {
-          const msgHash = hashEthereumTransaction(parameters.data.transaction);
-
-          // TODO: receive the simulated tx from the attached side (this is not required for the MVP)
-          // we cannot estimate the fee here and just pass it to the attached side
-          const res = await this.eWallet.sendMsgToIframe({
-            msg_type: "make_signature",
-            payload: {
-              msg: msgHash,
-            },
-          });
-          const signature = encodeEthereumSignature(res.payload.sign_output);
-
-          const signedTransaction = serializeTransaction(
-            parameters.data.transaction,
-            signature,
-          );
-
-          return {
-            type: "signed_transaction",
-            signedTransaction,
-          };
-        }
-
-        if (openModalAck.payload === "reject") {
-          throw new Error("User rejected the signature request");
-        }
-      }
-
-      throw new Error("Unreachable");
+      return handleSigningFlow(
+        this.eWallet,
+        signTypeConfig.sign_transaction,
+        parameters.data.address,
+        parameters.data.transaction,
+        origin,
+      );
     }
+
     case "personal_sign": {
-      const origin = this.eWallet.origin;
-
-      const msg: EWalletMsg = {
-        msg_type: "show_modal",
-        payload: {
-          modal_type: "make_signature",
-          data: {
-            chain_type: "eth",
-            sign_type: "arbitrary",
-            payload: {
-              // TODO: get chain info from ewallet or
-              // there needs to be a public client on the attached side
-              // for chain info management and tx simulation
-              chain_info: {
-                chain_id: "1",
-                chain_name: "ethereum",
-                chain_symbol_image_url:
-                  "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
-              },
-              signer: parameters.data.address,
-              data: parameters.data.message,
-              origin,
-            },
-          },
-        },
-      };
-
-      const openModalAck = await this.eWallet.showModal(msg);
-      if (openModalAck.msg_type === "show_modal_ack") {
-        await this.eWallet.hideModal();
-
-        if (openModalAck.payload === "approve") {
-          const msgHash = hashEthereumMessage(parameters.data.message);
-
-          const res = await this.eWallet.sendMsgToIframe({
-            msg_type: "make_signature",
-            payload: {
-              msg: msgHash,
-            },
-          });
-          const signature = encodeEthereumSignature(res.payload.sign_output);
-
-          return {
-            type: "signature",
-            signature: serializeSignature(signature),
-          };
-        }
-
-        if (openModalAck.payload === "reject") {
-          throw new Error("User rejected the signature request");
-        }
-      }
-
-      throw new Error("Unreachable");
+      return handleSigningFlow(
+        this.eWallet,
+        signTypeConfig.personal_sign,
+        parameters.data.address,
+        parameters.data.message,
+        origin,
+      );
     }
+
     case "sign_typedData_v4": {
-      const origin = this.eWallet.origin;
-
-      const msg: EWalletMsg = {
-        msg_type: "show_modal",
-        payload: {
-          modal_type: "make_signature",
-          data: {
-            chain_type: "eth",
-            sign_type: "eip712",
-            payload: {
-              chain_info: {
-                chain_id: "1",
-                chain_name: "ethereum",
-                chain_symbol_image_url:
-                  "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
-              },
-              signer: parameters.data.address,
-              data: parameters.data.message,
-              origin,
-            },
-          },
-        },
-      };
-
-      const openModalAck = await this.eWallet.showModal(msg);
-      if (openModalAck.msg_type === "show_modal_ack") {
-        await this.eWallet.hideModal();
-
-        if (openModalAck.payload === "approve") {
-          const msgHash = hashEthereumTypedData(parameters.data.message);
-
-          const res = await this.eWallet.sendMsgToIframe({
-            msg_type: "make_signature",
-            payload: {
-              msg: msgHash,
-            },
-          });
-          const signature = encodeEthereumSignature(res.payload.sign_output);
-
-          return {
-            type: "signature",
-            signature: serializeSignature(signature),
-          };
-        }
-
-        if (openModalAck.payload === "reject") {
-          throw new Error("User rejected the signature request");
-        }
-      }
-
-      throw new Error("Unreachable");
+      return handleSigningFlow(
+        this.eWallet,
+        signTypeConfig.sign_typedData_v4,
+        parameters.data.address,
+        parameters.data.message,
+        origin,
+      );
     }
+
     default: {
       throw new Error(`Unknown sign method: ${(parameters as any).type}`);
     }
