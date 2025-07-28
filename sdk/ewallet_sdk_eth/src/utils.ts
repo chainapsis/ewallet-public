@@ -4,6 +4,8 @@ import type {
   TypedDataDefinition,
   Signature,
   Hex,
+  Address,
+  ByteArray,
 } from "viem";
 import {
   serializeTransaction,
@@ -12,9 +14,9 @@ import {
   keccak256,
   toBytes,
   pad,
-  hexToBigInt,
   toHex,
 } from "viem";
+import { publicKeyToAddress } from "viem/accounts";
 import type { SignOutput } from "@keplr-ewallet/ewallet-sdk-core";
 import { secp256k1 } from "@noble/curves/secp256k1";
 
@@ -69,4 +71,22 @@ export const encodeEthereumSignature = (
   const s = pad(sHex, { dir: "left", size: 32 });
 
   return { r, s, v: BigInt(v) };
+};
+
+export const publicKeyToEthereumAddress = (
+  publicKey: Hex | ByteArray,
+  uncompressed?: boolean,
+): Address => {
+  let publicKeyWithout0x: string | ByteArray = publicKey;
+  if (typeof publicKey === "string" && publicKey.startsWith("0x")) {
+    publicKeyWithout0x = publicKey.slice(2);
+  }
+
+  const point = secp256k1.Point.fromHex(publicKeyWithout0x);
+
+  if (uncompressed) {
+    return publicKeyToAddress(`0x${point.toHex()}`);
+  }
+
+  return publicKeyToAddress(`0x${point.toHex(true)}`);
 };

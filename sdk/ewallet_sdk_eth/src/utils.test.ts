@@ -1,20 +1,12 @@
 import { publicKeyToAddress, serializeSignature } from "viem/accounts";
-import { encodeEthereumSignature } from "./utils";
-import { recoverAddress, recoverPublicKey } from "viem";
+import { encodeEthereumSignature, publicKeyToEthereumAddress } from "./utils";
+import { recoverPublicKey } from "viem";
 
 describe("encodeEthereumSignature", () => {
   it("should encode the signature correctly", async () => {
-    const compressedPublicKey =
+    const publicKey =
       "0268d39a99cf77adba08a28877900023513f6e49b702901fb53a90d9c1187e1aa4";
-    const addressWithCompressedPublicKey = publicKeyToAddress(
-      `0x${compressedPublicKey}`,
-    );
-
-    const uncompressedPublicKey =
-      "0468d39a99cf77adba08a28877900023513f6e49b702901fb53a90d9c1187e1aa4d4b640ac857c7a6ca794625bd0422b9d7ec90a7e2974ca949eca507ba4719f56";
-    const addressWithUncompressedPublicKey = publicKeyToAddress(
-      `0x${uncompressedPublicKey}`,
-    );
+    const address = publicKeyToAddress(`0x${publicKey}`);
 
     const msgHash =
       "d7ed35dd0510a611f63230dabd98e34dcfca9fda4e086083a0741e50a247249d"; // hashMessage("hello world!")
@@ -39,22 +31,17 @@ describe("encodeEthereumSignature", () => {
 
     const serializedSignature = serializeSignature(signature);
 
-    const recoveredAddress = await recoverAddress({
-      hash: `0x${msgHash}`,
-      signature: serializedSignature,
-    });
-    console.log("Recovered address:", recoveredAddress);
-
+    // recovered public key should be uncompressed
     const recoveredPublicKey = await recoverPublicKey({
       hash: `0x${msgHash}`,
       signature: serializedSignature,
     });
     console.log("Recovered public key:", recoveredPublicKey);
 
-    // TODO: check why the displayed public key is compressed though the recovered public key is uncompressed
-    expect(recoveredAddress).toBe(addressWithUncompressedPublicKey);
-    expect(recoveredPublicKey.toLowerCase()).toBe(
-      `0x${uncompressedPublicKey}`.toLowerCase(),
-    );
+    const recoveredAddress = publicKeyToEthereumAddress(recoveredPublicKey);
+
+    console.log("Recovered address", recoveredAddress);
+
+    expect(recoveredAddress).toBe(address);
   });
 });
