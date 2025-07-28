@@ -1,10 +1,9 @@
-import type { EWalletMsg, KeplrEWallet } from "@keplr-ewallet/ewallet-sdk-core";
-import {
-  serializeSignature,
-  serializeTransaction,
-  type Signature,
-  type TransactionSerializable,
-} from "viem";
+import type {
+  EWalletMsgMakeSignature,
+  EWalletMsgShowModal,
+} from "@keplr-ewallet/ewallet-sdk-core";
+import type { Signature, TransactionSerializable } from "viem";
+import { serializeSignature, serializeTransaction } from "viem";
 
 import type {
   EthSignMethod,
@@ -18,14 +17,6 @@ import {
   encodeEthereumSignature,
 } from "@keplr-ewallet-sdk-eth/utils";
 import type { EthEWallet } from "@keplr-ewallet-sdk-eth/eth_ewallet";
-
-// TODO: get chain info from ewallet
-const DEFAULT_CHAIN_INFO = {
-  chain_id: "1",
-  chain_name: "ethereum",
-  chain_symbol_image_url:
-    "https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:1/chain.png",
-} as const;
 
 const signTypeConfig: Record<
   EthSignMethod,
@@ -70,15 +61,27 @@ const signTypeConfig: Record<
   },
 };
 
-// Helper function to handle the common signing flow
 async function handleSigningFlow<M extends EthSignMethod>(
-  eWallet: KeplrEWallet,
+  ethEWallet: EthEWallet,
   config: (typeof signTypeConfig)[M],
   signer: string,
   data: any,
   origin: string,
 ): Promise<SignFunctionResult<M>> {
-  const msg: EWalletMsg = {
+  const activeChain = ethEWallet.activeChain;
+  if (!activeChain) {
+    throw new Error("Active chain not found");
+  }
+
+  const chainInfo = {
+    chain_id: `eip155:${activeChain.id}`,
+    chain_name: activeChain.name,
+    chain_symbol_image_url: `https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:${activeChain.id}/chain.png`,
+    // CHECK: to check if the chain is op stack or elastic chain?
+    // because L1 publish fee estimation might be required for those chains
+  };
+
+  const showModalMsg: EWalletMsgShowModal = {
     msg_type: "show_modal",
     payload: {
       modal_type: "make_signature",
@@ -86,7 +89,7 @@ async function handleSigningFlow<M extends EthSignMethod>(
         chain_type: "eth",
         sign_type: config.sign_type,
         payload: {
-          chain_info: DEFAULT_CHAIN_INFO,
+          chain_info: chainInfo,
           signer,
           data,
           origin,
@@ -95,7 +98,9 @@ async function handleSigningFlow<M extends EthSignMethod>(
     },
   };
 
-  const openModalAck = await eWallet.showModal(msg);
+  const eWallet = ethEWallet.eWallet;
+
+  const openModalAck = await eWallet.showModal(showModalMsg);
 
   if (openModalAck.msg_type !== "show_modal_ack") {
     throw new Error("Unreachable");
@@ -109,14 +114,22 @@ async function handleSigningFlow<M extends EthSignMethod>(
 
   const msgHash = config.hashFunction(data);
 
-  const res = await eWallet.sendMsgToIframe({
+  const makeSignatureMsg: EWalletMsgMakeSignature = {
     msg_type: "make_signature",
     payload: {
       msg: msgHash,
     },
-  });
+  };
 
-  const signature = encodeEthereumSignature(res.payload.sign_output);
+  const makeSignatureAck = await eWallet.sendMsgToIframe(makeSignatureMsg);
+
+  if (makeSignatureAck.msg_type !== "make_signature_ack") {
+    throw new Error("Unreachable");
+  }
+
+  const signature = encodeEthereumSignature(
+    makeSignatureAck.payload.sign_output,
+  );
   return config.processResult(signature, data);
 }
 
@@ -133,7 +146,7 @@ export async function makeSignature<M extends EthSignMethod>(
       // we cannot estimate the fee here and just pass it to the attached side
 
       return handleSigningFlow(
-        this.eWallet,
+        this,
         signTypeConfig.sign_transaction,
         parameters.data.address,
         parameters.data.transaction,
@@ -143,7 +156,7 @@ export async function makeSignature<M extends EthSignMethod>(
 
     case "personal_sign": {
       return handleSigningFlow(
-        this.eWallet,
+        this,
         signTypeConfig.personal_sign,
         parameters.data.address,
         parameters.data.message,
@@ -153,7 +166,7 @@ export async function makeSignature<M extends EthSignMethod>(
 
     case "sign_typedData_v4": {
       return handleSigningFlow(
-        this.eWallet,
+        this,
         signTypeConfig.sign_typedData_v4,
         parameters.data.address,
         parameters.data.message,

@@ -1,7 +1,20 @@
 import type { KeplrEWallet } from "@keplr-ewallet/ewallet-sdk-core";
-import type { Address, Hex } from "viem";
+import type { Address, Chain, Hex } from "viem";
 import { publicKeyToAddress } from "viem/accounts";
-import { base, mainnet, optimism } from "viem/chains";
+import {
+  arbitrum,
+  avalanche,
+  base,
+  berachain,
+  blast,
+  citreaTestnet,
+  forma,
+  mainnet,
+  optimism,
+  polygon,
+  sepolia,
+  unichain,
+} from "viem/chains";
 
 import type { EIP1193Provider } from "@keplr-ewallet-sdk-eth/provider";
 import {
@@ -13,15 +26,27 @@ import {
   toViemAccount,
 } from "@keplr-ewallet-sdk-eth/api";
 
-// TODO: define supported chains in ewallet
-const SUPPORTED_CHAINS = [mainnet, base, optimism];
+const SUPPORTED_CHAINS = [
+  mainnet,
+  base,
+  optimism,
+  arbitrum,
+  blast,
+  avalanche,
+  unichain,
+  polygon,
+  forma,
+  berachain,
+  sepolia,
+  citreaTestnet,
+];
 
 export class EthEWallet {
   readonly eWallet: KeplrEWallet;
   private _cachedProvider: EIP1193Provider | null;
   private _address: Address | null;
   private _activeChainId: number;
-  private readonly _chains;
+  private readonly _chains: Chain[];
 
   constructor(eWallet: KeplrEWallet) {
     this.eWallet = eWallet;
@@ -82,6 +107,10 @@ export class EthEWallet {
 
   protected set activeChainId(chainId: number) {
     this._activeChainId = chainId;
+  }
+
+  get activeChain(): Chain | undefined {
+    return this._chains.find((chain) => chain.id === this._activeChainId);
   }
 
   get chains() {
