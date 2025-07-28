@@ -55,5 +55,3 @@ export function loadEnvs(): EnvType {
 
   return envs;
 }
-
-export const Envs = loadEnvs();
