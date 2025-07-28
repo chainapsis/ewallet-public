@@ -1,6 +1,6 @@
 {
   "name": "@keplr-ewallet/ewallet-sdk-eth",
-  "version": "0.0.5-0.0.5-rc.2.0",
+  "version": "0.0.6-rc.0",
   "packageManager": "yarn@4.7.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -45,7 +45,7 @@
     "hardhat": "npx hardhat node"
   },
   "dependencies": {
-    "@keplr-ewallet/ewallet-sdk-core": "^0.0.5-rc.2",
+    "@keplr-ewallet/ewallet-sdk-core": "^0.0.6-rc.0",
     "eventemitter3": "^5.0.1",
     "uuid": "*",
     "viem": "*"
