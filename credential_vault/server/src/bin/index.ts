@@ -19,9 +19,6 @@ async function main() {
     return createPostgresRes;
   }
 
-  // @TODO: move to envs
-  const port = env.COMMITTEE_ID === 1 ? 4201 : 4202;
-
   const app = makeApp();
 
   app.locals = {
@@ -29,8 +26,8 @@ async function main() {
     env,
   };
 
-  app.listen(port, () => {
-    console.log(`Server listening on port: %s`, port);
+  app.listen(env.PORT, () => {
+    console.log(`Server listening on port: %s`, env.PORT);
   });
 
   return;

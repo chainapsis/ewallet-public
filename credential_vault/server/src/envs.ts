@@ -7,7 +7,7 @@ import fs from "node:fs";
 const ENV_FILE_NAME_STEM = "credential_vault";
 
 export interface EnvType {
-  COMMITTEE_ID: number;
+  PORT: number;
   DB_HOST: string;
   DB_PORT: number;
   DB_USER: string;
@@ -17,7 +17,7 @@ export interface EnvType {
 }
 
 const envSchema = z.object({
-  COMMITTEE_ID: z.number().min(1),
+  PORT: z.number().min(1),
   DB_HOST: z.string().min(1, "DB_HOST is required"),
   DB_PORT: z.number().min(1),
   DB_USER: z.string().min(1, "DB_USER is required"),
@@ -41,7 +41,7 @@ export function loadEnvs(): EnvType {
   });
 
   const rawEnv: EnvType = {
-    COMMITTEE_ID: parseInt(process.env.COMMITTEE_ID || "1", 10),
+    PORT: parseInt(process.env.PORT || "4201", 10),
     DB_HOST: process.env.DB_HOST || "localhost",
     DB_PORT: parseInt(process.env.DB_PORT || "5432", 10),
     DB_USER: process.env.DB_USER || "postgres",
