@@ -9,6 +9,7 @@
     "jest": "NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "dependencies": {
+    "@keplr-ewallet/credential-vault-interface": "workspace:*",
     "@keplr-ewallet/credential-vault-pg-interface": "workspace:*",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

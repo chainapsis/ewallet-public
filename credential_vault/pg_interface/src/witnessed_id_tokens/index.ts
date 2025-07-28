@@ -6,7 +6,7 @@ import type {
   CommitIdTokenRequest,
   IdTokenStatus,
   WitnessedIdToken,
-} from "@keplr-ewallet/ewallet-types";
+} from "@keplr-ewallet/credential-vault-interface";
 
 export async function commitIdToken(
   db: Pool,

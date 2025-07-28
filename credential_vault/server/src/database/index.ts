@@ -1,5 +1,6 @@
-import type { Result } from "@keplr-ewallet/stdlib-js";
 import { Pool, type PoolClient } from "pg";
+
+import type { Result } from "@keplr-ewallet-cv-server/utils";
 
 export type PgDatabaseConfig = {
   database: string;
@@ -17,8 +18,8 @@ export async function createPgDatabase(
     ...config,
     ssl: config.ssl
       ? {
-        rejectUnauthorized: false,
-      }
+          rejectUnauthorized: false,
+        }
       : undefined,
   };
 
@@ -40,8 +41,9 @@ export async function createPgDatabase(
     console.error("Failed to connect to PostgreSQL: %s", error);
     return {
       success: false,
-      err: `Failed to connect to PostgreSQL: ${error instanceof Error ? error.message : String(error)
-        }`,
+      err: `Failed to connect to PostgreSQL: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
     };
   }
 }

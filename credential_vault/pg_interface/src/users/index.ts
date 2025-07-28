@@ -1,6 +1,7 @@
-import { Pool, Result } from "pg";
-// import type { Result } from "@keplr-ewallet/stdlib-js";
-// import type { CredentialVaultUser } from "@keplr-ewallet/ewallet-types";
+import { Pool } from "pg";
+import type { CredentialVaultUser } from "@keplr-ewallet/credential-vault-interface";
+
+import type { Result } from "@keplr-ewallet-credential-vault-pg-interface/utils";
 
 export async function createUser(
   db: Pool,

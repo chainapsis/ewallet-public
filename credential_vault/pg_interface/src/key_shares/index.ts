@@ -1,12 +1,11 @@
 import { Pool } from "pg";
 import { v4 as uuidv4 } from "uuid";
-// import type { Result } from "@keplr-ewallet/stdlib-js";
 import type {
   CreateCredentialVaultKeyShareRequest,
   CredentialVaultKeyShare,
-} from "@keplr-ewallet/ewallet-types";
+} from "@keplr-ewallet/credential-vault-interface";
 
-import { Result } from "@keplr-ewallet-credential-vault-pg-interface/utils";
+import type { Result } from "@keplr-ewallet-credential-vault-pg-interface/utils";
 
 export async function createKeyShare(
   db: Pool,

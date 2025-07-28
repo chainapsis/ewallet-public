@@ -4,7 +4,7 @@ import type {
   GetKeyShareRequestBody,
   GetKeyShareResponse,
   RegisterKeyShareBody,
-} from "@keplr-ewallet/ewallet-types";
+} from "@keplr-ewallet/credential-vault-interface";
 
 import {
   getKeyShare,
