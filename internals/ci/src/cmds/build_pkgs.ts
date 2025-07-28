@@ -2,12 +2,12 @@ import { execSync } from "node:child_process";
 
 import { paths } from "../paths";
 
-export function buildSDK(..._args: any[]) {
-  doBuildSDK();
+export function buildPkgs(..._args: any[]) {
+  doBuildPkgs();
 }
 
-export function doBuildSDK() {
-  console.info("Start building SDKs...");
+export function doBuildPkgs() {
+  console.info("Start building packages...");
 
   console.info("Build sdk-core, path: %s", paths.sdk_core);
   execSync("yarn run build", {
