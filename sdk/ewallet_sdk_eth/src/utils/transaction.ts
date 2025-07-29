@@ -18,10 +18,13 @@ export const toTransactionSerializable = ({
   const txType = transaction.type || "0x2"; // Default to EIP-1559
 
   let chainIdNumber: number;
-  if (chainId.startsWith("0x")) {
+  // chainId can be in CAIP-2, hex, or decimal format
+  if (chainId.startsWith("eip155:")) {
+    chainIdNumber = parseInt(chainId.split(":")[1], 10);
+  } else if (chainId.startsWith("0x")) {
     chainIdNumber = parseInt(chainId, 16);
   } else {
-    chainIdNumber = parseInt(chainId);
+    chainIdNumber = parseInt(chainId, 10);
   }
 
   const baseFields = {

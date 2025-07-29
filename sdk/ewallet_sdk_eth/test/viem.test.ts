@@ -14,12 +14,6 @@ import {
 } from "viem";
 import { sepolia, mainnet } from "viem/chains";
 import { hashAuthorization } from "viem/utils";
-// import type { EthSigner } from "@keplr-ewallet/ewallet-sdk-eth";
-// import {
-//   EWalletEIP1193Provider,
-//   initEWalletEIP1193Provider,
-//   ErrorCodes,
-// } from "@keplr-ewallet/ewallet-sdk-eth";
 
 import { hardhatAlt, hardhatAccounts, hardhatNodeAlt } from "./hardhat";
 import {
