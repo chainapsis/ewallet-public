@@ -6,10 +6,7 @@ export async function switchChain(
   this: EthEWallet,
   chainId: Hex | number,
 ): Promise<void> {
-  const provider = this.cachedProvider;
-  if (provider === null) {
-    throw new Error("EthEWallet not initialized. Call initialize() first.");
-  }
+  const provider = await this.getEthereumProvider();
 
   await provider.request({
     method: "wallet_switchEthereumChain",

@@ -1,3 +1,4 @@
+export * from "./get_address";
 export * from "./get_public_key";
 export * from "./make_signature";
 export * from "./get_ethereum_provider";

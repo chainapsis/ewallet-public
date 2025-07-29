@@ -22,9 +22,6 @@ export const EthereumOffchainSignWidget = () => {
     try {
       setIsLoading(true);
 
-      // TODO: add lazy initialization inside the eth sdk
-      await ethEWallet.initialize();
-
       if (signType === "personal_sign") {
         const message =
           "Welcome to Keplr Embedded! 🚀 Try generating an MPC signature.";

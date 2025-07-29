@@ -1,4 +1,4 @@
-import { isAddress, toHex } from "viem";
+import { toHex } from "viem";
 import { v4 as uuidv4 } from "uuid";
 
 import {
@@ -10,9 +10,11 @@ import type { EthEWallet } from "@keplr-ewallet-sdk-eth/eth_ewallet";
 export async function getEthereumProvider(
   this: EthEWallet,
 ): Promise<EIP1193Provider> {
-  if (this.cachedProvider !== null) {
-    return this.cachedProvider;
+  if (this.provider !== null) {
+    return this.provider;
   }
+
+  const address = await this.getAddress();
 
   const activeChain =
     this.chains.find(
@@ -32,29 +34,15 @@ export async function getEthereumProvider(
       : [],
   }));
 
-  const providerId = uuidv4();
-  const hasSigner = isAddress(this.address);
-
-  if (!hasSigner) {
-    // if signer is not available, only handle public rpc requests
-    // don't cache public rpc provider
-    return await initEWalletEIP1193Provider({
-      id: providerId,
-      chains: addEthereumChainParameters,
-      skipChainValidation: true,
-    });
-  }
-
-  const sign = this.makeSignature;
-  this.cachedProvider = await initEWalletEIP1193Provider({
-    id: providerId,
+  this.provider = await initEWalletEIP1193Provider({
+    id: uuidv4(),
     signer: {
-      sign,
-      address: this.address,
+      sign: this.makeSignature,
+      address,
     },
     chains: addEthereumChainParameters,
     skipChainValidation: true, // skip chain validation as the chains are already validated
   });
 
-  return this.cachedProvider;
+  return this.provider;
 }

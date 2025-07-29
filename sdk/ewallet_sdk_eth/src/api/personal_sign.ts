@@ -9,7 +9,7 @@ export async function personalSign(
   const result = await this.makeSignature({
     type: "personal_sign",
     data: {
-      address: this.address,
+      address: await this.getAddress(),
       message,
     },
   });
