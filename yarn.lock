@@ -3047,6 +3047,7 @@ __metadata:
     "@keplr-ewallet/stdlib-js": "workspace:*"
     "@types/jest": "npm:*"
     "@types/node": "npm:*"
+    del-cli: "npm:*"
     ts-jest: "npm:*"
     typescript: "npm:*"
   languageName: unknown

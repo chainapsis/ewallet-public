@@ -30,5 +30,12 @@ export function doBuildPkgs() {
   });
   console.info("Ok");
 
+  console.info("Build crypto-bytes, path: %s", paths.crypto_bytes);
+  execSync("yarn run build", {
+    cwd: paths.crypto_bytes,
+    stdio: "inherit",
+  });
+  console.info("Ok");
+
   console.info("All done!");
 }
