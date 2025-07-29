@@ -15,7 +15,8 @@ import { WalletBox } from "./wallet_box";
 import { useKeplrEwallet } from "@/contexts/KeplrEwalletProvider";
 
 export const LoginWidget: React.FC<LoginWidgetProps> = () => {
-  const { eWallet, isAuthenticated, setIsAuthenticated } = useKeplrEwallet();
+  const { cosmosEWallet } = useKeplrEwallet();
+  const eWallet = cosmosEWallet?.eWallet;
   const [walletInfo, setWalletInfo] = useState<
     | {
         email: string;
@@ -23,6 +24,7 @@ export const LoginWidget: React.FC<LoginWidgetProps> = () => {
       }
     | undefined
   >();
+
   const [isSigningIn, setIsSigningIn] = useState(false);
 
   const handleSignIn = async () => {
@@ -47,7 +49,7 @@ export const LoginWidget: React.FC<LoginWidgetProps> = () => {
   const handleSignOut = async () => {
     if (eWallet) {
       await eWallet.signOut();
-      setIsAuthenticated(false);
+      // setIsAuthenticated(false);
       setWalletInfo(undefined);
     }
   };

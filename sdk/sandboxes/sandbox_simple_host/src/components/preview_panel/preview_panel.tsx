@@ -16,7 +16,9 @@ import { LoginWidget } from "@/components/widgets/login_widget/login_widget";
 // import { CosmosOffChainSignWidget } from "@keplr-ewallet-demo-web/components/widgets/cosmos_offchain_sign_widget/cosmos_offchain_sign_widget";
 
 export const PreviewPanel = () => {
-  const { eWallet } = useKeplrEwallet();
+  const { cosmosEWallet } = useKeplrEwallet();
+
+  console.log("cosmosEWallet !!!", cosmosEWallet);
 
   return (
     <div className={styles.wrapper}>

@@ -5,5 +5,9 @@ import { KeplrEWalletProvider } from "@/components/keplr_ewallet_provider/keplr_
 import { PreviewPanel } from "@/components/preview_panel/preview_panel";
 
 export default function Home() {
-  return <KeplrEWalletProvider>{/* <PreviewPanel /> */}</KeplrEWalletProvider>;
+  return (
+    <KeplrEWalletProvider>
+      <PreviewPanel />
+    </KeplrEWalletProvider>
+  );
 }
