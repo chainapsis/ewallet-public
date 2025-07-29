@@ -18957,6 +18957,7 @@ __metadata:
     tsc-alias: "npm:*"
     tsx: "npm:*"
     typescript: "npm:*"
+    zustand: "npm:^5.0.6"
   languageName: unknown
   linkType: soft
 

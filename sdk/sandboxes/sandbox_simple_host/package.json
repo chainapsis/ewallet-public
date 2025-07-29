@@ -16,7 +16,8 @@
     "next": "^15.3.5",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "sass": "^1.89.2"
+    "sass": "^1.89.2",
+    "zustand": "^5.0.6"
   },
   "devDependencies": {
     "@types/jest": "*",

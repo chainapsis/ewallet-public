@@ -1,13 +1,9 @@
 import React from "react";
 
 import styles from "./page.module.scss";
-import { KeplrEwalletProvider } from "@/contexts/KeplrEwalletProvider";
+import { KeplrEWalletProvider } from "@/components/keplr_ewallet_provider/keplr_ewallet_provider";
 import { PreviewPanel } from "@/components/preview_panel/preview_panel";
 
 export default function Home() {
-  return (
-    <KeplrEwalletProvider initialLoginMethods={["email", "google"]}>
-      <PreviewPanel />
-    </KeplrEwalletProvider>
-  );
+  return <KeplrEWalletProvider>{/* <PreviewPanel /> */}</KeplrEWalletProvider>;
 }

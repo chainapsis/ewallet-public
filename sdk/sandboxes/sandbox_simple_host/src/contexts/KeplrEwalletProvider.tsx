@@ -40,7 +40,7 @@ const KeplrEwalletContext = createContext<KeplrEwalletContextType | undefined>(
   undefined,
 );
 
-export const KeplrEwalletProvider = ({
+export const KeplrEwalletProvider2 = ({
   children,
   initialLoginMethods,
 }: KeplrEwalletProviderProps) => {
