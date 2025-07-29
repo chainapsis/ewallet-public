@@ -4,7 +4,6 @@ import type {
   Hex,
   Prettify,
   SignableMessage,
-  TypedDataDefinition,
   RpcTransactionRequest,
 } from "viem";
 
@@ -34,7 +33,7 @@ export interface EthSignMethodMap {
       type: "sign_typedData_v4";
       data: {
         address: Address;
-        message: TypedDataDefinition;
+        serializedTypedData: string;
       };
     };
     result: { type: "signature"; signature: Hex };

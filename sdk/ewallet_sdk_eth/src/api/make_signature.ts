@@ -16,6 +16,7 @@ import {
   hashEthereumTypedData,
   encodeEthereumSignature,
   toTransactionSerializable,
+  parseTypedDataDefinition,
 } from "@keplr-ewallet-sdk-eth/utils";
 import type { EthEWallet } from "@keplr-ewallet-sdk-eth/eth_ewallet";
 
@@ -87,9 +88,9 @@ const signTypeConfig: Record<
         throw new Error("Invalid sign type");
       }
 
-      const payload = data.payload;
+      const payloadData = data.payload.data;
 
-      return hashEthereumMessage(payload.data);
+      return hashEthereumMessage(payloadData.message);
     },
     processResult: (signature: Signature) => ({
       type: "signature",
@@ -107,9 +108,13 @@ const signTypeConfig: Record<
         throw new Error("Invalid sign type");
       }
 
-      const payload = data.payload;
+      const payloadData = data.payload.data;
 
-      return hashEthereumTypedData(payload.data);
+      const typedData = parseTypedDataDefinition(
+        payloadData.serializedTypedData,
+      );
+
+      return hashEthereumTypedData(typedData);
     },
     processResult: (signature: Signature) => ({
       type: "signature",
@@ -216,7 +221,9 @@ export async function makeSignature<M extends EthSignMethod>(
           chain_info: chainInfo,
           origin,
           signer: parameters.data.address,
-          data: parameters.data.message,
+          data: {
+            message: parameters.data.message,
+          },
         },
       };
 
@@ -235,7 +242,9 @@ export async function makeSignature<M extends EthSignMethod>(
           chain_info: chainInfo,
           origin,
           signer: parameters.data.address,
-          data: parameters.data.message,
+          data: {
+            serializedTypedData: parameters.data.serializedTypedData,
+          },
         },
       };
 

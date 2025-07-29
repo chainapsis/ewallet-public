@@ -19,7 +19,10 @@ import type {
   SignFunctionParams,
   SignFunctionResult,
 } from "@keplr-ewallet-sdk-eth/types";
-import { toTransactionSerializable } from "@keplr-ewallet-sdk-eth/utils";
+import {
+  parseTypedDataDefinition,
+  toTransactionSerializable,
+} from "@keplr-ewallet-sdk-eth/utils";
 
 export * from "./viemHelpers";
 export * from "./ethersHelpers";
@@ -151,8 +154,9 @@ export const createEthSigner = (
           };
         }
         case "sign_typedData_v4": {
-          const { message } = parameters.data;
-          const hash = hashTypedData(message);
+          const { serializedTypedData } = parameters.data;
+          const typedData = parseTypedDataDefinition(serializedTypedData);
+          const hash = hashTypedData(typedData);
           const signature = await account.sign({ hash });
           return {
             type: "signature",

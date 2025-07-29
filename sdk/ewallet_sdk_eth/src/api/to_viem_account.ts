@@ -1,5 +1,5 @@
-import { isAddress } from "viem";
-import type { Address, Hex, TypedDataDefinition } from "viem";
+import { isAddress, serializeTypedData } from "viem";
+import type { Address, Hex } from "viem";
 import { publicKeyToAddress } from "viem/accounts";
 
 import type { EWalletAccount } from "@keplr-ewallet-sdk-eth/types";
@@ -61,7 +61,7 @@ export async function toViemAccount(
         type: "sign_typedData_v4",
         data: {
           address,
-          message: typedData as TypedDataDefinition,
+          serializedTypedData: serializeTypedData(typedData),
         },
       });
 

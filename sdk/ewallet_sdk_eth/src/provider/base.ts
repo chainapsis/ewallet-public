@@ -3,7 +3,12 @@ import type {
   AddEthereumChainParameter as Chain,
   TypedDataDefinition,
 } from "viem";
-import { hexToString, isAddress, isAddressEqual } from "viem";
+import {
+  hexToString,
+  isAddress,
+  isAddressEqual,
+  serializeTypedData,
+} from "viem";
 import { v4 as uuidv4 } from "uuid";
 
 import { ErrorCodes, standardError } from "@keplr-ewallet-sdk-eth/errors";
@@ -20,6 +25,7 @@ import {
   UNSUPPORTED_RPC_METHODS,
   PUBLIC_RPC_METHODS,
 } from "@keplr-ewallet-sdk-eth/rpc";
+import { parseTypedData } from "@keplr-ewallet-sdk-eth/utils";
 import type {
   EIP1193Provider,
   EWalletEIP1193ProviderOptions,
@@ -27,12 +33,7 @@ import type {
   ChainWithStatus,
 } from "./types";
 import { ProviderEventEmitter } from "./types";
-import {
-  isValidChainId,
-  parseTypedData,
-  toSignableTransaction,
-  validateChain,
-} from "./utils";
+import { isValidChainId, toSignableTransaction, validateChain } from "./utils";
 import { VERSION } from "./constants";
 
 export class EWalletEIP1193Provider
@@ -379,7 +380,7 @@ export class EWalletEIP1193Provider
           type: "sign_typedData_v4",
           data: {
             address: this.signer.address,
-            message: typedData,
+            serializedTypedData: serializeTypedData(typedData),
           },
         });
 
