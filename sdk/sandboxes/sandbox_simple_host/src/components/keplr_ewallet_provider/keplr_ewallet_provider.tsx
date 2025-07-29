@@ -1,35 +1,43 @@
 "use client";
 
+import { useAppState } from "@/state";
 import { initCosmosEWallet } from "@keplr-ewallet/ewallet-sdk-cosmos";
 import React, { useEffect, useState, type PropsWithChildren } from "react";
 
 export const KeplrEWalletProvider: React.FC<PropsWithChildren> = ({
   children,
 }) => {
-  const [isInitializing, setIsInitializing] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const appState = useAppState.getState();
 
   useEffect(() => {
     async function fn() {
       try {
-        const cosmos = initCosmosEWallet({
-          customerId: "afb0afd1-d66d-4531-981c-cbf3fb1507b9", // from seed data
-        });
+        const isCosmosReady = await appState.initKeplrSdkCosmos();
 
-        console.log(1, cosmos);
+        if (!isCosmosReady) {
+          console.error("something wrong");
+        }
 
-        setIsInitializing(true);
+        // const isEthReady = await appState.initKeplrSdkEth();
+        //
+        // if (!isCosmosReady) {
+        //   console.error("something wrong");
+        // }
+
+        setIsInitialized(true);
       } catch (err: any) {
         console.error(err);
       }
     }
 
     fn().then();
-  }, [setIsInitializing]);
+  }, [setIsInitialized, appState]);
 
   return (
     <div>
-      <p>checking {isInitializing}</p>
-      {children}
+      <p>checking {isInitialized ? "true" : "false"}</p>
+      {isInitialized && children}
     </div>
   );
 };

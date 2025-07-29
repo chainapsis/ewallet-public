@@ -1,3 +1,7 @@
+import {
+  CosmosEWallet,
+  initCosmosEWallet,
+} from "@keplr-ewallet/ewallet-sdk-cosmos";
 import { create } from "zustand";
 import { combine, persist } from "zustand/middleware";
 
@@ -5,18 +9,12 @@ const STORAGE_KEY = "sandbox-simple-host";
 
 interface AppState {
   keplr_sdk_eth: null;
-  keplr_sdk_cosmos: null;
-  // customerId: string | null;
-  // keyshare_1: string | null;
-  // nonce: string | null;
-  // jwtToken: string | null;
-  // showModalMsg: EWalletMsgShowModalObject | null;
-  // hostOrigin: string | null;
+  keplr_sdk_cosmos: CosmosEWallet | null;
 }
 
 interface AppActions {
   initKeplrSdkEth: () => void;
-  initKeplrSdkCosmos: () => void;
+  initKeplrSdkCosmos: () => Promise<boolean>;
 }
 
 export const useAppState = create(
@@ -28,31 +26,19 @@ export const useAppState = create(
       },
       (set) => ({
         initKeplrSdkEth: () => {},
-        initKeplrSdkCosmos: () => {},
-        // setCustomerId: (customerId) => set({ customerId }),
-        // setNonce: (nonce) => set({ nonce }),
-        // setKeyshare_1: (keyshare_1) => set({ keyshare_1 }),
-        // setJwtToken: (jwtToken) => set({ jwtToken }),
-        // setHostOrigin: (hostOrigin) => set({ hostOrigin }),
-        // resetAll: () =>
-        //   set({
-        //     customerId: null,
-        //     keyshare_1: null,
-        //     nonce: null,
-        //     jwtToken: null,
-        //     hostOrigin: null,
-        //   }),
-        // setShowModalMsg: (showModalMsg) => {
-        //   if (!showModalMsg) {
-        //     set({ showModalMsg: null });
-        //     return;
-        //   }
-        //
-        //   // TODO: refactor to per function when adding types that need to show modals in the future @retto
-        //   if (showModalMsg && showModalMsg.msg.msg_type === "show_modal") {
-        //     set({ showModalMsg });
-        //   }
-        // },
+        initKeplrSdkCosmos: async () => {
+          const sdk = await initCosmosEWallet({
+            customerId: "afb0afd1-d66d-4531-981c-cbf3fb1507b9", // from seed data
+          });
+
+          if (sdk) {
+            set({ keplr_sdk_cosmos: sdk });
+            return true;
+          } else {
+            console.error("sdk init fail");
+            return false;
+          }
+        },
       }),
     ),
     { name: STORAGE_KEY },
