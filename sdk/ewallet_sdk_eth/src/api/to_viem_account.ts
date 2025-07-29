@@ -51,19 +51,22 @@ export async function toViemAccount(
         return transaction;
       })();
 
-      const result = await sign({
-        type: "sign_transaction",
-        data: {
-          address,
-          transaction: signableTransaction,
-        },
-      });
+      // TODO: implement this
+      throw new Error("Not implemented");
 
-      if (result.type !== "signed_transaction") {
-        throw new Error("Expected signed transaction result");
-      }
+      // const result = await sign({
+      //   type: "sign_transaction",
+      //   data: {
+      //     address,
+      //     transaction: signableTransaction,
+      //   },
+      // });
 
-      return result.signedTransaction;
+      // if (result.type !== "signed_transaction") {
+      //   throw new Error("Expected signed transaction result");
+      // }
+
+      // return result.signedTransaction;
     },
 
     signTypedData: async (typedData) => {

@@ -45,7 +45,7 @@ const signTypeConfig: Record<
 
       const serializableTx = toTransactionSerializable({
         chainId: payload.chain_info.chain_id,
-        tx: payload.data,
+        tx: payload.data.transaction,
       });
       return hashEthereumTransaction(serializableTx);
     },
@@ -193,7 +193,11 @@ export async function makeSignature<M extends EthSignMethod>(
           chain_info: chainInfo,
           origin,
           signer: parameters.data.address,
-          data: parameters.data.transaction,
+          data: {
+            transaction: parameters.data.transaction,
+            // TODO: check if simulation is not required;
+            skipSimulation: true,
+          },
         },
       };
 
