@@ -1,22 +1,23 @@
 import type { Hex } from "viem";
-import type { KeplrEWallet } from "@keplr-ewallet/ewallet-sdk-core";
+import {
+  initKeplrEwalletCore,
+  type KeplrEwalletInitArgs,
+} from "@keplr-ewallet/ewallet-sdk-core";
 
 import { EthEWallet } from "@keplr-ewallet-sdk-eth/eth_ewallet";
 
-export interface InitEthEWalletArgs {
-  eWallet: KeplrEWallet | null;
-  initialChainId?: Hex | number;
-}
+export async function initEthEWallet(
+  args: KeplrEwalletInitArgs,
+): Promise<EthEWallet | null> {
+  const eWalletRes = await initKeplrEwalletCore(args);
 
-export async function initEthEWallet({
-  eWallet,
-  initialChainId,
-}: InitEthEWalletArgs): Promise<EthEWallet | null> {
-  if (eWallet === null) {
+  // TODO: check if the ewallet is already initialized
+
+  if (!eWalletRes.success) {
+    console.error("eWallet core init failed, err: %s", eWalletRes.err);
     return null;
   }
+  const ethEWallet = new EthEWallet(eWalletRes.data);
 
-  const ethEWallet = new EthEWallet(eWallet);
-  await ethEWallet.initialize(initialChainId);
   return ethEWallet;
 }
