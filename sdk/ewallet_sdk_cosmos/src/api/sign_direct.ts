@@ -6,11 +6,10 @@ import type {
   SignDoc,
 } from "@keplr-wallet/types";
 import { SignDocWrapper } from "@keplr-wallet/cosmos";
+import type { MakeCosmosSigData } from "@keplr-ewallet/ewallet-sdk-core";
 
-import type { EWalletMsg } from "@keplr-ewallet-sdk-core/types";
 import { CosmosEWallet } from "@keplr-ewallet-sdk-cosmos/cosmos_ewallet";
 import { encodeCosmosSignature } from "@keplr-ewallet-sdk-cosmos/utils/sign";
-
 export async function signDirect(
   this: CosmosEWallet,
   chainId: string,
@@ -36,62 +35,35 @@ export async function signDirect(
     const chainInfoList = await this.getCosmosChainInfoList();
     const chainInfo = chainInfoList.find((info) => info.chainId === chainId);
 
-    const showModalMsg: EWalletMsg = {
-      msg_type: "show_modal",
+    const showModalData: MakeCosmosSigData = {
+      chain_type: "cosmos",
+      sign_type: "tx",
       payload: {
-        modal_type: "make_signature",
-        data: {
-          chain_type: "cosmos",
-          sign_type: "tx",
-          payload: {
-            chain_info: {
-              chain_id: chainId,
-              chain_name: chainInfo?.chainName ?? "",
-              chain_symbol_image_url:
-                chainInfo?.stakeCurrency?.coinImageUrl ?? "",
-            },
-            signer,
-            msgs: [],
-            signDocString: JSON.stringify(
-              signDocWrapper.protoSignDoc.toJSON(),
-              null,
-              2,
-            ),
-            origin,
-          },
+        chain_info: {
+          chain_id: chainId,
+          chain_name: chainInfo?.chainName ?? "",
+          chain_symbol_image_url: chainInfo?.stakeCurrency?.coinImageUrl ?? "",
         },
+        signer,
+        msgs: signDocWrapper.protoSignDoc.txMsgs,
+        signDocString: JSON.stringify(
+          signDocWrapper.protoSignDoc.toJSON(),
+          null,
+          2,
+        ),
+        origin,
       },
     };
-    const openModalAck = await this.eWallet.showModal(showModalMsg);
+    const showModalResponse = await this.showModal(showModalData);
 
-    if (openModalAck.msg_type !== "show_modal_ack") {
-      await this.eWallet.hideModal();
-      throw new Error(
-        "Can't receive show_modal_ack from ewallet in signDirect",
-      );
-    }
-
-    await this.eWallet.hideModal();
-
-    if (openModalAck.payload === "reject") {
+    if (showModalResponse === "reject") {
       throw new Error("User rejected the signature request");
     }
 
-    const makeSignatureAck = await this.eWallet.sendMsgToIframe({
-      msg_type: "make_signature",
-      payload: {
-        msg: signDocHash,
-      },
-    });
-
-    if (makeSignatureAck.msg_type !== "make_signature_ack") {
-      throw new Error(
-        "Can't receive make_signature_ack from ewallet in signDirect",
-      );
-    }
+    const makeSignatureAck = await this.makeSignature(signDocHash);
 
     const signature = encodeCosmosSignature(
-      makeSignatureAck.payload.sign_output,
+      makeSignatureAck.sign_output,
       publicKey,
     );
 
