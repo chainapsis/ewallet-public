@@ -1,23 +1,14 @@
 import { createServer } from "http";
 import { parse } from "url";
 import next from "next";
-// import { localPorts } from "@keplr-ewallet/dev-env";
 
-export { };
-
-const port = (function() {
-  return 3000;
-  // if (process.env.NODE_ENV !== "production") {
-  //   return localPorts.demo_web || 3200;
-  // } else {
-  //   return 3000;
-  // }
-})();
+export {};
 
 function main() {
   const dev = process.env.NODE_ENV !== "production";
   const app = next({ dev });
   const handle = app.getRequestHandler();
+  const port = 3000;
 
   app.prepare().then(() => {
     createServer((req, res) => {

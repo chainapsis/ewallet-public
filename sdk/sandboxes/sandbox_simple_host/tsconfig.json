@@ -20,11 +20,10 @@
       }
     ],
     "paths": {
-      "@keplr-ewallet-demo-web/*": ["./src/*"],
+      "@/*": ["./src/*"],
       "@keplr-ewallet-sdk-core/*": ["../ewallet_sdk_core/src/*"],
       "@keplr-ewallet-sdk-eth/*": ["../ewallet_sdk_variants/eth/src/*"],
-      "@keplr-ewallet-sdk-cosmos/*": ["../ewallet_sdk_variants/cosmos/src/*"],
-      "@keplr-ewallet-common-ui/*": ["../ewallet_common_ui/src/*"]
+      "@keplr-ewallet-sdk-cosmos/*": ["../ewallet_sdk_variants/cosmos/src/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
