@@ -2,7 +2,6 @@ import { execSync } from "node:child_process";
 
 import { paths } from "../paths";
 import { doBuildPkgs } from "./build_pkgs";
-import { updateAllVersionConstants } from "../utils/version";
 
 export async function version(..._args: any[]) {
   console.info("Start versioning packages...");
@@ -14,7 +13,4 @@ export async function version(..._args: any[]) {
     cwd: paths.root,
     stdio: "inherit",
   });
-
-  // Update VERSION constants after lerna has updated package.json versions
-  updateAllVersionConstants();
 }
