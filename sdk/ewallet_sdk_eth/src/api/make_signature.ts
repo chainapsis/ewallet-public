@@ -19,6 +19,7 @@ import {
   parseTypedDataDefinition,
 } from "@keplr-ewallet-sdk-eth/utils";
 import type { EthEWallet } from "@keplr-ewallet-sdk-eth/eth_ewallet";
+import { SUPPORTED_OP_STACK_CHAINS } from "@keplr-ewallet-sdk-eth/chains";
 
 const signTypeConfig: Record<
   EthSignMethod,
@@ -189,6 +190,10 @@ export async function makeSignature<M extends EthSignMethod>(
     // because L1 publish fee estimation might be required for those chains
   };
 
+  const estimateL1Fee = SUPPORTED_OP_STACK_CHAINS.some(
+    (chain) => chain.id === activeChain.id,
+  );
+
   switch (parameters.type) {
     case "sign_transaction": {
       const makeSignatureData: MakeEthereumSigData = {
@@ -200,8 +205,8 @@ export async function makeSignature<M extends EthSignMethod>(
           signer: parameters.data.address,
           data: {
             transaction: parameters.data.transaction,
-            // TODO: check if simulation is not required;
-            skipSimulation: true,
+            blockTime: activeChain.blockTime,
+            estimateL1Fee,
           },
         },
       };

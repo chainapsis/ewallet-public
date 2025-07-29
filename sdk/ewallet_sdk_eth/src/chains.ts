@@ -28,3 +28,5 @@ export const SUPPORTED_CHAINS = [
   sepolia,
   citreaTestnet,
 ];
+
+export const SUPPORTED_OP_STACK_CHAINS = [base, optimism, unichain, blast];
