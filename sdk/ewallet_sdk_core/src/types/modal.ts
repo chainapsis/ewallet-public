@@ -1,5 +1,7 @@
 import type { SignableMessage } from "viem";
 import type { StdSignDoc } from "@cosmjs/amino";
+import type { AnyWithUnpacked } from "@keplr-wallet/cosmos";
+import type { Msg } from "@keplr-wallet/types";
 
 export type ShowModalPayload = MakeSignatureModalPayload | OtherModalPayload;
 
@@ -33,12 +35,23 @@ export type MakeCosmosSigData =
       payload: CosmosArbitrarySignPayload;
     };
 
-export type CosmosTxSignPayload = {
+export type CosmosTxSignPayload =
+  | CosmosTxSignDirectPayload
+  | CosmosTxSignAminoPayload;
+
+type CosmosTxSignDirectPayload = {
   origin: string;
   chain_info: ChainInfoForAttachedModal;
   signer: string;
   signDocString: string;
-  msgs: any[];
+  msgs: AnyWithUnpacked[];
+};
+type CosmosTxSignAminoPayload = {
+  origin: string;
+  chain_info: ChainInfoForAttachedModal;
+  signer: string;
+  signDocString: string;
+  msgs: readonly Msg[];
 };
 
 export type CosmosArbitrarySignPayload = {
