@@ -25,7 +25,12 @@ import {
   UNSUPPORTED_RPC_METHODS,
   PUBLIC_RPC_METHODS,
 } from "@keplr-ewallet-sdk-eth/rpc";
-import { parseTypedData } from "@keplr-ewallet-sdk-eth/utils";
+import {
+  parseTypedData,
+  isValidChainId,
+  toSignableTransaction,
+  validateChain,
+} from "@keplr-ewallet-sdk-eth/utils";
 import type {
   EIP1193Provider,
   EWalletEIP1193ProviderOptions,
@@ -33,7 +38,6 @@ import type {
   ChainWithStatus,
 } from "./types";
 import { ProviderEventEmitter } from "./types";
-import { isValidChainId, toSignableTransaction, validateChain } from "./utils";
 import { VERSION } from "./constants";
 
 export class EWalletEIP1193Provider

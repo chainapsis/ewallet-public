@@ -1,6 +1,52 @@
 import type { RpcTransactionRequest, TransactionSerializable } from "viem";
 import { toHex } from "viem";
 
+export const toSignableTransaction = (
+  tx: RpcTransactionRequest,
+): RpcTransactionRequest => {
+  const { from, ...transaction } = tx;
+  const txType = transaction.type || "0x2"; // Default to EIP-1559
+
+  const baseFields = {
+    to: transaction.to || null,
+    data: transaction.data,
+    gas: transaction.gas,
+    nonce: transaction.nonce,
+    value: transaction.value,
+  };
+
+  let signableTransaction: RpcTransactionRequest;
+
+  switch (txType) {
+    case "0x0":
+      signableTransaction = {
+        ...baseFields,
+        type: "0x0",
+        gasPrice: transaction.gasPrice,
+      };
+      break;
+    case "0x1":
+      signableTransaction = {
+        ...baseFields,
+        type: "0x1",
+        gasPrice: transaction.gasPrice,
+        accessList: transaction.accessList || [],
+      };
+      break;
+    case "0x2":
+    default:
+      signableTransaction = {
+        ...baseFields,
+        type: "0x2",
+        maxPriorityFeePerGas: transaction.maxPriorityFeePerGas,
+        maxFeePerGas: transaction.maxFeePerGas,
+      };
+      break;
+  }
+
+  return signableTransaction;
+};
+
 export const toTransactionSerializable = ({
   chainId,
   tx,
@@ -84,42 +130,44 @@ export const toTransactionSerializable = ({
 export const toRpcTransactionRequest = (
   transaction: TransactionSerializable,
 ): RpcTransactionRequest => {
-  const convertToHex = (
+  const convertToHexValue = (
     value: bigint | number | undefined,
   ): `0x${string}` | undefined => {
     if (value === undefined) return undefined;
     return toHex(value);
   };
 
-  const base = {
+  const baseFields = {
     to: transaction.to,
     data: transaction.data,
-    value: convertToHex(transaction.value),
-    gas: convertToHex(transaction.gas),
-    nonce: convertToHex(transaction.nonce),
+    value: convertToHexValue(transaction.value),
+    gas: convertToHexValue(transaction.gas),
+    nonce: convertToHexValue(transaction.nonce),
   };
 
   switch (transaction.type) {
     case "legacy":
       return {
-        ...base,
+        ...baseFields,
         type: "0x0",
-        gasPrice: convertToHex(transaction.gasPrice),
+        gasPrice: convertToHexValue(transaction.gasPrice),
       };
     case "eip2930":
       return {
-        ...base,
+        ...baseFields,
         type: "0x1",
-        gasPrice: convertToHex(transaction.gasPrice),
+        gasPrice: convertToHexValue(transaction.gasPrice),
         accessList: transaction.accessList,
       };
     case "eip1559":
     default:
       return {
-        ...base,
+        ...baseFields,
         type: "0x2",
-        maxFeePerGas: convertToHex(transaction.maxFeePerGas),
-        maxPriorityFeePerGas: convertToHex(transaction.maxPriorityFeePerGas),
+        maxFeePerGas: convertToHexValue(transaction.maxFeePerGas),
+        maxPriorityFeePerGas: convertToHexValue(
+          transaction.maxPriorityFeePerGas,
+        ),
       };
   }
 };
