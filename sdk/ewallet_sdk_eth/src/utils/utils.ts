@@ -2,7 +2,6 @@ import type {
   SignableMessage,
   TransactionSerializable,
   TypedDataDefinition,
-  Signature,
   Hex,
   Address,
   ByteArray,
@@ -13,11 +12,8 @@ import {
   hashTypedData,
   keccak256,
   toBytes,
-  pad,
-  toHex,
 } from "viem";
 import { publicKeyToAddress } from "viem/accounts";
-import type { SignOutput } from "@keplr-ewallet/ewallet-sdk-core";
 import { secp256k1 } from "@noble/curves/secp256k1";
 
 export const hashEthereumMessage = (message: SignableMessage): Uint8Array => {

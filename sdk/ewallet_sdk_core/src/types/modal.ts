@@ -1,4 +1,8 @@
-import type { SignableMessage } from "viem";
+import type {
+  RpcTransactionRequest,
+  SignableMessage,
+  TypedDataDefinition,
+} from "viem";
 import type { StdSignDoc } from "@cosmjs/amino";
 import type { AnyWithUnpacked } from "@keplr-wallet/cosmos";
 import type { Msg } from "@keplr-wallet/types";
@@ -83,7 +87,10 @@ export type EthereumTxSignPayload = {
   origin: string;
   chain_info: ChainInfoForAttachedModal;
   signer: string;
-  data: any;
+  data: {
+    transaction: RpcTransactionRequest;
+    skipSimulation?: boolean;
+  };
 };
 
 export type EthereumArbitrarySignPayload = {
@@ -97,5 +104,5 @@ export type EthereumEip712SignPayload = {
   origin: string;
   chain_info: ChainInfoForAttachedModal;
   signer: string;
-  data: any;
+  data: TypedDataDefinition;
 };

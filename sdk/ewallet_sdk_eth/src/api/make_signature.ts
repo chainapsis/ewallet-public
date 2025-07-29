@@ -1,9 +1,9 @@
 import type {
   EWalletMsgMakeSignature,
   EWalletMsgShowModal,
+  MakeEthereumSigData,
 } from "@keplr-ewallet/ewallet-sdk-core";
-import type { Signature, TransactionSerializable } from "viem";
-import { serializeSignature, serializeTransaction } from "viem";
+import { type Signature, serializeSignature, serializeTransaction } from "viem";
 
 import type {
   EthSignMethod,
@@ -15,6 +15,7 @@ import {
   hashEthereumTransaction,
   hashEthereumTypedData,
   encodeEthereumSignature,
+  toTransactionSerializable,
 } from "@keplr-ewallet-sdk-eth/utils";
 import type { EthEWallet } from "@keplr-ewallet-sdk-eth/eth_ewallet";
 
@@ -22,21 +23,53 @@ const signTypeConfig: Record<
   EthSignMethod,
   {
     sign_type: "tx" | "arbitrary" | "eip712";
-    hashFunction: (data: any) => Uint8Array;
+    hashFunction: (data: MakeEthereumSigData) => Uint8Array;
     processResult: (
       signature: Signature,
-      data?: any,
+      data?: MakeEthereumSigData,
     ) => SignFunctionResult<EthSignMethod>;
   }
 > = {
   sign_transaction: {
     sign_type: "tx",
-    hashFunction: hashEthereumTransaction,
-    processResult: (
-      signature: Signature,
-      transaction: TransactionSerializable,
-    ) => {
-      const signedTransaction = serializeTransaction(transaction, signature);
+    hashFunction: (data: MakeEthereumSigData) => {
+      if (data.chain_type !== "eth") {
+        throw new Error("Invalid chain type");
+      }
+
+      if (data.sign_type !== "tx") {
+        throw new Error("Invalid sign type");
+      }
+
+      const payload = data.payload;
+
+      const serializableTx = toTransactionSerializable({
+        chainId: payload.chain_info.chain_id,
+        tx: payload.data,
+      });
+      return hashEthereumTransaction(serializableTx);
+    },
+    processResult: (signature: Signature, data?: MakeEthereumSigData) => {
+      if (!data) {
+        throw new Error("Data is required");
+      }
+
+      if (data.chain_type !== "eth") {
+        throw new Error("Invalid chain type");
+      }
+
+      if (data.sign_type !== "tx") {
+        throw new Error("Invalid sign type");
+      }
+
+      const payload = data.payload;
+
+      const serializableTx = toTransactionSerializable({
+        chainId: payload.chain_info.chain_id,
+        tx: payload.data.transaction,
+      });
+      const signedTransaction = serializeTransaction(serializableTx, signature);
+
       return {
         type: "signed_transaction",
         signedTransaction,
@@ -45,7 +78,19 @@ const signTypeConfig: Record<
   },
   personal_sign: {
     sign_type: "arbitrary",
-    hashFunction: hashEthereumMessage,
+    hashFunction: (data: MakeEthereumSigData) => {
+      if (data.chain_type !== "eth") {
+        throw new Error("Invalid chain type");
+      }
+
+      if (data.sign_type !== "arbitrary") {
+        throw new Error("Invalid sign type");
+      }
+
+      const payload = data.payload;
+
+      return hashEthereumMessage(payload.data);
+    },
     processResult: (signature: Signature) => ({
       type: "signature",
       signature: serializeSignature(signature),
@@ -53,7 +98,19 @@ const signTypeConfig: Record<
   },
   sign_typedData_v4: {
     sign_type: "eip712",
-    hashFunction: hashEthereumTypedData,
+    hashFunction: (data: MakeEthereumSigData) => {
+      if (data.chain_type !== "eth") {
+        throw new Error("Invalid chain type");
+      }
+
+      if (data.sign_type !== "eip712") {
+        throw new Error("Invalid sign type");
+      }
+
+      const payload = data.payload;
+
+      return hashEthereumTypedData(payload.data);
+    },
     processResult: (signature: Signature) => ({
       type: "signature",
       signature: serializeSignature(signature),
@@ -64,37 +121,13 @@ const signTypeConfig: Record<
 async function handleSigningFlow<M extends EthSignMethod>(
   ethEWallet: EthEWallet,
   config: (typeof signTypeConfig)[M],
-  signer: string,
-  data: any,
-  origin: string,
+  data: MakeEthereumSigData,
 ): Promise<SignFunctionResult<M>> {
-  const activeChain = ethEWallet.activeChain;
-  if (!activeChain) {
-    throw new Error("Active chain not found");
-  }
-
-  const chainInfo = {
-    chain_id: `eip155:${activeChain.id}`,
-    chain_name: activeChain.name,
-    chain_symbol_image_url: `https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:${activeChain.id}/chain.png`,
-    // CHECK: to check if the chain is op stack or elastic chain?
-    // because L1 publish fee estimation might be required for those chains
-  };
-
   const showModalMsg: EWalletMsgShowModal = {
     msg_type: "show_modal",
     payload: {
       modal_type: "make_signature",
-      data: {
-        chain_type: "eth",
-        sign_type: config.sign_type,
-        payload: {
-          chain_info: chainInfo,
-          signer,
-          data,
-          origin,
-        },
-      },
+      data,
     },
   };
 
@@ -138,39 +171,74 @@ export async function makeSignature<M extends EthSignMethod>(
   parameters: SignFunctionParams<M>,
 ): Promise<SignFunctionResult<M>> {
   const origin = this.eWallet.origin;
+  const activeChain = this.activeChain;
+  if (!activeChain) {
+    throw new Error("Active chain not found");
+  }
+
+  const chainInfo = {
+    chain_id: `eip155:${activeChain.id}`,
+    chain_name: activeChain.name,
+    chain_symbol_image_url: `https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:${activeChain.id}/chain.png`,
+    // CHECK: to check if the chain is op stack or elastic chain?
+    // because L1 publish fee estimation might be required for those chains
+  };
 
   switch (parameters.type) {
     case "sign_transaction": {
-      // TODO: simulate the tx and get the estimated fee
-      // TODO: receive the simulated tx from the attached side (this is not required for the MVP)
-      // we cannot estimate the fee here and just pass it to the attached side
+      const makeSignatureData: MakeEthereumSigData = {
+        chain_type: "eth",
+        sign_type: "tx",
+        payload: {
+          chain_info: chainInfo,
+          origin,
+          signer: parameters.data.address,
+          data: parameters.data.transaction,
+        },
+      };
 
       return handleSigningFlow(
         this,
         signTypeConfig.sign_transaction,
-        parameters.data.address,
-        parameters.data.transaction,
-        origin,
+        makeSignatureData,
       );
     }
 
     case "personal_sign": {
+      const makeSignatureData: MakeEthereumSigData = {
+        chain_type: "eth",
+        sign_type: "arbitrary",
+        payload: {
+          chain_info: chainInfo,
+          origin,
+          signer: parameters.data.address,
+          data: parameters.data.message,
+        },
+      };
+
       return handleSigningFlow(
         this,
         signTypeConfig.personal_sign,
-        parameters.data.address,
-        parameters.data.message,
-        origin,
+        makeSignatureData,
       );
     }
 
     case "sign_typedData_v4": {
+      const makeSignatureData: MakeEthereumSigData = {
+        chain_type: "eth",
+        sign_type: "eip712",
+        payload: {
+          chain_info: chainInfo,
+          origin,
+          signer: parameters.data.address,
+          data: parameters.data.message,
+        },
+      };
+
       return handleSigningFlow(
         this,
         signTypeConfig.sign_typedData_v4,
-        parameters.data.address,
-        parameters.data.message,
-        origin,
+        makeSignatureData,
       );
     }
 

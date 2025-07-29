@@ -30,7 +30,7 @@ import { ProviderEventEmitter } from "./types";
 import {
   isValidChainId,
   parseTypedData,
-  toSerializable,
+  toSignableTransaction,
   validateChain,
 } from "./utils";
 import { VERSION } from "./constants";
@@ -338,17 +338,14 @@ export class EWalletEIP1193Provider
         const [tx] =
           args.params as RpcRequestArgs<"eth_signTransaction">["params"];
 
-        const serializableTx = toSerializable({
-          chainId: this.activeChain?.chainId,
-          tx,
-        });
+        const signableTx = toSignableTransaction(tx);
 
         const { signedTransaction } =
           await this.signer.sign<"sign_transaction">({
             type: "sign_transaction",
             data: {
               address: this.signer.address,
-              transaction: serializableTx,
+              transaction: signableTx,
             },
           });
 

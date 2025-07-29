@@ -142,12 +142,12 @@ export const validateChain = (
   isValid: boolean;
   error?: string;
   errorType?:
-  | "DUPLICATE_CHAIN"
-  | "INVALID_CHAIN_ID"
-  | "INVALID_RPC_URLS"
-  | "INVALID_BLOCK_EXPLORER_URLS"
-  | "INVALID_NATIVE_CURRENCY"
-  | "CURRENCY_SYMBOL_MISMATCH";
+    | "DUPLICATE_CHAIN"
+    | "INVALID_CHAIN_ID"
+    | "INVALID_RPC_URLS"
+    | "INVALID_BLOCK_EXPLORER_URLS"
+    | "INVALID_NATIVE_CURRENCY"
+    | "CURRENCY_SYMBOL_MISMATCH";
   errorData?: any;
 } => {
   const { rpcUrls, blockExplorerUrls, chainId, nativeCurrency } = chain;
@@ -230,74 +230,50 @@ export const validateChain = (
   return { isValid: true };
 };
 
-export const toSerializable = ({
-  chainId,
-  tx,
-}: {
-  chainId: string;
-  tx: RpcTransactionRequest;
-}): TransactionSerializable => {
-  const convertValue = <T>(
-    value: string | number | undefined,
-    converter: (value: string | number) => T,
-    defaultValue?: T,
-  ): T | undefined => (value !== undefined ? converter(value) : defaultValue);
-
+export const toSignableTransaction = (
+  tx: RpcTransactionRequest,
+): RpcTransactionRequest => {
   const { from, ...transaction } = tx;
   const txType = transaction.type || "0x2"; // Default to EIP-1559
 
   const baseFields = {
-    chainId: parseInt(chainId, 16),
     to: transaction.to || null,
     data: transaction.data,
-    gas: convertValue(transaction.gas, BigInt),
-    nonce: convertValue(transaction.nonce, (value) =>
-      parseInt(value.toString(), 16),
-    ),
-    value: convertValue(transaction.value, BigInt) || BigInt(0),
+    gas: transaction.gas,
+    nonce: transaction.nonce,
+    value: transaction.value,
   };
 
-  const typeMapping: { [key: string]: "legacy" | "eip2930" | "eip1559" } = {
-    "0x0": "legacy",
-    "0x1": "eip2930",
-    "0x2": "eip1559",
-  };
+  let signableTransaction: RpcTransactionRequest;
 
-  const mappedType = typeMapping[txType] || "eip1559";
-
-  let transactionSerializable: TransactionSerializable;
-
-  switch (mappedType) {
-    case "legacy":
-      transactionSerializable = {
+  switch (txType) {
+    case "0x0":
+      signableTransaction = {
         ...baseFields,
-        type: "legacy",
-        gasPrice: convertValue(transaction.gasPrice, BigInt),
+        type: "0x0",
+        gasPrice: transaction.gasPrice,
       };
       break;
-    case "eip2930":
-      transactionSerializable = {
+    case "0x1":
+      signableTransaction = {
         ...baseFields,
-        type: "eip2930",
-        gasPrice: convertValue(transaction.gasPrice, BigInt),
+        type: "0x1",
+        gasPrice: transaction.gasPrice,
         accessList: transaction.accessList || [],
       };
       break;
-    case "eip1559":
+    case "0x2":
     default:
-      transactionSerializable = {
+      signableTransaction = {
         ...baseFields,
-        type: "eip1559",
-        maxPriorityFeePerGas: convertValue(
-          transaction.maxPriorityFeePerGas,
-          BigInt,
-        ),
-        maxFeePerGas: convertValue(transaction.maxFeePerGas, BigInt),
+        type: "0x2",
+        maxPriorityFeePerGas: transaction.maxPriorityFeePerGas,
+        maxFeePerGas: transaction.maxFeePerGas,
       };
       break;
   }
 
-  return transactionSerializable;
+  return signableTransaction;
 };
 
 /**

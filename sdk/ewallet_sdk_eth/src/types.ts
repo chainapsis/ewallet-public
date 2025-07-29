@@ -5,7 +5,7 @@ import type {
   Prettify,
   SignableMessage,
   TypedDataDefinition,
-  TransactionSerializable,
+  RpcTransactionRequest,
 } from "viem";
 
 export interface EthSignMethodMap {
@@ -14,7 +14,7 @@ export interface EthSignMethodMap {
       type: "sign_transaction";
       data: {
         address: Address;
-        transaction: TransactionSerializable;
+        transaction: RpcTransactionRequest;
       };
     };
     result: { type: "signed_transaction"; signedTransaction: Hex };
