@@ -13,7 +13,15 @@ export function makeApp() {
   const app = express();
 
   app.use(morgan("dev"));
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          upgradeInsecureRequests: null,
+        },
+      },
+    }),
+  );
   app.use(cors());
   app.use(express.json());
 
