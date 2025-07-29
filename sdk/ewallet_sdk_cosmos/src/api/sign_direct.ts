@@ -27,7 +27,6 @@ export async function signDirect(
     const signDocHash = sha256(signBytes);
     const publicKey = await this.getPublicKey();
     const origin = this.eWallet.origin;
-    console.log("signDirect @@@@@", signDoc, origin);
 
     const signDocWrapper = SignDocWrapper.fromDirectSignDoc({
       ...signDoc,
@@ -37,7 +36,7 @@ export async function signDirect(
     const chainInfoList = await this.getCosmosChainInfoList();
     const chainInfo = chainInfoList.find((info) => info.chainId === chainId);
 
-    const msg: EWalletMsg = {
+    const showModalMsg: EWalletMsg = {
       msg_type: "show_modal",
       payload: {
         modal_type: "make_signature",
@@ -63,33 +62,43 @@ export async function signDirect(
         },
       },
     };
-    const openModalAck = await this.eWallet.showModal(msg);
-    if (openModalAck.msg_type === "show_modal_ack") {
+    const openModalAck = await this.eWallet.showModal(showModalMsg);
+
+    if (openModalAck.msg_type !== "show_modal_ack") {
       await this.eWallet.hideModal();
-
-      if (openModalAck.payload === "approve") {
-        const res = await this.eWallet.sendMsgToIframe({
-          msg_type: "make_signature",
-          payload: {
-            msg: signDocHash,
-          },
-        });
-        const signature = encodeCosmosSignature(
-          res.payload.sign_output,
-          publicKey,
-        );
-        return {
-          signed: signDoc,
-          signature,
-        };
-      }
-
-      if (openModalAck.payload === "reject") {
-        throw new Error("User rejected the signature request");
-      }
+      throw new Error(
+        "Can't receive show_modal_ack from ewallet in signDirect",
+      );
     }
 
-    throw new Error("Unreachable");
+    await this.eWallet.hideModal();
+
+    if (openModalAck.payload === "reject") {
+      throw new Error("User rejected the signature request");
+    }
+
+    const makeSignatureAck = await this.eWallet.sendMsgToIframe({
+      msg_type: "make_signature",
+      payload: {
+        msg: signDocHash,
+      },
+    });
+
+    if (makeSignatureAck.msg_type !== "make_signature_ack") {
+      throw new Error(
+        "Can't receive make_signature_ack from ewallet in signDirect",
+      );
+    }
+
+    const signature = encodeCosmosSignature(
+      makeSignatureAck.payload.sign_output,
+      publicKey,
+    );
+
+    return {
+      signed: signDoc,
+      signature,
+    };
   } catch (error) {
     console.error("[signDirect cosmos] [error] @@@@@", error);
     throw error;

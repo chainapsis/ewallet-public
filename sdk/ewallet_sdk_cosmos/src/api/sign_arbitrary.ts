@@ -23,7 +23,7 @@ export async function signArbitrary(
     const chainInfoList = await this.getCosmosChainInfoList();
     const chainInfo = chainInfoList.find((info) => info.chainId === chainId);
 
-    const msg: EWalletMsg = {
+    const showModalMsg: EWalletMsg = {
       msg_type: "show_modal",
       payload: {
         modal_type: "make_signature",
@@ -45,44 +45,47 @@ export async function signArbitrary(
         },
       },
     };
-    const openModalAck = await this.eWallet.showModal(msg);
-    if (openModalAck.msg_type === "show_modal_ack") {
+    const openModalAck = await this.eWallet.showModal(showModalMsg);
+
+    if (openModalAck.msg_type !== "show_modal_ack") {
       await this.eWallet.hideModal();
-
-      if (openModalAck.payload === "approve") {
-        const res = await this.eWallet.sendMsgToIframe({
-          msg_type: "make_signature",
-          payload: {
-            msg: signDocHash,
-          },
-        });
-        const signature = encodeCosmosSignature(
-          res.payload.sign_output,
-          publicKey,
-        );
-
-        const isVerified = await this.verifyArbitrary(
-          chainId,
-          signer,
-          data,
-          signature,
-        );
-
-        if (!isVerified) {
-          throw new Error("Signature verification failed");
-        }
-
-        return {
-          ...signature,
-        };
-      }
-
-      if (openModalAck.payload === "reject") {
-        throw new Error("User rejected the signature request");
-      }
+      throw new Error("Can't receive show_modal_ack from ewallet");
     }
 
-    throw new Error("Can't receive show_modal_ack from ewallet");
+    await this.eWallet.hideModal();
+
+    if (openModalAck.payload === "reject") {
+      throw new Error("User rejected the signature request");
+    }
+
+    const makeSignatureAck = await this.eWallet.sendMsgToIframe({
+      msg_type: "make_signature",
+      payload: { msg: signDocHash },
+    });
+
+    if (makeSignatureAck.msg_type !== "make_signature_ack") {
+      throw new Error("Can't receive make_signature_ack from ewallet");
+    }
+
+    const signature = encodeCosmosSignature(
+      makeSignatureAck.payload.sign_output,
+      publicKey,
+    );
+
+    const isVerified = await this.verifyArbitrary(
+      chainId,
+      signer,
+      data,
+      signature,
+    );
+
+    if (!isVerified) {
+      throw new Error("Signature verification failed");
+    }
+
+    return {
+      ...signature,
+    };
   } catch (error) {
     console.error("[signArbitrary cosmos] [error] @@@@@", error);
     throw error;
