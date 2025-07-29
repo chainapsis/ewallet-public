@@ -1,4 +1,5 @@
 import type { RpcTransactionRequest, TransactionSerializable } from "viem";
+import { toHex } from "viem";
 
 export const toTransactionSerializable = ({
   chainId,
@@ -75,4 +76,47 @@ export const toTransactionSerializable = ({
   }
 
   return transactionSerializable;
+};
+
+export const toRpcTransactionRequest = (
+  transaction: TransactionSerializable,
+): RpcTransactionRequest => {
+  const convertToHex = (
+    value: bigint | number | undefined,
+  ): `0x${string}` | undefined => {
+    if (value === undefined) return undefined;
+    return toHex(value);
+  };
+
+  const base = {
+    to: transaction.to,
+    data: transaction.data,
+    value: convertToHex(transaction.value),
+    gas: convertToHex(transaction.gas),
+    nonce: convertToHex(transaction.nonce),
+  };
+
+  switch (transaction.type) {
+    case "legacy":
+      return {
+        ...base,
+        type: "0x0",
+        gasPrice: convertToHex(transaction.gasPrice),
+      };
+    case "eip2930":
+      return {
+        ...base,
+        type: "0x1",
+        gasPrice: convertToHex(transaction.gasPrice),
+        accessList: transaction.accessList,
+      };
+    case "eip1559":
+    default:
+      return {
+        ...base,
+        type: "0x2",
+        maxFeePerGas: convertToHex(transaction.maxFeePerGas),
+        maxPriorityFeePerGas: convertToHex(transaction.maxPriorityFeePerGas),
+      };
+  }
 };

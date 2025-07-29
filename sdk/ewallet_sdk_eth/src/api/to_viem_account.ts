@@ -4,6 +4,7 @@ import { publicKeyToAddress } from "viem/accounts";
 
 import type { EWalletAccount } from "@keplr-ewallet-sdk-eth/types";
 import type { EthEWallet } from "@keplr-ewallet-sdk-eth/eth_ewallet";
+import { toRpcTransactionRequest } from "@keplr-ewallet-sdk-eth/utils";
 
 export async function toViemAccount(
   this: EthEWallet,
@@ -40,33 +41,19 @@ export async function toViemAccount(
     },
 
     signTransaction: async (transaction) => {
-      const signableTransaction = (() => {
-        // For EIP-4844 Transactions, we want to sign the transaction payload body (tx_payload_body) without the sidecars (ie. without the network wrapper).
-        // See: https://github.com/ethereum/EIPs/blob/e00f4daa66bd56e2dbd5f1d36d09fd613811a48b/EIPS/eip-4844.md#networking
-        if (transaction.type === "eip4844")
-          return {
-            ...transaction,
-            sidecars: false,
-          };
-        return transaction;
-      })();
+      const result = await sign({
+        type: "sign_transaction",
+        data: {
+          address,
+          transaction: toRpcTransactionRequest(transaction),
+        },
+      });
 
-      // TODO: implement this
-      throw new Error("Not implemented");
+      if (result.type !== "signed_transaction") {
+        throw new Error("Expected signed transaction result");
+      }
 
-      // const result = await sign({
-      //   type: "sign_transaction",
-      //   data: {
-      //     address,
-      //     transaction: signableTransaction,
-      //   },
-      // });
-
-      // if (result.type !== "signed_transaction") {
-      //   throw new Error("Expected signed transaction result");
-      // }
-
-      // return result.signedTransaction;
+      return result.signedTransaction;
     },
 
     signTypedData: async (typedData) => {
