@@ -1,6 +1,6 @@
-import type { EthEWallet } from "@keplr-ewallet-sdk-eth/eth_ewallet";
 import { isAddress, type Hex } from "viem";
 
+import type { EthEWallet } from "@keplr-ewallet-sdk-eth/eth_ewallet";
 import { publicKeyToEthereumAddress } from "@keplr-ewallet-sdk-eth/utils";
 
 export async function getAddress(this: EthEWallet): Promise<Hex> {

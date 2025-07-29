@@ -1,5 +1,6 @@
+import { type Hex } from "viem";
+
 import type { EthEWallet } from "@keplr-ewallet-sdk-eth/eth_ewallet";
-import { isHex, type Hex } from "viem";
 
 export async function getPublicKey(this: EthEWallet): Promise<Hex> {
   if (this.publicKey !== null) {
