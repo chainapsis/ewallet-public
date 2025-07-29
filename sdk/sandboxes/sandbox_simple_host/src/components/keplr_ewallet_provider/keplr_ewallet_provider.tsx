@@ -1,7 +1,6 @@
 "use client";
 
 import { useAppState } from "@/state";
-import { initCosmosEWallet } from "@keplr-ewallet/ewallet-sdk-cosmos";
 import React, { useEffect, useState, type PropsWithChildren } from "react";
 
 export const KeplrEWalletProvider: React.FC<PropsWithChildren> = ({
@@ -19,13 +18,15 @@ export const KeplrEWalletProvider: React.FC<PropsWithChildren> = ({
           console.error("something wrong");
         }
 
-        // const isEthReady = await appState.initKeplrSdkEth();
-        //
-        // if (!isCosmosReady) {
-        //   console.error("something wrong");
-        // }
+        const isEthReady = await appState.initKeplrSdkEth();
 
-        setIsInitialized(true);
+        if (!isEthReady) {
+          console.error("something wrong");
+        }
+
+        if (isCosmosReady && isEthReady) {
+          setIsInitialized(true);
+        }
       } catch (err: any) {
         console.error(err);
       }

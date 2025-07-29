@@ -5,6 +5,7 @@ import cn from "classnames";
 import styles from "./preview_panel.module.scss";
 import { useKeplrEwallet } from "@/contexts/KeplrEwalletProvider";
 import { LoginWidget } from "@/components/widgets/login_widget/login_widget";
+import { EthereumOffchainSignWidget } from "@/components/widgets/ethereum_offchain_sign_widget/ethereum_offchain_sign_widget";
 // import { LoginWidget } from "@keplr-ewallet-demo-web/components/widgets/login_widget/login_widget";
 // import { useKeplrEwallet } from "@keplr-ewallet-demo-web/contexts/KeplrEwalletProvider";
 // import { AddressWidget } from "@keplr-ewallet-demo-web/components/widgets/address_widget/address_widget";
@@ -16,7 +17,7 @@ import { LoginWidget } from "@/components/widgets/login_widget/login_widget";
 // import { CosmosOffChainSignWidget } from "@keplr-ewallet-demo-web/components/widgets/cosmos_offchain_sign_widget/cosmos_offchain_sign_widget";
 
 export const PreviewPanel = () => {
-  const { cosmosEWallet } = useKeplrEwallet();
+  const { cosmosEWallet, ethEWallet } = useKeplrEwallet();
 
   console.log("cosmosEWallet !!!", cosmosEWallet);
 
@@ -29,7 +30,7 @@ export const PreviewPanel = () => {
           {/* <UserDataWidget userData={mockUserData} /> */}
         </div>
         {/* <div className={styles.col}> */}
-        {/*   <EthereumOffchainSignWidget /> */}
+        <EthereumOffchainSignWidget />
         {/*   <SignWidget */}
         {/*     chain="Ethereum" */}
         {/*     chainIcon={<EthereumIcon />} */}
