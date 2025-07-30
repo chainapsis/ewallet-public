@@ -139,15 +139,12 @@ async function handleSigningFlow<M extends EthSignMethod>(
 
   const eWallet = ethEWallet.eWallet;
 
-  const openModalAck = await eWallet.showModal(showModalMsg);
-
-  if (openModalAck.msg_type !== "show_modal_ack") {
-    throw new Error("Unreachable");
-  }
+  // TODO: receive the simulation result from the modal
+  const modalResponse = await eWallet.showModal(showModalMsg);
 
   await eWallet.hideModal();
 
-  if (openModalAck.payload === "reject") {
+  if (modalResponse === "reject") {
     throw new Error("User rejected the signature request");
   }
 

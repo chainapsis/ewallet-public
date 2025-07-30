@@ -17,16 +17,11 @@ export async function showModal(
     },
   };
 
-  const openModalAck = await this.eWallet.showModal(showModalMsg);
-
-  if (openModalAck.msg_type !== "show_modal_ack") {
-    await this.eWallet.hideModal();
-    throw new Error("Can't receive show_modal_ack from ewallet");
-  }
+  const modalResponse = await this.eWallet.showModal(showModalMsg);
 
   await this.eWallet.hideModal();
 
-  if (openModalAck.payload === "reject") {
+  if (modalResponse === "reject") {
     return "reject";
   }
 
