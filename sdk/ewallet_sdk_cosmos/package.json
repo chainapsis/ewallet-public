@@ -51,7 +51,8 @@
     "@noble/curves": "^1.9.2",
     "@noble/hashes": "^1.8.0",
     "bech32": "^2.0.0",
-    "bitcoinjs-lib": "^6.1.7"
+    "bitcoinjs-lib": "^6.1.7",
+    "starknet": "^7.6.4"
   },
   "devDependencies": {
     "@types/jest": "*",
