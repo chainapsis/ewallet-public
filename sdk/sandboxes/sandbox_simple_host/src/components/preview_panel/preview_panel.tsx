@@ -6,6 +6,7 @@ import styles from "./preview_panel.module.scss";
 import { useKeplrEwallet } from "@/contexts/KeplrEwalletProvider";
 import { LoginWidget } from "@/components/widgets/login_widget/login_widget";
 import { EthereumOffchainSignWidget } from "@/components/widgets/ethereum_offchain_sign_widget/ethereum_offchain_sign_widget";
+import { CosmosOnchainSignWidget } from "@/components/widgets/cosmos_onchain_sign_widget/cosmos_onchain_sign_widget";
 // import { LoginWidget } from "@keplr-ewallet-demo-web/components/widgets/login_widget/login_widget";
 // import { useKeplrEwallet } from "@keplr-ewallet-demo-web/contexts/KeplrEwalletProvider";
 // import { AddressWidget } from "@keplr-ewallet-demo-web/components/widgets/address_widget/address_widget";
@@ -13,7 +14,6 @@ import { EthereumOffchainSignWidget } from "@/components/widgets/ethereum_offcha
 // import { DocsWidget } from "@keplr-ewallet-demo-web/components/widgets/docs_widget/docs_widget";
 // import { SignWidget } from "@keplr-ewallet-demo-web/components/widgets/sign_widget/sign_widget";
 // import { CosmosOnchainSignWidget } from "@keplr-ewallet-demo-web/components/widgets/cosmos_onchain_sign_widget/cosmos_onchain_sign_widget";
-// import { EthereumOffchainSignWidget } from "@keplr-ewallet-demo-web/components/widgets/ethereum_offchain_sign_widget/ethereum_offchain_sign_widget";
 // import { CosmosOffChainSignWidget } from "@keplr-ewallet-demo-web/components/widgets/cosmos_offchain_sign_widget/cosmos_offchain_sign_widget";
 
 export const PreviewPanel = () => {
@@ -41,7 +41,7 @@ export const PreviewPanel = () => {
         {/* </div> */}
         {/* <div className={styles.col}> */}
         {/*   <CosmosOffChainSignWidget /> */}
-        {/*   <CosmosOnchainSignWidget /> */}
+        <CosmosOnchainSignWidget />
         {/* </div> */}
       </div>
     </div>
