@@ -89,8 +89,6 @@ export type EthereumTxSignPayload = {
   data: {
     transaction: RpcTransactionRequest;
     blockTime?: number;
-    skipBalanceCheck?: boolean;
-    skipSimulation?: boolean;
     estimateL1Fee?: boolean;
   };
 };
