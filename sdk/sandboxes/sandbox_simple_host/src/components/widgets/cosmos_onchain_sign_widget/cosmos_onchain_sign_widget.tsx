@@ -1,14 +1,19 @@
 import React, { useCallback, useState } from "react";
-import { makeSignDoc as makeProtoSignDoc } from "@cosmjs/proto-signing";
-import { makeSignDoc as makeAminoSignDoc } from "@cosmjs/amino";
-import type {
-  AminoSignResponse,
-  DirectSignResponse,
-} from "@keplr-wallet/types";
+import {
+  makeSignDoc as makeProtoSignDoc,
+  type DirectSignResponse,
+} from "@cosmjs/proto-signing";
+import {
+  coin,
+  makeSignDoc as makeAminoSignDoc,
+  type AminoSignResponse,
+} from "@cosmjs/amino";
+
 import {
   AuthInfo,
   Fee,
   TxBody,
+  TxRaw,
 } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
 import { PubKey } from "@keplr-wallet/proto-types/cosmos/crypto/secp256k1/keys";
@@ -16,10 +21,12 @@ import { SignMode } from "@keplr-wallet/proto-types/cosmos/tx/signing/v1beta1/si
 
 import { useKeplrEwallet } from "@/contexts/KeplrEwalletProvider";
 import { SignWidget } from "@/components/widgets/sign_widget/sign_widget";
-import Long from "long";
 import styles from "./cosmos_onchain_sign_widget.module.scss";
+import { SigningStargateClient } from "@cosmjs/stargate";
 
-const COSMOS_CHAIN_ID = "cosmoshub-4";
+const TEST_CHAIN_ID = "osmosis-1";
+const TEST_OSMOSIS_CHAIN_REST = "https://osmosis-rest.publicnode.com";
+const TEST_ACCOUNT_NUMBER = 3482954;
 
 export const CosmosOnchainSignWidget = () => {
   const { cosmosEWallet } = useKeplrEwallet();
@@ -28,6 +35,7 @@ export const CosmosOnchainSignWidget = () => {
   const [result, setResult] = useState<
     AminoSignResponse | DirectSignResponse | null
   >(null);
+  const [address, setAddress] = useState<string | null>(null);
 
   const handleClickCosmosSignDirect = useCallback(async () => {
     console.log("handleClickCosmosSignDirect()");
@@ -35,9 +43,9 @@ export const CosmosOnchainSignWidget = () => {
     if (cosmosEWallet !== null) {
       try {
         setIsLoading(true);
-        const account = await cosmosEWallet.getKey(COSMOS_CHAIN_ID);
+        const account = await cosmosEWallet.getKey(TEST_CHAIN_ID);
         const address = account?.bech32Address;
-        console.log("account", account);
+        setAddress(address);
 
         if (!address) {
           throw new Error("Address is not found");
@@ -57,7 +65,7 @@ export const CosmosOnchainSignWidget = () => {
                       amount: "10",
                     },
                   ],
-                }),
+                }).finish(),
               },
             ],
             memo: "",
@@ -89,26 +97,23 @@ export const CosmosOnchainSignWidget = () => {
                 amount: "1000",
               },
             ],
+            gas: "200000",
             gasLimit: "200000",
+            payer: address,
           }),
         }).finish();
 
         const mockSignDoc = makeProtoSignDoc(
           bodyBytes,
           authInfoBytes,
-          "osmosis-1",
-          1288582,
+          TEST_CHAIN_ID,
+          TEST_ACCOUNT_NUMBER,
         );
 
-        const compatibleSignDoc = {
-          ...mockSignDoc,
-          accountNumber: Long.fromBigInt(mockSignDoc.accountNumber),
-        };
-
         const result = await cosmosEWallet.signDirect(
-          COSMOS_CHAIN_ID,
+          TEST_CHAIN_ID,
           address,
-          compatibleSignDoc,
+          mockSignDoc,
         );
 
         setResult(result);
@@ -127,7 +132,7 @@ export const CosmosOnchainSignWidget = () => {
       throw new Error("CosmosEWallet is not initialized");
     }
 
-    const account = await cosmosEWallet.getKey(COSMOS_CHAIN_ID);
+    const account = await cosmosEWallet.getKey(TEST_CHAIN_ID);
     const address = account?.bech32Address;
 
     if (!address) {
@@ -144,6 +149,7 @@ export const CosmosOnchainSignWidget = () => {
       gas: "200000",
     };
     const memo = "";
+
     const msgs = [
       {
         type: "/cosmos.bank.v1beta1.MsgSend",
@@ -165,14 +171,14 @@ export const CosmosOnchainSignWidget = () => {
     const mockSignDoc = makeAminoSignDoc(
       msgs,
       stdFee,
-      "osmosis-1",
+      TEST_CHAIN_ID,
       memo,
       accountNumber,
       sequence,
     );
 
     const result = await cosmosEWallet.signAmino(
-      COSMOS_CHAIN_ID,
+      TEST_CHAIN_ID,
       address,
       mockSignDoc,
     );
@@ -208,10 +214,111 @@ export const CosmosOnchainSignWidget = () => {
       />
       {result && (
         <div className={styles.resultContainer}>
-          <div className={styles.resultItem}>{JSON.stringify(result)}</div>
-          <button className={styles.sendTxButton}>Send Tx</button>
+          <div className={styles.resultItem}>
+            <p>Signature</p>
+            <p>{result.signature.signature}</p>
+            <p>SignDoc</p>
+            <p>
+              {JSON.stringify(result.signed, (_, v) =>
+                typeof v === "bigint" ? v.toString() : v,
+              )}
+            </p>
+          </div>
+          {address && (
+            <SendTokenTest address={address} amount="10" denom="uosmo" />
+          )}
+          <SendTxButton result={result} className={styles.sendTxButton} />
         </div>
       )}
     </div>
+  );
+};
+
+const SendTokenTest = ({
+  address,
+  amount,
+  denom,
+}: {
+  address: string;
+  amount: string;
+  denom: string;
+}) => {
+  const { cosmosEWallet } = useKeplrEwallet();
+  const signer = cosmosEWallet?.getOfflineSigner(TEST_CHAIN_ID);
+  if (!signer) {
+    throw new Error("Signer is not found");
+  }
+  const sendToken = async () => {
+    const client = await SigningStargateClient.connectWithSigner(
+      TEST_OSMOSIS_CHAIN_REST,
+      signer,
+    );
+    const res = await client.sendTokens(
+      address,
+      amount,
+      [coin(amount, denom)],
+      "auto",
+    );
+    console.log("res", res);
+  };
+
+  return (
+    <div>
+      <p>Address: {address}</p>
+      <p>Amount: {amount}</p>
+      <p>Denom: {denom}</p>
+      <button onClick={sendToken}>Send Token</button>
+    </div>
+  );
+};
+
+const SendTxButton = ({
+  result,
+  className,
+}: {
+  result: DirectSignResponse | AminoSignResponse;
+  className?: string;
+}) => {
+  const { cosmosEWallet } = useKeplrEwallet();
+  const ENDPOINT = "/cosmos/tx/v1beta1/txs";
+
+  const signer = cosmosEWallet?.getOfflineSigner(TEST_CHAIN_ID);
+  if (!signer) {
+    throw new Error("Signer is not found");
+  }
+
+  const encodeTx = (() => {
+    const isSignDirect = "bodyBytes" in result.signed;
+    const signature = result.signature.signature;
+
+    if (isSignDirect) {
+      const tx = TxRaw.encode({
+        bodyBytes: result.signed.bodyBytes,
+        authInfoBytes: result.signed.authInfoBytes,
+        signatures: [Buffer.from(signature, "base64")],
+      }).finish();
+      return tx;
+    }
+
+    throw new Error("Not supported");
+  })();
+
+  const onSendTx = async () => {
+    const res = await fetch(TEST_OSMOSIS_CHAIN_REST + ENDPOINT, {
+      method: "POST",
+      body: JSON.stringify({
+        tx_bytes: Buffer.from(encodeTx as any).toString("base64"),
+        mode: "BROADCAST_MODE_SYNC",
+      }),
+    });
+
+    const data = await res.json();
+    console.log("result", data);
+  };
+
+  return (
+    <button className={className} onClick={onSendTx}>
+      Send Tx
+    </button>
   );
 };
