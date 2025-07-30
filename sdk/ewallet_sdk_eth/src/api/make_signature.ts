@@ -200,7 +200,7 @@ export async function makeSignature<M extends EthSignMethod>(
     chain_id: `eip155:${activeChain.id}`,
     chain_name: activeChain.name,
     chain_symbol_image_url: `https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:${activeChain.id}/chain.png`,
-    rpc_url: activeChain.rpcUrls[0].http[0],
+    rpc_url: activeChain.rpcUrls.default.http[0],
     block_explorer_url: activeChain.blockExplorers?.default.url,
   };
 
