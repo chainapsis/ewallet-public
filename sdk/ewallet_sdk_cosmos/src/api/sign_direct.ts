@@ -1,15 +1,13 @@
 import { sha256 } from "@noble/hashes/sha2";
-import { SignDoc as ProtoSignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
-import type {
-  DirectSignResponse,
-  KeplrSignOptions,
-  SignDoc,
-} from "@keplr-wallet/types";
+import type { KeplrSignOptions } from "@keplr-wallet/types";
 import { SignDocWrapper } from "@keplr-wallet/cosmos";
 import type { MakeCosmosSigData } from "@keplr-ewallet/ewallet-sdk-core";
 
 import { CosmosEWallet } from "@keplr-ewallet-sdk-cosmos/cosmos_ewallet";
 import { encodeCosmosSignature } from "@keplr-ewallet-sdk-cosmos/utils/sign";
+import { makeSignBytes, type DirectSignResponse } from "@cosmjs/proto-signing";
+import type { SignDoc } from "cosmjs-types/cosmos/tx/v1beta1/tx";
+
 export async function signDirect(
   this: CosmosEWallet,
   chainId: string,
@@ -18,14 +16,11 @@ export async function signDirect(
   signOptions?: KeplrSignOptions,
 ): Promise<DirectSignResponse> {
   try {
-    const compatibleSignDoc = {
-      ...signDoc,
-      accountNumber: signDoc.accountNumber.toString(),
-    };
-    const signBytes = ProtoSignDoc.encode(compatibleSignDoc).finish();
-    const signDocHash = sha256(signBytes);
-    const publicKey = await this.getPublicKey();
     const origin = this.eWallet.origin;
+
+    const signBytes = makeSignBytes(signDoc);
+    const hashedMessage = sha256(signBytes);
+    const publicKey = await this.getPublicKey();
 
     const signDocWrapper = SignDocWrapper.fromDirectSignDoc({
       ...signDoc,
@@ -60,7 +55,7 @@ export async function signDirect(
       throw new Error("User rejected the signature request");
     }
 
-    const makeSignatureAck = await this.makeSignature(signDocHash);
+    const makeSignatureAck = await this.makeSignature(hashedMessage);
 
     const signature = encodeCosmosSignature(
       makeSignatureAck.sign_output,

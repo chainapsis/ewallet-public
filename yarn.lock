@@ -3175,6 +3175,7 @@ __metadata:
     "@typescript-eslint/parser": "npm:*"
     bech32: "npm:^2.0.0"
     bitcoinjs-lib: "npm:^6.1.7"
+    cosmjs-types: "npm:^0.10.1"
     del-cli: "npm:*"
     jest: "npm:*"
     starknet: "npm:^7.6.4"
@@ -11282,6 +11283,13 @@ __metadata:
     typescript:
       optional: true
   checksum: 10c0/1c1703be4f02a250b1d6ca3267e408ce16abfe8364193891afc94c2d5c060b69611fdc8d97af74b7e6d5d1aac0ab2fb94d6b079573146bc2d756c2484ce5f0ee
+  languageName: node
+  linkType: hard
+
+"cosmjs-types@npm:^0.10.1":
+  version: 0.10.1
+  resolution: "cosmjs-types@npm:0.10.1"
+  checksum: 10c0/f114cd1a0636034d93b97f61b049c5dc4929c81ff63855c6e56b0335be2b2d35475eee862ea5bd504288b33d3a918952dab11d4b6bed6bc2829f401cb5e6c797
   languageName: node
   linkType: hard
 

@@ -52,6 +52,7 @@
     "@noble/hashes": "^1.8.0",
     "bech32": "^2.0.0",
     "bitcoinjs-lib": "^6.1.7",
+    "cosmjs-types": "^0.10.1",
     "starknet": "^7.6.4"
   },
   "devDependencies": {
