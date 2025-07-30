@@ -1,4 +1,6 @@
 import type {
+  ChainInfoForAttachedModal,
+  EthereumTxSignResponse,
   EWalletMsgMakeSignature,
   EWalletMsgShowModal,
   MakeEthereumSigData,
@@ -139,13 +141,27 @@ async function handleSigningFlow<M extends EthSignMethod>(
 
   const eWallet = ethEWallet.eWallet;
 
-  // TODO: receive the simulation result from the modal
   const modalResponse = await eWallet.showModal(showModalMsg);
 
   await eWallet.hideModal();
 
   if (modalResponse === "reject") {
     throw new Error("User rejected the signature request");
+  }
+
+  if (modalResponse !== "approve") {
+    const makeSignatureResponse = modalResponse.data as EthereumTxSignResponse;
+
+    if (data.sign_type === "tx") {
+      const transaction = makeSignatureResponse.transaction;
+      if (!transaction) {
+        throw new Error("Simulation result is not available");
+      }
+
+      // CHECK: validation required?
+      // override the transaction with the simulation result
+      data.payload.data.transaction = transaction;
+    }
   }
 
   const msgHash = config.hashFunction(data);
@@ -157,6 +173,7 @@ async function handleSigningFlow<M extends EthSignMethod>(
     },
   };
 
+  // TODO: add makeSignature api
   const makeSignatureAck = await eWallet.sendMsgToIframe(makeSignatureMsg);
 
   if (makeSignatureAck.msg_type !== "make_signature_ack") {
@@ -179,12 +196,12 @@ export async function makeSignature<M extends EthSignMethod>(
     throw new Error("Active chain not found");
   }
 
-  const chainInfo = {
+  const chainInfo: ChainInfoForAttachedModal = {
     chain_id: `eip155:${activeChain.id}`,
     chain_name: activeChain.name,
     chain_symbol_image_url: `https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:${activeChain.id}/chain.png`,
-    // CHECK: to check if the chain is op stack or elastic chain?
-    // because L1 publish fee estimation might be required for those chains
+    rpc_url: activeChain.rpcUrls[0].http[0],
+    block_explorer_url: activeChain.blockExplorers?.default.url,
   };
 
   const estimateL1Fee = SUPPORTED_OP_STACK_CHAINS.some(

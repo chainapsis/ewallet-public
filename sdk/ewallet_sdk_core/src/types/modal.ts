@@ -5,7 +5,7 @@ import type { Msg } from "@keplr-wallet/types";
 
 export type ShowModalPayload = MakeSignatureModalPayload | OtherModalPayload;
 
-export type ModalResponse = "approve" | "reject";
+export type ModalResponse = "approve" | "reject" | MakeSignatureModalResponse;
 
 export interface OtherModalPayload {
   modal_type: "other";
@@ -21,6 +21,9 @@ export type ChainInfoForAttachedModal = {
   readonly chain_id: string;
   readonly chain_name: string;
   readonly chain_symbol_image_url?: string;
+  readonly rpc_url?: string;
+  readonly rest_url?: string;
+  readonly block_explorer_url?: string;
 };
 
 export type MakeCosmosSigData =
@@ -109,3 +112,17 @@ export type EthereumEip712SignPayload = {
     serializedTypedData: string;
   };
 };
+
+export type MakeSignatureModalResponse = {
+  modal_type: "make_signature";
+  data: MakeEthereumSigResponse | MakeCosmosSigResponse;
+};
+
+export type MakeEthereumSigResponse = EthereumTxSignResponse;
+
+export type EthereumTxSignResponse = {
+  transaction: RpcTransactionRequest;
+};
+
+// TODO: define the response type for cosmos signature
+export type MakeCosmosSigResponse = {};
