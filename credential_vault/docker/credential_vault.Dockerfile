@@ -8,14 +8,18 @@ COPY --chown=node:node . .
 
 RUN yarn set version 4.7.0
 
-# Install dependencies for credential_vault server and crypto-bytes
-RUN yarn workspaces focus --production \
-    @keplr-ewallet/credential-vault-server
+# Install dependencies for crypto/bytes
 RUN yarn workspaces focus @keplr-ewallet/bytes
 
-# Build crypto-bytes
-WORKDIR /home/node/credential_vault/crypto/bytes/
+# Build crypto/bytes
+WORKDIR /home/node/credential_vault/crypto/bytes
 RUN yarn run build
+
+WORKDIR /home/node/credential_vault
+
+# Install dependencies for credential_vault server
+RUN yarn workspaces focus --production \
+    @keplr-ewallet/credential-vault-server
 
 WORKDIR /home/node/credential_vault/credential_vault/server
 
