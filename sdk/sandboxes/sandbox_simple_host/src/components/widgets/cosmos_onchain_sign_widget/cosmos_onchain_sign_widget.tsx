@@ -105,13 +105,13 @@ export const CosmosOnchainSignWidget = () => {
           accountNumber: Long.fromBigInt(mockSignDoc.accountNumber),
         };
 
-        const result = await cosmosEWallet.signDirect(
-          COSMOS_CHAIN_ID,
-          address,
-          compatibleSignDoc,
-        );
-
-        setResult(result);
+        // const result = await cosmosEWallet.signDirect(
+        //   COSMOS_CHAIN_ID,
+        //   address,
+        //   compatibleSignDoc,
+        // );
+        //
+        // setResult(result);
         console.log("SignDirect result:", result);
       } catch (error) {
         console.error("SignDirect failed:", error);

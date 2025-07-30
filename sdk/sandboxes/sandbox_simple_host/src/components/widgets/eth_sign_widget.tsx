@@ -4,19 +4,23 @@ import type { EthEWallet } from "@keplr-ewallet/ewallet-sdk-eth";
 
 import styles from "./eth_sign_widget.module.scss";
 import { Widget } from "./widget_components";
-import { useKeplrEwallet } from "@keplr-ewallet-demo-web/contexts/KeplrEwalletProvider";
+import { useKeplrEwallet } from "@/contexts/KeplrEwalletProvider";
+import { useAppState } from "@/state";
+// import { useKeplrEwallet } from "@keplr-ewallet-demo-web/contexts/KeplrEwalletProvider";
 
 export const EthSignWidget: React.FC<EthSignWidgetProps> = () => {
-  const { eWallet, isInitialized } = useKeplrEwallet();
+  // const { eWallet, isInitialized } = useKeplrEwallet();
+  const appState = useAppState();
+
   const [ethEWallet, setEthEWallet] = useState<EthEWallet | null>(null);
 
   useEffect(() => {
-    if (isInitialized && eWallet) {
-      initEthEWallet({ eWallet }).then((ethEWallet) => {
-        setEthEWallet(ethEWallet);
-      });
-    }
-  }, [isInitialized, eWallet]);
+    // if (isInitialized && eWallet) {
+    //   initEthEWallet({ eWallet }).then((ethEWallet) => {
+    //     setEthEWallet(ethEWallet);
+    //   });
+    // }
+  }, []);
 
   const handleClickEthSign = useCallback(async () => {
     if (ethEWallet) {
@@ -49,4 +53,4 @@ export const EthSignWidget: React.FC<EthSignWidgetProps> = () => {
   );
 };
 
-export interface EthSignWidgetProps { }
+export interface EthSignWidgetProps {}
