@@ -1,5 +1,10 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { makeSignDoc as makeProtoSignDoc } from "@cosmjs/proto-signing";
+import { makeSignDoc as makeAminoSignDoc } from "@cosmjs/amino";
+import type {
+  AminoSignResponse,
+  DirectSignResponse,
+} from "@keplr-wallet/types";
 import {
   AuthInfo,
   Fee,
@@ -8,47 +13,21 @@ import {
 import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
 import { PubKey } from "@keplr-wallet/proto-types/cosmos/crypto/secp256k1/keys";
 import { SignMode } from "@keplr-wallet/proto-types/cosmos/tx/signing/v1beta1/signing";
-import {
-  CosmosEWallet,
-  initCosmosEWallet,
-} from "@keplr-ewallet/ewallet-sdk-cosmos";
-import { CosmosIcon } from "@keplr-ewallet/ewallet-common-ui/icons/cosmos_icon";
 
-import { useKeplrEwallet } from "@keplr-ewallet-demo-web/contexts/KeplrEwalletProvider";
-import { SignWidget } from "@keplr-ewallet-demo-web/components/widgets/sign_widget/sign_widget";
+import { useKeplrEwallet } from "@/contexts/KeplrEwalletProvider";
+import { SignWidget } from "@/components/widgets/sign_widget/sign_widget";
 import Long from "long";
+import styles from "./cosmos_onchain_sign_widget.module.scss";
 
 const COSMOS_CHAIN_ID = "cosmoshub-4";
 
 export const CosmosOnchainSignWidget = () => {
-  const { eWallet } = useKeplrEwallet();
+  const { cosmosEWallet } = useKeplrEwallet();
   const [isLoading, setIsLoading] = useState(false);
-
-  const [cosmosEWallet, setCosmosEWallet] = useState<CosmosEWallet | null>(
-    null,
-  );
-
-  useEffect(() => {
-    if (eWallet) {
-      initCosmosEWallet({ eWallet }).then((res) => {
-        setCosmosEWallet(res);
-      });
-    }
-  }, [eWallet, setCosmosEWallet]);
-
-  // const handleClickGetCosmosAccounts = async () => {
-  //   const cosmosEWallet = await getCosmosEWallet({ eWallet });
-  //   if (cosmosEWallet !== null) {
-  //     try {
-  //       const ret = await cosmosEWallet.getAccounts();
-  //       console.log(22, ret);
-  //     } catch (error) {
-  //       console.error("Failed to get accounts:", error);
-  //     }
-  //   } else {
-  //     console.error("CosmosEWallet is not initialized");
-  //   }
-  // };
+  const [signType, setSignType] = useState<"animo" | "direct">("direct");
+  const [result, setResult] = useState<
+    AminoSignResponse | DirectSignResponse | null
+  >(null);
 
   const handleClickCosmosSignDirect = useCallback(async () => {
     console.log("handleClickCosmosSignDirect()");
@@ -131,6 +110,8 @@ export const CosmosOnchainSignWidget = () => {
           address,
           compatibleSignDoc,
         );
+
+        setResult(result);
         console.log("SignDirect result:", result);
       } catch (error) {
         console.error("SignDirect failed:", error);
@@ -140,15 +121,97 @@ export const CosmosOnchainSignWidget = () => {
     }
   }, [cosmosEWallet]);
 
+  const handleClickCosmosSignAnimo = useCallback(async () => {
+    console.info("handleClickCosmosSignAnimo()");
+    if (cosmosEWallet === null) {
+      throw new Error("CosmosEWallet is not initialized");
+    }
+
+    const account = await cosmosEWallet.getKey(COSMOS_CHAIN_ID);
+    const address = account?.bech32Address;
+
+    if (!address) {
+      throw new Error("Address is not found");
+    }
+
+    const stdFee = {
+      amount: [
+        {
+          denom: "uosmo",
+          amount: "1000",
+        },
+      ],
+      gas: "200000",
+    };
+    const memo = "";
+    const msgs = [
+      {
+        type: "/cosmos.bank.v1beta1.MsgSend",
+        value: {
+          fromAddress: address,
+          toAddress: address,
+          amount: [
+            {
+              denom: "uosmo",
+              amount: "10",
+            },
+          ],
+        },
+      },
+    ];
+    const accountNumber = 1288582;
+    const sequence = 0;
+
+    const mockSignDoc = makeAminoSignDoc(
+      msgs,
+      stdFee,
+      "osmosis-1",
+      memo,
+      accountNumber,
+      sequence,
+    );
+
+    const result = await cosmosEWallet.signAmino(
+      COSMOS_CHAIN_ID,
+      address,
+      mockSignDoc,
+    );
+
+    console.info("SignAmino result:", result);
+  }, [cosmosEWallet]);
+
   return (
-    <SignWidget
-      chain="Cosmos Hub"
-      chainIcon={<CosmosIcon />}
-      signType="onchain"
-      isLoading={isLoading}
-      signButtonOnClick={() => {
-        handleClickCosmosSignDirect();
-      }}
-    />
+    <div className={styles.container}>
+      <div className={styles.switch}>
+        <button
+          className={signType === "direct" ? styles.active : ""}
+          onClick={() => setSignType("direct")}
+        >
+          Direct
+        </button>
+        <button
+          className={signType === "animo" ? styles.active : ""}
+          onClick={() => setSignType("animo")}
+        >
+          Animo
+        </button>
+      </div>
+      <SignWidget
+        chain="Cosmos Hub"
+        signType="onchain"
+        isLoading={isLoading}
+        signButtonOnClick={
+          signType === "direct"
+            ? handleClickCosmosSignDirect
+            : handleClickCosmosSignAnimo
+        }
+      />
+      {result && (
+        <div className={styles.resultContainer}>
+          <div className={styles.resultItem}>{JSON.stringify(result)}</div>
+          <button className={styles.sendTxButton}>Send Tx</button>
+        </div>
+      )}
+    </div>
   );
 };

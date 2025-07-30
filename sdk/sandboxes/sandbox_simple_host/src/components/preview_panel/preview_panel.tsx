@@ -1,42 +1,50 @@
 "use client";
 
 import cn from "classnames";
-import { EthereumIcon } from "@keplr-ewallet/ewallet-common-ui/icons/ethereum_icon";
-import { CosmosIcon } from "@keplr-ewallet/ewallet-common-ui/icons/cosmos_icon";
 
 import styles from "./preview_panel.module.scss";
-import { LoginWidget } from "@keplr-ewallet-demo-web/components/widgets/login_widget/login_widget";
-import { useKeplrEwallet } from "@keplr-ewallet-demo-web/contexts/KeplrEwalletProvider";
-import { AddressWidget } from "@keplr-ewallet-demo-web/components/widgets/address_widget/address_widget";
-import { UserDataWidget } from "@keplr-ewallet-demo-web/components/widgets/user_data_widget/user_data_widget";
-import { DocsWidget } from "@keplr-ewallet-demo-web/components/widgets/docs_widget/docs_widget";
-import { SignWidget } from "@keplr-ewallet-demo-web/components/widgets/sign_widget/sign_widget";
-import { CosmosOnchainSignWidget } from "@keplr-ewallet-demo-web/components/widgets/cosmos_onchain_sign_widget/cosmos_onchain_sign_widget";
-import { EthereumOffchainSignWidget } from "@keplr-ewallet-demo-web/components/widgets/ethereum_offchain_sign_widget/ethereum_offchain_sign_widget";
-import { CosmosOffChainSignWidget } from "@keplr-ewallet-demo-web/components/widgets/cosmos_offchain_sign_widget/cosmos_offchain_sign_widget";
+import { useKeplrEwallet } from "@/contexts/KeplrEwalletProvider";
+import { LoginWidget } from "@/components/widgets/login_widget/login_widget";
+import { EthereumOffchainSignWidget } from "@/components/widgets/ethereum_offchain_sign_widget/ethereum_offchain_sign_widget";
+import { CosmosOnchainSignWidget } from "@/components/widgets/cosmos_onchain_sign_widget/cosmos_onchain_sign_widget";
+import { CosmosOffChainSignWidget } from "@/components/widgets/cosmos_offchain_sign_widget/cosmos_offchain_sign_widget";
+
+// import { LoginWidget } from "@keplr-ewallet-demo-web/components/widgets/login_widget/login_widget";
+// import { useKeplrEwallet } from "@keplr-ewallet-demo-web/contexts/KeplrEwalletProvider";
+// import { AddressWidget } from "@keplr-ewallet-demo-web/components/widgets/address_widget/address_widget";
+// import { UserDataWidget } from "@keplr-ewallet-demo-web/components/widgets/user_data_widget/user_data_widget";
+// import { DocsWidget } from "@keplr-ewallet-demo-web/components/widgets/docs_widget/docs_widget";
+// import { SignWidget } from "@keplr-ewallet-demo-web/components/widgets/sign_widget/sign_widget";
+// import { CosmosOnchainSignWidget } from "@keplr-ewallet-demo-web/components/widgets/cosmos_onchain_sign_widget/cosmos_onchain_sign_widget";
 
 export const PreviewPanel = () => {
-  const { eWallet } = useKeplrEwallet();
+  const { cosmosEWallet, ethEWallet } = useKeplrEwallet();
+
+  console.log("cosmosEWallet !!!", cosmosEWallet);
 
   return (
     <div className={styles.wrapper}>
       <div className={cn(styles.inner, "common-list-scroll")}>
         <div className={styles.col}>
           <LoginWidget />
-          <AddressWidget />
-          <UserDataWidget userData={mockUserData} />
+          {/* <AddressWidget /> */}
+          {/* <UserDataWidget userData={mockUserData} /> */}
         </div>
         <div className={styles.col}>
+          <h2>Ethereum</h2>
           <EthereumOffchainSignWidget />
-          <SignWidget
-            chain="Ethereum"
-            chainIcon={<EthereumIcon />}
-            signType="onchain"
-            signButtonOnClick={() => {}}
-          />
-          <DocsWidget />
         </div>
+        {/*   <SignWidget */}
+        {/*     chain="Ethereum" */}
+        {/*     chainIcon={<EthereumIcon />} */}
+        {/*     signType="onchain" */}
+        {/*     signButtonOnClick={() => {}} */}
+        {/*   /> */}
+        {/*   <DocsWidget /> */}
+        {/* </div> */}
+
         <div className={styles.col}>
+          <h2>Cosmos</h2>
           <CosmosOffChainSignWidget />
           <CosmosOnchainSignWidget />
         </div>

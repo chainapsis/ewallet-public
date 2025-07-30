@@ -19,6 +19,10 @@ import type {
   SignFunctionParams,
   SignFunctionResult,
 } from "@keplr-ewallet-sdk-eth/types";
+import {
+  parseTypedDataDefinition,
+  toTransactionSerializable,
+} from "@keplr-ewallet-sdk-eth/utils";
 
 export * from "./viemHelpers";
 export * from "./ethersHelpers";
@@ -112,6 +116,7 @@ export const createDummySigner = (): EthSigner => {
  * @dev signHash function is not part of the EthSigner interface, but is added for testing purposes
  */
 export const createEthSigner = (
+  chainId: number | string,
   privateKey: Hex,
 ): EthSigner & { signHash: ({ hash }: { hash: Hex }) => Promise<Hex> } => {
   const account = privateKeyToAccount(privateKey);
@@ -123,11 +128,15 @@ export const createEthSigner = (
       switch (parameters.type) {
         case "sign_transaction": {
           const { transaction } = parameters.data;
-          const serializedTx = serializeTransaction(transaction);
+          const serializableTx = toTransactionSerializable({
+            chainId: chainId.toString(),
+            tx: transaction,
+          });
+          const serializedTx = serializeTransaction(serializableTx);
           const hash = keccak256(serializedTx);
           const signature = await account.sign({ hash });
           const signedTransaction = serializeTransaction(
-            transaction,
+            serializableTx,
             parseSignature(signature),
           );
           return {
@@ -145,8 +154,9 @@ export const createEthSigner = (
           };
         }
         case "sign_typedData_v4": {
-          const { message } = parameters.data;
-          const hash = hashTypedData(message);
+          const { serializedTypedData } = parameters.data;
+          const typedData = parseTypedDataDefinition(serializedTypedData);
+          const hash = hashTypedData(typedData);
           const signature = await account.sign({ hash });
           return {
             type: "signature",

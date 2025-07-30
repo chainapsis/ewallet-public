@@ -1,4 +1,8 @@
-import { KeplrEWallet } from "@keplr-ewallet/ewallet-sdk-core";
+import {
+  KeplrEWallet,
+  type EWalletMsg,
+  type MakeCosmosSigData,
+} from "@keplr-ewallet/ewallet-sdk-core";
 import type { ChainInfo } from "@keplr-wallet/types";
 
 import {
@@ -15,6 +19,8 @@ import {
   signArbitrary,
   signDirect,
   verifyArbitrary,
+  showModal,
+  makeSignature,
 } from "@keplr-ewallet-sdk-cosmos/api";
 
 // The chain info itself rarely changes, but just in case
@@ -95,4 +101,6 @@ export class CosmosEWallet {
   signDirect = signDirect.bind(this);
   signArbitrary = signArbitrary.bind(this);
   verifyArbitrary = verifyArbitrary.bind(this);
+  protected showModal = showModal.bind(this);
+  protected makeSignature = makeSignature.bind(this);
 }

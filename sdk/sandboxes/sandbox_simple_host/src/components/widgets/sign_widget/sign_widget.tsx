@@ -1,10 +1,7 @@
 import React, { type ReactElement } from "react";
-import { Button } from "@keplr-ewallet/ewallet-common-ui/button";
-import { InfoCircleIcon } from "@keplr-ewallet/ewallet-common-ui/icons/info_circle";
-import { Typography } from "@keplr-ewallet/ewallet-common-ui/typography";
 
-import { Widget } from "@keplr-ewallet-demo-web/components/widgets/widget_components";
 import styles from "./sign_widget.module.scss";
+import { Widget } from "@/components/widgets/widget_components";
 
 export const SignWidget: React.FC<SignWidgetProps> = ({
   chain,
@@ -24,24 +21,9 @@ export const SignWidget: React.FC<SignWidgetProps> = ({
         <div className={styles.titleRow}>
           <div className={styles.chainBadge}>
             {chainIcon}
-            <Typography
-              tagType="span"
-              size="xs"
-              weight="medium"
-              color="secondary"
-            >
-              {chain}
-            </Typography>
+            <p>{chain}</p>
           </div>
-          <Typography
-            tagType="span"
-            size="sm"
-            weight="semibold"
-            color="secondary"
-            className={styles.titleText}
-          >
-            {signTitle}
-          </Typography>
+          <p>{signTitle}</p>
         </div>
 
         {isLoading ? (
@@ -50,14 +32,7 @@ export const SignWidget: React.FC<SignWidgetProps> = ({
           <Description signType={signType} />
         )}
 
-        <Button
-          variant="primary"
-          size="md"
-          fullWidth
-          onClick={signButtonOnClick}
-        >
-          Sign
-        </Button>
+        <button onClick={signButtonOnClick}>Sign</button>
       </div>
     </Widget>
   );
@@ -67,15 +42,8 @@ const Description = ({ signType }: { signType: SignType }) => {
   return (
     <>
       {signType === "offchain" && (
-        <Typography
-          tagType="div"
-          size="sm"
-          weight="medium"
-          color="tertiary"
-          className={styles.infoBox}
-        >
+        <div className={styles.infoBox}>
           <p className={styles.infoParagraph}>
-            <InfoCircleIcon />
             <span>Why use offchain signatures?</span>
           </p>
           <ul className={styles.infoList}>
@@ -83,19 +51,13 @@ const Description = ({ signType }: { signType: SignType }) => {
             <li>Authenticate without gas fees</li>
             <li>No transaction is sent on-chain</li>
           </ul>
-        </Typography>
+        </div>
       )}
       {signType === "onchain" && (
-        <Typography
-          tagType="div"
-          size="sm"
-          weight="medium"
-          color="tertiary"
-          className={styles.onchainTest}
-        >
+        <div className={styles.onchainTest}>
           <p>This is a demo ✨</p>
           <p>No transaction will be sent on-chain.</p>
-        </Typography>
+        </div>
       )}
     </>
   );
@@ -103,7 +65,7 @@ const Description = ({ signType }: { signType: SignType }) => {
 
 export interface SignWidgetProps {
   chain: string;
-  chainIcon: ReactElement;
+  chainIcon?: ReactElement;
   signType: SignType;
   signButtonOnClick: () => void;
   isLoading?: boolean;

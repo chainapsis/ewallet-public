@@ -1,20 +1,5 @@
 import type { KeplrEWallet } from "@keplr-ewallet/ewallet-sdk-core";
 import type { Address, Chain, Hex } from "viem";
-import { publicKeyToAddress } from "viem/accounts";
-import {
-  arbitrum,
-  avalanche,
-  base,
-  berachain,
-  blast,
-  citreaTestnet,
-  forma,
-  mainnet,
-  optimism,
-  polygon,
-  sepolia,
-  unichain,
-} from "viem/chains";
 
 import type { EIP1193Provider } from "@keplr-ewallet-sdk-eth/provider";
 import {
@@ -24,58 +9,25 @@ import {
   personalSign,
   switchChain,
   toViemAccount,
+  getAddress,
 } from "@keplr-ewallet-sdk-eth/api";
-
-const SUPPORTED_CHAINS = [
-  mainnet,
-  base,
-  optimism,
-  arbitrum,
-  blast,
-  avalanche,
-  unichain,
-  polygon,
-  forma,
-  berachain,
-  sepolia,
-  citreaTestnet,
-];
+import { SUPPORTED_CHAINS } from "@keplr-ewallet-sdk-eth/chains";
 
 export class EthEWallet {
   readonly eWallet: KeplrEWallet;
-  private _cachedProvider: EIP1193Provider | null;
+  private _provider: EIP1193Provider | null;
+  private _publicKey: Hex | null;
   private _address: Address | null;
   private _activeChainId: number;
   private readonly _chains: Chain[];
 
   constructor(eWallet: KeplrEWallet) {
     this.eWallet = eWallet;
-    this._cachedProvider = null;
+    this._provider = null;
+    this._publicKey = null;
     this._address = null;
     this._activeChainId = 1;
     this._chains = SUPPORTED_CHAINS;
-  }
-
-  async initialize(initialChainId?: Hex | number): Promise<void> {
-    const isInitialized =
-      this._address !== null && this._cachedProvider !== null;
-    if (isInitialized) {
-      return;
-    }
-
-    const publicKey = await this.getPublicKey();
-    this._address = publicKeyToAddress(publicKey);
-
-    const provider = await this.getEthereumProvider();
-    this.cachedProvider = provider;
-
-    if (initialChainId) {
-      try {
-        await this.switchChain(initialChainId);
-      } catch (error) {
-        console.error("Failed to switch chain", error);
-      }
-    }
   }
 
   get type(): "ethereum" {
@@ -86,19 +38,28 @@ export class EthEWallet {
     return `eip155:${this._activeChainId}`;
   }
 
-  get address(): Address {
-    if (this._address === null) {
-      throw new Error("EthEWallet not initialized. Call initialize() first.");
-    }
+  get publicKey(): Hex | null {
+    return this._publicKey;
+  }
+
+  protected set publicKey(publicKey: Hex) {
+    this._publicKey = publicKey;
+  }
+
+  get address(): Address | null {
     return this._address;
   }
 
-  get cachedProvider(): EIP1193Provider | null {
-    return this._cachedProvider;
+  protected set address(address: Address) {
+    this._address = address;
   }
 
-  protected set cachedProvider(provider: EIP1193Provider | null) {
-    this._cachedProvider = provider;
+  get provider(): EIP1193Provider | null {
+    return this._provider;
+  }
+
+  protected set provider(provider: EIP1193Provider | null) {
+    this._provider = provider;
   }
 
   get activeChainId(): number {
@@ -121,6 +82,7 @@ export class EthEWallet {
   sign = personalSign.bind(this);
   switchChain = switchChain.bind(this);
   toViemAccount = toViemAccount.bind(this);
-  protected getPublicKey = getPublicKey.bind(this);
+  getPublicKey = getPublicKey.bind(this);
+  getAddress = getAddress.bind(this);
   protected makeSignature = makeSignature.bind(this);
 }

@@ -3,7 +3,12 @@ import type {
   AddEthereumChainParameter as Chain,
   TypedDataDefinition,
 } from "viem";
-import { hexToString, isAddress, isAddressEqual } from "viem";
+import {
+  hexToString,
+  isAddress,
+  isAddressEqual,
+  serializeTypedData,
+} from "viem";
 import { v4 as uuidv4 } from "uuid";
 
 import { ErrorCodes, standardError } from "@keplr-ewallet-sdk-eth/errors";
@@ -20,6 +25,12 @@ import {
   UNSUPPORTED_RPC_METHODS,
   PUBLIC_RPC_METHODS,
 } from "@keplr-ewallet-sdk-eth/rpc";
+import {
+  parseTypedData,
+  isValidChainId,
+  toSignableTransaction,
+  validateChain,
+} from "@keplr-ewallet-sdk-eth/utils";
 import type {
   EIP1193Provider,
   EWalletEIP1193ProviderOptions,
@@ -27,12 +38,6 @@ import type {
   ChainWithStatus,
 } from "./types";
 import { ProviderEventEmitter } from "./types";
-import {
-  isValidChainId,
-  parseTypedData,
-  toSerializable,
-  validateChain,
-} from "./utils";
 import { VERSION } from "./constants";
 
 export class EWalletEIP1193Provider
@@ -338,17 +343,14 @@ export class EWalletEIP1193Provider
         const [tx] =
           args.params as RpcRequestArgs<"eth_signTransaction">["params"];
 
-        const serializableTx = toSerializable({
-          chainId: this.activeChain?.chainId,
-          tx,
-        });
+        const signableTx = toSignableTransaction(tx);
 
         const { signedTransaction } =
           await this.signer.sign<"sign_transaction">({
             type: "sign_transaction",
             data: {
               address: this.signer.address,
-              transaction: serializableTx,
+              transaction: signableTx,
             },
           });
 
@@ -382,7 +384,7 @@ export class EWalletEIP1193Provider
           type: "sign_typedData_v4",
           data: {
             address: this.signer.address,
-            message: typedData,
+            serializedTypedData: serializeTypedData(typedData),
           },
         });
 

@@ -80,6 +80,7 @@ function setupIframeElement(): Result<HTMLIFrameElement, string> {
   iframe.style.display = "none";
   iframe.style.backgroundColor = "transparent";
   iframe.style.overflow = "hidden";
+  iframe.style.zIndex = "1000000";
 
   bodyEl.appendChild(iframe);
 

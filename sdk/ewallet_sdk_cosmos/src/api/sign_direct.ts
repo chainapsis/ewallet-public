@@ -1,15 +1,12 @@
 import { sha256 } from "@noble/hashes/sha2";
-import { SignDoc as ProtoSignDoc } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
-import type {
-  DirectSignResponse,
-  KeplrSignOptions,
-  SignDoc,
-} from "@keplr-wallet/types";
+import type { KeplrSignOptions } from "@keplr-wallet/types";
 import { SignDocWrapper } from "@keplr-wallet/cosmos";
+import type { MakeCosmosSigData } from "@keplr-ewallet/ewallet-sdk-core";
 
-import type { EWalletMsg } from "@keplr-ewallet-sdk-core/types";
 import { CosmosEWallet } from "@keplr-ewallet-sdk-cosmos/cosmos_ewallet";
 import { encodeCosmosSignature } from "@keplr-ewallet-sdk-cosmos/utils/sign";
+import { makeSignBytes, type DirectSignResponse } from "@cosmjs/proto-signing";
+import type { SignDoc } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 
 export async function signDirect(
   this: CosmosEWallet,
@@ -19,15 +16,11 @@ export async function signDirect(
   signOptions?: KeplrSignOptions,
 ): Promise<DirectSignResponse> {
   try {
-    const compatibleSignDoc = {
-      ...signDoc,
-      accountNumber: signDoc.accountNumber.toString(),
-    };
-    const signBytes = ProtoSignDoc.encode(compatibleSignDoc).finish();
-    const signDocHash = sha256(signBytes);
-    const publicKey = await this.getPublicKey();
     const origin = this.eWallet.origin;
-    console.log("signDirect @@@@@", signDoc, origin);
+
+    const signBytes = makeSignBytes(signDoc);
+    const hashedMessage = sha256(signBytes);
+    const publicKey = await this.getPublicKey();
 
     const signDocWrapper = SignDocWrapper.fromDirectSignDoc({
       ...signDoc,
@@ -37,59 +30,42 @@ export async function signDirect(
     const chainInfoList = await this.getCosmosChainInfoList();
     const chainInfo = chainInfoList.find((info) => info.chainId === chainId);
 
-    const msg: EWalletMsg = {
-      msg_type: "show_modal",
+    const showModalData: MakeCosmosSigData = {
+      chain_type: "cosmos",
+      sign_type: "tx",
       payload: {
-        modal_type: "make_signature",
-        data: {
-          chain_type: "cosmos",
-          sign_type: "tx",
-          payload: {
-            chain_info: {
-              chain_id: chainId,
-              chain_name: chainInfo?.chainName ?? "",
-              chain_symbol_image_url:
-                chainInfo?.stakeCurrency?.coinImageUrl ?? "",
-            },
-            signer,
-            msgs: [],
-            signDocString: JSON.stringify(
-              signDocWrapper.protoSignDoc.toJSON(),
-              null,
-              2,
-            ),
-            origin,
-          },
+        chain_info: {
+          chain_id: chainId,
+          chain_name: chainInfo?.chainName ?? "",
+          chain_symbol_image_url: chainInfo?.stakeCurrency?.coinImageUrl ?? "",
         },
+        signer,
+        msgs: signDocWrapper.protoSignDoc.txMsgs,
+        signDocString: JSON.stringify(
+          signDocWrapper.protoSignDoc.toJSON(),
+          null,
+          2,
+        ),
+        origin,
       },
     };
-    const openModalAck = await this.eWallet.showModal(msg);
-    if (openModalAck.msg_type === "show_modal_ack") {
-      await this.eWallet.hideModal();
+    const showModalResponse = await this.showModal(showModalData);
 
-      if (openModalAck.payload === "approve") {
-        const res = await this.eWallet.sendMsgToIframe({
-          msg_type: "make_signature",
-          payload: {
-            msg: signDocHash,
-          },
-        });
-        const signature = encodeCosmosSignature(
-          res.payload.sign_output,
-          publicKey,
-        );
-        return {
-          signed: signDoc,
-          signature,
-        };
-      }
-
-      if (openModalAck.payload === "reject") {
-        throw new Error("User rejected the signature request");
-      }
+    if (showModalResponse === "reject") {
+      throw new Error("User rejected the signature request");
     }
 
-    throw new Error("Unreachable");
+    const makeSignatureAck = await this.makeSignature(hashedMessage);
+
+    const signature = encodeCosmosSignature(
+      makeSignatureAck.sign_output,
+      publicKey,
+    );
+
+    return {
+      signed: signDoc,
+      signature,
+    };
   } catch (error) {
     console.error("[signDirect cosmos] [error] @@@@@", error);
     throw error;

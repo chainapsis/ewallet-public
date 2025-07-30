@@ -73,9 +73,9 @@ describe("EWallet Provider - Ethers.js Integration", () => {
 
     beforeAll(async () => {
       // Use accounts 3, 4, 5 for ethers.test.ts to avoid conflicts with viem.test.ts
-      delta = createEthSigner(hardhatAccounts[3].privateKey);
-      epsilon = createEthSigner(hardhatAccounts[4].privateKey);
-      foxtrot = createEthSigner(hardhatAccounts[5].privateKey);
+      delta = createEthSigner(hardhat.id, hardhatAccounts[3].privateKey);
+      epsilon = createEthSigner(hardhat.id, hardhatAccounts[4].privateKey);
+      foxtrot = createEthSigner(hardhat.id, hardhatAccounts[5].privateKey);
 
       try {
         await hardhatNode.start();

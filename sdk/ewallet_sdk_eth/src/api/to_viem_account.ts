@@ -1,19 +1,14 @@
-import { isAddress } from "viem";
-import type { Address, Hex, TypedDataDefinition } from "viem";
-import { publicKeyToAddress } from "viem/accounts";
+import { type Address, type Hex, serializeTypedData } from "viem";
 
 import type { EWalletAccount } from "@keplr-ewallet-sdk-eth/types";
 import type { EthEWallet } from "@keplr-ewallet-sdk-eth/eth_ewallet";
+import { toRpcTransactionRequest } from "@keplr-ewallet-sdk-eth/utils";
 
 export async function toViemAccount(
   this: EthEWallet,
 ): Promise<EWalletAccount<"ewallet", Hex>> {
   const publicKey = await this.getPublicKey();
-  const address = publicKeyToAddress(publicKey as `0x${string}`);
-
-  if (!address || !isAddress(address)) {
-    throw new Error("Invalid address format");
-  }
+  const address = await this.getAddress();
 
   const sign = this.makeSignature;
 
@@ -22,7 +17,6 @@ export async function toViemAccount(
     type: "local",
     source: "ewallet",
     publicKey,
-
     signMessage: async ({ message }) => {
       const result = await sign({
         type: "personal_sign",
@@ -38,24 +32,12 @@ export async function toViemAccount(
 
       return result.signature;
     },
-
     signTransaction: async (transaction) => {
-      const signableTransaction = (() => {
-        // For EIP-4844 Transactions, we want to sign the transaction payload body (tx_payload_body) without the sidecars (ie. without the network wrapper).
-        // See: https://github.com/ethereum/EIPs/blob/e00f4daa66bd56e2dbd5f1d36d09fd613811a48b/EIPS/eip-4844.md#networking
-        if (transaction.type === "eip4844")
-          return {
-            ...transaction,
-            sidecars: false,
-          };
-        return transaction;
-      })();
-
       const result = await sign({
         type: "sign_transaction",
         data: {
           address,
-          transaction: signableTransaction,
+          transaction: toRpcTransactionRequest(transaction),
         },
       });
 
@@ -65,13 +47,12 @@ export async function toViemAccount(
 
       return result.signedTransaction;
     },
-
     signTypedData: async (typedData) => {
       const result = await sign({
         type: "sign_typedData_v4",
         data: {
           address,
-          message: typedData as TypedDataDefinition,
+          serializedTypedData: serializeTypedData(typedData),
         },
       });
 

@@ -8,7 +8,7 @@ import {
   toHex,
   parseEther,
 } from "viem";
-import { sepolia, mainnet } from "viem/chains";
+import { sepolia, mainnet, hardhat } from "viem/chains";
 
 import { hardhatAccounts } from "./hardhat";
 import {
@@ -45,8 +45,8 @@ describe("EWallet Provider - Mock RPC Testing", () => {
 
     beforeAll(async () => {
       // Use accounts 6, 7 for mock.test.ts to avoid conflicts with other test files
-      golf = createEthSigner(hardhatAccounts[6].privateKey);
-      hotel = createEthSigner(hardhatAccounts[7].privateKey);
+      golf = createEthSigner(hardhat.id, hardhatAccounts[6].privateKey);
+      hotel = createEthSigner(hardhat.id, hardhatAccounts[7].privateKey);
     });
 
     it("should successfully perform personal_sign", async () => {

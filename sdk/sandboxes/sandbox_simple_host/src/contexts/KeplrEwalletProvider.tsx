@@ -1,5 +1,6 @@
 "use client";
 
+import { useAppState } from "@/state";
 import {
   initKeplrEwalletCore,
   type KeplrEWallet,
@@ -40,7 +41,7 @@ const KeplrEwalletContext = createContext<KeplrEwalletContextType | undefined>(
   undefined,
 );
 
-export const KeplrEwalletProvider = ({
+export const KeplrEwalletProvider2 = ({
   children,
   initialLoginMethods,
 }: KeplrEwalletProviderProps) => {
@@ -99,12 +100,22 @@ export const KeplrEwalletProvider = ({
   );
 };
 
+// export const useKeplrEwallet = () => {
+//   const context = useContext(KeplrEwalletContext);
+//   if (context === undefined) {
+//     throw new Error(
+//       "useKeplrEwallet must be used within a KeplrEwalletProvider",
+//     );
+//   }
+//   return context;
+// };
+
 export const useKeplrEwallet = () => {
-  const context = useContext(KeplrEwalletContext);
-  if (context === undefined) {
-    throw new Error(
-      "useKeplrEwallet must be used within a KeplrEwalletProvider",
-    );
-  }
-  return context;
+  const cosmosEWallet = useAppState((state) => state.keplr_sdk_cosmos);
+  const ethEWallet = useAppState((state) => state.keplr_sdk_eth);
+
+  return {
+    cosmosEWallet,
+    ethEWallet,
+  };
 };

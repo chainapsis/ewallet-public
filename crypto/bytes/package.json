@@ -2,8 +2,12 @@
   "name": "@keplr-ewallet/bytes",
   "type": "module",
   "main": "./dist/index.js",
-  "version": "0.0.3-alpha.0",
+  "version": "0.0.3-alpha.2",
   "packageManager": "yarn@4.7.0",
+  "scripts": {
+    "clean": "del-cli dist",
+    "build": "yarn clean && tsc"
+  },
   "dependencies": {
     "@keplr-ewallet/stdlib-js": "workspace:*"
   },
@@ -19,6 +23,7 @@
     "@jest/globals": "*",
     "@types/jest": "*",
     "@types/node": "*",
+    "del-cli": "*",
     "ts-jest": "*",
     "typescript": "*"
   },

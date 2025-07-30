@@ -1,0 +1,29 @@
+import type {
+  EWalletMsg,
+  MakeCosmosSigData,
+} from "@keplr-ewallet/ewallet-sdk-core";
+
+import type { CosmosEWallet } from "@keplr-ewallet-sdk-cosmos/cosmos_ewallet";
+
+export async function showModal(
+  this: CosmosEWallet,
+  data: MakeCosmosSigData,
+): Promise<"approve" | "reject"> {
+  const showModalMsg: EWalletMsg = {
+    msg_type: "show_modal",
+    payload: {
+      modal_type: "make_signature",
+      data,
+    },
+  };
+
+  const modalResponse = await this.eWallet.showModal(showModalMsg);
+
+  await this.eWallet.hideModal();
+
+  if (modalResponse === "reject") {
+    return "reject";
+  }
+
+  return "approve";
+}

@@ -1,0 +1,59 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.switch {
+  display: flex;
+  gap: 8px;
+  padding: 4px;
+  background-color: #f3f4f6;
+  border-radius: 8px;
+  width: fit-content;
+
+  button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    background-color: transparent;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 500;
+
+    &:hover {
+      background-color: #e5e7eb;
+    }
+
+    &.active {
+      background-color: #ffffff;
+      color: #111827;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+.resultContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .resultItem {
+    padding: 8px 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background-color: #f3f4f6;
+    color: #111827;
+  }
+
+  .sendTxButton {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    background-color: #000;
+    color: #fff;
+    cursor: pointer;
+  }
+}

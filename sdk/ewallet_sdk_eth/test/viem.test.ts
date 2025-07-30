@@ -14,12 +14,6 @@ import {
 } from "viem";
 import { sepolia, mainnet } from "viem/chains";
 import { hashAuthorization } from "viem/utils";
-// import type { EthSigner } from "@keplr-ewallet/ewallet-sdk-eth";
-// import {
-//   EWalletEIP1193Provider,
-//   initEWalletEIP1193Provider,
-//   ErrorCodes,
-// } from "@keplr-ewallet/ewallet-sdk-eth";
 
 import { hardhatAlt, hardhatAccounts, hardhatNodeAlt } from "./hardhat";
 import {
@@ -90,9 +84,9 @@ describe("EWallet Provider - Viem Integration", () => {
 
     beforeAll(async () => {
       // Use accounts 0, 1, 2 for viem.test.ts to avoid conflicts with other test files
-      alice = createEthSigner(hardhatAccounts[0].privateKey);
-      bob = createEthSigner(hardhatAccounts[1].privateKey);
-      charlie = createEthSigner(hardhatAccounts[2].privateKey);
+      alice = createEthSigner(hardhatAlt.id, hardhatAccounts[0].privateKey);
+      bob = createEthSigner(hardhatAlt.id, hardhatAccounts[1].privateKey);
+      charlie = createEthSigner(hardhatAlt.id, hardhatAccounts[2].privateKey);
 
       try {
         await hardhatNodeAlt.start();

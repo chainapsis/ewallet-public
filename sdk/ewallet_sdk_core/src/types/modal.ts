@@ -1,9 +1,11 @@
-import type { SignableMessage } from "viem";
+import type { RpcTransactionRequest, SignableMessage } from "viem";
 import type { StdSignDoc } from "@cosmjs/amino";
+import type { AnyWithUnpacked } from "@keplr-wallet/cosmos";
+import type { Msg } from "@keplr-wallet/types";
 
 export type ShowModalPayload = MakeSignatureModalPayload | OtherModalPayload;
 
-export type ModalResponse = "approve" | "reject";
+export type ModalResponse = "approve" | "reject" | MakeSignatureModalResponse;
 
 export interface OtherModalPayload {
   modal_type: "other";
@@ -19,6 +21,9 @@ export type ChainInfoForAttachedModal = {
   readonly chain_id: string;
   readonly chain_name: string;
   readonly chain_symbol_image_url?: string;
+  readonly rpc_url?: string;
+  readonly rest_url?: string;
+  readonly block_explorer_url?: string;
 };
 
 export type MakeCosmosSigData =
@@ -33,12 +38,23 @@ export type MakeCosmosSigData =
       payload: CosmosArbitrarySignPayload;
     };
 
-export type CosmosTxSignPayload = {
+export type CosmosTxSignPayload =
+  | CosmosTxSignDirectPayload
+  | CosmosTxSignAminoPayload;
+
+type CosmosTxSignDirectPayload = {
   origin: string;
   chain_info: ChainInfoForAttachedModal;
   signer: string;
   signDocString: string;
-  msgs: any[];
+  msgs: AnyWithUnpacked[];
+};
+type CosmosTxSignAminoPayload = {
+  origin: string;
+  chain_info: ChainInfoForAttachedModal;
+  signer: string;
+  signDocString: string;
+  msgs: readonly Msg[];
 };
 
 export type CosmosArbitrarySignPayload = {
@@ -70,19 +86,41 @@ export type EthereumTxSignPayload = {
   origin: string;
   chain_info: ChainInfoForAttachedModal;
   signer: string;
-  data: any;
+  data: {
+    transaction: RpcTransactionRequest;
+    blockTime?: number;
+    estimateL1Fee?: boolean;
+  };
 };
 
 export type EthereumArbitrarySignPayload = {
   origin: string;
   chain_info: ChainInfoForAttachedModal;
   signer: string;
-  data: SignableMessage;
+  data: {
+    message: SignableMessage;
+  };
 };
 
 export type EthereumEip712SignPayload = {
   origin: string;
   chain_info: ChainInfoForAttachedModal;
   signer: string;
-  data: any;
+  data: {
+    serializedTypedData: string;
+  };
 };
+
+export type MakeSignatureModalResponse = {
+  modal_type: "make_signature";
+  data: MakeEthereumSigResponse | MakeCosmosSigResponse;
+};
+
+export type MakeEthereumSigResponse = EthereumTxSignResponse;
+
+export type EthereumTxSignResponse = {
+  transaction: RpcTransactionRequest;
+};
+
+// TODO: define the response type for cosmos signature
+export type MakeCosmosSigResponse = {};

@@ -11,3 +11,5 @@ export * from "./sign_amino";
 export * from "./sign_arbitrary";
 export * from "./sign_direct";
 export * from "./verify_arbitrary";
+export * from "./show_modal";
+export * from "./make_signature";

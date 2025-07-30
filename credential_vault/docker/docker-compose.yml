@@ -16,7 +16,7 @@ services:
   credential_vault_1:
     build:
       context: ../../
-      dockerfile: internals/docker/dockerfiles/credential_vault.Dockerfile
+      dockerfile: credential_vault/docker/credential_vault.Dockerfile
     ports:
       - "4201:4201"
     platform: linux/amd64
@@ -29,7 +29,7 @@ services:
   credential_vault_2:
     build:
       context: ../../
-      dockerfile: internals/docker/dockerfiles/credential_vault.Dockerfile
+      dockerfile: credential_vault/docker/credential_vault.Dockerfile
     ports:
       - "4202:4202"
     platform: linux/amd64

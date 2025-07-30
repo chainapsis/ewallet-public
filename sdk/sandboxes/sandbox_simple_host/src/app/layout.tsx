@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import "./globals.scss";
-import "@keplr-ewallet/ewallet-common-ui/styles/colors.scss";
-import "@keplr-ewallet/ewallet-common-ui/styles/typography.scss";
+// import "@keplr-ewallet/ewallet-common-ui/styles/colors.scss";
+// import "@keplr-ewallet/ewallet-common-ui/styles/typography.scss";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
