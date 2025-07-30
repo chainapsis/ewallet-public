@@ -19049,9 +19049,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "sandbox_simple_host@workspace:sdk/sandboxes/sandbox_simple_host"
   dependencies:
+    "@cosmjs/stargate": "npm:^0.34.0"
     "@keplr-ewallet/ewallet-sdk-core": "workspace:*"
     "@keplr-ewallet/ewallet-sdk-cosmos": "workspace:*"
     "@keplr-ewallet/ewallet-sdk-eth": "workspace:*"
+    "@keplr-wallet/cosmos": "npm:^0.12.253"
     "@types/jest": "npm:*"
     "@types/node": "npm:*"
     "@types/react": "npm:*"
