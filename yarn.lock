@@ -3145,6 +3145,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@keplr-ewallet/ewallet-sdk-core@workspace:sdk/ewallet_sdk_core"
   dependencies:
+    "@keplr-wallet/types": "npm:^0.12.257"
     "@types/jest": "npm:*"
     "@types/node": "npm:*"
     del-cli: "npm:*"
@@ -3667,6 +3668,17 @@ __metadata:
   dependencies:
     long: "npm:^4.0.0"
   checksum: 10c0/a541088e55ee0a57ac0e5a9c56e8b788d6325f438fcb4f0a478ba4ce76e336660774d8373a2c3dc6b53e4c6d7b5d91be3128102f340728c71a25448d35245980
+  languageName: node
+  linkType: hard
+
+"@keplr-wallet/types@npm:^0.12.257":
+  version: 0.12.257
+  resolution: "@keplr-wallet/types@npm:0.12.257"
+  dependencies:
+    long: "npm:^4.0.0"
+  peerDependencies:
+    starknet: ^7
+  checksum: 10c0/a995ef4d4aea9078d5521bbfc60f681f293fdf0d8c1e9824d9e68b224776160490964a54d6f05520742a096f0859f9777e112da19f657d377f6cb967514cc0f8
   languageName: node
   linkType: hard
 

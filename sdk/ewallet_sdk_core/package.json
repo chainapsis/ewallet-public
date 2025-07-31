@@ -46,5 +46,8 @@
     "tsc-alias": "*",
     "typescript": "*"
   },
-  "gitHead": "5c82fc2b9b670d82a53e5aef0d8550537a03dccc"
+  "gitHead": "5c82fc2b9b670d82a53e5aef0d8550537a03dccc",
+  "dependencies": {
+    "@keplr-wallet/types": "^0.12.257"
+  }
 }

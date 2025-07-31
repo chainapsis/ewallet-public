@@ -26,11 +26,6 @@ export type EWalletMsgGetPublicKeyAck = {
   payload: string | null;
 };
 
-export type EWalletMsgGetEmailAck = {
-  msg_type: "get_email_ack";
-  payload: string | null;
-};
-
 export type EWalletMsgSetOAuthNonce = {
   msg_type: "set_oauth_nonce";
   payload: string;
@@ -110,6 +105,23 @@ export type EWalletMsgGetEmail = {
   payload: null;
 };
 
+export type EWalletMsgGetEmailAck = {
+  msg_type: "get_email_ack";
+  payload: string | null;
+};
+
+export type EwalletMsgGetCosmosChainInfo = {
+  msg_type: "get_cosmos_chain_info";
+  payload: null;
+};
+
+export type EwalletMsgGetCosmosChainInfoAck = {
+  msg_type: "get_cosmos_chain_info_ack";
+  payload:
+    | { success: true; data: ChainInfo[] }
+    | { success: false; error: string };
+};
+
 export type EWalletMsg =
   | EWalletMsgInit
   | EWalletMsgInitAck
@@ -129,6 +141,8 @@ export type EWalletMsg =
   | EWalletMsgHideModalAck
   | EWalletMsgGetEmail
   | EWalletMsgGetEmailAck
+  | EwalletMsgGetCosmosChainInfo
+  | EwalletMsgGetCosmosChainInfoAck
   | {
       msg_type: "unknown";
       payload: string | null;
