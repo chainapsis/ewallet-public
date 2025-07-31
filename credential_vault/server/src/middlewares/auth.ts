@@ -30,12 +30,12 @@ export async function bearerTokenMiddleware(
   try {
     const result = await validateOAuthToken(idToken);
 
-    if (!result.isValid) {
-      res.status(401).json({ error: result.error || "Invalid token" });
+    if (!result.success) {
+      res.status(401).json({ error: result.err || "Invalid token" });
       return;
     }
 
-    if (!result.tokenInfo) {
+    if (!result.data) {
       res.status(500).json({
         error: "Internal server error: Token info missing after validation",
       });
@@ -43,9 +43,9 @@ export async function bearerTokenMiddleware(
     }
 
     req.user = {
-      email: result.tokenInfo.email,
-      name: result.tokenInfo.name,
-      sub: result.tokenInfo.sub,
+      email: result.data.email,
+      name: result.data.name,
+      sub: result.data.sub,
     };
 
     next();
