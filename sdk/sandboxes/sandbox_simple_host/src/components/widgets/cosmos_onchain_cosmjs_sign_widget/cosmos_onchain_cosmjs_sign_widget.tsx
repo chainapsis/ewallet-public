@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-
+import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
 import { coin } from "@cosmjs/amino";
 
 import { useKeplrEwallet } from "@/contexts/KeplrEwalletProvider";
@@ -177,8 +177,9 @@ export const CosmosOnchainCosmJsSignWidget = () => {
       throw new Error("CosmosEWallet or signer is not found");
     }
 
-    const { address, msgs } =
-      await makeMockSendTokenProtoSignDoc(cosmosEWallet);
+    const account = await cosmosEWallet.getKey(TEST_CHAIN_ID);
+    const address = account?.bech32Address;
+
     const testGasPrice = GasPrice.fromString("0.0025uosmo");
     const clientWithSigner = await SigningStargateClient.connectWithSigner(
       TEST_CHAIN_RPC,
@@ -188,10 +189,21 @@ export const CosmosOnchainCosmJsSignWidget = () => {
       },
     );
 
+    const msg = MsgSend.fromPartial({
+      fromAddress: address,
+      toAddress: address,
+      amount: [coin("10", "uosmo")],
+    });
+
     try {
       const res = await clientWithSigner.signAndBroadcast(
         address,
-        msgs,
+        [
+          {
+            typeUrl: "/cosmos.bank.v1beta1.MsgSend",
+            value: msg,
+          },
+        ],
         "auto",
       );
       setResult((prev) => ({
