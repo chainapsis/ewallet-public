@@ -8,6 +8,8 @@ import { LoginWidget } from "@/components/widgets/login_widget/login_widget";
 import { EthereumOffchainSignWidget } from "@/components/widgets/ethereum_offchain_sign_widget/ethereum_offchain_sign_widget";
 import { CosmosOnchainSignWidget } from "@/components/widgets/cosmos_onchain_sign_widget/cosmos_onchain_sign_widget";
 import { CosmosOffChainSignWidget } from "@/components/widgets/cosmos_offchain_sign_widget/cosmos_offchain_sign_widget";
+import { EthereumOnchainSignWidget } from "../widgets/ethereum_onchain_sign_widget/ethereum_onchain_sign_widget";
+import { CosmosOnchainCosmJsSignWidget } from "../widgets/cosmos_onchain_cosmjs_sign_widget/cosmos_onchain_cosmjs_sign_widget";
 
 // import { LoginWidget } from "@keplr-ewallet-demo-web/components/widgets/login_widget/login_widget";
 // import { useKeplrEwallet } from "@keplr-ewallet-demo-web/contexts/KeplrEwalletProvider";
@@ -33,6 +35,7 @@ export const PreviewPanel = () => {
         <div className={styles.col}>
           <h2>Ethereum</h2>
           <EthereumOffchainSignWidget />
+          <EthereumOnchainSignWidget />
         </div>
         {/*   <SignWidget */}
         {/*     chain="Ethereum" */}
@@ -47,6 +50,10 @@ export const PreviewPanel = () => {
           <h2>Cosmos</h2>
           <CosmosOffChainSignWidget />
           <CosmosOnchainSignWidget />
+        </div>
+        <div className={styles.col}>
+          <h2>Cosmos (cosmjs)</h2>
+          <CosmosOnchainCosmJsSignWidget />
         </div>
       </div>
     </div>

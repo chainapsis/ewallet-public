@@ -1,95 +1,39 @@
-import {
-  KeplrEWallet,
-  type EWalletMsg,
-  type MakeCosmosSigData,
-} from "@keplr-ewallet/ewallet-sdk-core";
+import { KeplrEWallet } from "@keplr-ewallet/ewallet-sdk-core";
+import { type Result } from "@keplr-ewallet/stdlib-js";
+
 import type { ChainInfo } from "@keplr-wallet/types";
 
-import {
-  enable,
-  experimentalSuggestChain,
-  getAccounts,
-  getKey,
-  getKeysSettled,
-  getOfflineSigner,
-  getOfflineSignerAuto,
-  getOfflineSignerOnlyAmino,
-  sendTx,
-  signAmino,
-  signArbitrary,
-  signDirect,
-  verifyArbitrary,
-  showModal,
-  makeSignature,
-} from "@keplr-ewallet-sdk-cosmos/api";
-
-// The chain info itself rarely changes, but just in case
-// Set cache time to 4 hours
-const CACHE_TIME_FOUR_HOUR = 1000 * 60 * 60 * 4;
+import { enable } from "./api/enable";
+import { getCosmosChainInfo } from "./api/get_cosmos_chain_info";
+import { getAccounts } from "./api/get_accounts";
+import { experimentalSuggestChain } from "./api/experimental_suggest_chain";
+import { getKey } from "./api/get_key";
+import { getOfflineSigner } from "./api/get_offline_signer";
+import { getOfflineSignerOnlyAmino } from "./api/get_offline_signer_only_amino";
+import { getOfflineSignerAuto } from "./api/get_offline_signer_auto";
+import { getKeysSettled } from "./api/get_keys_settled";
+import { sendTx } from "./api/send_tx";
+import { signAmino } from "./api/sign_amino";
+import { signDirect } from "./api/sign_direct";
+import { signArbitrary } from "./api/sign_arbitrary";
+import { verifyArbitrary } from "./api/verify_arbitrary";
+import { showModal } from "./api/show_modal";
+import { makeSignature } from "./api/make_signature";
+import { getPublicKey } from "./api/get_public_key";
 
 export class CosmosEWallet {
-  eWallet: KeplrEWallet;
-  private _cosmosChainInfoList: ChainInfo[] | null = null;
-  private _cosmosChainInfoMapByChainId: Map<string, ChainInfo> | null = null;
-  private _cacheTime: number = 0;
+  public eWallet: KeplrEWallet;
+  protected _cosmosChainInfo: ChainInfo[] | null = null;
+  protected _cacheTime: number = 0;
 
   constructor(eWallet: KeplrEWallet) {
     this.eWallet = eWallet;
   }
 
-  protected async getPublicKey(): Promise<Uint8Array> {
-    const publicKeyRes = await this.eWallet.sendMsgToIframe({
-      msg_type: "get_public_key",
-      payload: null,
-    });
-
-    if (
-      publicKeyRes.msg_type !== "get_public_key_ack" ||
-      publicKeyRes.payload === null
-    ) {
-      throw new Error("Failed to get public key");
-    }
-
-    const pubKey = publicKeyRes.payload;
-    return Buffer.from(pubKey, "hex");
-  }
-
-  protected async getCosmosChainInfoList(): Promise<ChainInfo[]> {
-    const isCacheExpired = Date.now() - this._cacheTime > CACHE_TIME_FOUR_HOUR;
-    if (
-      isCacheExpired ||
-      this._cosmosChainInfoList === null ||
-      this._cosmosChainInfoMapByChainId === null
-    ) {
-      const chainRegistryResponse: { chains: ChainInfo[] } | undefined = await (
-        await fetch("https://keplr-chain-registry.vercel.app/api/chains")
-      ).json();
-
-      if (!chainRegistryResponse) {
-        throw new Error("Failed to get chain registry response");
-      }
-
-      this._cosmosChainInfoList = chainRegistryResponse.chains;
-
-      const newMap = new Map<string, ChainInfo>();
-      for (const chainInfo of this._cosmosChainInfoList) {
-        if (
-          chainInfo.bech32Config?.bech32PrefixAccAddr &&
-          chainInfo.bech32Config?.bech32PrefixAccAddr.length > 0
-        ) {
-          newMap.set(chainInfo.bech32Config?.bech32PrefixAccAddr, chainInfo);
-        }
-      }
-
-      this._cacheTime = Date.now();
-      this._cosmosChainInfoMapByChainId = newMap;
-    }
-
-    return this._cosmosChainInfoList;
-  }
-
-  enable = enable;
-  experimentalSuggestChain = experimentalSuggestChain;
+  enable = enable.bind(this);
+  getPublicKey = getPublicKey.bind(this);
+  getCosmosChainInfo = getCosmosChainInfo.bind(this);
+  experimentalSuggestChain = experimentalSuggestChain.bind(this);
   getAccounts = getAccounts.bind(this);
   getOfflineSigner = getOfflineSigner.bind(this);
   getOfflineSignerOnlyAmino = getOfflineSignerOnlyAmino.bind(this);

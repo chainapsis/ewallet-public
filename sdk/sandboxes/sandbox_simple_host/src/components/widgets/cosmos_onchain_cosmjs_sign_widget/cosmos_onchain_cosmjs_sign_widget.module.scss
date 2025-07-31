@@ -1,0 +1,43 @@
+.sendTxButton {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  background-color: #000;
+  color: #fff;
+  cursor: pointer;
+
+  &:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.actionButtonContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.resultContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.success {
+  color: green;
+  margin: 0;
+  font-size: 14px;
+}
+
+.error {
+  color: red;
+  margin: 0;
+  font-size: 14px;
+}

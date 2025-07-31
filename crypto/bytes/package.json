@@ -2,7 +2,7 @@
   "name": "@keplr-ewallet/bytes",
   "type": "module",
   "main": "./dist/index.js",
-  "version": "0.0.3-alpha.2",
+  "version": "0.0.3-alpha.3",
   "packageManager": "yarn@4.7.0",
   "scripts": {
     "clean": "del-cli dist",

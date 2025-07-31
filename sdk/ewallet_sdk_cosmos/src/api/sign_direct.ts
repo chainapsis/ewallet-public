@@ -27,7 +27,7 @@ export async function signDirect(
       accountNumber: signDoc.accountNumber.toString(),
     });
 
-    const chainInfoList = await this.getCosmosChainInfoList();
+    const chainInfoList = await this.getCosmosChainInfo();
     const chainInfo = chainInfoList.find((info) => info.chainId === chainId);
 
     const showModalData: MakeCosmosSigData = {

@@ -1,6 +1,7 @@
-import { execSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 
 import { paths } from "../paths";
+import { expectSuccess } from "../expect";
 
 export async function publish(..._args: any[]) {
   console.info("Start publishing packages...");
@@ -13,8 +14,14 @@ It's "npm login", not "yarn npm login".
 `,
   );
 
-  execSync("yarn lerna publish from-package --loglevel verbose", {
-    cwd: paths.root,
-    stdio: "inherit",
-  });
+  const publishRet = spawnSync(
+    "yarn",
+    ["lerna", "publish", "from-package", "--loglevel", "verbose"],
+    {
+      cwd: paths.root,
+      stdio: "inherit",
+    },
+  );
+
+  expectSuccess(publishRet, "publish failed");
 }

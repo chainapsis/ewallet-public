@@ -23,7 +23,7 @@ export async function signAmino(
     const publicKey = await this.getPublicKey();
 
     const origin = this.eWallet.origin;
-    const chainInfoList = await this.getCosmosChainInfoList();
+    const chainInfoList = await this.getCosmosChainInfo();
     const chainInfo = chainInfoList.find((info) => info.chainId === chainId);
 
     const signDocWrapper = SignDocWrapper.fromAminoSignDoc(signDoc);

@@ -1,3 +1,4 @@
+import { Envs } from "@/envs";
 import {
   CosmosEWallet,
   initCosmosEWallet,
@@ -27,8 +28,12 @@ export const useAppState = create(
       },
       (set) => ({
         initKeplrSdkEth: async () => {
+          console.log("initKeplrSdkEth");
+
           const sdk = await initEthEWallet({
-            customerId: "afb0afd1-d66d-4531-981c-cbf3fb1507b9",
+            // TODO:
+            customer_id: "afb0afd1-d66d-4531-981c-cbf3fb1507b9",
+            sdk_endpoint: Envs.KEPLR_EWALLET_SDK_ENDPOINT,
           });
 
           if (sdk) {
@@ -40,8 +45,12 @@ export const useAppState = create(
           }
         },
         initKeplrSdkCosmos: async () => {
+          console.log("initKeplrSdkCosmos");
+
           const sdk = await initCosmosEWallet({
-            customerId: "afb0afd1-d66d-4531-981c-cbf3fb1507b9", // from seed data
+            // TODO:
+            customer_id: "afb0afd1-d66d-4531-981c-cbf3fb1507b9",
+            sdk_endpoint: Envs.KEPLR_EWALLET_SDK_ENDPOINT,
           });
 
           if (sdk) {

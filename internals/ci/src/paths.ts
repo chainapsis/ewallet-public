@@ -1,7 +1,9 @@
 import path from "node:path";
 
-export const paths = (function () {
+export const paths = (function() {
   const root = path.join(__dirname, "../../../");
+
+  const stdlib = path.join(__dirname, "../../../stdlib_js");
 
   const sdk_core = path.join(__dirname, "../../../sdk/ewallet_sdk_core/");
 
@@ -11,11 +13,18 @@ export const paths = (function () {
 
   const crypto_bytes = path.join(__dirname, "../../../crypto/bytes/");
 
+  const credential_vault_pg_interface = path.join(
+    __dirname,
+    "../../../credential_vault/pg_interface/",
+  );
+
   return {
     root,
+    stdlib,
     sdk_core,
     sdk_eth,
     sdk_cosmos,
     crypto_bytes,
+    credential_vault_pg_interface,
   };
 })();

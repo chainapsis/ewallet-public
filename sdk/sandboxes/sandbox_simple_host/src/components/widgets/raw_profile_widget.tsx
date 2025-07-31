@@ -1,7 +1,7 @@
 import { Widget } from "./widget_components";
-import { useKeplrEwallet } from "@keplr-ewallet-demo-web/contexts/KeplrEwalletProvider";
+// import { useKeplrEwallet } from "@keplr-ewallet-demo-web/contexts/KeplrEwalletProvider";
 
-export const RawProfileWidget: React.FC<LoginWidgetProps> = ({ }) => {
+export const RawProfileWidget: React.FC<LoginWidgetProps> = ({}) => {
   // const { eWallet, isAuthenticated, setIsAuthenticated } = useKeplrEwallet();
   // const handleGoogleSignIn = async () => {
   //   if (eWallet) {
@@ -25,4 +25,4 @@ export const RawProfileWidget: React.FC<LoginWidgetProps> = ({ }) => {
   return <Widget>raw profile</Widget>;
 };
 
-export interface LoginWidgetProps { }
+export interface LoginWidgetProps {}

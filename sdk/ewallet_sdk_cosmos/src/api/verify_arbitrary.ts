@@ -13,7 +13,7 @@ export async function verifyArbitrary(
 ): Promise<boolean> {
   try {
     // Get chain info to determine the bech32 prefix
-    const chainInfoList = await this.getCosmosChainInfoList();
+    const chainInfoList = await this.getCosmosChainInfo();
     const chainInfo = chainInfoList.find((info) => info.chainId === chainId);
 
     if (!chainInfo || !chainInfo.bech32Config?.bech32PrefixAccAddr) {

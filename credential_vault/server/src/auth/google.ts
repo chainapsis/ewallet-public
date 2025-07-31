@@ -1,3 +1,5 @@
+import type { Result } from "@keplr-ewallet/stdlib-js";
+
 // TODO: This may change later
 const GOOGLE_CLIENT_ID =
   "239646646986-8on7ql1vmbcshbjk12bdtopmto99iipm.apps.googleusercontent.com";
@@ -21,51 +23,45 @@ export interface GoogleTokenInfoResponse {
   typ: string;
 }
 
-export interface OAuthTokenValidationResult {
-  isValid: boolean;
-  tokenInfo?: GoogleTokenInfoResponse;
-  error?: string;
-}
-
 export async function validateOAuthToken(
   idToken: string,
-): Promise<OAuthTokenValidationResult> {
+): Promise<Result<GoogleTokenInfoResponse, string>> {
   try {
     const res = await fetch(
       `https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${idToken}`,
     );
     if (!res.ok) {
-      return { isValid: false, error: "Invalid token" };
+      return { success: false, err: "Invalid token" };
     }
     const tokenInfo = (await res.json()) as GoogleTokenInfoResponse;
 
     if (tokenInfo.aud !== GOOGLE_CLIENT_ID) {
-      return { isValid: false, error: "Invalid client_id" };
+      return { success: false, err: "Invalid client_id" };
     }
 
     if (
       tokenInfo.iss !== "https://accounts.google.com" &&
       tokenInfo.iss !== "https://oauth2.googleapis.com"
     ) {
-      return { isValid: false, error: "Invalid issuer" };
+      return { success: false, err: "Invalid issuer" };
     }
 
     if (tokenInfo.exp && Number(tokenInfo.exp) <= Date.now() / 1000) {
-      return { isValid: false, error: "Token expired" };
+      return { success: false, err: "Token expired" };
     }
 
     if (tokenInfo.email_verified !== "true") {
-      return { isValid: false, error: "Email not verified" };
+      return { success: false, err: "Email not verified" };
     }
 
     return {
-      isValid: true,
-      tokenInfo,
+      success: true,
+      data: tokenInfo,
     };
   } catch (error: any) {
     return {
-      isValid: false,
-      error: `Token validation failed: ${error.message}`,
+      success: false,
+      err: `Token validation failed: ${error.message}`,
     };
   }
 }

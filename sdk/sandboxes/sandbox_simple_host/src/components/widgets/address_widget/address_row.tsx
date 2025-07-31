@@ -1,5 +1,5 @@
 import React, { type ReactElement } from "react";
-import { Typography } from "@keplr-ewallet/ewallet-common-ui/typography";
+// import { Typography } from "@keplr-ewallet/ewallet-common-ui/typography";
 
 import styles from "./address_row.module.scss";
 
@@ -16,30 +16,14 @@ export const AddressRow: React.FC<AddressRowProps> = ({
   return (
     <div className={styles.container}>
       {icon}
-      <Typography tagType="span" size="xs" weight="semibold" color="secondary">
-        {label}
-      </Typography>
+      <p>{label}</p>
 
       <div className={styles.valueContainer}>
         {isLoggedIn ? (
-          <Typography
-            tagType="span"
-            size="md"
-            weight="medium"
-            color="secondary"
-          >
-            {address}
-          </Typography>
+          <p>{address}</p>
         ) : (
           <>
-            <Typography
-              tagType="span"
-              size="md"
-              weight="medium"
-              color="disabled"
-            >
-              {prefix}
-            </Typography>
+            <p>{prefix}</p>
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className={styles.dot} />
             ))}

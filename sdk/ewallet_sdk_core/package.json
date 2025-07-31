@@ -1,11 +1,11 @@
 {
   "name": "@keplr-ewallet/ewallet-sdk-core",
-  "version": "0.0.6-rc.3",
+  "version": "0.0.6-rc.9",
   "packageManager": "yarn@4.7.0",
   "type": "module",
   "scripts": {
     "clean": "del-cli dist",
-    "build": "tsc --build --force && tsc-alias"
+    "build": "yarn clean && tsc --build --force && tsc-alias"
   },
   "publishConfig": {
     "access": "public"
@@ -46,5 +46,9 @@
     "tsc-alias": "*",
     "typescript": "*"
   },
-  "gitHead": "5c82fc2b9b670d82a53e5aef0d8550537a03dccc"
+  "gitHead": "5c82fc2b9b670d82a53e5aef0d8550537a03dccc",
+  "dependencies": {
+    "@keplr-ewallet/stdlib-js": "workspace:*",
+    "@keplr-wallet/types": "^0.12.257"
+  }
 }
