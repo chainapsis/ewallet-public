@@ -42,7 +42,14 @@ export async function bearerTokenMiddleware(
       return;
     }
 
-    req.user = {
+    if (!result.data.email || !result.data.sub || !result.data.name) {
+      res.status(401).json({
+        error: "Unauthorized: Invalid token",
+      });
+      return;
+    }
+
+    res.locals.google_user = {
       email: result.data.email,
       name: result.data.name,
       sub: result.data.sub,

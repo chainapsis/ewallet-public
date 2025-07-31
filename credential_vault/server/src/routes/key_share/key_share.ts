@@ -92,20 +92,12 @@ export function setKeysharesRoutes(router: Router) {
       req: AuthenticatedRequest<RegisterKeyShareBody>,
       res: Response<EwalletApiResponse<void>>,
     ) => {
-      const user = req.user;
+      const googleUser = res.locals.google_user;
       const state = req.app.locals as any;
       const body = req.body;
 
-      if (!user?.email) {
-        return res.status(401).json({
-          success: false,
-          code: "UNAUTHORIZED",
-          msg: "Unauthorized",
-        });
-      }
-
       const registerKeyShareRes = await registerKeyShare(state.db, {
-        email: user.email,
+        email: googleUser.email,
         curve_type: body.curve_type,
         public_key: body.public_key,
         enc_share: body.enc_share,
@@ -214,19 +206,11 @@ export function setKeysharesRoutes(router: Router) {
       req: AuthenticatedRequest<GetKeyShareRequestBody>,
       res: Response<EwalletApiResponse<GetKeyShareResponse>>,
     ) => {
-      const user = req.user;
+      const googleUser = res.locals.google_user;
       const state = req.app.locals as any;
 
-      if (!user?.email) {
-        return res.status(401).json({
-          success: false,
-          code: "UNAUTHORIZED",
-          msg: "Unauthorized",
-        });
-      }
-
       const getKeyShareRes = await getKeyShare(state.db, {
-        email: user.email,
+        email: googleUser.email,
         public_key: req.body.public_key,
       });
       if (getKeyShareRes.success === false) {
