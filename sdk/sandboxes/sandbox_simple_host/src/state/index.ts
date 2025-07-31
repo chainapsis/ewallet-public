@@ -32,7 +32,7 @@ export const useAppState = create(
 
           const sdk = await initEthEWallet({
             // TODO:
-            customerId: "afb0afd1-d66d-4531-981c-cbf3fb1507b9",
+            customer_id: "afb0afd1-d66d-4531-981c-cbf3fb1507b9",
             sdk_endpoint: Envs.KEPLR_EWALLET_SDK_ENDPOINT,
           });
 
@@ -49,7 +49,7 @@ export const useAppState = create(
 
           const sdk = await initCosmosEWallet({
             // TODO:
-            customerId: "afb0afd1-d66d-4531-981c-cbf3fb1507b9",
+            customer_id: "afb0afd1-d66d-4531-981c-cbf3fb1507b9",
             sdk_endpoint: Envs.KEPLR_EWALLET_SDK_ENDPOINT,
           });
 
