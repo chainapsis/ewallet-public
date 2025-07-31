@@ -1,7 +1,9 @@
 import path from "node:path";
 
-export const paths = (function () {
+export const paths = (function() {
   const root = path.join(__dirname, "../../../");
+
+  const stdlib = path.join(__dirname, "../../../stdlib_js");
 
   const sdk_core = path.join(__dirname, "../../../sdk/ewallet_sdk_core/");
 
@@ -18,6 +20,7 @@ export const paths = (function () {
 
   return {
     root,
+    stdlib,
     sdk_core,
     sdk_eth,
     sdk_cosmos,

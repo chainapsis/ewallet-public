@@ -1,82 +1,39 @@
 import { KeplrEWallet } from "@keplr-ewallet/ewallet-sdk-core";
+import { type Result } from "@keplr-ewallet/stdlib-js";
+
 import type { ChainInfo } from "@keplr-wallet/types";
 
-import {
-  enable,
-  experimentalSuggestChain,
-  getAccounts,
-  getKey,
-  getKeysSettled,
-  getOfflineSigner,
-  getOfflineSignerAuto,
-  getOfflineSignerOnlyAmino,
-  sendTx,
-  signAmino,
-  signArbitrary,
-  signDirect,
-  verifyArbitrary,
-  showModal,
-  makeSignature,
-} from "@keplr-ewallet-sdk-cosmos/api";
-
-const CACHE_TIME = 1000 * 60 * 60 * 1;
+import { enable } from "./api/enable";
+import { getCosmosChainInfo } from "./api/get_cosmos_chain_info";
+import { getAccounts } from "./api/get_accounts";
+import { experimentalSuggestChain } from "./api/experimental_suggest_chain";
+import { getKey } from "./api/get_key";
+import { getOfflineSigner } from "./api/get_offline_signer";
+import { getOfflineSignerOnlyAmino } from "./api/get_offline_signer_only_amino";
+import { getOfflineSignerAuto } from "./api/get_offline_signer_auto";
+import { getKeysSettled } from "./api/get_keys_settled";
+import { sendTx } from "./api/send_tx";
+import { signAmino } from "./api/sign_amino";
+import { signDirect } from "./api/sign_direct";
+import { signArbitrary } from "./api/sign_arbitrary";
+import { verifyArbitrary } from "./api/verify_arbitrary";
+import { showModal } from "./api/show_modal";
+import { makeSignature } from "./api/make_signature";
+import { getPublicKey } from "./api/get_public_key";
 
 export class CosmosEWallet {
-  eWallet: KeplrEWallet;
-  private _cosmosChainInfo: ChainInfo[] | null = null;
-  private _cacheTime: number = 0;
+  public eWallet: KeplrEWallet;
+  protected _cosmosChainInfo: ChainInfo[] | null = null;
+  protected _cacheTime: number = 0;
 
   constructor(eWallet: KeplrEWallet) {
     this.eWallet = eWallet;
   }
 
-  protected async getPublicKey(): Promise<Uint8Array> {
-    try {
-      const pubKey = await this.eWallet.getPublicKey();
-      if (pubKey === null) {
-        throw new Error("Failed to get public key");
-      }
-
-      return Buffer.from(pubKey, "hex");
-    } catch (error) {
-      console.error("[cosmos] getPublicKey failed with error:", error);
-      throw error;
-    }
-  }
-
-  protected async getCosmosChainInfo(): Promise<ChainInfo[]> {
-    const isCacheExpired = Date.now() - this._cacheTime > CACHE_TIME;
-    if (isCacheExpired || this._cosmosChainInfo === null) {
-      const chainInfoRes = await this.eWallet.getCosmosChainInfo();
-
-      if (!chainInfoRes) {
-        throw new Error("Failed to get chain registry response");
-      }
-
-      if (!chainInfoRes.success) {
-        throw new Error(chainInfoRes.error);
-      }
-
-      this._cosmosChainInfo = chainInfoRes.data;
-
-      const newMap = new Map<string, ChainInfo>();
-      for (const chainInfo of this._cosmosChainInfo) {
-        if (
-          chainInfo.bech32Config?.bech32PrefixAccAddr &&
-          chainInfo.bech32Config?.bech32PrefixAccAddr.length > 0
-        ) {
-          newMap.set(chainInfo.bech32Config?.bech32PrefixAccAddr, chainInfo);
-        }
-      }
-
-      this._cacheTime = Date.now();
-    }
-
-    return this._cosmosChainInfo;
-  }
-
-  enable = enable;
-  experimentalSuggestChain = experimentalSuggestChain;
+  enable = enable.bind(this);
+  getPublicKey = getPublicKey.bind(this);
+  getCosmosChainInfo = getCosmosChainInfo.bind(this);
+  experimentalSuggestChain = experimentalSuggestChain.bind(this);
   getAccounts = getAccounts.bind(this);
   getOfflineSigner = getOfflineSigner.bind(this);
   getOfflineSignerOnlyAmino = getOfflineSignerOnlyAmino.bind(this);

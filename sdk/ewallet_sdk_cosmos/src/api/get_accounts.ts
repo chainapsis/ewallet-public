@@ -1,4 +1,5 @@
 import type { AccountData } from "@cosmjs/amino";
+import { type Result } from "@keplr-ewallet/stdlib-js";
 
 import { CosmosEWallet } from "@keplr-ewallet-sdk-cosmos/cosmos_ewallet";
 import {
@@ -8,9 +9,7 @@ import {
   getBech32Address,
 } from "@keplr-ewallet-sdk-cosmos/utils/address";
 
-export async function getAccounts(
-  this: CosmosEWallet,
-): Promise<readonly AccountData[]> {
+export async function getAccounts(this: CosmosEWallet): Promise<AccountData[]> {
   try {
     const pubKey = await this.getPublicKey();
     const chainInfoList = await this.getCosmosChainInfo();
@@ -18,7 +17,9 @@ export async function getAccounts(
     const accounts: AccountData[] = [];
     for (const chainInfo of chainInfoList) {
       const prefix = chainInfo.bech32Config?.bech32PrefixAccAddr;
-      if (!prefix) continue;
+      if (!prefix) {
+        continue;
+      }
 
       const hasEthereumSupport = isEthereumCompatible(chainInfo);
       const address = hasEthereumSupport
@@ -34,8 +35,7 @@ export async function getAccounts(
     }
 
     return accounts;
-  } catch (error) {
-    console.error("Failed to get accounts:", error);
-    return [];
+  } catch (error: any) {
+    throw error;
   }
 }
