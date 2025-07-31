@@ -1,6 +1,7 @@
 import { spawnSync } from "node:child_process";
 
 import { paths } from "../paths";
+import { expectSuccess } from "../expect";
 
 export async function dbMigrate(...args: any[]) {
   console.log(
@@ -9,8 +10,10 @@ export async function dbMigrate(...args: any[]) {
     paths.credential_vault_pg_interface,
   );
 
-  spawnSync("yarn", ["run", "migrate"], {
+  const dbMigrateRet = spawnSync("yarn", ["run", "migrate"], {
     cwd: paths.credential_vault_pg_interface,
     stdio: "inherit",
   });
+
+  expectSuccess(dbMigrateRet, "db migrate failed");
 }
