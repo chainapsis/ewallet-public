@@ -9,9 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@cosmjs/stargate": "^0.34.0",
     "@keplr-ewallet/ewallet-sdk-core": "workspace:*",
     "@keplr-ewallet/ewallet-sdk-cosmos": "workspace:*",
     "@keplr-ewallet/ewallet-sdk-eth": "workspace:*",
+    "@keplr-wallet/cosmos": "^0.12.253",
     "classnames": "^2.5.1",
     "long": "^5.3.2",
     "next": "^15.3.5",
