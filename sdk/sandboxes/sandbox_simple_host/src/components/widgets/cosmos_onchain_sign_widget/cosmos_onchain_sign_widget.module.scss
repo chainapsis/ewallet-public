@@ -41,7 +41,7 @@
   gap: 16px;
 
   .resultItem {
-    width: 100%;
+    max-width: 360px;
     padding: 8px 16px;
     border: 1px solid #e5e7eb;
     border-radius: 6px;
