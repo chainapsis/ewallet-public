@@ -9,6 +9,14 @@ export async function version(..._args: any[]) {
   console.info("We will build the packages here just to make sure");
   doBuildPkgs();
 
+  console.info(
+    "Fetching the Git repository at 'origin' to sync with the local",
+  );
+  execSync("git fetch origin", {
+    cwd: paths.root,
+    stdio: "inherit",
+  });
+
   execSync("yarn lerna version --no-private", {
     cwd: paths.root,
     stdio: "inherit",
