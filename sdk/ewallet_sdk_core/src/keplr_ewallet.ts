@@ -5,6 +5,7 @@ import { signOut } from "./api/sign_out";
 import { getPublicKey } from "./api/get_public_key";
 import { getEmail } from "./api/get_email";
 import { hideModal } from "./api/hide_modal";
+import { getCosmosChainInfo } from "./api/get_cosmos_chain_info";
 
 export class KeplrEWallet {
   customerId: string; // CHECK: would be better to name it appId?
@@ -30,4 +31,5 @@ export class KeplrEWallet {
   signOut = signOut.bind(this);
   getPublicKey = getPublicKey.bind(this);
   getEmail = getEmail.bind(this);
+  getCosmosChainInfo = getCosmosChainInfo.bind(this);
 }
