@@ -38,20 +38,17 @@ export class CosmosEWallet {
   }
 
   protected async getPublicKey(): Promise<Uint8Array> {
-    const publicKeyRes = await this.eWallet.sendMsgToIframe({
-      msg_type: "get_public_key",
-      payload: null,
-    });
+    try {
+      const pubKey = await this.eWallet.getPublicKey();
+      if (pubKey === null) {
+        throw new Error("Failed to get public key");
+      }
 
-    if (
-      publicKeyRes.msg_type !== "get_public_key_ack" ||
-      publicKeyRes.payload === null
-    ) {
-      throw new Error("Failed to get public key");
+      return Buffer.from(pubKey, "hex");
+    } catch (error) {
+      console.error("[cosmos] getPublicKey failed with error:", error);
+      throw error;
     }
-
-    const pubKey = publicKeyRes.payload;
-    return Buffer.from(pubKey, "hex");
   }
 
   protected async getCosmosChainInfoList(): Promise<ChainInfo[]> {
