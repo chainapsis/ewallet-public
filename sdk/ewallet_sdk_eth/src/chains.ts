@@ -13,6 +13,8 @@ import {
   unichain,
 } from "viem/chains";
 
+export const DEFAULT_CHAIN_ID = 1;
+
 // TODO: add chain icons and other chain info (op-stack, zksync, etc)
 export const SUPPORTED_CHAINS = [
   mainnet,

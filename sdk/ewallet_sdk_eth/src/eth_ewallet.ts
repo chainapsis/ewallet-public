@@ -1,7 +1,7 @@
 import type { KeplrEWallet } from "@keplr-ewallet/ewallet-sdk-core";
-import type { Address, Chain, Hex } from "viem";
+import type { Address, Hex } from "viem";
 
-import type { EIP1193Provider } from "@keplr-ewallet-sdk-eth/provider";
+import type { EWalletEIP1193Provider } from "@keplr-ewallet-sdk-eth/provider";
 import {
   getPublicKey,
   makeSignature,
@@ -11,23 +11,18 @@ import {
   toViemAccount,
   getAddress,
 } from "@keplr-ewallet-sdk-eth/api";
-import { SUPPORTED_CHAINS } from "@keplr-ewallet-sdk-eth/chains";
 
 export class EthEWallet {
   readonly eWallet: KeplrEWallet;
-  private _provider: EIP1193Provider | null;
+  private _provider: EWalletEIP1193Provider | null;
   private _publicKey: Hex | null;
   private _address: Address | null;
-  private _activeChainId: number;
-  private readonly _chains: Chain[];
 
   constructor(eWallet: KeplrEWallet) {
     this.eWallet = eWallet;
     this._provider = null;
     this._publicKey = null;
     this._address = null;
-    this._activeChainId = 1;
-    this._chains = SUPPORTED_CHAINS;
   }
 
   get type(): "ethereum" {
@@ -35,7 +30,11 @@ export class EthEWallet {
   }
 
   get chainId(): `eip155:${number}` {
-    return `eip155:${this._activeChainId}`;
+    if (!this._provider) {
+      return `eip155:${1}`;
+    }
+
+    return `eip155:${parseInt(this._provider.chainId, 16)}`;
   }
 
   get publicKey(): Hex | null {
@@ -54,28 +53,12 @@ export class EthEWallet {
     this._address = address;
   }
 
-  get provider(): EIP1193Provider | null {
+  protected get provider(): EWalletEIP1193Provider | null {
     return this._provider;
   }
 
-  protected set provider(provider: EIP1193Provider | null) {
+  protected set provider(provider: EWalletEIP1193Provider | null) {
     this._provider = provider;
-  }
-
-  get activeChainId(): number {
-    return this._activeChainId;
-  }
-
-  protected set activeChainId(chainId: number) {
-    this._activeChainId = chainId;
-  }
-
-  get activeChain(): Chain | undefined {
-    return this._chains.find((chain) => chain.id === this._activeChainId);
-  }
-
-  get chains() {
-    return this._chains;
   }
 
   getEthereumProvider = getEthereumProvider.bind(this);

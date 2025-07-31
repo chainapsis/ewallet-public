@@ -3,13 +3,17 @@ import { v4 as uuidv4 } from "uuid";
 
 import {
   initEWalletEIP1193Provider,
-  type EIP1193Provider,
+  type EWalletEIP1193Provider,
 } from "@keplr-ewallet-sdk-eth/provider";
 import type { EthEWallet } from "@keplr-ewallet-sdk-eth/eth_ewallet";
+import {
+  DEFAULT_CHAIN_ID,
+  SUPPORTED_CHAINS,
+} from "@keplr-ewallet-sdk-eth/chains";
 
 export async function getEthereumProvider(
   this: EthEWallet,
-): Promise<EIP1193Provider> {
+): Promise<EWalletEIP1193Provider> {
   if (this.provider !== null) {
     return this.provider;
   }
@@ -17,13 +21,12 @@ export async function getEthereumProvider(
   const address = await this.getAddress();
 
   const activeChain =
-    this.chains.find(
-      (chain) => chain.id === this.activeChainId || chain.id === 1,
-    ) ?? this.chains[0];
+    SUPPORTED_CHAINS.find((chain) => chain.id === DEFAULT_CHAIN_ID) ??
+    SUPPORTED_CHAINS[0];
 
   const addEthereumChainParameters = [
     activeChain,
-    ...this.chains.filter((chain) => chain.id !== this.activeChainId),
+    ...SUPPORTED_CHAINS.filter((chain) => chain.id !== DEFAULT_CHAIN_ID),
   ].map((chain) => ({
     chainId: toHex(chain.id),
     chainName: chain.name,
