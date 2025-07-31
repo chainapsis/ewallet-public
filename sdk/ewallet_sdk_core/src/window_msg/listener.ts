@@ -3,9 +3,9 @@ import type { EWalletMsg } from "@keplr-ewallet-sdk-core/types";
 // Only used for "init" message which is triggered by the child.
 // After initialization, message communication is only triggered
 // by parent window and child replies on the dedicated channel
-export async function registerMsgListener(): Promise<boolean> {
+export function registerMsgListener(): Promise<boolean> {
   if (window.__keplr_ewallet_ev) {
-    return false;
+    return Promise.resolve(false);
   }
 
   // Callback ref to remember
