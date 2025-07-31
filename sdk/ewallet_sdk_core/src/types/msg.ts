@@ -110,12 +110,12 @@ export type EWalletMsgGetEmailAck = {
   payload: string | null;
 };
 
-export type EwalletMsgGetCosmosChainInfo = {
+export type EWalletMsgGetCosmosChainInfo = {
   msg_type: "get_cosmos_chain_info";
   payload: null;
 };
 
-export type EwalletMsgGetCosmosChainInfoAck = {
+export type EWalletMsgGetCosmosChainInfoAck = {
   msg_type: "get_cosmos_chain_info_ack";
   payload:
     | { success: true; data: ChainInfo[] }
@@ -141,8 +141,8 @@ export type EWalletMsg =
   | EWalletMsgHideModalAck
   | EWalletMsgGetEmail
   | EWalletMsgGetEmailAck
-  | EwalletMsgGetCosmosChainInfo
-  | EwalletMsgGetCosmosChainInfoAck
+  | EWalletMsgGetCosmosChainInfo
+  | EWalletMsgGetCosmosChainInfoAck
   | {
       msg_type: "unknown";
       payload: string | null;
