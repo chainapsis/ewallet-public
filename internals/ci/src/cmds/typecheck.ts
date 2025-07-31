@@ -3,7 +3,12 @@ import { spawnSync } from "node:child_process";
 import { paths } from "../paths";
 
 export async function typeCheck(..._args: any[]) {
-  const pkgPaths = [paths.sdk_core, paths.sdk_cosmos, paths.sdk_eth];
+  const pkgPaths = [
+    paths.sdk_core,
+    paths.sdk_cosmos,
+    paths.sdk_eth,
+    paths.sandbox_simple_host,
+  ];
 
   console.info("Type checking, pkgPaths: %j", pkgPaths);
 

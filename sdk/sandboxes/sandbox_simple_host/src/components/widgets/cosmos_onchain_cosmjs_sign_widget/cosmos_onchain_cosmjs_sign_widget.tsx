@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react";
 import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
 import { coin } from "@cosmjs/amino";
 
-import { useKeplrEwallet } from "@/contexts/KeplrEwalletProvider";
 import { GasPrice, SigningStargateClient } from "@cosmjs/stargate";
 import {
   makeMockSendTokenAminoSignDoc,
   makeMockSendTokenProtoSignDoc,
 } from "@/utils/cosmos";
 import styles from "./cosmos_onchain_cosmjs_sign_widget.module.scss";
+import { useKeplrEwallet } from "@/components/keplr_ewallet_provider/use_keplr_ewallet";
 
 const TEST_CHAIN_ID = "osmosis-1";
 const TEST_CHAIN_RPC = "https://osmosis-rpc.publicnode.com:443";

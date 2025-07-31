@@ -11,6 +11,11 @@ export const paths = (function() {
 
   const sdk_cosmos = path.join(__dirname, "../../../sdk/ewallet_sdk_cosmos/");
 
+  const sandbox_simple_host = path.join(
+    __dirname,
+    "../../../sdk/sandboxes/sandbox_simple_host/",
+  );
+
   const crypto_bytes = path.join(__dirname, "../../../crypto/bytes/");
 
   const credential_vault_pg_interface = path.join(
@@ -26,5 +31,6 @@ export const paths = (function() {
     sdk_cosmos,
     crypto_bytes,
     credential_vault_pg_interface,
+    sandbox_simple_host,
   };
 })();

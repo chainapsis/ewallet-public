@@ -4,13 +4,13 @@ import { type AminoSignResponse } from "@cosmjs/amino";
 
 import { TxRaw } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 
-import { useKeplrEwallet } from "@/contexts/KeplrEwalletProvider";
 import { SignWidget } from "@/components/widgets/sign_widget/sign_widget";
 import styles from "./cosmos_onchain_sign_widget.module.scss";
 import {
   makeMockSendTokenAminoSignDoc,
   makeMockSendTokenProtoSignDoc,
 } from "@/utils/cosmos";
+import { useKeplrEwallet } from "@/components/keplr_ewallet_provider/use_keplr_ewallet";
 
 const TEST_CHAIN_ID = "osmosis-1";
 const TEST_OSMOSIS_CHAIN_REST = "https://osmosis-rest.publicnode.com";
