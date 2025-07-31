@@ -1,5 +1,6 @@
-import type { ModalResponse, ShowModalPayload } from "./modal";
+import type { ChainInfo } from "@keplr-wallet/types";
 
+import type { ModalResponse, ShowModalPayload } from "./modal";
 import type {
   EWalletMakeSignaturePayload,
   EWalletMakeSignatureAckPayload,
@@ -32,7 +33,7 @@ export type EWalletMsgGetEmailAck = {
 
 export type EWalletMsgSetOAuthNonce = {
   msg_type: "set_oauth_nonce";
-  payload: any;
+  payload: string;
 };
 
 export type EWalletMsgSetOAuthNonceAck = {
@@ -66,12 +67,12 @@ export type EWalletMsgOAuthSignInAck = {
 
 export type EWalletMsgSignOut = {
   msg_type: "sign_out";
-  payload: any;
+  payload: null;
 };
 
 export type EWalletMsgSignOutAck = {
   msg_type: "sign_out_ack";
-  payload: any;
+  payload: null;
 };
 
 export type EWalletMsgShowModal = {
@@ -86,12 +87,12 @@ export type EWalletMsgShowModalAck = {
 
 export type EWalletMsgHideModal = {
   msg_type: "hide_modal";
-  payload: any;
+  payload: null;
 };
 
 export type EWalletMsgHideModalAck = {
   msg_type: "hide_modal_ack";
-  payload: any;
+  payload: null;
 };
 
 export type EWalletMsgInit = {
