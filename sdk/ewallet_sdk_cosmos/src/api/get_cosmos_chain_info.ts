@@ -11,6 +11,7 @@ export async function getCosmosChainInfo(
   const isCacheExpired = Date.now() - this._cacheTime > CACHE_TIME;
 
   if (isCacheExpired || this._cosmosChainInfo === null) {
+    // TODO:@dan what's the use?
     const pubKey = await this.getPublicKey();
     const chainInfoRes = await fetchCosmosChainInfo();
     if (!chainInfoRes) {
@@ -23,6 +24,7 @@ export async function getCosmosChainInfo(
 
     this._cosmosChainInfo = chainInfoRes.data;
 
+    // TODO:@dan what's the use?
     const newMap = new Map<string, ChainInfo>();
     for (const chainInfo of this._cosmosChainInfo) {
       if (
