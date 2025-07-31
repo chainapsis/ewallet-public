@@ -6,4 +6,8 @@ export function expectSuccess(ret: SpawnSyncReturns<ArrayBuffer>, msg: string) {
 
     throw ret.error;
   }
+
+  if (ret.status !== 0) {
+    throw new Error(`Command didn't exit with code 0, msg: ${msg}`);
+  }
 }

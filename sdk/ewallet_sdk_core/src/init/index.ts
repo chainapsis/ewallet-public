@@ -29,7 +29,7 @@ export async function initKeplrEwalletCore(
       };
     }
 
-    console.info("Keplr ewallet is already initialized");
+    console.info("Keplr Ewallet is already initialized");
     return { success: true, data: window.__keplr_ewallet };
   }
 
@@ -99,9 +99,7 @@ async function checkURL(url?: string): Promise<Result<string, string>> {
   try {
     const _url = url ?? SDK_ENDPOINT;
 
-    console.log(123123);
     const response = await fetch(_url, { mode: "no-cors" });
-    console.log(123123221);
     if (!response.ok) {
       return { success: true, data: _url };
     } else {
