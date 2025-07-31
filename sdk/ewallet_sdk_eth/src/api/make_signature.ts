@@ -6,6 +6,7 @@ import type {
   MakeEthereumSigData,
 } from "@keplr-ewallet/ewallet-sdk-core";
 import { type Signature, serializeSignature, serializeTransaction } from "viem";
+import { v4 as uuidv4 } from "uuid";
 
 import type {
   EthSignMethod,
@@ -21,7 +22,6 @@ import {
   parseTypedDataDefinition,
 } from "@keplr-ewallet-sdk-eth/utils";
 import type { EthEWallet } from "@keplr-ewallet-sdk-eth/eth_ewallet";
-import { SUPPORTED_OP_STACK_CHAINS } from "@keplr-ewallet-sdk-eth/chains";
 
 const signTypeConfig: Record<
   EthSignMethod,
@@ -114,7 +114,7 @@ const signTypeConfig: Record<
       const payloadData = data.payload.data;
 
       const typedData = parseTypedDataDefinition(
-        payloadData.serializedTypedData,
+        payloadData.serialized_typed_data,
       );
 
       return hashEthereumTypedData(typedData);
@@ -204,9 +204,7 @@ export async function makeSignature<M extends EthSignMethod>(
     block_explorer_url: activeChain.blockExplorers?.default.url,
   };
 
-  const estimateL1Fee = SUPPORTED_OP_STACK_CHAINS.some(
-    (chain) => chain.id === activeChain.id,
-  );
+  const requestId = uuidv4();
 
   switch (parameters.type) {
     case "sign_transaction": {
@@ -217,10 +215,9 @@ export async function makeSignature<M extends EthSignMethod>(
           chain_info: chainInfo,
           origin,
           signer: parameters.data.address,
+          request_id: requestId,
           data: {
             transaction: parameters.data.transaction,
-            blockTime: activeChain.blockTime,
-            estimateL1Fee,
           },
         },
       };
@@ -240,6 +237,7 @@ export async function makeSignature<M extends EthSignMethod>(
           chain_info: chainInfo,
           origin,
           signer: parameters.data.address,
+          request_id: requestId,
           data: {
             message: parameters.data.message,
           },
@@ -261,8 +259,10 @@ export async function makeSignature<M extends EthSignMethod>(
           chain_info: chainInfo,
           origin,
           signer: parameters.data.address,
+          request_id: requestId,
           data: {
-            serializedTypedData: parameters.data.serializedTypedData,
+            version: "4",
+            serialized_typed_data: parameters.data.serializedTypedData,
           },
         },
       };
