@@ -1,7 +1,8 @@
-import { execSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 
 import { paths } from "../paths";
 import { doBuildPkgs } from "./build_pkgs";
+import { expectSuccess } from "../expect";
 
 export async function version(..._args: any[]) {
   console.info("Start versioning packages...");
@@ -12,12 +13,13 @@ export async function version(..._args: any[]) {
   console.info(
     "Fetching the Git repository at 'origin' to sync with the local",
   );
-  execSync("git fetch origin", {
+  const fetchRet = spawnSync("git", ["fetch", "origin"], {
     cwd: paths.root,
     stdio: "inherit",
   });
+  expectSuccess(fetchRet, "publish failed");
 
-  execSync("yarn lerna version --no-private", {
+  spawnSync("yarn", ["lerna", "version", "--no-private"], {
     cwd: paths.root,
     stdio: "inherit",
   });
