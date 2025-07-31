@@ -52,7 +52,7 @@ export async function initKeplrEwalletCore(
   // Wait till the "init" message is sent from the being-loaded iframe document.
   await registering;
 
-  const ewalletCore = new KeplrEWallet(args.customerId, iframe, url);
+  const ewalletCore = new KeplrEWallet(args.customer_id, iframe, url);
 
   window.__keplr_ewallet = ewalletCore;
 
