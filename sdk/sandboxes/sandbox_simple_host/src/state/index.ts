@@ -28,6 +28,7 @@ export const useAppState = create(
       (set) => ({
         initKeplrSdkEth: async () => {
           const sdk = await initEthEWallet({
+            // TODO:
             customerId: "afb0afd1-d66d-4531-981c-cbf3fb1507b9",
           });
 
@@ -41,7 +42,8 @@ export const useAppState = create(
         },
         initKeplrSdkCosmos: async () => {
           const sdk = await initCosmosEWallet({
-            customerId: "afb0afd1-d66d-4531-981c-cbf3fb1507b9", // from seed data
+            // TODO:
+            customerId: "afb0afd1-d66d-4531-981c-cbf3fb1507b9",
           });
 
           if (sdk) {

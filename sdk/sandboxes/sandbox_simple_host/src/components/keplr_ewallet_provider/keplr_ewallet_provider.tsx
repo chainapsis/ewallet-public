@@ -11,6 +11,8 @@ export const KeplrEWalletProvider: React.FC<PropsWithChildren> = ({
 
   useEffect(() => {
     async function fn() {
+      console.log("Start initizializing");
+
       try {
         const isCosmosReady = await appState.initKeplrSdkCosmos();
 
