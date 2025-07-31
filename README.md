@@ -2,8 +2,7 @@
 
 TBD
 
-## Build SDK
+## Build and Run
 
-```
-yarn ci build_sdk
-```
+See the scripts defined at ["./internals/ci"] for more details.
+...
