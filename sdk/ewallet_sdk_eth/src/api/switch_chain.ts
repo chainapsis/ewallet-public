@@ -7,15 +7,8 @@ export async function switchChain(
   chainId: Hex | number,
 ): Promise<void> {
   const provider = await this.getEthereumProvider();
-
   await provider.request({
     method: "wallet_switchEthereumChain",
     params: [{ chainId: toHex(chainId) }],
   });
-
-  if (typeof chainId === "string") {
-    this.activeChainId = parseInt(chainId, 16);
-  } else {
-    this.activeChainId = chainId;
-  }
 }
