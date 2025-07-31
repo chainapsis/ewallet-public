@@ -12,10 +12,9 @@ const KEPLR_EWALLET_ELEM_ID = "keplr-ewallet";
 export async function initKeplrEwalletCore(
   args: KeplrEwalletInitArgs,
 ): Promise<Result<KeplrEWallet, string>> {
-  console.info("init Keplr Ewallet core, args: %j", args);
+  console.info("Init Keplr Ewallet core, args: %j", args);
 
   if (window === undefined) {
-    // TODO: @elden
     return {
       success: false,
       err: "Keplr eWallet can only be initialized in the browser",
