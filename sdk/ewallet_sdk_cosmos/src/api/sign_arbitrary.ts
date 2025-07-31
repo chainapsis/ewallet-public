@@ -20,7 +20,7 @@ export async function signArbitrary(
     const signDocHash = sha256(serializeSignDoc(signDoc));
     const origin = this.eWallet.origin;
 
-    const chainInfoList = await this.getCosmosChainInfoList();
+    const chainInfoList = await this.getCosmosChainInfo();
     const chainInfo = chainInfoList.find((info) => info.chainId === chainId);
 
     const showModalMsg: MakeCosmosSigData = {

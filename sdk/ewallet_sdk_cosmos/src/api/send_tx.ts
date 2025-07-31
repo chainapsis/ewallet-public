@@ -14,7 +14,7 @@ export async function sendTx(
     onFulfill?: (tx: any) => void;
   } = {},
 ): Promise<Uint8Array> {
-  const chainInfoList = await this.getCosmosChainInfoList();
+  const chainInfoList = await this.getCosmosChainInfo();
   const chainInfo = chainInfoList.find((info) => info.chainId === chainId);
 
   if (!chainInfo) {

@@ -13,7 +13,7 @@ export async function getAccounts(
 ): Promise<readonly AccountData[]> {
   try {
     const pubKey = await this.getPublicKey();
-    const chainInfoList = await this.getCosmosChainInfoList();
+    const chainInfoList = await this.getCosmosChainInfo();
 
     const accounts: AccountData[] = [];
     for (const chainInfo of chainInfoList) {

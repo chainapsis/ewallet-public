@@ -13,7 +13,7 @@ export async function getKey(
   chainId: string,
 ): Promise<Key> {
   const pubKey = await this.getPublicKey();
-  const chainInfoList = await this.getCosmosChainInfoList();
+  const chainInfoList = await this.getCosmosChainInfo();
   const chainInfo = chainInfoList.find(
     (chainInfo) => chainInfo.chainId === chainId,
   );

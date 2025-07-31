@@ -1,8 +1,4 @@
-import {
-  KeplrEWallet,
-  type EWalletMsg,
-  type MakeCosmosSigData,
-} from "@keplr-ewallet/ewallet-sdk-core";
+import { KeplrEWallet } from "@keplr-ewallet/ewallet-sdk-core";
 import type { ChainInfo } from "@keplr-wallet/types";
 
 import {
@@ -23,14 +19,11 @@ import {
   makeSignature,
 } from "@keplr-ewallet-sdk-cosmos/api";
 
-// The chain info itself rarely changes, but just in case
-// Set cache time to 4 hours
-const CACHE_TIME_FOUR_HOUR = 1000 * 60 * 60 * 4;
+const CACHE_TIME = 1000 * 60 * 60 * 1;
 
 export class CosmosEWallet {
   eWallet: KeplrEWallet;
-  private _cosmosChainInfoList: ChainInfo[] | null = null;
-  private _cosmosChainInfoMapByChainId: Map<string, ChainInfo> | null = null;
+  private _cosmosChainInfo: ChainInfo[] | null = null;
   private _cacheTime: number = 0;
 
   constructor(eWallet: KeplrEWallet) {
@@ -51,25 +44,23 @@ export class CosmosEWallet {
     }
   }
 
-  protected async getCosmosChainInfoList(): Promise<ChainInfo[]> {
-    const isCacheExpired = Date.now() - this._cacheTime > CACHE_TIME_FOUR_HOUR;
-    if (
-      isCacheExpired ||
-      this._cosmosChainInfoList === null ||
-      this._cosmosChainInfoMapByChainId === null
-    ) {
-      const chainRegistryResponse: { chains: ChainInfo[] } | undefined = await (
-        await fetch("https://keplr-chain-registry.vercel.app/api/chains")
-      ).json();
+  protected async getCosmosChainInfo(): Promise<ChainInfo[]> {
+    const isCacheExpired = Date.now() - this._cacheTime > CACHE_TIME;
+    if (isCacheExpired || this._cosmosChainInfo === null) {
+      const chainInfoRes = await this.eWallet.getCosmosChainInfo();
 
-      if (!chainRegistryResponse) {
+      if (!chainInfoRes) {
         throw new Error("Failed to get chain registry response");
       }
 
-      this._cosmosChainInfoList = chainRegistryResponse.chains;
+      if (!chainInfoRes.success) {
+        throw new Error(chainInfoRes.error);
+      }
+
+      this._cosmosChainInfo = chainInfoRes.data;
 
       const newMap = new Map<string, ChainInfo>();
-      for (const chainInfo of this._cosmosChainInfoList) {
+      for (const chainInfo of this._cosmosChainInfo) {
         if (
           chainInfo.bech32Config?.bech32PrefixAccAddr &&
           chainInfo.bech32Config?.bech32PrefixAccAddr.length > 0
@@ -79,10 +70,9 @@ export class CosmosEWallet {
       }
 
       this._cacheTime = Date.now();
-      this._cosmosChainInfoMapByChainId = newMap;
     }
 
-    return this._cosmosChainInfoList;
+    return this._cosmosChainInfo;
   }
 
   enable = enable;
