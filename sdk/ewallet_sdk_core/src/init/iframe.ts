@@ -32,6 +32,11 @@ export function setupIframeElement(
   iframe.style.overflow = "hidden";
   iframe.style.zIndex = "1000000";
 
+  iframe.setAttribute(
+    "sandbox",
+    "allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox",
+  );
+
   // attach
   bodyEl.appendChild(iframe);
 
