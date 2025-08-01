@@ -11,6 +11,7 @@ export async function initKeplrEwalletCore(
   args: KeplrEwalletInitArgs,
 ): Promise<Result<KeplrEWallet, string>> {
   console.info("[keplr] init");
+  console.info("[keplr] sdk_endpoint: %s", args.sdk_endpoint);
 
   if (window === undefined) {
     console.error("[keplr] EWallet can only be initialized in the browser");
