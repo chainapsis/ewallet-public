@@ -188,6 +188,11 @@ const SendTxButton = ({
       }
 
       const data = await res.json();
+
+      if (data.code !== 0) {
+        throw new Error(data.tx_response.raw_log);
+      }
+
       return data;
     },
     onError: (error) => {
