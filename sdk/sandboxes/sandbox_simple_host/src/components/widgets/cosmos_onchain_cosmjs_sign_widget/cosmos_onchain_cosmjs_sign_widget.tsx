@@ -1,37 +1,42 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
 import { coin } from "@cosmjs/amino";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { GasPrice, SigningStargateClient } from "@cosmjs/stargate";
-import {
-  makeMockSendTokenAminoSignDoc,
-  makeMockSendTokenProtoSignDoc,
-} from "@/utils/cosmos";
+import { makeMockSendTokenAminoSignDoc } from "@/utils/cosmos";
 import styles from "./cosmos_onchain_cosmjs_sign_widget.module.scss";
 import { useKeplrEwallet } from "@/components/keplr_ewallet_provider/use_keplr_ewallet";
 
 const TEST_CHAIN_ID = "osmosis-1";
 const TEST_CHAIN_RPC = "https://osmosis-rpc.publicnode.com:443";
 
+interface AccountInfo {
+  address: string;
+  accountNumber?: number;
+}
+
 const useGetCosmosAccountInfo = () => {
   const { cosmosEWallet } = useKeplrEwallet();
-  const [accountInfo, setAccountInfo] = useState<{
-    address: string;
-    accountNumber?: number;
-    sequence?: string;
-  } | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const signer = cosmosEWallet?.getOfflineSigner(TEST_CHAIN_ID);
   const aminoSigner = cosmosEWallet?.getOfflineSignerOnlyAmino(TEST_CHAIN_ID);
 
-  useEffect(() => {
-    (async () => {
-      setIsLoading(true);
-      const key = await cosmosEWallet?.getKey(TEST_CHAIN_ID);
+  const {
+    data: accountInfo,
+    isLoading,
+    error,
+  } = useQuery<AccountInfo | null>({
+    queryKey: ["cosmosAccountInfo", TEST_CHAIN_ID, cosmosEWallet],
+    queryFn: async (): Promise<AccountInfo | null> => {
+      if (!cosmosEWallet || !signer) {
+        return null;
+      }
+
+      const key = await cosmosEWallet.getKey(TEST_CHAIN_ID);
       const address = key?.bech32Address;
 
-      if (!address || !key || !signer) {
-        return;
+      if (!address || !key) {
+        return null;
       }
 
       const client = await SigningStargateClient.connectWithSigner(
@@ -40,112 +45,68 @@ const useGetCosmosAccountInfo = () => {
       );
       const account = await client.getAccount(address);
 
-      setAccountInfo({
+      return {
         address,
         accountNumber: account?.accountNumber,
-        sequence: account?.sequence?.toString(),
-      });
-      setIsLoading(false);
-    })();
+      };
+    },
+    enabled: !!cosmosEWallet && !!signer,
+    staleTime: 1000 * 60 * 60, // 1 hour
+  });
 
-    return () => {
-      setAccountInfo(null);
-    };
-  }, [cosmosEWallet]);
-
-  return { accountInfo, isLoading, signer, aminoSigner };
+  return { accountInfo, isLoading, error, signer, aminoSigner };
 };
 
 export const CosmosOnchainCosmJsSignWidget = () => {
   const { cosmosEWallet } = useKeplrEwallet();
   const { accountInfo, isLoading, signer, aminoSigner } =
     useGetCosmosAccountInfo();
-  const [result, setResult] = useState<{
-    sendTokens: {
-      isSuccess: boolean;
-      successTxHash?: string;
-      error?: string;
-    };
-    signAndBroadcastAmino: {
-      isSuccess: boolean;
-      successTxHash?: string;
-      error?: string;
-    };
-    signAndBroadcastDirect: {
-      isSuccess: boolean;
-      successTxHash?: string;
-      error?: string;
-    };
-  }>({
-    sendTokens: {
-      isSuccess: false,
-    },
-    signAndBroadcastAmino: {
-      isSuccess: false,
-    },
-    signAndBroadcastDirect: {
-      isSuccess: false,
-    },
-  });
 
-  const sendToken = async () => {
-    const testGasPrice = GasPrice.fromString("0.0025uosmo");
-    const testSendToken = coin("10", "uosmo");
+  const sendTokenMutation = useMutation({
+    mutationFn: async (): Promise<string> => {
+      const testGasPrice = GasPrice.fromString("0.0025uosmo");
+      const testSendToken = coin("10", "uosmo");
 
-    if (!accountInfo || !signer) {
-      throw new Error("Account info or signer is not found");
-    }
+      if (!accountInfo || !signer) {
+        throw new Error("Account info or signer is not found");
+      }
 
-    const clientWithSigner = await SigningStargateClient.connectWithSigner(
-      TEST_CHAIN_RPC,
-      signer,
-      {
-        gasPrice: testGasPrice,
-      },
-    );
+      const clientWithSigner = await SigningStargateClient.connectWithSigner(
+        TEST_CHAIN_RPC,
+        signer,
+        {
+          gasPrice: testGasPrice,
+        },
+      );
 
-    try {
       const res = await clientWithSigner.sendTokens(
         accountInfo.address,
         accountInfo.address,
         [testSendToken],
         "auto",
       );
-      setResult((prev) => ({
-        ...prev,
-        sendTokens: {
-          isSuccess: true,
-          successTxHash: res.transactionHash,
+
+      return res.transactionHash;
+    },
+  });
+
+  const sendTokenAminoMutation = useMutation({
+    mutationFn: async (): Promise<string> => {
+      if (!cosmosEWallet || !aminoSigner) {
+        throw new Error("CosmosEWallet or aminoSigner is not found");
+      }
+
+      const { address, msgs } =
+        await makeMockSendTokenAminoSignDoc(cosmosEWallet);
+      const testGasPrice = GasPrice.fromString("0.0025uosmo");
+      const clientWithSigner = await SigningStargateClient.connectWithSigner(
+        TEST_CHAIN_RPC,
+        aminoSigner,
+        {
+          gasPrice: testGasPrice,
         },
-      }));
-    } catch (error) {
-      setResult((prev) => ({
-        ...prev,
-        sendTokens: {
-          isSuccess: false,
-          error: error instanceof Error ? error.message : "Unknown error",
-        },
-      }));
-    }
-  };
+      );
 
-  const onSendTokenAmino = async () => {
-    if (!cosmosEWallet || !aminoSigner) {
-      throw new Error("CosmosEWallet or aminoSigner is not found");
-    }
-
-    const { address, msgs } =
-      await makeMockSendTokenAminoSignDoc(cosmosEWallet);
-    const testGasPrice = GasPrice.fromString("0.0025uosmo");
-    const clientWithSigner = await SigningStargateClient.connectWithSigner(
-      TEST_CHAIN_RPC,
-      aminoSigner,
-      {
-        gasPrice: testGasPrice,
-      },
-    );
-
-    try {
       const res = await clientWithSigner.signAndBroadcast(
         address,
         msgs.map((msg) => ({
@@ -154,48 +115,35 @@ export const CosmosOnchainCosmJsSignWidget = () => {
         })),
         "auto",
       );
-      setResult((prev) => ({
-        ...prev,
-        signAndBroadcastAmino: {
-          isSuccess: true,
-          successTxHash: res.transactionHash,
+
+      return res.transactionHash;
+    },
+  });
+
+  const sendTokenDirectMutation = useMutation({
+    mutationFn: async (): Promise<string> => {
+      if (!cosmosEWallet || !signer) {
+        throw new Error("CosmosEWallet or signer is not found");
+      }
+
+      const account = await cosmosEWallet.getKey(TEST_CHAIN_ID);
+      const address = account?.bech32Address;
+
+      const testGasPrice = GasPrice.fromString("0.0025uosmo");
+      const clientWithSigner = await SigningStargateClient.connectWithSigner(
+        TEST_CHAIN_RPC,
+        signer,
+        {
+          gasPrice: testGasPrice,
         },
-      }));
-    } catch (error) {
-      setResult((prev) => ({
-        ...prev,
-        signAndBroadcastAmino: {
-          isSuccess: false,
-          error: error instanceof Error ? error.message : "Unknown error",
-        },
-      }));
-    }
-  };
+      );
 
-  const onSendTokenDirect = async () => {
-    if (!cosmosEWallet || !signer) {
-      throw new Error("CosmosEWallet or signer is not found");
-    }
+      const msg = MsgSend.fromPartial({
+        fromAddress: address,
+        toAddress: address,
+        amount: [coin("10", "uosmo")],
+      });
 
-    const account = await cosmosEWallet.getKey(TEST_CHAIN_ID);
-    const address = account?.bech32Address;
-
-    const testGasPrice = GasPrice.fromString("0.0025uosmo");
-    const clientWithSigner = await SigningStargateClient.connectWithSigner(
-      TEST_CHAIN_RPC,
-      signer,
-      {
-        gasPrice: testGasPrice,
-      },
-    );
-
-    const msg = MsgSend.fromPartial({
-      fromAddress: address,
-      toAddress: address,
-      amount: [coin("10", "uosmo")],
-    });
-
-    try {
       const res = await clientWithSigner.signAndBroadcast(
         address,
         [
@@ -206,23 +154,10 @@ export const CosmosOnchainCosmJsSignWidget = () => {
         ],
         "auto",
       );
-      setResult((prev) => ({
-        ...prev,
-        signAndBroadcastDirect: {
-          isSuccess: true,
-          successTxHash: res.transactionHash,
-        },
-      }));
-    } catch (error) {
-      setResult((prev) => ({
-        ...prev,
-        signAndBroadcastDirect: {
-          isSuccess: false,
-          error: error instanceof Error ? error.message : "Unknown error",
-        },
-      }));
-    }
-  };
+
+      return res.transactionHash;
+    },
+  });
 
   return (
     <div>
@@ -235,22 +170,22 @@ export const CosmosOnchainCosmJsSignWidget = () => {
 
             <ActionButton
               label="sendTokens"
-              onClick={sendToken}
-              result={result.sendTokens}
+              onClick={() => sendTokenMutation.mutate()}
+              mutation={sendTokenMutation}
               actionName="sendTokens"
             />
 
             <ActionButton
               label="signAndBroadcast (amino)"
-              onClick={onSendTokenAmino}
-              result={result.signAndBroadcastAmino}
+              onClick={() => sendTokenAminoMutation.mutate()}
+              mutation={sendTokenAminoMutation}
               actionName="signAndBroadcastAmino"
             />
 
             <ActionButton
               label="signAndBroadcast (direct)"
-              onClick={onSendTokenDirect}
-              result={result.signAndBroadcastDirect}
+              onClick={() => sendTokenDirectMutation.mutate()}
+              mutation={sendTokenDirectMutation}
               actionName="signAndBroadcastDirect"
             />
           </div>
@@ -260,55 +195,45 @@ export const CosmosOnchainCosmJsSignWidget = () => {
   );
 };
 
-interface ActionResult {
-  isSuccess: boolean;
-  successTxHash?: string;
-  error?: string;
-}
 interface ActionButtonProps {
   label: string;
-  onClick: () => Promise<void>;
-  result: ActionResult;
+  onClick: () => void;
+  mutation: {
+    isPending: boolean;
+    isSuccess: boolean;
+    isError: boolean;
+    data?: string;
+    error?: Error | null;
+  };
   actionName: string;
 }
 
 const ActionButton: React.FC<ActionButtonProps> = ({
   label,
   onClick,
-  result,
+  mutation,
   actionName,
 }) => {
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleClick = async () => {
-    setIsLoading(true);
-    try {
-      await onClick();
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <div className={styles.actionButtonContainer}>
       <button
         className={styles.sendTxButton}
-        onClick={handleClick}
-        disabled={isLoading}
+        onClick={onClick}
+        disabled={mutation.isPending}
       >
-        {isLoading ? `${label} loading...` : label}
+        {mutation.isPending ? `${label} loading...` : label}
       </button>
       <div className={styles.resultContainer}>
-        {result.isSuccess && !isLoading ? (
+        {mutation.isSuccess && !mutation.isPending ? (
           <p className={styles.success}>
             {actionName} success
-            {result.successTxHash && <span> - Tx: {result.successTxHash}</span>}
+            {mutation.data && <span> - Tx: {mutation.data}</span>}
           </p>
         ) : (
-          result.error &&
-          !isLoading && (
+          mutation.isError &&
+          !mutation.isPending && (
             <p className={styles.error}>
-              {actionName} error: {result.error}
+              {actionName} error: {mutation.error?.message || "Unknown error"}
             </p>
           )
         )}
