@@ -189,11 +189,11 @@ const SendTxButton = ({
 
       const data = await res.json();
 
-      if (data.code !== 0) {
+      if (data.tx_response.code !== 0) {
         throw new Error(data.tx_response.raw_log);
       }
 
-      return data;
+      return data.tx_response.txhash;
     },
     onError: (error) => {
       console.error("Send tx failed:", error);
@@ -219,7 +219,7 @@ const SendTxButton = ({
       )}
       {sendTxMutation.isSuccess && (
         <div style={{ color: "green", fontSize: "12px" }}>
-          Transaction sent successfully!
+          Transaction sent successfully! TxHash: {sendTxMutation.data}
         </div>
       )}
     </div>
