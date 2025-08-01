@@ -42,10 +42,10 @@ export async function initKeplrEwalletCore(
 
   const registering = registerMsgListener();
 
-  const url = checkURLRes.data;
-  console.log("[keplr] resolved SDK URL: %s", url);
+  const sdkEndpoint = checkURLRes.data;
+  console.log("[keplr] resolved sdk endpoint: %s", sdkEndpoint);
 
-  const iframeRes = setupIframeElement(url);
+  const iframeRes = setupIframeElement(sdkEndpoint);
   if (!iframeRes.success) {
     return iframeRes;
   }
@@ -55,7 +55,7 @@ export async function initKeplrEwalletCore(
   // Wait till the "init" message is sent from the being-loaded iframe document.
   await registering;
 
-  const ewalletCore = new KeplrEWallet(args.customer_id, iframe, url);
+  const ewalletCore = new KeplrEWallet(args.customer_id, iframe, sdkEndpoint);
 
   window.__keplr_ewallet = ewalletCore;
 

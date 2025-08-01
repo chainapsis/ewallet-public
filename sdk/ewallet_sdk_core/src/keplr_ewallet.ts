@@ -10,17 +10,17 @@ import { makeSignature } from "./api/make_signature";
 export class KeplrEWallet {
   customerId: string;
   iframe: HTMLIFrameElement;
-  attachedEndpoint: string;
+  sdkEndpoint: string;
   origin: string;
 
   public constructor(
     customerId: string,
     iframe: HTMLIFrameElement,
-    attachedEndpoint: string,
+    sdkEndpoint: string,
   ) {
     this.customerId = customerId;
     this.iframe = iframe;
-    this.attachedEndpoint = attachedEndpoint;
+    this.sdkEndpoint = sdkEndpoint;
     this.origin = window.location.origin;
   }
 
