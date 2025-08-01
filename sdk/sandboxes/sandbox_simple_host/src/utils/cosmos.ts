@@ -32,8 +32,14 @@ export async function makeMockSendTokenProtoSignDoc(
   const sequence = accountInfo?.sequence?.toString();
   const accountNumber = accountInfo?.accountNumber?.toString();
 
-  if (!address || !sequence || !accountNumber) {
-    throw new Error("Address or sequence or accountNumber is not found");
+  if (!address) {
+    throw new Error("Address is not found");
+  }
+
+  if (!accountNumber || !sequence) {
+    throw new Error(
+      `${account?.bech32Address} accountNumber or sequence is not found please Send some tokens to this address`,
+    );
   }
 
   const bodyBytes = TxBody.encode(
@@ -67,7 +73,7 @@ export async function makeMockSendTokenProtoSignDoc(
           },
           multi: undefined,
         },
-        sequence,
+        sequence: sequence ?? "0",
       },
     ],
     fee: Fee.fromPartial<{}>({
