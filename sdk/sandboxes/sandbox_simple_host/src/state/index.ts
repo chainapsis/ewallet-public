@@ -1,4 +1,3 @@
-import { Envs } from "@/envs";
 import {
   CosmosEWallet,
   initCosmosEWallet,
@@ -6,6 +5,8 @@ import {
 import { EthEWallet, initEthEWallet } from "@keplr-ewallet/ewallet-sdk-eth";
 import { create } from "zustand";
 import { combine, persist } from "zustand/middleware";
+
+import { Envs } from "@/envs";
 
 const STORAGE_KEY = "sandbox-simple-host";
 
