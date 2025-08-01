@@ -19071,6 +19071,7 @@ __metadata:
     "@keplr-ewallet/ewallet-sdk-cosmos": "workspace:*"
     "@keplr-ewallet/ewallet-sdk-eth": "workspace:*"
     "@keplr-wallet/cosmos": "npm:^0.12.253"
+    "@tanstack/react-query": "npm:~5.59.15"
     "@types/jest": "npm:*"
     "@types/node": "npm:*"
     "@types/react": "npm:*"
