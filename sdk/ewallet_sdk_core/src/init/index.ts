@@ -2,6 +2,7 @@ import type { KeplrEwalletInitArgs } from "@keplr-ewallet-sdk-core/types";
 import { registerMsgListener } from "@keplr-ewallet-sdk-core/window_msg/listener";
 import { KeplrEWallet } from "@keplr-ewallet-sdk-core/keplr_ewallet";
 import { type Result } from "@keplr-ewallet/stdlib-js";
+import { setupIframeElement } from "./iframe";
 
 const SDK_ENDPOINT = `https://attached.embed.keplr.app`;
 const KEPLR_EWALLET_ELEM_ID = "keplr-ewallet";
@@ -9,12 +10,14 @@ const KEPLR_EWALLET_ELEM_ID = "keplr-ewallet";
 export async function initKeplrEwalletCore(
   args: KeplrEwalletInitArgs,
 ): Promise<Result<KeplrEWallet, string>> {
-  console.info("Init Keplr Ewallet core");
+  console.info("[keplr] init");
 
   if (window === undefined) {
+    console.error("[keplr] EWallet can only be initialized in the browser");
+
     return {
       success: false,
-      err: "Keplr eWallet can only be initialized in the browser",
+      err: "Not in the browser context",
     };
   }
 
@@ -27,7 +30,7 @@ export async function initKeplrEwalletCore(
       };
     }
 
-    console.info("Keplr Ewallet is already initialized");
+    console.info("[keplr] already initialized");
     return { success: true, data: window.__keplr_ewallet };
   }
 
@@ -36,9 +39,10 @@ export async function initKeplrEwalletCore(
     return checkURLRes;
   }
 
-  const url = checkURLRes.data;
-
   const registering = registerMsgListener();
+
+  const url = checkURLRes.data;
+  console.log("[keplr] SDK URL: %s", url);
 
   const iframeRes = setupIframeElement(url);
   if (!iframeRes.success) {
@@ -55,42 +59,6 @@ export async function initKeplrEwalletCore(
   window.__keplr_ewallet = ewalletCore;
 
   return { success: true, data: ewalletCore };
-}
-
-function setupIframeElement(url: string): Result<HTMLIFrameElement, string> {
-  const bodyEls = document.getElementsByTagName("body");
-  if (bodyEls[0] === undefined) {
-    console.error("body element not found");
-    return {
-      success: false,
-      err: "body element not found",
-    };
-  }
-
-  const bodyEl = bodyEls[0];
-
-  console.log("Keplr EWallet SDK URL: %s", url);
-
-  // iframe setup
-  const iframe = document.createElement("iframe");
-  iframe.src = url;
-
-  // iframe style
-  iframe.style.position = "fixed";
-  iframe.style.top = "0";
-  iframe.style.left = "0";
-  iframe.style.width = "100vw";
-  iframe.style.height = "100vh";
-  iframe.style.border = "none";
-  iframe.style.display = "none";
-  iframe.style.backgroundColor = "transparent";
-  iframe.style.overflow = "hidden";
-  iframe.style.zIndex = "1000000";
-
-  // attach
-  bodyEl.appendChild(iframe);
-
-  return { success: true, data: iframe };
 }
 
 async function checkURL(url?: string): Promise<Result<string, string>> {
