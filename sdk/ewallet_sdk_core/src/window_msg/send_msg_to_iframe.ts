@@ -1,6 +1,8 @@
 import type { KeplrEWallet } from "@keplr-ewallet-sdk-core/keplr_ewallet";
 import type { EWalletMsg } from "@keplr-ewallet-sdk-core/types";
 
+export const EWALLET_ATTACHED_TARGET = "keplr_ewallet_attached";
+
 export function sendMsgToIframe(this: KeplrEWallet, msg: EWalletMsg) {
   return new Promise<EWalletMsg>((resolve, reject) => {
     if (this.iframe.contentWindow === null) {
@@ -15,7 +17,7 @@ export function sendMsgToIframe(this: KeplrEWallet, msg: EWalletMsg) {
     channel.port1.onmessage = (obj: any) => {
       const data = obj.data as EWalletMsg;
 
-      console.log("data", data);
+      console.log("[keplr] data", data);
 
       if (data.hasOwnProperty("payload")) {
         resolve(data);

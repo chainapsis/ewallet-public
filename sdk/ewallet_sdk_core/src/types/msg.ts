@@ -1,22 +1,25 @@
-import type { ChainInfo } from "@keplr-wallet/types";
-
 import type { ModalResponse, ShowModalPayload } from "./modal";
 import type {
   EWalletMakeSignaturePayload,
   EWalletMakeSignatureAckPayload,
 } from "./sign";
 
+export type MsgTarget = "keplr_ewallet_attached" | "keplr_ewallet_sdk_core";
+
 export type EWalletMsgMakeSignature = {
+  target: "keplr_ewallet_attached";
   msg_type: "make_signature";
   payload: EWalletMakeSignaturePayload;
 };
 
 export type EWalletMsgMakeSignatureAck = {
+  target: MsgTarget;
   msg_type: "make_signature_ack";
   payload: EWalletMakeSignatureAckPayload;
 };
 
 export type EWalletMsgGetPublicKey = {
+  target: "keplr_ewallet_attached";
   msg_type: "get_public_key";
   payload: null;
 };
@@ -27,6 +30,7 @@ export type EWalletMsgGetPublicKeyAck = {
 };
 
 export type EWalletMsgSetOAuthNonce = {
+  target: "keplr_ewallet_attached";
   msg_type: "set_oauth_nonce";
   payload: string;
 };
@@ -37,6 +41,7 @@ export type EWalletMsgSetOAuthNonceAck = {
 };
 
 export type EWalletMsgOAuthSignIn = {
+  target: "keplr_ewallet_attached";
   msg_type: "oauth_sign_in";
   payload: {
     access_token: string;
@@ -61,6 +66,7 @@ export type EWalletMsgOAuthSignInAck = {
 };
 
 export type EWalletMsgSignOut = {
+  target: "keplr_ewallet_attached";
   msg_type: "sign_out";
   payload: null;
 };
@@ -71,6 +77,7 @@ export type EWalletMsgSignOutAck = {
 };
 
 export type EWalletMsgShowModal = {
+  target: "keplr_ewallet_attached";
   msg_type: "show_modal";
   payload: ShowModalPayload;
 };
@@ -81,6 +88,7 @@ export type EWalletMsgShowModalAck = {
 };
 
 export type EWalletMsgHideModal = {
+  target: "keplr_ewallet_attached";
   msg_type: "hide_modal";
   payload: null;
 };
@@ -91,6 +99,7 @@ export type EWalletMsgHideModalAck = {
 };
 
 export type EWalletMsgInit = {
+  target: "keplr_ewallet_attached";
   msg_type: "init";
   payload: boolean;
 };
@@ -101,6 +110,7 @@ export type EWalletMsgInitAck = {
 };
 
 export type EWalletMsgGetEmail = {
+  target: "keplr_ewallet_attached";
   msg_type: "get_email";
   payload: null;
 };
@@ -109,18 +119,6 @@ export type EWalletMsgGetEmailAck = {
   msg_type: "get_email_ack";
   payload: string | null;
 };
-
-// export type EWalletMsgGetCosmosChainInfo = {
-//   msg_type: "get_cosmos_chain_info";
-//   payload: null;
-// };
-
-// export type EWalletMsgGetCosmosChainInfoAck = {
-//   msg_type: "get_cosmos_chain_info_ack";
-//   payload:
-//     | { success: true; data: ChainInfo[] }
-//     | { success: false; error: string };
-// };
 
 export type EWalletMsg =
   | EWalletMsgInit
@@ -141,8 +139,6 @@ export type EWalletMsg =
   | EWalletMsgHideModalAck
   | EWalletMsgGetEmail
   | EWalletMsgGetEmailAck
-  // | EWalletMsgGetCosmosChainInfo
-  // | EWalletMsgGetCosmosChainInfoAck
   | {
     msg_type: "unknown";
     payload: string | null;

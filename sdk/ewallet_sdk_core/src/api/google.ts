@@ -3,6 +3,7 @@ import {
   type OAuthState,
   RedirectUriSearchParamsKey,
 } from "@keplr-ewallet-sdk-core/oauth";
+import { EWALLET_ATTACHED_TARGET } from "@keplr-ewallet-sdk-core/window_msg/send_msg_to_iframe";
 
 const GoogleClientId =
   "239646646986-8on7ql1vmbcshbjk12bdtopmto99iipm.apps.googleusercontent.com";
@@ -28,6 +29,7 @@ export async function tryGoogleSignIn(
   // between user interaction and window opening.
   // so we need to send the message to iframe first and wait for the ack after window opening.
   const ackPromise = sendMsgToIframe({
+    target: EWALLET_ATTACHED_TARGET,
     msg_type: "set_oauth_nonce",
     payload: nonce,
   });

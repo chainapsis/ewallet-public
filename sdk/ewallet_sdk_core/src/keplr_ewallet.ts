@@ -1,4 +1,4 @@
-import { sendMsgToIframe } from "./window_msg";
+import { sendMsgToIframe } from "./window_msg/send_msg_to_iframe";
 import { showModal } from "./api/show_modal";
 import { signIn } from "./api/sign_in";
 import { signOut } from "./api/sign_out";
@@ -6,10 +6,9 @@ import { getPublicKey } from "./api/get_public_key";
 import { getEmail } from "./api/get_email";
 import { hideModal } from "./api/hide_modal";
 import { makeSignature } from "./api/make_signature";
-// import { getCosmosChainInfo } from "./api/get_cosmos_chain_info";
 
 export class KeplrEWallet {
-  customerId: string; // CHECK: would be better to name it appId?
+  customerId: string;
   iframe: HTMLIFrameElement;
   attachedEndpoint: string;
   origin: string;
@@ -33,5 +32,4 @@ export class KeplrEWallet {
   getPublicKey = getPublicKey.bind(this);
   getEmail = getEmail.bind(this);
   makeSignature = makeSignature.bind(this);
-  // getCosmosChainInfo = getCosmosChainInfo.bind(this);
 }
