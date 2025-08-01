@@ -1,6 +1,6 @@
 {
   "name": "@keplr-ewallet/ewallet-sdk-core",
-  "version": "0.0.6-rc.15",
+  "version": "0.0.6-rc.16",
   "packageManager": "yarn@4.7.0",
   "type": "module",
   "scripts": {
