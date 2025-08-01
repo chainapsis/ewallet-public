@@ -5,16 +5,15 @@ export async function makeSignature(
   signDocHash: Uint8Array,
 ) {
   try {
-    const makeSignatureAck = await this.eWallet.sendMsgToIframe({
+    const makeSignatureResponse = await this.eWallet.makeSignature({
       msg_type: "make_signature",
       payload: { msg: signDocHash },
     });
-
-    if (makeSignatureAck.msg_type !== "make_signature_ack") {
-      throw new Error("Can't receive make_signature_ack from ewallet");
+    if (!makeSignatureResponse) {
+      throw new Error("Failed to make signature");
     }
 
-    return makeSignatureAck.payload;
+    return makeSignatureResponse;
   } catch (error) {
     throw error;
   }

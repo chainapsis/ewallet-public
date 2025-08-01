@@ -174,16 +174,12 @@ async function handleSigningFlow<M extends EthSignMethod>(
     },
   };
 
-  // TODO: add makeSignature api
-  const makeSignatureAck = await eWallet.sendMsgToIframe(makeSignatureMsg);
-
-  if (makeSignatureAck.msg_type !== "make_signature_ack") {
-    throw new Error("Unreachable");
+  const makeSignatureResponse = await eWallet.makeSignature(makeSignatureMsg);
+  if (!makeSignatureResponse) {
+    throw new Error("Failed to make signature");
   }
 
-  const signature = encodeEthereumSignature(
-    makeSignatureAck.payload.sign_output,
-  );
+  const signature = encodeEthereumSignature(makeSignatureResponse.sign_output);
   return config.processResult(signature, data);
 }
 
