@@ -6,6 +6,7 @@ export async function makeSignature(
 ) {
   try {
     const makeSignatureResponse = await this.eWallet.makeSignature({
+      target: "keplr_ewallet_attached",
       msg_type: "make_signature",
       payload: { msg: signDocHash },
     });

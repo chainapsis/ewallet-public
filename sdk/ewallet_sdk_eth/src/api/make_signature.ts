@@ -136,6 +136,7 @@ async function handleSigningFlow<M extends EthSignMethod>(
   data: MakeEthereumSigData,
 ): Promise<SignFunctionResult<M>> {
   const showModalMsg: EWalletMsgShowModal = {
+    target: "keplr_ewallet_attached",
     msg_type: "show_modal",
     payload: {
       modal_type: "make_signature",
@@ -171,6 +172,7 @@ async function handleSigningFlow<M extends EthSignMethod>(
   const msgHash = config.hashFunction(data);
 
   const makeSignatureMsg: EWalletMsgMakeSignature = {
+    target: "keplr_ewallet_attached",
     msg_type: "make_signature",
     payload: {
       msg: msgHash,
