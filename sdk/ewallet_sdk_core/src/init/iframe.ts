@@ -14,7 +14,7 @@ export function setupIframeElement(
 
   const bodyEl = bodyEls[0];
 
-  console.info("[keplr] appending iframe");
+  console.debug("[keplr] appending iframe");
 
   // iframe setup
   const iframe = document.createElement("iframe");

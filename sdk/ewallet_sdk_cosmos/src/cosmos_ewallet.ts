@@ -1,6 +1,4 @@
 import { KeplrEWallet } from "@keplr-ewallet/ewallet-sdk-core";
-import { type Result } from "@keplr-ewallet/stdlib-js";
-
 import type { ChainInfo } from "@keplr-wallet/types";
 
 import { enable } from "./api/enable";

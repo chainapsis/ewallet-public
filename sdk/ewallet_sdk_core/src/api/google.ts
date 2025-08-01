@@ -18,8 +18,8 @@ export async function tryGoogleSignIn(
   const clientId = GoogleClientId;
   const redirectUri = `${new URL(IframeOrigin).origin}/google/callback`;
 
-  console.log("window host: %s", window.location.host);
-  console.log("redirectUri: %s", redirectUri);
+  console.debug("[keplr] window host: %s", window.location.host);
+  console.debug("[keplr] redirectUri: %s", redirectUri);
 
   const nonce = Array.from(crypto.getRandomValues(new Uint8Array(8)))
     .map((b) => b.toString(16).padStart(2, "0"))
@@ -40,7 +40,7 @@ export async function tryGoogleSignIn(
   };
   const oauthStateString = JSON.stringify(oauthState);
 
-  console.log("oauthStateString: %s", oauthStateString);
+  console.debug("[keplr] oauthStateString: %s", oauthStateString);
 
   const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
   authUrl.searchParams.set("client_id", clientId);

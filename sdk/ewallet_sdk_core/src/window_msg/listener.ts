@@ -32,7 +32,7 @@ export function registerMsgListener(): Promise<boolean> {
   window.addEventListener("message", msgHandler);
   window.__keplr_ewallet_ev = msgHandler;
 
-  console.info("[keplr] msg listener registered");
+  console.debug("[keplr] msg listener registered");
 
   return prom;
 }

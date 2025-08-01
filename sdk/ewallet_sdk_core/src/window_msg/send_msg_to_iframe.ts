@@ -18,7 +18,7 @@ export function sendMsgToIframe(this: KeplrEWallet, msg: EWalletMsg) {
     channel.port1.onmessage = (obj: any) => {
       const data = obj.data as EWalletMsg;
 
-      console.log("[keplr] reply recv", data);
+      console.debug("[keplr] reply recv", data);
 
       if (data.hasOwnProperty("payload")) {
         resolve(data);
