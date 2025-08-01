@@ -23,7 +23,8 @@ export function sendMsgToIframe(this: KeplrEWallet, msg: EWalletMsg) {
         resolve(data);
       } else {
         resolve({
-          msg_type: "unknown",
+          target: "keplr_ewallet_sdk",
+          msg_type: "unknown_msg_type",
           payload: JSON.stringify(data),
         });
       }
