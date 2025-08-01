@@ -6,6 +6,7 @@ use k256::{
     },
     EncodedPoint, Secp256k1,
 };
+use once_cell::sync::Lazy;
 use rand::thread_rng;
 use std::sync::{Arc, Mutex};
 
@@ -70,6 +71,21 @@ impl EcdheServer {
     }
 }
 
-lazy_static::lazy_static! {
-    pub static ref ECDHE_SERVER: EcdheServer = EcdheServer::new();
-}
+pub static ECDHE_SERVER: Lazy<EcdheServer> = Lazy::new(|| {
+    let test_priv_key = "0202020202020202020202020202020202020202020202020202020202020202";
+    let private_key_hex_from_env = test_priv_key;
+    // let private_key_hex_from_env = std::env::var("NODE_PRIVATE_KEY").unwrap();
+    let private_key = SecretKey::from_be_bytes(
+        hex::decode(&private_key_hex_from_env)
+            .expect("NODE_PRIVATE_KEY environment variable (hex) is invalid.")
+            .as_slice(),
+    )
+    .expect("Invalid private key format");
+
+    let public_key = private_key.public_key();
+    EcdheServer {
+        private_key,
+        public_key,
+        shared_secret: Arc::new(Mutex::new(None)),
+    }
+});
