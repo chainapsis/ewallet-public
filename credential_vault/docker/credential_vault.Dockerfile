@@ -8,16 +8,16 @@ COPY --chown=node:node . .
 
 RUN yarn set version 4.7.0
 
+# Build stdlib-js
+WORKDIR /home/node/credential_vault/stdlib_js
+RUN yarn run build
+
 # Install dependencies for crypto/bytes
 WORKDIR /home/node/credential_vault
 RUN yarn workspaces focus @keplr-ewallet/bytes
 
 # Build crypto/bytes
 WORKDIR /home/node/credential_vault/crypto/bytes
-RUN yarn run build
-
-# Build stdlib-js
-WORKDIR /home/node/credential_vault/stdlib_js
 RUN yarn run build
 
 # Install dependencies for credential_vault server
