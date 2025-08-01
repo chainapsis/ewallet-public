@@ -1,7 +1,3 @@
 [workspace]
 resolver = "2"
-members = [
-    "crypto/tecdsa/cait_sith_keplr",
-    "credential_vault_2/server",
-    "credential_vault_2/pg_interface",
-]
+members = ["crypto/tecdsa/cait_sith_keplr"]
