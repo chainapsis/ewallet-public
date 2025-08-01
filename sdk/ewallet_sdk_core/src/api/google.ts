@@ -8,15 +8,13 @@ import { EWALLET_ATTACHED_TARGET } from "@keplr-ewallet-sdk-core/window_msg/send
 const GoogleClientId =
   "239646646986-8on7ql1vmbcshbjk12bdtopmto99iipm.apps.googleusercontent.com";
 
-// TODO:should be given programatically
-const IframeOrigin = "http://localhost:3201/";
-
 export async function tryGoogleSignIn(
+  sdkEndpoint: string,
   customerId: string,
   sendMsgToIframe: KeplrEWallet["sendMsgToIframe"],
 ) {
   const clientId = GoogleClientId;
-  const redirectUri = `${new URL(IframeOrigin).origin}/google/callback`;
+  const redirectUri = `${new URL(sdkEndpoint).origin}/google/callback`;
 
   console.debug("[keplr] window host: %s", window.location.host);
   console.debug("[keplr] redirectUri: %s", redirectUri);

@@ -1,6 +1,6 @@
+use credential_vault_server::create_app;
 use hyper::{Body, Method, Request, StatusCode};
 use serde_json::{json, Value};
-use server::create_app;
 use tower::{Service, ServiceExt};
 
 async fn send_request(
