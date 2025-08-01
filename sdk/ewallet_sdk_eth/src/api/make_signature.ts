@@ -22,7 +22,10 @@ import {
   parseTypedDataDefinition,
 } from "@keplr-ewallet-sdk-eth/utils";
 import type { EthEWallet } from "@keplr-ewallet-sdk-eth/eth_ewallet";
-import { SUPPORTED_CHAINS } from "@keplr-ewallet-sdk-eth/chains";
+import {
+  getChainIconUrl,
+  SUPPORTED_CHAINS,
+} from "@keplr-ewallet-sdk-eth/chains";
 
 const signTypeConfig: Record<
   EthSignMethod,
@@ -204,7 +207,7 @@ export async function makeSignature<M extends EthSignMethod>(
   const chainInfo: ChainInfoForAttachedModal = {
     chain_id: `eip155:${activeChain.id}`,
     chain_name: activeChain.name,
-    chain_symbol_image_url: `https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:${activeChain.id}/chain.png`,
+    chain_symbol_image_url: getChainIconUrl(activeChain.id),
     rpc_url: activeChain.rpcUrls.default.http[0],
     block_explorer_url: activeChain.blockExplorers?.default.url,
   };

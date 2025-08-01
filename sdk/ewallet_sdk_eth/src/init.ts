@@ -11,8 +11,6 @@ export async function initEthEWallet(
 ): Promise<EthEWallet | null> {
   const eWalletRes = await initKeplrEwalletCore(args);
 
-  // TODO: check if the ewallet is already initialized
-
   if (!eWalletRes.success) {
     console.error("eWallet core init failed, err: %s", eWalletRes.err);
     return null;
