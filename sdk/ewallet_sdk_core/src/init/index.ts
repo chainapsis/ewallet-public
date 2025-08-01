@@ -63,9 +63,9 @@ export async function initKeplrEwalletCore(
 }
 
 async function checkURL(url?: string): Promise<Result<string, string>> {
-  try {
-    const _url = url ?? SDK_ENDPOINT;
+  const _url = url ?? SDK_ENDPOINT;
 
+  try {
     const response = await fetch(_url, { mode: "no-cors" });
     if (!response.ok) {
       return { success: true, data: _url };
@@ -76,6 +76,8 @@ async function checkURL(url?: string): Promise<Result<string, string>> {
       };
     }
   } catch (err: any) {
-    return { success: false, err: err.toString() };
+    console.error("[keplr] check url fail, url: %s", _url);
+
+    return { success: false, err: `check url fail, ${err.toString()}` };
   }
 }

@@ -7,6 +7,7 @@ export function sendMsgToIframe(this: KeplrEWallet, msg: EWalletMsg) {
   return new Promise<EWalletMsg>((resolve, reject) => {
     if (this.iframe.contentWindow === null) {
       reject("iframe contentWindow is null");
+
       return;
     }
 
@@ -17,11 +18,13 @@ export function sendMsgToIframe(this: KeplrEWallet, msg: EWalletMsg) {
     channel.port1.onmessage = (obj: any) => {
       const data = obj.data as EWalletMsg;
 
-      console.log("[keplr] data", data);
+      console.log("[keplr] reply recv", data);
 
       if (data.hasOwnProperty("payload")) {
         resolve(data);
       } else {
+        console.error("[keplr] unknown msg type");
+
         resolve({
           target: "keplr_ewallet_sdk",
           msg_type: "unknown_msg_type",
