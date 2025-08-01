@@ -1,16 +1,17 @@
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import { type DirectSignResponse } from "@cosmjs/proto-signing";
 import { type AminoSignResponse } from "@cosmjs/amino";
+import { useMutation } from "@tanstack/react-query";
 
 import { TxRaw } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 
-import { useKeplrEwallet } from "@/contexts/KeplrEwalletProvider";
 import { SignWidget } from "@/components/widgets/sign_widget/sign_widget";
 import styles from "./cosmos_onchain_sign_widget.module.scss";
 import {
   makeMockSendTokenAminoSignDoc,
   makeMockSendTokenProtoSignDoc,
 } from "@/utils/cosmos";
+import { useKeplrEwallet } from "@/components/keplr_ewallet_provider/use_keplr_ewallet";
 
 const TEST_CHAIN_ID = "osmosis-1";
 const TEST_OSMOSIS_CHAIN_REST = "https://osmosis-rest.publicnode.com";
@@ -18,55 +19,62 @@ const ENDPOINT = "/cosmos/tx/v1beta1/txs";
 
 export const CosmosOnchainSignWidget = () => {
   const { cosmosEWallet } = useKeplrEwallet();
-  const [isLoading, setIsLoading] = useState(false);
   const [signType, setSignType] = useState<"animo" | "direct">("direct");
-  const [result, setResult] = useState<
-    AminoSignResponse | DirectSignResponse | null
-  >(null);
 
-  const handleClickCosmosSignDirect = useCallback(async () => {
-    console.log("handleClickCosmosSignDirect()");
+  const directSignMutation = useMutation({
+    mutationFn: async () => {
+      console.log("handleClickCosmosSignDirect()");
 
-    if (cosmosEWallet !== null) {
-      try {
-        setIsLoading(true);
-        const { mockSignDoc, address } =
-          await makeMockSendTokenProtoSignDoc(cosmosEWallet);
-
-        const result = await cosmosEWallet.signDirect(
-          TEST_CHAIN_ID,
-          address,
-          mockSignDoc,
-        );
-
-        setResult(result);
-        console.log("SignDirect result:", result);
-      } catch (error) {
-        console.error("SignDirect failed:", error);
-      } finally {
-        setIsLoading(false);
+      if (cosmosEWallet === null) {
+        throw new Error("CosmosEWallet is not initialized");
       }
-    }
-  }, [cosmosEWallet]);
 
-  const handleClickCosmosSignAnimo = useCallback(async () => {
-    console.info("handleClickCosmosSignAnimo()");
-    if (cosmosEWallet === null) {
-      throw new Error("CosmosEWallet is not initialized");
-    }
+      const { mockSignDoc, address } =
+        await makeMockSendTokenProtoSignDoc(cosmosEWallet);
 
-    const { mockSignDoc, address } =
-      await makeMockSendTokenAminoSignDoc(cosmosEWallet);
+      const result = await cosmosEWallet.signDirect(
+        TEST_CHAIN_ID,
+        address,
+        mockSignDoc,
+      );
 
-    const result = await cosmosEWallet.signAmino(
-      TEST_CHAIN_ID,
-      address,
-      mockSignDoc,
-    );
+      console.log("SignDirect result:", result);
+      return result;
+    },
+    onError: (error) => {
+      console.error("SignDirect failed:", error);
+    },
+  });
 
-    setResult(result);
-    console.info("SignAmino result:", result);
-  }, [cosmosEWallet]);
+  const aminoSignMutation = useMutation({
+    mutationFn: async () => {
+      console.info("handleClickCosmosSignAnimo()");
+
+      if (cosmosEWallet === null) {
+        throw new Error("CosmosEWallet is not initialized");
+      }
+
+      const { mockSignDoc, address } =
+        await makeMockSendTokenAminoSignDoc(cosmosEWallet);
+
+      const result = await cosmosEWallet.signAmino(
+        TEST_CHAIN_ID,
+        address,
+        mockSignDoc,
+      );
+
+      console.info("SignAmino result:", result);
+      return result;
+    },
+    onError: (error) => {
+      console.error("SignAmino failed:", error);
+    },
+  });
+
+  const currentMutation =
+    signType === "direct" ? directSignMutation : aminoSignMutation;
+  const isLoading = currentMutation.isPending;
+  const result = currentMutation.data;
 
   return (
     <div className={styles.container}>
@@ -88,12 +96,15 @@ export const CosmosOnchainSignWidget = () => {
         chain="Cosmos Hub"
         signType="onchain"
         isLoading={isLoading}
-        signButtonOnClick={
-          signType === "direct"
-            ? handleClickCosmosSignDirect
-            : handleClickCosmosSignAnimo
-        }
+        signButtonOnClick={() => currentMutation.mutate()}
       />
+
+      {(directSignMutation.error || aminoSignMutation.error) && (
+        <div className={styles.error}>
+          {directSignMutation.error?.message ||
+            aminoSignMutation.error?.message}
+        </div>
+      )}
 
       {result && (
         <div className={styles.resultContainer}>
@@ -162,23 +173,55 @@ const SendTxButton = ({
     return null;
   })();
 
-  const onSendTx = async () => {
-    const res = await fetch(TEST_OSMOSIS_CHAIN_REST + ENDPOINT, {
-      method: "POST",
-      body: JSON.stringify({
-        tx_bytes: Buffer.from(encodeTx as any).toString("base64"),
-        mode: "BROADCAST_MODE_SYNC",
-      }),
-    });
+  const sendTxMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(TEST_OSMOSIS_CHAIN_REST + ENDPOINT, {
+        method: "POST",
+        body: JSON.stringify({
+          tx_bytes: Buffer.from(encodeTx as any).toString("base64"),
+          mode: "BROADCAST_MODE_SYNC",
+        }),
+      });
 
-    const data = await res.json();
-  };
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      const data = await res.json();
+
+      if (data.tx_response.code !== 0) {
+        throw new Error(data.tx_response.raw_log);
+      }
+
+      return data.tx_response.txhash;
+    },
+    onError: (error) => {
+      console.error("Send tx failed:", error);
+    },
+    onSuccess: (data) => {
+      console.log("Transaction sent successfully:", data);
+    },
+  });
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-      <button className={className} onClick={onSendTx}>
-        Send Tx
+      <button
+        className={className}
+        onClick={() => sendTxMutation.mutate()}
+        disabled={sendTxMutation.isPending}
+      >
+        {sendTxMutation.isPending ? "Sending..." : "Send Tx"}
       </button>
+      {sendTxMutation.error && (
+        <div style={{ color: "red", fontSize: "12px" }}>
+          Error: {sendTxMutation.error.message}
+        </div>
+      )}
+      {sendTxMutation.isSuccess && (
+        <div style={{ color: "green", fontSize: "12px" }}>
+          Transaction sent successfully! TxHash: {sendTxMutation.data}
+        </div>
+      )}
     </div>
   );
 };

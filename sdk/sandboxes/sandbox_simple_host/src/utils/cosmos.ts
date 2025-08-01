@@ -15,7 +15,6 @@ import { makeSignDoc as makeAminoSignDoc } from "@cosmjs/amino";
 
 const TEST_CHAIN_ID = "osmosis-1";
 const TEST_CHAIN_RPC = "https://osmosis-rpc.publicnode.com:443";
-const TEST_ACCOUNT_NUMBER = 3483499;
 
 export async function makeMockSendTokenProtoSignDoc(
   cosmosEWallet: CosmosEWallet,
@@ -30,10 +29,16 @@ export async function makeMockSendTokenProtoSignDoc(
 
   const address = account?.bech32Address;
   const sequence = accountInfo?.sequence?.toString();
-  const accountNumber = accountInfo?.accountNumber?.toString();
+  const accountNumber = accountInfo?.accountNumber;
 
-  if (!address || !sequence || !accountNumber) {
-    throw new Error("Address or sequence or accountNumber is not found");
+  if (!address) {
+    throw new Error("Address is not found");
+  }
+
+  if (!accountNumber || !sequence) {
+    throw new Error(
+      `${account?.bech32Address} accountNumber or sequence is not found please Send some tokens to this address`,
+    );
   }
 
   const bodyBytes = TxBody.encode(
@@ -67,7 +72,7 @@ export async function makeMockSendTokenProtoSignDoc(
           },
           multi: undefined,
         },
-        sequence,
+        sequence: sequence ?? "0",
       },
     ],
     fee: Fee.fromPartial<{}>({
@@ -86,12 +91,12 @@ export async function makeMockSendTokenProtoSignDoc(
     bodyBytes,
     authInfoBytes,
     TEST_CHAIN_ID,
-    TEST_ACCOUNT_NUMBER,
+    accountNumber,
   );
 
   const signDocWrapper = SignDocWrapper.fromDirectSignDoc({
     ...mockSignDoc,
-    accountNumber,
+    accountNumber: accountNumber.toString(),
   });
 
   return {

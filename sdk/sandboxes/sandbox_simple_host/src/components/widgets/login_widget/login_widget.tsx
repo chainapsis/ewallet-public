@@ -1,27 +1,17 @@
 import React, { useState } from "react";
 
-// import { useKeplrEwallet } from "@keplr-ewallet-demo-web/contexts/KeplrEwalletProvider";
-// import { Button } from "@keplr-ewallet/ewallet-common-ui/button";
-// import { KeplrIcon } from "@keplr-ewallet/ewallet-common-ui/icons/keplr_icon";
-// import { LeapIcon } from "@keplr-ewallet/ewallet-common-ui/icons/leap_icon";
-// import { MetamaskIcon } from "@keplr-ewallet/ewallet-common-ui/icons/metamask_icon";
-// import { GoogleIcon } from "@keplr-ewallet/ewallet-common-ui/icons/google_icon";
-// import { Logo } from "@keplr-ewallet/ewallet-common-ui/logo";
-// import { Typography } from "@keplr-ewallet/ewallet-common-ui/typography";
-
 import { Widget } from "../widget_components";
 import styles from "./login_widget.module.scss";
-import { WalletBox } from "./wallet_box";
-import { useKeplrEwallet } from "@/contexts/KeplrEwalletProvider";
+import { useKeplrEwallet } from "@/components/keplr_ewallet_provider/use_keplr_ewallet";
 
 export const LoginWidget: React.FC<LoginWidgetProps> = () => {
   const { cosmosEWallet } = useKeplrEwallet();
   const eWallet = cosmosEWallet?.eWallet;
   const [walletInfo, setWalletInfo] = useState<
     | {
-        email: string;
-        publicKey: string;
-      }
+      email: string;
+      publicKey: string;
+    }
     | undefined
   >();
 
@@ -99,4 +89,4 @@ export const LoginWidget: React.FC<LoginWidgetProps> = () => {
   );
 };
 
-export interface LoginWidgetProps {}
+export interface LoginWidgetProps { }

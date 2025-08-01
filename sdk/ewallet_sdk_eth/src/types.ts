@@ -57,10 +57,7 @@ export type SignFunction = <M extends EthSignMethod>(
 ) => Promise<SignFunctionResult<M>>;
 
 /**
- * Configuration for Ewallet signer
- * TODO: This is a temporary interface to be replaced with the actual signer interface
- * There needs user interaction to sign a message, transaction, or typed data
- * In example, a new popup window needs to be opened to sign a message with original data displayed
+ * Signer interface for Ethereum
  */
 export interface EthSigner {
   address: Hex;

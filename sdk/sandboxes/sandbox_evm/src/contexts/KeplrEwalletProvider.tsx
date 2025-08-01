@@ -53,7 +53,7 @@ export const KeplrEwalletProvider = ({
 
   useEffect(() => {
     initKeplrEwalletCore({
-      customerId: "afb0afd1-d66d-4531-981c-cbf3fb1507b9", // TODO: replace with actual customerId
+      customer_id: "afb0afd1-d66d-4531-981c-cbf3fb1507b9",
     }).then((result) => {
       if (result.success) {
         setEWallet(result.data);

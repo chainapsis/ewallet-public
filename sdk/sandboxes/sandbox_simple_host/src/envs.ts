@@ -3,5 +3,5 @@ export interface EnvType {
 }
 
 export const Envs = {
-  KEPLR_EWALLET_SDK_ENDPOINT: "http://localhost:3201",
+  KEPLR_EWALLET_SDK_ENDPOINT: process.env.KEPLR_EWALLET_SDK_ENDPOINT!,
 };

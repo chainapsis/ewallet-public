@@ -59,3 +59,14 @@
     cursor: pointer;
   }
 }
+
+.error {
+  padding: 8px 16px;
+  border: 1px solid red;
+  border-radius: 6px;
+  background-color: #f3f4f6;
+  font-size: 14px;
+  font-weight: 500;
+
+  color: red;
+}

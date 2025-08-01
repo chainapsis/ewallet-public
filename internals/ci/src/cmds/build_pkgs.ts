@@ -20,7 +20,7 @@ export function doBuildPkgs() {
   ];
 
   for (const [path, name] of pkgsInOrder) {
-    console.info("Build %s, path: %s", name, paths.sdk_core);
+    console.info("Build %s, path: %s", name, path);
 
     const coreRet = spawnSync("yarn", ["run", "build"], {
       cwd: path,

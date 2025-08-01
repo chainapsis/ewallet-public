@@ -12,7 +12,7 @@ export async function initCosmosEWallet(
 ): Promise<CosmosEWallet | null> {
   const eWalletRes = await initKeplrEwalletCore(args);
   if (!eWalletRes.success) {
-    console.error("eWallet core init failed, err: %s", eWalletRes.err);
+    console.error("[keplr] ewallet core init failed, err: %s", eWalletRes.err);
 
     return null;
   }

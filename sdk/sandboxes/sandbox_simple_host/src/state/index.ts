@@ -1,4 +1,3 @@
-import { Envs } from "@/envs";
 import {
   CosmosEWallet,
   initCosmosEWallet,
@@ -6,6 +5,8 @@ import {
 import { EthEWallet, initEthEWallet } from "@keplr-ewallet/ewallet-sdk-eth";
 import { create } from "zustand";
 import { combine, persist } from "zustand/middleware";
+
+import { Envs } from "@/envs";
 
 const STORAGE_KEY = "sandbox-simple-host";
 
@@ -28,8 +29,6 @@ export const useAppState = create(
       },
       (set) => ({
         initKeplrSdkEth: async () => {
-          console.log("initKeplrSdkEth");
-
           const sdk = await initEthEWallet({
             // TODO:
             customer_id: "afb0afd1-d66d-4531-981c-cbf3fb1507b9",
@@ -45,8 +44,6 @@ export const useAppState = create(
           }
         },
         initKeplrSdkCosmos: async () => {
-          console.log("initKeplrSdkCosmos");
-
           const sdk = await initCosmosEWallet({
             // TODO:
             customer_id: "afb0afd1-d66d-4531-981c-cbf3fb1507b9",

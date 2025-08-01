@@ -22,7 +22,10 @@ import {
   parseTypedDataDefinition,
 } from "@keplr-ewallet-sdk-eth/utils";
 import type { EthEWallet } from "@keplr-ewallet-sdk-eth/eth_ewallet";
-import { SUPPORTED_CHAINS } from "@keplr-ewallet-sdk-eth/chains";
+import {
+  getChainIconUrl,
+  SUPPORTED_CHAINS,
+} from "@keplr-ewallet-sdk-eth/chains";
 
 const signTypeConfig: Record<
   EthSignMethod,
@@ -133,6 +136,7 @@ async function handleSigningFlow<M extends EthSignMethod>(
   data: MakeEthereumSigData,
 ): Promise<SignFunctionResult<M>> {
   const showModalMsg: EWalletMsgShowModal = {
+    target: "keplr_ewallet_attached",
     msg_type: "show_modal",
     payload: {
       modal_type: "make_signature",
@@ -168,22 +172,19 @@ async function handleSigningFlow<M extends EthSignMethod>(
   const msgHash = config.hashFunction(data);
 
   const makeSignatureMsg: EWalletMsgMakeSignature = {
+    target: "keplr_ewallet_attached",
     msg_type: "make_signature",
     payload: {
       msg: msgHash,
     },
   };
 
-  // TODO: add makeSignature api
-  const makeSignatureAck = await eWallet.sendMsgToIframe(makeSignatureMsg);
-
-  if (makeSignatureAck.msg_type !== "make_signature_ack") {
-    throw new Error("Unreachable");
+  const makeSignatureResponse = await eWallet.makeSignature(makeSignatureMsg);
+  if (!makeSignatureResponse) {
+    throw new Error("Failed to make signature");
   }
 
-  const signature = encodeEthereumSignature(
-    makeSignatureAck.payload.sign_output,
-  );
+  const signature = encodeEthereumSignature(makeSignatureResponse.sign_output);
   return config.processResult(signature, data);
 }
 
@@ -208,7 +209,7 @@ export async function makeSignature<M extends EthSignMethod>(
   const chainInfo: ChainInfoForAttachedModal = {
     chain_id: `eip155:${activeChain.id}`,
     chain_name: activeChain.name,
-    chain_symbol_image_url: `https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/eip155:${activeChain.id}/chain.png`,
+    chain_symbol_image_url: getChainIconUrl(activeChain.id),
     rpc_url: activeChain.rpcUrls.default.http[0],
     block_explorer_url: activeChain.blockExplorers?.default.url,
   };

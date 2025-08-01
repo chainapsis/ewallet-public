@@ -1,5 +1,4 @@
 import type { AccountData } from "@cosmjs/amino";
-import { type Result } from "@keplr-ewallet/stdlib-js";
 
 import { CosmosEWallet } from "@keplr-ewallet-sdk-cosmos/cosmos_ewallet";
 import {

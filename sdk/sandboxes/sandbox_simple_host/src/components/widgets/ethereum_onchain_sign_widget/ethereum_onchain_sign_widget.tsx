@@ -9,8 +9,8 @@ import {
 } from "viem";
 import { publicKeyToEthereumAddress } from "@keplr-ewallet/ewallet-sdk-eth";
 
-import { useKeplrEwallet } from "@/contexts/KeplrEwalletProvider";
 import { SignWidget } from "@/components/widgets/sign_widget/sign_widget";
+import { useKeplrEwallet } from "@/components/keplr_ewallet_provider/use_keplr_ewallet";
 
 export const EthereumOnchainSignWidget = () => {
   const { ethEWallet } = useKeplrEwallet();

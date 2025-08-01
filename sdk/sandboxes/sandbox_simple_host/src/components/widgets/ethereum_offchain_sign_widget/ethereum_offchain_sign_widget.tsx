@@ -3,8 +3,8 @@ import { hashMessage, hashTypedData, recoverPublicKey } from "viem";
 import { publicKeyToEthereumAddress } from "@keplr-ewallet/ewallet-sdk-eth";
 
 import styles from "./ethereum_offchain_sign_widget.module.scss";
-import { useKeplrEwallet } from "@/contexts/KeplrEwalletProvider";
 import { SignWidget } from "@/components/widgets/sign_widget/sign_widget";
+import { useKeplrEwallet } from "@/components/keplr_ewallet_provider/use_keplr_ewallet";
 
 export const EthereumOffchainSignWidget = () => {
   const { ethEWallet } = useKeplrEwallet();

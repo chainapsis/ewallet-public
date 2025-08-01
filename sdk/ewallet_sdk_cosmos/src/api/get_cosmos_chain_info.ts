@@ -11,8 +11,6 @@ export async function getCosmosChainInfo(
   const isCacheExpired = Date.now() - this._cacheTime > CACHE_TIME;
 
   if (isCacheExpired || this._cosmosChainInfo === null) {
-    // TODO:@dan what's the use?
-    const pubKey = await this.getPublicKey();
     const chainInfoRes = await fetchCosmosChainInfo();
     if (!chainInfoRes) {
       throw new Error("Failed to get chain registry response");
@@ -22,34 +20,21 @@ export async function getCosmosChainInfo(
       throw new Error(chainInfoRes.err);
     }
 
-    this._cosmosChainInfo = chainInfoRes.data;
-
-    // TODO:@dan what's the use?
-    const newMap = new Map<string, ChainInfo>();
-    for (const chainInfo of this._cosmosChainInfo) {
-      if (
-        chainInfo.bech32Config?.bech32PrefixAccAddr &&
-        chainInfo.bech32Config?.bech32PrefixAccAddr.length > 0
-      ) {
-        newMap.set(chainInfo.bech32Config?.bech32PrefixAccAddr, chainInfo);
-      }
-    }
-
+    this._cosmosChainInfo = chainInfoRes.data.chains;
     this._cacheTime = Date.now();
   }
 
   return this._cosmosChainInfo;
-  // return { success: true, data: this._cosmosChainInfo };
 }
 
 export async function fetchCosmosChainInfo(): Promise<
-  Result<ChainInfo[], string>
+  Result<ChainInfoResponse, string>
 > {
   try {
     const response = await fetch(
       "https://keplr-chain-registry.vercel.app/api/chains",
     );
-    const chains = (await response.json()) as ChainInfo[] | null;
+    const chains = (await response.json()) as ChainInfoResponse | null;
 
     if (!chains) {
       return { success: false, err: "Failed to fetch chain info" };
@@ -64,4 +49,8 @@ export async function fetchCosmosChainInfo(): Promise<
 
     return { success: false, err: errorMessage };
   }
+}
+
+interface ChainInfoResponse {
+  chains: ChainInfo[];
 }

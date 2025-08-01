@@ -3,6 +3,7 @@ import {
   type OAuthState,
   RedirectUriSearchParamsKey,
 } from "@keplr-ewallet-sdk-core/oauth";
+import { EWALLET_ATTACHED_TARGET } from "@keplr-ewallet-sdk-core/window_msg/send_msg_to_iframe";
 
 const GoogleClientId =
   "239646646986-8on7ql1vmbcshbjk12bdtopmto99iipm.apps.googleusercontent.com";
@@ -17,8 +18,8 @@ export async function tryGoogleSignIn(
   const clientId = GoogleClientId;
   const redirectUri = `${new URL(IframeOrigin).origin}/google/callback`;
 
-  console.log("window host: %s", window.location.host);
-  console.log("redirectUri: %s", redirectUri);
+  console.debug("[keplr] window host: %s", window.location.host);
+  console.debug("[keplr] redirectUri: %s", redirectUri);
 
   const nonce = Array.from(crypto.getRandomValues(new Uint8Array(8)))
     .map((b) => b.toString(16).padStart(2, "0"))
@@ -28,6 +29,7 @@ export async function tryGoogleSignIn(
   // between user interaction and window opening.
   // so we need to send the message to iframe first and wait for the ack after window opening.
   const ackPromise = sendMsgToIframe({
+    target: EWALLET_ATTACHED_TARGET,
     msg_type: "set_oauth_nonce",
     payload: nonce,
   });
@@ -38,7 +40,7 @@ export async function tryGoogleSignIn(
   };
   const oauthStateString = JSON.stringify(oauthState);
 
-  console.log("oauthStateString: %s", oauthStateString);
+  console.debug("[keplr] oauthStateString: %s", oauthStateString);
 
   const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
   authUrl.searchParams.set("client_id", clientId);
@@ -70,38 +72,45 @@ export async function tryGoogleSignIn(
   }
 
   return new Promise<void>((resolve, reject) => {
-    const interval = setInterval(() => {
-      if (popup.closed) {
-        clearInterval(interval);
+    let focusTimer: number;
+    let timeoutId: number;
 
-        reject(new Error("Window closed by user"));
-      }
-    }, 1000);
+    function onFocus(e: FocusEvent) {
+      // when user focus back to the parent window, check if the popup is closed
+      // a small delay to handle the case message is sent but not received yet
+      focusTimer = window.setTimeout(() => {
+        if (popup && popup.closed) {
+          cleanup();
+          reject(new Error("Window closed by user"));
+        }
+      }, 200);
+    }
+    window.addEventListener("focus", onFocus);
 
-    const handler = (e: MessageEvent) => {
-      if (e.data && e.data.msg_type === "oauth_sign_in_ack") {
-        window.removeEventListener("message", handler);
-        clearInterval(interval);
-
+    function onMessage(e: MessageEvent) {
+      if (e.data?.msg_type === "oauth_sign_in_ack") {
+        cleanup();
         resolve();
       }
-    };
+    }
+    window.addEventListener("message", onMessage);
 
-    window.addEventListener("message", handler);
-
-    setTimeout(
+    timeoutId = window.setTimeout(
       () => {
-        window.removeEventListener("message", handler);
-        clearInterval(interval);
-        popup.close();
-
-        reject(
-          new Error(
-            "User is not responding to the sign in request for more than 5 minutes",
-          ),
-        );
+        cleanup();
+        reject(new Error("Timeout: no response within 5 minutes"));
       },
       5 * 60 * 1000,
     );
+
+    function cleanup() {
+      window.clearTimeout(focusTimer);
+      window.clearTimeout(timeoutId);
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("message", onMessage);
+      if (popup && !popup.closed) {
+        popup.close();
+      }
+    }
   });
 }

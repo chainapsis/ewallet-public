@@ -10,6 +10,7 @@ export async function showModal(
   data: MakeCosmosSigData,
 ): Promise<"approve" | "reject"> {
   const showModalMsg: EWalletMsg = {
+    target: "keplr_ewallet_attached",
     msg_type: "show_modal",
     payload: {
       modal_type: "make_signature",
