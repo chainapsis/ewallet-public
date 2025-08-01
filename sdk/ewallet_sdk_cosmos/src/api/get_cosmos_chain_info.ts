@@ -25,7 +25,6 @@ export async function getCosmosChainInfo(
   }
 
   return this._cosmosChainInfo;
-  // return { success: true, data: this._cosmosChainInfo };
 }
 
 export async function fetchCosmosChainInfo(): Promise<
