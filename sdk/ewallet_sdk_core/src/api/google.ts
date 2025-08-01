@@ -77,7 +77,7 @@ export async function tryGoogleSignIn(
       // when user focus back to the parent window, check if the popup is closed
       // a small delay to handle the case message is sent but not received yet
       focusTimer = window.setTimeout(() => {
-        if (popup?.closed) {
+        if (popup && popup.closed) {
           cleanup();
           reject(new Error("Window closed by user"));
         }
@@ -106,7 +106,9 @@ export async function tryGoogleSignIn(
       window.clearTimeout(timeoutId);
       window.removeEventListener("focus", onFocus);
       window.removeEventListener("message", onMessage);
-      popup?.close();
+      if (popup && !popup.closed) {
+        popup.close();
+      }
     }
   });
 }
