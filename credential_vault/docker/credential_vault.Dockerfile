@@ -8,6 +8,10 @@ COPY --chown=node:node . .
 
 RUN yarn set version 4.7.0
 
+# Install dependencies for stdlib-js
+WORKDIR /home/node/credential_vault
+RUN yarn workspaces focus @keplr-ewallet/stdlib-js
+
 # Build stdlib-js
 WORKDIR /home/node/credential_vault/stdlib_js
 RUN yarn run build
