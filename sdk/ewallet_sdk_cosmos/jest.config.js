@@ -6,17 +6,16 @@ export default {
       "ts-jest",
       {
         useESM: true,
+        tsconfig: "tsconfig.test.json",
       },
     ],
   },
   testTimeout: 60000,
   testEnvironment: "node",
-  modulePathIgnorePatterns: ["<rootDir>/dist/"],
+  modulePathIgnorePatterns: ["<rootDir>/dist/", "<rootDir>/dist-test/"],
   moduleNameMapper: {
     "^@keplr-ewallet-sdk-cosmos/(.*)$": "<rootDir>/src/$1",
-    "^@keplr-ewallet-sdk-core/(.*)$": "<rootDir>/../../ewallet_sdk_core/src/$1",
+    "^@keplr-ewallet-sdk-core/(.*)$": "<rootDir>/../ewallet_sdk_core/src/$1",
   },
-  setupFilesAfterEnv: [
-    // "<rootDir>/src/jest-setup.ts"
-  ],
+  setupFilesAfterEnv: [],
 };
