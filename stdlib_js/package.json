@@ -1,12 +1,31 @@
 {
   "name": "@keplr-ewallet/stdlib-js",
-  "private": true,
+  "version": "0.0.1",
   "type": "module",
   "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "packageManager": "yarn@4.7.0",
   "scripts": {
     "clean": "del-cli dist",
     "build": "yarn clean && tsc && tsc-alias"
+  },
+  "keywords": [
+    "keplr",
+    "ewallet"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chainapsis/keplr-ewallet.git",
+    "directory": "stdlib_js"
   },
   "devDependencies": {
     "@jest/globals": "*",
