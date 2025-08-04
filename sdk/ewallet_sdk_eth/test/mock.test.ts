@@ -399,7 +399,7 @@ describe("EWallet Provider - Mock RPC Testing", () => {
       await expect(
         provider.request({ method: "eth_chainId" }),
       ).rejects.toMatchObject({
-        code: ErrorCodes.resourceUnavailable,
+        code: ErrorCodes.rpc.resourceUnavailable,
       });
 
       // Should have disconnect event

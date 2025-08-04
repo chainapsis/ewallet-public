@@ -115,7 +115,7 @@ export class EWalletEIP1193Provider
     } catch (error: any) {
       if (this.isConnectionError(error)) {
         const rpcError = new RpcError({
-          code: ErrorCodes.resourceUnavailable,
+          code: ErrorCodes.rpc.resourceUnavailable,
           message: error?.message || "Resource unavailable",
           data: error,
         });
@@ -770,8 +770,8 @@ export class EWalletEIP1193Provider
 
     // Provider error codes for disconnection
     if (
-      error?.code === ErrorCodes.disconnected ||
-      error?.code === ErrorCodes.chainDisconnected
+      error?.code === ErrorCodes.provider.disconnected ||
+      error?.code === ErrorCodes.provider.chainDisconnected
     ) {
       return true;
     }

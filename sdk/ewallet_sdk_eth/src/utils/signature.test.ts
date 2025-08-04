@@ -1,5 +1,5 @@
 import { publicKeyToAddress, serializeSignature } from "viem/accounts";
-import { recoverPublicKey, hashTypedData, serializeTypedData } from "viem";
+import { recoverPublicKey } from "viem";
 
 import { publicKeyToEthereumAddress } from "./utils";
 import { encodeEthereumSignature } from "./signature";
