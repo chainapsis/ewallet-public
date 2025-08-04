@@ -4,7 +4,7 @@
 
 -- DROP TABLE public.users;
 
-CREATE TABLE public.users (
+CREATE TABLE IF NOT EXISTS public.users (
 	user_id uuid DEFAULT gen_random_uuid() NOT NULL,
 	email varchar(255) NOT NULL,
 	status varchar(16) DEFAULT 'active'::character varying NULL,
@@ -20,7 +20,7 @@ CREATE TABLE public.users (
 
 -- DROP TABLE public.wallets;
 
-CREATE TABLE public.wallets (
+CREATE TABLE IF NOT EXISTS public.wallets (
     wallet_id uuid DEFAULT gen_random_uuid() NOT NULL,
     user_id   uuid NOT NULL,
     curve_type varchar(16), -- default: 'secp256k1'
@@ -38,7 +38,7 @@ CREATE TABLE public.wallets (
 
 -- DROP TABLE public.key_shares;
 
-CREATE TABLE public.key_shares (
+CREATE TABLE IF NOT EXISTS public.key_shares (
     share_id  uuid DEFAULT gen_random_uuid() NOT NULL,
     wallet_id uuid NOT NULL,
     enc_share bytea NOT NULL,
@@ -53,7 +53,7 @@ CREATE TABLE public.key_shares (
 
 -- DROP TABLE public.witnessed_id_tokens;
 
-CREATE TABLE public.witnessed_id_tokens (
+CREATE TABLE IF NOT EXISTS public.witnessed_id_tokens (
     witness_id uuid DEFAULT gen_random_uuid() NOT NULL,
     user_id uuid NOT NULL,
     user_session_public_key bytea NOT NULL, -- 33 bytes (secp256k1 public key)
@@ -65,7 +65,6 @@ CREATE TABLE public.witnessed_id_tokens (
 );
 
 -- Indexes for witnessed_id_tokens
-CREATE INDEX idx_witnessed_id_tokens_user_id ON public.witnessed_id_tokens(user_id);
-CREATE UNIQUE INDEX idx_witnessed_id_tokens_hash ON public.witnessed_id_tokens(id_token_hash);
-CREATE INDEX idx_witnessed_id_tokens_status ON public.witnessed_id_tokens(status);
-
+CREATE INDEX IF NOT EXISTS idx_witnessed_id_tokens_user_id ON public.witnessed_id_tokens(user_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_witnessed_id_tokens_hash ON public.witnessed_id_tokens(id_token_hash);
+CREATE INDEX IF NOT EXISTS idx_witnessed_id_tokens_status ON public.witnessed_id_tokens(status);

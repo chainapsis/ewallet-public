@@ -1,42 +1,40 @@
 services:
-  cv_pg:
-    image: postgres
+  credential_vault_pg:
+    image: postgres:17.4
     restart: unless-stopped
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_DB: credential_vault_dev
+      POSTGRES_DB: credential_vault
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       TZ: "UTC"
       PGTZ: "UTC"
     volumes:
-      - cv_pg_data:/var/lib/postgresql/data
+      - credential_vault_pg_data:/var/lib/postgresql/data
+      - ../../credential_vault/pg_interface/migrate/migrate.sql:/docker-entrypoint-initdb.d/migrate.sql
 
-  credential_vault_1:
+  credential_vault:
     build:
       context: ../../
       dockerfile: credential_vault/docker/credential_vault.Dockerfile
     ports:
+      # You can change the port number to your desired port number
       - "4201:4201"
     platform: linux/amd64
     restart: unless-stopped
-    volumes:
-      - ../../credential_vault/server/credential_vault.env.example:/home/node/.keplr_ewallet/credential_vault.env:ro
-    depends_on:
-      - cv_pg
+    environment:
+      # You can change the port number to your desired port number
+      PORT: "4201"
+      DB_HOST: "credential_vault_pg"
+      DB_PORT: "5432"
+      DB_USER: "postgres"
+      DB_PASSWORD: "postgres"
+      DB_NAME: "credential_vault"
+      DB_SSL: "false"
 
-  credential_vault_2:
-    build:
-      context: ../../
-      dockerfile: credential_vault/docker/credential_vault.Dockerfile
-    ports:
-      - "4202:4202"
-    platform: linux/amd64
-    volumes:
-      - ../../credential_vault/server/credential_vault_2.env.example:/home/node/.keplr_ewallet/credential_vault.env:ro
     depends_on:
-      - cv_pg
+      - credential_vault_pg
 
 volumes:
-  cv_pg_data:
+  credential_vault_pg_data:
