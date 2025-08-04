@@ -10,6 +10,8 @@ use once_cell::sync::Lazy;
 use rand::thread_rng;
 use std::sync::{Arc, Mutex};
 
+use credential_vault_core::bytes::HexSerializedBytes;
+
 pub struct EcdheServer {
     private_key: SecretKey<Secp256k1>,
     public_key: PublicKey<Secp256k1>,
@@ -72,20 +74,23 @@ impl EcdheServer {
 }
 
 pub static ECDHE_SERVER: Lazy<EcdheServer> = Lazy::new(|| {
-    let test_priv_key = "0202020202020202020202020202020202020202020202020202020202020202";
-    let private_key_hex_from_env = test_priv_key;
-    // let private_key_hex_from_env = std::env::var("NODE_PRIVATE_KEY").unwrap();
-    let private_key = SecretKey::from_be_bytes(
-        hex::decode(&private_key_hex_from_env)
-            .expect("NODE_PRIVATE_KEY environment variable (hex) is invalid.")
-            .as_slice(),
-    )
-    .expect("Invalid private key format");
+    let private_key_hex_from_env = std::env::var("NODE_PRIVATE_KEY").unwrap();
+
+    let private_key_hex: HexSerializedBytes<32> =
+        HexSerializedBytes::<32>::from_hex(&private_key_hex_from_env).unwrap_or_else(|e| {
+            eprintln!("Error parsing private key: {}", e);
+            std::process::exit(1);
+        });
+    let private_key = SecretKey::from_be_bytes(&private_key_hex.data)
+        .map_err(|e| eprintln!("Error parsing private key: {}", e))
+        .unwrap();
 
     let public_key = private_key.public_key();
+
     EcdheServer {
         private_key,
         public_key,
+        // TODO: shared secret should be stored in the database @chemonoworld
         shared_secret: Arc::new(Mutex::new(None)),
     }
 });
