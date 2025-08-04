@@ -1,5 +1,7 @@
 import { Router, type Response } from "express";
 import type {
+  CheckKeyShareRequestBody,
+  CheckKeyShareResponse,
   EwalletApiResponse,
   GetKeyShareRequestBody,
   GetKeyShareResponse,
@@ -7,6 +9,7 @@ import type {
 } from "@keplr-ewallet/credential-vault-interface";
 
 import {
+  checkKeyShare,
   getKeyShare,
   registerKeyShare,
 } from "@keplr-ewallet-cv-server/apis/key_share";
@@ -229,6 +232,79 @@ export function setKeysharesRoutes(router: Router) {
       });
     },
   );
+
+  /**
+   * @swagger
+   * /keyshare/v1/check:
+   *   post:
+   *     tags:
+   *       - Key Share
+   *     summary: Check if a key share exists
+   *     description: Check if a key share exists
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/CheckKeyShareRequestBody'
+   *     responses:
+   *       200:
+   *         description: Successfully checked key share
+   *         content:
+   *           application/json:
+   *             schema:
+   *               allOf:
+   *                 - $ref: '#/components/schemas/SuccessResponse'
+   *                 - type: object
+   *                   properties:
+   *                     data:
+   *                       $ref: '#/components/schemas/CheckKeyShareResponse'
+   *       400:
+   *         description: Bad request - Public key is not valid
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ErrorResponse'
+   *             example:
+   *               success: false
+   *               code: PUBLIC_KEY_INVALID
+   *               msg: "Public key is not valid"
+   *       500:
+   *         description: Internal server error
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ErrorResponse'
+   *             example:
+   *               success: false
+   *               code: UNKNOWN_ERROR
+   *               msg: "{error message}"
+   */
+  router.post(
+    "/check",
+    async (req, res: Response<EwalletApiResponse<CheckKeyShareResponse>>) => {
+      const body = req.body as CheckKeyShareRequestBody;
+
+      const checkKeyShareRes = await checkKeyShare(req.app.locals.db, {
+        email: body.email.toLowerCase(),
+        public_key: body.public_key,
+      });
+      if (checkKeyShareRes.success === false) {
+        return res
+          .status(mapKeyShareErrorCodeToStatus(checkKeyShareRes.err.code))
+          .json({
+            success: false,
+            code: checkKeyShareRes.err.code,
+            msg: checkKeyShareRes.err.message,
+          });
+      }
+
+      return res.status(200).json({
+        success: true,
+        data: checkKeyShareRes.data,
+      });
+    },
+  );
 }
 
 function mapKeyShareErrorCodeToStatus(code: ErrorCode): number {
@@ -238,6 +314,7 @@ function mapKeyShareErrorCodeToStatus(code: ErrorCode): number {
     WALLET_NOT_FOUND: 404,
     UNAUTHORIZED: 401,
     KEY_SHARE_NOT_FOUND: 404,
+    PUBLIC_KEY_INVALID: 400,
     UNKNOWN_ERROR: 500,
   };
 
