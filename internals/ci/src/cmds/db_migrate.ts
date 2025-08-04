@@ -10,7 +10,7 @@ export async function dbMigrate(...args: any[]) {
     paths.credential_vault_pg_interface,
   );
 
-  const dbMigrateRet = spawnSync("yarn", ["run", "migrate"], {
+  const dbMigrateRet = spawnSync("yarn", ["run", "migrate_all"], {
     cwd: paths.credential_vault_pg_interface,
     stdio: "inherit",
   });

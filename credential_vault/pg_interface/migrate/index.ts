@@ -5,11 +5,12 @@ import { Pool, type PoolConfig } from "pg";
 
 import { dropAllTablesIfExist } from "@keplr-ewallet-credential-vault-pg-interface/postgres";
 
-const DEFAULT_DB_NAME = "credential_vault_dev";
+const DEFAULT_DB_NAME = process.env.DB_NAME || "credential_vault_dev";
 
 const MIGRATE_MODE = process.env.MIGRATE_MODE || "all"; // "all" or "one"
-const COMMITTEE_ID = parseInt(process.env.COMMITTEE_ID || "1", 10) || 1;
-const COMMITTEE_COUNT = parseInt(process.env.COMMITTEE_COUNT || "2", 10) || 2;
+const COMMITTEE_ID = parseInt(process.env.COMMITTEE_ID || "1", 10);
+const COMMITTEE_COUNT = parseInt(process.env.COMMITTEE_COUNT || "2", 10);
+const DROP_TABLES = process.env.DROP_TABLES === "true";
 
 function readMigrateSql() {
   const currentDir = dirname(fileURLToPath(import.meta.url));
@@ -22,17 +23,17 @@ async function createDBIfNotExists(committeeId: number) {
     committeeId === 1 ? DEFAULT_DB_NAME : `${DEFAULT_DB_NAME}${committeeId}`;
   console.info(`Creating database ${dbName} if not exists...`);
 
-  const testPgConfigPostgres = {
+  const pgConfig = {
     database: "postgres",
-    user: "postgres",
-    password: "postgres",
-    host: "localhost",
-    port: 5432,
-    ssl: false,
+    user: process.env.DB_USER || "postgres",
+    password: process.env.DB_PASSWORD || "postgres",
+    host: process.env.DB_HOST || "localhost",
+    port: parseInt(process.env.DB_PORT || "5432", 10),
+    ssl: process.env.DB_SSL === "true",
   };
 
-  console.info("Connecting to db (postgres), config: %j", testPgConfigPostgres);
-  const connRet = await createDBConn(testPgConfigPostgres);
+  console.info("Connecting to db (postgres), config: %j", pgConfig);
+  const connRet = await createDBConn(pgConfig);
   if (connRet.success === true) {
     const pool = connRet.data;
     const res = await pool.query(
@@ -88,24 +89,25 @@ async function migrateAll() {
   for (let i = 1; i <= COMMITTEE_COUNT; i++) {
     const dbName = i === 1 ? DEFAULT_DB_NAME : `${DEFAULT_DB_NAME}${i}`;
 
-    const testPgConfigCredentialVaultDev = {
+    const pgConfig = {
       database: dbName,
-      user: "postgres",
-      password: "postgres",
-      host: "localhost",
-      port: 5432,
-      ssl: false,
+      user: process.env.DB_USER || "postgres",
+      password: process.env.DB_PASSWORD || "postgres",
+      host: process.env.DB_HOST || "localhost",
+      port: parseInt(process.env.DB_PORT || "5432", 10),
+      ssl: process.env.DB_SSL === "true",
     };
 
-    console.info(
-      `Connecting to db (${dbName}), config: %j`,
-      testPgConfigCredentialVaultDev,
-    );
-    const connRet = await createDBConn(testPgConfigCredentialVaultDev);
+    console.info(`Connecting to db (${dbName}), config: %j`, pgConfig);
+    const connRet = await createDBConn(pgConfig);
     if (connRet.success === true) {
       const pool = connRet.data;
 
-      await dropAllTablesIfExist(pool);
+      if (DROP_TABLES) {
+        console.log(`Dropping tables in db (${dbName})...`);
+        await dropAllTablesIfExist(pool);
+      }
+
       await createTables(pool);
     }
   }
@@ -117,24 +119,25 @@ async function migrateOne() {
   const dbName =
     COMMITTEE_ID === 1 ? DEFAULT_DB_NAME : `${DEFAULT_DB_NAME}${COMMITTEE_ID}`;
 
-  const testPgConfigCredentialVaultDev = {
+  const pgConfig = {
     database: dbName,
-    user: "postgres",
-    password: "postgres",
-    host: "localhost",
-    port: 5432,
-    ssl: false,
+    user: process.env.DB_USER || "postgres",
+    password: process.env.DB_PASSWORD || "postgres",
+    host: process.env.DB_HOST || "localhost",
+    port: parseInt(process.env.DB_PORT || "5432", 10),
+    ssl: process.env.DB_SSL === "true",
   };
 
-  console.info(
-    "Connecting to db (credential_vault_dev), config: %j",
-    testPgConfigCredentialVaultDev,
-  );
-  const connRet = await createDBConn(testPgConfigCredentialVaultDev);
+  console.info(`Connecting to db (${dbName}), config: %j`, pgConfig);
+  const connRet = await createDBConn(pgConfig);
   if (connRet.success === true) {
     const pool = connRet.data;
 
-    await dropAllTablesIfExist(pool);
+    if (DROP_TABLES) {
+      console.log(`Dropping tables in db (${dbName})...`);
+      await dropAllTablesIfExist(pool);
+    }
+
     await createTables(pool);
   }
 }
