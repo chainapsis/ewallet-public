@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "../",
+    "outDir": "./dist-test",
+    "noEmit": true,
+    "types": ["jest", "@jest/globals"]
+  },
+  "include": ["src/**/*", "../ewallet_sdk_core/src/**/*"]
+}

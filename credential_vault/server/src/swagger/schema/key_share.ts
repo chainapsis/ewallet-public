@@ -47,4 +47,30 @@ export const keyShareSchemas = {
       },
     },
   },
+  CheckKeyShareRequestBody: {
+    type: "object",
+    required: ["email", "public_key"],
+    properties: {
+      email: {
+        type: "string",
+        description: "Email address",
+        example: "test@example.com",
+      },
+      public_key: {
+        type: "string",
+        description: "Public key in hex string format",
+        example: "3fa1c7e8b42d9f50c6e2a8749db1fe23",
+      },
+    },
+  },
+  CheckKeyShareResponse: {
+    type: "object",
+    required: ["is_exists"],
+    properties: {
+      is_exists: {
+        type: "boolean",
+        description: "Whether the key share exists",
+      },
+    },
+  },
 };

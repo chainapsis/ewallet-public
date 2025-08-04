@@ -6,7 +6,8 @@ export type ErrorCode =
   | "UNAUTHORIZED"
   | "KEY_SHARE_NOT_FOUND"
   | "ID_TOKEN_INVALID"
-  | "ID_TOKEN_MISMATCHED";
+  | "ID_TOKEN_MISMATCHED"
+  | "PUBLIC_KEY_INVALID";
 
 export interface ErrorResponse {
   code: ErrorCode;

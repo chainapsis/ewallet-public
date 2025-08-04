@@ -4,92 +4,99 @@ import type { ErrorCode, StandardErrorOptions } from "./types";
 const standardRpcError = {
   invalidInput: <T>(options: StandardErrorOptions<T>) => {
     return {
-      code: ErrorCodes.invalidInput,
-      message: options.message ?? defaultErrorMessage[ErrorCodes.invalidInput],
+      code: ErrorCodes.rpc.invalidInput,
+      message:
+        options.message ?? defaultErrorMessage[ErrorCodes.rpc.invalidInput],
       data: options.data,
     };
   },
   resourceNotFound: <T>(options: StandardErrorOptions<T>) => {
     return {
-      code: ErrorCodes.resourceNotFound,
+      code: ErrorCodes.rpc.resourceNotFound,
       message:
-        options.message ?? defaultErrorMessage[ErrorCodes.resourceNotFound],
+        options.message ?? defaultErrorMessage[ErrorCodes.rpc.resourceNotFound],
       data: options.data,
     };
   },
   resourceUnavailable: <T>(options: StandardErrorOptions<T>) => {
     return {
-      code: ErrorCodes.resourceUnavailable,
+      code: ErrorCodes.rpc.resourceUnavailable,
       message:
-        options.message ?? defaultErrorMessage[ErrorCodes.resourceUnavailable],
+        options.message ??
+        defaultErrorMessage[ErrorCodes.rpc.resourceUnavailable],
       data: options.data,
     };
   },
   transactionRejected: <T>(options: StandardErrorOptions<T>) => {
     return {
-      code: ErrorCodes.transactionRejected,
+      code: ErrorCodes.rpc.transactionRejected,
       message:
-        options.message ?? defaultErrorMessage[ErrorCodes.transactionRejected],
+        options.message ??
+        defaultErrorMessage[ErrorCodes.rpc.transactionRejected],
       data: options.data,
     };
   },
   methodNotSupported: <T>(options: StandardErrorOptions<T>) => {
     return {
-      code: ErrorCodes.methodNotSupported,
+      code: ErrorCodes.rpc.methodNotSupported,
       message:
-        options.message ?? defaultErrorMessage[ErrorCodes.methodNotSupported],
+        options.message ??
+        defaultErrorMessage[ErrorCodes.rpc.methodNotSupported],
       data: options.data,
     };
   },
   limitExceeded: <T>(options: StandardErrorOptions<T>) => {
     return {
-      code: ErrorCodes.limitExceeded,
-      message: options.message ?? defaultErrorMessage[ErrorCodes.limitExceeded],
+      code: ErrorCodes.rpc.limitExceeded,
+      message:
+        options.message ?? defaultErrorMessage[ErrorCodes.rpc.limitExceeded],
       data: options.data,
     };
   },
   versionNotSupported: <T>(options: StandardErrorOptions<T>) => {
     return {
-      code: ErrorCodes.versionNotSupported,
+      code: ErrorCodes.rpc.versionNotSupported,
       message:
-        options.message ?? defaultErrorMessage[ErrorCodes.versionNotSupported],
+        options.message ??
+        defaultErrorMessage[ErrorCodes.rpc.versionNotSupported],
       data: options.data,
     };
   },
   invalidRequest: <T>(options: StandardErrorOptions<T>) => {
     return {
-      code: ErrorCodes.invalidRequest,
+      code: ErrorCodes.rpc.invalidRequest,
       message:
-        options.message ?? defaultErrorMessage[ErrorCodes.invalidRequest],
+        options.message ?? defaultErrorMessage[ErrorCodes.rpc.invalidRequest],
       data: options.data,
     };
   },
   methodNotFound: <T>(options: StandardErrorOptions<T>) => {
     return {
-      code: ErrorCodes.methodNotFound,
+      code: ErrorCodes.rpc.methodNotFound,
       message:
-        options.message ?? defaultErrorMessage[ErrorCodes.methodNotFound],
+        options.message ?? defaultErrorMessage[ErrorCodes.rpc.methodNotFound],
       data: options.data,
     };
   },
   invalidParams: <T>(options: StandardErrorOptions<T>) => {
     return {
-      code: ErrorCodes.invalidParams,
-      message: options.message ?? defaultErrorMessage[ErrorCodes.invalidParams],
+      code: ErrorCodes.rpc.invalidParams,
+      message:
+        options.message ?? defaultErrorMessage[ErrorCodes.rpc.invalidParams],
       data: options.data,
     };
   },
   internal: <T>(options: StandardErrorOptions<T>) => {
     return {
-      code: ErrorCodes.internal,
-      message: options.message ?? defaultErrorMessage[ErrorCodes.internal],
+      code: ErrorCodes.rpc.internal,
+      message: options.message ?? defaultErrorMessage[ErrorCodes.rpc.internal],
       data: options.data,
     };
   },
   parse: <T>(options: StandardErrorOptions<T>) => {
     return {
-      code: ErrorCodes.parse,
-      message: options.message ?? defaultErrorMessage[ErrorCodes.parse],
+      code: ErrorCodes.rpc.parse,
+      message: options.message ?? defaultErrorMessage[ErrorCodes.rpc.parse],
       data: options.data,
     };
   },
@@ -98,55 +105,131 @@ const standardRpcError = {
 const standardProviderError = {
   userRejectedRequest: <T>(options: StandardErrorOptions<T>) => {
     return {
-      code: ErrorCodes.userRejectedRequest,
+      code: ErrorCodes.provider.userRejectedRequest,
       message:
-        options.message ?? defaultErrorMessage[ErrorCodes.userRejectedRequest],
+        options.message ??
+        defaultErrorMessage[ErrorCodes.provider.userRejectedRequest],
       data: options.data,
     };
   },
   unauthorized: <T>(options: StandardErrorOptions<T>) => {
     return {
-      code: ErrorCodes.unauthorized,
-      message: options.message ?? defaultErrorMessage[ErrorCodes.unauthorized],
+      code: ErrorCodes.provider.unauthorized,
+      message:
+        options.message ??
+        defaultErrorMessage[ErrorCodes.provider.unauthorized],
       data: options.data,
     };
   },
   unsupportedMethod: <T>(options: StandardErrorOptions<T>) => {
     return {
-      code: ErrorCodes.unsupportedMethod,
+      code: ErrorCodes.provider.unsupportedMethod,
       message:
-        options.message ?? defaultErrorMessage[ErrorCodes.unsupportedMethod],
+        options.message ??
+        defaultErrorMessage[ErrorCodes.provider.unsupportedMethod],
       data: options.data,
     };
   },
   disconnected: <T>(options: StandardErrorOptions<T>) => {
     return {
-      code: ErrorCodes.disconnected,
-      message: options.message ?? defaultErrorMessage[ErrorCodes.disconnected],
+      code: ErrorCodes.provider.disconnected,
+      message:
+        options.message ??
+        defaultErrorMessage[ErrorCodes.provider.disconnected],
       data: options.data,
     };
   },
   chainDisconnected: <T>(options: StandardErrorOptions<T>) => {
     return {
-      code: ErrorCodes.chainDisconnected,
+      code: ErrorCodes.provider.chainDisconnected,
       message:
-        options.message ?? defaultErrorMessage[ErrorCodes.chainDisconnected],
+        options.message ??
+        defaultErrorMessage[ErrorCodes.provider.chainDisconnected],
       data: options.data,
     };
   },
   unsupportedChain: <T>(options: StandardErrorOptions<T>) => {
     return {
-      code: ErrorCodes.unsupportedChain,
+      code: ErrorCodes.provider.unsupportedChain,
       message:
-        options.message ?? defaultErrorMessage[ErrorCodes.unsupportedChain],
+        options.message ??
+        defaultErrorMessage[ErrorCodes.provider.unsupportedChain],
       data: options.data,
     };
   },
 };
 
+const standardEthEWalletError = {
+  invalidChainType: <T>(options: StandardErrorOptions<T>) => {
+    return {
+      code: ErrorCodes.ethEWallet.invalidChainType,
+      message:
+        options.message ??
+        defaultErrorMessage[ErrorCodes.ethEWallet.invalidChainType],
+    };
+  },
+  invalidSignType: <T>(options: StandardErrorOptions<T>) => {
+    return {
+      code: ErrorCodes.ethEWallet.invalidSignType,
+      message:
+        options.message ??
+        defaultErrorMessage[ErrorCodes.ethEWallet.invalidSignType],
+    };
+  },
+  publicKeyFetchFailed: <T>(options: StandardErrorOptions<T>) => {
+    return {
+      code: ErrorCodes.ethEWallet.publicKeyFetchFailed,
+      message:
+        options.message ??
+        defaultErrorMessage[ErrorCodes.ethEWallet.publicKeyFetchFailed],
+    };
+  },
+  invalidAddress: <T>(options: StandardErrorOptions<T>) => {
+    return {
+      code: ErrorCodes.ethEWallet.invalidAddress,
+      message:
+        options.message ??
+        defaultErrorMessage[ErrorCodes.ethEWallet.invalidAddress],
+    };
+  },
+  signatureFailed: <T>(options: StandardErrorOptions<T>) => {
+    return {
+      code: ErrorCodes.ethEWallet.signatureFailed,
+      message:
+        options.message ??
+        defaultErrorMessage[ErrorCodes.ethEWallet.signatureFailed],
+    };
+  },
+  signResultMismatch: <T>(options: StandardErrorOptions<T>) => {
+    return {
+      code: ErrorCodes.ethEWallet.signResultMismatch,
+      message:
+        options.message ??
+        defaultErrorMessage[ErrorCodes.ethEWallet.signResultMismatch],
+    };
+  },
+  invalidMessage: <T>(options: StandardErrorOptions<T>) => {
+    return {
+      code: ErrorCodes.ethEWallet.invalidMessage,
+      message:
+        options.message ??
+        defaultErrorMessage[ErrorCodes.ethEWallet.invalidMessage],
+    };
+  },
+  userRejectedRequest: <T>(options: StandardErrorOptions<T>) => {
+    return {
+      code: ErrorCodes.ethEWallet.userRejectedRequest,
+      message:
+        options.message ??
+        defaultErrorMessage[ErrorCodes.ethEWallet.userRejectedRequest],
+    };
+  },
+};
+
 export const standardError = {
-  ...standardRpcError,
-  ...standardProviderError,
+  rpc: standardRpcError,
+  provider: standardProviderError,
+  ethEWallet: standardEthEWalletError,
   from: <T>(code: ErrorCode, options: StandardErrorOptions<T>) => {
     return {
       code,

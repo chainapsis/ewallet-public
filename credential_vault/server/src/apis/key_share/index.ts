@@ -8,6 +8,8 @@ import {
   getWalletByPublicKey,
 } from "@keplr-ewallet/credential-vault-pg-interface";
 import type {
+  CheckKeyShareRequest,
+  CheckKeyShareResponse,
   GetKeyShareRequest,
   GetKeyShareResponse,
   RegisterKeyShareRequest,
@@ -92,8 +94,6 @@ export async function registerKeyShare(
     }
 
     const wallet_id = createWalletRes.data.wallet_id;
-
-    console.log("enc_share", Buffer.from(enc_share, "hex"));
 
     const createKeyShareRes = await createKeyShare(db, {
       wallet_id,
@@ -210,6 +210,103 @@ export async function getKeyShare(
       data: {
         share_id: getKeyShareRes.data.share_id,
         enc_share: getKeyShareRes.data.enc_share.toString("hex"),
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      err: {
+        code: "UNKNOWN_ERROR",
+        message: String(error),
+      },
+    };
+  }
+}
+
+export async function checkKeyShare(
+  db: Pool,
+  checkKeyShareRequest: CheckKeyShareRequest,
+): Promise<Result<CheckKeyShareResponse, ErrorResponse>> {
+  try {
+    const { email, public_key } = checkKeyShareRequest;
+
+    const getUserRes = await getUserByEmail(db, email);
+    if (getUserRes.success === false) {
+      return {
+        success: false,
+        err: {
+          code: "UNKNOWN_ERROR",
+          message: getUserRes.err,
+        },
+      };
+    }
+    if (getUserRes.data === null) {
+      return {
+        success: true,
+        data: {
+          is_exists: false,
+        },
+      };
+    }
+
+    const getWalletRes = await getWalletByPublicKey(
+      db,
+      Buffer.from(public_key, "hex"),
+    );
+    if (getWalletRes.success === false) {
+      return {
+        success: false,
+        err: {
+          code: "UNKNOWN_ERROR",
+          message: getWalletRes.err,
+        },
+      };
+    }
+    if (getWalletRes.data === null) {
+      return {
+        success: true,
+        data: {
+          is_exists: false,
+        },
+      };
+    }
+    if (getWalletRes.data.user_id !== getUserRes.data.user_id) {
+      return {
+        success: false,
+        err: {
+          code: "PUBLIC_KEY_INVALID",
+          message: "Public key is not valid",
+        },
+      };
+    }
+
+    const getKeyShareRes = await getKeyShareByWalletId(
+      db,
+      getWalletRes.data.wallet_id,
+    );
+    if (getKeyShareRes.success === false) {
+      return {
+        success: false,
+        err: {
+          code: "UNKNOWN_ERROR",
+          message: getKeyShareRes.err,
+        },
+      };
+    }
+
+    if (getKeyShareRes.data === null) {
+      return {
+        success: true,
+        data: {
+          is_exists: false,
+        },
+      };
+    }
+
+    return {
+      success: true,
+      data: {
+        is_exists: true,
       },
     };
   } catch (error) {

@@ -1,4 +1,3 @@
-import type { Hex } from "viem";
 import {
   initKeplrEwalletCore,
   type KeplrEwalletInitArgs,

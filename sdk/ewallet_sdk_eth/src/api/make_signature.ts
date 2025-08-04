@@ -26,6 +26,7 @@ import {
   getChainIconUrl,
   SUPPORTED_CHAINS,
 } from "@keplr-ewallet-sdk-eth/chains";
+import { standardError } from "@keplr-ewallet-sdk-eth/errors";
 
 const signTypeConfig: Record<
   EthSignMethod,
@@ -42,11 +43,15 @@ const signTypeConfig: Record<
     sign_type: "tx",
     hashFunction: (data: MakeEthereumSigData) => {
       if (data.chain_type !== "eth") {
-        throw new Error("Invalid chain type");
+        throw standardError.ethEWallet.invalidChainType({
+          message: "Chain type should be eth",
+        });
       }
 
       if (data.sign_type !== "tx") {
-        throw new Error("Invalid sign type");
+        throw standardError.ethEWallet.invalidSignType({
+          message: "Sign type should be tx",
+        });
       }
 
       const payload = data.payload;
@@ -59,15 +64,21 @@ const signTypeConfig: Record<
     },
     processResult: (signature: Signature, data?: MakeEthereumSigData) => {
       if (!data) {
-        throw new Error("Data is required");
+        throw standardError.ethEWallet.invalidMessage({
+          message: "Data is required for sign_transaction method",
+        });
       }
 
       if (data.chain_type !== "eth") {
-        throw new Error("Invalid chain type");
+        throw standardError.ethEWallet.invalidChainType({
+          message: "Chain type should be eth",
+        });
       }
 
       if (data.sign_type !== "tx") {
-        throw new Error("Invalid sign type");
+        throw standardError.ethEWallet.invalidSignType({
+          message: "Sign type should be tx",
+        });
       }
 
       const payload = data.payload;
@@ -88,11 +99,15 @@ const signTypeConfig: Record<
     sign_type: "arbitrary",
     hashFunction: (data: MakeEthereumSigData) => {
       if (data.chain_type !== "eth") {
-        throw new Error("Invalid chain type");
+        throw standardError.ethEWallet.invalidChainType({
+          message: "Chain type should be eth",
+        });
       }
 
       if (data.sign_type !== "arbitrary") {
-        throw new Error("Invalid sign type");
+        throw standardError.ethEWallet.invalidSignType({
+          message: "Sign type should be arbitrary",
+        });
       }
 
       const payloadData = data.payload.data;
@@ -108,14 +123,25 @@ const signTypeConfig: Record<
     sign_type: "eip712",
     hashFunction: (data: MakeEthereumSigData) => {
       if (data.chain_type !== "eth") {
-        throw new Error("Invalid chain type");
+        throw standardError.ethEWallet.invalidChainType({
+          message: "Chain type should be eth",
+        });
       }
 
       if (data.sign_type !== "eip712") {
-        throw new Error("Invalid sign type");
+        throw standardError.ethEWallet.invalidSignType({
+          message: "Sign type should be eip712",
+        });
       }
 
       const payloadData = data.payload.data;
+
+      if (payloadData.version !== "4") {
+        throw standardError.ethEWallet.invalidMessage({
+          message:
+            "Typed data version should be 4 for sign_typedData_v4 method",
+        });
+      }
 
       const typedData = parseTypedDataDefinition(
         payloadData.serialized_typed_data,
@@ -151,7 +177,9 @@ async function handleSigningFlow<M extends EthSignMethod>(
   await eWallet.hideModal();
 
   if (modalResponse === "reject") {
-    throw new Error("User rejected the signature request");
+    throw standardError.ethEWallet.userRejectedRequest({
+      message: "User rejected the signature request",
+    });
   }
 
   if (modalResponse !== "approve") {
@@ -160,10 +188,12 @@ async function handleSigningFlow<M extends EthSignMethod>(
     if (data.sign_type === "tx") {
       const transaction = makeSignatureResponse.transaction;
       if (!transaction) {
-        throw new Error("Simulation result is not available");
+        throw standardError.ethEWallet.invalidMessage({
+          message:
+            "Simulation result is not present for sign_transaction method",
+        });
       }
 
-      // CHECK: validation required?
       // override the transaction with the simulation result
       data.payload.data.transaction = transaction;
     }
@@ -181,7 +211,7 @@ async function handleSigningFlow<M extends EthSignMethod>(
 
   const makeSignatureResponse = await eWallet.makeSignature(makeSignatureMsg);
   if (!makeSignatureResponse) {
-    throw new Error("Failed to make signature");
+    throw standardError.ethEWallet.signatureFailed({});
   }
 
   const signature = encodeEthereumSignature(makeSignatureResponse.sign_output);
@@ -203,7 +233,9 @@ export async function makeSignature<M extends EthSignMethod>(
     (chain) => chain.id === chainIdNumber,
   );
   if (!activeChain) {
-    throw new Error("Active chain not found");
+    throw standardError.ethEWallet.invalidMessage({
+      message: "Chain not found in the supported chains",
+    });
   }
 
   const chainInfo: ChainInfoForAttachedModal = {
@@ -285,7 +317,9 @@ export async function makeSignature<M extends EthSignMethod>(
     }
 
     default: {
-      throw new Error(`Unknown sign method: ${(parameters as any).type}`);
+      throw standardError.ethEWallet.invalidMessage({
+        message: `Unknown sign method: ${(parameters as any).type}`,
+      });
     }
   }
 }

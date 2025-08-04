@@ -71,7 +71,7 @@ describe("EWallet Provider - Viem Integration", () => {
       });
 
       await expect(client.getBlockNumber()).rejects.toMatchObject({
-        code: ErrorCodes.methodNotSupported,
+        code: ErrorCodes.rpc.methodNotSupported,
       });
     });
   });

@@ -6,8 +6,11 @@ use k256::{
     },
     EncodedPoint, Secp256k1,
 };
+use once_cell::sync::Lazy;
 use rand::thread_rng;
 use std::sync::{Arc, Mutex};
+
+use credential_vault_core::bytes::HexSerializedBytes;
 
 pub struct EcdheServer {
     private_key: SecretKey<Secp256k1>,
@@ -70,6 +73,24 @@ impl EcdheServer {
     }
 }
 
-lazy_static::lazy_static! {
-    pub static ref ECDHE_SERVER: EcdheServer = EcdheServer::new();
-}
+pub static ECDHE_SERVER: Lazy<EcdheServer> = Lazy::new(|| {
+    let private_key_hex_from_env = std::env::var("NODE_PRIVATE_KEY").unwrap();
+
+    let private_key_hex: HexSerializedBytes<32> =
+        HexSerializedBytes::<32>::from_hex(&private_key_hex_from_env).unwrap_or_else(|e| {
+            eprintln!("Error parsing private key: {}", e);
+            std::process::exit(1);
+        });
+    let private_key = SecretKey::from_be_bytes(&private_key_hex.data)
+        .map_err(|e| eprintln!("Error parsing private key: {}", e))
+        .unwrap();
+
+    let public_key = private_key.public_key();
+
+    EcdheServer {
+        private_key,
+        public_key,
+        // TODO: shared secret should be stored in the database @chemonoworld
+        shared_secret: Arc::new(Mutex::new(None)),
+    }
+});

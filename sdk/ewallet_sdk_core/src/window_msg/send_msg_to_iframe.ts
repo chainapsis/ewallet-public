@@ -33,6 +33,6 @@ export function sendMsgToIframe(this: KeplrEWallet, msg: EWalletMsg) {
       }
     };
 
-    contentWindow.postMessage(msg, this.attachedEndpoint, [channel.port2]);
+    contentWindow.postMessage(msg, this.sdkEndpoint, [channel.port2]);
   });
 }

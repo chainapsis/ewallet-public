@@ -1,6 +1,6 @@
 {
   "name": "@keplr-ewallet/ewallet-sdk-eth",
-  "version": "0.0.6-rc.19",
+  "version": "0.0.6-rc.24",
   "packageManager": "yarn@4.7.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -39,14 +39,11 @@
     "clean": "del-cli dist",
     "build": "yarn clean && tsc && tsc-alias",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
-    "test:debug": "yarn test --verbose",
-    "test:watch": "yarn test --watch",
-    "test:coverage": "yarn test --coverage",
     "hardhat": "npx hardhat node"
   },
   "dependencies": {
-    "@keplr-ewallet/ewallet-sdk-core": "^0.0.6-rc.16",
-    "@keplr-ewallet/stdlib-js": "workspace:*",
+    "@keplr-ewallet/ewallet-sdk-core": "^0.0.6-rc.19",
+    "@keplr-ewallet/stdlib-js": "^0.0.2-rc.1",
     "eventemitter3": "^5.0.1",
     "uuid": "*",
     "viem": "*"

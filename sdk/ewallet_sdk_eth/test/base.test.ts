@@ -157,9 +157,10 @@ describe("EWallet Provider - Base", () => {
 
         expect(thrownError).toBeDefined();
         // mainnet throws invalidParams, sepolia throws methodNotFound
-        expect([ErrorCodes.invalidParams, ErrorCodes.methodNotFound]).toContain(
-          thrownError.code,
-        );
+        expect([
+          ErrorCodes.rpc.invalidParams,
+          ErrorCodes.rpc.methodNotFound,
+        ]).toContain(thrownError.code);
       });
     });
 
@@ -195,7 +196,7 @@ describe("EWallet Provider - Base", () => {
             ],
           }),
         ).rejects.toMatchObject({
-          code: ErrorCodes.invalidParams,
+          code: ErrorCodes.rpc.invalidParams,
         });
 
         // should not change the chain
@@ -244,7 +245,7 @@ describe("EWallet Provider - Base", () => {
             params: [invalidChainParam],
           }),
         ).rejects.toMatchObject({
-          code: ErrorCodes.invalidParams,
+          code: ErrorCodes.rpc.invalidParams,
         });
       });
 
@@ -290,7 +291,7 @@ describe("EWallet Provider - Base", () => {
             params: [{ chainId: nonExistentChainId }],
           }),
         ).rejects.toMatchObject({
-          code: ErrorCodes.unsupportedChain,
+          code: ErrorCodes.provider.unsupportedChain,
         });
       });
 
@@ -364,7 +365,7 @@ describe("EWallet Provider - Base", () => {
         await expect(
           publicProvider.request({ method: "eth_accounts" }),
         ).rejects.toMatchObject({
-          code: ErrorCodes.unsupportedMethod, // Correct error code
+          code: ErrorCodes.provider.unsupportedMethod,
           message: expect.stringContaining("Signer is required"),
         });
       });

@@ -4,9 +4,10 @@
   "type": "module",
   "main": "./src/index.ts",
   "scripts": {
-    "migrate": "MIGRATE_MODE=all COMMITTEE_COUNT=2 tsx ./migrate/index.ts",
-    "migrate_1": "MIGRATE_MODE=one COMMITTEE_ID=1 tsx ./migrate/index.ts",
-    "migrate_2": "MIGRATE_MODE=one COMMITTEE_ID=2 tsx ./migrate/index.ts",
+    "migrate": "MIGRATE_MODE=one DROP_TABLES=false tsx ./migrate/index.ts",
+    "migrate_1": "MIGRATE_MODE=one COMMITTEE_ID=1 DROP_TABLES=true tsx ./migrate/index.ts",
+    "migrate_2": "MIGRATE_MODE=one COMMITTEE_ID=2 DROP_TABLES=true tsx ./migrate/index.ts",
+    "migrate_all": "MIGRATE_MODE=all COMMITTEE_COUNT=2 DROP_TABLES=true tsx ./migrate/index.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

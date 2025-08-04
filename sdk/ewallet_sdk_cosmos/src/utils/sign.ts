@@ -1,6 +1,6 @@
 import { encodeSecp256k1Signature } from "@cosmjs/amino";
 import type { StdSignature } from "@cosmjs/amino";
-import type { SignOutput } from "@keplr-ewallet-sdk-core/types";
+import type { SignOutput } from "@keplr-ewallet/ewallet-sdk-core";
 
 export const encodeCosmosSignature = (
   signOutput: SignOutput,

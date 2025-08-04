@@ -39,3 +39,17 @@ export interface GetKeyShareResponse {
 export type GetKeyShareRequestBody = {
   public_key: string; // hex string
 };
+
+export interface CheckKeyShareRequest {
+  email: string;
+  public_key: string; // hex string
+}
+
+export interface CheckKeyShareResponse {
+  is_exists: boolean;
+}
+
+export interface CheckKeyShareRequestBody {
+  email: string;
+  public_key: string; // hex string
+}

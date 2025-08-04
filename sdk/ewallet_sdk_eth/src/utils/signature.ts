@@ -1,22 +1,5 @@
-import type {
-  SignableMessage,
-  TransactionSerializable,
-  TypedDataDefinition,
-  Signature,
-  Hex,
-  Address,
-  ByteArray,
-} from "viem";
-import {
-  serializeTransaction,
-  hashMessage,
-  hashTypedData,
-  keccak256,
-  toBytes,
-  pad,
-  toHex,
-} from "viem";
-import { publicKeyToAddress } from "viem/accounts";
+import type { Signature, Hex } from "viem";
+import { pad, toHex } from "viem";
 import type { SignOutput } from "@keplr-ewallet/ewallet-sdk-core";
 import { secp256k1 } from "@noble/curves/secp256k1";
 

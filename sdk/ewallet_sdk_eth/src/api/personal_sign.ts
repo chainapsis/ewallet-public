@@ -1,6 +1,7 @@
 import type { Hex } from "viem";
 
 import type { EthEWallet } from "@keplr-ewallet-sdk-eth/eth_ewallet";
+import { standardError } from "@keplr-ewallet-sdk-eth/errors";
 
 export async function personalSign(
   this: EthEWallet,
@@ -15,7 +16,9 @@ export async function personalSign(
   });
 
   if (result.type !== "signature") {
-    throw new Error("Invalid signature response from ewallet");
+    throw standardError.ethEWallet.signResultMismatch({
+      message: "Expected signature result",
+    });
   }
 
   return result.signature;

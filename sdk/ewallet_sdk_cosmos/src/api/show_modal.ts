@@ -1,5 +1,5 @@
 import type {
-  EWalletMsg,
+  EWalletMsgShowModal,
   MakeCosmosSigData,
 } from "@keplr-ewallet/ewallet-sdk-core";
 
@@ -9,7 +9,7 @@ export async function showModal(
   this: CosmosEWallet,
   data: MakeCosmosSigData,
 ): Promise<"approve" | "reject"> {
-  const showModalMsg: EWalletMsg = {
+  const showModalMsg: EWalletMsgShowModal = {
     target: "keplr_ewallet_attached",
     msg_type: "show_modal",
     payload: {
