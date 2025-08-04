@@ -38,7 +38,7 @@ import type {
   ChainWithStatus,
 } from "./types";
 import { ProviderEventEmitter } from "./types";
-import { VERSION } from "./constants";
+import { VERSION } from "./version";
 
 export class EWalletEIP1193Provider
   extends ProviderEventEmitter
