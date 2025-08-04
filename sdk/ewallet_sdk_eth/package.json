@@ -1,6 +1,6 @@
 {
   "name": "@keplr-ewallet/ewallet-sdk-eth",
-  "version": "0.0.6-rc.21",
+  "version": "0.0.6-rc.22",
   "packageManager": "yarn@4.7.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
