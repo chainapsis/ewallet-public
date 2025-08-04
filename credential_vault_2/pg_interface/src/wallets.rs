@@ -1,6 +1,6 @@
+use crate::types::{CreateCredentialVaultWalletRequest, CredentialVaultWallet, Result};
 use tokio_postgres::Client;
 use uuid::Uuid;
-use crate::types::{CredentialVaultWallet, CreateCredentialVaultWalletRequest, Result};
 
 pub async fn create_wallet(
     client: &Client,
@@ -15,12 +15,17 @@ pub async fn create_wallet(
         RETURNING *
     ";
 
-    let row = client.query_one(query, &[
-        &wallet_id,
-        &request.user_id,
-        &request.curve_type,
-        &request.public_key,
-    ]).await?;
+    let row = client
+        .query_one(
+            query,
+            &[
+                &wallet_id,
+                &request.user_id,
+                &request.curve_type,
+                &request.public_key,
+            ],
+        )
+        .await?;
 
     Ok(CredentialVaultWallet {
         wallet_id: row.get("wallet_id"),

@@ -1,11 +1,11 @@
-use tokio_postgres::Client;
 use crate::types::Result;
+use tokio_postgres::Client;
 
 pub async fn run_migration(client: &Client) -> Result<()> {
     let migration_sql = include_str!("../migrate/migrate.sql");
-    
+
     client.batch_execute(migration_sql).await?;
-    
+
     println!("Migration completed successfully");
     Ok(())
 }

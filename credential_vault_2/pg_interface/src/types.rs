@@ -1,8 +1,8 @@
 use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize, Deserializer, Serializer};
 use serde::de::{self, Visitor};
-use uuid::Uuid;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt;
+use uuid::Uuid;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub struct Bytes32(pub [u8; 32]);
@@ -47,7 +47,8 @@ impl<'de> Visitor<'de> for Bytes32Visitor {
     {
         let mut bytes = [0u8; 32];
         for (i, byte) in bytes.iter_mut().enumerate() {
-            *byte = seq.next_element()?
+            *byte = seq
+                .next_element()?
                 .ok_or_else(|| de::Error::invalid_length(i, &self))?;
         }
         Ok(Bytes32(bytes))
@@ -100,7 +101,8 @@ impl<'de> Visitor<'de> for Bytes33Visitor {
     {
         let mut bytes = [0u8; 33];
         for (i, byte) in bytes.iter_mut().enumerate() {
-            *byte = seq.next_element()?
+            *byte = seq
+                .next_element()?
                 .ok_or_else(|| de::Error::invalid_length(i, &self))?;
         }
         Ok(Bytes33(bytes))

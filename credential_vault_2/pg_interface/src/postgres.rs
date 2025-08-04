@@ -1,5 +1,5 @@
-use tokio_postgres::{Client, NoTls};
 use crate::types::Result;
+use tokio_postgres::{Client, NoTls};
 
 pub async fn drop_all_tables_if_exist(client: &Client) -> Result<()> {
     let table_name_rows = client
@@ -16,7 +16,7 @@ pub async fn drop_all_tables_if_exist(client: &Client) -> Result<()> {
             .iter()
             .map(|row| row.get::<_, String>("table_name"))
             .collect();
-        
+
         println!("Existing tables: {:?}", table_names);
 
         for table_name in &table_names {
