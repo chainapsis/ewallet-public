@@ -24,9 +24,21 @@ export enum ProviderErrorCodes {
   unsupportedChain = 4902,
 }
 
+export enum EthEWalletErrorCodes {
+  invalidChainType = 5000,
+  invalidSignType = 5001,
+  signatureFailed = 5100,
+  signResultMismatch = 5101,
+  invalidMessage = 5102,
+  publicKeyFetchFailed = 5200,
+  invalidAddress = 5201,
+  userRejectedRequest = 5800,
+}
+
 export const ErrorCodes = {
   rpc: RpcErrorCodes,
   provider: ProviderErrorCodes,
+  ethEWallet: EthEWalletErrorCodes,
 };
 
 const defaultRpcErrorMessage: Record<RpcErrorCodes, string> = {
@@ -53,7 +65,20 @@ const defaultProviderErrorMessage: Record<ProviderErrorCodes, string> = {
   [ProviderErrorCodes.unsupportedChain]: "Unsupported chain",
 };
 
+const defaultEthEWalletErrorMessage: Record<EthEWalletErrorCodes, string> = {
+  [EthEWalletErrorCodes.invalidChainType]: "Invalid chain type",
+  [EthEWalletErrorCodes.invalidSignType]: "Invalid sign type",
+  [EthEWalletErrorCodes.publicKeyFetchFailed]: "Failed to fetch public key",
+  [EthEWalletErrorCodes.invalidAddress]:
+    "Invalid address, please check the public key is valid hex string",
+  [EthEWalletErrorCodes.signatureFailed]: "Failed to sign",
+  [EthEWalletErrorCodes.signResultMismatch]: "Sign result mismatch",
+  [EthEWalletErrorCodes.invalidMessage]: "Invalid message",
+  [EthEWalletErrorCodes.userRejectedRequest]: "User rejected the request",
+};
+
 export const defaultErrorMessage: Record<ErrorCode, string> = {
   ...defaultRpcErrorMessage,
   ...defaultProviderErrorMessage,
+  ...defaultEthEWalletErrorMessage,
 };

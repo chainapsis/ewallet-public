@@ -159,9 +159,77 @@ const standardProviderError = {
   },
 };
 
+const standardEthEWalletError = {
+  invalidChainType: <T>(options: StandardErrorOptions<T>) => {
+    return {
+      code: ErrorCodes.ethEWallet.invalidChainType,
+      message:
+        options.message ??
+        defaultErrorMessage[ErrorCodes.ethEWallet.invalidChainType],
+    };
+  },
+  invalidSignType: <T>(options: StandardErrorOptions<T>) => {
+    return {
+      code: ErrorCodes.ethEWallet.invalidSignType,
+      message:
+        options.message ??
+        defaultErrorMessage[ErrorCodes.ethEWallet.invalidSignType],
+    };
+  },
+  publicKeyFetchFailed: <T>(options: StandardErrorOptions<T>) => {
+    return {
+      code: ErrorCodes.ethEWallet.publicKeyFetchFailed,
+      message:
+        options.message ??
+        defaultErrorMessage[ErrorCodes.ethEWallet.publicKeyFetchFailed],
+    };
+  },
+  invalidAddress: <T>(options: StandardErrorOptions<T>) => {
+    return {
+      code: ErrorCodes.ethEWallet.invalidAddress,
+      message:
+        options.message ??
+        defaultErrorMessage[ErrorCodes.ethEWallet.invalidAddress],
+    };
+  },
+  signatureFailed: <T>(options: StandardErrorOptions<T>) => {
+    return {
+      code: ErrorCodes.ethEWallet.signatureFailed,
+      message:
+        options.message ??
+        defaultErrorMessage[ErrorCodes.ethEWallet.signatureFailed],
+    };
+  },
+  signResultMismatch: <T>(options: StandardErrorOptions<T>) => {
+    return {
+      code: ErrorCodes.ethEWallet.signResultMismatch,
+      message:
+        options.message ??
+        defaultErrorMessage[ErrorCodes.ethEWallet.signResultMismatch],
+    };
+  },
+  invalidMessage: <T>(options: StandardErrorOptions<T>) => {
+    return {
+      code: ErrorCodes.ethEWallet.invalidMessage,
+      message:
+        options.message ??
+        defaultErrorMessage[ErrorCodes.ethEWallet.invalidMessage],
+    };
+  },
+  userRejectedRequest: <T>(options: StandardErrorOptions<T>) => {
+    return {
+      code: ErrorCodes.ethEWallet.userRejectedRequest,
+      message:
+        options.message ??
+        defaultErrorMessage[ErrorCodes.ethEWallet.userRejectedRequest],
+    };
+  },
+};
+
 export const standardError = {
-  ...standardRpcError,
-  ...standardProviderError,
+  rpc: standardRpcError,
+  provider: standardProviderError,
+  ethEWallet: standardEthEWalletError,
   from: <T>(code: ErrorCode, options: StandardErrorOptions<T>) => {
     return {
       code,

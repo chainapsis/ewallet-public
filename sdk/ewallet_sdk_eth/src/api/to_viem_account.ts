@@ -3,6 +3,7 @@ import { type Address, type Hex, serializeTypedData } from "viem";
 import type { EWalletAccount } from "@keplr-ewallet-sdk-eth/types";
 import type { EthEWallet } from "@keplr-ewallet-sdk-eth/eth_ewallet";
 import { toRpcTransactionRequest } from "@keplr-ewallet-sdk-eth/utils";
+import { standardError } from "@keplr-ewallet-sdk-eth/errors";
 
 export async function toViemAccount(
   this: EthEWallet,
@@ -27,7 +28,9 @@ export async function toViemAccount(
       });
 
       if (result.type !== "signature") {
-        throw new Error("Expected signature result");
+        throw standardError.ethEWallet.signResultMismatch({
+          message: "Expected signature result",
+        });
       }
 
       return result.signature;
@@ -42,7 +45,9 @@ export async function toViemAccount(
       });
 
       if (result.type !== "signed_transaction") {
-        throw new Error("Expected signed transaction result");
+        throw standardError.ethEWallet.signResultMismatch({
+          message: "Expected signed transaction result",
+        });
       }
 
       return result.signedTransaction;
@@ -57,7 +62,9 @@ export async function toViemAccount(
       });
 
       if (result.type !== "signature") {
-        throw new Error("Expected signature result");
+        throw standardError.ethEWallet.signResultMismatch({
+          message: "Expected signature result",
+        });
       }
 
       return result.signature;
