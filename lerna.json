@@ -1,5 +1,6 @@
 {
   "packages": [
+    "stdlib_js",
     "sdk/ewallet_sdk_core",
     "sdk/ewallet_sdk_cosmos",
     "sdk/ewallet_sdk_eth",
