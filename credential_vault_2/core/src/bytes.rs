@@ -1,3 +1,4 @@
+use crate::crypto::CryptoError;
 use serde::{ser::SerializeTuple, Deserialize, Serialize};
 use std::fmt;
 
@@ -9,6 +10,17 @@ pub struct HexSerializedBytes<const N: usize> {
 impl<const N: usize> HexSerializedBytes<N> {
     const fn zero() -> Self {
         Self { data: [0; N] }
+    }
+
+    pub fn from_hex(hex: &str) -> Result<Self, CryptoError> {
+        let bytes = hex::decode(hex).map_err(|e| CryptoError::InvalidFormat(e.to_string()))?;
+        if bytes.len() != N {
+            return Err(CryptoError::InvalidFormat("invalid length".to_string()));
+        }
+        let data = bytes
+            .try_into()
+            .map_err(|e| CryptoError::InvalidFormat(e.to_string()))?;
+        Ok(Self { data })
     }
 }
 
