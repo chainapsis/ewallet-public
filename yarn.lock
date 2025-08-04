@@ -3044,7 +3044,7 @@ __metadata:
   resolution: "@keplr-ewallet/bytes@workspace:crypto/bytes"
   dependencies:
     "@jest/globals": "npm:*"
-    "@keplr-ewallet/stdlib-js": "workspace:*"
+    "@keplr-ewallet/stdlib-js": "npm:0.0.2-rc.0"
     "@types/jest": "npm:*"
     "@types/node": "npm:*"
     del-cli: "npm:*"
@@ -3145,7 +3145,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@keplr-ewallet/ewallet-sdk-core@workspace:sdk/ewallet_sdk_core"
   dependencies:
-    "@keplr-ewallet/stdlib-js": "workspace:*"
+    "@keplr-ewallet/stdlib-js": "npm:0.0.2-rc.0"
     "@keplr-wallet/types": "npm:^0.12.257"
     "@types/jest": "npm:*"
     "@types/node": "npm:*"
@@ -3164,7 +3164,7 @@ __metadata:
     "@cosmjs/amino": "npm:^0.33.1"
     "@cosmjs/proto-signing": "npm:^0.33.1"
     "@keplr-ewallet/ewallet-sdk-core": "npm:^0.0.6-rc.18"
-    "@keplr-ewallet/stdlib-js": "workspace:*"
+    "@keplr-ewallet/stdlib-js": "npm:0.0.2-rc.0"
     "@keplr-wallet/common": "npm:^0.12.253"
     "@keplr-wallet/cosmos": "npm:^0.12.253"
     "@keplr-wallet/crypto": "npm:^0.12.253"
@@ -3193,7 +3193,7 @@ __metadata:
   resolution: "@keplr-ewallet/ewallet-sdk-eth@workspace:sdk/ewallet_sdk_eth"
   dependencies:
     "@keplr-ewallet/ewallet-sdk-core": "npm:^0.0.6-rc.18"
-    "@keplr-ewallet/stdlib-js": "workspace:*"
+    "@keplr-ewallet/stdlib-js": "npm:0.0.2-rc.0"
     "@types/jest": "npm:*"
     "@types/node": "npm:*"
     "@typescript-eslint/eslint-plugin": "npm:*"
@@ -3211,7 +3211,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@keplr-ewallet/stdlib-js@workspace:*, @keplr-ewallet/stdlib-js@workspace:stdlib_js":
+"@keplr-ewallet/stdlib-js@npm:0.0.2-rc.0, @keplr-ewallet/stdlib-js@workspace:*, @keplr-ewallet/stdlib-js@workspace:stdlib_js":
   version: 0.0.0-use.local
   resolution: "@keplr-ewallet/stdlib-js@workspace:stdlib_js"
   dependencies:

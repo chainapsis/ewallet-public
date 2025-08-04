@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "@keplr-ewallet/ewallet-sdk-core": "^0.0.6-rc.18",
-    "@keplr-ewallet/stdlib-js": "workspace:*",
+    "@keplr-ewallet/stdlib-js": "0.0.2-rc.0",
     "eventemitter3": "^5.0.1",
     "uuid": "*",
     "viem": "*"
