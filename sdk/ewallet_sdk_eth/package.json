@@ -37,10 +37,7 @@
   },
   "scripts": {
     "clean": "del-cli dist",
-    "prebuild": "node scripts/generate-version.cjs",
-    "build": "yarn prebuild && yarn clean && tsc && tsc-alias",
-    "postversion": "yarn prebuild && git add src/provider/version.ts",
-    "prepublishOnly": "yarn build",
+    "build": "yarn clean && tsc && tsc-alias",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "hardhat": "npx hardhat node"
   },
