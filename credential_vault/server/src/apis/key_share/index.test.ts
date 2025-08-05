@@ -1,5 +1,6 @@
 import { Pool } from "pg";
 import {
+  createKeyShare,
   createUser,
   createWallet,
   getKeyShareByWalletId,
@@ -12,7 +13,7 @@ import {
   resetPgDatabase,
 } from "@keplr-ewallet-cv-server/database";
 import { testPgConfig } from "../../database/test_config";
-import { getKeyShare, registerKeyShare } from ".";
+import { checkKeyShare, getKeyShare, registerKeyShare } from ".";
 
 describe("key_share_test", () => {
   let pool: Pool;
@@ -258,6 +259,157 @@ describe("key_share_test", () => {
       }
       expect(getKeyShareRes.err.code).toBe("KEY_SHARE_NOT_FOUND");
       expect(getKeyShareRes.err.message).toBe("Key share not found");
+    });
+  });
+
+  describe("check key share", () => {
+    it("should return true if key share exists", async () => {
+      const email = "test@test.com";
+      const publicKey = "3fa1c7e8b42d9f50c6e2a8749db1fe23";
+      const encShare = "8c5e2d17ab9034f65d1c3b7a29ef4d88";
+
+      const createUserRes = await createUser(pool, email);
+      if (createUserRes.success === false) {
+        console.error(createUserRes.err);
+        throw new Error("Failed to create user");
+      }
+
+      const createWalletRes = await createWallet(pool, {
+        user_id: createUserRes.data!.user_id,
+        curve_type: "secp256k1",
+        public_key: Buffer.from(publicKey, "hex"),
+      });
+      if (createWalletRes.success === false) {
+        console.error(createWalletRes.err);
+        throw new Error("Failed to create wallet");
+      }
+
+      const createKeyShareRes = await createKeyShare(pool, {
+        wallet_id: createWalletRes.data!.wallet_id,
+        enc_share: Buffer.from(encShare, "hex"),
+      });
+      if (createKeyShareRes.success === false) {
+        console.error(createKeyShareRes.err);
+        throw new Error("Failed to create key share");
+      }
+
+      const checkKeyShareRes = await checkKeyShare(pool, {
+        email,
+        public_key: publicKey,
+      });
+      if (checkKeyShareRes.success === false) {
+        console.error(checkKeyShareRes.err);
+        throw new Error("Failed to check key share");
+      }
+
+      expect(checkKeyShareRes.success).toBe(true);
+      expect(checkKeyShareRes.data?.is_exists).toBe(true);
+    });
+
+    it("should return false if user not found", async () => {
+      const email = "test@test.com";
+      const publicKey = "3fa1c7e8b42d9f50c6e2a8749db1fe23";
+
+      const checkKeyShareRes = await checkKeyShare(pool, {
+        email,
+        public_key: publicKey,
+      });
+      if (checkKeyShareRes.success === false) {
+        console.error(checkKeyShareRes.err);
+        throw new Error("Failed to check key share");
+      }
+
+      expect(checkKeyShareRes.success).toBe(true);
+      expect(checkKeyShareRes.data?.is_exists).toBe(false);
+    });
+
+    it("should return false if wallet not found", async () => {
+      const email = "test@test.com";
+      const publicKey = "3fa1c7e8b42d9f50c6e2a8749db1fe23";
+
+      const createUserRes = await createUser(pool, email);
+      if (createUserRes.success === false) {
+        console.error(createUserRes.err);
+        throw new Error("Failed to create user");
+      }
+
+      const checkKeyShareRes = await checkKeyShare(pool, {
+        email,
+        public_key: publicKey,
+      });
+      if (checkKeyShareRes.success === false) {
+        console.error(checkKeyShareRes.err);
+        throw new Error("Failed to check key share");
+      }
+
+      expect(checkKeyShareRes.success).toBe(true);
+      expect(checkKeyShareRes.data?.is_exists).toBe(false);
+    });
+
+    it("should fail if public key is not valid", async () => {
+      const email = "test@test.com";
+      const publicKey = "3fa1c7e8b42d9f50c6e2a8749db1fe23";
+
+      const createUserRes = await createUser(pool, email);
+      if (createUserRes.success === false) {
+        console.error(createUserRes.err);
+        throw new Error("Failed to create user");
+      }
+
+      const createWalletRes = await createWallet(pool, {
+        user_id: "550e8400-e29b-41d4-a716-446655440000",
+        curve_type: "secp256k1",
+        public_key: Buffer.from(publicKey, "hex"),
+      });
+      if (createWalletRes.success === false) {
+        console.error(createWalletRes.err);
+        throw new Error("Failed to create wallet");
+      }
+
+      const checkKeyShareRes = await checkKeyShare(pool, {
+        email,
+        public_key: publicKey,
+      });
+      if (checkKeyShareRes.success === true) {
+        throw new Error("check key share should fail");
+      }
+
+      expect(checkKeyShareRes.success).toBe(false);
+      expect(checkKeyShareRes.err.code).toBe("PUBLIC_KEY_INVALID");
+      expect(checkKeyShareRes.err.message).toBe("Public key is not valid");
+    });
+
+    it("should return false if key share not found", async () => {
+      const email = "test@test.com";
+      const publicKey = "3fa1c7e8b42d9f50c6e2a8749db1fe23";
+
+      const createUserRes = await createUser(pool, email);
+      if (createUserRes.success === false) {
+        console.error(createUserRes.err);
+        throw new Error("Failed to create user");
+      }
+
+      const createWalletRes = await createWallet(pool, {
+        user_id: createUserRes.data!.user_id,
+        curve_type: "secp256k1",
+        public_key: Buffer.from(publicKey, "hex"),
+      });
+      if (createWalletRes.success === false) {
+        console.error(createWalletRes.err);
+        throw new Error("Failed to create wallet");
+      }
+
+      const checkKeyShareRes = await checkKeyShare(pool, {
+        email,
+        public_key: publicKey,
+      });
+      if (checkKeyShareRes.success === false) {
+        console.error(checkKeyShareRes.err);
+        throw new Error("Failed to check key share");
+      }
+
+      expect(checkKeyShareRes.success).toBe(true);
+      expect(checkKeyShareRes.data?.is_exists).toBe(false);
     });
   });
 });
