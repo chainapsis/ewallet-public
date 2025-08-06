@@ -59,6 +59,17 @@ export async function initKeplrEwalletCore(
 
   window.__keplr_ewallet = ewalletCore;
 
+  const hostOriginRes = await getHostOrigin();
+  if (!hostOriginRes.success) {
+    return hostOriginRes;
+  }
+
+  const hostOrigin = hostOriginRes.data;
+  const initStateRes = await ewalletCore.initState(hostOrigin);
+  if (!initStateRes.success) {
+    return initStateRes;
+  }
+
   return { success: true, data: ewalletCore };
 }
 
@@ -79,5 +90,19 @@ async function checkURL(url?: string): Promise<Result<string, string>> {
     console.error("[keplr] check url fail, url: %s", _url);
 
     return { success: false, err: `check url fail, ${err.toString()}` };
+  }
+}
+
+async function getHostOrigin(): Promise<Result<string, string>> {
+  try {
+    const myUrl = window.location.toString();
+    const normalizedIframeOrigin = new URL(myUrl).origin;
+    return { success: true, data: normalizedIframeOrigin };
+  } catch (err: any) {
+    console.error("[keplr] get host origin fail");
+    return {
+      success: false,
+      err: `get host origin fail, ${err.toString()}`,
+    };
   }
 }

@@ -57,15 +57,15 @@ export type EWalletMsgOAuthSignInAck = {
   target: "keplr_ewallet_sdk";
   msg_type: "oauth_sign_in_ack";
   payload:
-  | {
-    success: true;
-    wallet_id: string;
-    public_key: string;
-  }
-  | {
-    success: false;
-    error: string;
-  };
+    | {
+        success: true;
+        wallet_id: string;
+        public_key: string;
+      }
+    | {
+        success: false;
+        error: string;
+      };
 };
 
 export type EWalletMsgSignOut = {
@@ -128,6 +128,18 @@ export type EWalletMsgGetEmailAck = {
   payload: string | null;
 };
 
+export type EWalletMsgInitState = {
+  target: "keplr_ewallet_attached";
+  msg_type: "init_state";
+  payload: string;
+};
+
+export type EWalletMsgInitStateAck = {
+  target: "keplr_ewallet_sdk";
+  msg_type: "init_state_ack";
+  payload: null;
+};
+
 export type EWalletMsg =
   | EWalletMsgInit
   | EWalletMsgInitAck
@@ -147,8 +159,10 @@ export type EWalletMsg =
   | EWalletMsgHideModalAck
   | EWalletMsgGetEmail
   | EWalletMsgGetEmailAck
+  | EWalletMsgInitState
+  | EWalletMsgInitStateAck
   | {
-    target: "keplr_ewallet_sdk";
-    msg_type: "unknown_msg_type";
-    payload: string | null;
-  };
+      target: "keplr_ewallet_sdk";
+      msg_type: "unknown_msg_type";
+      payload: string | null;
+    };
