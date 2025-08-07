@@ -5,9 +5,24 @@ import type { Msg } from "@keplr-wallet/types";
 
 export type ShowModalPayload = MakeSignatureModalPayload | OtherModalPayload;
 
-export type ModalResponse = "approve" | "reject" | MakeSignatureModalResponse;
+export type ModalApproval = {
+  approved: true;
+  data: MakeSignatureModalResult | OtherModalResult;
+};
+
+export type ModalRejection = {
+  approved: false;
+  reason?: string;
+};
+
+export type ModalResult = ModalApproval | ModalRejection;
 
 export interface OtherModalPayload {
+  modal_type: "other";
+  data: {};
+}
+
+export interface OtherModalResult {
   modal_type: "other";
   data: {};
 }
@@ -113,16 +128,24 @@ export type EthereumEip712SignPayload = {
   };
 };
 
-export type MakeSignatureModalResponse = {
+export type MakeSignatureModalResult = {
   modal_type: "make_signature";
-  data: MakeEthereumSigResponse | MakeCosmosSigResponse;
-};
+} & (
+  | {
+      chain_type: "eth";
+      data: MakeEthereumSigResult;
+    }
+  | {
+      chain_type: "cosmos";
+      data: MakeCosmosSigResult;
+    }
+);
 
-export type MakeEthereumSigResponse = EthereumTxSignResponse;
+export type MakeEthereumSigResult = EthereumTxSignResult;
 
-export type EthereumTxSignResponse = {
+export type EthereumTxSignResult = {
   transaction: RpcTransactionRequest;
 };
 
 // TODO: define the response type for cosmos signature
-export type MakeCosmosSigResponse = {};
+export type MakeCosmosSigResult = {};
