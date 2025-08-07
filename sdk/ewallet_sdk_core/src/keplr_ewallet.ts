@@ -6,12 +6,13 @@ import { getPublicKey } from "./api/get_public_key";
 import { getEmail } from "./api/get_email";
 import { hideModal } from "./api/hide_modal";
 import { makeSignature } from "./api/make_signature";
+import { initState } from "./api/init_state";
 
 export class KeplrEWallet {
   customerId: string;
   iframe: HTMLIFrameElement;
   sdkEndpoint: string;
-  origin: string;
+  readonly origin: string;
 
   public constructor(
     customerId: string,
@@ -32,4 +33,5 @@ export class KeplrEWallet {
   getPublicKey = getPublicKey.bind(this);
   getEmail = getEmail.bind(this);
   makeSignature = makeSignature.bind(this);
+  initState = initState.bind(this);
 }

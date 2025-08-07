@@ -17,9 +17,9 @@ impl<const N: usize> HexSerializedBytes<N> {
         if bytes.len() != N {
             return Err(CryptoError::InvalidFormat("invalid length".to_string()));
         }
-        let data = bytes
-            .try_into()
-            .map_err(|e| CryptoError::InvalidFormat(e.to_string()))?;
+        let data = bytes.try_into().map_err(|_| {
+            CryptoError::InvalidFormat(format!("Failed to convert to array of length {}", N))
+        })?;
         Ok(Self { data })
     }
 }

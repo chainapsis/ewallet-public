@@ -44,12 +44,9 @@ export async function signArbitrary(
       throw new Error("User rejected the signature request");
     }
 
-    const makeSignatureAck = await this.makeSignature(signDocHash);
+    const signOutput = await this.makeSignature(signDocHash);
 
-    const signature = encodeCosmosSignature(
-      makeSignatureAck.sign_output,
-      publicKey,
-    );
+    const signature = encodeCosmosSignature(signOutput, publicKey);
 
     const isVerified = await this.verifyArbitrary(
       chainId,

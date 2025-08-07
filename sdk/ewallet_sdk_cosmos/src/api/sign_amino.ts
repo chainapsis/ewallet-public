@@ -50,12 +50,10 @@ export async function signAmino(
       throw new Error("User rejected the signature request");
     }
 
-    const makeSignatureAck = await this.makeSignature(signDocHash);
+    const signOutput = await this.makeSignature(signDocHash);
 
-    const signature = encodeCosmosSignature(
-      makeSignatureAck.sign_output,
-      publicKey,
-    );
+    const signature = encodeCosmosSignature(signOutput, publicKey);
+
     return {
       signed: signDoc,
       signature,
