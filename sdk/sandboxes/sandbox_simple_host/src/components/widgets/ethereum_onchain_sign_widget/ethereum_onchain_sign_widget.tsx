@@ -6,6 +6,9 @@ import {
   recoverPublicKey,
   serializeTransaction,
   type Signature,
+  parseUnits,
+  parseAbi,
+  encodeFunctionData,
 } from "viem";
 import { publicKeyToEthereumAddress } from "@keplr-ewallet/ewallet-sdk-eth";
 
@@ -20,32 +23,36 @@ export const EthereumOnchainSignWidget = () => {
       throw new Error("EthEWallet is not initialized");
     }
 
-    await ethEWallet.switchChain(8453);
-
     const provider = await ethEWallet.getEthereumProvider();
+    const address = await ethEWallet.getAddress();
 
-    // works fine
-    await provider.request({
-      method: "wallet_switchEthereumChain",
-      params: [{ chainId: "0xa" }],
+    const toAddress = "0xbb6B34131210C091cb2890b81fCe7103816324a5"; // dogemos.eth
+    const usdcAddress = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
+    const transferAmount = parseUnits("1", 6);
+
+    const abi = parseAbi([
+      "function transfer(address to, uint256 amount) public returns (bool)",
+    ]);
+    const data = encodeFunctionData({
+      abi,
+      functionName: "transfer",
+      args: [toAddress, transferAmount],
     });
 
-    const address = await ethEWallet.getAddress();
     const signedTx = await provider.request({
       method: "eth_signTransaction",
       params: [
         {
           type: "0x2",
           from: address,
-          to: "0xbb6B34131210C091cb2890b81fCe7103816324a5", // dogemos.eth
-          value: "0x1",
+          to: usdcAddress,
+          data,
+          value: "0x0",
         },
       ],
     });
 
     const parsedTx = parseTransaction(signedTx);
-
-    console.log("parsedTx", parsedTx);
 
     const signature: Signature = {
       r: parsedTx.r!,
@@ -76,13 +83,7 @@ export const EthereumOnchainSignWidget = () => {
     if (!isRecoveredAddressEqual) {
       throw new Error("Recovered address is not equal to the address");
     }
-
-    console.log("signature", signature);
-    console.log("txHash", txHash);
-    console.log("recoveredAddress", recoveredAddress);
-    console.log("isRecoveredAddressEqual", isRecoveredAddressEqual);
   };
-
   return (
     <SignWidget
       chain="Ethereum"

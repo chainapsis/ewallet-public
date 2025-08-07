@@ -183,27 +183,37 @@ async function handleSigningFlow<M extends EthSignMethod>(
 
   const makeSignatureResult = modalResult.data;
 
-  if (makeSignatureResult.modal_type !== "make_signature") {
-    throw standardError.ethEWallet.invalidMessage({
-      message: "Invalid modal result for eth signature",
-    });
-  }
+  if (data.sign_type === "tx") {
+    if (!makeSignatureResult) {
+      throw standardError.ethEWallet.invalidMessage({
+        message:
+          "Make signature result is not present for sign_transaction method",
+      });
+    }
 
-  if (makeSignatureResult.chain_type === "eth") {
+    if (makeSignatureResult.modal_type !== "make_signature") {
+      throw standardError.ethEWallet.invalidMessage({
+        message: "Invalid modal result for eth signature",
+      });
+    }
+
+    if (makeSignatureResult.chain_type !== "eth") {
+      throw standardError.ethEWallet.invalidMessage({
+        message: "Invalid chain type for eth signature",
+      });
+    }
+
     const makeSignatureResponse = makeSignatureResult.data;
 
-    if (data.sign_type === "tx") {
-      const transaction = makeSignatureResponse.transaction;
-      if (!transaction) {
-        throw standardError.ethEWallet.invalidMessage({
-          message:
-            "Simulation result is not present for sign_transaction method",
-        });
-      }
-
-      // override the transaction with the simulation result
-      data.payload.data.transaction = transaction;
+    const transaction = makeSignatureResponse.transaction;
+    if (!transaction) {
+      throw standardError.ethEWallet.invalidMessage({
+        message: "Simulation result is not present for sign_transaction method",
+      });
     }
+
+    // override the transaction with the simulation result
+    data.payload.data.transaction = transaction;
   }
 
   const msgHash = config.hashFunction(data);

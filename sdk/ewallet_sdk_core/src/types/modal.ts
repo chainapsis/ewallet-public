@@ -7,7 +7,7 @@ export type ShowModalPayload = MakeSignatureModalPayload | OtherModalPayload;
 
 export type ModalApproval = {
   approved: true;
-  data: MakeSignatureModalResult | OtherModalResult;
+  data: MakeSignatureModalResult | null;
 };
 
 export type ModalRejection = {
@@ -18,11 +18,6 @@ export type ModalRejection = {
 export type ModalResult = ModalApproval | ModalRejection;
 
 export interface OtherModalPayload {
-  modal_type: "other";
-  data: {};
-}
-
-export interface OtherModalResult {
   modal_type: "other";
   data: {};
 }
