@@ -1,6 +1,5 @@
 import type {
   ChainInfoForAttachedModal,
-  EthereumTxSignResponse,
   EWalletMsgMakeSignature,
   EWalletMsgShowModal,
   MakeEthereumSigData,
@@ -172,18 +171,26 @@ async function handleSigningFlow<M extends EthSignMethod>(
 
   const eWallet = ethEWallet.eWallet;
 
-  const modalResponse = await eWallet.showModal(showModalMsg);
+  const modalResult = await eWallet.showModal(showModalMsg);
 
   await eWallet.hideModal();
 
-  if (modalResponse === "reject") {
+  if (!modalResult.approved) {
     throw standardError.ethEWallet.userRejectedRequest({
-      message: "User rejected the signature request",
+      message: modalResult.reason ?? "User rejected the signature request",
     });
   }
 
-  if (modalResponse !== "approve") {
-    const makeSignatureResponse = modalResponse.data as EthereumTxSignResponse;
+  const makeSignatureResult = modalResult.data;
+
+  if (makeSignatureResult.modal_type !== "make_signature") {
+    throw standardError.ethEWallet.invalidMessage({
+      message: "Invalid modal result for eth signature",
+    });
+  }
+
+  if (makeSignatureResult.chain_type === "eth") {
+    const makeSignatureResponse = makeSignatureResult.data;
 
     if (data.sign_type === "tx") {
       const transaction = makeSignatureResponse.transaction;
@@ -209,12 +216,12 @@ async function handleSigningFlow<M extends EthSignMethod>(
     },
   };
 
-  const makeSignatureResponse = await eWallet.makeSignature(makeSignatureMsg);
-  if (!makeSignatureResponse) {
+  const signOutput = await eWallet.makeSignature(makeSignatureMsg);
+  if (!signOutput) {
     throw standardError.ethEWallet.signatureFailed({});
   }
 
-  const signature = encodeEthereumSignature(makeSignatureResponse.sign_output);
+  const signature = encodeEthereumSignature(signOutput);
   return config.processResult(signature, data);
 }
 

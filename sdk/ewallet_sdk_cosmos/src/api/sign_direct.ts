@@ -55,12 +55,9 @@ export async function signDirect(
       throw new Error("User rejected the signature request");
     }
 
-    const makeSignatureAck = await this.makeSignature(hashedMessage);
+    const signOutput = await this.makeSignature(hashedMessage);
 
-    const signature = encodeCosmosSignature(
-      makeSignatureAck.sign_output,
-      publicKey,
-    );
+    const signature = encodeCosmosSignature(signOutput, publicKey);
 
     return {
       signed: signDoc,

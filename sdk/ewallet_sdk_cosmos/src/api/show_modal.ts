@@ -18,11 +18,11 @@ export async function showModal(
     },
   };
 
-  const modalResponse = await this.eWallet.showModal(showModalMsg);
+  const modalResult = await this.eWallet.showModal(showModalMsg);
 
   await this.eWallet.hideModal();
 
-  if (modalResponse === "reject") {
+  if (!modalResult.approved) {
     return "reject";
   }
 
