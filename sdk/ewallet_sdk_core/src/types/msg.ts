@@ -54,23 +54,10 @@ export type EWalletMsgOAuthSignIn = {
 export type EWalletMsgOAuthSignInAck = {
   target: "keplr_ewallet_sdk";
   msg_type: "oauth_sign_in_ack";
-<<<<<<< HEAD
-  payload:
-    | {
-        success: true;
-        wallet_id: string;
-        public_key: string;
-      }
-    | {
-        success: false;
-        error: string;
-      };
-=======
   payload: AckPayload<{
     wallet_id: string;
     public_key: string;
   }>;
->>>>>>> dd2f518 (core: unify ack msg payload format)
 };
 
 export type EWalletMsgSignOut = {
