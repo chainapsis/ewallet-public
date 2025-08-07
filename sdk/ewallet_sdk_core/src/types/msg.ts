@@ -1,8 +1,11 @@
+import type { Result } from "@keplr-ewallet/stdlib-js";
+
 import type { ModalResult, ShowModalPayload } from "./modal";
-import type { AckPayload } from "./ack_payload";
 import type { EWalletMakeSignaturePayload, SignOutput } from "./sign";
 
 export type MsgTarget = "keplr_ewallet_attached" | "keplr_ewallet_sdk_core";
+
+export type AckPayload<T> = Result<T, string>;
 
 export type EWalletMsgMakeSignature = {
   target: "keplr_ewallet_attached";
