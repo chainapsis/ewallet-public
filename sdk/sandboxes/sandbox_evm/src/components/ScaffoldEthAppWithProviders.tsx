@@ -13,10 +13,7 @@ import {
   keplrEWallet,
   wagmiConfigWithKeplr,
 } from "@keplr-ewallet-sandbox-evm/services/web3/wagmiConfig";
-import {
-  KeplrEwalletProvider,
-  useKeplrEwallet,
-} from "@keplr-ewallet-sandbox-evm/contexts/KeplrEwalletProvider";
+import { EWalletProvider } from "@keplr-ewallet-sandbox-evm/components/KeplrEwalletProvider";
 
 const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
   useInitializeNativeCurrencyPrice();
@@ -42,17 +39,9 @@ export const queryClient = new QueryClient({
 });
 
 const WagmiWithKeplr = ({ children }: { children: React.ReactNode }) => {
-  const { eWallet } = useKeplrEwallet();
-
-  const wagmiConfig = (() => {
-    if (!eWallet) {
-      return wagmiConfigWithKeplr();
-    }
-
-    return wagmiConfigWithKeplr(keplrEWallet(eWallet));
-  })();
-
-  return <WagmiProvider config={wagmiConfig}>{children}</WagmiProvider>;
+  return (
+    <WagmiProvider config={wagmiConfigWithKeplr()}>{children}</WagmiProvider>
+  );
 };
 
 export const ScaffoldEthAppWithProviders = ({
@@ -61,7 +50,7 @@ export const ScaffoldEthAppWithProviders = ({
   children: React.ReactNode;
 }) => {
   return (
-    <KeplrEwalletProvider initialLoginMethods={["email", "google"]}>
+    <EWalletProvider>
       <WagmiWithKeplr>
         <QueryClientProvider client={queryClient}>
           <RainbowKitProvider avatar={BlockieAvatar}>
@@ -69,6 +58,6 @@ export const ScaffoldEthAppWithProviders = ({
           </RainbowKitProvider>
         </QueryClientProvider>
       </WagmiWithKeplr>
-    </KeplrEwalletProvider>
+    </EWalletProvider>
   );
 };

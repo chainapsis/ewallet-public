@@ -1,17 +1,5 @@
-import {
-  Chain,
-  createClient,
-  fallback,
-  getAddress,
-  hashMessage,
-  hashTypedData,
-  Hex,
-  http,
-  keccak256,
-  parseSignature,
-  serializeTransaction,
-} from "viem";
-import { mainnet } from "viem/chains";
+import { Chain, createClient, fallback, getAddress, http } from "viem";
+import { sepolia } from "viem/chains";
 import { createConfig, CreateConnectorFn, createConnector } from "wagmi";
 import {
   connectorsForWallets,
@@ -20,16 +8,9 @@ import {
 } from "@rainbow-me/rainbowkit";
 import { coinbaseWallet, metaMaskWallet } from "@rainbow-me/rainbowkit/wallets";
 import { toPrivyWallet } from "@privy-io/cross-app-connect/rainbow-kit";
-import { KeplrEWallet } from "@keplr-ewallet/ewallet-sdk-core";
 import {
   type EIP1193Provider,
-  EthSigner,
-  EthSignMethod,
-  initEthEWallet,
-  parseTypedDataDefinition,
-  SignFunctionParams,
-  SignFunctionResult,
-  toTransactionSerializable,
+  EthEWallet,
 } from "@keplr-ewallet/ewallet-sdk-eth";
 
 import { getAlchemyHttpUrl } from "@keplr-ewallet-sandbox-evm/utils/scaffold-eth";
@@ -38,8 +19,7 @@ import scaffoldConfig, {
   DEFAULT_ALCHEMY_API_KEY,
   ScaffoldConfig,
 } from "@keplr-ewallet-sandbox-evm/../scaffold.config";
-import { Envs } from "@keplr-ewallet-sandbox-evm/envs";
-import { privateKeyToAccount } from "viem/accounts";
+import { useAppState } from "@keplr-ewallet-sandbox-evm/services/store/app";
 
 const { targetNetworks } = scaffoldConfig;
 
@@ -57,64 +37,7 @@ export const enabledChains = targetNetworks.find(
   (network: Chain) => network.id === 11155111,
 )
   ? targetNetworks
-  : ([...targetNetworks, mainnet] as const);
-
-export const createEthLocalSigner = (
-  privateKey: Hex,
-): EthSigner & { signHash: ({ hash }: { hash: Hex }) => Promise<Hex> } => {
-  const account = privateKeyToAccount(privateKey);
-  return {
-    address: account.address,
-    sign: async function <M extends EthSignMethod>(
-      parameters: SignFunctionParams<M>,
-    ): Promise<SignFunctionResult<M>> {
-      switch (parameters.type) {
-        case "sign_transaction": {
-          const { transaction } = parameters.data;
-          const serializableTx = toTransactionSerializable({
-            chainId: "0x1",
-            tx: transaction,
-          });
-          const serializedTx = serializeTransaction(serializableTx);
-          const hash = keccak256(serializedTx);
-          const signature = await account.sign({ hash });
-          const signedTransaction = serializeTransaction(
-            serializableTx,
-            parseSignature(signature),
-          );
-          return {
-            type: "signed_transaction",
-            signedTransaction,
-          };
-        }
-        case "personal_sign": {
-          const { message } = parameters.data;
-          const hash = hashMessage(message);
-          const signature = await account.sign({ hash });
-          return {
-            type: "signature",
-            signature,
-          };
-        }
-        case "sign_typedData_v4": {
-          const { serializedTypedData } = parameters.data;
-          const typedData = parseTypedDataDefinition(serializedTypedData);
-          const hash = hashTypedData(typedData);
-          const signature = await account.sign({ hash });
-          return {
-            type: "signature",
-            signature,
-          };
-        }
-        default:
-          throw new Error(`Unknown sign type: ${(parameters as any).type}`);
-      }
-    },
-    signHash: async ({ hash }: { hash: Hex }): Promise<Hex> => {
-      return await account.sign({ hash });
-    },
-  };
-};
+  : ([...targetNetworks, sepolia] as const);
 
 export interface WalletConnectOptions {
   projectId: string;
@@ -123,22 +46,13 @@ export interface WalletConnectOptions {
 // TODO: move to ewallet/variants/rainbowkit or wagmi?
 const keplrEWalletConnector = (
   walletDetails: WalletDetailsParams,
-  eWallet: KeplrEWallet,
+  ethEWallet: EthEWallet,
 ): CreateConnectorFn => {
   let provider: EIP1193Provider | null = null;
 
   const initProvider = async (
     chains: readonly [Chain, ...Chain[]],
   ): Promise<EIP1193Provider> => {
-    const ethEWallet = await initEthEWallet({
-      customer_id: "afb0afd1-d66d-4531-981c-cbf3fb1507b9",
-      sdk_endpoint: Envs.KEPLR_EWALLET_SDK_ENDPOINT,
-    });
-
-    if (!ethEWallet) {
-      throw new Error("Failed to initialize eth e-wallet");
-    }
-
     await ethEWallet.eWallet.signIn("google");
 
     return await ethEWallet.getEthereumProvider();
@@ -243,7 +157,7 @@ const keplrEWalletConnector = (
 };
 
 // TODO: move to ewallet/variants/rainbowkit or wagmi?
-export const keplrEWallet = (eWallet: KeplrEWallet) => {
+export const keplrEWallet = (eWallet: EthEWallet) => {
   return (): Wallet => ({
     id: "keplr-ewallet",
     name: "Keplr E-Wallet",
@@ -263,11 +177,13 @@ export const keplrEWallet = (eWallet: KeplrEWallet) => {
   });
 };
 
-export const wagmiConfigWithKeplr = (connector?: () => Wallet) => {
+export const wagmiConfigWithKeplr = () => {
   let wallets = [...defaultWallets];
 
-  if (connector && typeof connector === "function") {
-    wallets.unshift(connector);
+  const ethEWallet = useAppState((state) => state.keplr_sdk_eth);
+
+  if (ethEWallet) {
+    wallets.unshift(keplrEWallet(ethEWallet));
   }
 
   return createConfig({

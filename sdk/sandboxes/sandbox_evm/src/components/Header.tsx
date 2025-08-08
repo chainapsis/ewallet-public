@@ -7,7 +7,6 @@ import { Bars3Icon, BugAntIcon } from "@heroicons/react/24/outline";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 import { useOutsideClick } from "@keplr-ewallet-sandbox-evm/hooks/scaffold-eth";
-import { useKeplrEwallet } from "@keplr-ewallet-sandbox-evm/contexts/KeplrEwalletProvider";
 import { keplrIcon } from "@keplr-ewallet-sandbox-evm/assets/icon";
 
 type HeaderMenuLink = {
@@ -62,8 +61,6 @@ export const Header = () => {
   useOutsideClick(burgerMenuRef, () => {
     burgerMenuRef?.current?.removeAttribute("open");
   });
-
-  const { eWallet, isInitialized, setIsAuthenticated } = useKeplrEwallet();
 
   return (
     <div className="sticky lg:static top-0 navbar bg-base-100 min-h-0 shrink-0 justify-between z-20 shadow-md shadow-secondary px-0 sm:px-2">
