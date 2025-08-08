@@ -3,6 +3,7 @@ import {
   type OAuthState,
   RedirectUriSearchParamsKey,
 } from "@keplr-ewallet-sdk-core/oauth";
+import type { EWalletMsg } from "@keplr-ewallet-sdk-core/types";
 import { EWALLET_ATTACHED_TARGET } from "@keplr-ewallet-sdk-core/window_msg/send_msg_to_iframe";
 
 const GoogleClientId =
@@ -86,9 +87,15 @@ export async function tryGoogleSignIn(
     window.addEventListener("focus", onFocus);
 
     function onMessage(e: MessageEvent) {
-      if (e.data?.msg_type === "oauth_sign_in_ack") {
+      const data = e.data as EWalletMsg;
+
+      if (data.msg_type === "oauth_sign_in_ack") {
         cleanup();
-        resolve();
+        if (data.payload.success) {
+          resolve();
+        } else {
+          reject(new Error(data.payload.err));
+        }
       }
     }
     window.addEventListener("message", onMessage);
