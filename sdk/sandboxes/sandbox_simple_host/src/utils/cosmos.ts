@@ -13,8 +13,7 @@ import type { Coin } from "@keplr-wallet/proto-types/cosmos/base/v1beta1/coin";
 import type { CosmosEWallet } from "@keplr-ewallet/ewallet-sdk-cosmos";
 import { makeSignDoc as makeAminoSignDoc } from "@cosmjs/amino";
 
-const TEST_CHAIN_ID = "osmosis-1";
-const TEST_CHAIN_RPC = "https://osmosis-rpc.publicnode.com:443";
+import { TEST_COSMOS_CHAIN_ID, TEST_COSMOS_CHAIN_RPC } from "@/constants";
 
 export async function makeMockSendTokenProtoSignDoc(
   cosmosEWallet: CosmosEWallet,
@@ -23,8 +22,10 @@ export async function makeMockSendTokenProtoSignDoc(
     amount: "10",
   },
 ) {
-  const account = await cosmosEWallet.getKey(TEST_CHAIN_ID);
-  const stargateClient = await SigningStargateClient.connect(TEST_CHAIN_RPC);
+  const account = await cosmosEWallet.getKey(TEST_COSMOS_CHAIN_ID);
+  const stargateClient = await SigningStargateClient.connect(
+    TEST_COSMOS_CHAIN_RPC,
+  );
   const accountInfo = await stargateClient.getAccount(account?.bech32Address);
 
   const address = account?.bech32Address;
@@ -90,7 +91,7 @@ export async function makeMockSendTokenProtoSignDoc(
   const mockSignDoc = makeProtoSignDoc(
     bodyBytes,
     authInfoBytes,
-    TEST_CHAIN_ID,
+    TEST_COSMOS_CHAIN_ID,
     accountNumber,
   );
 
@@ -115,8 +116,10 @@ export async function makeMockSendTokenAminoSignDoc(
     amount: "10",
   },
 ) {
-  const account = await cosmosEWallet.getKey(TEST_CHAIN_ID);
-  const stargateClient = await SigningStargateClient.connect(TEST_CHAIN_RPC);
+  const account = await cosmosEWallet.getKey(TEST_COSMOS_CHAIN_ID);
+  const stargateClient = await SigningStargateClient.connect(
+    TEST_COSMOS_CHAIN_RPC,
+  );
   const accountInfo = await stargateClient.getAccount(account?.bech32Address);
 
   const address = account?.bech32Address;
@@ -156,7 +159,7 @@ export async function makeMockSendTokenAminoSignDoc(
   const mockSignDoc = makeAminoSignDoc(
     msgs,
     stdFee,
-    TEST_CHAIN_ID,
+    TEST_COSMOS_CHAIN_ID,
     memo,
     accountNumber,
     sequence,
