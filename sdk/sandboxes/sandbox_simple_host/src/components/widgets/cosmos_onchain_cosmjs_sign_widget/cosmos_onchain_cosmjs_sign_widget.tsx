@@ -7,9 +7,8 @@ import { GasPrice, SigningStargateClient } from "@cosmjs/stargate";
 import { makeMockSendTokenAminoSignDoc } from "@/utils/cosmos";
 import styles from "./cosmos_onchain_cosmjs_sign_widget.module.scss";
 import { useKeplrEwallet } from "@/components/keplr_ewallet_provider/use_keplr_ewallet";
-
-const TEST_CHAIN_ID = "osmosis-1";
-const TEST_CHAIN_RPC = "https://osmosis-rpc.publicnode.com:443";
+import { useAuthState } from "@/state/auth";
+import { TEST_COSMOS_CHAIN_ID, TEST_COSMOS_CHAIN_RPC } from "@/constants";
 
 interface AccountInfo {
   address: string;
@@ -18,21 +17,29 @@ interface AccountInfo {
 
 const useGetCosmosAccountInfo = () => {
   const { cosmosEWallet } = useKeplrEwallet();
-  const signer = cosmosEWallet?.getOfflineSigner(TEST_CHAIN_ID);
-  const aminoSigner = cosmosEWallet?.getOfflineSignerOnlyAmino(TEST_CHAIN_ID);
+  const publicKey = useAuthState((state) => state.publicKey);
+  const signer = cosmosEWallet?.getOfflineSigner(TEST_COSMOS_CHAIN_ID);
+  const aminoSigner =
+    cosmosEWallet?.getOfflineSignerOnlyAmino(TEST_COSMOS_CHAIN_ID);
 
   const {
     data: accountInfo,
     isLoading,
     error,
   } = useQuery<AccountInfo | null>({
-    queryKey: ["cosmosAccountInfo", TEST_CHAIN_ID, cosmosEWallet],
+    queryKey: [
+      "cosmosAccountInfo",
+      TEST_COSMOS_CHAIN_ID,
+      cosmosEWallet,
+      publicKey,
+    ],
     queryFn: async (): Promise<AccountInfo | null> => {
+      console.log("cosmosAddress !!!", publicKey);
       if (!cosmosEWallet || !signer) {
         return null;
       }
 
-      const key = await cosmosEWallet.getKey(TEST_CHAIN_ID);
+      const key = await cosmosEWallet.getKey(TEST_COSMOS_CHAIN_ID);
       const address = key?.bech32Address;
 
       if (!address || !key) {
@@ -40,17 +47,17 @@ const useGetCosmosAccountInfo = () => {
       }
 
       const client = await SigningStargateClient.connectWithSigner(
-        TEST_CHAIN_RPC,
+        TEST_COSMOS_CHAIN_RPC,
         signer,
       );
       const account = await client.getAccount(address);
 
       return {
-        address,
+        address: address,
         accountNumber: account?.accountNumber,
       };
     },
-    enabled: !!cosmosEWallet && !!signer,
+    enabled: !!cosmosEWallet && !!signer && !!publicKey,
     staleTime: 1000 * 60 * 60, // 1 hour
   });
 
@@ -72,7 +79,7 @@ export const CosmosOnchainCosmJsSignWidget = () => {
       }
 
       const clientWithSigner = await SigningStargateClient.connectWithSigner(
-        TEST_CHAIN_RPC,
+        TEST_COSMOS_CHAIN_RPC,
         signer,
         {
           gasPrice: testGasPrice,
@@ -100,7 +107,7 @@ export const CosmosOnchainCosmJsSignWidget = () => {
         await makeMockSendTokenAminoSignDoc(cosmosEWallet);
       const testGasPrice = GasPrice.fromString("0.0025uosmo");
       const clientWithSigner = await SigningStargateClient.connectWithSigner(
-        TEST_CHAIN_RPC,
+        TEST_COSMOS_CHAIN_RPC,
         aminoSigner,
         {
           gasPrice: testGasPrice,
@@ -126,12 +133,12 @@ export const CosmosOnchainCosmJsSignWidget = () => {
         throw new Error("CosmosEWallet or signer is not found");
       }
 
-      const account = await cosmosEWallet.getKey(TEST_CHAIN_ID);
+      const account = await cosmosEWallet.getKey(TEST_COSMOS_CHAIN_ID);
       const address = account?.bech32Address;
 
       const testGasPrice = GasPrice.fromString("0.0025uosmo");
       const clientWithSigner = await SigningStargateClient.connectWithSigner(
-        TEST_CHAIN_RPC,
+        TEST_COSMOS_CHAIN_RPC,
         signer,
         {
           gasPrice: testGasPrice,

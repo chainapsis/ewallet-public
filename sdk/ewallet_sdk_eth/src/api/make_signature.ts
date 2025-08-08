@@ -226,13 +226,15 @@ async function handleSigningFlow<M extends EthSignMethod>(
     },
   };
 
-  const signOutput = await eWallet.makeSignature(makeSignatureMsg);
-  if (!signOutput) {
-    throw standardError.ethEWallet.signatureFailed({});
+  try {
+    const signOutput = await eWallet.makeSignature(makeSignatureMsg);
+    const signature = encodeEthereumSignature(signOutput);
+    return config.processResult(signature, data);
+  } catch (error) {
+    throw standardError.ethEWallet.signatureFailed({
+      message: error instanceof Error ? error.message : String(error),
+    });
   }
-
-  const signature = encodeEthereumSignature(signOutput);
-  return config.processResult(signature, data);
 }
 
 export async function makeSignature<M extends EthSignMethod>(

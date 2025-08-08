@@ -12,10 +12,11 @@ import {
   makeMockSendTokenProtoSignDoc,
 } from "@/utils/cosmos";
 import { useKeplrEwallet } from "@/components/keplr_ewallet_provider/use_keplr_ewallet";
-
-const TEST_CHAIN_ID = "osmosis-1";
-const TEST_OSMOSIS_CHAIN_REST = "https://osmosis-rest.publicnode.com";
-const ENDPOINT = "/cosmos/tx/v1beta1/txs";
+import {
+  TEST_COSMOS_CHAIN_ID,
+  TEST_COSMOS_CHAIN_REST,
+  TEST_COSMOS_CHAIN_ENDPOINT,
+} from "@/constants";
 
 export const CosmosOnchainSignWidget = () => {
   const { cosmosEWallet } = useKeplrEwallet();
@@ -33,7 +34,7 @@ export const CosmosOnchainSignWidget = () => {
         await makeMockSendTokenProtoSignDoc(cosmosEWallet);
 
       const result = await cosmosEWallet.signDirect(
-        TEST_CHAIN_ID,
+        TEST_COSMOS_CHAIN_ID,
         address,
         mockSignDoc,
       );
@@ -58,7 +59,7 @@ export const CosmosOnchainSignWidget = () => {
         await makeMockSendTokenAminoSignDoc(cosmosEWallet);
 
       const result = await cosmosEWallet.signAmino(
-        TEST_CHAIN_ID,
+        TEST_COSMOS_CHAIN_ID,
         address,
         mockSignDoc,
       );
@@ -152,7 +153,7 @@ const SendTxButton = ({
 }) => {
   const { cosmosEWallet } = useKeplrEwallet();
 
-  const signer = cosmosEWallet?.getOfflineSigner(TEST_CHAIN_ID);
+  const signer = cosmosEWallet?.getOfflineSigner(TEST_COSMOS_CHAIN_ID);
   if (!signer) {
     throw new Error("Signer is not found");
   }
@@ -175,13 +176,16 @@ const SendTxButton = ({
 
   const sendTxMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(TEST_OSMOSIS_CHAIN_REST + ENDPOINT, {
-        method: "POST",
-        body: JSON.stringify({
-          tx_bytes: Buffer.from(encodeTx as any).toString("base64"),
-          mode: "BROADCAST_MODE_SYNC",
-        }),
-      });
+      const res = await fetch(
+        TEST_COSMOS_CHAIN_REST + TEST_COSMOS_CHAIN_ENDPOINT,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            tx_bytes: Buffer.from(encodeTx as any).toString("base64"),
+            mode: "BROADCAST_MODE_SYNC",
+          }),
+        },
+      );
 
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);

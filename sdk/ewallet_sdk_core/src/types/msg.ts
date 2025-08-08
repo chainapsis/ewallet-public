@@ -57,10 +57,7 @@ export type EWalletMsgOAuthSignIn = {
 export type EWalletMsgOAuthSignInAck = {
   target: "keplr_ewallet_sdk";
   msg_type: "oauth_sign_in_ack";
-  payload: AckPayload<{
-    wallet_id: string;
-    public_key: string;
-  }>;
+  payload: AckPayload<null>;
 };
 
 export type EWalletMsgSignOut = {

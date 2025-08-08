@@ -2,6 +2,7 @@
 
 import { useAppState } from "@/state";
 import React, { useEffect, useState, type PropsWithChildren } from "react";
+import { InitAuth } from "@/components/init_auth.tsx";
 
 export const KeplrEWalletProvider: React.FC<PropsWithChildren> = ({
   children,
@@ -38,7 +39,12 @@ export const KeplrEWalletProvider: React.FC<PropsWithChildren> = ({
   return (
     <div>
       <p>checking {isInitialized ? "true" : "false"}</p>
-      {isInitialized && children}
+      {isInitialized && (
+        <>
+          <InitAuth />
+          {children}
+        </>
+      )}
     </div>
   );
 };

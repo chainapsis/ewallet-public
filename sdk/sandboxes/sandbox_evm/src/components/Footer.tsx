@@ -1,13 +1,6 @@
 import React from "react";
-import Link from "next/link";
-import { hardhat } from "viem/chains";
-import {
-  CurrencyDollarIcon,
-  MagnifyingGlassIcon,
-} from "@heroicons/react/24/outline";
+import { BanknotesIcon, CurrencyDollarIcon } from "@heroicons/react/24/outline";
 
-import { Faucet } from "@keplr-ewallet-sandbox-evm/components/scaffold-eth";
-import { useTargetNetwork } from "@keplr-ewallet-sandbox-evm/hooks/scaffold-eth/useTargetNetwork";
 import { useGlobalState } from "@keplr-ewallet-sandbox-evm/services/store/store";
 
 /**
@@ -17,8 +10,6 @@ export const Footer = () => {
   const nativeCurrencyPrice = useGlobalState(
     (state) => state.nativeCurrency.price,
   );
-  const { targetNetwork } = useTargetNetwork();
-  const isLocalNetwork = targetNetwork.id === hardhat.id;
 
   return (
     <div className="min-h-0 px-1 mb-11 lg:mb-0">
@@ -33,19 +24,17 @@ export const Footer = () => {
                 </div>
               </div>
             )}
-            {isLocalNetwork && (
-              <>
-                <Faucet />
-                <Link
-                  href="/blockexplorer"
-                  passHref
-                  className="btn btn-primary btn-sm font-normal gap-1"
-                >
-                  <MagnifyingGlassIcon className="h-4 w-4" />
-                  <span>Block Explorer</span>
-                </Link>
-              </>
-            )}
+            <div>
+              <div
+                className="btn btn-primary btn-sm font-normal gap-1 cursor-auto"
+                onClick={() => {
+                  window.open("https://faucet.circle.com/", "_blank");
+                }}
+              >
+                <BanknotesIcon className="h-4 w-4" />
+                <span>USDC Testnet Faucet</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

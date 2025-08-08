@@ -1,19 +1,5 @@
-import {
-  Chain,
-  createClient,
-  fallback,
-  getAddress,
-  hashMessage,
-  hashTypedData,
-  Hex,
-  http,
-  keccak256,
-  parseSignature,
-  serializeTransaction,
-  toHex,
-} from "viem";
-import { hardhat, mainnet } from "viem/chains";
-import { privateKeyToAccount } from "viem/accounts";
+import { Chain, createClient, fallback, getAddress, http, toHex } from "viem";
+import { sepolia } from "viem/chains";
 import { createConfig, CreateConnectorFn, createConnector } from "wagmi";
 import {
   connectorsForWallets,
@@ -21,17 +7,11 @@ import {
   Wallet,
 } from "@rainbow-me/rainbowkit";
 import { coinbaseWallet, metaMaskWallet } from "@rainbow-me/rainbowkit/wallets";
+import { keplrWallet } from "@keplr-wallet/rainbow-connector";
 import { toPrivyWallet } from "@privy-io/cross-app-connect/rainbow-kit";
-import { KeplrEWallet } from "@keplr-ewallet/ewallet-sdk-core";
 import {
   type EIP1193Provider,
   EthEWallet,
-  EthSigner,
-  EthSignMethod,
-  initEthEWallet,
-  initEWalletEIP1193Provider,
-  SignFunctionParams,
-  SignFunctionResult,
 } from "@keplr-ewallet/ewallet-sdk-eth";
 
 import { getAlchemyHttpUrl } from "@keplr-ewallet-sandbox-evm/utils/scaffold-eth";
@@ -40,10 +20,12 @@ import scaffoldConfig, {
   DEFAULT_ALCHEMY_API_KEY,
   ScaffoldConfig,
 } from "@keplr-ewallet-sandbox-evm/../scaffold.config";
+import { useAppState } from "@keplr-ewallet-sandbox-evm/services/store/app";
 
 const { targetNetworks } = scaffoldConfig;
 
 export const defaultWallets = [
+  keplrWallet,
   metaMaskWallet,
   coinbaseWallet,
   toPrivyWallet({
@@ -54,62 +36,10 @@ export const defaultWallets = [
 ];
 
 export const enabledChains = targetNetworks.find(
-  (network: Chain) => network.id === 1,
+  (network: Chain) => network.id === 11155111,
 )
   ? targetNetworks
-  : ([...targetNetworks, mainnet] as const);
-
-export const createEthLocalSigner = (
-  privateKey: Hex,
-): EthSigner & { signHash: ({ hash }: { hash: Hex }) => Promise<Hex> } => {
-  const account = privateKeyToAccount(privateKey);
-  return {
-    address: account.address,
-    sign: async function <M extends EthSignMethod>(
-      parameters: SignFunctionParams<M>,
-    ): Promise<SignFunctionResult<M>> {
-      switch (parameters.type) {
-        case "sign_transaction": {
-          const { transaction } = parameters.data;
-          const serializedTx = serializeTransaction(transaction);
-          const hash = keccak256(serializedTx);
-          const signature = await account.sign({ hash });
-          const signedTransaction = serializeTransaction(
-            transaction,
-            parseSignature(signature),
-          );
-          return {
-            type: "signed_transaction",
-            signedTransaction,
-          };
-        }
-        case "personal_sign": {
-          const { message } = parameters.data;
-          const hash = hashMessage(message);
-          const signature = await account.sign({ hash });
-          return {
-            type: "signature",
-            signature,
-          };
-        }
-        case "sign_typedData_v4": {
-          const { message } = parameters.data;
-          const hash = hashTypedData(message);
-          const signature = await account.sign({ hash });
-          return {
-            type: "signature",
-            signature,
-          };
-        }
-        default:
-          throw new Error(`Unknown sign type: ${(parameters as any).type}`);
-      }
-    },
-    signHash: async ({ hash }: { hash: Hex }): Promise<Hex> => {
-      return await account.sign({ hash });
-    },
-  };
-};
+  : ([...targetNetworks, sepolia] as const);
 
 export interface WalletConnectOptions {
   projectId: string;
@@ -118,140 +48,9 @@ export interface WalletConnectOptions {
 // TODO: move to ewallet/variants/rainbowkit or wagmi?
 const keplrEWalletConnector = (
   walletDetails: WalletDetailsParams,
-  eWallet: KeplrEWallet,
+  ethEWallet: EthEWallet,
 ): CreateConnectorFn => {
   let provider: EIP1193Provider | null = null;
-
-  const initProvider = async (
-    chains: readonly [Chain, ...Chain[]],
-  ): Promise<EIP1193Provider> => {
-    // TODO:
-    // 1. open connect modal/popup (with e-wallet app id, request origin, etc.)
-    // 2. sign in with google
-    // 3. return credentials from modal/popup to here
-
-    const url = new URL("http://localhost:3201/connect");
-    const params = new URLSearchParams({
-      requestOrigin: window.location.origin,
-      keplrEWalletAppId: "ewallet-connect-rainbowkit",
-      connect: "true",
-    });
-
-    const target = "keplr-ewallet-connect";
-    const width = 500;
-    const height = 600;
-    const left = window.screenX + (window.innerWidth - width) / 2;
-    const top = window.screenY + (window.innerHeight - height) / 2;
-
-    // in mobile, new tab is opened with the url and the same process below is done.
-    const popup = window.open(
-      "about:blank",
-      target,
-      `width=${width},height=${height},left=${left},top=${top}`,
-    );
-
-    if (!popup) {
-      throw new Error("Failed to open new window for e-wallet connect");
-    }
-
-    // register nonce to e-wallet
-    try {
-      const ack = await eWallet.sendMsgToIframe({
-        msg_type: "set_oauth_nonce",
-        payload: Array.from(crypto.getRandomValues(new Uint8Array(8)))
-          .map((b) => b.toString(16).padStart(2, "0"))
-          .join(""),
-      });
-      console.log("ack:", ack);
-    } catch (e) {
-      console.error("Failed to register nonce to e-wallet:", e);
-      popup.close();
-      throw e;
-    }
-
-    popup.location.href = `${url.toString()}?${params.toString()}`;
-
-    // oauth2 signIn이 response_mode=web_message를 지원하면 팝업에서 더 안전하게 인증 결과를 받을 수 있다고 한다.
-    function listenForResult(popup: Window): Promise<string> {
-      return new Promise((resolve, reject) => {
-        function handler(event: MessageEvent) {
-          // 팝업 오리진에서 온 메시지만 처리
-          if (event.origin !== url.origin) return;
-
-          const data = event.data;
-
-          if (data.type === "connect_ack") {
-            window.removeEventListener("message", handler);
-            // Cross-Origin-Opener-Policy policy would block the window.close call.
-            popup.close();
-            resolve(data.message);
-          }
-        }
-        window.addEventListener("message", handler);
-
-        // 팝업이 강제 종료되었을 때 타임아웃 처리
-        const interval = setInterval(() => {
-          if (popup.closed) {
-            clearInterval(interval);
-            reject(new Error("Window closed by user"));
-          }
-        }, 500);
-
-        // 사용자가 5분 이상 팝업을 열어두면 타임아웃
-        const timeout = setTimeout(
-          () => {
-            popup.close();
-            reject(new Error("User unresponded to the window"));
-          },
-          5 * 60 * 1000,
-        ); // 5 minutes
-
-        return () => {
-          clearTimeout(timeout);
-        };
-      });
-    }
-
-    const result = await listenForResult(popup);
-    console.log("result:", result);
-
-    // 테스트를 위한 random local account 추가
-    if (result) {
-      // generate random private key
-      const privateKey = toHex(
-        Buffer.from(crypto.getRandomValues(new Uint8Array(32))),
-      );
-      // local account from hardhat private key
-      const signer = createEthLocalSigner(privateKey);
-
-      console.log("signer:", signer);
-
-      const chain = chains[0];
-
-      console.log("chain:", chain);
-
-      const provider = await initEWalletEIP1193Provider({
-        id: "keplr-ewallet-connect-rainbowkit",
-        chains: [
-          {
-            chainId: toHex(chain.id),
-            chainName: chain.name,
-            rpcUrls: chain.rpcUrls.default.http,
-            nativeCurrency: chain.nativeCurrency,
-            blockExplorerUrls: chain.blockExplorers?.default.url
-              ? [chain.blockExplorers.default.url]
-              : ["http://localhost:8545/blockexplorer"], // CHECK: block explorer url should be checked?
-          },
-        ],
-        signer,
-      });
-
-      return provider;
-    }
-
-    // TODO: 팝업에서 받은 결과를 통해 provider 초기화
-    throw new Error("Not implemented yet!");
-  };
 
   return createConnector((config) => {
     console.log("keplr e-wallet connector init with chains:", config.chains);
@@ -313,12 +112,12 @@ const keplrEWalletConnector = (
         // return 0;
       },
       getProvider: async (): Promise<EIP1193Provider> => {
-        console.log("getProvider");
-        if (!provider) {
-          provider = await initProvider(config.chains);
-
-          console.log("provider:", provider);
+        if (provider) {
+          return provider;
         }
+
+        await ethEWallet.eWallet.signIn("google");
+        provider = await ethEWallet.getEthereumProvider();
 
         return provider;
       },
@@ -329,6 +128,22 @@ const keplrEWalletConnector = (
         } catch (_) {
           return false;
         }
+      },
+      switchChain: async ({ chainId }: { chainId: number }) => {
+        const chain = targetNetworks.find((network) => network.id === chainId);
+        if (!chain) {
+          throw new Error(`Chain ${chainId} not found`);
+        }
+
+        const providerInstance = await wallet.getProvider();
+        await providerInstance.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: toHex(chainId) }],
+        });
+
+        wallet.onChainChanged(chainId);
+
+        return chain;
       },
       onAccountsChanged: (accounts: string[]) => {
         if (accounts.length === 0) wallet.onDisconnect();
@@ -352,7 +167,7 @@ const keplrEWalletConnector = (
 };
 
 // TODO: move to ewallet/variants/rainbowkit or wagmi?
-export const keplrEWallet = (eWallet: KeplrEWallet) => {
+export const keplrEWallet = (eWallet: EthEWallet) => {
   return (): Wallet => ({
     id: "keplr-ewallet",
     name: "Keplr E-Wallet",
@@ -372,11 +187,13 @@ export const keplrEWallet = (eWallet: KeplrEWallet) => {
   });
 };
 
-export const wagmiConfigWithKeplr = (connector?: () => Wallet) => {
+export const wagmiConfigWithKeplr = () => {
   let wallets = [...defaultWallets];
 
-  if (connector && typeof connector === "function") {
-    wallets.unshift(connector);
+  const ethEWallet = useAppState((state) => state.keplr_sdk_eth);
+
+  if (ethEWallet) {
+    wallets.unshift(keplrEWallet(ethEWallet));
   }
 
   return createConfig({
@@ -414,9 +231,7 @@ export const wagmiConfigWithKeplr = (connector?: () => Wallet) => {
       return createClient({
         chain,
         transport: fallback(rpcFallbacks),
-        ...(chain.id !== (hardhat as Chain).id
-          ? { pollingInterval: scaffoldConfig.pollingInterval }
-          : {}),
+        ...{ pollingInterval: scaffoldConfig.pollingInterval },
       });
     },
   });
