@@ -1,6 +1,6 @@
 {
   "name": "@keplr-ewallet/stdlib-js",
-  "version": "0.0.2-rc.2",
+  "version": "0.0.2-rc.3",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

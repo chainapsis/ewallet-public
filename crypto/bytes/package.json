@@ -2,14 +2,14 @@
   "name": "@keplr-ewallet/bytes",
   "type": "module",
   "main": "./dist/index.js",
-  "version": "0.0.3-alpha.8",
+  "version": "0.0.3-alpha.9",
   "packageManager": "yarn@4.7.0",
   "scripts": {
     "clean": "del-cli dist",
     "build": "yarn clean && tsc"
   },
   "dependencies": {
-    "@keplr-ewallet/stdlib-js": "^0.0.2-rc.2"
+    "@keplr-ewallet/stdlib-js": "^0.0.2-rc.3"
   },
   "publishConfig": {
     "access": "public"
