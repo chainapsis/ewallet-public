@@ -4,41 +4,6 @@
  */
 import { GenericContractsDeclaration } from "@keplr-ewallet-sandbox-evm/utils/scaffold-eth/contract";
 
-const deployedContracts = {
-  31337: {
-    Counter: {
-      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-      abi: [
-        {
-          inputs: [],
-          name: "count",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "decrement",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "increment",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-      ],
-    },
-  },
-} as const;
+const deployedContracts = {} as const;
 
 export default deployedContracts satisfies GenericContractsDeclaration;

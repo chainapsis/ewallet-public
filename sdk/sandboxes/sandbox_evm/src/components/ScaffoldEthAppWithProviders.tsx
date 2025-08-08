@@ -1,6 +1,6 @@
 "use client";
 
-import { RainbowKitProvider, Wallet } from "@rainbow-me/rainbowkit";
+import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
 import { WagmiProvider } from "wagmi";
@@ -9,10 +9,7 @@ import { Footer } from "@keplr-ewallet-sandbox-evm/components/Footer";
 import { Header } from "@keplr-ewallet-sandbox-evm/components/Header";
 import { BlockieAvatar } from "@keplr-ewallet-sandbox-evm/components/scaffold-eth";
 import { useInitializeNativeCurrencyPrice } from "@keplr-ewallet-sandbox-evm/hooks/scaffold-eth";
-import {
-  keplrEWallet,
-  wagmiConfigWithKeplr,
-} from "@keplr-ewallet-sandbox-evm/services/web3/wagmiConfig";
+import { wagmiConfigWithKeplr } from "@keplr-ewallet-sandbox-evm/services/web3/wagmiConfig";
 import { EWalletProvider } from "@keplr-ewallet-sandbox-evm/components/KeplrEwalletProvider";
 
 const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
