@@ -9,7 +9,6 @@ import { secp256k1 } from "@noble/curves/secp256k1";
 
 export const publicKeyToEthereumAddress = (
   publicKey: Hex | ByteArray,
-  uncompressed?: boolean,
 ): Address => {
   let publicKeyWithout0x: string | ByteArray = publicKey;
   if (typeof publicKey === "string" && publicKey.startsWith("0x")) {
@@ -18,11 +17,10 @@ export const publicKeyToEthereumAddress = (
 
   const point = secp256k1.Point.fromHex(publicKeyWithout0x);
 
-  if (uncompressed) {
-    return publicKeyToAddress(`0x${point.toHex()}`);
-  }
+  const uncompressedPublicKey: Hex = `0x${point.toHex(false)}`;
 
-  return publicKeyToAddress(`0x${point.toHex(true)}`);
+  // ethereum address should be generated from uncompressed public key
+  return publicKeyToAddress(uncompressedPublicKey);
 };
 
 export const isValidChainId = (chainId: unknown): chainId is string =>
