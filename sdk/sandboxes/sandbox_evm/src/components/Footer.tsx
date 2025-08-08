@@ -1,5 +1,5 @@
 import React from "react";
-import { CurrencyDollarIcon } from "@heroicons/react/24/outline";
+import { BanknotesIcon, CurrencyDollarIcon } from "@heroicons/react/24/outline";
 
 import { useGlobalState } from "@keplr-ewallet-sandbox-evm/services/store/store";
 
@@ -24,6 +24,17 @@ export const Footer = () => {
                 </div>
               </div>
             )}
+            <div>
+              <div
+                className="btn btn-primary btn-sm font-normal gap-1 cursor-auto"
+                onClick={() => {
+                  window.open("https://faucet.circle.com/", "_blank");
+                }}
+              >
+                <BanknotesIcon className="h-4 w-4" />
+                <span>USDC Testnet Faucet</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
