@@ -3576,6 +3576,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@keplr-wallet/rainbow-connector@npm:^0.1.1":
+  version: 0.1.1
+  resolution: "@keplr-wallet/rainbow-connector@npm:0.1.1"
+  peerDependencies:
+    "@rainbow-me/rainbowkit": ^2
+    wagmi: ^2
+  checksum: 10c0/bdd0c83a80cdc1a410b3f3bbe3ba742a4b614f649bbb7677f05070eb53e1f095e9e609f086e06e90fcf1d31918ff8ee2e22e319c99f319e22ecfb30b3be3806c
+  languageName: node
+  linkType: hard
+
 "@keplr-wallet/router@npm:0.10.24-ibc.go.v7.hot.fix":
   version: 0.10.24-ibc.go.v7.hot.fix
   resolution: "@keplr-wallet/router@npm:0.10.24-ibc.go.v7.hot.fix"
@@ -18985,6 +18995,7 @@ __metadata:
     "@keplr-ewallet/ewallet-sdk-core": "workspace:*"
     "@keplr-ewallet/ewallet-sdk-eth": "workspace:*"
     "@keplr-wallet/proto-types": "npm:^0.12.250"
+    "@keplr-wallet/rainbow-connector": "npm:^0.1.1"
     "@nomicfoundation/hardhat-ethers": "npm:^3.0.9"
     "@nomicfoundation/hardhat-ignition": "npm:^0.15.12"
     "@nomicfoundation/hardhat-ignition-ethers": "npm:^0.15.13"

@@ -7,6 +7,7 @@ import {
   Wallet,
 } from "@rainbow-me/rainbowkit";
 import { coinbaseWallet, metaMaskWallet } from "@rainbow-me/rainbowkit/wallets";
+import { keplrWallet } from "@keplr-wallet/rainbow-connector";
 import { toPrivyWallet } from "@privy-io/cross-app-connect/rainbow-kit";
 import {
   type EIP1193Provider,
@@ -24,6 +25,7 @@ import { useAppState } from "@keplr-ewallet-sandbox-evm/services/store/app";
 const { targetNetworks } = scaffoldConfig;
 
 export const defaultWallets = [
+  keplrWallet,
   metaMaskWallet,
   coinbaseWallet,
   toPrivyWallet({

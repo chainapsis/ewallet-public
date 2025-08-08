@@ -37,7 +37,9 @@ export const queryClient = new QueryClient({
 
 const WagmiWithKeplr = ({ children }: { children: React.ReactNode }) => {
   return (
-    <WagmiProvider config={wagmiConfigWithKeplr()}>{children}</WagmiProvider>
+    <WagmiProvider reconnectOnMount={false} config={wagmiConfigWithKeplr()}>
+      {children}
+    </WagmiProvider>
   );
 };
 
