@@ -3,18 +3,12 @@ import React, { useState } from "react";
 import { Widget } from "../widget_components";
 import styles from "./login_widget.module.scss";
 import { useKeplrEwallet } from "@/components/keplr_ewallet_provider/use_keplr_ewallet";
+import { useAuthState } from "@/state/auth";
 
 export const LoginWidget: React.FC<LoginWidgetProps> = () => {
   const { cosmosEWallet } = useKeplrEwallet();
   const eWallet = cosmosEWallet?.eWallet;
-  const [walletInfo, setWalletInfo] = useState<
-    | {
-      email: string;
-      publicKey: string;
-    }
-    | undefined
-  >();
-
+  const auth = useAuthState();
   const [isSigningIn, setIsSigningIn] = useState(false);
 
   const handleSignIn = async () => {
@@ -24,10 +18,8 @@ export const LoginWidget: React.FC<LoginWidgetProps> = () => {
       const email = await eWallet?.getEmail();
       const publicKey = await eWallet?.getPublicKey();
       if (email && publicKey) {
-        setWalletInfo({
-          email,
-          publicKey,
-        });
+        auth.setEmail(email);
+        auth.setPublicKey(publicKey);
       }
     } catch (error) {
       console.error(error);
@@ -39,8 +31,7 @@ export const LoginWidget: React.FC<LoginWidgetProps> = () => {
   const handleSignOut = async () => {
     if (eWallet) {
       await eWallet.signOut();
-      // setIsAuthenticated(false);
-      setWalletInfo(undefined);
+      auth.reset();
     }
   };
 
@@ -55,19 +46,19 @@ export const LoginWidget: React.FC<LoginWidgetProps> = () => {
     );
   }
 
-  if (walletInfo) {
+  if (auth.email && auth.publicKey) {
     return (
       <Widget>
         <div className={styles.loginInfoContainer}>
           <div className={styles.loginInfoRow}>
-            <p>{walletInfo?.email}</p>
+            <p>{auth.email}</p>
             <button className={styles.signOutButton} onClick={handleSignOut}>
               <p>Sign out</p>
             </button>
           </div>
           <div className={styles.publicKeyRow}>
             <p>Public Key</p>
-            <p>{walletInfo?.publicKey}</p>
+            <p>{auth.publicKey}</p>
           </div>
         </div>
       </Widget>
@@ -89,4 +80,4 @@ export const LoginWidget: React.FC<LoginWidgetProps> = () => {
   );
 };
 
-export interface LoginWidgetProps { }
+export interface LoginWidgetProps {}
