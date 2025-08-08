@@ -1,9 +1,8 @@
 import { createServer } from "http";
 import { parse } from "url";
 import next from "next";
-import { localPorts } from "@keplr-ewallet/dev-env";
 
-const port = localPorts.sandbox_evm || 3301;
+const port = 3301;
 
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });

@@ -3,19 +3,10 @@
 import React, { useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { hardhat } from "viem/chains";
-import {
-  Bars3Icon,
-  BugAntIcon,
-  GlobeAltIcon,
-} from "@heroicons/react/24/outline";
+import { Bars3Icon, BugAntIcon } from "@heroicons/react/24/outline";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
-import { FaucetButton } from "@keplr-ewallet-sandbox-evm/components/scaffold-eth";
-import {
-  useOutsideClick,
-  useTargetNetwork,
-} from "@keplr-ewallet-sandbox-evm/hooks/scaffold-eth";
+import { useOutsideClick } from "@keplr-ewallet-sandbox-evm/hooks/scaffold-eth";
 import { useKeplrEwallet } from "@keplr-ewallet-sandbox-evm/contexts/KeplrEwalletProvider";
 import { keplrIcon } from "@keplr-ewallet-sandbox-evm/assets/icon";
 
@@ -34,11 +25,6 @@ export const menuLinks: HeaderMenuLink[] = [
     label: "Debug Contracts",
     href: "/debug",
     icon: <BugAntIcon className="h-4 w-4" />,
-  },
-  {
-    label: "Block Explorer",
-    href: "/blockexplorer",
-    icon: <GlobeAltIcon className="h-4 w-4" />,
   },
 ];
 
@@ -72,9 +58,6 @@ export const HeaderMenuLinks = () => {
  * Site header
  */
 export const Header = () => {
-  const { targetNetwork } = useTargetNetwork();
-  const isLocalNetwork = targetNetwork.id === hardhat.id;
-
   const burgerMenuRef = useRef<HTMLDetailsElement>(null);
   useOutsideClick(burgerMenuRef, () => {
     burgerMenuRef?.current?.removeAttribute("open");
@@ -113,25 +96,7 @@ export const Header = () => {
         </ul>
       </div>
       <div className="navbar-end grow mr-4 gap-2">
-        {/* TODO: show keplr ewallet connection state */}
-        <button
-          className="btn btn-primary rounded-lg"
-          onClick={async () => {
-            if (eWallet) {
-              try {
-                await eWallet.signIn("google");
-                console.log("sign in success");
-                setIsAuthenticated(true);
-              } catch (error) {
-                console.error("Sign in failed:", error);
-              }
-            }
-          }}
-        >
-          Connect Keplr E-Wallet
-        </button>
         <ConnectButton />
-        {isLocalNetwork && <FaucetButton />}
       </div>
     </div>
   );

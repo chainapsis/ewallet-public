@@ -1,9 +1,5 @@
 "use client";
 
-import {
-  initKeplrEwalletCore,
-  KeplrEWallet,
-} from "@keplr-ewallet/ewallet-sdk-core";
 import React, {
   createContext,
   useState,
@@ -11,6 +7,12 @@ import React, {
   ReactNode,
   useEffect,
 } from "react";
+import {
+  initKeplrEwalletCore,
+  KeplrEWallet,
+} from "@keplr-ewallet/ewallet-sdk-core";
+
+import { Envs } from "@keplr-ewallet-sandbox-evm/envs";
 
 export type LoginMethod = "email" | "sms" | "google" | "apple" | "twitter";
 
@@ -54,6 +56,7 @@ export const KeplrEwalletProvider = ({
   useEffect(() => {
     initKeplrEwalletCore({
       customer_id: "afb0afd1-d66d-4531-981c-cbf3fb1507b9",
+      sdk_endpoint: Envs.KEPLR_EWALLET_SDK_ENDPOINT,
     }).then((result) => {
       if (result.success) {
         setEWallet(result.data);
