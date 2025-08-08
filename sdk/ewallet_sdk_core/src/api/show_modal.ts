@@ -33,11 +33,12 @@ export async function showModal(
       timeoutId = null;
     }
 
-    if (
-      showModalAck.msg_type !== "show_modal_ack" ||
-      !showModalAck.payload.success
-    ) {
+    if (showModalAck.msg_type !== "show_modal_ack") {
       throw new Error("Unreachable");
+    }
+
+    if (!showModalAck.payload.success) {
+      throw new Error(showModalAck.payload.err);
     }
 
     return showModalAck.payload.data;

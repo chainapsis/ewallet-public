@@ -7,17 +7,16 @@ import type {
 export async function makeSignature(
   this: KeplrEWallet,
   msg: EWalletMsgMakeSignature,
-): Promise<SignOutput | null> {
-  try {
-    const res = await this.sendMsgToIframe(msg);
+): Promise<SignOutput> {
+  const res = await this.sendMsgToIframe(msg);
 
-    if (res.msg_type === "make_signature_ack" && res.payload.success) {
-      return res.payload.data;
-    }
-
-    return null;
-  } catch (error) {
-    console.error("[core] makeSignature failed with error:", error);
-    return null;
+  if (res.msg_type !== "make_signature_ack") {
+    throw new Error("Unreachable");
   }
+
+  if (!res.payload.success) {
+    throw new Error(res.payload.err);
+  }
+
+  return res.payload.data;
 }
