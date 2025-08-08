@@ -1,4 +1,4 @@
-import { Chain, createClient, fallback, getAddress, http } from "viem";
+import { Chain, createClient, fallback, getAddress, http, toHex } from "viem";
 import { sepolia } from "viem/chains";
 import { createConfig, CreateConnectorFn, createConnector } from "wagmi";
 import {
@@ -49,14 +49,6 @@ const keplrEWalletConnector = (
   ethEWallet: EthEWallet,
 ): CreateConnectorFn => {
   let provider: EIP1193Provider | null = null;
-
-  const initProvider = async (
-    chains: readonly [Chain, ...Chain[]],
-  ): Promise<EIP1193Provider> => {
-    await ethEWallet.eWallet.signIn("google");
-
-    return await ethEWallet.getEthereumProvider();
-  };
 
   return createConnector((config) => {
     console.log("keplr e-wallet connector init with chains:", config.chains);
@@ -118,12 +110,12 @@ const keplrEWalletConnector = (
         // return 0;
       },
       getProvider: async (): Promise<EIP1193Provider> => {
-        console.log("getProvider");
-        if (!provider) {
-          provider = await initProvider(config.chains);
-
-          console.log("provider:", provider);
+        if (provider) {
+          return provider;
         }
+
+        await ethEWallet.eWallet.signIn("google");
+        provider = await ethEWallet.getEthereumProvider();
 
         return provider;
       },
@@ -134,6 +126,22 @@ const keplrEWalletConnector = (
         } catch (_) {
           return false;
         }
+      },
+      switchChain: async ({ chainId }: { chainId: number }) => {
+        const chain = targetNetworks.find((network) => network.id === chainId);
+        if (!chain) {
+          throw new Error(`Chain ${chainId} not found`);
+        }
+
+        const providerInstance = await wallet.getProvider();
+        await providerInstance.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: toHex(chainId) }],
+        });
+
+        wallet.onChainChanged(chainId);
+
+        return chain;
       },
       onAccountsChanged: (accounts: string[]) => {
         if (accounts.length === 0) wallet.onDisconnect();
