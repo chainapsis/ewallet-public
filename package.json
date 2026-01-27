@@ -67,7 +67,8 @@
       "crypto/teddsa/api_lib",
       "crypto/teddsa/frost_ed25519_keplr_wasm",
       "sandbox/sandbox_rialo",
-      "sandbox/sandbox_sol"
+      "sandbox/sandbox_sol",
+      "extension/oko_extension"
     ]
   },
   "packageManager": "yarn@4.10.3",

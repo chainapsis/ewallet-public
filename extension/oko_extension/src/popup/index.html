@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=320, initial-scale=1.0" />
+    <title>Oko Wallet</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html, body {
+        width: 320px;
+        min-height: 100%;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        background: #1a1a2e;
+        color: #1a1a2e;
+      }
+      .container {
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 280px;
+      }
+      #signin-view {
+        background: #ffffff;
+        min-height: 400px;
+      }
+      #loading {
+        background: #ffffff;
+        min-height: 400px;
+      }
+      .logo {
+        width: 84px;
+        height: 32px;
+        margin-bottom: 24px;
+        object-fit: contain;
+      }
+      .signin-btn {
+        width: 100%;
+        padding: 14px 20px;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        color: white;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      .signin-btn:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(26, 26, 46, 0.3);
+      }
+      .signin-btn:active:not(:disabled) {
+        transform: translateY(0);
+      }
+      .signin-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+      .signin-btn .spinner {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin-right: 8px;
+        vertical-align: middle;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        margin-bottom: 16px;
+      }
+      .status-badge.signing-in {
+        background: #fef3c7;
+        color: #92400e;
+      }
+      .status-badge.success {
+        background: #d1fae5;
+        color: #065f46;
+      }
+      .status-badge.error {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .status-badge .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+      .status-badge.signing-in .dot {
+        animation: pulse 1s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+      }
+      .footer {
+        margin-top: auto;
+        padding-top: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        font-size: 11px;
+        color: #a0aec0;
+      }
+      .footer-logo {
+        height: 16px;
+        opacity: 0.6;
+      }
+      .footer a {
+        color: #a0aec0;
+        text-decoration: none;
+      }
+      .footer a:hover {
+        color: #718096;
+      }
+
+      /* Connected State */
+      .connected-container {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        color: white;
+      }
+      .status {
+        font-size: 12px;
+        color: #48bb78;
+        margin-bottom: 16px;
+      }
+      .account-info {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 12px 16px;
+        width: 100%;
+        margin-bottom: 12px;
+      }
+      .account-label {
+        font-size: 10px;
+        color: #a0aec0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+      }
+      .account-address {
+        font-size: 12px;
+        font-family: monospace;
+        word-break: break-all;
+        color: #e2e8f0;
+      }
+      .connected-btn {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+      }
+      .connected-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+      .connected-btn + .connected-btn {
+        margin-top: 8px;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+      .loading {
+        color: #a0aec0;
+        font-size: 12px;
+        padding: 40px 0;
+      }
+
+      /* Iframe container - hidden but present */
+      #oko-iframe-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -1;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Iframe container for SDK -->
+    <div id="oko-iframe-container"></div>
+
+    <!-- Loading state -->
+    <div id="loading" class="container">
+      <div class="loading">Loading...</div>
+    </div>
+
+    <!-- Sign In View (Not connected) -->
+    <div id="signin-view" class="container hidden">
+      <img src="./icons/icon128.png" alt="Oko" class="logo" />
+
+      <div id="status-badge" class="status-badge hidden">
+        <span class="dot"></span>
+        <span id="status-text"></span>
+      </div>
+
+      <button id="signin-btn" class="signin-btn">Sign in with Oko</button>
+
+      <div class="footer">
+        <img src="./icons/icon128.png" alt="Oko" class="footer-logo" />
+        <a href="https://oko-wallet.canny.io/bug-reports" target="_blank">Get support</a>
+      </div>
+    </div>
+
+    <!-- Connected View -->
+    <div id="connected-view" class="container connected-container hidden">
+      <img src="./icons/icon128.png" alt="Oko" class="logo" style="filter: brightness(0) invert(1);" />
+      <p class="status">Connected</p>
+
+      <div id="evm-account" class="account-info hidden">
+        <div class="account-label">EVM Address</div>
+        <div id="evm-address" class="account-address"></div>
+      </div>
+
+      <div id="svm-account" class="account-info hidden">
+        <div class="account-label">Solana Address</div>
+        <div id="svm-address" class="account-address"></div>
+      </div>
+
+      <button id="disconnect-btn" class="connected-btn">Disconnect</button>
+    </div>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

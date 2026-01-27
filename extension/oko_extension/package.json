@@ -1,0 +1,34 @@
+{
+  "name": "@oko-wallet/extension",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@keplr-wallet/types": "0.12.297",
+    "@noble/hashes": "^1.7.2",
+    "@oko-wallet/oko-sdk-core": "workspace:*",
+    "@oko-wallet/oko-sdk-cosmos": "workspace:*",
+    "@oko-wallet/oko-types": "workspace:*",
+    "@oko-wallet/stdlib-js": "workspace:*",
+    "@solana/web3.js": "^1.98.2",
+    "@wallet-standard/base": "^1.1.0",
+    "@wallet-standard/features": "^1.1.0",
+    "@wallet-standard/wallet": "^1.1.0",
+    "bech32": "^2.0.0",
+    "buffer": "^6.0.3",
+    "eventemitter3": "^5.0.1",
+    "uuid": "^13.0.0",
+    "viem": "^2.41.2"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.287",
+    "@types/node": "^24.10.1",
+    "typescript": "^5.8.3",
+    "vite": "^6.0.11"
+  }
+}
