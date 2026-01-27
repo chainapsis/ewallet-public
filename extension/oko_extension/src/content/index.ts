@@ -59,11 +59,8 @@ async function handleOkoAttachedModal(): Promise<void> {
     return;
   }
 
-  console.log("[oko-content] Modal request detected on oko_attached", { requestId });
-
   try {
     const payload = JSON.parse(decodeURIComponent(encodedPayload));
-    console.log("[oko-content] Modal payload:", payload);
 
     // Request background to inject script using chrome.scripting.executeScript
     // This bypasses CSP restrictions
@@ -74,11 +71,9 @@ async function handleOkoAttachedModal(): Promise<void> {
         hostOrigin,
         requestId,
         modalPayload: payload,
-        apiKey: OKO_API_KEY, // Pass api_key so it can be set in oko_attached's localStorage
+        apiKey: OKO_API_KEY,
       },
     });
-
-    console.log("[oko-content] Requested background to inject modal script");
   } catch (error) {
     console.error("[oko-content] Failed to handle modal:", error);
 
@@ -141,12 +136,11 @@ window.addEventListener("message", async (event) => {
 
   // Messages from oko_attached page to extension
   if (isOkoAttachedPage()) {
-    // Handle responses from our injected modal script
+    // Handle responses from our injected modal script (via MessageChannel)
     if (message?.__oko_extension_response__) {
       const msgType = message.data?.msg_type;
-      console.log("[oko-content] Response from injected script:", msgType, message.requestId);
 
-      // Only forward actual modal responses (open_modal_ack, close_modal), not init messages
+      // Only forward actual modal responses (open_modal_ack, close_modal)
       if (msgType === "open_modal_ack" || msgType === "close_modal") {
         try {
           await chrome.runtime.sendMessage({
@@ -159,20 +153,15 @@ window.addEventListener("message", async (event) => {
               error: message.data?.payload?.error,
             },
           });
-          console.log("[oko-content] Modal response forwarded to background");
         } catch (error) {
           console.error("[oko-content] Error forwarding modal response:", error);
         }
-      } else {
-        console.log("[oko-content] Ignoring non-modal response:", msgType);
       }
       return;
     }
 
-    // Handle messages with source "oko-attached" (from oko_attached internal)
+    // Handle messages with source "oko-attached" (wallet state updates)
     if (message?.source === "oko-attached") {
-      console.log("[oko-content] Message from oko_attached:", message.type, message);
-
       try {
         await chrome.runtime.sendMessage({
           type: "OKO_ATTACHED_MESSAGE",
@@ -184,11 +173,8 @@ window.addEventListener("message", async (event) => {
       }
     }
 
-    // Handle messages with target "oko_sdk" (responses to our modal requests)
-    if (message?.target === "oko_sdk") {
-      console.log("[oko-content] Response from oko_attached to SDK:", message);
-
-      // Get the request ID from URL
+    // Handle messages with target "oko_sdk" (direct postMessage responses)
+    if (message?.target === "oko_sdk" && (message?.msg_type === "open_modal_ack" || message?.msg_type === "close_modal")) {
       const urlParams = new URLSearchParams(window.location.search);
       const requestId = urlParams.get("requestId");
 
@@ -198,13 +184,12 @@ window.addEventListener("message", async (event) => {
             type: "OKO_ATTACHED_MESSAGE",
             id: requestId,
             payload: {
-              type: message.msg_type === "open_modal_ack" ? "SIGN_RESULT" : message.msg_type,
+              type: "SIGN_RESULT",
               requestId,
               payload: message.payload,
               error: message.payload?.error,
             },
           });
-          console.log("[oko-content] Modal response forwarded to background");
         } catch (error) {
           console.error("[oko-content] Error forwarding modal response:", error);
         }
@@ -232,58 +217,33 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 // Inject the script immediately (only on non-oko_attached pages)
 if (!isOkoAttachedPage()) {
-  console.log("[oko-content] Injecting script...");
   injectScript();
 } else {
-  console.log("[oko-content] On oko_attached page...");
+  // On oko_attached page - handle modal URL params
+  handleOkoAttachedModal();
 
-  // Check if we're loaded from extension's sign.html via URL parameter
-  // This is more reliable than referrer which can be empty for cross-origin iframes
-  const urlParams = new URLSearchParams(window.location.search);
-  const isFromExtension = urlParams.get("oko_ext") === "true";
+  // Set up message relay for cases where CSP blocks inline scripts
+  window.addEventListener("message", (event) => {
+    const isFromParent = event.source === window.parent && event.source !== window;
+    const message = event.data;
 
-  console.log("[oko-content] isFromExtension:", isFromExtension);
+    // Skip if this message was already relayed (has the relay flag)
+    if (message?.__oko_relayed__) {
+      return;
+    }
 
-  if (isFromExtension) {
-    // Loaded from extension's sign.html
-    // postMessage from sign.html can reach oko_attached directly
-    // No relay needed - the SDK communication pattern works as-is
-    console.log("[oko-content] In extension iframe, no relay needed (direct postMessage works)");
-  } else {
-    // Top-level page or non-extension iframe - handle modal URL params
-    handleOkoAttachedModal();
+    if (isFromParent && message?.target === "oko_attached" && message?.source === "oko_sdk") {
+      // Add relay flag to prevent infinite loops
+      const messageWithFlag = { ...message, __oko_relayed__: true };
 
-    // Set up message relay for cases where CSP blocks inline scripts
-    // This is for when oko_attached is opened directly (not in sign.html iframe)
-    window.addEventListener("message", (event) => {
-      const isFromParent = event.source === window.parent && event.source !== window;
-      const message = event.data;
-
-      // Skip if this message was already relayed (has the relay flag)
-      if (message?.__oko_relayed__) {
-        return;
-      }
-
-      if (isFromParent) {
-        console.log("[oko-content] Message from parent:", message?.msg_type, message?.target, message?.source);
-
-        if (message?.target === "oko_attached" && message?.source === "oko_sdk") {
-          console.log("[oko-content] Relaying message via background:", message.msg_type);
-
-          // Add relay flag to prevent infinite loops
-          const messageWithFlag = { ...message, __oko_relayed__: true };
-
-          // Request background to use chrome.scripting.executeScript to bypass CSP
-          chrome.runtime.sendMessage({
-            type: "RELAY_TO_MAIN_WORLD",
-            id: crypto.randomUUID(),
-            payload: messageWithFlag,
-          }).catch((err) => {
-            console.error("[oko-content] Failed to relay via background:", err);
-          });
-        }
-      }
-    });
-  }
+      // Request background to use chrome.scripting.executeScript to bypass CSP
+      chrome.runtime.sendMessage({
+        type: "RELAY_TO_MAIN_WORLD",
+        id: crypto.randomUUID(),
+        payload: messageWithFlag,
+      }).catch((err) => {
+        console.error("[oko-content] Failed to relay via background:", err);
+      });
+    }
+  });
 }
-console.log("[oko-content] Content script loaded");

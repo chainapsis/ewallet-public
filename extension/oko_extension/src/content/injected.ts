@@ -17,19 +17,14 @@ import { ExtensionSvmWallet } from "@/providers/svm-provider";
 import { ExtensionCosmosProvider } from "@/providers/cosmos-provider";
 import { sendToBackground, waitForResponse } from "@/providers/bridge";
 
-console.log("[oko-injected] Script loaded!");
-
 // Avoid re-injection
 if ((window as any).__OKO_INJECTED__) {
-  console.log("[oko-injected] Already injected, skipping");
+  // Already injected
 } else {
   (window as any).__OKO_INJECTED__ = true;
 
-  console.log("[oko-injected] Initializing Oko wallet providers...");
-
   // ============== EVM Provider ==============
   try {
-    console.log("[oko-injected] Creating EVM provider...");
     const evmProvider = new ExtensionEvmProvider();
 
     // Inject as window.ethereum
@@ -46,8 +41,6 @@ if ((window as any).__OKO_INJECTED__) {
 
     // Dispatch initialization event
     window.dispatchEvent(new Event("ethereum#initialized"));
-
-    console.log("[oko-injected] EVM provider injected as window.ethereum");
   } catch (error) {
     console.error("[oko-injected] Failed to inject EVM provider:", error);
   }
@@ -111,14 +104,12 @@ if ((window as any).__OKO_INJECTED__) {
       solana: svmWallet,
     };
 
-    console.log("[oko-injected] SVM wallet registered with wallet-standard");
   } catch (error) {
     console.error("[oko-injected] Failed to register SVM wallet:", error);
   }
 
   // ============== Cosmos Provider ==============
   try {
-    console.log("[oko-injected] Creating Cosmos provider...");
     const cosmosProvider = new ExtensionCosmosProvider();
 
     // Set up Keplr SDK proxy protocol handler
@@ -129,8 +120,6 @@ if ((window as any).__OKO_INJECTED__) {
 
       // Handle Keplr SDK proxy requests
       if (data?.type === "proxy-request" && data?.method) {
-        console.log("[oko-injected] Keplr proxy request:", data.method);
-
         try {
           let result: unknown;
 
@@ -199,12 +188,8 @@ if ((window as any).__OKO_INJECTED__) {
         }
       }
     });
-    console.log("[oko-injected] Cosmos provider created:", cosmosProvider);
 
     // Inject as window.keplr
-    console.log("[oko-injected] Injecting window.keplr...");
-
-    // Use direct assignment first (some libraries check this way)
     (window as any).keplr = cosmosProvider;
 
     // Then make it non-writable
@@ -220,8 +205,6 @@ if ((window as any).__OKO_INJECTED__) {
     (window as any).getOfflineSignerOnlyAmino = (chainId: string) => cosmosProvider.getOfflineSignerOnlyAmino(chainId);
     (window as any).getOfflineSignerAuto = (chainId: string) => cosmosProvider.getOfflineSignerAuto(chainId);
 
-    console.log("[oko-injected] window.keplr =", (window as any).keplr);
-
     // Also expose on window.oko
     (window as any).oko = {
       ...(window as any).oko,
@@ -230,13 +213,7 @@ if ((window as any).__OKO_INJECTED__) {
 
     // Dispatch Keplr initialization event
     window.dispatchEvent(new Event("keplr_keystorechange"));
-
-    console.log("[oko-injected] Cosmos provider injected as window.keplr");
   } catch (error) {
     console.error("[oko-injected] Failed to inject Cosmos provider:", error);
   }
-
-  console.log("[oko-injected] Oko wallet initialization complete");
-  console.log("[oko-injected] Final check - window.keplr:", (window as any).keplr);
-  console.log("[oko-injected] Final check - window.ethereum:", (window as any).ethereum);
 }

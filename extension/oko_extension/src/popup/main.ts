@@ -105,16 +105,12 @@ function updateUI(state: WalletState): void {
 
 // Get current state from background storage
 async function loadStateFromBackground(): Promise<WalletState> {
-  console.log("[oko-popup] Loading state from background...");
-
   try {
     const response = await chrome.runtime.sendMessage({
       type: "GET_STATE",
       id: crypto.randomUUID(),
       payload: null,
     });
-
-    console.log("[oko-popup] Background response:", response);
 
     if (response?.success && response.data?.isConnected) {
       return response.data as WalletState;
@@ -133,10 +129,8 @@ async function loadStateFromBackground(): Promise<WalletState> {
 
 // Save state to background
 async function saveStateToBackground(state: WalletState): Promise<void> {
-  console.log("[oko-popup] Saving state to background:", JSON.stringify(state));
-
   try {
-    const response = await chrome.runtime.sendMessage({
+    await chrome.runtime.sendMessage({
       type: "OKO_ATTACHED_MESSAGE",
       id: crypto.randomUUID(),
       payload: {
@@ -149,15 +143,6 @@ async function saveStateToBackground(state: WalletState): Promise<void> {
         },
       },
     });
-    console.log("[oko-popup] Save response:", response);
-
-    // Verify it was saved
-    const verifyResponse = await chrome.runtime.sendMessage({
-      type: "GET_STATE",
-      id: crypto.randomUUID(),
-      payload: null,
-    });
-    console.log("[oko-popup] Verify saved state:", JSON.stringify(verifyResponse?.data));
   } catch (error) {
     console.error("[oko-popup] Failed to save state:", error);
   }
@@ -175,8 +160,6 @@ async function initSDKForSignIn(): Promise<boolean> {
   if (okoWallet) {
     return true;
   }
-
-  console.log("[oko-popup] Initializing SDK for sign-in...");
 
   if (!OKO_API_KEY) {
     console.error("[oko-popup] API key not configured");
@@ -198,16 +181,12 @@ async function initSDKForSignIn(): Promise<boolean> {
   // Listen for account changes (fires after sign-in)
   okoWallet.on({
     type: "CORE__accountsChanged",
-    handler: async (event) => {
-      console.log("[oko-popup] CORE__accountsChanged:", event);
-
+    handler: async () => {
       try {
         const walletInfo = await okoWallet?.getWalletInfo();
-        console.log("[oko-popup] Wallet info:", walletInfo);
 
         if (walletInfo?.publicKey) {
           const publicKey = walletInfo.publicKey;
-          console.log("[oko-popup] Public key found:", publicKey);
 
           // Skip Ed25519 key - it's not implemented in oko_attached
           // and causes unhandled promise rejection
@@ -220,15 +199,11 @@ async function initSDKForSignIn(): Promise<boolean> {
             cosmosPublicKey: publicKey,
           };
 
-          console.log("[oko-popup] State to save:", JSON.stringify(state));
-
           // Save to background storage
           await saveStateToBackground(state);
 
           // Update UI
-          console.log("[oko-popup] Updating UI...");
           updateUI(state);
-          console.log("[oko-popup] Done!");
         }
       } catch (error) {
         console.error("[oko-popup] Error handling account change:", error);
@@ -242,7 +217,6 @@ async function initSDKForSignIn(): Promise<boolean> {
       setTimeout(() => reject(new Error("Timeout")), 10000);
     });
     await Promise.race([okoWallet.waitUntilInitialized, timeout]);
-    console.log("[oko-popup] SDK ready for sign-in");
     return true;
   } catch (error) {
     console.error("[oko-popup] SDK init timeout:", error);
@@ -264,12 +238,10 @@ async function openSignIn(): Promise<void> {
 
   try {
     await okoWallet.openSignInModal();
-    console.log("[oko-popup] Sign-in completed");
     setSignInStatus("success", "Welcome to Oko!");
 
     setTimeout(() => setSignInStatus("idle"), 2000);
   } catch (error) {
-    console.error("[oko-popup] Sign-in failed:", error);
     const message = error instanceof Error ? error.message : "Sign-in failed";
     setSignInStatus("error", message === "Sign in cancelled" ? "Cancelled" : message);
 
@@ -285,7 +257,7 @@ async function disconnect(): Promise<void> {
       try {
         await okoWallet.signOut();
       } catch {
-        console.log("[oko-popup] SDK signOut failed (expected)");
+        // Expected to fail sometimes
       }
     }
 
@@ -302,8 +274,6 @@ async function disconnect(): Promise<void> {
       svmPublicKey: null,
       cosmosPublicKey: null,
     });
-
-    console.log("[oko-popup] Disconnected");
   } catch (error) {
     console.error("[oko-popup] Disconnect failed:", error);
   }
@@ -315,36 +285,26 @@ const signLoadingTextEl = signLoadingEl?.querySelector(".text");
 
 // Handle signing mode
 async function handleSignMode(): Promise<void> {
-  console.log("[oko-popup] handleSignMode called", { signRequestId, signPayload: signPayload?.substring(0, 100) });
-
   if (!signRequestId || !signPayload) {
-    console.error("[oko-popup] Sign mode missing parameters");
     sendSignResult({ success: false, error: "Missing parameters" });
     return;
   }
-
-  console.log("[oko-popup] Sign mode activated", { signRequestId });
 
   // Enable sign mode styling
   document.body.classList.add("sign-mode");
   signLoadingEl?.classList.remove("hidden");
   if (signLoadingTextEl) signLoadingTextEl.textContent = "Initializing...";
-  console.log("[oko-popup] Sign mode styling applied, loading shown");
 
   // Initialize SDK
-  console.log("[oko-popup] Initializing SDK...");
   const sdkReady = await initSDKForSignIn();
-  console.log("[oko-popup] SDK init result:", sdkReady, "okoWallet:", !!okoWallet);
 
   if (!sdkReady || !okoWallet) {
-    console.error("[oko-popup] SDK init failed for signing");
     sendSignResult({ success: false, error: "SDK initialization failed" });
     return;
   }
 
   try {
     const payload = JSON.parse(decodeURIComponent(signPayload));
-    console.log("[oko-popup] Sign payload parsed:", payload);
 
     if (signLoadingTextEl) signLoadingTextEl.textContent = "Opening signature request...";
 
@@ -355,20 +315,10 @@ async function handleSignMode(): Promise<void> {
       payload,
     };
 
-    console.log("[oko-popup] Calling openModal with:", JSON.stringify(openModalMsg));
-
     // Hide loading when modal opens (SDK will show its iframe)
     signLoadingEl?.classList.add("hidden");
 
-    // Check if iframe exists
-    const iframes = document.querySelectorAll("iframe");
-    console.log("[oko-popup] Iframes in document:", iframes.length);
-    iframes.forEach((iframe, i) => {
-      console.log(`[oko-popup] Iframe ${i}:`, iframe.src, iframe.style.cssText);
-    });
-
     const result = await okoWallet.openModal(openModalMsg);
-    console.log("[oko-popup] openModal result:", result);
 
     if (result.success) {
       sendSignResult({
@@ -409,11 +359,8 @@ disconnectBtn.addEventListener("click", disconnect);
 
 // Initialize
 (async () => {
-  console.log("[oko-popup] Initializing...", { signMode, signRequestId, signPayload: signPayload?.substring(0, 50) });
-
   // Check if we're in sign mode
   if (signMode) {
-    console.log("[oko-popup] Entering sign mode");
     // Hide normal UI elements
     signinViewEl.classList.add("hidden");
     connectedViewEl.classList.add("hidden");
@@ -424,14 +371,5 @@ disconnectBtn.addEventListener("click", disconnect);
 
   // Normal popup mode - load state from background storage
   const state = await loadStateFromBackground();
-
-  if (state.isConnected) {
-    // Already connected - show connected view
-    console.log("[oko-popup] Already connected, showing connected view");
-    updateUI(state);
-  } else {
-    // Not connected - show sign-in view
-    console.log("[oko-popup] Not connected, showing sign-in view");
-    updateUI(state);
-  }
+  updateUI(state);
 })();

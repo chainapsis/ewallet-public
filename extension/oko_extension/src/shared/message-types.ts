@@ -157,12 +157,6 @@ export interface InjectModalScriptMessage extends ExtensionMessage<InjectModalSc
   type: "INJECT_MODAL_SCRIPT";
 }
 
-export interface SignPageResultMessage {
-  type: "SIGN_PAGE_RESULT";
-  requestId: string;
-  result: unknown;
-}
-
 export interface RelayToMainWorldMessage extends ExtensionMessage<{
   source: string;
   target: string;
@@ -194,5 +188,4 @@ export type ProviderMessage =
   | OkoAttachedMessage
   | SignPopupResultMessage
   | InjectModalScriptMessage
-  | SignPageResultMessage
   | RelayToMainWorldMessage;

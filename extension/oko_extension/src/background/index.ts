@@ -5,7 +5,6 @@
  * All wallet operations (signing, key management) are delegated to oko_attached.
  */
 
-import { OKO_ATTACHED_URL } from "@/shared/constants";
 import type {
   ProviderMessage,
   ExtensionResponse,
@@ -222,7 +221,7 @@ async function handleCosmosRequest(
   const requestId = uuidv4();
   const state = getWalletState();
 
-  console.log("[oko-extension] Cosmos request:", request.method, request.params);
+  console.debug("[oko-extension] Cosmos request:", request.method);
 
   switch (request.method) {
     case "enable":
@@ -311,7 +310,7 @@ async function handleCosmosRequest(
 // Listen for messages from content scripts
 chrome.runtime.onMessage.addListener(
   (message: ProviderMessage, sender, sendResponse) => {
-    console.log("[oko-extension] Received message:", message.type, message);
+    console.debug("[oko-extension] Received message:", message.type);
 
     // Handle async responses
     (async () => {
@@ -330,39 +329,18 @@ chrome.runtime.onMessage.addListener(
             break;
 
           case "GET_STATE": {
-            console.log("[oko-bg] GET_STATE request");
-            // Check in-memory state first
             const currentState = getWalletState();
-            console.log("[oko-bg] In-memory state:", currentState);
 
             if (currentState.isConnected) {
-              console.log("[oko-bg] Returning in-memory state (connected)");
-              sendResponse({
-                id: message.id,
-                success: true,
-                data: currentState,
-              });
+              sendResponse({ id: message.id, success: true, data: currentState });
             } else {
               // If not connected in memory, check storage (handles race condition)
-              console.log("[oko-bg] Checking storage...");
               chrome.storage.local.get(["walletState"], (result) => {
-                console.log("[oko-bg] Storage state:", result.walletState);
                 if (result.walletState?.isConnected) {
-                  // Update in-memory state from storage
                   updateWalletState(result.walletState);
-                  console.log("[oko-bg] Returning storage state (connected)");
-                  sendResponse({
-                    id: message.id,
-                    success: true,
-                    data: result.walletState,
-                  });
+                  sendResponse({ id: message.id, success: true, data: result.walletState });
                 } else {
-                  console.log("[oko-bg] Returning default state (not connected)");
-                  sendResponse({
-                    id: message.id,
-                    success: true,
-                    data: currentState,
-                  });
+                  sendResponse({ id: message.id, success: true, data: currentState });
                 }
               });
             }
@@ -384,23 +362,15 @@ chrome.runtime.onMessage.addListener(
             };
             const modalRequestId = message.id;
 
-            console.log("[oko-bg] OPEN_MODAL request:", modalPayload.msg_type, modalRequestId);
-
             // Store the sendResponse to be called when sign.html responds
             addPendingRequest(
               modalRequestId,
-              (result) => {
-                console.log("[oko-bg] OPEN_MODAL resolved:", result);
-                sendResponse({ id: modalRequestId, success: true, data: result });
-              },
-              (error) => {
-                console.log("[oko-bg] OPEN_MODAL rejected:", error);
-                sendResponse({
-                  id: modalRequestId,
-                  success: false,
-                  error: error instanceof Error ? error.message : String(error),
-                });
-              }
+              (result) => sendResponse({ id: modalRequestId, success: true, data: result }),
+              (error) => sendResponse({
+                id: modalRequestId,
+                success: false,
+                error: error instanceof Error ? error.message : String(error),
+              })
             );
 
             // Build payload for sign.html
@@ -415,8 +385,6 @@ chrome.runtime.onMessage.addListener(
             const signUrl = chrome.runtime.getURL(
               `sign.html?requestId=${modalRequestId}&payload=${encodedPayload}`
             );
-
-            console.log("[oko-bg] Opening sign.html for OPEN_MODAL:", signUrl);
 
             const modalWindow = await chrome.windows.create({
               url: signUrl,
@@ -456,7 +424,7 @@ chrome.runtime.onMessage.addListener(
               apiKey?: string;
             };
 
-            console.log("[oko-bg] INJECT_MODAL_SCRIPT:", modalReqId, "from tab:", sender.tab?.id, "modal_type:", modalPayload.modal_type);
+            console.debug("[oko-bg] INJECT_MODAL_SCRIPT:", modalPayload.modal_type);
 
             // Use sender's tab directly instead of querying
             const tabId = sender.tab?.id;
@@ -472,196 +440,100 @@ chrome.runtime.onMessage.addListener(
                 target: { tabId },
                 world: "MAIN",
                 func: (hostOrigin: string, requestId: string, modalType: string, modalId: string, modalData: unknown, apiKey: string | undefined) => {
-                  console.log("[oko-modal-injected] Starting modal communication...", {
-                    modalType,
-                    modalId,
-                    hostOrigin,
-                    hasApiKey: !!apiKey,
-                    apiKeyLength: apiKey?.length || 0
-                  });
-
                   const STORAGE_KEY = "oko-wallet-app-2";
-
-                  // Check if we need to set api_key and reload
-                  // The "_oko_reloaded" flag in URL prevents infinite reload loop
                   const urlParams = new URLSearchParams(window.location.search);
                   const alreadyReloaded = urlParams.get("_oko_reloaded") === "true";
 
+                  // Set api_key in localStorage and reload if needed
                   if (apiKey && !alreadyReloaded) {
                     try {
                       const existingData = localStorage.getItem(STORAGE_KEY);
-                      let storeData = existingData ? JSON.parse(existingData) : { state: { perOrigin: {} }, version: 0 };
+                      const storeData = existingData ? JSON.parse(existingData) : { state: { perOrigin: {} }, version: 0 };
 
-                      // Ensure the structure exists
                       if (!storeData.state) storeData.state = { perOrigin: {} };
                       if (!storeData.state.perOrigin) storeData.state.perOrigin = {};
                       if (!storeData.state.perOrigin[hostOrigin]) storeData.state.perOrigin[hostOrigin] = {};
 
-                      // Always set/update the api_key to ensure it's current
                       storeData.state.perOrigin[hostOrigin].apiKey = apiKey;
                       localStorage.setItem(STORAGE_KEY, JSON.stringify(storeData));
 
-                      // Verify what we stored
-                      const verifyData = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-                      console.log("[oko-modal-injected] Stored api_key:", {
-                        hostOrigin,
-                        storedApiKeyLength: verifyData?.state?.perOrigin?.[hostOrigin]?.apiKey?.length || 0,
-                        allOrigins: Object.keys(verifyData?.state?.perOrigin || {})
-                      });
-                      console.log("[oko-modal-injected] Reloading page to ensure zustand hydrates...");
-
-                      // Add reload flag and reload so zustand picks up the api_key during hydration
+                      // Reload so zustand picks up the api_key during hydration
                       urlParams.set("_oko_reloaded", "true");
                       window.location.search = urlParams.toString();
-                      return; // Stop execution, page will reload
+                      return;
                     } catch (e) {
-                      console.error("[oko-modal-injected] Failed to set api_key:", e);
-                    }
-                  } else if (alreadyReloaded) {
-                    // Verify localStorage on reloaded page
-                    try {
-                      const rawData = localStorage.getItem(STORAGE_KEY);
-                      console.log("[oko-modal-injected] Raw localStorage:", rawData?.substring(0, 500));
-
-                      const verifyData = JSON.parse(rawData || "{}");
-                      const storedApiKey = verifyData?.state?.perOrigin?.[hostOrigin]?.apiKey;
-                      const allOrigins = Object.keys(verifyData?.state?.perOrigin || {});
-
-                      console.log("[oko-modal-injected] Page reloaded, localStorage check:");
-                      console.log("  hostOrigin we're looking for:", hostOrigin);
-                      console.log("  origins in storage:", allOrigins);
-                      console.log("  hasApiKeyInStorage:", !!storedApiKey);
-                      console.log("  apiKeyLength:", storedApiKey?.length || 0);
-
-                      // Check if origin exists but with different format
-                      allOrigins.forEach(origin => {
-                        const data = verifyData?.state?.perOrigin?.[origin];
-                        console.log(`  origin "${origin}": apiKey=${!!data?.apiKey}, wallet=${!!data?.wallet}`);
-                      });
-                    } catch (e) {
-                      console.error("[oko-modal-injected] Failed to verify localStorage:", e);
+                      console.error("[oko-modal] Failed to set api_key:", e);
                     }
                   }
 
-                  // Try to make oko_attached think it's in an iframe by mocking window.parent
-                  // This is a hack to bypass the event.source check
+                  // Mock window.parent for top-level window
                   const mockParent = {
-                    postMessage: (data: unknown, targetOrigin: string, transfer?: Transferable[]) => {
-                      const msg = data as { msg_type?: string; target?: string };
-                      console.log("[oko-modal-injected] mockParent.postMessage called:", msg?.msg_type || msg?.target);
+                    postMessage: (data: unknown, _targetOrigin: string, transfer?: Transferable[]) => {
+                      const msg = data as { msg_type?: string };
 
-                      // Only forward actual modal responses, not init messages
                       if (msg?.msg_type === "open_modal_ack" || msg?.msg_type === "close_modal") {
-                        window.postMessage({
-                          __oko_extension_response__: true,
-                          requestId: requestId,
-                          data: data,
-                        }, "*");
+                        window.postMessage({ __oko_extension_response__: true, requestId, data }, "*");
                       }
 
-                      // If a port was transferred, respond on it
-                      if (transfer && transfer.length > 0) {
-                        const port = transfer[0] as MessagePort;
-                        if (port && typeof port.postMessage === "function") {
-                          // Acknowledge init messages
-                          if (msg?.msg_type === "init") {
-                            port.postMessage({
-                              target: "oko_attached",
-                              msg_type: "init_ack",
-                              payload: { success: true, data: null },
-                            });
-                          }
-                        }
+                      // Acknowledge init messages via transferred port
+                      if (transfer?.[0] && msg?.msg_type === "init") {
+                        (transfer[0] as MessagePort).postMessage({
+                          target: "oko_attached",
+                          msg_type: "init_ack",
+                          payload: { success: true, data: null },
+                        });
                       }
                     },
                   };
 
-                  // Check if we're actually in a top-level window (not iframe)
                   if (window === window.top) {
                     try {
-                      // Try to override parent - this might not work due to security
-                      Object.defineProperty(window, "parent", {
-                        get: () => mockParent,
-                        configurable: true,
-                      });
-                      console.log("[oko-modal-injected] window.parent overridden");
-                    } catch (e) {
-                      console.log("[oko-modal-injected] Could not override window.parent:", e);
-                    }
+                      Object.defineProperty(window, "parent", { get: () => mockParent, configurable: true });
+                    } catch { /* ignore */ }
                   }
 
                   // Wait for oko_attached to be ready, then send open_modal via MessageChannel
                   setTimeout(() => {
-                    console.log("[oko-modal-injected] Sending open_modal via MessageChannel:", modalType);
-
-                    // Create a MessageChannel for two-way communication (like the SDK does)
                     const channel = new MessageChannel();
 
                     channel.port1.onmessage = (event: MessageEvent) => {
                       const response = event.data;
-                      console.log("[oko-modal-injected] Got response via MessageChannel:", response?.msg_type);
-
                       if (response?.msg_type === "open_modal_ack" || response?.msg_type === "close_modal") {
-                        window.postMessage({
-                          __oko_extension_response__: true,
-                          requestId: requestId,
-                          data: response,
-                        }, "*");
+                        window.postMessage({ __oko_extension_response__: true, requestId, data: response }, "*");
                       }
                     };
 
-                    // Fix: Override the origin in modalData to use hostOrigin (extension origin)
-                    // This ensures oko_attached looks up api_key for the correct origin
+                    // Fix origin in modalData to use hostOrigin (extension origin)
                     let fixedModalData = modalData;
                     if (modalData && typeof modalData === "object") {
                       const data = modalData as Record<string, unknown>;
                       if (data.payload && typeof data.payload === "object") {
                         const payload = data.payload as Record<string, unknown>;
                         if (payload.origin) {
-                          console.log("[oko-modal-injected] Fixing origin in payload from", payload.origin, "to", hostOrigin);
-                          fixedModalData = {
-                            ...data,
-                            payload: {
-                              ...payload,
-                              origin: hostOrigin,
-                            },
-                          };
+                          fixedModalData = { ...data, payload: { ...payload, origin: hostOrigin } };
                         }
                       }
                     }
 
-                    // Send the open_modal message with the port
                     window.postMessage({
                       source: "oko_sdk",
                       target: "oko_attached",
                       msg_type: "open_modal",
-                      payload: {
-                        modal_type: modalType,
-                        modal_id: modalId,
-                        data: fixedModalData,
-                      },
+                      payload: { modal_type: modalType, modal_id: modalId, data: fixedModalData },
                     }, "*", [channel.port2]);
                   }, 2000);
 
-                  // Also listen for responses via regular postMessage (backup)
-                  window.addEventListener("message", function handler(event) {
+                  // Backup: listen for responses via regular postMessage
+                  window.addEventListener("message", (event) => {
                     const msg = event.data;
                     if (msg?.target === "oko_sdk" && (msg?.msg_type === "open_modal_ack" || msg?.msg_type === "close_modal")) {
-                      console.log("[oko-modal-injected] Got modal response via postMessage:", msg.msg_type);
-                      window.postMessage({
-                        __oko_extension_response__: true,
-                        requestId: requestId,
-                        data: msg,
-                      }, "*");
+                      window.postMessage({ __oko_extension_response__: true, requestId, data: msg }, "*");
                     }
                   });
-
-                  console.log("[oko-modal-injected] Setup complete");
                 },
                 args: [hostOrigin, modalReqId, modalPayload.modal_type, modalPayload.modal_id || crypto.randomUUID(), modalPayload.data, apiKey],
               });
 
-              console.log("[oko-bg] Script injected successfully");
               sendResponse({ id: message.id, success: true, data: null });
             } catch (error) {
               console.error("[oko-bg] Script injection failed:", error);
@@ -703,7 +575,7 @@ chrome.runtime.onMessage.addListener(
               requestId: string;
               result: { success?: boolean; data?: unknown; error?: string } | unknown;
             };
-            console.log("[oko-bg] SIGN_POPUP_RESULT:", signReqId, result);
+            console.debug("[oko-bg] SIGN_POPUP_RESULT:", signReqId);
 
             // Handle the result
             const resultObj = result as { success?: boolean; data?: unknown; error?: string; msg_type?: string; payload?: unknown };
@@ -729,47 +601,6 @@ chrome.runtime.onMessage.addListener(
             break;
           }
 
-          case "SIGN_PAGE_RESULT": {
-            // Result from sign.html page
-            const { requestId: signPageReqId, result: signPageResult } = message as {
-              requestId: string;
-              result: {
-                success?: boolean;
-                data?: unknown;
-                error?: string;
-                errorType?: string;
-                message?: string;
-              };
-            };
-            console.log("[oko-bg] SIGN_PAGE_RESULT:", signPageReqId, signPageResult);
-
-            if (signPageResult?.success) {
-              resolvePendingRequest(signPageReqId, signPageResult.data);
-            } else {
-              // Check if this is a session expired error
-              if (signPageResult?.error === "session_expired") {
-                // Open oko_attached for re-login
-                console.log("[oko-bg] Session expired, opening login popup");
-                openOkoAttached().then(() => {
-                  console.log("[oko-bg] Login popup opened");
-                }).catch((err) => {
-                  console.error("[oko-bg] Failed to open login popup:", err);
-                });
-
-                // Still reject the request - user will need to retry after logging in
-                rejectPendingRequest(
-                  signPageReqId,
-                  new Error(signPageResult?.message || "Session expired. Please sign in again and retry.")
-                );
-              } else {
-                rejectPendingRequest(signPageReqId, new Error(signPageResult?.error || "Signing failed"));
-              }
-            }
-
-            sendResponse({ id: signPageReqId, success: true, data: null });
-            break;
-          }
-
           case "RELAY_TO_MAIN_WORLD": {
             // Relay message to MAIN world using chrome.scripting.executeScript
             // This bypasses CSP restrictions
@@ -790,7 +621,7 @@ chrome.runtime.onMessage.addListener(
               break;
             }
 
-            console.log("[oko-bg] RELAY_TO_MAIN_WORLD:", relayPayload.msg_type, "to tab", tabId, "frame", frameId);
+            console.debug("[oko-bg] RELAY_TO_MAIN_WORLD:", relayPayload.msg_type);
 
             try {
               // Target the specific frame where the content script is running (the iframe)
@@ -803,26 +634,16 @@ chrome.runtime.onMessage.addListener(
                 world: "MAIN",
                 func: (msgData: unknown) => {
                   const msg = msgData as { msg_type?: string; __oko_relayed__?: boolean };
-                  console.log("[oko-main-world] Dispatching message:", msg?.msg_type);
-
-                  // Keep the relay flag to prevent infinite loops
-                  // oko_attached should ignore unknown fields
-
-                  // Create and dispatch a MessageEvent
                   const event = new MessageEvent("message", {
                     data: msg,
                     origin: window.location.origin,
                     source: window.parent,
                   });
-
-                  console.log("[oko-main-world] Event source is parent:", event.source === window.parent);
-
                   window.dispatchEvent(event);
                 },
                 args: [relayPayload],
               });
 
-              console.log("[oko-bg] RELAY_TO_MAIN_WORLD: Script executed successfully");
               sendResponse({ id: message.id, success: true, data: null });
             } catch (error) {
               console.error("[oko-bg] RELAY_TO_MAIN_WORLD: Script execution failed:", error);

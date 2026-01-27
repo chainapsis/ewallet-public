@@ -274,21 +274,13 @@ export class ExtensionOkoWallet implements OkoWalletInterface {
   async openModal(
     msg: OkoWalletMsgOpenModal
   ): Promise<Result<OpenModalAckPayload, OpenModalError>> {
-    console.log("[ExtensionOkoWallet] openModal called with:", msg.msg_type, msg.payload);
-
-    // Capture the dApp's origin - this is crucial for oko_attached to find the api_key
     const dappOrigin = window.location.origin;
-    console.log("[ExtensionOkoWallet] dApp origin:", dappOrigin);
 
-    // Send the modal request to background and wait for response
-    // Include the dApp's origin so oko_attached can find the api_key
     const response = await sendToBackground<OpenModalAckPayload>("OPEN_MODAL", {
       msg_type: msg.msg_type,
       payload: msg.payload,
       host_origin: dappOrigin,
     });
-
-    console.log("[ExtensionOkoWallet] openModal response:", response);
 
     if (response.success) {
       return { success: true, data: response.data as OpenModalAckPayload };
