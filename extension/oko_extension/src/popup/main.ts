@@ -1,5 +1,11 @@
-import { OkoWallet, type OkoWalletInterface } from "@oko-wallet/oko-sdk-core";
+import { OkoWallet, type OkoWalletInterface, type OkoWalletMsgOpenModal } from "@oko-wallet/oko-sdk-core";
 import { OKO_ATTACHED_URL, OKO_API_KEY } from "@/shared/constants";
+
+// Check if we're in sign mode (opened as a window for signing)
+const urlParams = new URLSearchParams(window.location.search);
+const signMode = urlParams.get("mode") === "sign";
+const signRequestId = urlParams.get("requestId");
+const signPayload = urlParams.get("payload");
 
 interface WalletState {
   isConnected: boolean;
@@ -303,13 +309,120 @@ async function disconnect(): Promise<void> {
   }
 }
 
+// Sign mode elements
+const signLoadingEl = document.getElementById("sign-loading");
+const signLoadingTextEl = signLoadingEl?.querySelector(".text");
+
+// Handle signing mode
+async function handleSignMode(): Promise<void> {
+  console.log("[oko-popup] handleSignMode called", { signRequestId, signPayload: signPayload?.substring(0, 100) });
+
+  if (!signRequestId || !signPayload) {
+    console.error("[oko-popup] Sign mode missing parameters");
+    sendSignResult({ success: false, error: "Missing parameters" });
+    return;
+  }
+
+  console.log("[oko-popup] Sign mode activated", { signRequestId });
+
+  // Enable sign mode styling
+  document.body.classList.add("sign-mode");
+  signLoadingEl?.classList.remove("hidden");
+  if (signLoadingTextEl) signLoadingTextEl.textContent = "Initializing...";
+  console.log("[oko-popup] Sign mode styling applied, loading shown");
+
+  // Initialize SDK
+  console.log("[oko-popup] Initializing SDK...");
+  const sdkReady = await initSDKForSignIn();
+  console.log("[oko-popup] SDK init result:", sdkReady, "okoWallet:", !!okoWallet);
+
+  if (!sdkReady || !okoWallet) {
+    console.error("[oko-popup] SDK init failed for signing");
+    sendSignResult({ success: false, error: "SDK initialization failed" });
+    return;
+  }
+
+  try {
+    const payload = JSON.parse(decodeURIComponent(signPayload));
+    console.log("[oko-popup] Sign payload parsed:", payload);
+
+    if (signLoadingTextEl) signLoadingTextEl.textContent = "Opening signature request...";
+
+    // Create open_modal message
+    const openModalMsg: OkoWalletMsgOpenModal = {
+      target: "oko_attached",
+      msg_type: "open_modal",
+      payload,
+    };
+
+    console.log("[oko-popup] Calling openModal with:", JSON.stringify(openModalMsg));
+
+    // Hide loading when modal opens (SDK will show its iframe)
+    signLoadingEl?.classList.add("hidden");
+
+    // Check if iframe exists
+    const iframes = document.querySelectorAll("iframe");
+    console.log("[oko-popup] Iframes in document:", iframes.length);
+    iframes.forEach((iframe, i) => {
+      console.log(`[oko-popup] Iframe ${i}:`, iframe.src, iframe.style.cssText);
+    });
+
+    const result = await okoWallet.openModal(openModalMsg);
+    console.log("[oko-popup] openModal result:", result);
+
+    if (result.success) {
+      sendSignResult({
+        target: "oko_sdk",
+        msg_type: "open_modal_ack",
+        payload: result.data,
+      });
+    } else {
+      sendSignResult({
+        target: "oko_sdk",
+        msg_type: "open_modal_ack",
+        payload: { type: "error", error: result.err },
+      });
+    }
+  } catch (error) {
+    console.error("[oko-popup] Sign error:", error);
+    sendSignResult({ success: false, error: String(error) });
+  }
+}
+
+// Send sign result back to background
+function sendSignResult(result: unknown): void {
+  chrome.runtime.sendMessage({
+    type: "SIGN_POPUP_RESULT",
+    requestId: signRequestId,
+    result,
+  });
+
+  // Close the window after a short delay
+  setTimeout(() => {
+    window.close();
+  }, 500);
+}
+
 // Event listeners
 signinBtn.addEventListener("click", openSignIn);
 disconnectBtn.addEventListener("click", disconnect);
 
 // Initialize
 (async () => {
-  // Load state from background storage (source of truth)
+  console.log("[oko-popup] Initializing...", { signMode, signRequestId, signPayload: signPayload?.substring(0, 50) });
+
+  // Check if we're in sign mode
+  if (signMode) {
+    console.log("[oko-popup] Entering sign mode");
+    // Hide normal UI elements
+    signinViewEl.classList.add("hidden");
+    connectedViewEl.classList.add("hidden");
+    loadingEl.classList.add("hidden");
+    await handleSignMode();
+    return;
+  }
+
+  // Normal popup mode - load state from background storage
   const state = await loadStateFromBackground();
 
   if (state.isConnected) {

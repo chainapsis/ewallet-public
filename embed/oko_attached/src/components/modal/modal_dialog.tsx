@@ -9,6 +9,7 @@ import { ErrorModal } from "@oko-wallet-attached/components/modal_variants/error
 import { useMemoryState } from "@oko-wallet-attached/store/memory";
 import { UnsupportedChainModal } from "../modal_variants/unsupported_chain/unsupported_chain_modal";
 import { TelegramLoginModal } from "@oko-wallet-attached/components/modal_variants/auth/telegram_login/telegram_login_modal";
+import { SessionExpiredModal } from "@oko-wallet-attached/components/modal_variants/session_expired/session_expired_modal";
 
 export const ModalDialog: FC<ModalDialogProps> = ({ modalRequest }) => {
   const msg = modalRequest.msg;
@@ -57,6 +58,17 @@ export const ModalDialog: FC<ModalDialogProps> = ({ modalRequest }) => {
           error={error}
         />
       );
+    }
+
+    // Session expired errors - show re-login modal
+    const sessionExpiredErrors = [
+      "api_key_not_found",
+      "jwt_not_found",
+      "wallet_not_found",
+      "key_share_not_combined",
+    ];
+    if (sessionExpiredErrors.includes(error.error.type)) {
+      return <SessionExpiredModal error={error} />;
     }
 
     return <ErrorModal error={error} />;

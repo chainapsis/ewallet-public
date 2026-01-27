@@ -100,7 +100,7 @@ function postBuildPlugin() {
       }
 
       // Move popup HTML from src/popup/index.html to popup.html
-      // Also fix the script path
+      // Also fix the script and modulepreload paths
       const popupHtmlSrc = resolve(distDir, "src/popup/index.html");
       const popupHtmlDest = resolve(distDir, "popup.html");
       if (existsSync(popupHtmlSrc)) {
@@ -110,8 +110,34 @@ function postBuildPlugin() {
           /src="[^"]*popup\/popup\.js"/,
           'src="./popup/popup.js"'
         );
+        // Fix modulepreload paths from ../../chunks/ to ./chunks/
+        html = html.replace(
+          /href="[^"]*chunks\//g,
+          'href="./chunks/'
+        );
         writeFileSync(popupHtmlDest, html);
-        // Clean up src directory
+      }
+
+      // Move sign HTML from src/sign/index.html to sign.html
+      const signHtmlSrc = resolve(distDir, "src/sign/index.html");
+      const signHtmlDest = resolve(distDir, "sign.html");
+      if (existsSync(signHtmlSrc)) {
+        let html = readFileSync(signHtmlSrc, "utf-8");
+        // Fix the script path
+        html = html.replace(
+          /src="[^"]*sign\/sign\.js"/,
+          'src="./sign/sign.js"'
+        );
+        // Fix modulepreload paths
+        html = html.replace(
+          /href="[^"]*chunks\//g,
+          'href="./chunks/'
+        );
+        writeFileSync(signHtmlDest, html);
+      }
+
+      // Clean up src directory
+      if (existsSync(resolve(distDir, "src"))) {
         rmSync(resolve(distDir, "src"), { recursive: true, force: true });
       }
     },
@@ -127,11 +153,15 @@ export default defineConfig({
       input: {
         background: resolve(__dirname, "src/background/index.ts"),
         popup: resolve(__dirname, "src/popup/index.html"),
+        sign: resolve(__dirname, "src/sign/index.html"),
       },
       output: {
         entryFileNames: (chunkInfo) => {
           if (chunkInfo.name === "popup") {
             return "popup/[name].js";
+          }
+          if (chunkInfo.name === "sign") {
+            return "sign/[name].js";
           }
           return "[name].js";
         },

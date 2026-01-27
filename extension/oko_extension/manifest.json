@@ -5,6 +5,9 @@
   "description": "MPC-powered multi-chain wallet - EVM, Solana, and Cosmos",
   "permissions": ["storage", "activeTab", "scripting", "tabs"],
   "host_permissions": ["<all_urls>"],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'; frame-src https://attached.oko.app https://*.oko.app https://oko.so https://*.oko.so;"
+  },
   "background": {
     "service_worker": "background.js",
     "type": "module"

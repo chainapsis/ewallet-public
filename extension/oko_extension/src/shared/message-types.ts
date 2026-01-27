@@ -108,6 +108,15 @@ export interface OpenOkoAttachedMessage extends ExtensionMessage<{ url?: string 
   type: "OPEN_OKO_ATTACHED";
 }
 
+export interface OpenModalPayload {
+  msg_type: string;
+  payload: unknown;
+}
+
+export interface OpenModalMessage extends ExtensionMessage<OpenModalPayload> {
+  type: "OPEN_MODAL";
+}
+
 export interface DisconnectMessage extends ExtensionMessage<null> {
   type: "DISCONNECT";
 }
@@ -127,6 +136,43 @@ export interface OkoAttachedMessage extends ExtensionMessage<OkoAttachedMessageP
   type: "OKO_ATTACHED_MESSAGE";
 }
 
+export interface SignPopupResultPayload {
+  requestId: string;
+  result: unknown;
+}
+
+export interface SignPopupResultMessage {
+  type: "SIGN_POPUP_RESULT";
+  requestId: string;
+  result: unknown;
+}
+
+export interface InjectModalScriptPayload {
+  hostOrigin: string;
+  requestId: string;
+  modalPayload: { msg_type: string; payload: unknown };
+}
+
+export interface InjectModalScriptMessage extends ExtensionMessage<InjectModalScriptPayload> {
+  type: "INJECT_MODAL_SCRIPT";
+}
+
+export interface SignPageResultMessage {
+  type: "SIGN_PAGE_RESULT";
+  requestId: string;
+  result: unknown;
+}
+
+export interface RelayToMainWorldMessage extends ExtensionMessage<{
+  source: string;
+  target: string;
+  msg_type: string;
+  payload: unknown;
+  requestId?: string;
+}> {
+  type: "RELAY_TO_MAIN_WORLD";
+}
+
 // ============== Window PostMessage Types ==============
 
 export interface WindowMessage {
@@ -143,5 +189,10 @@ export type ProviderMessage =
   | CosmosProviderMessage
   | GetStateMessage
   | OpenOkoAttachedMessage
+  | OpenModalMessage
   | DisconnectMessage
-  | OkoAttachedMessage;
+  | OkoAttachedMessage
+  | SignPopupResultMessage
+  | InjectModalScriptMessage
+  | SignPageResultMessage
+  | RelayToMainWorldMessage;

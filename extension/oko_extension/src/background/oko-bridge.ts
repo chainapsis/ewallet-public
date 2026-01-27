@@ -3,48 +3,160 @@ import {
   updateWalletState,
   addPendingRequest,
   resolvePendingRequest,
+  rejectPendingRequest,
 } from "./state";
 
-// Track the oko_attached tab
-let okoAttachedTabId: number | null = null;
+// Track the oko_attached window
+let okoAttachedWindowId: number | null = null;
 
 /**
- * Open oko_attached in a new tab for sign-in or signing
+ * Get extension origin for host_origin parameter
  */
-export async function openOkoAttached(path = ""): Promise<chrome.tabs.Tab> {
-  const url = `${OKO_ATTACHED_URL}${path}`;
+function getExtensionOrigin(): string {
+  return chrome.runtime.getURL("").slice(0, -1); // Remove trailing slash
+}
 
-  // Check if we already have an oko_attached tab open
-  if (okoAttachedTabId !== null) {
+/**
+ * Close the oko_attached/sign popup window
+ */
+export async function closeOkoAttachedWindow(): Promise<void> {
+  if (okoAttachedWindowId !== null) {
     try {
-      const existingTab = await chrome.tabs.get(okoAttachedTabId);
-      if (existingTab) {
-        // Focus the existing tab
-        await chrome.tabs.update(okoAttachedTabId, { active: true, url });
-        await chrome.windows.update(existingTab.windowId!, { focused: true });
-        return existingTab;
+      await chrome.windows.remove(okoAttachedWindowId);
+      console.log("[oko-bridge] Popup window closed");
+    } catch {
+      // Window already closed
+    }
+    okoAttachedWindowId = null;
+  }
+}
+
+/**
+ * Set the oko_attached window ID (for tracking windows created elsewhere)
+ */
+export function setOkoAttachedWindowId(windowId: number | null): void {
+  okoAttachedWindowId = windowId;
+}
+
+/**
+ * Open oko_attached in a popup window
+ */
+export async function openOkoAttached(path = ""): Promise<chrome.windows.Window> {
+  // Build URL with host_origin parameter so oko_attached can find the api_key
+  const baseUrl = new URL(OKO_ATTACHED_URL);
+  baseUrl.searchParams.set("host_origin", getExtensionOrigin());
+
+  // Append additional path/query if provided
+  const url = path ? `${baseUrl.toString()}${path.startsWith("?") ? "&" + path.slice(1) : path}` : baseUrl.toString();
+
+  console.log("[oko-bridge] openOkoAttached URL:", url);
+
+  // Check if we already have an oko_attached window open
+  if (okoAttachedWindowId !== null) {
+    try {
+      const existingWindow = await chrome.windows.get(okoAttachedWindowId, { populate: true });
+      if (existingWindow) {
+        // Update URL and focus the existing window
+        const tabId = existingWindow.tabs?.[0]?.id;
+        if (tabId) {
+          await chrome.tabs.update(tabId, { url });
+        }
+        await chrome.windows.update(okoAttachedWindowId, { focused: true });
+        return existingWindow;
       }
     } catch {
-      // Tab no longer exists
-      okoAttachedTabId = null;
+      // Window no longer exists
+      okoAttachedWindowId = null;
     }
   }
 
-  // Create a new tab
-  const tab = await chrome.tabs.create({ url, active: true });
-  okoAttachedTabId = tab.id ?? null;
+  // Create a new popup window
+  const window = await chrome.windows.create({
+    url,
+    type: "popup",
+    width: 420,
+    height: 700,
+    focused: true,
+  });
 
-  // Listen for tab close
-  if (tab.id) {
-    chrome.tabs.onRemoved.addListener(function listener(tabId) {
-      if (tabId === okoAttachedTabId) {
-        okoAttachedTabId = null;
-        chrome.tabs.onRemoved.removeListener(listener);
+  console.log("[oko-bridge] oko_attached window created:", window.id);
+  okoAttachedWindowId = window.id ?? null;
+
+  // Listen for window close
+  if (window.id) {
+    chrome.windows.onRemoved.addListener(function listener(windowId) {
+      if (windowId === okoAttachedWindowId) {
+        console.log("[oko-bridge] oko_attached window closed");
+        okoAttachedWindowId = null;
+        chrome.windows.onRemoved.removeListener(listener);
       }
     });
   }
 
-  return tab;
+  return window;
+}
+
+/**
+ * Open sign.html page with SDK for signing
+ * sign.html uses the SDK which ensures the same origin is used for both login and signing
+ */
+export async function openSignPopup(
+  requestId: string,
+  method: string,
+  params: unknown
+): Promise<chrome.windows.Window> {
+  console.log("[oko-bridge] openSignPopup called", { requestId, method });
+
+  // Build payload for the sign page
+  const payload = {
+    modal_type: `cosmos/${method}`,
+    modal_id: crypto.randomUUID(),
+    data: params,
+  };
+
+  const encodedPayload = encodeURIComponent(JSON.stringify(payload));
+
+  // Open sign.html which uses SDK
+  const signUrl = chrome.runtime.getURL(
+    `sign.html?requestId=${requestId}&payload=${encodedPayload}`
+  );
+
+  console.log("[oko-bridge] Opening sign page:", signUrl);
+
+  // Close existing window if any
+  if (okoAttachedWindowId !== null) {
+    try {
+      await chrome.windows.remove(okoAttachedWindowId);
+    } catch {
+      // Window already closed
+    }
+    okoAttachedWindowId = null;
+  }
+
+  // Create popup window with sign page
+  const window = await chrome.windows.create({
+    url: signUrl,
+    type: "popup",
+    width: 420,
+    height: 700,
+    focused: true,
+  });
+
+  console.log("[oko-bridge] Sign page window created:", window.id);
+  okoAttachedWindowId = window.id ?? null;
+
+  // Listen for window close
+  if (window.id) {
+    chrome.windows.onRemoved.addListener(function listener(windowId) {
+      if (windowId === okoAttachedWindowId) {
+        console.log("[oko-bridge] Sign page window closed");
+        okoAttachedWindowId = null;
+        chrome.windows.onRemoved.removeListener(listener);
+      }
+    });
+  }
+
+  return window;
 }
 
 /**
@@ -61,16 +173,17 @@ export async function sendToOkoAttached<T>(
     addPendingRequest(requestId, resolve as (v: unknown) => void, reject);
 
     // Open oko_attached
-    openOkoAttached().then((tab) => {
-      if (!tab.id) {
-        reject(new Error("Failed to open oko_attached tab"));
+    openOkoAttached().then((window) => {
+      const tabId = window.tabs?.[0]?.id;
+      if (!tabId) {
+        reject(new Error("Failed to open oko_attached window"));
         return;
       }
 
       // We need to inject a script to communicate with oko_attached
       // The oko_attached page will handle the message and respond back
       chrome.scripting.executeScript({
-        target: { tabId: tab.id },
+        target: { tabId },
         func: (msgType: string, msgPayload: unknown, reqId: string) => {
           // This runs in the context of oko_attached page
           window.postMessage(
@@ -156,16 +269,14 @@ export function handleOkoAttachedMessage(message: {
     case "CONNECT_RESULT": {
       if (message.requestId) {
         if (message.error) {
-          resolvePendingRequest(message.requestId, {
-            success: false,
-            error: message.error,
-          });
+          // Use reject for errors - this triggers the reject callback in OPEN_MODAL
+          rejectPendingRequest(message.requestId, new Error(message.error));
         } else {
-          resolvePendingRequest(message.requestId, {
-            success: true,
-            data: message.payload,
-          });
+          // Pass payload directly - ExtensionOkoWallet.openModal will wrap it in Result
+          resolvePendingRequest(message.requestId, message.payload);
         }
+        // Close the popup window after signing is complete
+        closeOkoAttachedWindow();
       }
       break;
     }

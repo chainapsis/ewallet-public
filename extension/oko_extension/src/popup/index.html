@@ -201,9 +201,65 @@
         pointer-events: none;
         z-index: -1;
       }
+
+      /* Sign mode - full screen for SDK iframe */
+      body.sign-mode {
+        width: 100%;
+        height: 100vh;
+        overflow: hidden;
+      }
+      body.sign-mode #loading,
+      body.sign-mode #signin-view,
+      body.sign-mode #connected-view {
+        display: none !important;
+      }
+      /* SDK creates iframe with class oko-sdk-iframe */
+      body.sign-mode iframe {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        border: none !important;
+        z-index: 9999 !important;
+        pointer-events: auto !important;
+        display: block !important;
+      }
+      #sign-loading {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #ffffff;
+        z-index: 1;
+      }
+      #sign-loading .spinner-large {
+        width: 40px;
+        height: 40px;
+        border: 3px solid #e2e8f0;
+        border-top-color: #1a1a2e;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin-bottom: 16px;
+      }
+      #sign-loading .text {
+        color: #718096;
+        font-size: 14px;
+      }
     </style>
   </head>
   <body>
+    <!-- Sign mode loading -->
+    <div id="sign-loading" class="hidden">
+      <div class="spinner-large"></div>
+      <div class="text">Loading...</div>
+    </div>
+
     <!-- Iframe container for SDK -->
     <div id="oko-iframe-container"></div>
 

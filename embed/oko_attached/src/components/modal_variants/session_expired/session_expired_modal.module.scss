@@ -1,0 +1,81 @@
+@use "@oko-wallet-attached/components/modal_variants/common/make_signature/make_signature_modal_tokens"
+  as *;
+
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.modal {
+  height: 100%;
+  max-height: $make-signature-modal-max-height;
+  overflow-y: auto;
+}
+
+.closeButton {
+  display: flex;
+  justify-content: flex-end;
+
+  padding: 8px;
+  cursor: pointer;
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px;
+  gap: 12px;
+}
+
+.modalInnerContentContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--bg-primary);
+  padding: 0 16px;
+}
+
+.loginOptionsContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.closeButtonBottom {
+  border: 1px solid var(--border-primary) !important;
+}
+
+.errorIconContainer {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+
+  .ring2 {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 32px;
+    height: 32px;
+    border-radius: 24px;
+    border: 2px solid var(--fg-warning-primary);
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  .ring1 {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 42px;
+    height: 42px;
+    border-radius: 24px;
+    border: 2px solid var(--fg-warning-primary);
+    opacity: 0.1;
+    pointer-events: none;
+  }
+}
