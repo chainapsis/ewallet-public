@@ -48,10 +48,10 @@ function updateUI(state: WalletState): void {
     signinViewEl.classList.add("hidden");
     connectedViewEl.classList.remove("hidden");
 
-    // Show EVM address if available
+    // Show EVM address if available (full address)
     if (state.evmAddress) {
       evmAccountEl.classList.remove("hidden");
-      evmAddressEl.textContent = truncateAddress(state.evmAddress);
+      evmAddressEl.textContent = state.evmAddress;
     } else {
       evmAccountEl.classList.add("hidden");
     }

@@ -76,9 +76,13 @@ export class ExtensionOkoWallet implements OkoWalletInterface {
 
     console.debug("[ExtensionOkoWallet] sendMsgToIframe:", msg.msg_type);
 
-    // Handle get_cosmos_chain_info locally by fetching from chain registry
+    // Handle chain info requests locally
     if (msg.msg_type === "get_cosmos_chain_info") {
       return this._handleGetCosmosChainInfo(msg);
+    }
+
+    if (msg.msg_type === "get_eth_chain_info") {
+      return this._handleGetEthChainInfo(msg);
     }
 
     // Other messages go to background
@@ -91,13 +95,13 @@ export class ExtensionOkoWallet implements OkoWalletInterface {
         target: "oko_sdk",
         msg_type: `${msg.msg_type}_ack`,
         payload: { success: true, data: response.data },
-      };
+      } as OkoWalletMsg;
     } else {
       return {
         target: "oko_sdk",
         msg_type: `${msg.msg_type}_ack`,
         payload: { success: false, err: response.error },
-      };
+      } as OkoWalletMsg;
     }
   }
 
@@ -122,8 +126,8 @@ export class ExtensionOkoWallet implements OkoWalletInterface {
     return chainIdToPath[chainId] || chainId.split("-")[0];
   }
 
-  // Default supported chains when chain_id is null
-  private readonly _defaultChains = [
+  // Default supported Cosmos chains
+  private readonly _defaultCosmosChains = [
     "osmosis-1",
     "cosmoshub-4",
     "juno-1",
@@ -133,6 +137,93 @@ export class ExtensionOkoWallet implements OkoWalletInterface {
     "stride-1",
   ];
 
+  // Default supported EVM chains (in Keplr ChainInfo format for SDK compatibility)
+  private readonly _defaultEvmChains = [
+    {
+      chainId: "eip155:1",
+      chainName: "Ethereum",
+      rpc: "https://eth.llamarpc.com",
+      currencies: [{ coinDenom: "ETH", coinMinimalDenom: "wei", coinDecimals: 18 }],
+      bip44: { coinType: 60 },
+      chainSymbolImageUrl: "https://assets.coingecko.com/coins/images/279/small/ethereum.png",
+      features: ["eth-address-gen", "eth-key-sign"],
+      evm: { chainId: 1, rpc: "https://eth.llamarpc.com" },
+    },
+    {
+      chainId: "eip155:137",
+      chainName: "Polygon",
+      rpc: "https://polygon.llamarpc.com",
+      currencies: [{ coinDenom: "MATIC", coinMinimalDenom: "wei", coinDecimals: 18 }],
+      bip44: { coinType: 60 },
+      chainSymbolImageUrl: "https://assets.coingecko.com/coins/images/4713/small/matic-token-icon.png",
+      features: ["eth-address-gen", "eth-key-sign"],
+      evm: { chainId: 137, rpc: "https://polygon.llamarpc.com" },
+    },
+    {
+      chainId: "eip155:42161",
+      chainName: "Arbitrum One",
+      rpc: "https://arbitrum.llamarpc.com",
+      currencies: [{ coinDenom: "ETH", coinMinimalDenom: "wei", coinDecimals: 18 }],
+      bip44: { coinType: 60 },
+      chainSymbolImageUrl: "https://assets.coingecko.com/coins/images/16547/small/photo_2023-03-29_21.47.00.jpeg",
+      features: ["eth-address-gen", "eth-key-sign"],
+      evm: { chainId: 42161, rpc: "https://arbitrum.llamarpc.com" },
+    },
+    {
+      chainId: "eip155:10",
+      chainName: "Optimism",
+      rpc: "https://optimism.llamarpc.com",
+      currencies: [{ coinDenom: "ETH", coinMinimalDenom: "wei", coinDecimals: 18 }],
+      bip44: { coinType: 60 },
+      chainSymbolImageUrl: "https://assets.coingecko.com/coins/images/25244/small/Optimism.png",
+      features: ["eth-address-gen", "eth-key-sign"],
+      evm: { chainId: 10, rpc: "https://optimism.llamarpc.com" },
+    },
+    {
+      chainId: "eip155:8453",
+      chainName: "Base",
+      rpc: "https://base.llamarpc.com",
+      currencies: [{ coinDenom: "ETH", coinMinimalDenom: "wei", coinDecimals: 18 }],
+      bip44: { coinType: 60 },
+      chainSymbolImageUrl: "https://assets.coingecko.com/coins/images/32594/small/base.png",
+      features: ["eth-address-gen", "eth-key-sign"],
+      evm: { chainId: 8453, rpc: "https://base.llamarpc.com" },
+    },
+  ];
+
+  /**
+   * Handle get_eth_chain_info request
+   */
+  private async _handleGetEthChainInfo(msg: OkoWalletMsg): Promise<OkoWalletMsg> {
+    try {
+      const chainId = (msg.payload as any)?.chain_id;
+
+      let chains = this._defaultEvmChains;
+
+      // Filter by chain_id if specified
+      if (chainId) {
+        chains = chains.filter((c) => c.chainId === chainId || c.evm?.chainId === parseInt(chainId, 10));
+      }
+
+      if (chains.length === 0) {
+        throw new Error(`Chain ${chainId} not found`);
+      }
+
+      return {
+        target: "oko_sdk",
+        msg_type: "get_eth_chain_info_ack",
+        payload: { success: true, data: chains },
+      } as OkoWalletMsg;
+    } catch (error) {
+      console.error("[ExtensionOkoWallet] Failed to get ETH chain info:", error);
+      return {
+        target: "oko_sdk",
+        msg_type: "get_eth_chain_info_ack",
+        payload: { success: false, err: String(error) },
+      } as OkoWalletMsg;
+    }
+  }
+
   /**
    * Fetch chain info from Cosmos chain registry
    */
@@ -141,7 +232,7 @@ export class ExtensionOkoWallet implements OkoWalletInterface {
       const chainId = (msg.payload as any)?.chain_id;
 
       // If chain_id is null, fetch all default chains
-      const chainIds = chainId ? [chainId] : this._defaultChains;
+      const chainIds = chainId ? [chainId] : this._defaultCosmosChains;
 
       console.debug("[ExtensionOkoWallet] Fetching chain info for:", chainIds);
 
@@ -285,7 +376,7 @@ export class ExtensionOkoWallet implements OkoWalletInterface {
     if (response.success) {
       return { success: true, data: response.data as OpenModalAckPayload };
     } else {
-      return { success: false, err: { type: "error", error: response.error || "Unknown error" } as OpenModalError };
+      return { success: false, err: { type: "unknown_error", error: response.error || "Unknown error" } };
     }
   }
 

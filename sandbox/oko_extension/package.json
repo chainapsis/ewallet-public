@@ -15,6 +15,8 @@
     "@noble/hashes": "^1.7.2",
     "@oko-wallet/oko-sdk-core": "workspace:*",
     "@oko-wallet/oko-sdk-cosmos": "workspace:*",
+    "@oko-wallet/oko-sdk-eth": "workspace:*",
+    "@oko-wallet/oko-sdk-svm": "workspace:*",
     "@oko-wallet/oko-types": "workspace:*",
     "@oko-wallet/stdlib-js": "workspace:*",
     "@solana/web3.js": "^1.98.2",

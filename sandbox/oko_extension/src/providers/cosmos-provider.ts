@@ -5,6 +5,7 @@
  */
 
 import { OkoCosmosWallet } from "@oko-wallet/oko-sdk-cosmos";
+import type { OkoCosmosWalletInterface } from "@oko-wallet/oko-sdk-cosmos";
 import type { Key, ChainInfo, StdSignDoc } from "@keplr-wallet/types";
 import { ExtensionOkoWallet } from "./extension-oko-wallet";
 import { OKO_ATTACHED_URL, OKO_API_KEY } from "@/shared/constants";
@@ -56,14 +57,14 @@ export class ExtensionCosmosProvider {
     },
   };
 
-  private _cosmosWallet: InstanceType<typeof OkoCosmosWallet> | null = null;
+  private _cosmosWallet: OkoCosmosWalletInterface | null = null;
   private _initPromise: Promise<void> | null = null;
 
   constructor() {
     // Lazy initialization
   }
 
-  private async _ensureInitialized(): Promise<InstanceType<typeof OkoCosmosWallet>> {
+  private async _ensureInitialized(): Promise<OkoCosmosWalletInterface> {
     if (this._cosmosWallet) {
       return this._cosmosWallet;
     }
@@ -84,14 +85,19 @@ export class ExtensionCosmosProvider {
 
     await extensionWallet.waitUntilInitialized;
 
-    this._cosmosWallet = new OkoCosmosWallet(extensionWallet);
-    await this._cosmosWallet.waitUntilInitialized;
+    // OkoCosmosWallet constructor returns instance but types say void - need cast
+    const cosmosWallet = new OkoCosmosWallet(extensionWallet) as unknown as OkoCosmosWalletInterface;
+    await cosmosWallet.waitUntilInitialized;
+    this._cosmosWallet = cosmosWallet;
   }
 
   async enable(chainIds: string | string[]): Promise<void> {
     const wallet = await this._ensureInitialized();
     const chains = Array.isArray(chainIds) ? chainIds : [chainIds];
-    await wallet.enable(chains);
+    // Enable each chain
+    for (const chainId of chains) {
+      await wallet.enable(chainId);
+    }
   }
 
   async getKey(chainId: string): Promise<Key> {
@@ -142,7 +148,8 @@ export class ExtensionCosmosProvider {
     signature: StdSignature
   ): Promise<boolean> {
     const wallet = await this._ensureInitialized();
-    return wallet.verifyArbitrary(chainId, signer, data, signature);
+    const result = await wallet.verifyArbitrary(chainId, signer, data, signature);
+    return result.isVerified;
   }
 
   async sendTx(

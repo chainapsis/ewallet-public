@@ -10941,6 +10941,8 @@ __metadata:
     "@noble/hashes": "npm:^1.7.2"
     "@oko-wallet/oko-sdk-core": "workspace:*"
     "@oko-wallet/oko-sdk-cosmos": "workspace:*"
+    "@oko-wallet/oko-sdk-eth": "workspace:*"
+    "@oko-wallet/oko-sdk-svm": "workspace:*"
     "@oko-wallet/oko-types": "workspace:*"
     "@oko-wallet/stdlib-js": "workspace:*"
     "@solana/web3.js": "npm:^1.98.2"
@@ -11502,7 +11504,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@oko-wallet/oko-sdk-eth@npm:^0.1.2-alpha.1, @oko-wallet/oko-sdk-eth@workspace:sdk/oko_sdk_eth":
+"@oko-wallet/oko-sdk-eth@npm:^0.1.2-alpha.1, @oko-wallet/oko-sdk-eth@workspace:*, @oko-wallet/oko-sdk-eth@workspace:sdk/oko_sdk_eth":
   version: 0.0.0-use.local
   resolution: "@oko-wallet/oko-sdk-eth@workspace:sdk/oko_sdk_eth"
   dependencies:

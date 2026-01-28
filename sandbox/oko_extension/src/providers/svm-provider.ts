@@ -1,186 +1,168 @@
 /**
  * SVM Provider - Wallet Standard compatible wallet for Solana dApps
  *
- * Implements the Wallet Standard interface used by Solana dApps like
- * Raydium, Jupiter, etc. via @wallet-standard/wallet
+ * Uses OkoSvmWallet and OkoStandardWallet from SDK with ExtensionOkoWallet
+ * for communication with background service worker.
  */
 
-import EventEmitter from "eventemitter3";
-import { OKO_WALLET_NAME, OKO_ICON } from "@/shared/constants";
-import { sendToBackground } from "./bridge";
-import type {
-  Wallet,
-  WalletAccount,
-  WalletIcon,
-  IdentifierString,
-} from "@wallet-standard/base";
-import type {
-  StandardConnectFeature,
-  StandardConnectMethod,
-  StandardDisconnectFeature,
-  StandardDisconnectMethod,
-  StandardEventsFeature,
-  StandardEventsListeners,
-  StandardEventsNames,
-  StandardEventsOnMethod,
-} from "@wallet-standard/features";
+import { OkoSvmWallet, OkoStandardWallet } from "@oko-wallet/oko-sdk-svm";
+import type { WalletStandardConfig, OkoSvmWalletInterface } from "@oko-wallet/oko-sdk-svm";
+import type { Wallet, WalletAccount, WalletIcon, IdentifierString } from "@wallet-standard/base";
+import type { StandardEventsListeners, StandardEventsNames } from "@wallet-standard/features";
+import { ExtensionOkoWallet } from "./extension-oko-wallet";
+import { OKO_ATTACHED_URL, OKO_API_KEY, OKO_ICON } from "@/shared/constants";
 
-// Solana-specific feature identifiers
-const SolanaSignMessage = "solana:signMessage" as const;
-const SolanaSignTransaction = "solana:signTransaction" as const;
-const SolanaSignAndSendTransaction = "solana:signAndSendTransaction" as const;
+// Default Solana chain configurations for Wallet Standard
+const DEFAULT_SVM_CONFIGS: WalletStandardConfig[] = [
+  {
+    chains: ["solana:mainnet", "solana:devnet", "solana:testnet"],
+    features: {
+      signIn: "solana:signIn",
+      signMessage: "solana:signMessage",
+      signTransaction: "solana:signTransaction",
+      signAndSendTransaction: "solana:signAndSendTransaction",
+    },
+    rpcEndpoints: {
+      "solana:mainnet": "https://api.mainnet-beta.solana.com",
+      "solana:devnet": "https://api.devnet.solana.com",
+      "solana:testnet": "https://api.testnet.solana.com",
+    },
+  },
+];
 
-// Shared base58 decoder
-function base58ToBytes(base58: string): Uint8Array {
-  const ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-  const bytes: number[] = [];
-  for (let i = 0; i < base58.length; i++) {
-    const char = base58[i];
-    const value = ALPHABET.indexOf(char);
-    if (value === -1) {
-      throw new Error(`Invalid base58 character: ${char}`);
-    }
-    let carry = value;
-    for (let j = 0; j < bytes.length; j++) {
-      carry += bytes[j] * 58;
-      bytes[j] = carry & 0xff;
-      carry >>= 8;
-    }
-    while (carry > 0) {
-      bytes.push(carry & 0xff);
-      carry >>= 8;
-    }
-  }
-  for (let i = 0; i < base58.length && base58[i] === "1"; i++) {
-    bytes.push(0);
-  }
-  return new Uint8Array(bytes.reverse());
-}
-
-// Wallet account for Solana
-class OkoSvmWalletAccount implements WalletAccount {
-  readonly address: string;
-  readonly publicKey: Uint8Array;
-  readonly chains: readonly IdentifierString[];
-  readonly features: readonly IdentifierString[];
-  readonly label?: string;
-  readonly icon?: WalletIcon;
-
-  constructor(publicKey: string, chains: IdentifierString[]) {
-    this.address = publicKey;
-    this.publicKey = base58ToBytes(publicKey);
-    this.chains = chains;
-    this.features = [
-      SolanaSignMessage,
-      SolanaSignTransaction,
-      SolanaSignAndSendTransaction,
-    ];
-    this.label = "Oko Account";
-    this.icon = OKO_ICON as WalletIcon;
-  }
-}
-
-// Event types
-type WalletEvent = "change";
-
+/**
+ * Extension SVM wallet that implements Wallet Standard
+ * Wraps OkoSvmWallet and OkoStandardWallet from SDK
+ */
 export class ExtensionSvmWallet implements Wallet {
-  readonly version = "1.0.0" as const;
-  readonly name = OKO_WALLET_NAME;
-  readonly icon: WalletIcon = OKO_ICON as WalletIcon;
-  readonly chains = ["solana:mainnet", "solana:devnet", "solana:testnet"] as const;
-
-  private _accounts: WalletAccount[] = [];
+  private _standardWallet: OkoStandardWallet | null = null;
+  private _svmWallet: OkoSvmWalletInterface | null = null;
+  private _extensionWallet: ExtensionOkoWallet | null = null;
+  private _initPromise: Promise<void> | null = null;
   private _listeners: { [E in StandardEventsNames]?: StandardEventsListeners[E][] } = {};
-  private _eventEmitter = new EventEmitter<WalletEvent>();
-  private _publicKey: string | null = null;
 
-  constructor() {
-    this._initState();
-  }
-
-  private async _initState(): Promise<void> {
-    try {
-      const response = await sendToBackground<{
-        isConnected: boolean;
-        svmPublicKey: string | null;
-      }>("GET_STATE", null);
-
-      if (response.success && response.data?.svmPublicKey) {
-        this._publicKey = response.data.svmPublicKey;
-        this._updateAccounts();
-      }
-    } catch (error) {
-      console.debug("[oko-svm] Failed to init state:", error);
-    }
-  }
+  // Wallet Standard required properties
+  readonly version = "1.0.0" as const;
+  readonly name = "Oko" as const;
+  readonly icon: WalletIcon = OKO_ICON as WalletIcon;
+  readonly chains: readonly IdentifierString[] = [
+    "solana:mainnet",
+    "solana:devnet",
+    "solana:testnet",
+  ];
 
   get accounts(): readonly WalletAccount[] {
-    return this._accounts;
+    return this._standardWallet?.accounts ?? [];
   }
 
   get features(): Record<string, unknown> {
+    // Return basic features that trigger initialization when used
     return {
       "standard:connect": {
-        version: "1.0.0",
-        connect: this._connect.bind(this),
-      } as StandardConnectFeature["standard:connect"],
-
+        version: "1.0.0" as const,
+        connect: async () => {
+          const wallet = await this._ensureInitialized();
+          const features = wallet.features;
+          const connect = features["standard:connect"] as {
+            connect: () => Promise<{ accounts: readonly WalletAccount[] }>;
+          };
+          return connect.connect();
+        },
+      },
       "standard:disconnect": {
-        version: "1.0.0",
-        disconnect: this._disconnect.bind(this),
-      } as StandardDisconnectFeature["standard:disconnect"],
-
+        version: "1.0.0" as const,
+        disconnect: async () => {
+          if (this._standardWallet) {
+            const features = this._standardWallet.features;
+            const disconnect = features["standard:disconnect"] as {
+              disconnect: () => Promise<void>;
+            };
+            await disconnect.disconnect();
+          }
+        },
+      },
       "standard:events": {
-        version: "1.0.0",
+        version: "1.0.0" as const,
         on: this._on.bind(this),
-      } as StandardEventsFeature["standard:events"],
-
-      [SolanaSignMessage]: {
-        version: "1.0.0",
-        signMessage: this._signMessage.bind(this),
       },
-
-      [SolanaSignTransaction]: {
-        version: "1.0.0",
-        signTransaction: this._signTransaction.bind(this),
+      "solana:signMessage": {
+        version: "1.0.0" as const,
+        signMessage: async (input: unknown) => {
+          const wallet = await this._ensureInitialized();
+          const features = wallet.features;
+          const signMessage = features["solana:signMessage"] as {
+            signMessage: (input: unknown) => Promise<unknown>;
+          };
+          return signMessage.signMessage(input);
+        },
       },
-
-      [SolanaSignAndSendTransaction]: {
-        version: "1.0.0",
-        signAndSendTransaction: this._signAndSendTransaction.bind(this),
+      "solana:signTransaction": {
+        version: "1.0.0" as const,
+        signTransaction: async (input: unknown) => {
+          const wallet = await this._ensureInitialized();
+          const features = wallet.features;
+          const signTransaction = features["solana:signTransaction"] as {
+            signTransaction: (input: unknown) => Promise<unknown>;
+          };
+          return signTransaction.signTransaction(input);
+        },
+      },
+      "solana:signAndSendTransaction": {
+        version: "1.0.0" as const,
+        signAndSendTransaction: async (input: unknown) => {
+          const wallet = await this._ensureInitialized();
+          const features = wallet.features;
+          const signAndSendTransaction = features["solana:signAndSendTransaction"] as {
+            signAndSendTransaction: (input: unknown) => Promise<unknown>;
+          };
+          return signAndSendTransaction.signAndSendTransaction(input);
+        },
       },
     };
   }
 
-  private async _connect(): Promise<{ accounts: readonly WalletAccount[] }> {
-    console.debug("[oko-svm] connect");
-
-    const response = await sendToBackground<{ publicKey: string }>(
-      "SVM_REQUEST",
-      { method: "connect" }
-    );
-
-    if (!response.success) {
-      throw new Error(response.error || "Failed to connect");
-    }
-
-    if (response.data?.publicKey) {
-      this._publicKey = response.data.publicKey;
-      this._updateAccounts();
-      this._emit("change", { accounts: this._accounts });
-    }
-
-    return { accounts: this._accounts };
+  constructor() {
+    // Start initialization in background
+    this._initState();
   }
 
-  private async _disconnect(): Promise<void> {
-    console.debug("[oko-svm] disconnect");
+  private async _ensureInitialized(): Promise<OkoStandardWallet> {
+    if (this._standardWallet) {
+      return this._standardWallet;
+    }
 
-    await sendToBackground("SVM_REQUEST", { method: "disconnect" });
+    if (!this._initPromise) {
+      this._initPromise = this._init();
+    }
 
-    this._publicKey = null;
-    this._accounts = [];
-    this._emit("change", { accounts: this._accounts });
+    await this._initPromise;
+    return this._standardWallet!;
+  }
+
+  private async _init(): Promise<void> {
+    const extensionWallet = new ExtensionOkoWallet(OKO_API_KEY, OKO_ATTACHED_URL);
+    await extensionWallet.waitUntilInitialized;
+    this._extensionWallet = extensionWallet;
+
+    // OkoSvmWallet constructor returns instance but types say undefined - need cast
+    const svmWallet = new OkoSvmWallet(extensionWallet) as unknown as OkoSvmWalletInterface;
+    await svmWallet.waitUntilInitialized;
+    this._svmWallet = svmWallet;
+
+    this._standardWallet = new OkoStandardWallet(svmWallet, DEFAULT_SVM_CONFIGS);
+
+    // Forward events from internal wallet
+    svmWallet.on("connect", () => this._emit("change", { accounts: this.accounts }));
+    svmWallet.on("disconnect", () => this._emit("change", { accounts: [] }));
+    svmWallet.on("accountChanged", () => this._emit("change", { accounts: this.accounts }));
+  }
+
+  private async _initState(): Promise<void> {
+    try {
+      await this._ensureInitialized();
+    } catch (error) {
+      console.debug("[oko-svm] Failed to init state:", error);
+    }
   }
 
   private _on<E extends StandardEventsNames>(
@@ -212,97 +194,6 @@ export class ExtensionSvmWallet implements Wallet {
       for (const listener of listeners) {
         (listener as (...a: unknown[]) => void)(...args);
       }
-    }
-  }
-
-  private async _signMessage(input: {
-    account: WalletAccount;
-    message: Uint8Array;
-  }): Promise<{ signedMessage: Uint8Array; signature: Uint8Array }> {
-    console.debug("[oko-svm] signMessage");
-
-    const response = await sendToBackground<{ signature: number[] }>(
-      "SVM_REQUEST",
-      {
-        method: "signMessage",
-        params: {
-          message: Array.from(input.message),
-        },
-      }
-    );
-
-    if (!response.success) {
-      throw new Error(response.error || "Failed to sign message");
-    }
-
-    const signature = new Uint8Array(response.data?.signature || []);
-    return {
-      signedMessage: input.message,
-      signature,
-    };
-  }
-
-  private async _signTransaction(input: {
-    account: WalletAccount;
-    transaction: Uint8Array;
-    chain?: string;
-  }): Promise<{ signedTransaction: Uint8Array }> {
-    console.debug("[oko-svm] signTransaction");
-
-    const response = await sendToBackground<{ signedTransaction: number[] }>(
-      "SVM_REQUEST",
-      {
-        method: "signTransaction",
-        params: {
-          transaction: Array.from(input.transaction),
-          chain: input.chain,
-        },
-      }
-    );
-
-    if (!response.success) {
-      throw new Error(response.error || "Failed to sign transaction");
-    }
-
-    return {
-      signedTransaction: new Uint8Array(response.data?.signedTransaction || []),
-    };
-  }
-
-  private async _signAndSendTransaction(input: {
-    account: WalletAccount;
-    transaction: Uint8Array;
-    chain?: string;
-  }): Promise<{ signature: Uint8Array }> {
-    console.debug("[oko-svm] signAndSendTransaction");
-
-    const response = await sendToBackground<{ signature: string }>(
-      "SVM_REQUEST",
-      {
-        method: "signAndSendTransaction",
-        params: {
-          transaction: Array.from(input.transaction),
-          chain: input.chain,
-        },
-      }
-    );
-
-    if (!response.success) {
-      throw new Error(response.error || "Failed to sign and send transaction");
-    }
-
-    // Convert base58 signature to bytes
-    const signatureBytes = base58ToBytes(response.data?.signature || "");
-    return { signature: signatureBytes };
-  }
-
-  private _updateAccounts(): void {
-    if (this._publicKey) {
-      this._accounts = [
-        new OkoSvmWalletAccount(this._publicKey, [...this.chains]),
-      ];
-    } else {
-      this._accounts = [];
     }
   }
 }
