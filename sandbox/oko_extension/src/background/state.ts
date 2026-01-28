@@ -7,6 +7,7 @@ let walletState: WalletState = {
   evmAddress: null,
   svmPublicKey: null,
   cosmosPublicKey: null,
+  evmChainId: "0x1",
 };
 
 // Pending requests waiting for oko_attached responses (5 min timeout)
@@ -37,6 +38,7 @@ export function resetWalletState(): void {
     evmAddress: null,
     svmPublicKey: null,
     cosmosPublicKey: null,
+    evmChainId: "0x1",
   };
 }
 

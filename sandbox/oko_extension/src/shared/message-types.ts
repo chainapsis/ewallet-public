@@ -96,6 +96,7 @@ export interface WalletState {
   evmAddress: string | null;
   svmPublicKey: string | null;
   cosmosPublicKey: string | null;
+  evmChainId: string;
 }
 
 // ============== Internal Messages ==============

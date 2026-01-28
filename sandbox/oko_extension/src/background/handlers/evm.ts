@@ -3,9 +3,18 @@
  */
 
 import type { ExtensionResponse, EvmRpcRequest } from "@/shared/message-types";
-import { getWalletState, addPendingRequest } from "../state";
+import { getWalletState, updateWalletState, addPendingRequest } from "../state";
 import { openOkoAttached, openSignPopup } from "../oko-bridge";
 import { v4 as uuidv4 } from "uuid";
+
+// Supported EVM chains (hex chainId)
+const SUPPORTED_EVM_CHAINS = new Set([
+  "0x1",    // Ethereum
+  "0x89",   // Polygon
+  "0xa4b1", // Arbitrum
+  "0xa",    // Optimism
+  "0x2105", // Base
+]);
 
 // Track pending EVM RPC requests waiting for connection
 const rpcRequestsWaitingForConnection = new Map<
@@ -49,7 +58,7 @@ export async function handleEvmRequest(
 
   switch (request.method) {
     case "eth_chainId":
-      sendResponse({ id: requestId, success: true, data: "0x1" });
+      sendResponse({ id: requestId, success: true, data: state.evmChainId });
       return;
 
     case "web3_clientVersion":
@@ -117,8 +126,35 @@ export async function handleEvmRequest(
       return;
     }
 
-    case "wallet_switchEthereumChain":
+    case "wallet_switchEthereumChain": {
+      const params = request.params as [{ chainId: string }] | undefined;
+      const targetChainId = params?.[0]?.chainId;
+
+      if (!targetChainId) {
+        sendResponse({
+          id: requestId,
+          success: false,
+          error: "Missing chainId parameter",
+        });
+        return;
+      }
+
+      if (!SUPPORTED_EVM_CHAINS.has(targetChainId)) {
+        sendResponse({
+          id: requestId,
+          success: false,
+          error: `Unrecognized chain ID "${targetChainId}". Try adding the chain using wallet_addEthereumChain first.`,
+        });
+        return;
+      }
+
+      updateWalletState({ evmChainId: targetChainId });
+      sendResponse({ id: requestId, success: true, data: null });
+      return;
+    }
+
     case "wallet_addEthereumChain":
+      // For test extension, just return success without actually adding
       sendResponse({ id: requestId, success: true, data: null });
       return;
 

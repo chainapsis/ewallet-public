@@ -154,15 +154,27 @@ function handleSyncEvmAddress(
   sendResponse({ id: messageId, success: true, data: null });
 }
 
-const ETH_RPC_URL = "https://eth.llamarpc.com";
+// EVM RPC URLs from Keplr chain registry
+const EVM_RPC_URLS: Record<string, string> = {
+  "0x1": "https://evm-1.keplr.app",       // Ethereum
+  "0x89": "https://evm-137.keplr.app",    // Polygon
+  "0xa4b1": "https://evm-42161.keplr.app", // Arbitrum
+  "0xa": "https://evm-10.keplr.app",      // Optimism
+  "0x2105": "https://evm-8453.keplr.app", // Base
+};
+
+const DEFAULT_RPC_URL = "https://evm-1.keplr.app";
 
 async function handleEthRpcCall(
   payload: { method: string; params?: unknown[] },
   messageId: string,
   sendResponse: (response: ExtensionResponse) => void
 ): Promise<void> {
+  const state = getWalletState();
+  const rpcUrl = EVM_RPC_URLS[state.evmChainId] || DEFAULT_RPC_URL;
+
   try {
-    const response = await fetch(ETH_RPC_URL, {
+    const response = await fetch(rpcUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

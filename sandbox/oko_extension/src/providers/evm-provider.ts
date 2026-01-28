@@ -147,7 +147,7 @@ export class ExtensionEvmProvider {
 
     // eth_requestAccounts - handle sign-in flow
     if (args.method === "eth_requestAccounts") {
-      let address = this._ethWallet?.state.address;
+      let address: string | null | undefined = this._ethWallet?.state.address;
       if (!address) {
         // Need to sign in
         await this._extensionWallet!.openSignInModal();
