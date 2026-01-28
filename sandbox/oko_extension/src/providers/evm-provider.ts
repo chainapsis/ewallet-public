@@ -107,30 +107,121 @@ export class ExtensionEvmProvider {
     return this._ethWallet?.provider?.isConnected ?? false;
   }
 
+  // RPC methods that need network access - route through background to bypass CSP
+  private readonly _networkRpcMethods = new Set([
+    "eth_call",
+    "eth_getBalance",
+    "eth_getTransactionCount",
+    "eth_getCode",
+    "eth_estimateGas",
+    "eth_gasPrice",
+    "eth_maxPriorityFeePerGas",
+    "eth_feeHistory",
+    "eth_getBlockByNumber",
+    "eth_getBlockByHash",
+    "eth_blockNumber",
+    "eth_getTransactionByHash",
+    "eth_getTransactionReceipt",
+    "eth_getLogs",
+    "eth_sendRawTransaction",
+    "net_version",
+  ]);
+
   /**
-   * EIP-1193 request method - delegates to SDK provider
+   * EIP-1193 request method
+   * Routes network calls through background to bypass CSP
    */
   async request<T = unknown>(args: RequestArguments): Promise<T> {
-    const wallet = await this._ensureInitialized();
-    const provider = await wallet.getEthereumProvider();
+    await this._ensureInitialized();
 
-    // Handle eth_requestAccounts specially to trigger sign-in flow
-    if (args.method === "eth_requestAccounts") {
-      // Cast to any because SDK provider expects strictly typed RpcMethod
-      let accounts = await provider.request(args as any);
-      if (!accounts || (accounts as string[]).length === 0) {
-        // Need to sign in
-        await this._extensionWallet!.openSignInModal();
-        // Re-fetch accounts after sign-in
-        accounts = await provider.request(args as any);
-      }
-      // Sync EVM address to background state
-      if (accounts && (accounts as string[]).length > 0) {
-        this._syncEvmAddress((accounts as string[])[0]);
-      }
-      return accounts as T;
+    // eth_chainId - return directly
+    if (args.method === "eth_chainId") {
+      return "0x1" as T; // Ethereum mainnet
     }
 
+    // eth_accounts - return cached address
+    if (args.method === "eth_accounts") {
+      const address = this._ethWallet?.state.address;
+      return (address ? [address] : []) as T;
+    }
+
+    // eth_requestAccounts - handle sign-in flow
+    if (args.method === "eth_requestAccounts") {
+      let address = this._ethWallet?.state.address;
+      if (!address) {
+        // Need to sign in
+        await this._extensionWallet!.openSignInModal();
+        // Re-fetch from SDK
+        const provider = await this._ethWallet!.getEthereumProvider();
+        const accounts = await provider.request({ method: "eth_accounts" } as any);
+        address = (accounts as string[])?.[0];
+      }
+      if (address) {
+        this._syncEvmAddress(address);
+        return [address] as T;
+      }
+      return [] as T;
+    }
+
+    // Signing methods - use SDK modal with wrapped provider
+    if (
+      args.method === "personal_sign" ||
+      args.method === "eth_signTypedData_v4" ||
+      args.method === "eth_sendTransaction" ||
+      args.method === "eth_signTransaction"
+    ) {
+      const provider = await this._ethWallet!.getEthereumProvider();
+
+      // Wrap the provider's internal request to route RPC calls through background
+      const originalRequest = provider.request.bind(provider);
+      const wrappedRequest = async (innerArgs: any) => {
+        // If it's a network RPC call, route through background
+        if (this._networkRpcMethods.has(innerArgs.method)) {
+          const response = await sendToBackground<unknown>("ETH_RPC_CALL", {
+            method: innerArgs.method,
+            params: innerArgs.params,
+          });
+          if (response.success) {
+            return response.data;
+          }
+          throw new Error(response.error || `RPC call failed: ${innerArgs.method}`);
+        }
+        // Otherwise use original
+        return originalRequest(innerArgs);
+      };
+
+      // Replace provider's request method so internal calls go through our wrapper
+      provider.request = wrappedRequest as any;
+
+      try {
+        // Now call through the wrapped version
+        return await provider.request(args as any) as T;
+      } finally {
+        // Restore original request method
+        provider.request = originalRequest;
+      }
+    }
+
+    // Network RPC methods - route through background to bypass CSP
+    if (this._networkRpcMethods.has(args.method)) {
+      const response = await sendToBackground<T>("ETH_RPC_CALL", {
+        method: args.method,
+        params: args.params,
+      });
+
+      if (response.success) {
+        return response.data as T;
+      }
+      throw new Error(response.error || `RPC call failed: ${args.method}`);
+    }
+
+    // wallet_* methods
+    if (args.method === "wallet_switchEthereumChain" || args.method === "wallet_addEthereumChain") {
+      return null as T; // No-op for now
+    }
+
+    // Fallback - try SDK provider
+    const provider = await this._ethWallet!.getEthereumProvider();
     return provider.request(args as any) as Promise<T>;
   }
 
