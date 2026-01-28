@@ -71,25 +71,3 @@ export function sendToBackground<T = unknown>(
     );
   });
 }
-
-/**
- * Wait for a specific response by ID
- */
-export function waitForResponse<T = unknown>(
-  id: string,
-  timeoutMs = 300000
-): Promise<ExtensionResponse<T>> {
-  return new Promise((resolve, reject) => {
-    // Check if already resolved
-    const timeout = setTimeout(() => {
-      pendingResponses.delete(id);
-      reject(new Error("Response timeout"));
-    }, timeoutMs);
-
-    pendingResponses.set(id, {
-      resolve: resolve as (value: ExtensionResponse) => void,
-      reject,
-      timeout,
-    });
-  });
-}

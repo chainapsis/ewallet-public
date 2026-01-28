@@ -30,6 +30,33 @@ const SolanaSignMessage = "solana:signMessage" as const;
 const SolanaSignTransaction = "solana:signTransaction" as const;
 const SolanaSignAndSendTransaction = "solana:signAndSendTransaction" as const;
 
+// Shared base58 decoder
+function base58ToBytes(base58: string): Uint8Array {
+  const ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+  const bytes: number[] = [];
+  for (let i = 0; i < base58.length; i++) {
+    const char = base58[i];
+    const value = ALPHABET.indexOf(char);
+    if (value === -1) {
+      throw new Error(`Invalid base58 character: ${char}`);
+    }
+    let carry = value;
+    for (let j = 0; j < bytes.length; j++) {
+      carry += bytes[j] * 58;
+      bytes[j] = carry & 0xff;
+      carry >>= 8;
+    }
+    while (carry > 0) {
+      bytes.push(carry & 0xff);
+      carry >>= 8;
+    }
+  }
+  for (let i = 0; i < base58.length && base58[i] === "1"; i++) {
+    bytes.push(0);
+  }
+  return new Uint8Array(bytes.reverse());
+}
+
 // Wallet account for Solana
 class OkoSvmWalletAccount implements WalletAccount {
   readonly address: string;
@@ -41,7 +68,7 @@ class OkoSvmWalletAccount implements WalletAccount {
 
   constructor(publicKey: string, chains: IdentifierString[]) {
     this.address = publicKey;
-    this.publicKey = this._base58ToBytes(publicKey);
+    this.publicKey = base58ToBytes(publicKey);
     this.chains = chains;
     this.features = [
       SolanaSignMessage,
@@ -50,34 +77,6 @@ class OkoSvmWalletAccount implements WalletAccount {
     ];
     this.label = "Oko Account";
     this.icon = OKO_ICON as WalletIcon;
-  }
-
-  private _base58ToBytes(base58: string): Uint8Array {
-    // Simple base58 decode (in production, use a proper library)
-    const ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-    const bytes: number[] = [];
-    for (let i = 0; i < base58.length; i++) {
-      const char = base58[i];
-      const value = ALPHABET.indexOf(char);
-      if (value === -1) {
-        throw new Error(`Invalid base58 character: ${char}`);
-      }
-      let carry = value;
-      for (let j = 0; j < bytes.length; j++) {
-        carry += bytes[j] * 58;
-        bytes[j] = carry & 0xff;
-        carry >>= 8;
-      }
-      while (carry > 0) {
-        bytes.push(carry & 0xff);
-        carry >>= 8;
-      }
-    }
-    // Add leading zeros
-    for (let i = 0; i < base58.length && base58[i] === "1"; i++) {
-      bytes.push(0);
-    }
-    return new Uint8Array(bytes.reverse());
   }
 }
 
@@ -293,7 +292,7 @@ export class ExtensionSvmWallet implements Wallet {
     }
 
     // Convert base58 signature to bytes
-    const signatureBytes = this._base58ToBytes(response.data?.signature || "");
+    const signatureBytes = base58ToBytes(response.data?.signature || "");
     return { signature: signatureBytes };
   }
 
@@ -305,31 +304,5 @@ export class ExtensionSvmWallet implements Wallet {
     } else {
       this._accounts = [];
     }
-  }
-
-  private _base58ToBytes(base58: string): Uint8Array {
-    const ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-    const bytes: number[] = [];
-    for (let i = 0; i < base58.length; i++) {
-      const char = base58[i];
-      const value = ALPHABET.indexOf(char);
-      if (value === -1) {
-        throw new Error(`Invalid base58 character: ${char}`);
-      }
-      let carry = value;
-      for (let j = 0; j < bytes.length; j++) {
-        carry += bytes[j] * 58;
-        bytes[j] = carry & 0xff;
-        carry >>= 8;
-      }
-      while (carry > 0) {
-        bytes.push(carry & 0xff);
-        carry >>= 8;
-      }
-    }
-    for (let i = 0; i < base58.length && base58[i] === "1"; i++) {
-      bytes.push(0);
-    }
-    return new Uint8Array(bytes.reverse());
   }
 }

@@ -11,11 +11,9 @@
 import { Buffer } from "buffer";
 (window as any).Buffer = Buffer;
 
-import { MESSAGE_TARGET, OKO_WALLET_NAME, OKO_ICON } from "@/shared/constants";
 import { ExtensionEvmProvider } from "@/providers/evm-provider";
 import { ExtensionSvmWallet } from "@/providers/svm-provider";
 import { ExtensionCosmosProvider } from "@/providers/cosmos-provider";
-import { sendToBackground, waitForResponse } from "@/providers/bridge";
 
 // Avoid re-injection
 if ((window as any).__OKO_INJECTED__) {

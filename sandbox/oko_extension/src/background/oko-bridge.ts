@@ -37,6 +37,18 @@ export function setOkoAttachedWindowId(windowId: number | null): void {
 }
 
 /**
+ * Track window and clean up when closed
+ */
+function trackWindowClose(windowId: number): void {
+  chrome.windows.onRemoved.addListener(function listener(closedId) {
+    if (closedId === windowId && okoAttachedWindowId === windowId) {
+      okoAttachedWindowId = null;
+      chrome.windows.onRemoved.removeListener(listener);
+    }
+  });
+}
+
+/**
  * Open oko_attached in a popup window
  */
 export async function openOkoAttached(path = ""): Promise<chrome.windows.Window> {
@@ -78,14 +90,8 @@ export async function openOkoAttached(path = ""): Promise<chrome.windows.Window>
 
   okoAttachedWindowId = window.id ?? null;
 
-  // Listen for window close
   if (window.id) {
-    chrome.windows.onRemoved.addListener(function listener(windowId) {
-      if (windowId === okoAttachedWindowId) {
-        okoAttachedWindowId = null;
-        chrome.windows.onRemoved.removeListener(listener);
-      }
-    });
+    trackWindowClose(window.id);
   }
 
   return window;
@@ -137,14 +143,8 @@ export async function openSignPopup(
 
   okoAttachedWindowId = window.id ?? null;
 
-  // Listen for window close
   if (window.id) {
-    chrome.windows.onRemoved.addListener(function listener(windowId) {
-      if (windowId === okoAttachedWindowId) {
-        okoAttachedWindowId = null;
-        chrome.windows.onRemoved.removeListener(listener);
-      }
-    });
+    trackWindowClose(window.id);
   }
 
   return window;
