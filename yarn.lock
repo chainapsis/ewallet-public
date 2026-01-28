@@ -10933,9 +10933,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@oko-wallet/extension@workspace:extension/oko_extension":
+"@oko-wallet/extension@workspace:sandbox/oko_extension":
   version: 0.0.0-use.local
-  resolution: "@oko-wallet/extension@workspace:extension/oko_extension"
+  resolution: "@oko-wallet/extension@workspace:sandbox/oko_extension"
   dependencies:
     "@keplr-wallet/types": "npm:0.12.297"
     "@noble/hashes": "npm:^1.7.2"
