@@ -27,7 +27,6 @@ interface RequestArguments {
 
 export class ExtensionEvmProvider {
   // EIP-1193 properties
-  public readonly isMetaMask = true;
   public readonly isOko = true;
 
   private _ethWallet: OkoEthWalletInterface | null = null;
@@ -71,16 +70,8 @@ export class ExtensionEvmProvider {
     await ethWallet.waitUntilInitialized;
     this._ethWallet = ethWallet;
 
-    // Forward events from SDK provider
-    try {
-      const provider = await ethWallet.getEthereumProvider();
-      provider.on("connect", (info: unknown) => this._emit("connect", info));
-      provider.on("disconnect", (error: unknown) => this._emit("disconnect", error));
-      provider.on("chainChanged", (chainId: unknown) => this._emit("chainChanged", chainId));
-      provider.on("accountsChanged", (accounts: unknown) => this._emit("accountsChanged", accounts));
-    } catch (error) {
-      console.debug("[oko-evm] Failed to setup event forwarding:", error);
-    }
+    // Note: Event forwarding from SDK provider disabled to prevent infinite loops
+    // dApps should poll eth_accounts instead of relying on accountsChanged events
   }
 
   private async _initState(): Promise<void> {

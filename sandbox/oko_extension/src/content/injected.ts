@@ -14,6 +14,7 @@ import { Buffer } from "buffer";
 import { ExtensionEvmProvider } from "@/providers/evm-provider";
 import { ExtensionSvmWallet } from "@/providers/svm-provider";
 import { ExtensionCosmosProvider } from "@/providers/cosmos-provider";
+import { OKO_ICON } from "@/shared/constants";
 
 // EIP-6963 types
 interface EIP6963ProviderInfo {
@@ -33,9 +34,6 @@ interface EIP6963AnnounceProviderEvent extends CustomEvent {
   detail: EIP6963ProviderDetail;
 }
 
-// MetaMask icon (official SVG as base64)
-const METAMASK_ICON = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMTIiIGhlaWdodD0iMTg5IiB2aWV3Qm94PSIwIDAgMjEyIDE4OSI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cG9seWdvbiBmaWxsPSIjQ0RCREIyIiBwb2ludHM9IjYwLjc1IDE3My4yNSA4OC4zMTMgMTgwLjU2MyA4OC4zMTMgMTcxIDkwLjU2MyAxNjguNzUgMTA2LjMxMyAxNjguNzUgMTA2LjMxMyAxODAgMTA2LjMxMyAxODcuODc1IDg5LjQzOCAxODcuODc1IDY4LjYyNSAxNzguODc1Ii8+PHBvbHlnb24gZmlsbD0iI0NEQkRCMiIgcG9pbnRzPSIxMDUuNzUgMTczLjI1IDEzMi43NSAxODAuNTYzIDEzMi43NSAxNzEgMTM1IDE2OC43NSAxNTAuNzUgMTY4Ljc1IDE1MC43NSAxODAgMTUwLjc1IDE4Ny44NzUgMTMzLjg3NSAxODcuODc1IDExMy4wNjMgMTc4Ljg3NSIgdHJhbnNmb3JtPSJtYXRyaXgoLTEgMCAwIDEgMjU2LjUgMCkiLz48cG9seWdvbiBmaWxsPSIjMzkzOTM5IiBwb2ludHM9IjkwLjU2MyAxNTIuNDM4IDg4LjMxMyAxNzEgOTEuMTI1IDE2OC43NSAxMjAuMzc1IDE2OC43NSAxMjMuNzUgMTcxIDEyMS41IDE1Mi40MzggMTE3IDE0OS42MjUgOTQuNSAxNTAuMTg4Ii8+PHBvbHlnb24gZmlsbD0iI0Y4OUMzNSIgcG9pbnRzPSI3NS4zNzUgMjcgODguODc1IDU4LjUgOTUuMDYzIDE1MC4xODggMTE3IDE1MC4xODggMTIzLjc1IDU4LjUgMTM2LjEyNSAyNyIvPjxwb2x5Z29uIGZpbGw9IiNGODlEMzUiIHBvaW50cz0iMTYuMzEzIDk2LjE4OCAuNTYzIDE0MS43NSAzOS45MzggMTM5LjUgNjUuMjUgMTM5LjUgNjUuMjUgMTE5LjgxMyA2NC4xMjUgNzkuMzEzIDU4LjUgODMuODEzIi8+PHBvbHlnb24gZmlsbD0iI0Q4N0MzMCIgcG9pbnRzPSI0Ni4xMjUgMTAxLjI1IDkyLjI1IDEwMi4zNzUgODcuMTg4IDEyNiA2NS4yNSAxMjAuMzc1Ii8+PHBvbHlnb24gZmlsbD0iI0VBOEQzQSIgcG9pbnRzPSI0Ni4xMjUgMTAxLjgxMyA2NS4yNSAxMTkuODEzIDY1LjI1IDEzNy44MTMiLz48cG9seWdvbiBmaWxsPSIjRjg5RDM1IiBwb2ludHM9IjY1LjI1IDEyMC4zNzUgODcuNzUgMTI2IDk1LjA2MyAxNTAuMTg4IDkwIDEzNS41NjMgNjUuMjUgMTM5LjUiLz48cG9seWdvbiBmaWxsPSIjRUI4RjM1IiBwb2ludHM9IjY1LjI1IDEzOS41IDkwLjU2MyAxNTIuNDM4IDg4LjMxMyAxNzEiLz48cG9seWdvbiBmaWxsPSIjRUE4RTNBIiBwb2ludHM9IjkwLjU2MyAxNTIuNDM4IDk1LjYyNSAxNTAuMTg4IDExNy4xODggMTUwLjE4OCIvPjxwb2x5Z29uIGZpbGw9IiNEODdDMzAiIHBvaW50cz0iMzkuMzc1IDEzOC45MzggNjUuMjUgMTM5LjUgNjUuMjUgMTE5LjgxMyIvPjxwb2x5Z29uIGZpbGw9IiNFQjhGMzUiIHBvaW50cz0iMTIuNTYzIDEwMC42ODggMzkuOTM4IDEzOS41IDE2LjMxMyA5Ni4xODgiLz48cG9seWdvbiBmaWxsPSIjRTg4MjFFIiBwb2ludHM9IjEyLjU2MyAxMDAuNjg4IDc0LjgxMyA4OC4zMTMgNTguNSA4My44MTMiLz48cG9seWdvbiBmaWxsPSIjMzkzOTM5IiBwb2ludHM9IjQyLjE4OCA0NC4xODggNzguNjI1IDgzLjgxMyA1OS4wNjMgMTI4LjgxMyA3OC42MjUgMTI4LjgxMyIvPjxwb2x5Z29uIGZpbGw9IiNFODhGMzUiIHBvaW50cz0iNzQuODE4IDg4LjMxMyAxMi41NjMgMTAwLjY4OCAxNi4zMTMgNzkuMzEzIDI3LjU2MyAzNi4xODgiLz48cG9seWdvbiBmaWxsPSIjOEU1QTMwIiBwb2ludHM9IjI4LjEyNSA0My4yMTkgNDAuNjg4IDgxIDc4LjA2MyA4My44MTMiLz48cG9seWdvbiBmaWxsPSIjRjg5RDM1IiBwb2ludHM9Ijg5LjQzOCAxODAuNTYzIDEzMi43NSAxODAuNTYzIDEzMi43NSAxNzEgOTAuNTYzIDE3MSIvPjxwb2x5Z29uIGZpbGw9IiNGODlEMzUiIHBvaW50cz0iODkuNDM4IDE4MC41NjMgODguODc1IDE3MSA5MC41NjMgMTcxIDkwLjU2MyAxNjguNzUgMTA2LjMxMyAxNjguNzUgMTIwLjM3NSAxNjguNzUgMTIxLjUgMTcxIDEyMy43NSAxNzEgMTIzLjE4OCAxODAuNTYzIi8+PC9nPjwvc3ZnPgo=";
-
 // Avoid re-injection
 if ((window as any).__OKO_INJECTED__) {
   // Already injected
@@ -46,12 +44,12 @@ if ((window as any).__OKO_INJECTED__) {
   try {
     const evmProvider = new ExtensionEvmProvider();
 
-    // EIP-6963: Provider info (announce as MetaMask for compatibility)
+    // EIP-6963: Provider info
     const providerInfo: EIP6963ProviderInfo = {
       uuid: "a9e6f8a7-4b8c-4d9e-8f0a-1b2c3d4e5f6a",
-      name: "MetaMask",
-      icon: METAMASK_ICON,
-      rdns: "io.metamask",
+      name: "Oko",
+      icon: OKO_ICON,
+      rdns: "app.oko",
     };
 
     // EIP-6963: Announce provider function
