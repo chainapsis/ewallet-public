@@ -1,4 +1,5 @@
 import type { WalletState } from "@/shared/message-types";
+import { PendingRequestManager } from "@/shared/pending-request-manager";
 
 // In-memory state for the service worker
 let walletState: WalletState = {
@@ -8,15 +9,8 @@ let walletState: WalletState = {
   cosmosPublicKey: null,
 };
 
-// Pending requests waiting for oko_attached responses
-const pendingRequests = new Map<
-  string,
-  {
-    resolve: (value: unknown) => void;
-    reject: (reason: unknown) => void;
-    timeout: ReturnType<typeof setTimeout>;
-  }
->();
+// Pending requests waiting for oko_attached responses (5 min timeout)
+const pendingRequests = new PendingRequestManager(300000);
 
 export function getWalletState(): WalletState {
   return { ...walletState };
@@ -50,36 +44,17 @@ export function addPendingRequest(
   id: string,
   resolve: (value: unknown) => void,
   reject: (reason: unknown) => void,
-  timeoutMs = 300000 // 5 minutes default timeout
+  timeoutMs?: number
 ): void {
-  const timeout = setTimeout(() => {
-    pendingRequests.delete(id);
-    reject(new Error("Request timeout"));
-  }, timeoutMs);
-
-  pendingRequests.set(id, { resolve, reject, timeout });
+  pendingRequests.add(id, resolve, reject, timeoutMs);
 }
 
 export function resolvePendingRequest(id: string, data: unknown): boolean {
-  const pending = pendingRequests.get(id);
-  if (pending) {
-    clearTimeout(pending.timeout);
-    pendingRequests.delete(id);
-    pending.resolve(data);
-    return true;
-  }
-  return false;
+  return pendingRequests.resolve(id, data);
 }
 
 export function rejectPendingRequest(id: string, error: unknown): boolean {
-  const pending = pendingRequests.get(id);
-  if (pending) {
-    clearTimeout(pending.timeout);
-    pendingRequests.delete(id);
-    pending.reject(error);
-    return true;
-  }
-  return false;
+  return pendingRequests.reject(id, error);
 }
 
 export function hasPendingRequest(id: string): boolean {

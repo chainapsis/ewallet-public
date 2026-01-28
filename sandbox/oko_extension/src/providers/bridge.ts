@@ -5,21 +5,10 @@
 
 import { MESSAGE_TARGET } from "@/shared/constants";
 import type { ExtensionResponse } from "@/shared/message-types";
+import { PendingRequestManager, generateRequestId } from "@/shared/pending-request-manager";
 
-// Pending response handlers
-const pendingResponses = new Map<
-  string,
-  {
-    resolve: (value: ExtensionResponse) => void;
-    reject: (error: Error) => void;
-    timeout: ReturnType<typeof setTimeout>;
-  }
->();
-
-// Generate unique request ID
-function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-}
+// Pending response handlers (30 second timeout for provider requests)
+const pendingResponses = new PendingRequestManager<ExtensionResponse>(30000);
 
 // Listen for responses from content script
 if (typeof window !== "undefined") {
@@ -29,12 +18,7 @@ if (typeof window !== "undefined") {
     const message = event.data;
     if (message?.target !== MESSAGE_TARGET.INJECTED) return;
 
-    const pending = pendingResponses.get(message.id);
-    if (pending) {
-      clearTimeout(pending.timeout);
-      pendingResponses.delete(message.id);
-      pending.resolve(message.payload as ExtensionResponse);
-    }
+    pendingResponses.resolve(message.id, message.payload as ExtensionResponse);
   });
 }
 
@@ -47,18 +31,14 @@ export function sendToBackground<T = unknown>(
   timeoutMs = 30000
 ): Promise<ExtensionResponse<T>> {
   return new Promise((resolve, reject) => {
-    const id = generateId();
+    const id = generateRequestId();
 
-    const timeout = setTimeout(() => {
-      pendingResponses.delete(id);
-      reject(new Error(`Request timeout: ${type}`));
-    }, timeoutMs);
-
-    pendingResponses.set(id, {
-      resolve: resolve as (value: ExtensionResponse) => void,
+    pendingResponses.add(
+      id,
+      resolve as (value: ExtensionResponse) => void,
       reject,
-      timeout,
-    });
+      timeoutMs
+    );
 
     window.postMessage(
       {
