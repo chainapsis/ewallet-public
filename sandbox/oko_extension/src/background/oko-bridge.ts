@@ -83,7 +83,7 @@ export async function openOkoAttached(path = ""): Promise<chrome.windows.Window>
   const window = await chrome.windows.create({
     url,
     type: "popup",
-    width: 420,
+    width: 450,
     height: 700,
     focused: true,
   });
@@ -136,7 +136,7 @@ export async function openSignPopup(
   const window = await chrome.windows.create({
     url: signUrl,
     type: "popup",
-    width: 420,
+    width: 450,
     height: 700,
     focused: true,
   });

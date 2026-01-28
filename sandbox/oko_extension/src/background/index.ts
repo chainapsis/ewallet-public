@@ -142,7 +142,7 @@ async function handleOpenSigninWindow(): Promise<void> {
   await chrome.windows.create({
     url: signinUrl,
     type: "popup",
-    width: 420,
+    width: 450,
     height: 700,
     focused: true,
   });
@@ -186,7 +186,7 @@ async function handleOpenModal(
   const modalWindow = await chrome.windows.create({
     url: signUrl,
     type: "popup",
-    width: 420,
+    width: 450,
     height: 700,
     focused: true,
   });
