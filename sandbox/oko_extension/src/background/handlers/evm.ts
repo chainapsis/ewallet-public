@@ -5,6 +5,7 @@
 import type { ExtensionResponse, EvmRpcRequest } from "@/shared/message-types";
 import { getWalletState, updateWalletState, addPendingRequest } from "../state";
 import { openOkoAttached, openSignPopup } from "../oko-bridge";
+import { broadcastEvent } from "../event-broadcaster";
 import { v4 as uuidv4 } from "uuid";
 
 // Supported EVM chains (hex chainId)
@@ -148,7 +149,14 @@ export async function handleEvmRequest(
         return;
       }
 
+      const previousChainId = state.evmChainId;
       updateWalletState({ evmChainId: targetChainId });
+
+      // Emit chainChanged event if chain actually changed
+      if (previousChainId !== targetChainId) {
+        broadcastEvent("chainChanged", targetChainId);
+      }
+
       sendResponse({ id: requestId, success: true, data: null });
       return;
     }

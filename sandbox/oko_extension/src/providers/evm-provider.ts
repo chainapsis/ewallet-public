@@ -44,8 +44,26 @@ export class ExtensionEvmProvider {
     this.on = this.on.bind(this);
     this.removeListener = this.removeListener.bind(this);
 
+    // Listen for provider events from background
+    this._setupEventListener();
+
     // Initialize in background
     this._initState();
+  }
+
+  private _setupEventListener(): void {
+    window.addEventListener("message", (event) => {
+      if (event.source !== window) return;
+
+      const message = event.data;
+      if (message?.target !== "oko-injected") return;
+      if (message?.type !== "PROVIDER_EVENT") return;
+
+      const { event: providerEvent, payload } = message;
+      console.debug("[oko-evm] Provider event:", providerEvent, payload);
+
+      this._emit(providerEvent as ProviderEvent, payload);
+    });
   }
 
   private async _ensureInitialized(): Promise<OkoEthWalletInterface> {

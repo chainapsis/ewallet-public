@@ -31,6 +31,7 @@ import {
   resolveConnectionRequests,
 } from "./handlers";
 import { modalInjectScript, relayToMainWorldScript } from "./scripts/modal-inject";
+import { broadcastEvent } from "./event-broadcaster";
 
 console.log("[oko-extension] Background service worker started");
 
@@ -150,7 +151,14 @@ function handleSyncEvmAddress(
   messageId: string,
   sendResponse: (response: ExtensionResponse) => void
 ): void {
+  const previousAddress = getWalletState().evmAddress;
   updateWalletState({ evmAddress: payload.evmAddress, isConnected: true });
+
+  // Emit accountsChanged event if address changed
+  if (previousAddress !== payload.evmAddress) {
+    broadcastEvent("accountsChanged", [payload.evmAddress]);
+  }
+
   sendResponse({ id: messageId, success: true, data: null });
 }
 
@@ -264,12 +272,21 @@ function handleDisconnect(
   messageId: string,
   sendResponse: (response: ExtensionResponse) => void
 ): void {
+  const previousAddress = getWalletState().evmAddress;
+
   updateWalletState({
     isConnected: false,
     evmAddress: null,
     svmPublicKey: null,
     cosmosPublicKey: null,
   });
+
+  // Emit disconnect and accountsChanged events
+  if (previousAddress) {
+    broadcastEvent("accountsChanged", []);
+    broadcastEvent("disconnect", { code: 4900, message: "Disconnected" });
+  }
+
   sendResponse({ id: messageId, success: true, data: null });
 }
 
