@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite build --watch",
     "build": "vite build",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "zip": "npx bestzip oko_extension.zip dist/*",
+    "package": "yarn build && yarn zip"
   },
   "dependencies": {
     "@keplr-wallet/types": "0.12.297",

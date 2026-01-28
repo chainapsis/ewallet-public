@@ -1,9 +1,11 @@
 import { OkoWallet, type OkoWalletInterface, type OkoWalletMsgOpenModal } from "@oko-wallet/oko-sdk-core";
 import { OKO_ATTACHED_URL, OKO_API_KEY } from "@/shared/constants";
 
-// Check if we're in sign mode (opened as a window for signing)
+// Check if we're in special modes (opened as a window)
 const urlParams = new URLSearchParams(window.location.search);
-const signMode = urlParams.get("mode") === "sign";
+const mode = urlParams.get("mode");
+const signMode = mode === "sign";
+const signinMode = mode === "signin";
 const signRequestId = urlParams.get("requestId");
 const signPayload = urlParams.get("payload");
 
@@ -19,10 +21,8 @@ const loadingEl = document.getElementById("loading")!;
 const signinViewEl = document.getElementById("signin-view")!;
 const connectedViewEl = document.getElementById("connected-view")!;
 
-// Sign-in button and status
+// Sign-in button
 const signinBtn = document.getElementById("signin-btn") as HTMLButtonElement;
-const statusBadge = document.getElementById("status-badge")!;
-const statusText = document.getElementById("status-text")!;
 
 // Connected view elements
 const disconnectBtn = document.getElementById("disconnect-btn")!;
@@ -31,42 +31,8 @@ const evmAddressEl = document.getElementById("evm-address")!;
 const svmAccountEl = document.getElementById("svm-account")!;
 const svmAddressEl = document.getElementById("svm-address")!;
 
-// SDK instance (only used for sign-in)
+// SDK instance (only used for sign mode)
 let okoWallet: OkoWalletInterface | null = null;
-
-// Sign-in status management
-type SignInStatus = "idle" | "signing-in" | "success" | "error";
-
-function setSignInStatus(status: SignInStatus, message?: string): void {
-  statusBadge.classList.remove("hidden", "signing-in", "success", "error");
-
-  if (status === "idle") {
-    statusBadge.classList.add("hidden");
-    signinBtn.disabled = false;
-    signinBtn.innerHTML = "Sign in with Oko";
-    return;
-  }
-
-  statusBadge.classList.add(status);
-
-  switch (status) {
-    case "signing-in":
-      statusText.textContent = message || "Signing in...";
-      signinBtn.disabled = true;
-      signinBtn.innerHTML = '<span class="spinner"></span>Signing in...';
-      break;
-    case "success":
-      statusText.textContent = message || "Sign-in successful!";
-      signinBtn.disabled = false;
-      signinBtn.innerHTML = "Sign in with Oko";
-      break;
-    case "error":
-      statusText.textContent = message || "Sign-in failed";
-      signinBtn.disabled = false;
-      signinBtn.innerHTML = "Try again";
-      break;
-  }
-}
 
 // Truncate address for display
 function truncateAddress(address: string): string {
@@ -224,28 +190,19 @@ async function initSDKForSignIn(): Promise<boolean> {
   }
 }
 
-// Open sign-in modal
+// Open sign-in via background (opens popup.html?mode=signin in separate window)
 async function openSignIn(): Promise<void> {
-  setSignInStatus("signing-in", "Preparing...");
-
-  const sdkReady = await initSDKForSignIn();
-  if (!sdkReady || !okoWallet) {
-    setSignInStatus("error", "Failed to initialize");
-    return;
-  }
-
-  setSignInStatus("signing-in", "Opening sign-in...");
-
   try {
-    await okoWallet.openSignInModal();
-    setSignInStatus("success", "Welcome to Oko!");
+    await chrome.runtime.sendMessage({
+      type: "OPEN_SIGNIN_WINDOW",
+      id: crypto.randomUUID(),
+      payload: null,
+    });
 
-    setTimeout(() => setSignInStatus("idle"), 2000);
+    // Close popup - user will sign in via the new window
+    window.close();
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Sign-in failed";
-    setSignInStatus("error", message === "Sign in cancelled" ? "Cancelled" : message);
-
-    setTimeout(() => setSignInStatus("idle"), 3000);
+    console.error("[oko-popup] Failed to open sign-in window:", error);
   }
 }
 
@@ -353,6 +310,39 @@ function sendSignResult(result: unknown): void {
   }, 500);
 }
 
+// Handle signin mode (opened as a separate window for sign-in)
+async function handleSigninMode(): Promise<void> {
+  // Hide normal UI elements, show loading
+  signinViewEl.classList.add("hidden");
+  connectedViewEl.classList.add("hidden");
+  loadingEl.classList.remove("hidden");
+
+  // Initialize SDK
+  const sdkReady = await initSDKForSignIn();
+
+  if (!sdkReady || !okoWallet) {
+    loadingEl.classList.add("hidden");
+    signinViewEl.classList.remove("hidden");
+    console.error("[oko-popup] SDK initialization failed");
+    return;
+  }
+
+  loadingEl.classList.add("hidden");
+
+  try {
+    await okoWallet.openSignInModal();
+    // Sign-in successful - window will be closed by accountsChanged handler
+    // or we close it here after a delay
+    setTimeout(() => {
+      window.close();
+    }, 1000);
+  } catch (error) {
+    console.error("[oko-popup] Sign-in error:", error);
+    // On error or cancel, close the window
+    window.close();
+  }
+}
+
 // Event listeners
 signinBtn.addEventListener("click", openSignIn);
 disconnectBtn.addEventListener("click", disconnect);
@@ -361,11 +351,16 @@ disconnectBtn.addEventListener("click", disconnect);
 (async () => {
   // Check if we're in sign mode
   if (signMode) {
-    // Hide normal UI elements
     signinViewEl.classList.add("hidden");
     connectedViewEl.classList.add("hidden");
     loadingEl.classList.add("hidden");
     await handleSignMode();
+    return;
+  }
+
+  // Check if we're in signin mode (separate window for sign-in)
+  if (signinMode) {
+    await handleSigninMode();
     return;
   }
 

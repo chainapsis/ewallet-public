@@ -108,6 +108,10 @@ export interface OpenOkoAttachedMessage extends ExtensionMessage<{ url?: string 
   type: "OPEN_OKO_ATTACHED";
 }
 
+export interface OpenSigninWindowMessage extends ExtensionMessage<null> {
+  type: "OPEN_SIGNIN_WINDOW";
+}
+
 export interface OpenModalPayload {
   msg_type: string;
   payload: unknown;
@@ -183,6 +187,7 @@ export type ProviderMessage =
   | CosmosProviderMessage
   | GetStateMessage
   | OpenOkoAttachedMessage
+  | OpenSigninWindowMessage
   | OpenModalMessage
   | DisconnectMessage
   | OkoAttachedMessage

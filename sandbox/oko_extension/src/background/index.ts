@@ -352,6 +352,20 @@ chrome.runtime.onMessage.addListener(
             sendResponse({ id: message.id, success: true, data: null });
             break;
 
+          case "OPEN_SIGNIN_WINDOW": {
+            // Open popup.html?mode=signin in a separate window
+            const signinUrl = chrome.runtime.getURL("popup.html?mode=signin");
+            await chrome.windows.create({
+              url: signinUrl,
+              type: "popup",
+              width: 420,
+              height: 700,
+              focused: true,
+            });
+            sendResponse({ id: message.id, success: true, data: null });
+            break;
+          }
+
           case "OPEN_MODAL": {
             // Open sign.html with SDK for modal interaction (signing, etc.)
             // sign.html uses SDK which ensures same origin as login, so api_key is found
