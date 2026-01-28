@@ -96,10 +96,6 @@ chrome.runtime.onMessage.addListener(
             handleSyncEvmAddress(message.payload as { evmAddress: string }, message.id, sendResponse);
             break;
 
-          case "ETH_RPC_CALL":
-            await handleEthRpcCall(message.payload as { method: string; params?: unknown[] }, message.id, sendResponse);
-            break;
-
           default: {
             const _exhaustiveCheck: never = message;
             sendResponse({
@@ -152,41 +148,6 @@ function handleSyncEvmAddress(
 ): void {
   updateWalletState({ evmAddress: payload.evmAddress, isConnected: true });
   sendResponse({ id: messageId, success: true, data: null });
-}
-
-const ETH_RPC_URL = "https://eth.llamarpc.com";
-
-async function handleEthRpcCall(
-  payload: { method: string; params?: unknown[] },
-  messageId: string,
-  sendResponse: (response: ExtensionResponse) => void
-): Promise<void> {
-  try {
-    const response = await fetch(ETH_RPC_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        id: 1,
-        method: payload.method,
-        params: payload.params || [],
-      }),
-    });
-
-    const data = await response.json();
-
-    if (data.error) {
-      sendResponse({ id: messageId, success: false, error: data.error.message });
-    } else {
-      sendResponse({ id: messageId, success: true, data: data.result });
-    }
-  } catch (error) {
-    sendResponse({
-      id: messageId,
-      success: false,
-      error: error instanceof Error ? error.message : String(error),
-    });
-  }
 }
 
 async function handleOpenSigninWindow(): Promise<void> {

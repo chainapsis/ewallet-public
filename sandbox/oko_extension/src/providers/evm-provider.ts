@@ -7,7 +7,6 @@
 
 import { OkoEthWallet } from "@oko-wallet/oko-sdk-eth";
 import type { OkoEthWalletInterface } from "@oko-wallet/oko-sdk-eth";
-import type { MakeEthereumSigData, ChainInfoForAttachedModal } from "@oko-wallet/oko-sdk-core";
 import { ExtensionOkoWallet } from "./extension-oko-wallet";
 import { sendToBackground } from "./bridge";
 import { OKO_ATTACHED_URL, OKO_API_KEY } from "@/shared/constants";
@@ -84,6 +83,15 @@ export class ExtensionEvmProvider {
     }
   }
 
+  /**
+   * Sync EVM address to background state for popup display
+   */
+  private _syncEvmAddress(address: string): void {
+    sendToBackground("SYNC_EVM_ADDRESS", { evmAddress: address }).catch(() => {
+      // Silently ignore sync failures
+    });
+  }
+
   get chainId(): string {
     if (this._ethWallet?.provider) {
       return this._ethWallet.provider.chainId;
@@ -100,163 +108,30 @@ export class ExtensionEvmProvider {
   }
 
   /**
-   * EIP-1193 request method
-   * Routes RPC calls through background to avoid CSP restrictions
-   * Signing operations use SDK's openModal
+   * EIP-1193 request method - delegates to SDK provider
    */
   async request<T = unknown>(args: RequestArguments): Promise<T> {
-    await this._ensureInitialized();
+    const wallet = await this._ensureInitialized();
+    const provider = await wallet.getEthereumProvider();
 
     // Handle eth_requestAccounts specially to trigger sign-in flow
     if (args.method === "eth_requestAccounts") {
-      const state = await sendToBackground<{ evmAddress: string | null }>("GET_STATE", null);
-      if (state.success && state.data?.evmAddress) {
-        return [state.data.evmAddress] as T;
+      // Cast to any because SDK provider expects strictly typed RpcMethod
+      let accounts = await provider.request(args as any);
+      if (!accounts || (accounts as string[]).length === 0) {
+        // Need to sign in
+        await this._extensionWallet!.openSignInModal();
+        // Re-fetch accounts after sign-in
+        accounts = await provider.request(args as any);
       }
-      // Need to sign in
-      await this._extensionWallet!.openSignInModal();
-      // Re-fetch after sign-in
-      const newState = await sendToBackground<{ evmAddress: string | null }>("GET_STATE", null);
-      if (newState.success && newState.data?.evmAddress) {
-        return [newState.data.evmAddress] as T;
+      // Sync EVM address to background state
+      if (accounts && (accounts as string[]).length > 0) {
+        this._syncEvmAddress((accounts as string[])[0]);
       }
-      return [] as T;
+      return accounts as T;
     }
 
-    // eth_accounts - return cached address
-    if (args.method === "eth_accounts") {
-      const state = await sendToBackground<{ evmAddress: string | null }>("GET_STATE", null);
-      if (state.success && state.data?.evmAddress) {
-        return [state.data.evmAddress] as T;
-      }
-      return [] as T;
-    }
-
-    // Chain info
-    if (args.method === "eth_chainId") {
-      return "0x1" as T; // Ethereum mainnet
-    }
-
-    // Signing methods - use ExtensionOkoWallet.openModal directly
-    if (
-      args.method === "personal_sign" ||
-      args.method === "eth_signTypedData_v4" ||
-      args.method === "eth_sendTransaction" ||
-      args.method === "eth_signTransaction"
-    ) {
-      // Get signer address from state
-      const state = await sendToBackground<{ evmAddress: string | null }>("GET_STATE", null);
-      const signerAddress = state.data?.evmAddress;
-      if (!signerAddress) {
-        throw new Error("Wallet not connected");
-      }
-
-      // Build chain info for modal
-      const chainInfo: ChainInfoForAttachedModal = {
-        chain_id: "eip155:1",
-        chain_name: "Ethereum",
-        rpc_url: "https://eth.llamarpc.com",
-        currencies: [{ coinDenom: "ETH", coinMinimalDenom: "wei", coinDecimals: 18 }],
-        bip44: { coinType: 60 },
-        features: ["eth-address-gen", "eth-key-sign"],
-        evm: { chainId: 1, rpc: "https://eth.llamarpc.com" },
-      };
-
-      const origin = window.location.origin;
-
-      // Build signing data based on method
-      let sigData: MakeEthereumSigData;
-      const params = args.params as unknown[];
-
-      if (args.method === "personal_sign") {
-        // personal_sign params: [message, address]
-        sigData = {
-          chain_type: "eth",
-          sign_type: "arbitrary",
-          payload: {
-            origin,
-            chain_info: chainInfo,
-            signer: signerAddress,
-            data: {
-              message: params[0] as string,
-            },
-          },
-        };
-      } else if (args.method === "eth_signTypedData_v4") {
-        // eth_signTypedData_v4 params: [address, typedData]
-        sigData = {
-          chain_type: "eth",
-          sign_type: "eip712",
-          payload: {
-            origin,
-            chain_info: chainInfo,
-            signer: signerAddress,
-            data: {
-              version: "4",
-              serialized_typed_data: typeof params[1] === "string" ? params[1] : JSON.stringify(params[1]),
-            },
-          },
-        };
-      } else {
-        // eth_sendTransaction / eth_signTransaction params: [transaction]
-        sigData = {
-          chain_type: "eth",
-          sign_type: "tx",
-          payload: {
-            origin,
-            chain_info: chainInfo,
-            signer: signerAddress,
-            data: {
-              transaction: params[0] as any,
-            },
-          },
-        };
-      }
-
-      const result = await this._extensionWallet!.openModal({
-        target: "oko_attached",
-        msg_type: "open_modal",
-        payload: {
-          modal_type: "eth/make_signature" as const,
-          modal_id: crypto.randomUUID(),
-          data: sigData,
-        },
-      });
-
-      if (result.success) {
-        // Extract signature from result based on response type
-        const ackPayload = result.data as {
-          type?: string;
-          data?: { sig_result?: { type: string; signature?: string; signedTransaction?: string } };
-        };
-
-        if (ackPayload?.type === "approve" && ackPayload.data?.sig_result) {
-          const sigResult = ackPayload.data.sig_result;
-          if (sigResult.type === "signature") {
-            return sigResult.signature as T;
-          } else if (sigResult.type === "signed_transaction") {
-            return sigResult.signedTransaction as T;
-          }
-        }
-
-        // Fallback for other response formats
-        return result.data as T;
-      } else {
-        const err = result.err as { type?: string; error?: string } | undefined;
-        throw new Error(err?.error || "Signing failed");
-      }
-    }
-
-    // Other RPC calls - route through background to avoid CSP
-    const response = await sendToBackground<T>("ETH_RPC_CALL", {
-      method: args.method,
-      params: args.params,
-    });
-
-    if (response.success) {
-      return response.data as T;
-    }
-    throw new Error(response.error || `RPC call failed: ${args.method}`);
+    return provider.request(args as any) as Promise<T>;
   }
 
   /**
@@ -323,5 +198,18 @@ export class ExtensionEvmProvider {
   removeListener(event: ProviderEvent, handler: EventHandler): this {
     this._eventListeners.get(event)?.delete(handler);
     return this;
+  }
+
+  private _emit(event: ProviderEvent, ...args: unknown[]): void {
+    const handlers = this._eventListeners.get(event);
+    if (handlers) {
+      handlers.forEach((handler) => {
+        try {
+          handler(...args);
+        } catch (error) {
+          console.error(`[oko-evm] Error in ${event} handler:`, error);
+        }
+      });
+    }
   }
 }

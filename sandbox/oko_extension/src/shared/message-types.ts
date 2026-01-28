@@ -175,13 +175,6 @@ export interface SyncEvmAddressMessage extends ExtensionMessage<{
   type: "SYNC_EVM_ADDRESS";
 }
 
-export interface EthRpcCallMessage extends ExtensionMessage<{
-  method: string;
-  params?: unknown[];
-}> {
-  type: "ETH_RPC_CALL";
-}
-
 // ============== Window PostMessage Types ==============
 
 export interface WindowMessage {
@@ -205,5 +198,4 @@ export type ProviderMessage =
   | SignPopupResultMessage
   | InjectModalScriptMessage
   | RelayToMainWorldMessage
-  | SyncEvmAddressMessage
-  | EthRpcCallMessage;
+  | SyncEvmAddressMessage;
