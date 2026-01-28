@@ -92,6 +92,10 @@ chrome.runtime.onMessage.addListener(
             await handleRelayToMainWorld(message, sender, sendResponse);
             break;
 
+          case "SYNC_EVM_ADDRESS":
+            handleSyncEvmAddress(message.payload as { evmAddress: string }, message.id, sendResponse);
+            break;
+
           default: {
             const _exhaustiveCheck: never = message;
             sendResponse({
@@ -135,6 +139,15 @@ function handleGetState(
       }
     });
   }
+}
+
+function handleSyncEvmAddress(
+  payload: { evmAddress: string },
+  messageId: string,
+  sendResponse: (response: ExtensionResponse) => void
+): void {
+  updateWalletState({ evmAddress: payload.evmAddress, isConnected: true });
+  sendResponse({ id: messageId, success: true, data: null });
 }
 
 async function handleOpenSigninWindow(): Promise<void> {

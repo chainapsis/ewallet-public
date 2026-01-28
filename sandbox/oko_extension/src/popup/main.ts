@@ -44,7 +44,7 @@ function truncateAddress(address: string): string {
 function updateUI(state: WalletState): void {
   loadingEl.classList.add("hidden");
 
-  if (state.isConnected && (state.evmAddress || state.svmPublicKey)) {
+  if (state.isConnected && (state.evmAddress || state.svmPublicKey || state.cosmosPublicKey)) {
     signinViewEl.classList.add("hidden");
     connectedViewEl.classList.remove("hidden");
 
@@ -114,12 +114,6 @@ async function saveStateToBackground(state: WalletState): Promise<void> {
   }
 }
 
-// Derive EVM address from public key
-function deriveEvmAddress(publicKey: string): string {
-  // For secp256k1 public key, we take a portion as placeholder
-  // TODO: Implement proper keccak256 derivation
-  return `0x${publicKey.slice(2, 42)}`;
-}
 
 // Initialize SDK for sign-in only
 async function initSDKForSignIn(): Promise<boolean> {
@@ -154,14 +148,12 @@ async function initSDKForSignIn(): Promise<boolean> {
         if (walletInfo?.publicKey) {
           const publicKey = walletInfo.publicKey;
 
-          // Skip Ed25519 key - it's not implemented in oko_attached
-          // and causes unhandled promise rejection
-          const svmPublicKey: string | null = null;
-
+          // EVM address is set by SYNC_EVM_ADDRESS when dApp connects
+          // Don't derive here - just set cosmosPublicKey
           const state: WalletState = {
             isConnected: true,
-            evmAddress: deriveEvmAddress(publicKey),
-            svmPublicKey,
+            evmAddress: null,
+            svmPublicKey: null,
             cosmosPublicKey: publicKey,
           };
 

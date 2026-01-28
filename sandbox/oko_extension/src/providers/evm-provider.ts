@@ -8,6 +8,7 @@
 import { OkoEthWallet } from "@oko-wallet/oko-sdk-eth";
 import type { OkoEthWalletInterface } from "@oko-wallet/oko-sdk-eth";
 import { ExtensionOkoWallet } from "./extension-oko-wallet";
+import { sendToBackground } from "./bridge";
 import { OKO_ATTACHED_URL, OKO_API_KEY } from "@/shared/constants";
 
 // EIP-1193 event types
@@ -82,6 +83,15 @@ export class ExtensionEvmProvider {
     }
   }
 
+  /**
+   * Sync EVM address to background state for popup display
+   */
+  private _syncEvmAddress(address: string): void {
+    sendToBackground("SYNC_EVM_ADDRESS", { evmAddress: address }).catch(() => {
+      // Silently ignore sync failures
+    });
+  }
+
   get chainId(): string {
     if (this._ethWallet?.provider) {
       return this._ethWallet.provider.chainId;
@@ -107,12 +117,16 @@ export class ExtensionEvmProvider {
     // Handle eth_requestAccounts specially to trigger sign-in flow
     if (args.method === "eth_requestAccounts") {
       // Cast to any because SDK provider expects strictly typed RpcMethod
-      const accounts = await provider.request(args as any);
+      let accounts = await provider.request(args as any);
       if (!accounts || (accounts as string[]).length === 0) {
         // Need to sign in
         await this._extensionWallet!.openSignInModal();
         // Re-fetch accounts after sign-in
-        return provider.request(args as any) as Promise<T>;
+        accounts = await provider.request(args as any);
+      }
+      // Sync EVM address to background state
+      if (accounts && (accounts as string[]).length > 0) {
+        this._syncEvmAddress((accounts as string[])[0]);
       }
       return accounts as T;
     }

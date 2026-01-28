@@ -182,7 +182,7 @@ export function handleOkoAttachedMessage(message: {
         updates.isConnected = true;
       }
       if (state?.publicKey) {
-        updates.evmAddress = state.publicKey;
+        // publicKey is Cosmos secp256k1 public key, NOT EVM address
         updates.cosmosPublicKey = state.publicKey;
         updates.isConnected = true;
       }

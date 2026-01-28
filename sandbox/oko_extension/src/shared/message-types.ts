@@ -169,6 +169,12 @@ export interface RelayToMainWorldMessage extends ExtensionMessage<{
   type: "RELAY_TO_MAIN_WORLD";
 }
 
+export interface SyncEvmAddressMessage extends ExtensionMessage<{
+  evmAddress: string;
+}> {
+  type: "SYNC_EVM_ADDRESS";
+}
+
 // ============== Window PostMessage Types ==============
 
 export interface WindowMessage {
@@ -191,4 +197,5 @@ export type ProviderMessage =
   | OkoAttachedMessage
   | SignPopupResultMessage
   | InjectModalScriptMessage
-  | RelayToMainWorldMessage;
+  | RelayToMainWorldMessage
+  | SyncEvmAddressMessage;
