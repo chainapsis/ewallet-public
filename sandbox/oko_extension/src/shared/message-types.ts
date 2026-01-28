@@ -145,10 +145,8 @@ export interface SignPopupResultPayload {
   result: unknown;
 }
 
-export interface SignPopupResultMessage {
+export interface SignPopupResultMessage extends ExtensionMessage<SignPopupResultPayload> {
   type: "SIGN_POPUP_RESULT";
-  requestId: string;
-  result: unknown;
 }
 
 export interface InjectModalScriptPayload {
