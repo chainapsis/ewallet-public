@@ -22,4 +22,7 @@ export type {
   SvmWalletEventHandler,
 } from "./event";
 
-export type { OkoSvmWalletInternal } from "./internal";
+export type {
+  OkoSvmWalletInternal,
+  OkoSvmWalletChainOptions,
+} from "./internal";

@@ -28,12 +28,16 @@ export function init(
     };
   }
 
+  const chainOptions = {
+    chain_id: args.chain_id,
+  };
+
   return {
     success: true,
     data: new (
       OkoSvmWallet as unknown as new (
         ...args: unknown[]
       ) => OkoSvmWalletInterface
-    )(okoSvmWalletRes.data),
+    )(okoSvmWalletRes.data, chainOptions),
   };
 }
