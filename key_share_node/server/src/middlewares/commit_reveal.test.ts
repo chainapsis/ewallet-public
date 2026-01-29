@@ -51,9 +51,7 @@ interface TestContext {
   apiName: string;
 }
 
-function createTestContext(
-  overrides: Partial<TestContext> = {},
-): TestContext {
+function createTestContext(overrides: Partial<TestContext> = {}): TestContext {
   const keypairRes = generateEddsaKeypair();
   if (!keypairRes.success) {
     throw new Error(`Failed to generate keypair: ${keypairRes.err}`);
@@ -100,7 +98,9 @@ async function createSession(
   options: { expiresInMs?: number; state?: string } = {},
 ) {
   const idTokenHash = computeIdTokenHash(ctx.authType, ctx.idToken);
-  const expiresAt = new Date(Date.now() + (options.expiresInMs ?? 5 * 60 * 1000));
+  const expiresAt = new Date(
+    Date.now() + (options.expiresInMs ?? 5 * 60 * 1000),
+  );
 
   const result = await createCommitRevealSession(pool, {
     session_id: ctx.sessionId,
@@ -212,7 +212,11 @@ describe("commit_reveal_middleware_test", () => {
       "/test/get_key_shares_fail",
       commitRevealMiddleware("get_key_shares"),
       (_req, res) => {
-        res.status(500).json({ success: false, code: "SERVER_ERROR", msg: "Simulated failure" });
+        res.status(500).json({
+          success: false,
+          code: "SERVER_ERROR",
+          msg: "Simulated failure",
+        });
       },
     );
   });
@@ -1004,7 +1008,10 @@ describe("commit_reveal_middleware_test", () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Verify session is COMPLETED
-      const sessionRes = await getCommitRevealSessionBySessionId(pool, ctx.sessionId);
+      const sessionRes = await getCommitRevealSessionBySessionId(
+        pool,
+        ctx.sessionId,
+      );
       if (!sessionRes.success) {
         throw new Error(`Failed to get session: ${sessionRes.err}`);
       }
@@ -1037,7 +1044,10 @@ describe("commit_reveal_middleware_test", () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Verify session is COMPLETED
-      const sessionRes = await getCommitRevealSessionBySessionId(pool, ctx.sessionId);
+      const sessionRes = await getCommitRevealSessionBySessionId(
+        pool,
+        ctx.sessionId,
+      );
       if (!sessionRes.success) {
         throw new Error(`Failed to get session: ${sessionRes.err}`);
       }
@@ -1070,7 +1080,10 @@ describe("commit_reveal_middleware_test", () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Verify session is still COMMITTED (not COMPLETED)
-      const sessionRes = await getCommitRevealSessionBySessionId(pool, ctx.sessionId);
+      const sessionRes = await getCommitRevealSessionBySessionId(
+        pool,
+        ctx.sessionId,
+      );
       if (!sessionRes.success) {
         throw new Error(`Failed to get session: ${sessionRes.err}`);
       }
@@ -1103,7 +1116,10 @@ describe("commit_reveal_middleware_test", () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Verify session is COMPLETED
-      const sessionRes = await getCommitRevealSessionBySessionId(pool, ctx.sessionId);
+      const sessionRes = await getCommitRevealSessionBySessionId(
+        pool,
+        ctx.sessionId,
+      );
       if (!sessionRes.success) {
         throw new Error(`Failed to get session: ${sessionRes.err}`);
       }
@@ -1136,7 +1152,10 @@ describe("commit_reveal_middleware_test", () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Verify session is COMPLETED
-      const sessionRes = await getCommitRevealSessionBySessionId(pool, ctx.sessionId);
+      const sessionRes = await getCommitRevealSessionBySessionId(
+        pool,
+        ctx.sessionId,
+      );
       if (!sessionRes.success) {
         throw new Error(`Failed to get session: ${sessionRes.err}`);
       }
@@ -1169,7 +1188,10 @@ describe("commit_reveal_middleware_test", () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Verify session is still COMMITTED (not COMPLETED)
-      const sessionRes = await getCommitRevealSessionBySessionId(pool, ctx.sessionId);
+      const sessionRes = await getCommitRevealSessionBySessionId(
+        pool,
+        ctx.sessionId,
+      );
       if (!sessionRes.success) {
         throw new Error(`Failed to get session: ${sessionRes.err}`);
       }
