@@ -10,6 +10,7 @@ import {
 } from "@oko-wallet/oko-pg-interface/commit_reveal";
 
 import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
+import type { ApiName } from "@oko-wallet/oko-types/commit_reveal";
 import {
   isApiAllowed,
   isFinalApi,
@@ -22,7 +23,7 @@ export interface CommitRevealBody {
   auth_type?: string;
 }
 
-export function commitRevealMiddleware(apiName: string) {
+export function commitRevealMiddleware(apiName: ApiName) {
   return async (req: Request, res: Response, next: NextFunction) => {
     const state = req.app.locals as ServerState;
     const body = req.body as CommitRevealBody;

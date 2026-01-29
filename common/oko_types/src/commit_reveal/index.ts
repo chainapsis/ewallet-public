@@ -4,6 +4,8 @@ export type OperationType =
   | "sign_in_reshare"
   | "add_ed25519";
 
+export type ApiName = "signin" | "keygen" | "reshare" | "keygen_ed25519";
+
 export type SessionState = "COMMITTED" | "COMPLETED";
 
 export interface CommitRevealSession {

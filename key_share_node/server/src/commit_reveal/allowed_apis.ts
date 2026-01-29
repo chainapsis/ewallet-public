@@ -1,13 +1,9 @@
-import type { OperationType } from "@oko-wallet/ksn-interface/commit_reveal";
+import type {
+  OperationType,
+  ApiName,
+} from "@oko-wallet/ksn-interface/commit_reveal";
 
-export type ApiName =
-  | "get_key_shares"
-  | "register"
-  | "reshare"
-  | "reshare_register"
-  | "register_ed25519";
-
-export const ALLOWED_APIS = {
+export const ALLOWED_APIS: Record<OperationType, ApiName[]> = {
   sign_in: ["get_key_shares"],
   sign_up: ["register"],
   sign_in_reshare: ["get_key_shares", "reshare"],
@@ -15,7 +11,7 @@ export const ALLOWED_APIS = {
   add_ed25519: ["register_ed25519", "get_key_shares"],
 };
 
-export const FINAL_APIS = {
+export const FINAL_APIS: Record<OperationType, ApiName[]> = {
   sign_in: ["get_key_shares"],
   sign_up: ["register"],
   sign_in_reshare: ["reshare"],
@@ -25,14 +21,14 @@ export const FINAL_APIS = {
 
 export function isApiAllowed(
   operationType: OperationType,
-  apiName: string,
+  apiName: ApiName,
 ): boolean {
-  return ALLOWED_APIS[operationType].includes(apiName);
+  return (ALLOWED_APIS[operationType]).includes(apiName);
 }
 
 export function isFinalApi(
   operationType: OperationType,
-  apiName: string,
+  apiName: ApiName,
 ): boolean {
-  return FINAL_APIS[operationType].includes(apiName);
+  return (FINAL_APIS[operationType]).includes(apiName);
 }

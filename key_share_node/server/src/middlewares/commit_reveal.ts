@@ -10,10 +10,10 @@ import {
 } from "@oko-wallet/ksn-pg-interface/commit_reveal";
 
 import { ErrorCodeMap } from "@oko-wallet-ksn-server/error";
+import type { ApiName } from "@oko-wallet/ksn-interface/commit_reveal";
 import {
   isApiAllowed,
   isFinalApi,
-  type ApiName,
 } from "@oko-wallet-ksn-server/commit_reveal";
 import type { ServerState } from "@oko-wallet-ksn-server/state";
 import { logger } from "@oko-wallet-ksn-server/logger";
