@@ -111,9 +111,7 @@ describe("commit_reveal_middleware_basic_validation_test", () => {
     const state = params.state ?? "COMMITTED";
 
     await pool.query(
-      `INSERT INTO "commit_reveal_sessions"
-       (session_id, operation_type, client_ephemeral_pubkey, id_token_hash, state, expires_at)
-       VALUES ($1, $2, $3, $4, $5, $6)`,
+      `INSERT INTO "commit_reveal_sessions" (session_id, operation_type, client_ephemeral_pubkey, id_token_hash, state, expires_at) VALUES ($1, $2, $3, $4, $5, $6)`,
       [
         params.session_id,
         params.operation_type,
