@@ -35,6 +35,7 @@ export type MakeSvmSigResult =
 export interface SvmTxSignPayload {
   origin: string;
   signer: string;
+  chain_id: string;
   data: {
     serialized_transaction: string;
     message_to_sign: string;
@@ -45,6 +46,7 @@ export interface SvmTxSignPayload {
 export interface SvmAllTxSignPayload {
   origin: string;
   signer: string;
+  chain_id: string;
   data: {
     serialized_transactions: string[];
     messages_to_sign: string[];
@@ -55,6 +57,7 @@ export interface SvmAllTxSignPayload {
 export interface SvmMessageSignPayload {
   origin: string;
   signer: string;
+  chain_id: string;
   data: {
     message: string;
   };

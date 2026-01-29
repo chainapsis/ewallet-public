@@ -2,49 +2,48 @@ import type { FC } from "react";
 import type { SvmMessageSignPayload } from "@oko-wallet/oko-sdk-core";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 
 import styles from "../common/signature_content.module.scss";
 import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
-import { SignerAddressOrEmail } from "@oko-wallet-attached/components/modal_variants/common/metadata_content/signer_address_or_email/signer_address_or_email";
 import { SvmMessageSummary } from "./svm_message_summary";
-import { SOLANA_LOGO_URL } from "@oko-wallet-attached/constants/urls";
+import { getFaviconUrl } from "@oko-wallet-attached/utils/favicon";
+import { getChainByChainId } from "@oko-wallet-attached/requests/chain_infos";
 
 interface SvmMessageSignatureContentProps {
   payload: SvmMessageSignPayload;
 }
 
-function getFaviconUrl(origin: string): string {
-  if (!origin) return "";
-  try {
-    const parsed = new URL(origin);
-    return `https://www.google.com/s2/favicons?domain_url=${encodeURIComponent(
-      parsed.origin,
-    )}`;
-  } catch {
-    return "";
-  }
-}
-
 export const SvmMessageSignatureContent: FC<
   SvmMessageSignatureContentProps
 > = ({ payload }) => {
-  const { origin, signer } = payload;
+  const { origin, chain_id } = payload;
   const faviconUrl = getFaviconUrl(origin);
+
+  const { data: chainInfo } = useQuery({
+    queryKey: ["chain", chain_id],
+    queryFn: () => getChainByChainId(chain_id),
+  });
+
+  const chainName = useMemo(() => {
+    if (chainInfo?.chainName) {
+      return chainInfo.chainName;
+    }
+    if (!chain_id) {
+      return null;
+    }
+    const namespace = chain_id.split(":")[0];
+    if (!namespace) {
+      return null;
+    }
+    return namespace.charAt(0).toUpperCase() + namespace.slice(1);
+  }, [chainInfo?.chainName, chain_id]);
+
+  const chainLogoUrl = chainInfo?.chainSymbolImageUrl;
 
   return (
     <div className={styles.signatureContent}>
-      <div className={styles.chainInfo}>
-        <img src={SOLANA_LOGO_URL} alt="Solana" className={styles.chainLogo} />
-        <Spacing width={8} />
-        <span className={styles.chainName}>Solana</span>
-      </div>
-
-      <Spacing height={16} />
-
-      <div className={styles.signTypeTitle}>Sign Message</div>
-
-      <Spacing height={12} />
-
       <div className={styles.metadataWrapper}>
         <div className={styles.originRow}>
           {faviconUrl && faviconUrl.length > 0 && (
@@ -67,24 +66,23 @@ export const SvmMessageSignatureContent: FC<
               requested your
             </Typography>
             <div className={styles.chainNameGroup}>
-              <Avatar
-                src={SOLANA_LOGO_URL}
-                alt="Solana"
-                size="sm"
-                variant="rounded"
-              />
+              {chainLogoUrl && (
+                <Avatar
+                  src={chainLogoUrl}
+                  alt={chainName ?? "chain"}
+                  size="sm"
+                  variant="rounded"
+                />
+              )}
               <Typography size="lg" color="secondary" weight="semibold">
-                Solana signature
+                {chainName ? `${chainName} signature` : "signature"}
               </Typography>
             </div>
           </div>
-
-          {/* TODO: refactor this @chemonoworld @Ryz0nd */}
-          {/* <SignerAddressOrEmail signer={signer} origin={origin} /> */}
         </div>
       </div>
 
-      <Spacing height={16} />
+      <Spacing height={28} />
 
       <SvmMessageSummary payload={payload} />
     </div>

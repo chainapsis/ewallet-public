@@ -8,8 +8,13 @@ import {
 import { Skeleton } from "@oko-wallet/oko-common-ui/skeleton";
 
 import styles from "./instructions.module.scss";
-import { SvmTransferPretty } from "./transfer/transfer";
+import { isStakingProgram } from "./staking/constants";
+import {
+  extractStakingData,
+  StakingInstruction,
+} from "./staking/staking_instruction";
 import { TokenTransferPretty } from "./transfer/token_transfer";
+import { SvmTransferPretty } from "./transfer/transfer";
 import { UnknownInstruction } from "./unknown/unknown";
 import { Collapsible } from "@oko-wallet-attached/components/collapsible/collapsible";
 
@@ -20,12 +25,19 @@ function isTokenProgram(programId: string): boolean {
 function getInstructionTitle(instruction: ParsedInstruction): string {
   const { programId, instructionName } = instruction;
 
+  if (extractStakingData(instruction) !== null) {
+    return "Staking";
+  }
+
   if (programId === SYSTEM_PROGRAM_ID && instructionName === "transfer") {
     return "Token Transfer";
   }
 
   if (isTokenProgram(programId)) {
-    if (instructionName === "transferChecked" || instructionName === "transfer") {
+    if (
+      instructionName === "transferChecked" ||
+      instructionName === "transfer"
+    ) {
       return "Token Transfer";
     }
   }
@@ -38,6 +50,16 @@ function renderInstruction(
   index: number,
 ): ReactNode {
   const { programId, instructionName, data, accounts } = instruction;
+
+  // Staking instruction (check first, includes System Program createAccount for Stake)
+  if (extractStakingData(instruction) !== null) {
+    return <StakingInstruction key={index} instruction={instruction} />;
+  }
+
+  // Staking Programs without amount data -> skip (return null)
+  if (isStakingProgram(programId)) {
+    return null;
+  }
 
   // System Program - SOL Transfer
   if (programId === SYSTEM_PROGRAM_ID && instructionName === "transfer") {
@@ -101,11 +123,16 @@ export const Instructions: FC<InstructionsProps> = ({
     return <Skeleton width="100%" height="32px" />;
   }
 
+  // Filter out null results from renderInstruction (e.g., staking programs without amount)
+  const validInstructions = instructions.filter(
+    (ix, index) => renderInstruction(ix, index) !== null,
+  );
+
   // Single instruction: render directly without collapsible
-  if (instructions.length === 1) {
+  if (validInstructions.length === 1) {
     return (
       <div className={styles.instructionsContainer}>
-        {renderInstruction(instructions[0], 0)}
+        {renderInstruction(validInstructions[0], 0)}
       </div>
     );
   }
@@ -113,7 +140,7 @@ export const Instructions: FC<InstructionsProps> = ({
   // Multiple instructions: render each in a collapsible
   return (
     <div className={styles.instructionsContainer}>
-      {instructions.map((instruction, index) => (
+      {validInstructions.map((instruction, index) => (
         <Collapsible
           key={index}
           title={getInstructionTitle(instruction)}

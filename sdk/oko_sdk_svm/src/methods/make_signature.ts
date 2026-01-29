@@ -42,8 +42,14 @@ export async function makeSignature(
   }
 
   const signer = this.publicKey.toBase58();
+  const chainId = this.state.chainId;
 
-  const makeSignatureData = createMakeSignatureData(origin, signer, params);
+  const makeSignatureData = createMakeSignatureData(
+    origin,
+    signer,
+    chainId,
+    params,
+  );
 
   const signResult = await handleSigningFlow(this, makeSignatureData, params);
 
@@ -53,6 +59,7 @@ export async function makeSignature(
 function createMakeSignatureData(
   origin: string,
   signer: string,
+  chainId: string,
   params: SvmSignParams,
 ): MakeSvmSigData {
   switch (params.type) {
@@ -78,6 +85,7 @@ function createMakeSignatureData(
         payload: {
           origin,
           signer,
+          chain_id: chainId,
           data: {
             serialized_transaction: serialized,
             message_to_sign: messageBase64,
@@ -119,6 +127,7 @@ function createMakeSignatureData(
         payload: {
           origin,
           signer,
+          chain_id: chainId,
           data: {
             serialized_transactions: serializedTxs,
             messages_to_sign: messagesToSign,
@@ -135,6 +144,7 @@ function createMakeSignatureData(
         payload: {
           origin,
           signer,
+          chain_id: chainId,
           data: {
             message: Buffer.from(params.message).toString("hex"),
           },
