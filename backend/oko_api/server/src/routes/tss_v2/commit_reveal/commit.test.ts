@@ -225,4 +225,186 @@ describe("commit_reveal_commit_success_test", () => {
       );
     });
   });
+
+  describe("duplicate key errors", () => {
+    it("should return 409 when session_id already exists", async () => {
+      const sessionId = uuidv4();
+      const body1 = {
+        ...createValidBody(),
+        session_id: sessionId,
+      };
+      const body2 = {
+        ...createValidBody(),
+        session_id: sessionId,
+      };
+
+      await request(app).post(testEndpoint).send(body1).expect(200);
+
+      const response = await request(app)
+        .post(testEndpoint)
+        .send(body2)
+        .expect(409);
+
+      expect(response.body.success).toBe(false);
+      expect(response.body.code).toBe("SESSION_ALREADY_EXISTS");
+    });
+
+    it("should return 409 when client_ephemeral_pubkey already exists", async () => {
+      const pubkey = generateRandomHex(32);
+      const body1 = {
+        ...createValidBody(),
+        client_ephemeral_pubkey: pubkey,
+      };
+      const body2 = {
+        ...createValidBody(),
+        client_ephemeral_pubkey: pubkey,
+      };
+
+      await request(app).post(testEndpoint).send(body1).expect(200);
+
+      const response = await request(app)
+        .post(testEndpoint)
+        .send(body2)
+        .expect(409);
+
+      expect(response.body.success).toBe(false);
+      expect(response.body.code).toBe("SESSION_ALREADY_EXISTS");
+    });
+
+    it("should return 409 when id_token_hash already exists", async () => {
+      const idTokenHash = generateRandomHex(32);
+      const body1 = {
+        ...createValidBody(),
+        id_token_hash: idTokenHash,
+      };
+      const body2 = {
+        ...createValidBody(),
+        id_token_hash: idTokenHash,
+      };
+
+      await request(app).post(testEndpoint).send(body1).expect(200);
+
+      const response = await request(app)
+        .post(testEndpoint)
+        .send(body2)
+        .expect(409);
+
+      expect(response.body.success).toBe(false);
+      expect(response.body.code).toBe("SESSION_ALREADY_EXISTS");
+    });
+  });
+
+  describe("invalid input errors", () => {
+    it("should return 400 when client_ephemeral_pubkey is invalid hex", async () => {
+      const body = {
+        ...createValidBody(),
+        client_ephemeral_pubkey: "invalid_hex_string",
+      };
+
+      const response = await request(app)
+        .post(testEndpoint)
+        .send(body)
+        .expect(400);
+
+      expect(response.body.success).toBe(false);
+      expect(response.body.code).toBe("INVALID_REQUEST");
+      expect(response.body.msg).toContain("client_ephemeral_pubkey");
+    });
+
+    it("should return 400 when client_ephemeral_pubkey is wrong length", async () => {
+      const body = {
+        ...createValidBody(),
+        client_ephemeral_pubkey: generateRandomHex(16), // 16 bytes instead of 32
+      };
+
+      const response = await request(app)
+        .post(testEndpoint)
+        .send(body)
+        .expect(400);
+
+      expect(response.body.success).toBe(false);
+      expect(response.body.code).toBe("INVALID_REQUEST");
+      expect(response.body.msg).toContain("client_ephemeral_pubkey");
+    });
+
+    it("should return 400 when id_token_hash is invalid hex", async () => {
+      const body = {
+        ...createValidBody(),
+        id_token_hash: "invalid_hex_string",
+      };
+
+      const response = await request(app)
+        .post(testEndpoint)
+        .send(body)
+        .expect(400);
+
+      expect(response.body.success).toBe(false);
+      expect(response.body.code).toBe("INVALID_REQUEST");
+      expect(response.body.msg).toContain("id_token_hash");
+    });
+
+    it("should return 400 when id_token_hash is wrong length", async () => {
+      const body = {
+        ...createValidBody(),
+        id_token_hash: generateRandomHex(16), // 16 bytes instead of 32
+      };
+
+      const response = await request(app)
+        .post(testEndpoint)
+        .send(body)
+        .expect(400);
+
+      expect(response.body.success).toBe(false);
+      expect(response.body.code).toBe("INVALID_REQUEST");
+      expect(response.body.msg).toContain("id_token_hash");
+    });
+
+    it("should return 500 when session_id is missing", async () => {
+      const body = createValidBody();
+      const { session_id, ...bodyWithoutSessionId } = body;
+
+      const response = await request(app)
+        .post(testEndpoint)
+        .send(bodyWithoutSessionId)
+        .expect(500);
+
+      expect(response.body.success).toBe(false);
+    });
+
+    it("should return 500 when operation_type is missing", async () => {
+      const body = createValidBody();
+      const { operation_type, ...bodyWithoutOperationType } = body;
+
+      const response = await request(app)
+        .post(testEndpoint)
+        .send(bodyWithoutOperationType)
+        .expect(500);
+
+      expect(response.body.success).toBe(false);
+    });
+
+    it("should return 400 when client_ephemeral_pubkey is missing", async () => {
+      const body = createValidBody();
+      const { client_ephemeral_pubkey, ...bodyWithoutPubkey } = body;
+
+      const response = await request(app)
+        .post(testEndpoint)
+        .send(bodyWithoutPubkey)
+        .expect(400);
+
+      expect(response.body.success).toBe(false);
+    });
+
+    it("should return 400 when id_token_hash is missing", async () => {
+      const body = createValidBody();
+      const { id_token_hash, ...bodyWithoutHash } = body;
+
+      const response = await request(app)
+        .post(testEndpoint)
+        .send(bodyWithoutHash)
+        .expect(400);
+
+      expect(response.body.success).toBe(false);
+    });
+  });
 });
