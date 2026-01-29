@@ -4,7 +4,10 @@ import AccountInfo from "./AccountInfo";
 import { SignMessageWidget } from "./sign_message_widget";
 import { SignTransactionWidget } from "./sign_transaction_widget";
 import { SplTokenTransferWidget } from "./spl_token_transfer_widget";
-import { TestTransactionsWidget } from "./test_transactions_widget";
+import {
+  TestTransactionsWidget,
+  StakingWidget,
+} from "./test_transactions_widget";
 import { SiwsWidget } from "./siws_widget";
 
 interface ConnectedViewProps {
@@ -27,6 +30,7 @@ export default function ConnectedView({
           <SignMessageWidget />
           <SignTransactionWidget />
           <SplTokenTransferWidget />
+          <StakingWidget />
           <TestTransactionsWidget />
         </div>
       </div>
