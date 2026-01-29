@@ -8,9 +8,9 @@ import {
   updateCommitRevealSessionState,
   hasCommitRevealApiBeenCalled,
 } from "@oko-wallet/oko-pg-interface/commit_reveal";
-
-import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
 import type { ApiName } from "@oko-wallet/oko-types/commit_reveal";
+import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
+
 import {
   isApiAllowed,
   isFinalApi,
