@@ -1,5 +1,11 @@
-export type OperationType = "sign_in" | "sign_up" | "reshare";
-export type SessionState = "COMMITTED" | "COMPLETED" | "EXPIRED";
+export type OperationType =
+  | "sign_in"
+  | "sign_up"
+  | "sign_in_reshare"
+  | "register_reshare"
+  | "add_ed25519";
+
+export type SessionState = "COMMITTED" | "COMPLETED";
 
 export interface CommitRevealSession {
   session_id: string;
