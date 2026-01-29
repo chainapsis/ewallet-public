@@ -5,7 +5,8 @@
   "main": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./knexfile": "./knexfile.ts"
+    "./knexfile": "./knexfile.ts",
+    "./commit_reveal": "./src/commit_reveal/index.ts"
   },
   "scripts": {
     "migrate": "MIGRATE_MODE=all NODE_COUNT=3 tsx ./src/bin/migrate/index.ts",

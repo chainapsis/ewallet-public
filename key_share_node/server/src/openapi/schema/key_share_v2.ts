@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { authTypeSchema, publicKeySchema, shareSchema } from "./key_share_v1";
+import { commitRevealRequestFieldsSchema } from "./commit_reveal";
 import { registry } from "../doc";
 
 // ============================================================================
@@ -32,9 +33,10 @@ export const GetKeyShareV2RequestBodySchema = registry.register(
         "Object with curve_type as key and public_key as value",
       ),
     })
+    .merge(commitRevealRequestFieldsSchema)
     .openapi("GetKeyShareV2RequestBody", {
       description:
-        "Request payload for retrieving multiple key shares at once.",
+        "Request payload for retrieving multiple key shares at once. Requires commit-reveal session.",
     }),
 );
 
@@ -153,9 +155,10 @@ export const RegisterKeyShareV2RequestBodySchema = registry.register(
         "Both secp256k1 and ed25519 wallet info are required",
       ),
     })
+    .merge(commitRevealRequestFieldsSchema)
     .openapi("RegisterKeyShareV2RequestBody", {
       description:
-        "Request payload for registering key shares. Both secp256k1 and ed25519 wallets are required.",
+        "Request payload for registering key shares. Both secp256k1 and ed25519 wallets are required. Requires commit-reveal session.",
     }),
 );
 
@@ -185,9 +188,10 @@ export const RegisterEd25519V2RequestBodySchema = registry.register(
         .describe("ed25519 public key (32 bytes hex)"),
       share: shareSchema.describe("Key share in hex string format (64 bytes)"),
     })
+    .merge(commitRevealRequestFieldsSchema)
     .openapi("RegisterEd25519V2RequestBody", {
       description:
-        "Request payload for registering ed25519 wallet for existing users.",
+        "Request payload for registering ed25519 wallet for existing users. Requires commit-reveal session.",
     }),
 );
 
@@ -233,8 +237,10 @@ export const ReshareKeyShareV2RequestBodySchema = registry.register(
         "Object with curve_type as key and wallet reshare info as value",
       ),
     })
+    .merge(commitRevealRequestFieldsSchema)
     .openapi("ReshareKeyShareV2RequestBody", {
-      description: "Request payload for resharing multiple key shares at once.",
+      description:
+        "Request payload for resharing multiple key shares at once. Requires commit-reveal session.",
     }),
 );
 
@@ -275,9 +281,10 @@ export const ReshareRegisterV2RequestBodySchema = registry.register(
         "Object with curve_type as key and wallet info as value",
       ),
     })
+    .merge(commitRevealRequestFieldsSchema)
     .openapi("ReshareRegisterV2RequestBody", {
       description:
-        "Request payload for registering key shares during reshare (new node joining). User must already exist.",
+        "Request payload for registering key shares during reshare (new node joining). User must already exist. Requires commit-reveal session.",
     }),
 );
 

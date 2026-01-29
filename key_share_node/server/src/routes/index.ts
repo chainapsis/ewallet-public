@@ -12,7 +12,6 @@ export function setRoutes(app: Express) {
   const pgDumpRouter = makePgDumpRouter();
   app.use("/pg_dump/v1", pgDumpRouter);
 
-  // NOTE: A new architecture where each io handler is mapped to a single file.
   const keyshareV2Router = makeKeyshareV2Router();
   app.use("/keyshare/v2", keyshareV2Router);
 
