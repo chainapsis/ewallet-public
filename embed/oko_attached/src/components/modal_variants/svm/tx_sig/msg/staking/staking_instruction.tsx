@@ -11,6 +11,12 @@ import type { ParsedInstruction } from "@oko-wallet-attached/tx-parsers/svm";
 
 const STAKE_ACCOUNT_RENT_LAMPORTS = 2_282_880; // ~0.00228288 SOL
 
+export interface StakedData {
+  stakeAmount: bigint | number;
+  rentAmount: bigint | number;
+  totalAmount: bigint | number;
+}
+
 function formatLamports(lamports: bigint | number): string {
   const formatter = new Intl.NumberFormat(undefined, {
     minimumFractionDigits: 0,
@@ -19,11 +25,9 @@ function formatLamports(lamports: bigint | number): string {
   return formatter.format(`${lamports}E-9` as unknown as number);
 }
 
-export function extractStakingData(instruction: ParsedInstruction): {
-  stakeAmount: bigint | number;
-  rentAmount: bigint | number;
-  totalAmount: bigint | number;
-} | null {
+export function extractStakingData(
+  instruction: ParsedInstruction,
+): StakedData | null {
   const { programId, instructionName, data } = instruction;
 
   // System Program - createAccount for Stake Program
