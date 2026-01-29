@@ -21,7 +21,7 @@ const SESSION_EXPIRY_MINUTES = 5;
 
 registry.registerPath({
   method: "post",
-  path: "/tss/v2/commit-reveal/commit",
+  path: "/tss/v2/commit",
   tags: ["TSS"],
   summary: "Create a commit-reveal session",
   description:

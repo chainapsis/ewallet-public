@@ -28,12 +28,12 @@ import { keygenEd25519 } from "./keygen_ed25519";
 import { userSignInV2 } from "./user_signin";
 import { userReshareV2 } from "./user_reshare";
 import { userCheckEmailV2 } from "./user_check_email";
-import { commitRevealCommit } from "./commit_reveal/commit";
+import { commitRevealCommit } from "./commit";
 
 export function makeTSSRouterV2() {
   const router = Router();
 
-  router.post("/commit-reveal/commit", commitRevealCommit);
+  router.post("/commit", commitRevealCommit);
 
   router.post(
     "/keygen",

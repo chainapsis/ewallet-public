@@ -15,7 +15,7 @@ import {
 
 import { testPgConfig } from "@oko-wallet-api/database/test_config";
 import { resetPgDatabase } from "@oko-wallet-api/testing/database";
-import { commitRevealCommit } from "./commit_reveal/commit";
+import { commitRevealCommit } from "./commit";
 import { commitRevealMiddleware } from "@oko-wallet-api/middleware/commit_reveal";
 
 // Mock keypair for testing
@@ -71,7 +71,7 @@ describe("tss_v2_e2e_success_flows", () => {
     app.use(express.json());
 
     // Commit endpoint (no middleware)
-    app.post("/tss/v2/commit-reveal/commit", commitRevealCommit);
+    app.post("/tss/v2/commit", commitRevealCommit);
 
     // Protected endpoints with commit-reveal middleware
     // Mock handlers that simulate successful API calls
@@ -185,7 +185,7 @@ describe("tss_v2_e2e_success_flows", () => {
 
       // Step 1: Commit
       const commitResponse = await request(app)
-        .post("/tss/v2/commit-reveal/commit")
+        .post("/tss/v2/commit")
         .send({
           session_id: sessionId,
           operation_type: "sign_up",
@@ -249,7 +249,7 @@ describe("tss_v2_e2e_success_flows", () => {
 
       // Commit
       await request(app)
-        .post("/tss/v2/commit-reveal/commit")
+        .post("/tss/v2/commit")
         .send({
           session_id: sessionId,
           operation_type: "sign_up",
@@ -317,7 +317,7 @@ describe("tss_v2_e2e_success_flows", () => {
 
       // Commit
       const commitResponse = await request(app)
-        .post("/tss/v2/commit-reveal/commit")
+        .post("/tss/v2/commit")
         .send({
           session_id: sessionId,
           operation_type: "sign_in",
@@ -373,7 +373,7 @@ describe("tss_v2_e2e_success_flows", () => {
 
       // Commit with sign_in_reshare operation
       await request(app)
-        .post("/tss/v2/commit-reveal/commit")
+        .post("/tss/v2/commit")
         .send({
           session_id: sessionId,
           operation_type: "sign_in_reshare",
@@ -456,7 +456,7 @@ describe("tss_v2_e2e_success_flows", () => {
 
       // Commit
       await request(app)
-        .post("/tss/v2/commit-reveal/commit")
+        .post("/tss/v2/commit")
         .send({
           session_id: sessionId,
           operation_type: "add_ed25519",
@@ -523,7 +523,7 @@ describe("tss_v2_e2e_error_scenarios", () => {
     app = express();
     app.use(express.json());
 
-    app.post("/tss/v2/commit-reveal/commit", commitRevealCommit);
+    app.post("/tss/v2/commit", commitRevealCommit);
 
     app.post("/tss/v2/keygen", commitRevealMiddleware("keygen"), (_req, res) => {
       res.status(200).json({ success: true, data: { message: "keygen ok" } });
@@ -580,7 +580,7 @@ describe("tss_v2_e2e_error_scenarios", () => {
 
       // Commit
       await request(app)
-        .post("/tss/v2/commit-reveal/commit")
+        .post("/tss/v2/commit")
         .send({
           session_id: sessionId,
           operation_type: "sign_up",
@@ -627,7 +627,7 @@ describe("tss_v2_e2e_error_scenarios", () => {
 
       // Commit
       await request(app)
-        .post("/tss/v2/commit-reveal/commit")
+        .post("/tss/v2/commit")
         .send({
           session_id: sessionId,
           operation_type: "sign_up",
@@ -698,7 +698,7 @@ describe("tss_v2_e2e_error_scenarios", () => {
 
       // Commit with sign_in operation
       await request(app)
-        .post("/tss/v2/commit-reveal/commit")
+        .post("/tss/v2/commit")
         .send({
           session_id: sessionId,
           operation_type: "sign_in", // sign_in operation
@@ -749,7 +749,7 @@ describe("tss_v2_e2e_error_scenarios", () => {
 
       // Commit with original token hash
       await request(app)
-        .post("/tss/v2/commit-reveal/commit")
+        .post("/tss/v2/commit")
         .send({
           session_id: sessionId,
           operation_type: "sign_up",

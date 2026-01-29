@@ -63,7 +63,7 @@ describe("commit_reveal_commit_success_test", () => {
     app = express();
     app.use(express.json());
 
-    app.post("/tss/v2/commit-reveal/commit", commitRevealCommit);
+    app.post("/tss/v2/commit", commitRevealCommit);
 
     app.locals.db = pool;
     app.locals.server_keypair = mockServerKeypair;
@@ -78,7 +78,7 @@ describe("commit_reveal_commit_success_test", () => {
     await pool.end();
   });
 
-  const testEndpoint = "/tss/v2/commit-reveal/commit";
+  const testEndpoint = "/tss/v2/commit";
 
   const createValidBody = () => ({
     session_id: uuidv4(),
