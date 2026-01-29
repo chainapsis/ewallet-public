@@ -26,6 +26,7 @@
     "./key_share_node_meta": "./src/key_share_node_meta/index.ts",
     "./server_keypairs": "./src/server_keypairs/index.ts",
     "./referrals": "./src/referrals/index.ts",
+    "./commit_reveal": "./src/commit_reveal/index.ts",
     "./knexfile": "./knexfile.ts"
   },
   "dependencies": {

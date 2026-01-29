@@ -6,8 +6,6 @@ import { ChevronRightIcon } from "@oko-wallet/oko-common-ui/icons/chevron_right"
 import styles from "../common/summary.module.scss";
 import { MakeSignatureRawCodeBlock } from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_sig_modal_code_block";
 import { MakeSignatureRawCodeBlockContainer } from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_sig_modal_code_block_container";
-import { TxContainer } from "@oko-wallet-attached/components/modal_variants/eth/tx_sig/actions/common/tx_container";
-import { TxRow } from "@oko-wallet-attached/components/modal_variants/common/tx_row";
 
 export interface SvmMessageSummaryProps {
   payload: SvmMessageSignPayload;
@@ -35,22 +33,23 @@ export const SvmMessageSummary: FC<SvmMessageSummaryProps> = ({
       decoded = msgData.message;
     }
 
+    const displayText =
+      decoded.length > 200 ? decoded.slice(0, 200) + "..." : decoded;
+
     const content: ReactNode = (
-      <TxContainer>
-        <TxRow label="Content">
-          <Typography
-            color="primary"
-            size="sm"
-            weight="semibold"
-            style={{
-              wordBreak: "break-word",
-              whiteSpace: "pre-wrap",
-            }}
-          >
-            {decoded.length > 200 ? decoded.slice(0, 200) + "..." : decoded}
-          </Typography>
-        </TxRow>
-      </TxContainer>
+      <MakeSignatureRawCodeBlockContainer>
+        <Typography
+          color="tertiary"
+          size="sm"
+          weight="medium"
+          style={{
+            wordBreak: "break-word",
+            whiteSpace: "pre-wrap",
+          }}
+        >
+          {displayText}
+        </Typography>
+      </MakeSignatureRawCodeBlockContainer>
     );
 
     return {

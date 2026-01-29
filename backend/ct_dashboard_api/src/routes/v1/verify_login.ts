@@ -8,7 +8,7 @@ import {
   getCTDUserWithCustomerByEmail,
   verifyCustomerDashboardUserEmail,
 } from "@oko-wallet/oko-pg-interface/customer_dashboard_users";
-import { verifyEmailCode } from "@oko-wallet/oko-pg-interface/email_verifications";
+import { verifyEmailCodeFromPending } from "@oko-wallet/oko-pg-interface/email_verifications";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type {
   LoginResponse,
@@ -133,8 +133,8 @@ export async function verifyLogin(
       return;
     }
 
-    // Verify the code first
-    const verificationResult = await verifyEmailCode(state.db, {
+    // Verify the code first (from PENDING status directly to VERIFIED)
+    const verificationResult = await verifyEmailCodeFromPending(state.db, {
       email: request.email,
       verification_code: request.verification_code,
     });

@@ -37,7 +37,9 @@ export const Collapsible: FC<CollapsibleProps> = ({
         />
       </div>
       {isExpanded && (
-        <div className={styles.collapsibleContent}>{children}</div>
+        <div className={styles.collapsibleContent} data-collapsible-content>
+          {children}
+        </div>
       )}
     </div>
   );

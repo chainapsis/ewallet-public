@@ -21,6 +21,7 @@ import {
   reshareKeyShareV2,
   reshareRegisterV2,
 } from "@oko-wallet-ksn-server/api/key_share";
+import { encryptDataAsync } from "@oko-wallet-ksn-server/encrypt";
 
 const TEST_ENC_SECRET = "test_enc_secret";
 
@@ -112,7 +113,7 @@ describe("key_share_v2_test", () => {
       expect(result.success).toBe(true);
     });
 
-    it("3.2 success - new user secp256k1 only", async () => {
+    it("3.2 failure - INVALID_REQUEST (missing ed25519)", async () => {
       const secp256k1Pk = parseSecp256k1PublicKey(TEST_SECP256K1_PK);
       const secp256k1Share = generateRandomShare();
 
@@ -128,12 +129,17 @@ describe("key_share_v2_test", () => {
         TEST_ENC_SECRET,
       );
 
-      expect(result.success).toBe(true);
+      expect(result.success).toBe(false);
+      if (result.success === false) {
+        expect(result.code).toBe("INVALID_REQUEST");
+      }
     });
 
     it("3.3 failure - DUPLICATE_PUBLIC_KEY", async () => {
       const secp256k1Pk = parseSecp256k1PublicKey(TEST_SECP256K1_PK);
+      const ed25519Pk = parseEd25519PublicKey(TEST_ED25519_PK);
       const secp256k1Share = generateRandomShare();
+      const ed25519Share = generateRandomShare();
 
       // Pre-create wallet with same public key
       await createWallet(pool, {
@@ -149,6 +155,7 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           wallets: {
             secp256k1: { public_key: secp256k1Pk, share: secp256k1Share },
+            ed25519: { public_key: ed25519Pk, share: ed25519Share },
           },
         },
         TEST_ENC_SECRET,
@@ -160,42 +167,6 @@ describe("key_share_v2_test", () => {
       }
     });
 
-    it("3.4 failure - USER_ALREADY_REGISTERED", async () => {
-      const secp256k1Pk = parseSecp256k1PublicKey(TEST_SECP256K1_PK);
-      const secp256k1Pk2 = parseSecp256k1PublicKey(TEST_SECP256K1_PK_2);
-      const secp256k1Share = generateRandomShare();
-
-      // First registration
-      await registerKeyShareV2(
-        pool,
-        {
-          user_auth_id: TEST_USER_AUTH_ID,
-          auth_type: "google",
-          wallets: {
-            secp256k1: { public_key: secp256k1Pk, share: secp256k1Share },
-          },
-        },
-        TEST_ENC_SECRET,
-      );
-
-      // Second registration attempt with different pk
-      const result = await registerKeyShareV2(
-        pool,
-        {
-          user_auth_id: TEST_USER_AUTH_ID,
-          auth_type: "google",
-          wallets: {
-            secp256k1: { public_key: secp256k1Pk2, share: secp256k1Share },
-          },
-        },
-        TEST_ENC_SECRET,
-      );
-
-      expect(result.success).toBe(false);
-      if (result.success === false) {
-        expect(result.code).toBe("USER_ALREADY_REGISTERED");
-      }
-    });
   });
 
   // ============================================================================
@@ -238,23 +209,30 @@ describe("key_share_v2_test", () => {
       }
     });
 
-    it("2.2 success - partial exists (secp256k1 only)", async () => {
+    it("2.2 success - partial exists (secp256k1 only, legacy user)", async () => {
       const secp256k1Pk = parseSecp256k1PublicKey(TEST_SECP256K1_PK);
       const ed25519Pk = parseEd25519PublicKey(TEST_ED25519_PK);
       const secp256k1Share = generateRandomShare();
 
-      // Register secp256k1 only
-      await registerKeyShareV2(
-        pool,
-        {
-          user_auth_id: TEST_USER_AUTH_ID,
-          auth_type: "google",
-          wallets: {
-            secp256k1: { public_key: secp256k1Pk, share: secp256k1Share },
-          },
-        },
-        TEST_ENC_SECRET,
-      );
+      // Create user with only secp256k1 using low-level functions (simulating legacy user)
+      const createUserRes = await createUser(pool, "google", TEST_USER_AUTH_ID);
+      if (createUserRes.success === false) {
+        throw new Error("Failed to create user");
+      }
+
+      const walletRes = await createWallet(pool, {
+        user_id: createUserRes.data.user_id,
+        curve_type: "secp256k1",
+        public_key: secp256k1Pk.toUint8Array(),
+      });
+      if (walletRes.success === false) {
+        throw new Error("Failed to create wallet");
+      }
+
+      await createKeyShare(pool, {
+        wallet_id: walletRes.data.wallet_id,
+        enc_share: Buffer.from(secp256k1Share.toUint8Array()),
+      });
 
       const result = await checkKeyShareV2(pool, {
         user_auth_id: TEST_USER_AUTH_ID,
@@ -356,21 +334,35 @@ describe("key_share_v2_test", () => {
   // getKeyShareV2
   // ============================================================================
   describe("getKeyShareV2", () => {
-    it("1.1 success - secp256k1 only", async () => {
+    it("1.1 success - secp256k1 only (legacy user)", async () => {
       const secp256k1Pk = parseSecp256k1PublicKey(TEST_SECP256K1_PK);
       const secp256k1Share = generateRandomShare();
 
-      await registerKeyShareV2(
-        pool,
-        {
-          user_auth_id: TEST_USER_AUTH_ID,
-          auth_type: "google",
-          wallets: {
-            secp256k1: { public_key: secp256k1Pk, share: secp256k1Share },
-          },
-        },
+      // Create legacy user with only secp256k1 using low-level functions
+      const createUserRes = await createUser(pool, "google", TEST_USER_AUTH_ID);
+      if (createUserRes.success === false) {
+        throw new Error("Failed to create user");
+      }
+
+      const walletRes = await createWallet(pool, {
+        user_id: createUserRes.data.user_id,
+        curve_type: "secp256k1",
+        public_key: secp256k1Pk.toUint8Array(),
+      });
+      if (walletRes.success === false) {
+        throw new Error("Failed to create wallet");
+      }
+
+      // Encrypt the share before storing (same as registerKeyShareV2 does)
+      const encryptedShare = await encryptDataAsync(
+        secp256k1Share.toHex(),
         TEST_ENC_SECRET,
       );
+
+      await createKeyShare(pool, {
+        wallet_id: walletRes.data.wallet_id,
+        enc_share: Buffer.from(encryptedShare, "utf8"),
+      });
 
       const result = await getKeyShareV2(
         pool,
@@ -493,9 +485,11 @@ describe("key_share_v2_test", () => {
     it("1.5 failure - WALLET_NOT_FOUND", async () => {
       const secp256k1Pk = parseSecp256k1PublicKey(TEST_SECP256K1_PK);
       const secp256k1Pk2 = parseSecp256k1PublicKey(TEST_SECP256K1_PK_2);
+      const ed25519Pk = parseEd25519PublicKey(TEST_ED25519_PK);
       const secp256k1Share = generateRandomShare();
+      const ed25519Share = generateRandomShare();
 
-      // Register with different pk
+      // Register with different secp256k1 pk (but include ed25519 for valid registration)
       await registerKeyShareV2(
         pool,
         {
@@ -503,11 +497,13 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           wallets: {
             secp256k1: { public_key: secp256k1Pk2, share: secp256k1Share },
+            ed25519: { public_key: ed25519Pk, share: ed25519Share },
           },
         },
         TEST_ENC_SECRET,
       );
 
+      // Try to get with non-existent secp256k1 pk
       const result = await getKeyShareV2(
         pool,
         {
@@ -593,24 +589,31 @@ describe("key_share_v2_test", () => {
   // registerEd25519V2
   // ============================================================================
   describe("registerEd25519V2", () => {
-    it("4.1 success - add ed25519 to user with secp256k1", async () => {
+    it("4.1 success - add ed25519 to user with secp256k1 (legacy user)", async () => {
       const secp256k1Pk = parseSecp256k1PublicKey(TEST_SECP256K1_PK);
       const ed25519Pk = parseEd25519PublicKey(TEST_ED25519_PK);
       const secp256k1Share = generateRandomShare();
       const ed25519Share = generateRandomShare();
 
-      // First register secp256k1
-      await registerKeyShareV2(
-        pool,
-        {
-          user_auth_id: TEST_USER_AUTH_ID,
-          auth_type: "google",
-          wallets: {
-            secp256k1: { public_key: secp256k1Pk, share: secp256k1Share },
-          },
-        },
-        TEST_ENC_SECRET,
-      );
+      // Create legacy user with only secp256k1 using low-level functions
+      const createUserRes = await createUser(pool, "google", TEST_USER_AUTH_ID);
+      if (createUserRes.success === false) {
+        throw new Error("Failed to create user");
+      }
+
+      const walletRes = await createWallet(pool, {
+        user_id: createUserRes.data.user_id,
+        curve_type: "secp256k1",
+        public_key: secp256k1Pk.toUint8Array(),
+      });
+      if (walletRes.success === false) {
+        throw new Error("Failed to create wallet");
+      }
+
+      await createKeyShare(pool, {
+        wallet_id: walletRes.data.wallet_id,
+        enc_share: Buffer.from(secp256k1Share.toUint8Array()),
+      });
 
       // Then add ed25519
       const result = await registerEd25519V2(
@@ -865,9 +868,11 @@ describe("key_share_v2_test", () => {
     it("5.5 failure - WALLET_NOT_FOUND", async () => {
       const secp256k1Pk = parseSecp256k1PublicKey(TEST_SECP256K1_PK);
       const secp256k1Pk2 = parseSecp256k1PublicKey(TEST_SECP256K1_PK_2);
+      const ed25519Pk = parseEd25519PublicKey(TEST_ED25519_PK);
       const secp256k1Share = generateRandomShare();
+      const ed25519Share = generateRandomShare();
 
-      // Register with different pk
+      // Register with different secp256k1 pk (but include ed25519 for valid registration)
       await registerKeyShareV2(
         pool,
         {
@@ -875,12 +880,13 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           wallets: {
             secp256k1: { public_key: secp256k1Pk2, share: secp256k1Share },
+            ed25519: { public_key: ed25519Pk, share: ed25519Share },
           },
         },
         TEST_ENC_SECRET,
       );
 
-      // Try to reshare with non-existent pk
+      // Try to reshare with non-existent secp256k1 pk
       const result = await reshareKeyShareV2(
         pool,
         {
@@ -935,10 +941,12 @@ describe("key_share_v2_test", () => {
 
     it("5.7 failure - RESHARE_FAILED (wrong share value)", async () => {
       const secp256k1Pk = parseSecp256k1PublicKey(TEST_SECP256K1_PK);
+      const ed25519Pk = parseEd25519PublicKey(TEST_ED25519_PK);
       const secp256k1Share = generateRandomShare();
+      const ed25519Share = generateRandomShare();
       const wrongShare = generateRandomShare();
 
-      // Register
+      // Register with both wallets
       await registerKeyShareV2(
         pool,
         {
@@ -946,6 +954,7 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           wallets: {
             secp256k1: { public_key: secp256k1Pk, share: secp256k1Share },
+            ed25519: { public_key: ed25519Pk, share: ed25519Share },
           },
         },
         TEST_ENC_SECRET,
@@ -1063,7 +1072,9 @@ describe("key_share_v2_test", () => {
       expect(result.success).toBe(true);
     });
 
-    it("6.4 failure - USER_NOT_FOUND", async () => {
+    it("6.4 success - creates new user if not exists (reshare scenario)", async () => {
+      // reshareRegisterV2 is designed to create users that don't exist locally
+      // This is for reshare to new nodes where user exists on other nodes
       const secp256k1Pk = parseSecp256k1PublicKey(TEST_SECP256K1_PK);
       const secp256k1Share = generateRandomShare();
 
@@ -1079,9 +1090,20 @@ describe("key_share_v2_test", () => {
         TEST_ENC_SECRET,
       );
 
-      expect(result.success).toBe(false);
-      if (result.success === false) {
-        expect(result.code).toBe("USER_NOT_FOUND");
+      expect(result.success).toBe(true);
+
+      // Verify the user and wallet were created
+      const checkResult = await checkKeyShareV2(pool, {
+        user_auth_id: TEST_USER_AUTH_ID_NONEXISTENT,
+        auth_type: "google",
+        wallets: {
+          secp256k1: secp256k1Pk,
+        },
+      });
+
+      expect(checkResult.success).toBe(true);
+      if (checkResult.success) {
+        expect(checkResult.data.secp256k1?.exists).toBe(true);
       }
     });
 

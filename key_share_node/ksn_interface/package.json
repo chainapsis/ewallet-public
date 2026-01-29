@@ -40,6 +40,10 @@
     "./db_backup": {
       "import": "./dist/db_backup.js",
       "types": "./dist/db_backup.d.ts"
+    },
+    "./commit_reveal": {
+      "import": "./dist/commit_reveal.js",
+      "types": "./dist/commit_reveal.d.ts"
     }
   },
   "publishConfig": {
