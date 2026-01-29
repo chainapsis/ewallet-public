@@ -1,5 +1,13 @@
 "use client";
 
+import { Card } from "@oko-wallet/oko-common-ui/card";
+import { Dropdown } from "@oko-wallet/oko-common-ui/dropdown";
+import { ChevronDownIcon } from "@oko-wallet/oko-common-ui/icons/chevron_down";
+import { SearchIcon } from "@oko-wallet/oko-common-ui/icons/search";
+import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
+import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import cn from "classnames";
 import {
   type ChangeEvent,
   type FC,
@@ -7,31 +15,23 @@ import {
   useMemo,
   useState,
 } from "react";
-import cn from "classnames";
 
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import { Card } from "@oko-wallet/oko-common-ui/card";
-import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
-import { SearchIcon } from "@oko-wallet/oko-common-ui/icons/search";
-import { Dropdown } from "@oko-wallet/oko-common-ui/dropdown";
-import { ChevronDownIcon } from "@oko-wallet/oko-common-ui/icons/chevron_down";
-import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
+import { AddressItem } from "./components/address_item";
+import styles from "./deposit_modal.module.scss";
+import { SearchEmptyView } from "@oko-wallet-user-dashboard/components/search_empty_view";
 import { useEnabledChains } from "@oko-wallet-user-dashboard/hooks/queries";
 import {
-  useEthAddress,
   useBech32Addresses,
+  useEthAddress,
   useSolanaAddress,
 } from "@oko-wallet-user-dashboard/hooks/queries/use_addresses";
-import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
 import { useSearch } from "@oko-wallet-user-dashboard/hooks/use_search";
-import { isCosmosChainId } from "@oko-wallet-user-dashboard/utils/chain";
 import {
-  getChainIdentifier,
   DEFAULT_ENABLED_CHAINS,
+  getChainIdentifier,
 } from "@oko-wallet-user-dashboard/state/chains";
-
-import styles from "./deposit_modal.module.scss";
-import { AddressItem } from "./components/address_item";
+import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
+import { isCosmosChainId } from "@oko-wallet-user-dashboard/utils/chain";
 
 const ecosystemFilterOptions = [
   "All Chains",
@@ -136,12 +136,12 @@ export const DepositModal: FC<DepositModalProps> = ({ renderTrigger }) => {
 
   const getAddressForChain = (
     chain: ModularChainInfo,
-  ): string | null | undefined => {
+  ): string | undefined => {
     if (chain.evm) {
-      return ethAddress;
+      return ethAddress === null ? undefined : ethAddress;
     }
     if (chain.solana) {
-      return solanaAddress;
+      return solanaAddress === null ? undefined : solanaAddress;
     }
     return bech32Addresses[chain.chainId];
   };
@@ -151,13 +151,18 @@ export const DepositModal: FC<DepositModalProps> = ({ renderTrigger }) => {
       {renderTrigger({ onOpen })}
 
       {isOpen && (
+        /* biome-ignore lint/a11y/noStaticElementInteractions: for mouse user convenience */
         <div
           className={cn(styles.modalBackground, {
             [styles.hidden]: isHidden,
           })}
           onClick={onClose}
         >
-          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+          <div
+            className={styles.modal}
+            role="dialog"
+            onClick={(e) => e.stopPropagation()}
+          >
             <Card
               className={styles.modalCard}
               variant="elevated"
@@ -172,6 +177,7 @@ export const DepositModal: FC<DepositModalProps> = ({ renderTrigger }) => {
                     className={styles.closeButton}
                     onClick={onClose}
                     aria-label="Close modal"
+                    type="button"
                   >
                     <XCloseIcon color="var(--fg-quaternary)" size={20} />
                   </button>
@@ -219,15 +225,19 @@ export const DepositModal: FC<DepositModalProps> = ({ renderTrigger }) => {
               </div>
 
               <div className={cn(styles.chainList, "common-list-scroll")}>
-                {filteredChainInfos.map((chain) => (
-                  <AddressItem
-                    key={chain.chainId}
-                    chainInfo={chain}
-                    address={getAddressForChain(chain)}
-                    onQrModalOpen={hideModal}
-                    onQrModalClose={showModal}
-                  />
-                ))}
+                {filteredChainInfos.length > 0 ? (
+                  filteredChainInfos.map((chain) => (
+                    <AddressItem
+                      key={chain.chainId}
+                      chainInfo={chain}
+                      address={getAddressForChain(chain)}
+                      onQrModalOpen={hideModal}
+                      onQrModalClose={showModal}
+                    />
+                  ))
+                ) : (
+                  <SearchEmptyView />
+                )}
               </div>
 
               <Spacing height={8} />

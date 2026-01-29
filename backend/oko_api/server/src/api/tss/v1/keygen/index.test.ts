@@ -1,5 +1,6 @@
 import { jest } from "@jest/globals";
 import { Pool } from "pg";
+import type { Logger } from "winston";
 import type { WalletStatus } from "@oko-wallet/oko-types/wallets";
 import {
   type KeygenRequest,
@@ -25,6 +26,13 @@ import { testPgConfig } from "@oko-wallet-api/database/test_config";
 import { TEMP_ENC_SECRET } from "@oko-wallet-api/api/tss/utils";
 
 const mockCheckKeyShareFromKSNodes = jest.fn() as jest.Mock;
+
+const mockLogger = {
+  error: jest.fn(),
+  warn: jest.fn(),
+  info: jest.fn(),
+  debug: jest.fn(),
+} as unknown as Logger;
 
 await jest.unstable_mockModule("@oko-wallet-api/api/tss/ks_node", () => ({
   checkKeyShareFromKSNodes: mockCheckKeyShareFromKSNodes,
@@ -115,6 +123,7 @@ describe("keygen_v1_test", () => {
         jwtConfig,
         keygenRequest,
         TEMP_ENC_SECRET,
+        mockLogger,
       );
       if (keygenResponse.success === false) {
         console.error(keygenResponse);
@@ -215,6 +224,7 @@ describe("keygen_v1_test", () => {
         jwtConfig,
         keygenRequest,
         TEMP_ENC_SECRET,
+        mockLogger,
       );
       if (keygenResponse.success === true) {
         throw new Error("keygen should fail");
@@ -259,6 +269,7 @@ describe("keygen_v1_test", () => {
         jwtConfig,
         keygenRequest,
         TEMP_ENC_SECRET,
+        mockLogger,
       );
       if (keygenResponse.success === true) {
         throw new Error("keygen should fail");
@@ -297,6 +308,7 @@ describe("keygen_v1_test", () => {
         jwtConfig,
         keygenRequest,
         TEMP_ENC_SECRET,
+        mockLogger,
       );
       if (keygenResponse.success === true) {
         throw new Error("keygen should fail");
@@ -337,6 +349,7 @@ describe("keygen_v1_test", () => {
         jwtConfig,
         keygenRequest,
         TEMP_ENC_SECRET,
+        mockLogger,
       );
       if (keygenResponse.success === true) {
         throw new Error("keygen should fail");

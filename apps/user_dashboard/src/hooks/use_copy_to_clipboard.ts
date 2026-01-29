@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
 
 const COPIED_RESET_DELAY_MS = 1500;
 

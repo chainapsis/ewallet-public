@@ -1,5 +1,6 @@
 import { jest } from "@jest/globals";
 import { Pool } from "pg";
+import type { Logger } from "winston";
 import type {
   KeygenRequest,
   PresignStep1Request,
@@ -83,6 +84,13 @@ import { TEMP_ENC_SECRET } from "@oko-wallet-api/api/tss/utils";
 const mockCheckKeyShareFromKSNodes = jest.fn() as jest.Mock;
 const mockCheckKeyShareFromKSNodesV2 = jest.fn() as jest.Mock;
 
+const mockLogger = {
+  error: jest.fn(),
+  warn: jest.fn(),
+  info: jest.fn(),
+  debug: jest.fn(),
+} as unknown as Logger;
+
 await jest.unstable_mockModule("@oko-wallet-api/api/tss/ks_node", () => ({
   checkKeyShareFromKSNodes: mockCheckKeyShareFromKSNodes,
   checkKeyShareFromKSNodesV2: mockCheckKeyShareFromKSNodesV2,
@@ -146,6 +154,7 @@ async function setUpTssStage(pool: Pool) {
     jwtConfig,
     keygenRequest,
     TEMP_ENC_SECRET,
+    mockLogger,
   );
   if (keygenResponse.success === false) {
     console.error(keygenResponse);

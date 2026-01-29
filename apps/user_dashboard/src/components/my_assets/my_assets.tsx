@@ -1,14 +1,13 @@
 "use client";
 
-import { type FC } from "react";
-
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import { SettingIcon } from "@oko-wallet/oko-common-ui/icons/setting_icon";
 import { Button } from "@oko-wallet/oko-common-ui/button";
-import { ShowHideChainsModal } from "@oko-wallet-user-dashboard/components/show_hide_chains_modal/show_hide_chains_modal";
+import { SettingIcon } from "@oko-wallet/oko-common-ui/icons/setting_icon";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import type { FC } from "react";
 
-import styles from "./my_assets.module.scss";
 import { TokenList } from "./components/token_list/token_list";
+import styles from "./my_assets.module.scss";
+import { ShowHideChainsModal } from "@oko-wallet-user-dashboard/components/show_hide_chains_modal/show_hide_chains_modal";
 
 export const MyAssets: FC = () => {
   return (

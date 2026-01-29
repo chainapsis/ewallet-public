@@ -18,10 +18,10 @@ import {
 registry.registerPath({
   method: "post",
   path: "/keyshare/v2/register/ed25519",
-  tags: ["Key Share v2"],
+  tags: ["Key Share v2", "Commit-Reveal"],
   summary: "Register ed25519 wallet for existing users",
   description:
-    "Register ed25519 wallet for users who already have secp256k1 wallet.",
+    "Register ed25519 wallet for users who already have secp256k1 wallet. Requires commit-reveal authentication.",
   security: [{ oauthAuth: [] }],
   request: {
     body: {
@@ -62,11 +62,18 @@ registry.registerPath({
                 msg: "Share is not valid",
               },
             },
-            DUPLICATE_PUBLIC_KEY: {
+            INVALID_REQUEST: {
               value: {
                 success: false,
-                code: "DUPLICATE_PUBLIC_KEY",
-                msg: "ed25519 wallet already exists",
+                code: "INVALID_REQUEST",
+                msg: "cr_session_id and cr_signature are required",
+              },
+            },
+            INVALID_SIGNATURE: {
+              value: {
+                success: false,
+                code: "INVALID_SIGNATURE",
+                msg: "Invalid signature",
               },
             },
           },
@@ -82,7 +89,7 @@ registry.registerPath({
       },
     },
     404: {
-      description: "Not found - User or secp256k1 wallet not found",
+      description: "Not found - User, secp256k1 wallet or session not found",
       content: {
         "application/json": {
           schema: ErrorResponseSchema,
@@ -99,6 +106,54 @@ registry.registerPath({
                 success: false,
                 code: "WALLET_NOT_FOUND",
                 msg: "secp256k1 wallet not found (not an existing user)",
+              },
+            },
+            SESSION_NOT_FOUND: {
+              value: {
+                success: false,
+                code: "SESSION_NOT_FOUND",
+                msg: "Session not found",
+              },
+            },
+          },
+        },
+      },
+    },
+    409: {
+      description: "Conflict - Duplicate public key or API already called",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+          examples: {
+            DUPLICATE_PUBLIC_KEY: {
+              value: {
+                success: false,
+                code: "DUPLICATE_PUBLIC_KEY",
+                msg: "ed25519 wallet already exists",
+              },
+            },
+            API_ALREADY_CALLED: {
+              value: {
+                success: false,
+                code: "API_ALREADY_CALLED",
+                msg: 'API "register_ed25519" has already been called for this session',
+              },
+            },
+          },
+        },
+      },
+    },
+    410: {
+      description: "Gone - Session has expired",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+          examples: {
+            SESSION_EXPIRED: {
+              value: {
+                success: false,
+                code: "SESSION_EXPIRED",
+                msg: "Session has expired",
               },
             },
           },

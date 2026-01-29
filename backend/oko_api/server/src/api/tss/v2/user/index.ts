@@ -1,4 +1,5 @@
 import { Pool } from "pg";
+import type { Logger } from "winston";
 import {
   getActiveWalletByUserIdAndCurveType,
   getWalletByPublicKey,
@@ -12,7 +13,7 @@ import type {
 } from "@oko-wallet/oko-types/user";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
-import { getUserByEmailAndAuthType } from "@oko-wallet/oko-pg-interface/oko_users";
+import { getUserByEmailAndAuthType, updateUserMetadata } from "@oko-wallet/oko-pg-interface/oko_users";
 import {
   getActiveKSNodes,
   getWalletKSNodesByWalletId,
@@ -41,8 +42,10 @@ export async function signInV2(
     expires_in: string;
   },
   encryptionSecret: string,
+  logger: Logger,
   email?: string,
   name?: string,
+  metadata?: Record<string, unknown>,
 ): Promise<OkoApiResponse<SignInResponseV2>> {
   try {
     const getUserRes = await getUserByEmailAndAuthType(
@@ -63,6 +66,14 @@ export async function signInV2(
         code: "USER_NOT_FOUND",
         msg: `User not found: ${user_identifier} (auth_type: ${auth_type})`,
       };
+    }
+
+    // Update user metadata on every sign-in
+    if (metadata) {
+      const updateMetadataRes = await updateUserMetadata(db, getUserRes.data.user_id, metadata);
+      if (updateMetadataRes.success === false) {
+        logger.error(`Failed to update user metadata: ${updateMetadataRes.err}`);
+      }
     }
 
     const secp256k1WalletRes = await getActiveWalletByUserIdAndCurveType(

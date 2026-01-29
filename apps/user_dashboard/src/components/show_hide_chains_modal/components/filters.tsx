@@ -1,13 +1,17 @@
-import { type FC, type ReactNode, useState } from "react";
-
 import { Dropdown } from "@oko-wallet/oko-common-ui/dropdown";
 import { ChevronDownIcon } from "@oko-wallet/oko-common-ui/icons/chevron_down";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import { type FC, type ReactNode, useState } from "react";
 
 import styles from "./filters.module.scss";
 
 const visibilityOptions = ["Show All", "Show Hidden"] as const;
-const ecosystemFilterOptions = ["All Chains", "Cosmos", "EVM", "Solana"] as const;
+const ecosystemFilterOptions = [
+  "All Chains",
+  "Cosmos",
+  "EVM",
+  "Solana",
+] as const;
 
 type SelectedFilters = {
   visibility: (typeof visibilityOptions)[number];

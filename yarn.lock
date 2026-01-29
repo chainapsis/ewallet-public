@@ -10767,7 +10767,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@oko-wallet/ksn-interface@npm:^0.1.2-alpha.1, @oko-wallet/ksn-interface@workspace:key_share_node/ksn_interface":
+"@oko-wallet/ksn-interface@npm:^0.1.2-alpha.1, @oko-wallet/ksn-interface@workspace:*, @oko-wallet/ksn-interface@workspace:key_share_node/ksn_interface":
   version: 0.0.0-use.local
   resolution: "@oko-wallet/ksn-interface@workspace:key_share_node/ksn_interface"
   dependencies:
@@ -10891,14 +10891,22 @@ __metadata:
   resolution: "@oko-wallet/oko-api-server@workspace:backend/oko_api/server"
   dependencies:
     "@oko-wallet/admin-api": "workspace:*"
+    "@oko-wallet/bytes": "npm:^0.1.2-alpha.2"
+    "@oko-wallet/cait-sith-keplr-addon": "workspace:*"
     "@oko-wallet/crypto-js": "npm:^0.1.2-alpha.1"
     "@oko-wallet/ct-dashboard-api": "workspace:*"
     "@oko-wallet/dotenv": "npm:0.0.2-alpha.26"
+    "@oko-wallet/ksn-interface": "workspace:*"
+    "@oko-wallet/oko-api-error-codes": "workspace:*"
     "@oko-wallet/oko-api-openapi": "workspace:*"
     "@oko-wallet/oko-api-server-state": "workspace:*"
     "@oko-wallet/oko-pg-interface": "workspace:*"
     "@oko-wallet/oko-types": "npm:^0.1.2-alpha.1"
+    "@oko-wallet/postgres-lib": "workspace:*"
     "@oko-wallet/stdlib-js": "npm:0.0.2-rc.41"
+    "@oko-wallet/tecdsa-interface": "npm:0.0.2-alpha.22"
+    "@oko-wallet/teddsa-addon": "workspace:*"
+    "@oko-wallet/teddsa-interface": "workspace:*"
     "@oko-wallet/user-dashboard-api": "workspace:*"
     "@types/cors": "npm:^2.8.17"
     "@types/express": "npm:^5.0.6"
@@ -11494,7 +11502,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@oko-wallet/teddsa-addon@workspace:crypto/teddsa/teddsa_addon":
+"@oko-wallet/teddsa-addon@workspace:*, @oko-wallet/teddsa-addon@workspace:crypto/teddsa/teddsa_addon":
   version: 0.0.0-use.local
   resolution: "@oko-wallet/teddsa-addon@workspace:crypto/teddsa/teddsa_addon"
   dependencies:

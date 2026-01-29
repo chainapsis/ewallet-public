@@ -83,6 +83,12 @@ RUN yarn workspaces focus @oko-wallet/teddsa-interface
 WORKDIR /home/node/oko/crypto/teddsa/teddsa_interface
 RUN yarn run build
 
+# Build ksn-interface (depends on bytes, oko-types)
+WORKDIR /home/node/oko
+RUN yarn workspaces focus @oko-wallet/ksn-interface
+WORKDIR /home/node/oko/key_share_node/ksn_interface
+RUN yarn run build
+
 # Install dependencies for crypto-js
 WORKDIR /home/node/oko
 RUN yarn workspaces focus @oko-wallet/crypto-js

@@ -6,18 +6,22 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
+import {
+  SOLANA_DEVNET,
+  SOLANA_MAINNET,
+  SOLANA_TESTNET,
+} from "@oko-wallet-user-dashboard/config/solana";
+import { KEPLR_API_ENDPOINT } from "@oko-wallet-user-dashboard/fetch";
+import {
+  DEFAULT_ENABLED_CHAINS,
+  getChainIdentifier,
+  transformKeplrChain,
+  useChainStore,
+} from "@oko-wallet-user-dashboard/state/chains";
 import type {
   CosmosChainInfo,
   ModularChainInfo,
 } from "@oko-wallet-user-dashboard/types/chain";
-import {
-  useChainStore,
-  transformKeplrChain,
-  getChainIdentifier,
-  DEFAULT_ENABLED_CHAINS,
-} from "@oko-wallet-user-dashboard/state/chains";
-import { KEPLR_API_ENDPOINT } from "@oko-wallet-user-dashboard/fetch";
-import { SOLANA_MAINNET, SOLANA_DEVNET, SOLANA_TESTNET } from "@oko-wallet-user-dashboard/config/solana";
 
 interface KeplrChainsResponse {
   chains: CosmosChainInfo[];

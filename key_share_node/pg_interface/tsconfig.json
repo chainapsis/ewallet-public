@@ -1,5 +1,4 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "target": "es2017",
     "lib": ["es2017", "esnext.asynciterable"],
@@ -14,6 +13,7 @@
     "strict": true,
     "noImplicitThis": true,
     "noImplicitReturns": true,
+    "verbatimModuleSyntax": true,
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,

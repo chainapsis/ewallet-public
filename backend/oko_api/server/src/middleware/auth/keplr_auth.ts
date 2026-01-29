@@ -95,13 +95,9 @@ export async function userJwtMiddlewareV2(
       return;
     }
 
-    const payload = verifyTokenRes.data;
+    const payload = verifyTokenRes.data
 
-    if (
-      !payload.email ||
-      !payload.wallet_id_secp256k1 ||
-      !payload.wallet_id_ed25519
-    ) {
+    if (!payload.email || !payload.wallet_id_secp256k1 || !payload.wallet_id_ed25519) {
       res.status(401).json({
         error: "Unauthorized: Invalid token",
       });

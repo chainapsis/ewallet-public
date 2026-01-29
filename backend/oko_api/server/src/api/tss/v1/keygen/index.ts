@@ -1,7 +1,9 @@
 import { Pool } from "pg";
+import type { Logger } from "winston";
 import {
   createUser,
   getUserByEmailAndAuthType,
+  updateUserMetadata,
 } from "@oko-wallet/oko-pg-interface/oko_users";
 import type { Result } from "@oko-wallet/stdlib-js";
 import { encryptDataAsync } from "@oko-wallet/crypto-js/node";
@@ -32,9 +34,10 @@ export async function runKeygen(
   },
   keygenRequest: KeygenRequest,
   encryptionSecret: string,
+  logger: Logger,
 ): Promise<OkoApiResponse<SignInResponse>> {
   try {
-    const { auth_type, user_identifier, keygen_2, email, name } = keygenRequest;
+    const { auth_type, user_identifier, keygen_2, email, name, metadata } = keygenRequest;
 
     const getUserRes = await getUserByEmailAndAuthType(
       db,
@@ -52,6 +55,14 @@ export async function runKeygen(
     let user: User;
     if (getUserRes.data !== null) {
       user = getUserRes.data;
+
+      // Update user metadata if user already exists
+      if (metadata) {
+        const updateMetadataRes = await updateUserMetadata(db, user.user_id, metadata);
+        if (updateMetadataRes.success === false) {
+          logger.error(`Failed to update user metadata: ${updateMetadataRes.err}`);
+        }
+      }
 
       const getActiveWalletRes = await getActiveWalletByUserIdAndCurveType(
         db,
@@ -73,7 +84,7 @@ export async function runKeygen(
         };
       }
     } else {
-      const createUserRes = await createUser(db, user_identifier, auth_type);
+      const createUserRes = await createUser(db, user_identifier, auth_type, metadata);
       if (createUserRes.success === false) {
         return {
           success: false,

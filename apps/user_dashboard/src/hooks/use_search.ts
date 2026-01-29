@@ -1,5 +1,5 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
 import throttle from "lodash.throttle";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 // fields가 동적일 경우 너무 잦은 rerender를 방지하기 위해 함수일 경우 key를 넣어주도록 강제
 type SearchField<T> =

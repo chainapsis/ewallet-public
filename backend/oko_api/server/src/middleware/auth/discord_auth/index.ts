@@ -52,6 +52,7 @@ export async function discordAuthMiddleware(
       user_identifier: `discord_${result.data.id}`,
       email: result.data.email,
       name: result.data.username,
+      metadata: result.data as unknown as Record<string, unknown>,
     };
 
     next();

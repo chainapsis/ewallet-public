@@ -1,15 +1,14 @@
-import type { FC } from "react";
-
 import { Button } from "@oko-wallet/oko-common-ui/button";
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import { ChevronLeftIcon } from "@oko-wallet/oko-common-ui/icons/chevron_left";
 import { TelegramIcon } from "@oko-wallet/oko-common-ui/icons/telegram_icon";
 import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
-import { DiscordIcon } from "@oko-wallet-common-ui/icons/discord_icon";
-import type { AuthType } from "@oko-wallet/oko-types/auth";
-import { ChevronLeftIcon } from "@oko-wallet/oko-common-ui/icons/chevron_left";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
+import type { FC } from "react";
 
 import styles from "./login_widget.module.scss";
+import { DiscordIcon } from "@oko-wallet-common-ui/icons/discord_icon";
 
 export interface LoginSocialsViewProps {
   onBack: () => void;

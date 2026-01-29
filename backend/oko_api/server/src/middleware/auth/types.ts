@@ -11,6 +11,8 @@ export interface OAuthUser {
   email?: string;
   // x, telegram, discord
   name?: string;
+  // raw metadata from auth provider
+  metadata?: Record<string, unknown>;
 }
 
 export interface OAuthLocals {

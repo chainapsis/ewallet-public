@@ -1,5 +1,5 @@
-import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
 import { S3_BUCKET_URL } from "@oko-wallet-user-dashboard/fetch";
+import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
 
 // CAIP-2 standard chain IDs using genesis hash (first 32 characters)
 export const SOLANA_MAINNET: ModularChainInfo = {

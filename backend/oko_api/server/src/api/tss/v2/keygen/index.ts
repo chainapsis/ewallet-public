@@ -1,7 +1,9 @@
 import { Pool } from "pg";
+import type { Logger } from "winston";
 import {
   createUser,
   getUserByEmailAndAuthType,
+  updateUserMetadata,
 } from "@oko-wallet/oko-pg-interface/oko_users";
 import type { Result } from "@oko-wallet/stdlib-js";
 import { encryptDataAsync } from "@oko-wallet/crypto-js/node";
@@ -36,6 +38,7 @@ export async function runKeygenV2(
   },
   keygenRequest: KeygenRequestV2,
   encryptionSecret: string,
+  logger: Logger,
 ): Promise<OkoApiResponse<SignInResponseV2>> {
   try {
     const {
@@ -45,6 +48,7 @@ export async function runKeygenV2(
       keygen_2_ed25519,
       email,
       name,
+      metadata,
     } = keygenRequest;
 
     // 1. Get or create user
@@ -64,6 +68,14 @@ export async function runKeygenV2(
     let user: User;
     if (getUserRes.data !== null) {
       user = getUserRes.data;
+
+      // Update user metadata if user already exists
+      if (metadata) {
+        const updateMetadataRes = await updateUserMetadata(db, user.user_id, metadata);
+        if (updateMetadataRes.success === false) {
+          logger.error(`Failed to update user metadata: ${updateMetadataRes.err}`);
+        }
+      }
 
       // Check if secp256k1 wallet already exists
       const getSecp256k1WalletRes = await getActiveWalletByUserIdAndCurveType(
@@ -107,7 +119,7 @@ export async function runKeygenV2(
         };
       }
     } else {
-      const createUserRes = await createUser(db, user_identifier, auth_type);
+      const createUserRes = await createUser(db, user_identifier, auth_type, metadata);
       if (createUserRes.success === false) {
         return {
           success: false,
@@ -397,9 +409,10 @@ export async function runKeygenEd25519(
   },
   keygenRequest: KeygenEd25519Request,
   encryptionSecret: string,
+  logger: Logger,
 ): Promise<OkoApiResponse<SignInResponseV2>> {
   try {
-    const { auth_type, user_identifier, keygen_2, email, name } = keygenRequest;
+    const { auth_type, user_identifier, keygen_2, email, name, metadata } = keygenRequest;
 
     const getUserRes = await getUserByEmailAndAuthType(
       db,
@@ -424,6 +437,14 @@ export async function runKeygenEd25519(
     }
 
     const user = getUserRes.data;
+
+    // Update user metadata on keygen_ed25519
+    if (metadata) {
+      const updateMetadataRes = await updateUserMetadata(db, user.user_id, metadata);
+      if (updateMetadataRes.success === false) {
+        logger.error(`Failed to update user metadata: ${updateMetadataRes.err}`);
+      }
+    }
 
     // in keygen_ed25519, secp256k1 wallet must exist
     const getSecp256k1WalletRes = await getActiveWalletByUserIdAndCurveType(

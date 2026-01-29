@@ -1,11 +1,49 @@
 import type { FC, ReactNode } from "react";
-import type { ParsedInstruction } from "@oko-wallet-attached/tx-parsers/svm";
+import {
+  type ParsedInstruction,
+  SYSTEM_PROGRAM_ID,
+  TOKEN_PROGRAM_ID,
+  TOKEN_2022_PROGRAM_ID,
+} from "@oko-wallet-attached/tx-parsers/svm";
 import { Skeleton } from "@oko-wallet/oko-common-ui/skeleton";
 
 import styles from "./instructions.module.scss";
-import { SvmTransferPretty } from "./transfer/transfer";
+import { isStakingProgram } from "./staking/constants";
+import {
+  extractStakingData,
+  StakingInstruction,
+} from "./staking/staking_instruction";
 import { TokenTransferPretty } from "./transfer/token_transfer";
+import { SvmTransferPretty } from "./transfer/transfer";
 import { UnknownInstruction } from "./unknown/unknown";
+import { Collapsible } from "@oko-wallet-attached/components/collapsible/collapsible";
+
+function isTokenProgram(programId: string): boolean {
+  return programId === TOKEN_PROGRAM_ID || programId === TOKEN_2022_PROGRAM_ID;
+}
+
+function getInstructionTitle(instruction: ParsedInstruction): string {
+  const { programId, instructionName } = instruction;
+
+  if (extractStakingData(instruction) !== null) {
+    return "Staking";
+  }
+
+  if (programId === SYSTEM_PROGRAM_ID && instructionName === "transfer") {
+    return "Token Transfer";
+  }
+
+  if (isTokenProgram(programId)) {
+    if (
+      instructionName === "transferChecked" ||
+      instructionName === "transfer"
+    ) {
+      return "Token Transfer";
+    }
+  }
+
+  return instructionName || "Unknown";
+}
 
 function renderInstruction(
   instruction: ParsedInstruction,
@@ -13,23 +51,28 @@ function renderInstruction(
 ): ReactNode {
   const { programId, instructionName, data, accounts } = instruction;
 
-  // System Program - SOL Transfer
-  if (programId === "11111111111111111111111111111111") {
-    if (instructionName === "transfer") {
-      const lamports = data.lamports as bigint | number | undefined;
-      const to = accounts[1]?.pubkey;
+  // Staking instruction (check first, includes System Program createAccount for Stake)
+  if (extractStakingData(instruction) !== null) {
+    return <StakingInstruction key={index} instruction={instruction} />;
+  }
 
-      if (lamports !== undefined) {
-        return <SvmTransferPretty key={index} lamports={lamports} to={to} />;
-      }
+  // Staking Programs without amount data -> skip (return null)
+  if (isStakingProgram(programId)) {
+    return null;
+  }
+
+  // System Program - SOL Transfer
+  if (programId === SYSTEM_PROGRAM_ID && instructionName === "transfer") {
+    const lamports = data.lamports as bigint | number | undefined;
+    const to = accounts[1]?.pubkey;
+
+    if (lamports !== undefined) {
+      return <SvmTransferPretty key={index} lamports={lamports} to={to} />;
     }
   }
 
   // Token Program - Token Transfer
-  if (
-    programId === "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" ||
-    programId === "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
-  ) {
+  if (isTokenProgram(programId)) {
     // transferChecked: source, mint, destination, owner
     if (instructionName === "transferChecked") {
       const amount = data.amount as bigint | number | undefined;
@@ -80,14 +123,32 @@ export const Instructions: FC<InstructionsProps> = ({
     return <Skeleton width="100%" height="32px" />;
   }
 
+  // Filter out null results from renderInstruction (e.g., staking programs without amount)
+  const validInstructions = instructions.filter(
+    (ix, index) => renderInstruction(ix, index) !== null,
+  );
+
+  // Single instruction: render directly without collapsible
+  if (validInstructions.length === 1) {
+    return (
+      <div className={styles.instructionsContainer}>
+        {renderInstruction(validInstructions[0], 0)}
+      </div>
+    );
+  }
+
+  // Multiple instructions: render each in a collapsible
   return (
     <div className={styles.instructionsContainer}>
-      {instructions.flatMap((ix, index) => [
-        index > 0 && (
-          <div key={`divider-${index}`} className={styles.instructionDivider} />
-        ),
-        renderInstruction(ix, index),
-      ])}
+      {validInstructions.map((instruction, index) => (
+        <Collapsible
+          key={index}
+          title={getInstructionTitle(instruction)}
+          defaultExpanded={index === 0}
+        >
+          {renderInstruction(instruction, index)}
+        </Collapsible>
+      ))}
     </div>
   );
 };

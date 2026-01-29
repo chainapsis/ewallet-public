@@ -1,15 +1,15 @@
+import { EthermintChainIdHelper } from "@keplr-wallet/cosmos";
+import { Button } from "@oko-wallet/oko-common-ui/button";
+import { Card } from "@oko-wallet/oko-common-ui/card";
+import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import { QRCodeSVG } from "qrcode.react";
 import { type FC, type ReactNode, useState } from "react";
 import { createPortal } from "react-dom";
-import { QRCodeSVG } from "qrcode.react";
-import { EthermintChainIdHelper } from "@keplr-wallet/cosmos";
-import { Card } from "@oko-wallet/oko-common-ui/card";
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
-import { Button } from "@oko-wallet/oko-common-ui/button";
 
-import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
 import { AddressChip } from "../address_chip/address_chip";
 import styles from "./address_qr_modal.module.scss";
+import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
 
 interface AddressQrModalProps {
   renderTrigger: (props: { onOpen: () => void }) => ReactNode;

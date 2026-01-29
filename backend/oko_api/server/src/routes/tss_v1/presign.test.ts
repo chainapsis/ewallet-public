@@ -18,6 +18,13 @@ await jest.unstable_mockModule("@oko-wallet-api/api/tss/v1/presign", () => ({
   runPresignStep3: mockRunPresignStep3,
 }));
 
+await jest.unstable_mockModule(
+  "@oko-wallet-api/middleware/auth/tss_activate",
+  () => ({
+    tssActivateMiddleware: (_req: any, _res: any, next: any) => next(),
+  }),
+);
+
 // Dynamically import after jest.unstable_mockModule to apply ESM mocks correctly
 const { makeApp } = await import("@oko-wallet-api/testing/app");
 const { runPresignStep1, runPresignStep2, runPresignStep3 } = await import(

@@ -1,10 +1,9 @@
+import type { AuthType } from "@oko-wallet/oko-types/auth";
 import { type FC, useState } from "react";
 
-import type { AuthType } from "@oko-wallet/oko-types/auth";
-
-import styles from "./login_widget.module.scss";
 import { LoginDefaultView } from "./login_default_view";
 import { LoginSocialsView } from "./login_socials_view";
+import styles from "./login_widget.module.scss";
 
 export interface LoginWidgetProps {
   onSignIn: (method: AuthType) => void;

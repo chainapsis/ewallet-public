@@ -8,6 +8,12 @@
   background: var(--bg-secondary);
   width: 100%;
   gap: 16px;
+
+  :global([data-collapsible-content]) & {
+    padding: 0;
+    background: none;
+    border-radius: 0;
+  }
 }
 
 .tokenInfo {

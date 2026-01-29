@@ -4,15 +4,16 @@
  * Chain data is managed by TanStack Query in hooks/queries/use_chains.ts
  */
 
-import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
-import type {
-  ModularChainInfo,
-  CosmosChainInfo,
-} from "@oko-wallet-user-dashboard/types/chain";
+import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
+
 import { SOLANA_MAINNET } from "@oko-wallet-user-dashboard/config/solana";
+import type {
+  CosmosChainInfo,
+  ModularChainInfo,
+} from "@oko-wallet-user-dashboard/types/chain";
 
 const STORAGE_KEY = "oko:user_dashboard:chains";
 export const DEFAULT_ENABLED_CHAINS = [
