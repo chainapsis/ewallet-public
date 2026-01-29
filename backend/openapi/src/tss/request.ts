@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { registry } from "../registry";
+import { CommitRevealRequestFieldsSchema } from "./commit_reveal";
 
 const OAuthTypeSchema = z.enum(["google", "auth0"]).openapi({
   description: "OAuth provider type",
@@ -9,9 +10,11 @@ const OAuthTypeSchema = z.enum(["google", "auth0"]).openapi({
 
 export const SignInRequestSchema = registry.register(
   "TssUserSignInRequest",
-  z.object({
-    auth_type: OAuthTypeSchema,
-  }),
+  z
+    .object({
+      auth_type: OAuthTypeSchema.optional(),
+    })
+    .merge(CommitRevealRequestFieldsSchema),
 );
 
 export const KeygenRequestSchema = registry.register(
@@ -73,23 +76,25 @@ const TeddsaKeygenOutputSchema = z.object({
 
 export const KeygenRequestV2Schema = registry.register(
   "TssKeygenRequestV2",
-  z.object({
-    keygen_2_secp256k1: z
-      .object({
-        private_share: z.string().openapi({
-          description: "Private key share for secp256k1 TSS",
+  z
+    .object({
+      keygen_2_secp256k1: z
+        .object({
+          private_share: z.string().openapi({
+            description: "Private key share for secp256k1 TSS",
+          }),
+          public_key: z.string().openapi({
+            description: "secp256k1 public key in hex format",
+          }),
+        })
+        .openapi({
+          description: "Keygen stage 2 payload for secp256k1",
         }),
-        public_key: z.string().openapi({
-          description: "secp256k1 public key in hex format",
-        }),
-      })
-      .openapi({
-        description: "Keygen stage 2 payload for secp256k1",
+      keygen_2_ed25519: TeddsaKeygenOutputSchema.openapi({
+        description: "Server's keygen output for ed25519",
       }),
-    keygen_2_ed25519: TeddsaKeygenOutputSchema.openapi({
-      description: "Server's keygen output for ed25519",
-    }),
-  }),
+    })
+    .merge(CommitRevealRequestFieldsSchema),
 );
 
 const ReshareWalletInfoSchema = z.object({
@@ -112,21 +117,23 @@ const ReshareWalletInfoSchema = z.object({
 
 export const ReshareRequestV2Schema = registry.register(
   "TssUserReshareRequestV2",
-  z.object({
-    wallets: z
-      .object({
-        secp256k1: ReshareWalletInfoSchema.openapi({
-          description: "secp256k1 wallet reshare info",
-        }).optional(),
-        ed25519: ReshareWalletInfoSchema.openapi({
-          description: "ed25519 wallet reshare info",
-        }).optional(),
-      })
-      .refine((data) => data.secp256k1 || data.ed25519, {
-        message: "At least one of secp256k1 or ed25519 must be provided",
-      })
-      .openapi({
-        description: "Wallet reshare info per curve type",
-      }),
-  }),
+  z
+    .object({
+      wallets: z
+        .object({
+          secp256k1: ReshareWalletInfoSchema.openapi({
+            description: "secp256k1 wallet reshare info",
+          }).optional(),
+          ed25519: ReshareWalletInfoSchema.openapi({
+            description: "ed25519 wallet reshare info",
+          }).optional(),
+        })
+        .refine((data) => data.secp256k1 || data.ed25519, {
+          message: "At least one of secp256k1 or ed25519 must be provided",
+        })
+        .openapi({
+          description: "Wallet reshare info per curve type",
+        }),
+    })
+    .merge(CommitRevealRequestFieldsSchema),
 );

@@ -7,16 +7,15 @@ import {
   createCommitRevealApiCall,
   updateCommitRevealSessionState,
   hasCommitRevealApiBeenCalled,
-} from "@oko-wallet/ksn-pg-interface/commit_reveal";
-import type { ApiName } from "@oko-wallet/ksn-interface/commit_reveal";
+} from "@oko-wallet/oko-pg-interface/commit_reveal";
+import type { ApiName } from "@oko-wallet/oko-types/commit_reveal";
+import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
 
-import { ErrorCodeMap } from "@oko-wallet-ksn-server/error";
 import {
   isApiAllowed,
   isFinalApi,
-} from "@oko-wallet-ksn-server/commit_reveal";
-import type { ServerState } from "@oko-wallet-ksn-server/state";
-import { logger } from "@oko-wallet-ksn-server/logger";
+} from "@oko-wallet-api/commit_reveal/allowed_apis";
+import type { ServerState } from "@oko-wallet/oko-api-server-state";
 
 export interface CommitRevealBody {
   cr_session_id: string;
@@ -39,7 +38,6 @@ export function commitRevealMiddleware(apiName: ApiName) {
       return;
     }
 
-    // Get session from DB
     const sessionResult = await getCommitRevealSessionBySessionId(
       state.db,
       cr_session_id,
@@ -170,7 +168,7 @@ export function commitRevealMiddleware(apiName: ApiName) {
     }
 
     // Verify signature: message = node_pubkey + session_id + auth_type + id_token + operation_type + api_name
-    const nodePubkeyHex = state.serverKeypair.publicKey.toHex();
+    const nodePubkeyHex = state.server_keypair.publicKey.toHex();
     const message = `${nodePubkeyHex}${cr_session_id}${authType}${idToken}${session.operation_type}${apiName}`;
     const rBytes = Bytes.fromUint8Array(
       signatureRes.data.toUint8Array().slice(0, 32),
@@ -238,7 +236,7 @@ export function commitRevealMiddleware(apiName: ApiName) {
           await client.query("COMMIT");
         } catch (err) {
           await client.query("ROLLBACK");
-          logger.error(
+          state.logger.error(
             "Failed to record API call for session %s: %s",
             cr_session_id,
             err,
