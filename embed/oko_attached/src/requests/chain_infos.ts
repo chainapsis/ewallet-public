@@ -33,8 +33,10 @@ export async function getAllChainsCached(): Promise<ChainInfo[]> {
   return queryClient.ensureQueryData(allChainsQuery);
 }
 
+const COSMOS_CHAIN_DISCRIMINATOR = "bech32Config";
+
 export function filterCosmosChains(chains: ChainInfo[]): ChainInfo[] {
-  return chains.filter((c) => "bech32Config" in c);
+  return chains.filter((c) => COSMOS_CHAIN_DISCRIMINATOR in c);
 }
 
 export function filterEthChains(chains: ChainInfo[]): ChainInfo[] {
