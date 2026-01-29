@@ -497,3 +497,290 @@ describe("tss_v2_e2e_success_flows", () => {
     });
   });
 });
+
+describe("tss_v2_e2e_error_scenarios", () => {
+  let pool: Pool;
+  let app: express.Application;
+
+  beforeAll(async () => {
+    const config = testPgConfig;
+    const createPostgresRes = await createPgConn({
+      database: config.database,
+      host: config.host,
+      password: config.password,
+      user: config.user,
+      port: config.port,
+      ssl: config.ssl,
+    });
+
+    if (createPostgresRes.success === false) {
+      console.error(createPostgresRes.err);
+      throw new Error("Failed to create postgres database");
+    }
+
+    pool = createPostgresRes.data;
+
+    app = express();
+    app.use(express.json());
+
+    app.post("/tss/v2/commit-reveal/commit", commitRevealCommit);
+
+    app.post("/tss/v2/keygen", commitRevealMiddleware("keygen"), (_req, res) => {
+      res.status(200).json({ success: true, data: { message: "keygen ok" } });
+    });
+
+    app.post("/tss/v2/user/signin", commitRevealMiddleware("signin"), (_req, res) => {
+      res.status(200).json({ success: true, data: { message: "signin ok" } });
+    });
+
+    app.locals.db = pool;
+    app.locals.server_keypair = mockServerKeypair;
+    app.locals.logger = testLogger;
+  });
+
+  beforeEach(async () => {
+    await resetPgDatabase(pool);
+  });
+
+  afterAll(async () => {
+    await pool.end();
+  });
+
+  function createValidSignature(
+    clientKeypair: { privateKey: Bytes<32>; publicKey: Bytes<32> },
+    sessionId: string,
+    authType: string,
+    idToken: string,
+    operationType: string,
+    apiName: string,
+  ): string {
+    const nodePubkeyHex = mockServerKeypair.publicKey.toHex();
+    const message = `${nodePubkeyHex}${sessionId}${authType}${idToken}${operationType}${apiName}`;
+    const signRes = signMessage(message, clientKeypair.privateKey);
+    if (!signRes.success) throw new Error("Failed to sign message");
+
+    const sigBytesRes = convertEddsaSignatureToBytes(signRes.data);
+    if (!sigBytesRes.success) throw new Error("Failed to convert signature");
+
+    return sigBytesRes.data.toHex();
+  }
+
+  describe("error scenarios", () => {
+    it("should reject invalid signature", async () => {
+      const sessionId = uuidv4();
+      const authType = "google";
+      const idToken = "test_id_token";
+
+      const clientKeypairRes = generateEddsaKeypair();
+      if (!clientKeypairRes.success) throw new Error("Failed to generate keypair");
+      const clientKeypair = clientKeypairRes.data;
+
+      const hashRes = sha256(`${authType}${idToken}`);
+      if (!hashRes.success) throw new Error("Failed to compute hash");
+
+      // Commit
+      await request(app)
+        .post("/tss/v2/commit-reveal/commit")
+        .send({
+          session_id: sessionId,
+          operation_type: "sign_up",
+          client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
+          id_token_hash: hashRes.data.toHex(),
+        })
+        .expect(200);
+
+      // Try keygen with wrong signature (signed with wrong message)
+      const wrongSignature = createValidSignature(
+        clientKeypair,
+        sessionId,
+        authType,
+        idToken,
+        "sign_up",
+        "wrong_api", // wrong api name in signature
+      );
+
+      const response = await request(app)
+        .post("/tss/v2/keygen")
+        .set("Authorization", `Bearer ${idToken}`)
+        .send({
+          cr_session_id: sessionId,
+          cr_signature: wrongSignature,
+          auth_type: authType,
+        })
+        .expect(400);
+
+      expect(response.body.success).toBe(false);
+      expect(response.body.code).toBe("INVALID_SIGNATURE");
+    });
+
+    it("should reject expired session", async () => {
+      const sessionId = uuidv4();
+      const authType = "google";
+      const idToken = "test_id_token";
+
+      const clientKeypairRes = generateEddsaKeypair();
+      if (!clientKeypairRes.success) throw new Error("Failed to generate keypair");
+      const clientKeypair = clientKeypairRes.data;
+
+      const hashRes = sha256(`${authType}${idToken}`);
+      if (!hashRes.success) throw new Error("Failed to compute hash");
+
+      // Commit
+      await request(app)
+        .post("/tss/v2/commit-reveal/commit")
+        .send({
+          session_id: sessionId,
+          operation_type: "sign_up",
+          client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
+          id_token_hash: hashRes.data.toHex(),
+        })
+        .expect(200);
+
+      // Manually expire the session
+      await pool.query(
+        `UPDATE "commit_reveal_sessions" SET expires_at = $1 WHERE session_id = $2`,
+        [new Date(Date.now() - 1000), sessionId],
+      );
+
+      const signature = createValidSignature(
+        clientKeypair,
+        sessionId,
+        authType,
+        idToken,
+        "sign_up",
+        "keygen",
+      );
+
+      const response = await request(app)
+        .post("/tss/v2/keygen")
+        .set("Authorization", `Bearer ${idToken}`)
+        .send({
+          cr_session_id: sessionId,
+          cr_signature: signature,
+          auth_type: authType,
+        })
+        .expect(410);
+
+      expect(response.body.success).toBe(false);
+      expect(response.body.code).toBe("SESSION_EXPIRED");
+    });
+
+    it("should reject non-existent session", async () => {
+      const nonExistentSessionId = uuidv4();
+      const authType = "google";
+      const idToken = "test_id_token";
+
+      const response = await request(app)
+        .post("/tss/v2/keygen")
+        .set("Authorization", `Bearer ${idToken}`)
+        .send({
+          cr_session_id: nonExistentSessionId,
+          cr_signature: generateRandomHex(64),
+          auth_type: authType,
+        })
+        .expect(404);
+
+      expect(response.body.success).toBe(false);
+      expect(response.body.code).toBe("SESSION_NOT_FOUND");
+    });
+
+    it("should reject wrong operation type for API", async () => {
+      const sessionId = uuidv4();
+      const authType = "google";
+      const idToken = "test_id_token";
+
+      const clientKeypairRes = generateEddsaKeypair();
+      if (!clientKeypairRes.success) throw new Error("Failed to generate keypair");
+      const clientKeypair = clientKeypairRes.data;
+
+      const hashRes = sha256(`${authType}${idToken}`);
+      if (!hashRes.success) throw new Error("Failed to compute hash");
+
+      // Commit with sign_in operation
+      await request(app)
+        .post("/tss/v2/commit-reveal/commit")
+        .send({
+          session_id: sessionId,
+          operation_type: "sign_in", // sign_in operation
+          client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
+          id_token_hash: hashRes.data.toHex(),
+        })
+        .expect(200);
+
+      // Try to call keygen (not allowed for sign_in)
+      const signature = createValidSignature(
+        clientKeypair,
+        sessionId,
+        authType,
+        idToken,
+        "sign_in",
+        "keygen",
+      );
+
+      const response = await request(app)
+        .post("/tss/v2/keygen")
+        .set("Authorization", `Bearer ${idToken}`)
+        .send({
+          cr_session_id: sessionId,
+          cr_signature: signature,
+          auth_type: authType,
+        })
+        .expect(400);
+
+      expect(response.body.success).toBe(false);
+      expect(response.body.code).toBe("INVALID_REQUEST");
+      expect(response.body.msg).toContain("keygen");
+      expect(response.body.msg).toContain("sign_in");
+    });
+
+    it("should reject id_token_hash mismatch", async () => {
+      const sessionId = uuidv4();
+      const authType = "google";
+      const originalIdToken = "original_id_token";
+      const wrongIdToken = "wrong_id_token";
+
+      const clientKeypairRes = generateEddsaKeypair();
+      if (!clientKeypairRes.success) throw new Error("Failed to generate keypair");
+      const clientKeypair = clientKeypairRes.data;
+
+      // Hash with original token
+      const hashRes = sha256(`${authType}${originalIdToken}`);
+      if (!hashRes.success) throw new Error("Failed to compute hash");
+
+      // Commit with original token hash
+      await request(app)
+        .post("/tss/v2/commit-reveal/commit")
+        .send({
+          session_id: sessionId,
+          operation_type: "sign_up",
+          client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
+          id_token_hash: hashRes.data.toHex(),
+        })
+        .expect(200);
+
+      // Try keygen with wrong id_token (different from committed hash)
+      const signature = createValidSignature(
+        clientKeypair,
+        sessionId,
+        authType,
+        wrongIdToken, // wrong token
+        "sign_up",
+        "keygen",
+      );
+
+      const response = await request(app)
+        .post("/tss/v2/keygen")
+        .set("Authorization", `Bearer ${wrongIdToken}`) // wrong token in header
+        .send({
+          cr_session_id: sessionId,
+          cr_signature: signature,
+          auth_type: authType,
+        })
+        .expect(400);
+
+      expect(response.body.success).toBe(false);
+      expect(response.body.code).toBe("INVALID_REQUEST");
+      expect(response.body.msg).toContain("id_token_hash mismatch");
+    });
+  });
+});
