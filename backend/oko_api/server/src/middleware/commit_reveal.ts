@@ -8,14 +8,16 @@ import {
   updateCommitRevealSessionState,
   hasCommitRevealApiBeenCalled,
 } from "@oko-wallet/oko-pg-interface/commit_reveal";
-import type { ApiName } from "@oko-wallet/oko-types/commit_reveal";
+import type { ApiName, CommitRevealSession } from "@oko-wallet/oko-types/commit_reveal";
 import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
 
 import {
   isApiAllowed,
   isFinalApi,
-} from "@oko-wallet-api/commit_reveal/allowed_apis";
+} from "@oko-wallet-api/commit_reveal";
 import type { ServerState } from "@oko-wallet/oko-api-server-state";
+
+const DEFAULT_AUTH_TYPE = "google";
 
 export interface CommitRevealBody {
   cr_session_id: string;
@@ -135,7 +137,7 @@ export function commitRevealMiddleware(apiName: ApiName) {
     }
 
     // Get auth_type and id_token from request
-    const authType = body.auth_type ?? "google";
+    const authType = body.auth_type ?? DEFAULT_AUTH_TYPE;
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       res.status(401).json({
@@ -169,7 +171,14 @@ export function commitRevealMiddleware(apiName: ApiName) {
 
     // Verify signature: message = node_pubkey + session_id + auth_type + id_token + operation_type + api_name
     const nodePubkeyHex = state.server_keypair.publicKey.toHex();
-    const message = `${nodePubkeyHex}${cr_session_id}${authType}${idToken}${session.operation_type}${apiName}`;
+    const message = makeSigMessage({
+      nodePubkeyHex,
+      cr_session_id,
+      authType,
+      idToken,
+      session,
+      apiName,
+    });
     const rBytes = Bytes.fromUint8Array(
       signatureRes.data.toUint8Array().slice(0, 32),
       32,
@@ -249,4 +258,32 @@ export function commitRevealMiddleware(apiName: ApiName) {
 
     next();
   };
+}
+
+export interface SigMessageArgs {
+  nodePubkeyHex: string;
+  cr_session_id: string;
+  authType: string;
+  idToken: string;
+  session: CommitRevealSession;
+  apiName: ApiName;
+}
+
+// message = node_pubkey + session_id + auth_type + id_token + operation_type + api_name
+function makeSigMessage({
+  nodePubkeyHex,
+  cr_session_id,
+  authType,
+  idToken,
+  session,
+  apiName,
+}: SigMessageArgs) {
+  return (
+    nodePubkeyHex +
+    cr_session_id +
+    authType +
+    idToken +
+    session.operation_type +
+    apiName
+  );
 }

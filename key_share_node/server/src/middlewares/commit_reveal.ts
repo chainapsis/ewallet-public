@@ -41,7 +41,6 @@ export function commitRevealMiddleware(apiName: ApiName) {
       return;
     }
 
-    // Get session from DB
     const sessionResult = await getCommitRevealSessionBySessionId(
       state.db,
       cr_session_id,
@@ -270,8 +269,7 @@ export interface SigMessageArgs {
   apiName: ApiName;
 }
 
-// message = node_pubkey + session_id + auth_type +
-//           id_token + operation_type + api_name
+// message = node_pubkey + session_id + auth_type + id_token + operation_type + api_name
 function makeSigMessage({
   nodePubkeyHex,
   cr_session_id,
