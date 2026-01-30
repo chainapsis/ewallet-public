@@ -27,6 +27,7 @@
     "./server_keypairs": "./src/server_keypairs/index.ts",
     "./referrals": "./src/referrals/index.ts",
     "./commit_reveal": "./src/commit_reveal/index.ts",
+    "./user_customer_connections": "./src/user_customer_connections/index.ts",
     "./knexfile": "./knexfile.ts"
   },
   "dependencies": {
