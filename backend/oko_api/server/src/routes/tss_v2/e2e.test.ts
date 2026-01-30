@@ -45,7 +45,7 @@ function generateRandomHex(bytes: number): string {
   return randomBytes(bytes).toString("hex");
 }
 
-describe("tss_v2_e2e_success_flows", () => {
+describe("tss_v2_commit_reveal_e2e_test", () => {
   let pool: Pool;
   let app: express.Application;
 

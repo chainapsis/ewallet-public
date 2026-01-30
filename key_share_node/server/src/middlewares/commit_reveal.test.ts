@@ -10,17 +10,17 @@ import {
   convertEddsaSignatureToBytes,
 } from "@oko-wallet/crypto-js/node/ecdhe";
 import { sha256 } from "@oko-wallet/crypto-js";
-
-import { connectPG, resetPgDatabase } from "@oko-wallet-ksn-server/database";
-import { testPgConfig } from "@oko-wallet-ksn-server/database/test_config";
-import { commitRevealMiddleware } from "./commit_reveal";
-import type { ServerState } from "@oko-wallet-ksn-server/state";
 import type { OperationType } from "@oko-wallet/ksn-interface/commit_reveal";
 import {
   createCommitRevealSession,
   getCommitRevealSessionBySessionId,
   hasCommitRevealApiBeenCalled,
 } from "@oko-wallet/ksn-pg-interface/commit_reveal";
+
+import { connectPG, resetPgDatabase } from "@oko-wallet-ksn-server/database";
+import { testPgConfig } from "@oko-wallet-ksn-server/database/test_config";
+import { commitRevealMiddleware } from "./commit_reveal";
+import type { ServerState } from "@oko-wallet-ksn-server/state";
 
 // Mock server keypair
 const serverPrivateKeyRes = Bytes.fromHexString(

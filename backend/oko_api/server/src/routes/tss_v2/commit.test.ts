@@ -38,7 +38,7 @@ function generateRandomHex(bytes: number): string {
   return randomBytes(bytes).toString("hex");
 }
 
-describe("commit_reveal_commit_success_test", () => {
+describe("commit_route_test", () => {
   let pool: Pool;
   let app: express.Application;
 
