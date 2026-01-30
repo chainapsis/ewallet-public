@@ -11,7 +11,7 @@ fi
 
 act --workflows ".github/workflows/deploy_oko_apps.yml" \
     --input tag=develop/v0.0.1 \
-    --secret-file .secrets \
-    --var-file .vars \
+    --secret-file "./internals/github_local/.secrets" \
+    --var-file "./internals/github_local/.vars" \
     -s ACTIONS_STEP_DEBUG=true \
     --container-architecture linux/amd64
