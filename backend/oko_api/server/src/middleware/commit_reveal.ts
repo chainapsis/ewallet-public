@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { Bytes } from "@oko-wallet/bytes";
 import { verifySignature } from "@oko-wallet/crypto-js/node/ecdhe";
-import { sha256, makeCommitRevealSignMessage } from "@oko-wallet/crypto-js";
+import { sha256, buildRevealMessage } from "@oko-wallet/crypto-js";
 import {
   getCommitRevealSessionBySessionId,
   createCommitRevealApiCall,
@@ -168,7 +168,7 @@ export function commitRevealMiddleware(apiName: ApiName) {
 
     // Verify signature: message = node_pubkey + session_id + auth_type + id_token + operation_type + api_name
     const nodePubkeyHex = state.server_keypair.publicKey.toHex();
-    const message = makeCommitRevealSignMessage({
+    const message = buildRevealMessage({
       nodePubkeyHex,
       sessionId: cr_session_id,
       authType,

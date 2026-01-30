@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { sha256 } from "@oko-wallet/crypto-js";
+import { sha256, buildRevealMessage } from "@oko-wallet/crypto-js";
 import {
   generateEddsaKeypair,
   signMessage,
@@ -39,7 +39,14 @@ export function createRevealSignature(
   operationType: string,
   apiName: string,
 ): Result<string, string> {
-  const message = `${nodePubkey}${sessionId}${authType}${idToken}${operationType}${apiName}`;
+  const message = buildRevealMessage({
+    nodePubkeyHex: nodePubkey,
+    sessionId,
+    authType,
+    idToken,
+    operationType,
+    apiName,
+  });
   const signRes = signMessage(message, clientPrivateKey);
   if (!signRes.success) {
     return { success: false, err: signRes.err };

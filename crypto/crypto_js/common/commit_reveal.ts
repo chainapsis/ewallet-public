@@ -11,7 +11,7 @@ export interface CommitRevealSignMessageArgs {
  * Create the message to be signed for commit-reveal signature verification.
  * message = node_pubkey + session_id + auth_type + id_token + operation_type + api_name
  */
-export function makeCommitRevealSignMessage({
+export function buildRevealMessage({
   nodePubkeyHex,
   sessionId,
   authType,
