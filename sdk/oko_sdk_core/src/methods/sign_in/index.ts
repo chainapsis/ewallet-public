@@ -33,7 +33,6 @@ export async function signIn(this: OkoWalletInterface, type: SignInType) {
     throw new Error(`Sign in error, err: ${err}`);
   }
 
-  // @TODO: required for ed25519 support
   const walletInfo = await this.getWalletInfo();
 
   if (!walletInfo) {

@@ -1,5 +1,5 @@
 import type {
-  KeygenEd25519Body,
+  KeygenEd25519RequestBody,
   SignEd25519Round1Body,
   SignEd25519Round1Response,
   SignEd25519Round2Body,
@@ -118,7 +118,7 @@ async function makePostRequest<T, R>(
 
 export async function reqKeygenEd25519(
   endpoint: string,
-  payload: KeygenEd25519Body,
+  payload: KeygenEd25519RequestBody,
   authToken: string,
 ) {
   const resp: OkoApiResponse<SignInResponseV2> = await makePostRequest(

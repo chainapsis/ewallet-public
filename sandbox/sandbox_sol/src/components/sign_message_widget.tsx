@@ -6,14 +6,14 @@ import bs58 from "bs58";
 import Button from "./Button";
 
 export function SignMessageWidget() {
-  const { okoSolWallet } = useSdkStore();
+  const { okoSvmWallet } = useSdkStore();
   const [message, setMessage] = useState("Hello, Solana!");
   const [signature, setSignature] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSignMessage = async () => {
-    if (!okoSolWallet) return;
+    if (!okoSvmWallet) return;
 
     setIsLoading(true);
     setError(null);
@@ -21,7 +21,7 @@ export function SignMessageWidget() {
 
     try {
       const messageBytes = new TextEncoder().encode(message);
-      const signatureBytes = await okoSolWallet.signMessage(messageBytes);
+      const signatureBytes = await okoSvmWallet.signMessage(messageBytes);
 
       const signatureBase58 = bs58.encode(signatureBytes);
       setSignature(signatureBase58);

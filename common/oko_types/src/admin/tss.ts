@@ -6,6 +6,7 @@ export interface GetTssSessionListRequest {
   offset: number;
   node_id?: string;
   customer_id?: string;
+  curve_type?: string;
 }
 
 export interface GetTssSessionListResponse {

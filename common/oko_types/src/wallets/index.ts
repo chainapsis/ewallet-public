@@ -30,5 +30,18 @@ export type WalletWithEmail = Wallet & {
 
 export type WalletWithEmailAndKSNodes = Wallet & {
   email: string;
+  auth_type: string;
   wallet_ks_nodes: string[];
+};
+
+export type UserWithWallets = {
+  user_id: string;
+  email: string;
+  auth_type: string;
+  secp256k1_public_key: Buffer | null;
+  secp256k1_wallet_id: string | null;
+  secp256k1_ks_nodes: string[];
+  ed25519_public_key: Buffer | null;
+  ed25519_wallet_id: string | null;
+  ed25519_ks_nodes: string[];
 };

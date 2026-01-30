@@ -1,10 +1,11 @@
-import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
+import type { ReactNode } from "react";
 
 import "@oko-wallet/oko-common-ui/styles/colors.scss";
 import "@oko-wallet/oko-common-ui/styles/typography.scss";
 import "@oko-wallet/oko-common-ui/styles/shadow.scss";
+
 import { Providers } from "@oko-wallet-user-dashboard/components/providers/providers";
 
 import "./globals.scss";

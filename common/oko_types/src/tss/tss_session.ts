@@ -22,6 +22,7 @@ export type TssSessionWithCustomer = TssSession & {
 export type TssSessionWithCustomerAndUser = TssSessionWithCustomer & {
   wallet_public_key?: string;
   user_email?: string;
+  curve_type?: string;
 };
 
 export type CreateTssSessionRequest = {

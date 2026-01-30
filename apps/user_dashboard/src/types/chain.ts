@@ -65,7 +65,13 @@ export interface EVMChainInfo {
   readonly features?: string[];
 }
 
-export type ChainModule = "cosmos" | "evm" | "starknet" | "bitcoin";
+// Solana chain info
+export interface SolanaChainInfo {
+  readonly rpc: string;
+  readonly currencies: Currency[];
+}
+
+export type ChainModule = "cosmos" | "evm" | "starknet" | "bitcoin" | "solana";
 
 // Unified chain info structure
 export interface ModularChainInfo {
@@ -76,6 +82,7 @@ export interface ModularChainInfo {
   readonly isNative?: boolean;
   readonly cosmos?: CosmosChainInfo;
   readonly evm?: EVMChainInfo;
+  readonly solana?: SolanaChainInfo;
 }
 
 // Chain info with UI state

@@ -9,15 +9,15 @@ import type {
   MakeEthSigModalResult,
 } from "./eth";
 import type {
-  MakeSolanaSigData,
-  MakeSolSigError,
-  MakeSolSigModalResult,
-} from "./sol";
+  MakeSvmSigData,
+  MakeSvmSigError,
+  MakeSvmSigModalResult,
+} from "./svm";
 
 export * from "./common";
 export * from "./cosmos";
 export * from "./eth";
-export * from "./sol";
+export * from "./svm";
 
 export type MakeSigModalPayload =
   | {
@@ -31,9 +31,9 @@ export type MakeSigModalPayload =
       data: MakeEthereumSigData;
     }
   | {
-      modal_type: "sol/make_signature";
+      modal_type: "svm/make_signature";
       modal_id: string;
-      data: MakeSolanaSigData;
+      data: MakeSvmSigData;
     };
 
 export type MakeSigModalApproveAckPayload =
@@ -50,10 +50,10 @@ export type MakeSigModalApproveAckPayload =
       data: MakeEthSigModalResult;
     }
   | {
-      modal_type: "sol/make_signature";
+      modal_type: "svm/make_signature";
       modal_id: string;
       type: "approve";
-      data: MakeSolSigModalResult;
+      data: MakeSvmSigModalResult;
     };
 
 export type MakeSigModalRejectAckPayload =
@@ -68,7 +68,7 @@ export type MakeSigModalRejectAckPayload =
       type: "reject";
     }
   | {
-      modal_type: "sol/make_signature";
+      modal_type: "svm/make_signature";
       modal_id: string;
       type: "reject";
     };
@@ -87,8 +87,8 @@ export type MakeSigModalErrorAckPayload =
       error: MakeCosmosSigError;
     }
   | {
-      modal_type: "sol/make_signature";
+      modal_type: "svm/make_signature";
       modal_id: string;
       type: "error";
-      error: MakeSolSigError;
+      error: MakeSvmSigError;
     };

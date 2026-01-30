@@ -66,6 +66,7 @@ export async function telegramAuthMiddleware(
       // in telegram, use telegram id as identifier with prefix
       user_identifier: `telegram_${userInfo.id}`,
       name: userInfo.username,
+      metadata: userInfo as unknown as Record<string, unknown>,
     };
 
     next();

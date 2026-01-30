@@ -15,18 +15,21 @@ export async function getTSSSessionsList({
   offset = 0,
   node_id,
   customer_id,
+  curve_type,
 }: {
   token: string;
   limit?: number;
   offset?: number;
   node_id?: string;
   customer_id?: string;
+  curve_type?: string;
 }) {
   const body: GetTssSessionListRequest = {
     limit,
     offset,
     node_id,
     customer_id,
+    curve_type,
   };
 
   return doFetch<GetTssSessionListResponse>(

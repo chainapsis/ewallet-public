@@ -7,17 +7,19 @@ import { useSDKState } from "@oko-wallet-demo-web/state/sdk";
 export function useInitOko() {
   const initOkoCosmos = useSDKState((state) => state.initOkoCosmos);
   const initOkoEth = useSDKState((state) => state.initOkoEth);
-  // const initOkoSol = useSDKState((state) => state.initOkoSol);
+  const initOkoSvm = useSDKState((state) => state.initOkoSvm);
 
   const isInitialized = useSDKState(
-    (state) => state.oko_cosmos !== null && state.oko_eth !== null,
-    // state.oko_sol !== null,
+    (state) =>
+      state.oko_cosmos !== null &&
+      state.oko_eth !== null &&
+      state.oko_svm !== null,
   );
 
   useEffect(() => {
     initOkoCosmos();
     initOkoEth();
-    // initOkoSol();
+    initOkoSvm();
   }, []);
 
   return { isInitialized };

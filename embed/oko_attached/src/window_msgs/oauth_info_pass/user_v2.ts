@@ -39,6 +39,7 @@ import {
   runTeddsaKeygen,
   serializeKeyPackage,
   serializePublicKeyPackage,
+  type TeddsaKeygenOutputBytes,
 } from "@oko-wallet/teddsa-hooks";
 import { reqKeygenEd25519 } from "@oko-wallet/teddsa-api-lib";
 import { reqKeygenV2 } from "@oko-wallet/api-lib";
@@ -83,16 +84,17 @@ export async function handleNewUserV2(
   const { keygen_1: secp256k1Keygen1, keygen_2: secp256k1Keygen2 } =
     secp256k1KeygenRes.data;
 
-  // 2. ed25519 keygen
-  const ed25519KeygenRes = await runTeddsaKeygen();
-  if (ed25519KeygenRes.success === false) {
-    return {
-      success: false,
-      err: { type: "sign_in_request_fail", error: ed25519KeygenRes.err },
-    };
+  // 2. ed25519 keygen and split
+  const ed25519KeygenSplitRes =
+    await runEd25519KeygenAndSplit(keyshareNodeMeta);
+  if (ed25519KeygenSplitRes.success === false) {
+    return { success: false, err: ed25519KeygenSplitRes.err };
   }
-  const { keygen_1: ed25519Keygen1, keygen_2: ed25519Keygen2 } =
-    ed25519KeygenRes.data;
+  const {
+    keygen1: ed25519Keygen1,
+    keygen2: ed25519Keygen2,
+    userKeyShares: ed25519UserKeyShares,
+  } = ed25519KeygenSplitRes.data;
 
   // 3. secp256k1 key share split
   const splitUserKeySharesRes = await splitUserKeyShares(
@@ -106,28 +108,6 @@ export async function handleNewUserV2(
     };
   }
   const secp256k1UserKeyShares = splitUserKeySharesRes.data;
-
-  // 4. ed25519 key share split
-  const ed25519SigningShareRes = extractSigningShare(
-    ed25519Keygen1.key_package,
-  );
-  if (ed25519SigningShareRes.success === false) {
-    return {
-      success: false,
-      err: { type: "sign_in_request_fail", error: ed25519SigningShareRes.err },
-    };
-  }
-  const ed25519SplitRes = await splitTeddsaSigningShare(
-    ed25519SigningShareRes.data,
-    keyshareNodeMeta,
-  );
-  if (ed25519SplitRes.success === false) {
-    return {
-      success: false,
-      err: { type: "sign_in_request_fail", error: ed25519SplitRes.err },
-    };
-  }
-  const ed25519UserKeyShares = ed25519SplitRes.data;
 
   // 5. Send key shares by both curves to ks nodes using V2 API
   const registerKeySharesResults: Result<void, string>[] = await Promise.all(
@@ -161,6 +141,7 @@ export async function handleNewUserV2(
   const reqKeygenV2Res = await reqKeygenV2(
     TSS_V2_ENDPOINT,
     {
+      auth_type: authType,
       keygen_2_secp256k1: {
         public_key: secp256k1Keygen1.public_key.toHex(),
         private_share: secp256k1Keygen2.tss_private_share.toHex(),
@@ -229,38 +210,11 @@ export async function handleExistingUserV2(
   authType: AuthType,
 ): Promise<Result<UserSignInResultV2, OAuthSignInError>> {
   // 1. Sign in to API server
-  const signInRes = await makeAuthorizedOkoApiRequest<any, SignInResponseV2>(
-    "user/signin",
-    idToken,
-    {
-      auth_type: authType,
-    },
-    TSS_V2_ENDPOINT,
-  );
-  if (!signInRes.success) {
-    console.error("[attached] sign in failed, err: %s", signInRes.err);
-    return {
-      success: false,
-      err: { type: "sign_in_request_fail", error: signInRes.err.toString() },
-    };
+  const signInResult = await signInV2(idToken, authType);
+  if (!signInResult.success) {
+    return { success: false, err: signInResult.err };
   }
-
-  const apiResponse = signInRes.data;
-  if (!apiResponse.success) {
-    console.error(
-      "[attached] sign in request failed, err: %s",
-      apiResponse.msg,
-    );
-    return {
-      success: false,
-      err: {
-        type: "sign_in_request_fail",
-        error: `code: ${apiResponse.code}`,
-      },
-    };
-  }
-
-  const signInResp = apiResponse.data;
+  const signInResp = signInResult.data;
 
   // 2. Request secp256k1 and ed25519 shares from KS nodes using V2 API
   const requestSharesRes = await requestKeySharesV2(
@@ -302,37 +256,16 @@ export async function handleExistingUserV2(
     };
   }
 
-  // 3. Combine secp256k1 shares (convert hex strings to Point256)
-  const secp256k1SharesByNode: UserKeySharePointByNode[] = [];
-  for (const item of requestSharesRes.data) {
-    const shareHex = item.shares.secp256k1;
-    if (!shareHex) {
-      return {
-        success: false,
-        err: {
-          type: "key_share_combine_fail",
-          error: `secp256k1 share missing from node: ${item.node.name}`,
-        },
-      };
-    }
-    const point256Res = decodeKeyShareStringToPoint256(shareHex);
-    if (point256Res.success === false) {
-      return {
-        success: false,
-        err: {
-          type: "key_share_combine_fail",
-          error: `secp256k1 decode err: ${point256Res.err}`,
-        },
-      };
-    }
-    secp256k1SharesByNode.push({
-      node: item.node,
-      share: point256Res.data,
-    });
+  // 3. Decode and combine secp256k1 shares
+  const secp256k1DecodeRes = await decodeSecp256k1SharesByNode(
+    requestSharesRes.data,
+  );
+  if (!secp256k1DecodeRes.success) {
+    return { success: false, err: secp256k1DecodeRes.err };
   }
 
   const keyshare1Secp256k1Res = await combineUserShares(
-    secp256k1SharesByNode,
+    secp256k1DecodeRes.data,
     keyshareNodeMetaSecp256k1.threshold,
   );
   if (keyshare1Secp256k1Res.success === false) {
@@ -507,40 +440,20 @@ export async function handleExistingUserNeedsEd25519Keygen(
   keyshareNodeMetaEd25519: KeyShareNodeMetaWithNodeStatusInfo,
   authType: AuthType,
 ): Promise<Result<UserSignInResultV2, OAuthSignInError>> {
-  // 1. ed25519 keygen
-  const ed25519KeygenRes = await runTeddsaKeygen();
-  if (ed25519KeygenRes.success === false) {
-    return {
-      success: false,
-      err: { type: "sign_in_request_fail", error: ed25519KeygenRes.err },
-    };
-  }
-  const { keygen_1: ed25519Keygen1, keygen_2: ed25519Keygen2 } =
-    ed25519KeygenRes.data;
-
-  // 2. ed25519 key share split
-  const ed25519SigningShareRes = extractSigningShare(
-    ed25519Keygen1.key_package,
-  );
-  if (ed25519SigningShareRes.success === false) {
-    return {
-      success: false,
-      err: { type: "sign_in_request_fail", error: ed25519SigningShareRes.err },
-    };
-  }
-  const ed25519SplitRes = await splitTeddsaSigningShare(
-    ed25519SigningShareRes.data,
+  // 1. ed25519 keygen and split
+  const ed25519KeygenSplitRes = await runEd25519KeygenAndSplit(
     keyshareNodeMetaEd25519,
   );
-  if (ed25519SplitRes.success === false) {
-    return {
-      success: false,
-      err: { type: "sign_in_request_fail", error: ed25519SplitRes.err },
-    };
+  if (ed25519KeygenSplitRes.success === false) {
+    return { success: false, err: ed25519KeygenSplitRes.err };
   }
-  const ed25519UserKeyShares = ed25519SplitRes.data;
+  const {
+    keygen1: ed25519Keygen1,
+    keygen2: ed25519Keygen2,
+    userKeyShares: ed25519UserKeyShares,
+  } = ed25519KeygenSplitRes.data;
 
-  // 3. Send ed25519 key shares to ks nodes using V2 API
+  // 2. Send ed25519 key shares to ks nodes using V2 API
   const registerEd25519Results: Result<void, string>[] = await Promise.all(
     keyshareNodeMetaEd25519.nodes.map((node, index) =>
       registerKeyShareEd25519V2(
@@ -569,6 +482,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
   const reqKeygenEd25519Res = await reqKeygenEd25519(
     TSS_V2_ENDPOINT,
     {
+      auth_type: authType,
       keygen_2: {
         key_package: serializeKeyPackage(ed25519Keygen2.key_package),
         public_key_package: serializePublicKeyPackage(
@@ -628,37 +542,16 @@ export async function handleExistingUserNeedsEd25519Keygen(
     };
   }
 
-  // 7. Combine secp256k1 shares (convert hex strings to Point256)
-  const secp256k1SharesByNode: UserKeySharePointByNode[] = [];
-  for (const item of requestSharesRes.data) {
-    const shareHex = item.shares.secp256k1;
-    if (!shareHex) {
-      return {
-        success: false,
-        err: {
-          type: "key_share_combine_fail",
-          error: `secp256k1 share missing from node: ${item.node.name}`,
-        },
-      };
-    }
-    const point256Res = decodeKeyShareStringToPoint256(shareHex);
-    if (point256Res.success === false) {
-      return {
-        success: false,
-        err: {
-          type: "key_share_combine_fail",
-          error: `secp256k1 decode err: ${point256Res.err}`,
-        },
-      };
-    }
-    secp256k1SharesByNode.push({
-      node: item.node,
-      share: point256Res.data,
-    });
+  // 6. Decode and combine secp256k1 shares
+  const secp256k1DecodeRes = await decodeSecp256k1SharesByNode(
+    requestSharesRes.data,
+  );
+  if (!secp256k1DecodeRes.success) {
+    return { success: false, err: secp256k1DecodeRes.err };
   }
 
   const keyshare1Secp256k1Res = await combineUserShares(
-    secp256k1SharesByNode,
+    secp256k1DecodeRes.data,
     keyshareNodeMetaSecp256k1.threshold,
   );
   if (keyshare1Secp256k1Res.success === false) {
@@ -671,7 +564,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
     };
   }
 
-  // 8. Convert ed25519 keygen1 to hex format for storage
+  // 7. Convert ed25519 keygen1 to hex format for storage
   const keyPackageEd25519Hex = teddsaKeygenToHex(ed25519Keygen1);
 
   return {
@@ -721,38 +614,11 @@ export async function handleReshareV2(
   ed25519NeedsReshare: boolean,
 ): Promise<Result<UserSignInResultV2, OAuthSignInError>> {
   // 1. Sign in to API server to get public keys and server verifying share
-  const signInRes = await makeAuthorizedOkoApiRequest<any, SignInResponseV2>(
-    "user/signin",
-    idToken,
-    {
-      auth_type: authType,
-    },
-    TSS_V2_ENDPOINT,
-  );
-  if (!signInRes.success) {
-    console.error("[attached] sign in failed, err: %s", signInRes.err);
-    return {
-      success: false,
-      err: { type: "sign_in_request_fail", error: signInRes.err.toString() },
-    };
+  const signInResult = await signInV2(idToken, authType);
+  if (!signInResult.success) {
+    return { success: false, err: signInResult.err };
   }
-
-  const apiResponse = signInRes.data;
-  if (!apiResponse.success) {
-    console.error(
-      "[attached] sign in request failed, err: %s",
-      apiResponse.msg,
-    );
-    return {
-      success: false,
-      err: {
-        type: "sign_in_request_fail",
-        error: `code: ${apiResponse.code}`,
-      },
-    };
-  }
-
-  const signInResp = apiResponse.data;
+  const signInResp = signInResult.data;
 
   // Parse public keys
   const publicKeySecp256k1Res = Bytes.fromHexString(
@@ -868,80 +734,28 @@ export async function handleReshareAndEd25519Keygen(
     };
   }
 
-  // 2. ed25519 keygen (new)
-  const ed25519KeygenRes = await runTeddsaKeygen();
-  if (ed25519KeygenRes.success === false) {
-    return {
-      success: false,
-      err: { type: "sign_in_request_fail", error: ed25519KeygenRes.err },
-    };
-  }
-  const { keygen_1: ed25519Keygen1, keygen_2: ed25519Keygen2 } =
-    ed25519KeygenRes.data;
-
-  // 3. ed25519 key share split
-  const ed25519SigningShareRes = extractSigningShare(
-    ed25519Keygen1.key_package,
-  );
-  if (ed25519SigningShareRes.success === false) {
-    return {
-      success: false,
-      err: { type: "sign_in_request_fail", error: ed25519SigningShareRes.err },
-    };
-  }
-  const ed25519SplitRes = await splitTeddsaSigningShare(
-    ed25519SigningShareRes.data,
+  // 2. ed25519 keygen and split
+  const ed25519KeygenSplitRes = await runEd25519KeygenAndSplit(
     keyshareNodeMetaEd25519,
   );
-  if (ed25519SplitRes.success === false) {
-    return {
-      success: false,
-      err: { type: "sign_in_request_fail", error: ed25519SplitRes.err },
-    };
+  if (ed25519KeygenSplitRes.success === false) {
+    return { success: false, err: ed25519KeygenSplitRes.err };
   }
-  const ed25519UserKeyShares = ed25519SplitRes.data;
+  const {
+    keygen1: ed25519Keygen1,
+    keygen2: ed25519Keygen2,
+    userKeyShares: ed25519UserKeyShares,
+  } = ed25519KeygenSplitRes.data;
 
-  // 4. Request secp256k1 shares from ACTIVE nodes
-  const requestSharesRes = await requestKeySharesV2(
-    idToken,
-    activeNodes,
-    keyshareNodeMetaSecp256k1.threshold,
-    authType,
-    {
-      secp256k1: undefined, // Will be filled after sign-in
-    },
-  );
-
-  // We need to sign in first to get the public key
-  const signInRes = await makeAuthorizedOkoApiRequest<any, SignInResponseV2>(
-    "user/signin",
-    idToken,
-    {
-      auth_type: authType,
-    },
-    TSS_V2_ENDPOINT,
-  );
-  if (!signInRes.success) {
-    return {
-      success: false,
-      err: { type: "sign_in_request_fail", error: signInRes.err.toString() },
-    };
+  // 3. Sign in to get the public key
+  const signInResult = await signInV2(idToken, authType);
+  if (!signInResult.success) {
+    return { success: false, err: signInResult.err };
   }
-
-  const apiResponse = signInRes.data;
-  if (!apiResponse.success) {
-    return {
-      success: false,
-      err: {
-        type: "sign_in_request_fail",
-        error: `code: ${apiResponse.code}`,
-      },
-    };
-  }
-  const signInResp = apiResponse.data;
+  const signInResp = signInResult.data;
   const secp256k1PublicKey = signInResp.user.public_key_secp256k1;
 
-  // 5. Request secp256k1 shares with public key
+  // 4. Request secp256k1 shares with public key
   const requestSecp256k1SharesRes = await requestKeySharesV2(
     idToken,
     activeNodes,
@@ -961,31 +775,25 @@ export async function handleReshareAndEd25519Keygen(
     };
   }
 
-  // 6. secp256k1 expand
-  const secp256k1SharesByNode: UserKeySharePointByNode[] = [];
-  for (const item of requestSecp256k1SharesRes.data) {
-    const shareHex = item.shares.secp256k1;
-    if (!shareHex) {
-      continue;
-    }
-    const point256Res = decodeKeyShareStringToPoint256(shareHex);
-    if (!point256Res.success) {
-      return {
-        success: false,
-        err: {
-          type: "reshare_fail",
-          error: `secp256k1 decode err: ${point256Res.err}`,
-        },
-      };
-    }
-    secp256k1SharesByNode.push({
-      node: item.node,
-      share: point256Res.data,
-    });
+  // 5. Decode secp256k1 shares (filter out items without shares for reshare case)
+  const itemsWithSecp256k1 = requestSecp256k1SharesRes.data.filter(
+    (item) => item.shares.secp256k1,
+  );
+  const secp256k1DecodeRes =
+    await decodeSecp256k1SharesByNode(itemsWithSecp256k1);
+  if (!secp256k1DecodeRes.success) {
+    return {
+      success: false,
+      err: {
+        type: "reshare_fail",
+        error: secp256k1DecodeRes.err.error,
+      },
+    };
   }
 
+  // 6. Expand secp256k1 shares to additional nodes
   const secp256k1ExpandRes = await runExpandShares(
-    secp256k1SharesByNode,
+    secp256k1DecodeRes.data,
     additionalNodes,
     keyshareNodeMetaSecp256k1.threshold,
   );
@@ -1075,6 +883,7 @@ export async function handleReshareAndEd25519Keygen(
   const reqKeygenEd25519Res = await reqKeygenEd25519(
     TSS_V2_ENDPOINT,
     {
+      auth_type: authType,
       keygen_2: {
         key_package: serializeKeyPackage(ed25519Keygen2.key_package),
         public_key_package: serializePublicKeyPackage(
@@ -1164,4 +973,153 @@ async function saveReferralV2(
   if (!apiResponse.success) {
     throw new Error(`Save referral V2 API error: ${apiResponse.msg}`);
   }
+}
+
+/**
+ * Decode secp256k1 shares from hex strings to Point256 format.
+ * Used by multiple handlers that need to process shares from KS nodes.
+ */
+async function decodeSecp256k1SharesByNode(
+  sharesData: Array<{
+    node: { name: string; endpoint: string };
+    shares: { secp256k1?: string };
+  }>,
+): Promise<
+  Result<
+    UserKeySharePointByNode[],
+    { type: "key_share_combine_fail"; error: string }
+  >
+> {
+  const sharesByNode: UserKeySharePointByNode[] = [];
+
+  for (const item of sharesData) {
+    const shareHex = item.shares.secp256k1;
+    if (!shareHex) {
+      return {
+        success: false,
+        err: {
+          type: "key_share_combine_fail",
+          error: `secp256k1 share missing from node: ${item.node.name}`,
+        },
+      };
+    }
+    const point256Res = decodeKeyShareStringToPoint256(shareHex);
+    if (point256Res.success === false) {
+      return {
+        success: false,
+        err: {
+          type: "key_share_combine_fail",
+          error: `secp256k1 decode err: ${point256Res.err}`,
+        },
+      };
+    }
+    sharesByNode.push({
+      node: item.node,
+      share: point256Res.data,
+    });
+  }
+
+  return { success: true, data: sharesByNode };
+}
+
+interface Ed25519KeygenSplitResult {
+  keygen1: TeddsaKeygenOutputBytes;
+  keygen2: TeddsaKeygenOutputBytes;
+  userKeyShares: TeddsaKeyShareByNode[];
+}
+
+/**
+ * Run ed25519 keygen and split the signing share for distribution to KS nodes.
+ * Used by handlers that need to create new ed25519 wallets.
+ */
+async function runEd25519KeygenAndSplit(
+  keyshareNodeMeta: KeyShareNodeMetaWithNodeStatusInfo,
+): Promise<
+  Result<
+    Ed25519KeygenSplitResult,
+    { type: "sign_in_request_fail"; error: string }
+  >
+> {
+  // 1. ed25519 keygen
+  const ed25519KeygenRes = await runTeddsaKeygen();
+  if (ed25519KeygenRes.success === false) {
+    return {
+      success: false,
+      err: { type: "sign_in_request_fail", error: ed25519KeygenRes.err },
+    };
+  }
+  const { keygen_1: keygen1, keygen_2: keygen2 } = ed25519KeygenRes.data;
+
+  // 2. Extract signing share from key package
+  const signingShareRes = extractSigningShare(keygen1.key_package);
+  if (signingShareRes.success === false) {
+    return {
+      success: false,
+      err: { type: "sign_in_request_fail", error: signingShareRes.err },
+    };
+  }
+
+  // 3. Split signing share for distribution
+  const splitRes = await splitTeddsaSigningShare(
+    signingShareRes.data,
+    keyshareNodeMeta,
+  );
+  if (splitRes.success === false) {
+    return {
+      success: false,
+      err: { type: "sign_in_request_fail", error: splitRes.err },
+    };
+  }
+
+  return {
+    success: true,
+    data: {
+      keygen1,
+      keygen2,
+      userKeyShares: splitRes.data,
+    },
+  };
+}
+
+interface SignInRequestV2 {
+  auth_type: AuthType;
+}
+
+/**
+ * Sign in to API server and return user data.
+ * Used by handlers that need to authenticate before requesting shares.
+ */
+async function signInV2(
+  idToken: string,
+  authType: AuthType,
+): Promise<Result<SignInResponseV2, { type: "sign_in_request_fail"; error: string }>> {
+  const signInRes = await makeAuthorizedOkoApiRequest<
+    SignInRequestV2,
+    SignInResponseV2
+  >("user/signin", idToken, { auth_type: authType }, TSS_V2_ENDPOINT);
+
+  if (!signInRes.success) {
+    console.error("[attached] sign in failed, err: %s", signInRes.err);
+    return {
+      success: false,
+      err: { type: "sign_in_request_fail", error: signInRes.err.toString() },
+    };
+  }
+
+  const apiResponse = signInRes.data;
+  if (!apiResponse.success) {
+    console.error(
+      "[attached] sign in request failed, err: %s",
+      apiResponse.msg,
+    );
+    return {
+      success: false,
+      err: {
+        type: "sign_in_request_fail",
+        error: `code: ${apiResponse.code}`,
+      },
+    };
+  }
+
+  return { success: true, data: apiResponse.data };
 }

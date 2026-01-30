@@ -1,9 +1,29 @@
-import { useState, type FC } from "react";
+import { useState, type FC, type ReactNode } from "react";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import { EyeIcon } from "@oko-wallet/oko-common-ui/icons/eye";
+import { GoogleIcon } from "@oko-wallet/oko-common-ui/icons/google_icon";
+import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
+import { TelegramIcon } from "@oko-wallet/oko-common-ui/icons/telegram_icon";
+import { DiscordIcon } from "@oko-wallet/oko-common-ui/icons/discord_icon";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
 
 import { useAppState } from "@oko-wallet-attached/store/app";
 import styles from "./signer_address_or_email.module.scss";
+
+function renderAuthIcon(authType: AuthType | undefined): ReactNode {
+  switch (authType) {
+    case "google":
+      return <GoogleIcon width={16} height={16} />;
+    case "x":
+      return <XIcon size={16} />;
+    case "telegram":
+      return <TelegramIcon size={16} />;
+    case "discord":
+      return <DiscordIcon size={16} />;
+    default:
+      return null;
+  }
+}
 
 interface SignerAddressOrEmailProps {
   signer: string;
@@ -24,15 +44,21 @@ export const SignerAddressOrEmailView: FC<ViewProps> = ({
   origin,
   prefix,
 }) => {
-  const email = useAppState((state) => state.getWallet(origin)?.email);
+  const wallet = useAppState((state) => state.getWallet(origin));
+  const email = wallet?.email;
+  const authType = wallet?.authType;
+
   const displayValue =
     type === "address" ? `${value.slice(0, 9)}...${value.slice(-9)}` : email;
 
   return (
-    <Typography size="sm" color="brand-tertiary" weight="medium">
-      {prefix && `${prefix} `}
-      {displayValue}
-    </Typography>
+    <>
+      {type === "email" && renderAuthIcon(authType)}
+      <Typography size="sm" color="brand-tertiary" weight="medium">
+        {prefix && `${prefix} `}
+        {displayValue}
+      </Typography>
+    </>
   );
 };
 

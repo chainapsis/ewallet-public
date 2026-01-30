@@ -36,6 +36,10 @@ export function getOpenApiDocument() {
         description: "Production server",
       },
     ],
-    tags: [{ name: "Key Share" }, { name: "PG Dump" }],
+    tags: [
+      { name: "Commit-Reveal" },
+      { name: "Key Share" },
+      { name: "PG Dump" },
+    ],
   });
 }

@@ -1,6 +1,7 @@
 import { useState, type FC } from "react";
 import { CosmosIcon } from "@oko-wallet/oko-common-ui/icons/cosmos_icon";
 import { EthereumBlueIcon } from "@oko-wallet/oko-common-ui/icons/ethereum_blue_icon";
+import { SolanaIcon } from "@oko-wallet/oko-common-ui/icons/solana_icon";
 import { WalletIcon } from "@oko-wallet/oko-common-ui/icons/wallet";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
@@ -15,7 +16,7 @@ import { useGetChainInfos } from "@oko-wallet-demo-web/hooks/use_get_chain_infos
 
 export const AddressWidget: FC<AddressWidgetProps> = ({}) => {
   const [showModal, setShowModal] = useState(false);
-  const { cosmosAddress, ethAddress } = useAddresses();
+  const { cosmosAddress, ethAddress, solanaAddress } = useAddresses();
 
   const { data: chains } = useGetChainInfos();
 
@@ -54,6 +55,13 @@ export const AddressWidget: FC<AddressWidgetProps> = ({}) => {
             icon={<CosmosIcon />}
             chain="cosmos"
             address={formatAddress(cosmosAddress)}
+          />
+          <Spacing height={12} />
+
+          <AddressRow
+            icon={<SolanaIcon />}
+            chain="solana"
+            address={formatAddress(solanaAddress)}
           />
           <Spacing height={12} />
 

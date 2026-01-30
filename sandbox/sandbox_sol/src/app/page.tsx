@@ -1,6 +1,6 @@
 "use client";
 
-import { useOkoSol } from "@/hooks/use_oko_sol";
+import { useOkoSvm } from "@/hooks/use_oko_svm";
 import LoginView from "@/components/LoginView";
 import ConnectedView from "@/components/ConnectedView";
 
@@ -12,7 +12,7 @@ export default function Home() {
     publicKey,
     connect,
     disconnect,
-  } = useOkoSol();
+  } = useOkoSvm();
 
   return (
     <main className="min-h-screen flex items-center justify-center px-6 py-12">

@@ -6,14 +6,19 @@
 import { useQuery } from "@tanstack/react-query";
 
 import {
-  useSDKState,
-  selectEthSDK,
+  selectCosmosInitialized,
   selectCosmosSDK,
   selectEthInitialized,
-  selectCosmosInitialized,
+  selectEthSDK,
+  selectSolInitialized,
+  selectSolSDK,
+  useSDKState,
 } from "@oko-wallet-user-dashboard/state/sdk";
-import { isEvmOnlyChain } from "@oko-wallet-user-dashboard/utils/chain";
 import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
+import {
+  isEvmOnlyChain,
+  isSolanaChainId,
+} from "@oko-wallet-user-dashboard/utils/chain";
 
 /**
  * Hook to get ETH address
@@ -26,12 +31,39 @@ export function useEthAddress() {
     queryKey: ["address", "eth"],
     queryFn: async () => {
       if (!okoEth) {
-        return undefined;
+        return null;
       }
-      return okoEth.getAddress();
+      return okoEth.getAddress() ?? null;
     },
     enabled: !!okoEth && isInitialized,
     staleTime: Infinity, // Address doesn't change
+    gcTime: Infinity,
+  });
+
+  return {
+    address: query.data,
+    isLoading: query.isLoading,
+    error: query.error,
+  };
+}
+
+/**
+ * Hook to get Solana address
+ */
+export function useSolanaAddress() {
+  const okoSvm = useSDKState(selectSolSDK);
+  const isInitialized = useSDKState(selectSolInitialized);
+
+  const query = useQuery({
+    queryKey: ["address", "solana"],
+    queryFn: async () => {
+      if (!okoSvm) {
+        return null;
+      }
+      return okoSvm.state.publicKey?.toBase58() ?? null;
+    },
+    enabled: !!okoSvm && isInitialized,
+    staleTime: Infinity,
     gcTime: Infinity,
   });
 
@@ -54,21 +86,22 @@ export function useBech32Address(chainId: string | undefined) {
     chainId &&
       !chainId.startsWith("eip155:") &&
       !chainId.startsWith("bip122:") &&
-      !chainId.startsWith("starknet:"),
+      !chainId.startsWith("starknet:") &&
+      !chainId.startsWith("solana:"),
   );
 
   const query = useQuery({
     queryKey: ["address", "bech32", chainId],
     queryFn: async () => {
       if (!okoCosmos || !chainId) {
-        return undefined;
+        return null;
       }
       try {
         const key = await okoCosmos.getKey(chainId);
-        return key?.bech32Address;
+        return key?.bech32Address ?? null;
       } catch (error) {
         console.error(`Failed to fetch bech32 address for ${chainId}:`, error);
-        return undefined;
+        return null;
       }
     },
     enabled: !!okoCosmos && isInitialized && !!chainId && isCosmosChain,
@@ -88,8 +121,14 @@ export function useBech32Address(chainId: string | undefined) {
  */
 export function useChainAddress(chainInfo: ModularChainInfo | undefined) {
   const { address: ethAddress, isLoading: ethLoading } = useEthAddress();
+  const { address: solanaAddress, isLoading: solanaLoading } =
+    useSolanaAddress();
   const { address: bech32Address, isLoading: bech32Loading } = useBech32Address(
-    chainInfo && !isEvmOnlyChain(chainInfo) ? chainInfo.chainId : undefined,
+    chainInfo &&
+      !isEvmOnlyChain(chainInfo) &&
+      !isSolanaChainId(chainInfo.chainId)
+      ? chainInfo.chainId
+      : undefined,
   );
 
   if (!chainInfo) {
@@ -98,6 +137,10 @@ export function useChainAddress(chainInfo: ModularChainInfo | undefined) {
 
   if (isEvmOnlyChain(chainInfo)) {
     return { address: ethAddress, isLoading: ethLoading };
+  }
+
+  if (isSolanaChainId(chainInfo.chainId)) {
+    return { address: solanaAddress, isLoading: solanaLoading };
   }
 
   return { address: bech32Address, isLoading: bech32Loading };
@@ -116,7 +159,8 @@ export function useBech32Addresses(chainIds: string[]) {
     (id) =>
       !id.startsWith("eip155:") &&
       !id.startsWith("bip122:") &&
-      !id.startsWith("starknet:"),
+      !id.startsWith("starknet:") &&
+      !id.startsWith("solana:"),
   );
 
   const query = useQuery({

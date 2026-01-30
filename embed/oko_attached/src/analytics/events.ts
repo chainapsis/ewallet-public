@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import type { ParsedInstruction } from "@oko-wallet-attached/tx-parsers/sol";
+import type { ParsedInstruction } from "@oko-wallet-attached/tx-parsers/svm";
 
 import type { EthTxAction } from "@oko-wallet-attached/components/modal_variants/eth/tx_sig/actions/types";
 import { trackEvent } from "./amplitude";
@@ -69,9 +69,9 @@ export function trackTxButtonEvent(args: TrackTxButtonEventArgs) {
       break;
     }
 
-    case "solana": {
+    case "svm": {
       const { instructions } = args;
-      txTypes = classifySolanaTxType(instructions);
+      txTypes = classifySvmTxType(instructions);
       break;
     }
   }
@@ -104,7 +104,7 @@ function classifyCosmosTxType(messages: CosmosMsgs) {
   return messages.map((msg) => ("typeUrl" in msg ? msg.typeUrl : msg.type));
 }
 
-function classifySolanaTxType(instructions: ParsedInstruction[] | null) {
+function classifySvmTxType(instructions: ParsedInstruction[] | null) {
   if (instructions === null || instructions.length === 0) {
     return ["unknown"];
   }

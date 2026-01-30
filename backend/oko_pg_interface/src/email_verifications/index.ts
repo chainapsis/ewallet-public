@@ -194,3 +194,58 @@ LIMIT 1
     };
   }
 }
+
+export async function verifyEmailCodeFromPending(
+  db: Pool,
+  request: VerifyEmailRequest,
+): Promise<Result<VerifyEmailResponse, string>> {
+  try {
+    const updateQuery = `
+UPDATE email_verifications
+SET status = '${EmailVerificationStatus.VERIFIED}', updated_at = NOW()
+WHERE email_verification_id = (
+  SELECT email_verification_id
+  FROM email_verifications
+  WHERE email = $1
+    AND verification_code = $2
+    AND status = '${EmailVerificationStatus.PENDING}'
+    AND expires_at > NOW()
+  ORDER BY created_at DESC
+  LIMIT 1
+)
+RETURNING status
+`;
+
+    const result = await db.query<EmailVerification>(updateQuery, [
+      request.email,
+      request.verification_code,
+    ]);
+
+    const row = result.rows[0];
+    if (!row) {
+      return {
+        success: false,
+        err: "Invalid or expired verification code",
+      };
+    }
+
+    if (row.status !== EmailVerificationStatus.VERIFIED) {
+      return {
+        success: false,
+        err: "Invalid or expired verification code",
+      };
+    }
+
+    return {
+      success: true,
+      data: {
+        is_verified: true,
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      err: String(error),
+    };
+  }
+}

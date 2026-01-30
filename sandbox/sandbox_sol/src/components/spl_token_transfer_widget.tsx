@@ -76,7 +76,7 @@ function getAssociatedTokenAddress(
 }
 
 export function SplTokenTransferWidget() {
-  const { okoSolWallet, publicKey } = useSdkStore();
+  const { okoSvmWallet, publicKey } = useSdkStore();
   const [selectedToken, setSelectedToken] = useState(DEVNET_TOKENS[0]);
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("1");
@@ -85,7 +85,7 @@ export function SplTokenTransferWidget() {
   const [error, setError] = useState<string | null>(null);
 
   const handleSignTransaction = async () => {
-    if (!okoSolWallet || !publicKey) return;
+    if (!okoSvmWallet || !publicKey) return;
 
     setIsLoading(true);
     setError(null);
@@ -132,7 +132,7 @@ export function SplTokenTransferWidget() {
         ),
       );
 
-      const signedTx = await okoSolWallet.signTransaction(transaction);
+      const signedTx = await okoSvmWallet.signTransaction(transaction);
       const txSignature = signedTx.signature;
 
       if (txSignature) {
@@ -149,7 +149,7 @@ export function SplTokenTransferWidget() {
   };
 
   const handleSendTransaction = async () => {
-    if (!okoSolWallet || !publicKey) return;
+    if (!okoSvmWallet || !publicKey) return;
 
     setIsLoading(true);
     setError(null);
@@ -195,7 +195,7 @@ export function SplTokenTransferWidget() {
         ),
       );
 
-      const txSignature = await okoSolWallet.sendTransaction(
+      const txSignature = await okoSvmWallet.sendTransaction(
         transaction,
         DEVNET_CONNECTION,
       );

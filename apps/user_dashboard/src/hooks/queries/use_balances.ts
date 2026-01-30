@@ -1,18 +1,22 @@
-import { useQuery, useQueries } from "@tanstack/react-query";
+import { Connection, PublicKey } from "@solana/web3.js";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
-import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
-import type {
-  TokenBalance,
-  RawBalance,
-} from "@oko-wallet-user-dashboard/types/token";
-import { getChainIdentifier } from "@oko-wallet-user-dashboard/state/chains";
-import { isCosmosChainId } from "@oko-wallet-user-dashboard/utils/chain";
-import { calculateUsdValue } from "@oko-wallet-user-dashboard/utils/format_token_amount";
-
+import {
+  useBech32Addresses,
+  useEthAddress,
+  useSolanaAddress,
+} from "./use_addresses";
 import { useEnabledChains } from "./use_chains";
 import { usePrices } from "./use_prices";
-import { useEthAddress, useBech32Addresses } from "./use_addresses";
+import { getChainIdentifier } from "@oko-wallet-user-dashboard/state/chains";
+import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
+import type {
+  RawBalance,
+  TokenBalance,
+} from "@oko-wallet-user-dashboard/types/token";
+import { isCosmosChainId } from "@oko-wallet-user-dashboard/utils/chain";
+import { calculateUsdValue } from "@oko-wallet-user-dashboard/utils/format_token_amount";
 
 /**
  * Fetch Cosmos balances from LCD endpoint
@@ -63,6 +67,20 @@ async function fetchEvmBalance(
   return BigInt(data.result).toString();
 }
 
+/**
+ * Fetch Solana native balance
+ */
+async function fetchSolanaBalance(
+  rpcEndpoint: string,
+  address: string,
+): Promise<string> {
+  const connection = new Connection(rpcEndpoint);
+  const pubkey = new PublicKey(address);
+  const balance = await connection.getBalance(pubkey);
+  // Return as lamports string (similar to wei for EVM)
+  return balance.toString();
+}
+
 interface UseBalancesOptions {
   enabled?: boolean;
 }
@@ -77,9 +95,11 @@ export function useChainBalances(
   const chainId = chainInfo?.chainId;
   const isEvm = chainInfo?.evm !== undefined;
   const isCosmos = chainInfo?.cosmos !== undefined;
+  const isSolana = chainInfo?.solana !== undefined;
 
   // Get addresses using TanStack Query hooks
   const { address: ethAddress } = useEthAddress();
+  const { address: solanaAddress } = useSolanaAddress();
   const cosmosChainIds = useMemo(
     () => (chainId && isCosmos ? [chainId] : []),
     [chainId, isCosmos],
@@ -123,12 +143,33 @@ export function useChainBalances(
     refetchInterval: 60 * 1000,
   });
 
+  // Solana native balance query
+  const solanaQuery = useQuery({
+    queryKey: ["balances", "solana", chainId, solanaAddress],
+    queryFn: async () => {
+      if (!chainInfo?.solana?.rpc || !solanaAddress) {
+        return "0";
+      }
+      return fetchSolanaBalance(chainInfo.solana.rpc, solanaAddress);
+    },
+    enabled:
+      (options?.enabled ?? true) &&
+      isSolana &&
+      !!solanaAddress &&
+      !!chainInfo?.solana?.rpc,
+    staleTime: 30 * 1000,
+    refetchInterval: 60 * 1000,
+  });
+
   return {
     cosmosBalances: cosmosQuery.data ?? [],
     evmBalance: evmQuery.data ?? "0",
-    isLoading: cosmosQuery.isLoading || evmQuery.isLoading,
-    isFetching: cosmosQuery.isFetching || evmQuery.isFetching,
-    error: cosmosQuery.error || evmQuery.error,
+    solanaBalance: solanaQuery.data ?? "0",
+    isLoading:
+      cosmosQuery.isLoading || evmQuery.isLoading || solanaQuery.isLoading,
+    isFetching:
+      cosmosQuery.isFetching || evmQuery.isFetching || solanaQuery.isFetching,
+    error: cosmosQuery.error || evmQuery.error || solanaQuery.error,
   };
 }
 
@@ -142,6 +183,8 @@ export function useAllBalances() {
 
   // Get addresses using TanStack Query hooks
   const { address: ethAddress, isLoading: ethLoading } = useEthAddress();
+  const { address: solanaAddress, isLoading: solanaLoading } =
+    useSolanaAddress();
   const cosmosChainIds = useMemo(
     () =>
       enabledChains
@@ -157,12 +200,19 @@ export function useAllBalances() {
     queries: enabledChains.map((chain) => {
       const isCosmos = chain.cosmos !== undefined;
       const isEvm = chain.evm !== undefined;
+      const isSolana = chain.solana !== undefined;
       const bech32Address = isCosmos
         ? bech32Addresses[chain.chainId]
         : undefined;
 
       return {
-        queryKey: ["balances", chain.chainId, bech32Address, ethAddress],
+        queryKey: [
+          "balances",
+          chain.chainId,
+          bech32Address,
+          ethAddress,
+          solanaAddress,
+        ],
         queryFn: async (): Promise<TokenBalance[]> => {
           const results: TokenBalance[] = [];
 
@@ -224,9 +274,40 @@ export function useAllBalances() {
             }
           }
 
+          // Fetch Solana native balance
+          if (isSolana && solanaAddress && chain.solana?.rpc) {
+            try {
+              const balance = await fetchSolanaBalance(
+                chain.solana.rpc,
+                solanaAddress,
+              );
+              const nativeCurrency = chain.solana.currencies[0];
+              if (nativeCurrency && BigInt(balance) > BigInt(0)) {
+                results.push({
+                  chainInfo: chain,
+                  token: { currency: nativeCurrency, amount: balance },
+                  address: solanaAddress,
+                  priceUsd: nativeCurrency.coinGeckoId
+                    ? priceMap[nativeCurrency.coinGeckoId]
+                    : undefined,
+                  isFetching: false,
+                  error: undefined,
+                });
+              }
+            } catch (error) {
+              console.error(
+                `Failed to fetch Solana balance for ${chain.chainId}:`,
+                error,
+              );
+            }
+          }
+
           return results;
         },
-        enabled: (isCosmos && !!bech32Address) || (isEvm && !!ethAddress),
+        enabled:
+          (isCosmos && !!bech32Address) ||
+          (isEvm && !!ethAddress) ||
+          (isSolana && !!solanaAddress),
         staleTime: 30 * 1000,
         refetchInterval: 60 * 1000,
       };
@@ -258,19 +339,18 @@ export function useAllBalances() {
     });
 
   // Group balances by chain identifier
-  const balancesByChainIdentifier = allBalances.reduce<
-    Map<string, TokenBalance[]>
-  >((map, balance) => {
+  const balancesByChainIdentifier = new Map();
+  for (const balance of allBalances) {
     const identifier = getChainIdentifier(balance.chainInfo.chainId);
-    const existing = map.get(identifier) ?? [];
+    const existing = balancesByChainIdentifier.get(identifier) ?? [];
     existing.push(balance);
-    map.set(identifier, existing);
-    return map;
-  }, new Map());
+    balancesByChainIdentifier.set(identifier, existing);
+  }
 
   const isLoading =
     chainsLoading ||
     ethLoading ||
+    solanaLoading ||
     addressesLoading ||
     balanceQueries.some((q) => q.isLoading) ||
     pricesLoading;
@@ -292,19 +372,19 @@ export function useAllBalances() {
 export function useTotalBalance() {
   const { balances, isLoading } = useAllBalances();
 
-  const totalUsd = balances.reduce((sum, bal) => {
+  let totalUsd = 0;
+  for (const bal of balances) {
     if (!bal.priceUsd) {
-      return sum;
+      continue;
+      // return sum;
     }
-    return (
-      sum +
-      calculateUsdValue(
-        bal.token.amount,
-        bal.token.currency.coinDecimals,
-        bal.priceUsd,
-      )
+
+    totalUsd += calculateUsdValue(
+      bal.token.amount,
+      bal.token.currency.coinDecimals,
+      bal.priceUsd,
     );
-  }, 0);
+  }
 
   return {
     totalUsd,

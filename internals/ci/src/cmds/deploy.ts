@@ -30,6 +30,9 @@ const APP_CONFIGS = {
   "oko-sandbox-evm": {
     path: path.join(paths.root, "sandbox/sandbox_evm"),
   },
+  "oko-sandbox-sol": {
+    path: path.join(paths.root, "sandbox/sandbox_sol"),
+  },
 };
 
 function listDeployableApps(): void {

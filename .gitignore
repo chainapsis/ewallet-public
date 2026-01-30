@@ -400,6 +400,7 @@ $RECYCLE.BIN/
 .claude/
 .plans/
 .tasks/
+.mcp.json
 
 # vscode
 .vscode/

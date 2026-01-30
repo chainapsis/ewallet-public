@@ -73,3 +73,27 @@
     background: var(--error-700) !important;
   }
 }
+
+.paginationWrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navButton {
+  padding: 6px 12px;
+  border: 1px solid var(--border-secondary);
+  border-radius: 6px;
+  background: var(--bg-primary);
+  color: var(--fg-primary);
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.pageInfo {
+  color: var(--fg-secondary);
+}

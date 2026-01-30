@@ -11,6 +11,10 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@oko-wallet/oko-common-ui/table";
+import { Dropdown } from "@oko-wallet/oko-common-ui/dropdown";
+import { Badge } from "@oko-wallet/oko-common-ui/badge";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import { ChevronDownIcon } from "@oko-wallet/oko-common-ui/icons/chevron_down";
 
 import styles from "./sig_shares_table.module.scss";
 import { useGetTSSSessionsList } from "./use_get_tss_sessions";
@@ -21,10 +25,11 @@ import {
   useTablePagination,
 } from "@oko-wallet-admin/components/table/use_table";
 import { useAllKeyShareNodes } from "@oko-wallet-admin/fetch/ks_node/use_all_ks_nodes";
-import { Dropdown } from "@oko-wallet/oko-common-ui/dropdown";
-import { Badge } from "@oko-wallet/oko-common-ui/badge";
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import { ChevronDownIcon } from "@oko-wallet/oko-common-ui/icons/chevron_down";
+
+const CUSTOMER_ID = "customer_id";
+const APP_ID = "app_id";
+const NODE_ID = "node_id";
+const CURVE_TYPE = "curve_type";
 
 const defaultData: TssSessionWithCustomerAndUser[] = [];
 
@@ -72,13 +77,18 @@ const columns = [
   }),
   columnHelper.accessor((row) => row.user_email, {
     id: "user_email",
-    header: "Email",
+    header: "User Identifier",
     cell: (info) => <div className={styles.userEmail}>{info.getValue()}</div>,
   }),
   columnHelper.accessor((row) => row.wallet_id, {
     id: "wallet_id",
     header: "Wallet ID",
     cell: (info) => <div className={styles.walletId}>{info.getValue()}</div>,
+  }),
+  columnHelper.accessor((row) => row.curve_type, {
+    id: "curve_type",
+    header: "Curve Type",
+    cell: (info) => <div>{info.getValue()}</div>,
   }),
   columnHelper.accessor((row) => row.wallet_public_key, {
     id: "wallet_public_key",
@@ -150,12 +160,17 @@ export const SigSharesTable: FC = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const selectedCustomerId =
-    searchParams.get("customer_id") || searchParams.get("app_id");
-  const selectedNodeId = searchParams.get("node_id");
+    searchParams.get(CUSTOMER_ID) || searchParams.get(APP_ID);
+  const selectedNodeId = searchParams.get(NODE_ID);
+  const selectedCurveType = searchParams.get(CURVE_TYPE);
 
   const getFilterType = () => {
-    if (selectedNodeId) return "node";
-    if (selectedCustomerId) return "app";
+    if (selectedNodeId) {
+      return "node";
+    }
+    if (selectedCustomerId) {
+      return "app";
+    }
     return "app";
   };
 
@@ -186,10 +201,10 @@ export const SigSharesTable: FC = () => {
     const params = new URLSearchParams(searchParams.toString());
 
     if (type === "app") {
-      params.delete("node_id");
+      params.delete(NODE_ID);
     } else {
-      params.delete("customer_id");
-      params.delete("app_id");
+      params.delete(CUSTOMER_ID);
+      params.delete(APP_ID);
     }
 
     router.push(`?${params.toString()}`, { scroll: false });
@@ -203,11 +218,11 @@ export const SigSharesTable: FC = () => {
     const params = new URLSearchParams(searchParams.toString());
 
     if (customerId) {
-      params.set("customer_id", customerId);
-      params.delete("app_id");
+      params.set(CUSTOMER_ID, customerId);
+      params.delete(APP_ID);
     } else {
-      params.delete("customer_id");
-      params.delete("app_id");
+      params.delete(CUSTOMER_ID);
+      params.delete(APP_ID);
     }
 
     router.push(`?${params.toString()}`, { scroll: false });
@@ -217,9 +232,21 @@ export const SigSharesTable: FC = () => {
     const params = new URLSearchParams(searchParams.toString());
 
     if (!nodeId || nodeId === "") {
-      params.delete("node_id");
+      params.delete(NODE_ID);
     } else {
-      params.set("node_id", nodeId);
+      params.set(NODE_ID, nodeId);
+    }
+
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
+  const handleCurveTypeChange = (curveType: string | null) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (curveType) {
+      params.set(CURVE_TYPE, curveType);
+    } else {
+      params.delete(CURVE_TYPE);
     }
 
     router.push(`?${params.toString()}`, { scroll: false });
@@ -229,6 +256,7 @@ export const SigSharesTable: FC = () => {
     page: pageIndex,
     nodeId: selectedNodeId || undefined,
     customerId: selectedCustomerId || undefined,
+    curveType: selectedCurveType || undefined,
   });
 
   const tssSessions = data?.tss_sessions ?? defaultData;
@@ -381,6 +409,52 @@ export const SigSharesTable: FC = () => {
               </Dropdown.Content>
             </Dropdown>
           )}
+
+          <div className={styles.divider}>|</div>
+
+          <Typography
+            size="md"
+            weight="medium"
+            color="tertiary"
+            className={styles.separatorText}
+          >
+            Curve
+          </Typography>
+
+          <Dropdown>
+            <Dropdown.Trigger asChild>
+              <div className={styles.dropdownTrigger}>
+                <Badge
+                  color={selectedCurveType ? "brand" : "gray"}
+                  size="md"
+                  label={selectedCurveType || "All"}
+                />
+                <ChevronDownIcon
+                  color="var(--fg-tertiary)"
+                  size={16}
+                  className={styles.chevronIcon}
+                />
+              </div>
+            </Dropdown.Trigger>
+            <Dropdown.Content className={styles.dropdownContent}>
+              <Dropdown.Item onClick={() => handleCurveTypeChange(null)}>
+                <Typography size="sm" color="primary">
+                  All
+                </Typography>
+              </Dropdown.Item>
+              <Dropdown.Divider />
+              <Dropdown.Item onClick={() => handleCurveTypeChange("secp256k1")}>
+                <Typography size="sm" color="primary">
+                  secp256k1
+                </Typography>
+              </Dropdown.Item>
+              <Dropdown.Item onClick={() => handleCurveTypeChange("ed25519")}>
+                <Typography size="sm" color="primary">
+                  ed25519
+                </Typography>
+              </Dropdown.Item>
+            </Dropdown.Content>
+          </Dropdown>
         </div>
       </div>
       {tssSessions.length === 0 ? (
@@ -423,6 +497,7 @@ export const SigSharesTable: FC = () => {
           </div>
           <div className={styles.paginationWrapper}>
             <button
+              type="button"
               className={styles.navButton}
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={!hasPrev || currentPage <= 1}
@@ -431,6 +506,7 @@ export const SigSharesTable: FC = () => {
             </button>
             <span className={styles.pageInfo}>Page {currentPage}</span>
             <button
+              type="button"
               className={styles.navButton}
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={!hasNext}

@@ -218,7 +218,10 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
 
     if (feeData !== undefined) {
       if (feeData.type === "eip1559") {
-        if (!feeData.maxFeePerGas || !feeData.maxPriorityFeePerGas) {
+        if (
+          feeData.maxFeePerGas === undefined ||
+          feeData.maxPriorityFeePerGas === undefined
+        ) {
           return;
         }
 

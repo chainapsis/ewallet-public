@@ -4091,6 +4091,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@dao-xyz/borsh@npm:^5.2.4":
+  version: 5.2.4
+  resolution: "@dao-xyz/borsh@npm:5.2.4"
+  dependencies:
+    "@protobufjs/float": "npm:^1.0.2"
+    "@protobufjs/utf8": "npm:^1.1.0"
+    "@types/benchmark": "npm:^2.1.5"
+    protobufjs: "npm:^7.5.4"
+  checksum: 10c0/3043dc34a6d4e0d125528d7ec0c656e4db78a9e30541c43e66164bc9433d72f4425409e2bf6ec72583310ceca9a0c4b7dcd2d0ed1a9e1ad9630e1327a12564f1
+  languageName: node
+  linkType: hard
+
 "@discoveryjs/json-ext@npm:0.5.7":
   version: 0.5.7
   resolution: "@discoveryjs/json-ext@npm:0.5.7"
@@ -9124,7 +9136,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@noble/curves@npm:2.0.1":
+"@noble/curves@npm:2.0.1, @noble/curves@npm:^2.0.1":
   version: 2.0.1
   resolution: "@noble/curves@npm:2.0.1"
   dependencies:
@@ -9139,6 +9151,13 @@ __metadata:
   dependencies:
     "@noble/hashes": "npm:1.7.2"
   checksum: 10c0/e7ef119b114681d6b7530b29a21f9bbea6fa6973bc369167da2158d05054cc6e6dbfb636ba89fad7707abacc150de30188b33192f94513911b24bdb87af50bbd
+  languageName: node
+  linkType: hard
+
+"@noble/ed25519@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "@noble/ed25519@npm:3.0.0"
+  checksum: 10c0/6355aed04523d063d3e9a9952926af4a0eaa722e08133f558d44963a3048bf6dae02cae9032d42238d1fcb2a93ef27658f2baf4cf07939457717a4337a89dc26
   languageName: node
   linkType: hard
 
@@ -9195,6 +9214,13 @@ __metadata:
   version: 1.8.0
   resolution: "@noble/hashes@npm:1.8.0"
   checksum: 10c0/06a0b52c81a6fa7f04d67762e08b2c476a00285858150caeaaff4037356dd5e119f45b2a530f638b77a5eeca013168ec1b655db41bae3236cb2e9d511484fc77
+  languageName: node
+  linkType: hard
+
+"@noble/hashes@npm:2.0.0":
+  version: 2.0.0
+  resolution: "@noble/hashes@npm:2.0.0"
+  checksum: 10c0/4c619df392164ea8655c630e753e791e1afb5f38cb746463d36509f684a197c3c653858b6a78135a0b54c80270a66f28003d5999ec1ad06cec0d658bf720a03f
   languageName: node
   linkType: hard
 
@@ -10306,26 +10332,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@oko-wallet/attached-api@workspace:*, @oko-wallet/attached-api@workspace:backend/attached_api":
-  version: 0.0.0-use.local
-  resolution: "@oko-wallet/attached-api@workspace:backend/attached_api"
-  dependencies:
-    "@oko-wallet/oko-api-openapi": "workspace:*"
-    "@oko-wallet/oko-pg-interface": "workspace:*"
-    "@oko-wallet/oko-types": "npm:^0.1.2-alpha.1"
-    "@types/express": "npm:^5.0.6"
-    "@types/jest": "npm:^29.5.14"
-    "@types/node": "npm:^24.10.1"
-    "@types/supertest": "npm:^6.0.3"
-    express: "npm:^4.21.1"
-    jest: "npm:^30.1.3"
-    supertest: "npm:^7.0.0"
-    ts-jest: "npm:^29.4.5"
-    typescript: "npm:^5.8.3"
-    zod: "npm:^4.1.12"
-  languageName: unknown
-  linkType: soft
-
 "@oko-wallet/aws@workspace:*, @oko-wallet/aws@workspace:lib/aws":
   version: 0.0.0-use.local
   resolution: "@oko-wallet/aws@workspace:lib/aws"
@@ -10571,7 +10577,7 @@ __metadata:
     "@oko-wallet/oko-sdk-core": "npm:^0.1.2-alpha.1"
     "@oko-wallet/oko-sdk-cosmos": "npm:^0.1.2-alpha.1"
     "@oko-wallet/oko-sdk-eth": "npm:^0.1.2-alpha.1"
-    "@oko-wallet/oko-sdk-sol": "workspace:*"
+    "@oko-wallet/oko-sdk-svm": "workspace:*"
     "@oko-wallet/stdlib-js": "npm:^0.0.2-rc.44"
     "@types/node": "npm:^24.10.1"
     "@types/react": "npm:^19.2.7"
@@ -10761,7 +10767,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@oko-wallet/ksn-interface@npm:^0.1.2-alpha.1, @oko-wallet/ksn-interface@workspace:key_share_node/ksn_interface":
+"@oko-wallet/ksn-interface@npm:^0.1.2-alpha.1, @oko-wallet/ksn-interface@workspace:*, @oko-wallet/ksn-interface@workspace:key_share_node/ksn_interface":
   version: 0.0.0-use.local
   resolution: "@oko-wallet/ksn-interface@workspace:key_share_node/ksn_interface"
   dependencies:
@@ -10798,48 +10804,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@oko-wallet/log-api@workspace:*, @oko-wallet/log-api@workspace:backend/log_api":
-  version: 0.0.0-use.local
-  resolution: "@oko-wallet/log-api@workspace:backend/log_api"
-  dependencies:
-    "@oko-wallet/bytes": "npm:^0.1.2-alpha.1"
-    "@oko-wallet/oko-api-error-codes": "workspace:*"
-    "@oko-wallet/oko-api-server-state": "workspace:*"
-    "@oko-wallet/oko-pg-interface": "workspace:*"
-    "@oko-wallet/oko-types": "npm:^0.1.2-alpha.1"
-    "@oko-wallet/postgres-lib": "workspace:*"
-    "@oko-wallet/stdlib-js": "npm:0.0.2-rc.41"
-    "@types/cors": "npm:^2.8.17"
-    "@types/express": "npm:^5.0.6"
-    "@types/express-rate-limit": "npm:^6.0.2"
-    "@types/jest": "npm:^29.5.14"
-    "@types/jsonwebtoken": "npm:^9.0.7"
-    "@types/morgan": "npm:^1.9.9"
-    "@types/node": "npm:^24.10.1"
-    "@types/supertest": "npm:^6.0.3"
-    "@types/swagger-jsdoc": "npm:^6.0.4"
-    "@types/swagger-ui-express": "npm:^4.1.8"
-    cors: "npm:^2.8.5"
-    dayjs: "npm:^1.11.18"
-    dotenv: "npm:^16.4.5"
-    express: "npm:^4.21.1"
-    express-rate-limit: "npm:8.2.1"
-    helmet: "npm:^8.0.0"
-    jest: "npm:^30.1.3"
-    jsonwebtoken: "npm:^9.0.2"
-    morgan: "npm:^1.10.0"
-    pg: "npm:^8.16.3"
-    supertest: "npm:^7.0.0"
-    swagger-ui-express: "npm:^5.0.1"
-    ts-jest: "npm:^29.4.5"
-    typescript: "npm:^5.8.3"
-    uuid: "npm:^13.0.0"
-    winston: "npm:^3.17.0"
-    winston-elasticsearch: "npm:^0.19.0"
-    zod: "npm:^4.1.12"
-  languageName: unknown
-  linkType: soft
-
 "@oko-wallet/oko-admin-web@workspace:apps/oko_admin_web":
   version: 0.0.0-use.local
   resolution: "@oko-wallet/oko-admin-web@workspace:apps/oko_admin_web"
@@ -10865,9 +10829,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@oko-wallet/oko-api-error-codes@workspace:*, @oko-wallet/oko-api-error-codes@workspace:backend/oko_api/error_codes":
+"@oko-wallet/oko-api-error-codes@workspace:*, @oko-wallet/oko-api-error-codes@workspace:backend/oko_api_error_codes":
   version: 0.0.0-use.local
-  resolution: "@oko-wallet/oko-api-error-codes@workspace:backend/oko_api/error_codes"
+  resolution: "@oko-wallet/oko-api-error-codes@workspace:backend/oko_api_error_codes"
   dependencies:
     "@oko-wallet/oko-types": "npm:^0.1.2-alpha.1"
     "@oko-wallet/stdlib-js": "npm:0.0.2-rc.41"
@@ -10927,16 +10891,22 @@ __metadata:
   resolution: "@oko-wallet/oko-api-server@workspace:backend/oko_api/server"
   dependencies:
     "@oko-wallet/admin-api": "workspace:*"
-    "@oko-wallet/attached-api": "workspace:*"
+    "@oko-wallet/bytes": "npm:^0.1.2-alpha.2"
+    "@oko-wallet/cait-sith-keplr-addon": "workspace:*"
     "@oko-wallet/crypto-js": "npm:^0.1.2-alpha.1"
     "@oko-wallet/ct-dashboard-api": "workspace:*"
     "@oko-wallet/dotenv": "npm:0.0.2-alpha.26"
-    "@oko-wallet/log-api": "workspace:*"
+    "@oko-wallet/ksn-interface": "workspace:*"
+    "@oko-wallet/oko-api-error-codes": "workspace:*"
     "@oko-wallet/oko-api-openapi": "workspace:*"
     "@oko-wallet/oko-api-server-state": "workspace:*"
     "@oko-wallet/oko-pg-interface": "workspace:*"
     "@oko-wallet/oko-types": "npm:^0.1.2-alpha.1"
+    "@oko-wallet/postgres-lib": "workspace:*"
     "@oko-wallet/stdlib-js": "npm:0.0.2-rc.41"
+    "@oko-wallet/tecdsa-interface": "npm:0.0.2-alpha.22"
+    "@oko-wallet/teddsa-addon": "workspace:*"
+    "@oko-wallet/teddsa-interface": "workspace:*"
     "@oko-wallet/user-dashboard-api": "workspace:*"
     "@types/cors": "npm:^2.8.17"
     "@types/express": "npm:^5.0.6"
@@ -10965,6 +10935,8 @@ __metadata:
     tsx: "npm:^4.20.3"
     typescript: "npm:^5.8.3"
     uuid: "npm:^13.0.0"
+    winston: "npm:^3.17.0"
+    winston-elasticsearch: "npm:^0.19.0"
     zod: "npm:^4.1.12"
   languageName: unknown
   linkType: soft
@@ -11139,20 +11111,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@oko-wallet/oko-sdk-common@workspace:sdk/oko_sdk_common":
-  version: 0.0.0-use.local
-  resolution: "@oko-wallet/oko-sdk-common@workspace:sdk/oko_sdk_common"
-  dependencies:
-    "@jest/globals": "npm:^29.7.0"
-    "@types/jest": "npm:^29.5.14"
-    "@types/node": "npm:^24.10.1"
-    del-cli: "npm:^6.0.0"
-    ts-jest: "npm:^29.4.5"
-    tsc-alias: "npm:^1.8.16"
-    typescript: "npm:^5.8.3"
-  languageName: unknown
-  linkType: soft
-
 "@oko-wallet/oko-sdk-core@npm:^0.0.6-rc.131":
   version: 0.0.6-rc.131
   resolution: "@oko-wallet/oko-sdk-core@npm:0.0.6-rc.131"
@@ -11277,9 +11235,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@oko-wallet/oko-sdk-sol@workspace:*, @oko-wallet/oko-sdk-sol@workspace:sdk/oko_sdk_sol":
+"@oko-wallet/oko-sdk-svm@workspace:*, @oko-wallet/oko-sdk-svm@workspace:sdk/oko_sdk_svm":
   version: 0.0.0-use.local
-  resolution: "@oko-wallet/oko-sdk-sol@workspace:sdk/oko_sdk_sol"
+  resolution: "@oko-wallet/oko-sdk-svm@workspace:sdk/oko_sdk_svm"
   dependencies:
     "@oko-wallet/oko-sdk-core": "npm:^0.1.2-alpha.1"
     "@oko-wallet/stdlib-js": "npm:^0.0.2-rc.42"
@@ -11435,11 +11393,32 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@oko-wallet/sandbox-rialo@workspace:sandbox/sandbox_rialo":
+  version: 0.0.0-use.local
+  resolution: "@oko-wallet/sandbox-rialo@workspace:sandbox/sandbox_rialo"
+  dependencies:
+    "@oko-wallet/oko-sdk-svm": "workspace:*"
+    "@rialo/frost": "npm:^0.1.0"
+    "@rialo/ts-cdk": "npm:^0.1.0"
+    "@rialo/wallet-standard": "npm:^0.1.0"
+    "@tailwindcss/postcss": "npm:^4"
+    "@types/node": "npm:^22.0.0"
+    "@types/react": "npm:^19.0.0"
+    "@types/react-dom": "npm:^19.0.0"
+    bs58: "npm:^6.0.0"
+    next: "npm:^16.1.1"
+    react: "npm:^19.0.0"
+    react-dom: "npm:^19.0.0"
+    tailwindcss: "npm:^4.1.3"
+    typescript: "npm:^5.8.3"
+  languageName: unknown
+  linkType: soft
+
 "@oko-wallet/sandbox-sol@workspace:sandbox/sandbox_sol":
   version: 0.0.0-use.local
   resolution: "@oko-wallet/sandbox-sol@workspace:sandbox/sandbox_sol"
   dependencies:
-    "@oko-wallet/oko-sdk-sol": "workspace:*"
+    "@oko-wallet/oko-sdk-svm": "workspace:*"
     "@solana/wallet-adapter-base": "npm:^0.9.23"
     "@solana/wallet-adapter-react": "npm:^0.15.35"
     "@solana/wallet-adapter-react-ui": "npm:^0.9.35"
@@ -11523,7 +11502,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@oko-wallet/teddsa-addon@workspace:crypto/teddsa/teddsa_addon":
+"@oko-wallet/teddsa-addon@workspace:*, @oko-wallet/teddsa-addon@workspace:crypto/teddsa/teddsa_addon":
   version: 0.0.0-use.local
   resolution: "@oko-wallet/teddsa-addon@workspace:crypto/teddsa/teddsa_addon"
   dependencies:
@@ -11634,8 +11613,10 @@ __metadata:
     "@oko-wallet/oko-common-ui": "workspace:*"
     "@oko-wallet/oko-sdk-cosmos": "npm:^0.1.2-alpha.1"
     "@oko-wallet/oko-sdk-eth": "npm:^0.1.2-alpha.1"
+    "@oko-wallet/oko-sdk-svm": "workspace:*"
     "@oko-wallet/oko-types": "npm:^0.1.2-alpha.2"
     "@oko-wallet/stdlib-js": "npm:0.0.2-rc.41"
+    "@solana/web3.js": "npm:^1.98.0"
     "@tanstack/react-query": "npm:^5.90.12"
     "@tanstack/react-table": "npm:^8.21.3"
     "@types/lodash.throttle": "npm:^4"
@@ -14887,6 +14868,76 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@rialo/frost-core@npm:^0.1.1":
+  version: 0.1.1
+  resolution: "@rialo/frost-core@npm:0.1.1"
+  dependencies:
+    "@rialo/ts-cdk": "npm:0.1.9"
+    "@rialo/wallet-standard": "npm:0.1.1"
+    "@tanstack/store": "npm:0.8.0"
+    "@wallet-standard/app": "npm:1.1.0"
+    "@wallet-standard/base": "npm:1.1.0"
+    "@wallet-standard/features": "npm:1.1.0"
+  checksum: 10c0/185e34580bd93e27b4a42f9d7091670be62e146150a8b147c1fa5716839180e7f62803bff09b9c7df0c93f4f890e63e06715118fcbfef1951007ff0642996c8d
+  languageName: node
+  linkType: hard
+
+"@rialo/frost@npm:^0.1.0":
+  version: 0.1.1
+  resolution: "@rialo/frost@npm:0.1.1"
+  dependencies:
+    "@rialo/frost-core": "npm:^0.1.1"
+    "@rialo/ts-cdk": "npm:0.1.9"
+    "@tanstack/react-query": "npm:5.90.10"
+    "@tanstack/react-store": "npm:0.8.0"
+  peerDependencies:
+    react: ^18.0.0 || ^19.0.0
+  checksum: 10c0/27e7b54b9d96cf7dafccce8c500022882cd10ca3bd1809ff5fbb64e1c19bad8192475ce2dd33fc2fe8213810fa215e99032b8242b289a653c8851830976d9355
+  languageName: node
+  linkType: hard
+
+"@rialo/ts-cdk@npm:0.1.9":
+  version: 0.1.9
+  resolution: "@rialo/ts-cdk@npm:0.1.9"
+  dependencies:
+    "@dao-xyz/borsh": "npm:^5.2.4"
+    "@noble/curves": "npm:^2.0.1"
+    "@noble/ed25519": "npm:^3.0.0"
+    "@noble/hashes": "npm:2.0.0"
+    "@scure/base": "npm:^2.0.0"
+    "@scure/bip32": "npm:^2.0.1"
+    "@scure/bip39": "npm:^2.0.1"
+    ed25519-hd-key: "npm:^1.3.0"
+  checksum: 10c0/f8e35d5c7235fa63c2eaf60692ceb06e5b914e6ba01e9ce409641c5fc063c6fde10cc6f690bc0fc364bb7d0164a37e33211885763f48c54ba1ebb95ae63fe230
+  languageName: node
+  linkType: hard
+
+"@rialo/ts-cdk@npm:^0.1.0":
+  version: 0.1.10
+  resolution: "@rialo/ts-cdk@npm:0.1.10"
+  dependencies:
+    "@dao-xyz/borsh": "npm:^5.2.4"
+    "@noble/curves": "npm:^2.0.1"
+    "@noble/ed25519": "npm:^3.0.0"
+    "@noble/hashes": "npm:2.0.0"
+    "@scure/base": "npm:^2.0.0"
+    "@scure/bip32": "npm:^2.0.1"
+    "@scure/bip39": "npm:^2.0.1"
+    ed25519-hd-key: "npm:^1.3.0"
+  checksum: 10c0/ab59142ac4f1a3bce757c31cbac38e9f56d513ee4815d13d2ba74f838f5d2889fcb98801941ac8329a03236f31a557c5e5cbc6f5ff7e5fcac6114a6de767fa51
+  languageName: node
+  linkType: hard
+
+"@rialo/wallet-standard@npm:0.1.1, @rialo/wallet-standard@npm:^0.1.0":
+  version: 0.1.1
+  resolution: "@rialo/wallet-standard@npm:0.1.1"
+  dependencies:
+    "@wallet-standard/base": "npm:1.1.0"
+    "@wallet-standard/features": "npm:1.1.0"
+  checksum: 10c0/c277d4d4fd1cf9a5dbce1b4e1dc5da72dd53d1a90ace04ca9ab001aec094478937f68f42726bc7e7a5bebb23c03192d79fe986a0708888cfde038cd332c06a0e
+  languageName: node
+  linkType: hard
+
 "@rolldown/pluginutils@npm:1.0.0-beta.27":
   version: 1.0.0-beta.27
   resolution: "@rolldown/pluginutils@npm:1.0.0-beta.27"
@@ -15264,6 +15315,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@scure/base@npm:2.0.0, @scure/base@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@scure/base@npm:2.0.0"
+  checksum: 10c0/7d999c7bebf053bb49cb706fdc6c5366737cff0f7f7518f52d32d7f7ad7b898904f03673648a2af5c4f22396f5c05f1d8bddbf010d6595052d07ba8163d506ad
+  languageName: node
+  linkType: hard
+
 "@scure/base@npm:~1.1.0, @scure/base@npm:~1.1.6":
   version: 1.1.9
   resolution: "@scure/base@npm:1.1.9"
@@ -15315,6 +15373,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@scure/bip32@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "@scure/bip32@npm:2.0.1"
+  dependencies:
+    "@noble/curves": "npm:2.0.1"
+    "@noble/hashes": "npm:2.0.1"
+    "@scure/base": "npm:2.0.0"
+  checksum: 10c0/7c7ceac0ded08942afc866fa8a2f6fe1ad90b09932fd11560418701a965efe26e0cdf29ea87d18bc0bd847d34541c2ba1afed08794e273eafac8ab2ad23d012d
+  languageName: node
+  linkType: hard
+
 "@scure/bip39@npm:1.1.1":
   version: 1.1.1
   resolution: "@scure/bip39@npm:1.1.1"
@@ -15352,6 +15421,16 @@ __metadata:
     "@noble/hashes": "npm:~1.8.0"
     "@scure/base": "npm:~1.2.5"
   checksum: 10c0/73a54b5566a50a3f8348a5cfd74d2092efeefc485efbed83d7a7374ffd9a75defddf446e8e5ea0385e4adb49a94b8ae83c5bad3e16333af400e932f7da3aaff8
+  languageName: node
+  linkType: hard
+
+"@scure/bip39@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "@scure/bip39@npm:2.0.1"
+  dependencies:
+    "@noble/hashes": "npm:2.0.1"
+    "@scure/base": "npm:2.0.0"
+  checksum: 10c0/ed8a0788bca006a6e4a647ed67c4c973b1deeaee5d62ddc168c9521c33e3a66cf5707c8aadcd0b6f9e3e41c3f763a985d913f4abc3813963497238e73ce166b6
   languageName: node
   linkType: hard
 
@@ -17178,10 +17257,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/query-core@npm:5.90.10":
+  version: 5.90.10
+  resolution: "@tanstack/query-core@npm:5.90.10"
+  checksum: 10c0/c51762d4413f99886af24d0a4897e286233fae305131df2db8294c26b1375e74e87d0cd7dafbe1b7d23338221fca0304c05058dd9a909c0988a8829d8f7283e6
+  languageName: node
+  linkType: hard
+
 "@tanstack/query-core@npm:5.90.17":
   version: 5.90.17
   resolution: "@tanstack/query-core@npm:5.90.17"
   checksum: 10c0/f10ba6d82d21fab5a3ad5df028090255f0da5368dad2a78cdb57426519bdb3608d284fbfe733ece139382f60ae17deb5eef14249fbff854b3791795effd8f06f
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query@npm:5.90.10":
+  version: 5.90.10
+  resolution: "@tanstack/react-query@npm:5.90.10"
+  dependencies:
+    "@tanstack/query-core": "npm:5.90.10"
+  peerDependencies:
+    react: ^18 || ^19
+  checksum: 10c0/a852c44fafb0331a47ba8b46f96bc6c3c66a1bfbec8a09de15fc0ba6fd1b867da42c4974f83489a03cc4d7fd9fa40ec23b8790d2f69a930ca63b85f2bf4a4885
   languageName: node
   linkType: hard
 
@@ -17230,7 +17327,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/react-store@npm:^0.8.0":
+"@tanstack/react-store@npm:0.8.0, @tanstack/react-store@npm:^0.8.0":
   version: 0.8.0
   resolution: "@tanstack/react-store@npm:0.8.0"
   dependencies:
@@ -17519,6 +17616,13 @@ __metadata:
   version: 2.4.6
   resolution: "@types/bcryptjs@npm:2.4.6"
   checksum: 10c0/1182663f0c081c5c58760019459cd309335e9b5fc6552780b0fd21b6c5f25661a844709e46218796f4bdbebe6736e11cfc5af0729bc2cdb0160943650aceb3da
+  languageName: node
+  linkType: hard
+
+"@types/benchmark@npm:^2.1.5":
+  version: 2.1.5
+  resolution: "@types/benchmark@npm:2.1.5"
+  checksum: 10c0/31ca163891bea0dbe28ad517ae95d18531518049e95cfac218e082590b33edd75cda23fc3e4abf72112b3928e844488c9b029b33aa29f825a83a16d2ed202154
   languageName: node
   linkType: hard
 
@@ -18927,7 +19031,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wallet-standard/app@npm:^1.1.0":
+"@wallet-standard/app@npm:1.1.0, @wallet-standard/app@npm:^1.1.0":
   version: 1.1.0
   resolution: "@wallet-standard/app@npm:1.1.0"
   dependencies:
@@ -18936,7 +19040,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wallet-standard/base@npm:^1.0.1, @wallet-standard/base@npm:^1.1.0":
+"@wallet-standard/base@npm:1.1.0, @wallet-standard/base@npm:^1.0.1, @wallet-standard/base@npm:^1.1.0":
   version: 1.1.0
   resolution: "@wallet-standard/base@npm:1.1.0"
   checksum: 10c0/4cae344d5a74ba4b7d063b649b191f2267bd11ea9573ebb9e78874163c03b58e3ec531bb296d0a8d7941bc09231761d97afb4c6ca8c0dc399c81d39884b4e408
@@ -18968,7 +19072,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wallet-standard/features@npm:^1.0.3, @wallet-standard/features@npm:^1.1.0":
+"@wallet-standard/features@npm:1.1.0, @wallet-standard/features@npm:^1.0.3, @wallet-standard/features@npm:^1.1.0":
   version: 1.1.0
   resolution: "@wallet-standard/features@npm:1.1.0"
   dependencies:
@@ -23503,7 +23607,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"create-hmac@npm:^1.1.7":
+"create-hmac@npm:1.1.7, create-hmac@npm:^1.1.7":
   version: 1.1.7
   resolution: "create-hmac@npm:1.1.7"
   dependencies:
@@ -24856,6 +24960,16 @@ __metadata:
     typeforce: "npm:^1.18.0"
     wif: "npm:^2.0.6"
   checksum: 10c0/206a3c9af725416e6e91515278259319d88c880cf067c4e4d275fee5e746064cc5bc6279bdb2f87a9218ef25dd82921422d05e0952d4b41c8e91c070c504aa70
+  languageName: node
+  linkType: hard
+
+"ed25519-hd-key@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "ed25519-hd-key@npm:1.3.0"
+  dependencies:
+    create-hmac: "npm:1.1.7"
+    tweetnacl: "npm:1.0.3"
+  checksum: 10c0/8fb2fa9a9cb90bfbd0261b1f14f2f6367c98c51d0d5b9045df6e95634372493c59fc162dd1c584f569717fc18c23067a570edc3f48506d644c81eb8fde90c1b2
   languageName: node
   linkType: hard
 
@@ -32238,7 +32352,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"long@npm:^5.2.3, long@npm:^5.3.2":
+"long@npm:^5.0.0, long@npm:^5.2.3, long@npm:^5.3.2":
   version: 5.3.2
   resolution: "long@npm:5.3.2"
   checksum: 10c0/7130fe1cbce2dca06734b35b70d380ca3f70271c7f8852c922a7c62c86c4e35f0c39290565eca7133c625908d40e126ac57c02b1b1a4636b9457d77e1e60b981
@@ -37963,6 +38077,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"protobufjs@npm:^7.5.4":
+  version: 7.5.4
+  resolution: "protobufjs@npm:7.5.4"
+  dependencies:
+    "@protobufjs/aspromise": "npm:^1.1.2"
+    "@protobufjs/base64": "npm:^1.1.2"
+    "@protobufjs/codegen": "npm:^2.0.4"
+    "@protobufjs/eventemitter": "npm:^1.1.0"
+    "@protobufjs/fetch": "npm:^1.1.0"
+    "@protobufjs/float": "npm:^1.0.2"
+    "@protobufjs/inquire": "npm:^1.1.0"
+    "@protobufjs/path": "npm:^1.1.2"
+    "@protobufjs/pool": "npm:^1.1.0"
+    "@protobufjs/utf8": "npm:^1.1.0"
+    "@types/node": "npm:>=13.7.0"
+    long: "npm:^5.0.0"
+  checksum: 10c0/913b676109ffb3c05d3d31e03a684e569be91f3bba8613da4a683d69d9dba948daa2afd7d2e7944d1aa6c417890c35d9d9a8883c1160affafb0f9670d59ef722
+  languageName: node
+  linkType: hard
+
 "protocols@npm:^2.0.0, protocols@npm:^2.0.1":
   version: 2.0.2
   resolution: "protocols@npm:2.0.2"
@@ -43002,6 +43136,13 @@ __metadata:
     debug: "npm:^4.4.3"
     make-fetch-happen: "npm:^15.0.1"
   checksum: 10c0/38330b0b2d16f7f58eccd49b3a6ff0f87dd20743d6f2c26c2621089d8d83d807808e0e660c5be891122538d32db250e3e88267da4421537253e7aa99a45e5800
+  languageName: node
+  linkType: hard
+
+"tweetnacl@npm:1.0.3":
+  version: 1.0.3
+  resolution: "tweetnacl@npm:1.0.3"
+  checksum: 10c0/069d9df51e8ad4a89fbe6f9806c68e06c65be3c7d42f0701cc43dba5f0d6064686b238bbff206c5addef8854e3ce00c643bff59432ea2f2c639feab0ee1a93f9
   languageName: node
   linkType: hard
 

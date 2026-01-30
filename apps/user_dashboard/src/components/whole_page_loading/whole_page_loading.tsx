@@ -1,12 +1,12 @@
-import type { FC } from "react";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import cn from "classnames";
 import Image from "next/image";
+import type { FC } from "react";
 
 import styles from "./whole_page_loading.module.scss";
-import { Spinner } from "../spinner/spinner";
+import { OkoLoader } from "@oko-wallet-user-dashboard/components/loader/oko_loader";
 import { DashboardHeader } from "@oko-wallet-user-dashboard/components/dashboard_header/dashboard_header";
 import { SignInImage } from "@oko-wallet-user-dashboard/components/sign_in_image/sign_in_image";
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
 
 export const WholePageLoading: FC = () => {
   const description =
@@ -39,7 +39,7 @@ export const WholePageLoading: FC = () => {
             </div>
           </SignInImage>
           <div className={styles.content}>
-            <Spinner size={30} />
+            <OkoLoader size={80} />
           </div>
         </div>
       </div>
@@ -47,7 +47,7 @@ export const WholePageLoading: FC = () => {
       <div className={cn(styles.wrapper, styles.mobile)}>
         <SignInImage>
           <div className={styles.spinnerWrapper}>
-            <Spinner size={30} />
+            <OkoLoader size={80} />
           </div>
         </SignInImage>
       </div>

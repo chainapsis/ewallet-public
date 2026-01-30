@@ -80,6 +80,18 @@ export async function setup(args: SetupArgs) {
     console.log("Skipping cargo check (skip_rust)");
   }
 
+  const dbMigrateKsnRet = spawnSync("yarn", ["ci", "db_migrate_ksn"], {
+    cwd: paths.root,
+    stdio: "inherit",
+  });
+  expectSuccess(dbMigrateKsnRet, "db migrate ksn failed");
+
+  const dbMigrateApiRet = spawnSync("yarn", ["ci", "db_migrate_api"], {
+    cwd: paths.root,
+    stdio: "inherit",
+  });
+  expectSuccess(dbMigrateApiRet, "db migrate api failed");
+
   console.log(`Setup complete
 You can now run: ./internals/tmux/tmux-e2e-start.sh
 `);

@@ -1,11 +1,7 @@
 "use client";
 
-import { useState, type FC } from "react";
-import {
-  createColumnHelper,
-  flexRender,
-  type PaginationState,
-} from "@tanstack/react-table";
+import { type FC } from "react";
+import { createColumnHelper, flexRender } from "@tanstack/react-table";
 import type { KSNodeHealthCheck } from "@oko-wallet/oko-types/tss";
 import type { WithTime } from "@oko-wallet/oko-types/aux_types";
 import {
@@ -18,7 +14,10 @@ import {
 } from "@oko-wallet/oko-common-ui/table";
 
 import styles from "./ksn_health_check_tbl.module.scss";
-import { useTable } from "@oko-wallet-admin/components/table/use_table";
+import {
+  useTable,
+  useTablePagination,
+} from "@oko-wallet-admin/components/table/use_table";
 import { useKSNHealthChecks } from "@oko-wallet-admin/fetch/ks_node/use_ksn_health_checks";
 
 const columnHelper = createColumnHelper<WithTime<KSNodeHealthCheck>>();
@@ -36,25 +35,27 @@ const columns = [
 ];
 
 export const KSNHealthCheckTable: FC = () => {
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 20,
+  const {
+    currentPage,
+    handlePageChange,
+    pagination,
+    onPaginationChange,
+  } = useTablePagination({
+    initialPageSize: 20,
   });
 
   const { data } = useKSNHealthChecks(pagination);
 
+  const hasNext = data?.has_next ?? false;
+  const hasPrev = currentPage > 1;
+
   const table = useTable({
     columns,
     data: data?.rows ?? [],
-    // pagination,
-    // onPaginationChange,
-    pageCount: 1, // nodeData?.pagination?.total_pages ?? 0,
+    pagination,
+    onPaginationChange,
     manualPagination: true,
   });
-
-  // if (nodeData?.ksNodes.length === 0) {
-  //   return <EmptyState text="No Keyshare Nodes here yet." />;
-  // }
 
   return (
     <div className={styles.wrapper}>
@@ -89,11 +90,23 @@ export const KSNHealthCheckTable: FC = () => {
           </TableBody>
         </Table>
       </div>
-      {/* <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      /> */}
+      <div className={styles.paginationWrapper}>
+        <button
+          className={styles.navButton}
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={!hasPrev}
+        >
+          Prev
+        </button>
+        <span className={styles.pageInfo}>Page {currentPage}</span>
+        <button
+          className={styles.navButton}
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={!hasNext}
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };

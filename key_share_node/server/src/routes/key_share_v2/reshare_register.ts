@@ -21,10 +21,10 @@ import {
 registry.registerPath({
   method: "post",
   path: "/keyshare/v2/reshare/register",
-  tags: ["Key Share v2"],
+  tags: ["Key Share v2", "Commit-Reveal"],
   summary: "Register key shares during reshare (new node)",
   description:
-    "Register key shares for an existing user when a new node joins during reshare. Unlike /register, the user must already exist.",
+    "Register key shares for an existing user when a new node joins during reshare. Unlike /register, the user must already exist. Requires commit-reveal authentication.",
   security: [{ oauthAuth: [] }],
   request: {
     body: {
@@ -65,11 +65,18 @@ registry.registerPath({
                 msg: "Share is not valid",
               },
             },
-            DUPLICATE_PUBLIC_KEY: {
+            INVALID_REQUEST: {
               value: {
                 success: false,
-                code: "DUPLICATE_PUBLIC_KEY",
-                msg: "Duplicate public key for curve_type: secp256k1",
+                code: "INVALID_REQUEST",
+                msg: "cr_session_id and cr_signature are required",
+              },
+            },
+            INVALID_SIGNATURE: {
+              value: {
+                success: false,
+                code: "INVALID_SIGNATURE",
+                msg: "Invalid signature",
               },
             },
           },
@@ -81,6 +88,64 @@ registry.registerPath({
       content: {
         "application/json": {
           schema: ErrorResponseSchema,
+        },
+      },
+    },
+    404: {
+      description: "Not found - Session not found",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+          examples: {
+            SESSION_NOT_FOUND: {
+              value: {
+                success: false,
+                code: "SESSION_NOT_FOUND",
+                msg: "Session not found",
+              },
+            },
+          },
+        },
+      },
+    },
+    409: {
+      description: "Conflict - Duplicate public key or API already called",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+          examples: {
+            DUPLICATE_PUBLIC_KEY: {
+              value: {
+                success: false,
+                code: "DUPLICATE_PUBLIC_KEY",
+                msg: "Duplicate public key for curve_type: secp256k1",
+              },
+            },
+            API_ALREADY_CALLED: {
+              value: {
+                success: false,
+                code: "API_ALREADY_CALLED",
+                msg: 'API "reshare_register" has already been called for this session',
+              },
+            },
+          },
+        },
+      },
+    },
+    410: {
+      description: "Gone - Session has expired",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+          examples: {
+            SESSION_EXPIRED: {
+              value: {
+                success: false,
+                code: "SESSION_EXPIRED",
+                msg: "Session has expired",
+              },
+            },
+          },
         },
       },
     },

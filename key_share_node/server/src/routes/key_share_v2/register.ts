@@ -21,10 +21,10 @@ import {
 registry.registerPath({
   method: "post",
   path: "/keyshare/v2/register",
-  tags: ["Key Share v2"],
+  tags: ["Key Share v2", "Commit-Reveal"],
   summary: "Register key shares (both curves required)",
   description:
-    "Register key shares for the authenticated user. Both secp256k1 and ed25519 wallets are required.",
+    "Register key shares for the authenticated user. Both secp256k1 and ed25519 wallets are required. Requires commit-reveal authentication.",
   security: [{ oauthAuth: [] }],
   request: {
     body: {
@@ -72,21 +72,11 @@ registry.registerPath({
                 msg: "Share is not valid",
               },
             },
-          },
-        },
-      },
-    },
-    409: {
-      description: "Conflict - Duplicate public key",
-      content: {
-        "application/json": {
-          schema: ErrorResponseSchema,
-          examples: {
-            DUPLICATE_PUBLIC_KEY: {
+            INVALID_SIGNATURE: {
               value: {
                 success: false,
-                code: "DUPLICATE_PUBLIC_KEY",
-                msg: "Duplicate public key for curve_type: secp256k1",
+                code: "INVALID_SIGNATURE",
+                msg: "Invalid signature",
               },
             },
           },
@@ -98,6 +88,64 @@ registry.registerPath({
       content: {
         "application/json": {
           schema: ErrorResponseSchema,
+        },
+      },
+    },
+    404: {
+      description: "Not found - Session not found",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+          examples: {
+            SESSION_NOT_FOUND: {
+              value: {
+                success: false,
+                code: "SESSION_NOT_FOUND",
+                msg: "Session not found",
+              },
+            },
+          },
+        },
+      },
+    },
+    409: {
+      description: "Conflict - Duplicate public key or API already called",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+          examples: {
+            DUPLICATE_PUBLIC_KEY: {
+              value: {
+                success: false,
+                code: "DUPLICATE_PUBLIC_KEY",
+                msg: "Duplicate public key for curve_type: secp256k1",
+              },
+            },
+            API_ALREADY_CALLED: {
+              value: {
+                success: false,
+                code: "API_ALREADY_CALLED",
+                msg: 'API "register" has already been called for this session',
+              },
+            },
+          },
+        },
+      },
+    },
+    410: {
+      description: "Gone - Session has expired",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+          examples: {
+            SESSION_EXPIRED: {
+              value: {
+                success: false,
+                code: "SESSION_EXPIRED",
+                msg: "Session has expired",
+              },
+            },
+          },
         },
       },
     },

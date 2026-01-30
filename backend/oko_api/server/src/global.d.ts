@@ -1,3 +1,9 @@
-/// <reference types="@oko-wallet/oko-api-server-state/src/global" />
+import type { ServerState } from "@oko-wallet/oko-api-server-state";
 
-export {};
+declare global {
+  namespace Express {
+    interface Locals extends ServerState { }
+  }
+}
+
+export { };

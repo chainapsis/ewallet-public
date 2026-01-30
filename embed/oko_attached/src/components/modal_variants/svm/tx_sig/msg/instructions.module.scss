@@ -1,0 +1,46 @@
+.container {
+  display: flex;
+  padding: 16px;
+  flex-direction: column;
+  align-items: flex-start;
+  overflow-y: auto;
+  border-radius: 12px;
+  background: var(--bg-secondary);
+  width: 100%;
+  gap: 16px;
+
+  :global([data-collapsible-content]) & {
+    padding: 0;
+    background: none;
+    border-radius: 0;
+  }
+}
+
+.tokenInfo {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.tokenAmount {
+  text-overflow: ellipsis;
+  word-break: break-all;
+}
+
+.address {
+  word-break: break-all;
+}
+
+.instructionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.instructionDivider {
+  width: 100%;
+  height: 1px;
+  background: var(--border-primary);
+}

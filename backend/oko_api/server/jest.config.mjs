@@ -7,6 +7,7 @@ export default {
   modulePathIgnorePatterns: ["<rootDir>/dist/"],
   moduleNameMapper: {
     "^@oko-wallet-api/(.*)$": "<rootDir>/src/$1",
+    "^@oko-wallet-admin-api/(.*)$": "<rootDir>/../../admin_api/src/$1",
   },
   extensionsToTreatAsEsm: [".ts"],
   globals: {

@@ -15,6 +15,7 @@ import { get_ks_node_by_id } from "./get_ks_node_by_id";
 import { get_ksn_health_checks } from "./get_ksn_health_checks";
 import { get_tss_all_activation_setting } from "./get_tss_all_activation_setting";
 import { get_tss_session_list } from "./get_tss_session_list";
+import { get_user_list } from "./get_user_list";
 import { get_wallet_list } from "./get_wallet_list";
 import { resend_customer_user_password } from "./resend_customer_user_password";
 import { set_tss_all_activation_setting } from "./set_tss_all_activation_setting";
@@ -86,6 +87,8 @@ export function makeOkoAdminRouter() {
   );
 
   router.post("/wallet/get_wallet_list", adminAuthMiddleware, get_wallet_list);
+
+  router.post("/wallet/get_user_list", adminAuthMiddleware, get_user_list);
 
   router.post(
     "/ks_node/get_all_ks_nodes",

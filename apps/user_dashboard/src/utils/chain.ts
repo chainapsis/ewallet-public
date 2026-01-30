@@ -27,13 +27,29 @@ export function hasCosmosSupport(chainInfo: ModularChainInfo): boolean {
 }
 
 /**
- * Check if chainId is for a Cosmos chain (not EVM-only, Bitcoin, or Starknet)
+ * Check if chainId is for a Cosmos chain (not EVM-only, Bitcoin, Starknet, or Solana)
  * Used for address derivation logic
  */
 export function isCosmosChainId(chainId: string): boolean {
   return (
     !chainId.startsWith("eip155:") &&
     !chainId.startsWith("bip122:") &&
-    !chainId.startsWith("starknet:")
+    !chainId.startsWith("starknet:") &&
+    !chainId.startsWith("solana:")
   );
+}
+
+/**
+ * Check if chainId is for a Solana chain
+ * Solana chains use the "solana:" prefix with genesis hash (e.g., "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp")
+ */
+export function isSolanaChainId(chainId: string): boolean {
+  return chainId.startsWith("solana:");
+}
+
+/**
+ * Check if chainInfo has Solana support
+ */
+export function hasSolanaSupport(chainInfo: ModularChainInfo): boolean {
+  return chainInfo.solana !== undefined;
 }

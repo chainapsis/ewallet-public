@@ -7,6 +7,7 @@ export interface User {
   email: string;
   status: string;
   auth_type: AuthType;
+  metadata: Record<string, unknown> | null;
   created_at: Date;
   updated_at: Date;
 }

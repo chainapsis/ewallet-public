@@ -51,6 +51,7 @@ export async function xAuthMiddleware(
       // in x, use x id as email identifier with prefix
       user_identifier: `x_${result.data.id}`,
       name: result.data.username,
+      metadata: result.data as unknown as Record<string, unknown>,
     };
 
     next();

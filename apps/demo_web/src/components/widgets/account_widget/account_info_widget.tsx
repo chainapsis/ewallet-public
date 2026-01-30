@@ -16,7 +16,8 @@ import type { LoginMethod } from "@oko-wallet-demo-web/types/login";
 export type AccountInfoWidgetProps = {
   type: LoginMethod;
   email: string;
-  publicKey: string;
+  publicKeySecp256k1: string;
+  publicKeyEd25519: string | null;
   name: string | null;
   onSignOut: () => void;
 };
@@ -24,7 +25,8 @@ export type AccountInfoWidgetProps = {
 export const AccountInfoWidget: FC<AccountInfoWidgetProps> = ({
   type,
   email,
-  publicKey,
+  publicKeySecp256k1,
+  publicKeyEd25519,
   name,
   onSignOut,
 }) => {
@@ -56,12 +58,35 @@ export const AccountInfoWidget: FC<AccountInfoWidgetProps> = ({
             color="tertiary"
             className={styles.label}
           >
-            Public Key
+            Public Key (secp256k1)
           </Typography>
           <Typography size="sm" weight="medium" className={styles.publicKey}>
-            {publicKey}
+            {publicKeySecp256k1}
           </Typography>
         </div>
+
+        {publicKeyEd25519 && (
+          <>
+            <Spacing height={12} />
+            <div className={styles.publicKeyCol}>
+              <Typography
+                size="xs"
+                weight="semibold"
+                color="tertiary"
+                className={styles.label}
+              >
+                Public Key (ed25519)
+              </Typography>
+              <Typography
+                size="sm"
+                weight="medium"
+                className={styles.publicKey}
+              >
+                {publicKeyEd25519}
+              </Typography>
+            </div>
+          </>
+        )}
 
         <Spacing height={12} />
 

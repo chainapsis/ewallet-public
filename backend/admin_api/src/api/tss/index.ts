@@ -18,7 +18,7 @@ export async function getTssSessionList(
   body: GetTssSessionListRequest,
 ): Promise<OkoApiResponse<GetTssSessionListResponse>> {
   try {
-    let { limit, offset, node_id, customer_id } = body;
+    let { limit, offset, node_id, customer_id, curve_type } = body;
     if (!limit || !offset) {
       limit = 10;
       offset = 0;
@@ -33,6 +33,7 @@ export async function getTssSessionList(
       offset,
       node_id,
       customer_id,
+      curve_type,
     );
     if (getTssSessionsRes.success === false) {
       return {

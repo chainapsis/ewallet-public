@@ -1,0 +1,68 @@
+.signatureContent {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.chainInfo {
+  display: flex;
+  align-items: center;
+}
+
+.chainLogo {
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+}
+
+.chainName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fg-secondary);
+}
+
+.signTypeTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--fg-primary);
+}
+
+.metadataWrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.originRow {
+  display: flex;
+  align-items: center;
+}
+
+.originFavicon {
+  width: 20px;
+  height: 20px;
+  margin-right: 4px;
+  border-radius: 5px;
+  box-shadow:
+    0px 0.625px 0.625px -0.5px rgba(10, 13, 18, 0.13),
+    0px 0.625px 1.875px 0px rgba(10, 13, 18, 0.1),
+    0px 0.625px 1.25px 0px rgba(10, 13, 18, 0.06);
+}
+
+.signInfoColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chainInfoRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.chainNameGroup {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}

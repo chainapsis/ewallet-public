@@ -4,10 +4,18 @@ import { Tooltip } from "@oko-wallet/oko-common-ui/tooltip";
 
 import styles from "./address_row.module.scss";
 
+const chainConfig: Record<
+  AddressRowProps["chain"],
+  { label: string; prefix: string }
+> = {
+  ethereum: { label: "Ethereum", prefix: "0x" },
+  cosmos: { label: "Cosmos Hub", prefix: "cosmos1" },
+  solana: { label: "Solana", prefix: "" },
+};
+
 export const AddressRow: FC<AddressRowProps> = ({ icon, chain, address }) => {
   const isLoggedIn = !!address;
-  const label = chain === "ethereum" ? "Ethereum" : "Cosmos Hub";
-  const prefix = chain === "ethereum" ? "0x" : "cosmos1";
+  const { label, prefix } = chainConfig[chain];
 
   const renderChainLabel = () => (
     <div className={isLoggedIn ? styles.chainLabelChip : styles.chainLabel}>
@@ -63,6 +71,6 @@ export const AddressRow: FC<AddressRowProps> = ({ icon, chain, address }) => {
 
 export interface AddressRowProps {
   icon: ReactElement;
-  chain: "ethereum" | "cosmos";
+  chain: "ethereum" | "cosmos" | "solana";
   address?: string;
 }

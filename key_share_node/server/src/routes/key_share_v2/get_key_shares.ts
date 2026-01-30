@@ -21,10 +21,10 @@ import {
 registry.registerPath({
   method: "post",
   path: "/keyshare/v2",
-  tags: ["Key Share v2"],
+  tags: ["Key Share v2", "Commit-Reveal"],
   summary: "Get multiple key shares",
   description:
-    "Retrieve multiple key shares for the authenticated user in a single request.",
+    "Retrieve multiple key shares for the authenticated user in a single request. Requires commit-reveal authentication.",
   security: [{ oauthAuth: [] }],
   request: {
     body: {
@@ -58,6 +58,20 @@ registry.registerPath({
                 msg: "Public key is not valid",
               },
             },
+            INVALID_REQUEST: {
+              value: {
+                success: false,
+                code: "INVALID_REQUEST",
+                msg: "cr_session_id and cr_signature are required",
+              },
+            },
+            INVALID_SIGNATURE: {
+              value: {
+                success: false,
+                code: "INVALID_SIGNATURE",
+                msg: "Invalid signature",
+              },
+            },
           },
         },
       },
@@ -71,7 +85,7 @@ registry.registerPath({
       },
     },
     404: {
-      description: "Not found - User, wallet or key share not found",
+      description: "Not found - User, wallet, key share or session not found",
       content: {
         "application/json": {
           schema: ErrorResponseSchema,
@@ -95,6 +109,47 @@ registry.registerPath({
                 success: false,
                 code: "KEY_SHARE_NOT_FOUND",
                 msg: "Key share not found for curve_type: ed25519",
+              },
+            },
+            SESSION_NOT_FOUND: {
+              value: {
+                success: false,
+                code: "SESSION_NOT_FOUND",
+                msg: "Session not found",
+              },
+            },
+          },
+        },
+      },
+    },
+    409: {
+      description: "Conflict - API already called for this session",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+          examples: {
+            API_ALREADY_CALLED: {
+              value: {
+                success: false,
+                code: "API_ALREADY_CALLED",
+                msg: 'API "get_key_shares" has already been called for this session',
+              },
+            },
+          },
+        },
+      },
+    },
+    410: {
+      description: "Gone - Session has expired",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+          examples: {
+            SESSION_EXPIRED: {
+              value: {
+                success: false,
+                code: "SESSION_EXPIRED",
+                msg: "Session has expired",
               },
             },
           },

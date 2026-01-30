@@ -2,12 +2,45 @@
 
 import { useState } from "react";
 import { useSdkStore } from "@/store/sdk";
-import { OkoStandardWallet, buildSignInMessage } from "@oko-wallet/oko-sdk-sol";
+import {
+  OkoStandardWallet,
+  buildSignInMessage,
+  type WalletStandardConfig,
+} from "@oko-wallet/oko-sdk-svm";
+import {
+  SolanaSignIn,
+  SolanaSignMessage,
+  SolanaSignTransaction,
+  SolanaSignAndSendTransaction,
+  type SolanaSignInFeature,
+} from "@solana/wallet-standard-features";
+import {
+  SOLANA_CHAINS,
+  SOLANA_MAINNET_CHAIN,
+  SOLANA_DEVNET_CHAIN,
+  SOLANA_TESTNET_CHAIN,
+} from "@solana/wallet-standard-chains";
 import bs58 from "bs58";
+
+// Config for wallet-standard features (used for SIWS testing)
+const SOLANA_CONFIG: WalletStandardConfig = {
+  chains: SOLANA_CHAINS,
+  features: {
+    signIn: SolanaSignIn,
+    signMessage: SolanaSignMessage,
+    signTransaction: SolanaSignTransaction,
+    signAndSendTransaction: SolanaSignAndSendTransaction,
+  },
+  rpcEndpoints: {
+    [SOLANA_MAINNET_CHAIN]: "https://api.mainnet-beta.solana.com",
+    [SOLANA_DEVNET_CHAIN]: "https://api.devnet.solana.com",
+    [SOLANA_TESTNET_CHAIN]: "https://api.testnet.solana.com",
+  },
+};
 import Button from "./Button";
 
 export function SiwsWidget() {
-  const { okoSolWallet } = useSdkStore();
+  const { okoSvmWallet } = useSdkStore();
 
   // SIWS input fields
   const [domain, setDomain] = useState("");
@@ -42,12 +75,12 @@ export function SiwsWidget() {
 
   // Preview the SIWS message
   const handlePreview = () => {
-    if (!okoSolWallet?.publicKey) {
+    if (!okoSvmWallet?.publicKey) {
       setError("Wallet not connected");
       return;
     }
 
-    const address = okoSolWallet.publicKey.toBase58();
+    const address = okoSvmWallet.publicKey.toBase58();
     const message = buildSignInMessage(
       {
         domain: domain || undefined,
@@ -63,7 +96,7 @@ export function SiwsWidget() {
 
   // Execute SIWS
   const handleSignIn = async () => {
-    if (!okoSolWallet) {
+    if (!okoSvmWallet) {
       setError("SDK not initialized");
       return;
     }
@@ -73,13 +106,15 @@ export function SiwsWidget() {
     setResult(null);
 
     try {
-      // Create StandardWallet wrapper
-      const standardWallet = new OkoStandardWallet(okoSolWallet);
+      // Create StandardWallet wrapper with config
+      const standardWallet = new OkoStandardWallet(okoSvmWallet, [SOLANA_CONFIG]);
 
-      // Call solana:signIn feature
-      const [signInResult] = await standardWallet.features[
+      // Call solana:signIn feature (cast to proper type since features is Record<string, unknown>)
+      const signInFeature = standardWallet.features[
         "solana:signIn"
-      ].signIn({
+      ] as SolanaSignInFeature["solana:signIn"];
+
+      const [signInResult] = await signInFeature.signIn({
         domain: domain || undefined,
         statement: statement || undefined,
         uri: uri || undefined,
@@ -191,7 +226,7 @@ export function SiwsWidget() {
       <div className="flex gap-3 mb-6">
         <Button
           onClick={handlePreview}
-          disabled={!okoSolWallet?.connected}
+          disabled={!okoSvmWallet?.connected}
           variant="ghost"
           className="flex-1"
         >
@@ -199,7 +234,7 @@ export function SiwsWidget() {
         </Button>
         <Button
           onClick={handleSignIn}
-          disabled={isLoading || !okoSolWallet?.connected}
+          disabled={isLoading || !okoSvmWallet?.connected}
           loading={isLoading}
           className="flex-1"
         >

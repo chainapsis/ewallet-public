@@ -3,6 +3,8 @@ import { z } from "zod";
 export const ENV_FILE_NAME = "oko_api_server.env";
 export const EXAMPLE_ENV_FILE = "oko_api_server.env.example";
 
+export type Envs = z.infer<typeof envSchema>;
+
 export const envSchema = z.object({
   SERVER_PORT: z.string(),
   JWT_SECRET: z.string(),

@@ -15,17 +15,19 @@ Oko Solana SDK fully supports the [Wallet Standard](https://github.com/anza-xyz/
 ## Installation
 
 ```bash
-npm install @oko-wallet/oko-sdk-sol @solana/web3.js
+npm install @oko-wallet/oko-sdk-svm @solana/web3.js
 ```
 
 ## Basic Setup
 
 ```typescript
-import { OkoSolWallet } from "@oko-wallet/oko-sdk-sol";
+import { OkoSvmWallet } from "@oko-wallet/oko-sdk-svm";
+import { SOLANA_MAINNET_CHAIN } from "@solana/wallet-standard-chains";
 
 // Initialize Solana wallet
-const initRes = OkoSolWallet.init({
+const initRes = OkoSvmWallet.init({
   api_key: "your-api-key",
+  chain_id: SOLANA_MAINNET_CHAIN,
 });
 
 if (!initRes.success) {
@@ -61,7 +63,7 @@ const transaction = new Transaction().add(
     fromPubkey: wallet.publicKey!,
     toPubkey: recipientAddress,
     lamports: 0.1 * LAMPORTS_PER_SOL,
-  })
+  }),
 );
 
 // Get recent blockhash
@@ -80,7 +82,7 @@ console.log("Transaction sent:", signature);
 // Alternative method that returns { signature }
 const { signature } = await wallet.signAndSendTransaction(
   transaction,
-  connection
+  connection,
 );
 ```
 
@@ -136,31 +138,58 @@ unsubscribe(); // or wallet.off("connect", handler);
 
 ## Wallet Standard Integration
 
-Register Oko wallet for automatic discovery by dApps using `@solana/wallet-adapter`:
-
 ```typescript
-import { OkoSolWallet, registerOkoWallet } from "@oko-wallet/oko-sdk-sol";
+import {
+  OkoSvmWallet,
+  registerWalletStandard,
+  type WalletStandardConfig,
+} from "@oko-wallet/oko-sdk-svm";
+import {
+  SOLANA_CHAINS,
+  SOLANA_MAINNET_CHAIN,
+  SOLANA_DEVNET_CHAIN,
+} from "@solana/wallet-standard-chains";
+import {
+  SolanaSignIn,
+  SolanaSignMessage,
+  SolanaSignTransaction,
+  SolanaSignAndSendTransaction,
+} from "@solana/wallet-standard-features";
 
-const initRes = OkoSolWallet.init({ api_key: "your-api-key" });
+const SOLANA_CONFIG: WalletStandardConfig = {
+  chains: SOLANA_CHAINS,
+  features: {
+    signIn: SolanaSignIn,
+    signMessage: SolanaSignMessage,
+    signTransaction: SolanaSignTransaction,
+    signAndSendTransaction: SolanaSignAndSendTransaction,
+  },
+  rpcEndpoints: {
+    [SOLANA_MAINNET_CHAIN]: "https://api.mainnet-beta.solana.com",
+    [SOLANA_DEVNET_CHAIN]: "https://api.devnet.solana.com",
+  },
+};
+
+const initRes = OkoSvmWallet.init({
+  api_key: "your-api-key",
+  chain_id: SOLANA_MAINNET_CHAIN,
+});
+
 if (initRes.success) {
-  const wallet = initRes.data;
-
-  // Register with wallet-standard
-  registerOkoWallet(wallet);
-
-  // Now dApps using getWallets() will discover Oko automatically
+  // Register wallet-standard separately (call once globally)
+  registerWalletStandard(initRes.data, [SOLANA_CONFIG]);
 }
 ```
 
 ### Supported Features
 
-| Feature | Description |
-|---------|-------------|
-| `standard:connect` | Connect to wallet |
-| `standard:disconnect` | Disconnect from wallet |
-| `standard:events` | Subscribe to wallet events |
-| `solana:signMessage` | Sign arbitrary messages |
-| `solana:signTransaction` | Sign transactions |
+| Feature                         | Description                     |
+| ------------------------------- | ------------------------------- |
+| `standard:connect`              | Connect to wallet               |
+| `standard:disconnect`           | Disconnect from wallet          |
+| `standard:events`               | Subscribe to wallet events      |
+| `solana:signMessage`            | Sign arbitrary messages         |
+| `solana:signTransaction`        | Sign transactions               |
 | `solana:signAndSendTransaction` | Sign and broadcast transactions |
 
 ## Versioned Transactions

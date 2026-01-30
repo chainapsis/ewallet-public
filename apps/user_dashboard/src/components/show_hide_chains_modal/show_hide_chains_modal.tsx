@@ -1,3 +1,10 @@
+import { Button } from "@oko-wallet/oko-common-ui/button";
+import { Card } from "@oko-wallet/oko-common-ui/card";
+import { SearchIcon } from "@oko-wallet/oko-common-ui/icons/search";
+import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
+import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import cn from "classnames";
 import {
   type ChangeEvent,
   type FC,
@@ -7,29 +14,23 @@ import {
   useRef,
   useState,
 } from "react";
-import cn from "classnames";
 
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import { Card } from "@oko-wallet/oko-common-ui/card";
-import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
-import { Button } from "@oko-wallet/oko-common-ui/button";
-import { SearchIcon } from "@oko-wallet/oko-common-ui/icons/search";
-import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
-import {
-  useChainStore,
-  getChainIdentifier,
-} from "@oko-wallet-user-dashboard/state/chains";
+import { ChainItem } from "./components/chain_item";
+import { ShowHideChainsFilters } from "./components/filters";
+import styles from "./show_hide_chains_modal.module.scss";
+import { SearchEmptyView } from "@oko-wallet-user-dashboard/components/search_empty_view";
 import {
   useAllBalances,
   useChains,
 } from "@oko-wallet-user-dashboard/hooks/queries";
+import { useSearch } from "@oko-wallet-user-dashboard/hooks/use_search";
+import {
+  DEFAULT_ENABLED_CHAINS,
+  getChainIdentifier,
+  useChainStore,
+} from "@oko-wallet-user-dashboard/state/chains";
 import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
 import type { TokenBalance } from "@oko-wallet-user-dashboard/types/token";
-import { useSearch } from "@oko-wallet-user-dashboard/hooks/use_search";
-
-import styles from "./show_hide_chains_modal.module.scss";
-import { ShowHideChainsFilters } from "./components/filters";
-import { ChainItem } from "./components/chain_item";
 
 interface ShowHideChainsModalProps {
   renderTrigger: (props: { onOpen: () => void }) => ReactNode;
@@ -66,9 +67,9 @@ export const ShowHideChainsModal: FC<ShowHideChainsModalProps> = ({
     setSearchQuery(e.target.value);
   };
 
-  // Filter chains that have cosmos or evm modules
+  // Filter chains that have cosmos, evm, or solana modules
   const visibleChains = useMemo(() => {
-    return chains.filter((chain) => chain.cosmos || chain.evm);
+    return chains.filter((chain) => chain.cosmos || chain.evm || chain.solana);
   }, [chains]);
 
   // Search configuration
@@ -88,6 +89,9 @@ export const ShowHideChainsModal: FC<ShowHideChainsModalProps> = ({
           if (chain.evm) {
             return chain.evm.currencies[0]?.coinDenom || "";
           }
+          if (chain.solana) {
+            return chain.solana.currencies[0]?.coinDenom || "";
+          }
           return "";
         },
       },
@@ -98,6 +102,10 @@ export const ShowHideChainsModal: FC<ShowHideChainsModalProps> = ({
   const searchedChains = useSearch(visibleChains, searchQuery, searchFields);
 
   const sortedSearchedChains = useMemo(() => {
+    const defaultChainOrder = new Map<string, number>(
+      DEFAULT_ENABLED_CHAINS.map((id, index) => [id, index]),
+    );
+
     return [...searchedChains].sort((a, b) => {
       const aIsEnabled = isChainEnabled(a.chainId);
       const bIsEnabled = isChainEnabled(b.chainId);
@@ -105,6 +113,26 @@ export const ShowHideChainsModal: FC<ShowHideChainsModalProps> = ({
         return -1;
       }
       if (!aIsEnabled && bIsEnabled) {
+        return 1;
+      }
+
+      // Default chains first, in order
+      const aDefaultIndex = defaultChainOrder.get(
+        getChainIdentifier(a.chainId),
+      );
+      const bDefaultIndex = defaultChainOrder.get(
+        getChainIdentifier(b.chainId),
+      );
+      const aIsDefault = aDefaultIndex !== undefined;
+      const bIsDefault = bDefaultIndex !== undefined;
+
+      if (aIsDefault && bIsDefault) {
+        return aDefaultIndex - bDefaultIndex;
+      }
+      if (aIsDefault && !bIsDefault) {
+        return -1;
+      }
+      if (!aIsDefault && bIsDefault) {
         return 1;
       }
 
@@ -143,8 +171,13 @@ export const ShowHideChainsModal: FC<ShowHideChainsModalProps> = ({
       {renderTrigger({ onOpen })}
 
       {isOpen && (
+        /* biome-ignore lint/a11y/noStaticElementInteractions: for mouse user convenience */
         <div className={styles.modalBackground} onClick={onClose}>
-          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+          <div
+            className={styles.modal}
+            role="dialog"
+            onClick={(e) => e.stopPropagation()}
+          >
             <Card
               className={styles.modalCard}
               variant="elevated"
@@ -155,6 +188,7 @@ export const ShowHideChainsModal: FC<ShowHideChainsModalProps> = ({
                   className={styles.closeButton}
                   onClick={onClose}
                   aria-label="Close modal"
+                  type="button"
                 >
                   <XCloseIcon color="var(--fg-quaternary)" size={20} />
                 </button>
@@ -178,42 +212,58 @@ export const ShowHideChainsModal: FC<ShowHideChainsModalProps> = ({
               <Spacing height={8} />
 
               <ShowHideChainsFilters>
-                {({ visibility, ecosystem }) => (
-                  <div className={cn(styles.chainList, "common-list-scroll")}>
-                    {sortedSearchedChains
-                      .filter((chain) => {
-                        switch (visibility) {
-                          case "Show All": {
-                            return true;
-                          }
-                          case "Show Hidden": {
-                            return !isChainEnabled(chain.chainId);
-                          }
+                {({ visibility, ecosystem }) => {
+                  const filteredChains = sortedSearchedChains
+                    .filter((chain) => {
+                      switch (visibility) {
+                        case "Show All": {
+                          return true;
                         }
-                      })
-                      .filter((chain) => {
-                        switch (ecosystem) {
-                          case "All Chains": {
-                            return true;
-                          }
-                          case "Cosmos": {
-                            return !!chain.cosmos;
-                          }
-                          case "EVM": {
-                            return !!chain.evm;
-                          }
+                        case "Show Hidden": {
+                          return !isChainEnabled(chain.chainId);
                         }
-                      })
-                      .map((chain) => (
-                        <ChainItem
-                          key={chain.chainId}
-                          chainInfo={chain}
-                          getTokenBalances={getTokenBalances}
-                          onEnable={handleEnable}
-                        />
-                      ))}
-                  </div>
-                )}
+                        default: {
+                          return false;
+                        }
+                      }
+                    })
+                    .filter((chain) => {
+                      switch (ecosystem) {
+                        case "All Chains": {
+                          return true;
+                        }
+                        case "Cosmos": {
+                          return !!chain.cosmos;
+                        }
+                        case "EVM": {
+                          return !!chain.evm;
+                        }
+                        case "Solana": {
+                          return !!chain.solana;
+                        }
+                        default: {
+                          return false;
+                        }
+                      }
+                    });
+
+                  return (
+                    <div className={cn(styles.chainList, "common-list-scroll")}>
+                      {filteredChains.length > 0 ? (
+                        filteredChains.map((chain) => (
+                          <ChainItem
+                            key={chain.chainId}
+                            chainInfo={chain}
+                            getTokenBalances={getTokenBalances}
+                            onEnable={handleEnable}
+                          />
+                        ))
+                      ) : (
+                        <SearchEmptyView />
+                      )}
+                    </div>
+                  );
+                }}
               </ShowHideChainsFilters>
 
               <Button

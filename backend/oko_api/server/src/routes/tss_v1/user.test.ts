@@ -55,6 +55,13 @@ await jest.unstable_mockModule("@oko-wallet-api/middleware/auth/oauth", () => ({
     mockOauthMiddleware(req, res, next),
 }));
 
+await jest.unstable_mockModule(
+  "@oko-wallet-api/middleware/auth/tss_activate",
+  () => ({
+    tssActivateMiddleware: (_req: any, _res: any, next: any) => next(),
+  }),
+);
+
 async function setUpKSNodes(pool: Pool): Promise<KeyShareNode[]> {
   const ksNodeNames = ["ksNode1", "ksNode2"];
   const ksNodes: KeyShareNode[] = [];
@@ -287,7 +294,7 @@ describe("user_route_test", () => {
       expect(response.body).toEqual({
         success: false,
         code: "USER_NOT_FOUND",
-        msg: "User not found: test@example.com",
+        msg: "User not found: test@example.com (auth_type: google)",
       });
     });
 

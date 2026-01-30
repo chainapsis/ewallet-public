@@ -17,7 +17,7 @@ import Button from "./Button";
 import { DEVNET_CONNECTION } from "@/lib/connection";
 
 export function SignTransactionWidget() {
-  const { okoSolWallet, publicKey } = useSdkStore();
+  const { okoSvmWallet, publicKey } = useSdkStore();
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("0.001");
   const [useVersioned, setUseVersioned] = useState(false);
@@ -26,7 +26,7 @@ export function SignTransactionWidget() {
   const [error, setError] = useState<string | null>(null);
 
   const handleSignTransaction = async () => {
-    if (!okoSolWallet || !publicKey) {
+    if (!okoSvmWallet || !publicKey) {
       return;
     }
 
@@ -64,7 +64,7 @@ export function SignTransactionWidget() {
         }).compileToV0Message();
 
         const transaction = new VersionedTransaction(messageV0);
-        const signedTx = await okoSolWallet.signTransaction(transaction);
+        const signedTx = await okoSvmWallet.signTransaction(transaction);
         const txSignature = signedTx.signatures[0];
 
         if (txSignature) {
@@ -78,7 +78,7 @@ export function SignTransactionWidget() {
           feePayer: fromPubkey,
         }).add(instruction);
 
-        const signedTx = await okoSolWallet.signTransaction(transaction);
+        const signedTx = await okoSvmWallet.signTransaction(transaction);
         const txSignature = signedTx.signature;
 
         if (txSignature) {
@@ -96,7 +96,7 @@ export function SignTransactionWidget() {
   };
 
   const handleSendTransaction = async () => {
-    if (!okoSolWallet || !publicKey) {
+    if (!okoSvmWallet || !publicKey) {
       return;
     }
 
@@ -143,7 +143,7 @@ export function SignTransactionWidget() {
         }).add(instruction);
       }
 
-      const txSignature = await okoSolWallet.sendTransaction(
+      const txSignature = await okoSvmWallet.sendTransaction(
         transaction,
         DEVNET_CONNECTION,
       );

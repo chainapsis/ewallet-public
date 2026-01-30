@@ -1,15 +1,15 @@
-import type { FC } from "react";
 import { Button } from "@oko-wallet/oko-common-ui/button";
+import { ChevronRightIcon } from "@oko-wallet/oko-common-ui/icons/chevron_right";
+import { DiscordIcon } from "@oko-wallet/oko-common-ui/icons/discord_icon";
 import { GoogleIcon } from "@oko-wallet/oko-common-ui/icons/google_icon";
+import { MailboxIcon } from "@oko-wallet/oko-common-ui/icons/mailbox";
+import { TelegramIcon } from "@oko-wallet/oko-common-ui/icons/telegram_icon";
+import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
 import { Logo } from "@oko-wallet/oko-common-ui/logo";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
-import { MailboxIcon } from "@oko-wallet/oko-common-ui/icons/mailbox";
-import { DiscordIcon } from "@oko-wallet/oko-common-ui/icons/discord_icon";
-import { ChevronRightIcon } from "@oko-wallet/oko-common-ui/icons/chevron_right";
-import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
-import { TelegramIcon } from "@oko-wallet/oko-common-ui/icons/telegram_icon";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
+import type { FC } from "react";
 
 import styles from "./login_widget.module.scss";
 

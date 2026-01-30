@@ -8,17 +8,18 @@ export async function createUser(
   db: Pool,
   email: string,
   auth_type: AuthType,
+  metadata?: Record<string, unknown>,
 ): Promise<Result<User, string>> {
   try {
     const query = `
 INSERT INTO oko_users (
-  user_id, email, auth_type
+  user_id, email, auth_type, metadata
 ) VALUES (
-  $1, $2, $3
-) 
+  $1, $2, $3, $4
+)
 RETURNING *
 `;
-    const values = [uuidv4(), email, auth_type];
+    const values = [uuidv4(), email, auth_type, metadata ? JSON.stringify(metadata) : null];
 
     const result = await db.query<User>(query, values);
 
@@ -49,8 +50,8 @@ export async function getUserByEmailAndAuthType(
 ): Promise<Result<User | null, string>> {
   try {
     const query = `
-SELECT * 
-FROM oko_users 
+SELECT *
+FROM oko_users
 WHERE email = $1 AND auth_type = $2
 LIMIT 1
 `;
@@ -65,6 +66,41 @@ LIMIT 1
     return {
       success: true,
       data: user,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      err: String(error),
+    };
+  }
+}
+
+export async function updateUserMetadata(
+  db: Pool | PoolClient,
+  userId: string,
+  metadata: Record<string, unknown>,
+): Promise<Result<User, string>> {
+  try {
+    const query = `
+UPDATE oko_users
+SET metadata = $2, updated_at = NOW()
+WHERE user_id = $1
+RETURNING *
+`;
+
+    const result = await db.query<User>(query, [userId, JSON.stringify(metadata)]);
+
+    const row = result.rows[0];
+    if (!row) {
+      return {
+        success: false,
+        err: "User not found",
+      };
+    }
+
+    return {
+      success: true,
+      data: row,
     };
   } catch (error) {
     return {

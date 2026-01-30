@@ -25,13 +25,11 @@ export const paths = (function () {
 
   const oko_types = path.join(__dirname, "../../../common/oko_types/");
 
-  const sdk_common = path.join(__dirname, "../../../sdk/oko_sdk_common/");
-
   const sdk_cosmos_kit = path.join(__dirname, "../../../sdk/oko_cosmos_kit/");
 
   const sdk_core = path.join(__dirname, "../../../sdk/oko_sdk_core/");
 
-  const sdk_sol = path.join(__dirname, "../../../sdk/oko_sdk_sol/");
+  const sdk_svm = path.join(__dirname, "../../../sdk/oko_sdk_svm/");
 
   const sdk_eth = path.join(__dirname, "../../../sdk/oko_sdk_eth/");
 
@@ -41,6 +39,8 @@ export const paths = (function () {
     __dirname,
     "../../../sandbox/sandbox_simple_host/",
   );
+
+  const sandbox_sol = path.join(__dirname, "../../../sandbox/sandbox_sol/");
 
   const crypto_bytes = path.join(__dirname, "../../../crypto/bytes/");
 
@@ -100,8 +100,6 @@ export const paths = (function () {
     "../../../backend/oko_api/server",
   );
 
-  const tss_api = path.join(__dirname, "../../../backend/tss_api");
-
   const admin_api = path.join(__dirname, "../../../backend/admin_api");
 
   const ct_dashboard_api = path.join(
@@ -152,14 +150,14 @@ export const paths = (function () {
     sdk_eth,
     sdk_cosmos_kit,
     sdk_cosmos,
-    sdk_sol,
-    sdk_common,
+    sdk_svm,
     crypto_bytes,
     crypto_js,
     ksn_interface,
     ksn_server,
     ksn_pg_interface,
     sandbox_simple_host,
+    sandbox_sol,
     tecdsa_interface,
     teddsa_interface,
     oko_pg_interface,
@@ -173,7 +171,6 @@ export const paths = (function () {
     user_dashboard,
     ct_dashboard_web,
     oko_api_server,
-    tss_api,
     admin_api,
     ct_dashboard_api,
     dockerfiles,

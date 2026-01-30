@@ -28,7 +28,10 @@ export const AccountWidget: FC<AccountWidgetProps> = () => {
     status: "ready",
   });
   const email = useUserInfoState((state) => state.email);
-  const publicKey = useUserInfoState((state) => state.publicKey);
+  const publicKeySecp256k1 = useUserInfoState(
+    (state) => state.publicKeySecp256k1,
+  );
+  const publicKeyEd25519 = useUserInfoState((state) => state.publicKeyEd25519);
   const name = useUserInfoState((state) => state.name);
   const authType = useUserInfoState((state) => state.authType);
   const isSignedIn = useUserInfoState((state) => state.isSignedIn);
@@ -118,7 +121,8 @@ export const AccountWidget: FC<AccountWidgetProps> = () => {
       <AccountInfoWidget
         type={displayLoginMethod}
         email={email || ""}
-        publicKey={publicKey || ""}
+        publicKeySecp256k1={publicKeySecp256k1 || ""}
+        publicKeyEd25519={publicKeyEd25519}
         name={name}
         onSignOut={handleSignOut}
       />

@@ -59,6 +59,7 @@ export async function auth0AuthMiddleware(
       // in auth0, use email as identifier
       user_identifier: result.data.email,
       email: result.data.email,
+      metadata: result.data as unknown as Record<string, unknown>,
     };
 
     next();

@@ -1,7 +1,7 @@
 "use client";
 
-import { type ReactNode, type FormEvent } from "react";
 import { Button } from "@oko-wallet/oko-common-ui/button";
+import type { FormEvent, ReactNode } from "react";
 
 import styles from "./account_form.module.scss";
 

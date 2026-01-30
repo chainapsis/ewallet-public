@@ -1,5 +1,4 @@
 import { Pool } from "pg";
-import type { Logger } from "winston";
 import {
   generateEddsaKeypair,
   type EddsaKeypair,
@@ -13,6 +12,7 @@ import {
 
 import { createPgDatabase } from "./database";
 import { initLogger } from "./logger";
+import type { Logger } from "winston";
 
 export async function makeServerState(
   args: InitStateArgs,

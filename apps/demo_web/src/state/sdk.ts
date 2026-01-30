@@ -8,10 +8,10 @@ import {
   OkoEthWallet,
   type OkoEthWalletInterface,
 } from "@oko-wallet/oko-sdk-eth";
-// import {
-//   OkoSolWallet,
-//   type OkoSolWalletInterface,
-// } from "@oko-wallet/oko-sdk-sol";
+import {
+  OkoSvmWallet,
+  type OkoSvmWalletInterface,
+} from "@oko-wallet/oko-sdk-svm";
 import { create } from "zustand";
 import { combine } from "zustand/middleware";
 
@@ -20,7 +20,7 @@ import { useUserInfoState } from "@oko-wallet-demo-web/state/user_info";
 interface SDKState {
   oko_eth: OkoEthWalletInterface | null;
   oko_cosmos: OkoCosmosWalletInterface | null;
-  // oko_sol: OkoSolWalletInterface | null;
+  oko_svm: OkoSvmWalletInterface | null;
 
   isEthInitializing: boolean;
   isEthLazyInitialized: boolean;
@@ -35,13 +35,13 @@ interface SDKState {
 interface SDKActions {
   initOkoEth: () => Promise<OkoEthWalletInterface | null>;
   initOkoCosmos: () => Promise<OkoCosmosWalletInterface | null>;
-  // initOkoSol: () => Promise<OkoSolWalletInterface | null>;
+  initOkoSvm: () => Promise<OkoSvmWalletInterface | null>;
 }
 
 const initialState: SDKState = {
   oko_eth: null,
   oko_cosmos: null,
-  // oko_sol: null,
+  oko_svm: null,
 
   isEthInitializing: false,
   isEthLazyInitialized: false,
@@ -142,13 +142,13 @@ export const useSDKState = create(
         return null;
       }
     },
-    initOkoSol: async () => {
+    initOkoSvm: async () => {
       const state = get();
 
-      // if (state.oko_sol || state.isSolInitializing) {
-      //   console.log("Sol SDK already initialized or initializing, skipping...");
-      //   return state.oko_sol;
-      // }
+      if (state.oko_svm || state.isSolInitializing) {
+        console.log("Sol SDK already initialized or initializing, skipping...");
+        return state.oko_svm;
+      }
 
       try {
         console.log("Initializing Sol SDK...");
@@ -156,39 +156,42 @@ export const useSDKState = create(
           isSolInitializing: true,
         });
 
-        // const initRes = OkoSolWallet.init({
-        //   api_key:
-        //     "72bd2afd04374f86d563a40b814b7098e5ad6c7f52d3b8f84ab0c3d05f73ac6c",
-        //   sdk_endpoint: process.env.NEXT_PUBLIC_OKO_SDK_ENDPOINT,
-        // });
+        const initRes = OkoSvmWallet.init({
+          api_key:
+            "72bd2afd04374f86d563a40b814b7098e5ad6c7f52d3b8f84ab0c3d05f73ac6c",
+          sdk_endpoint: process.env.NEXT_PUBLIC_OKO_SDK_ENDPOINT,
+          chain_id: "solana:devnet",
+        });
 
-        // if (initRes.success) {
-        //   console.log("Sol SDK initialized");
+        if (initRes.success) {
+          console.log("Sol SDK initialized");
 
-        //   const okoSol = initRes.data;
-        //   set({
-        //     // oko_sol: okoSol,
-        //     isSolInitializing: false,
-        //   });
+          const okoSvm = initRes.data;
+          setupSolListener(okoSvm);
 
-        //   try {
-        //     await okoSol.waitUntilInitialized;
-        //     console.log("Sol SDK lazy initialized");
-        //     set({
-        //       isSolLazyInitialized: true,
-        //     });
-        //   } catch (e) {
-        //     console.error("Sol SDK lazy init failed:", e);
-        //     set({ isSolLazyInitialized: true }); // Still mark as done to not block
-        //   }
+          set({
+            oko_svm: okoSvm,
+            isSolInitializing: false,
+          });
 
-        //   return okoSol;
-        // } else {
-        //   console.error("Sol sdk init fail, err: %s", initRes.err);
-        //   set({ isSolInitializing: false, isSolLazyInitialized: true });
+          try {
+            await okoSvm.waitUntilInitialized;
+            console.log("Sol SDK lazy initialized");
+            set({
+              isSolLazyInitialized: true,
+            });
+          } catch (e) {
+            console.error("Sol SDK lazy init failed:", e);
+            set({ isSolLazyInitialized: true }); // Still mark as done to not block
+          }
 
-        //   return null;
-        // }
+          return okoSvm;
+        } else {
+          console.error("Sol sdk init fail, err: %s", initRes.err);
+          set({ isSolInitializing: false, isSolLazyInitialized: true });
+
+          return null;
+        }
       } catch (e) {
         console.error("Sol SDK init error:", e);
         set({ isSolInitializing: false, isSolLazyInitialized: true });
@@ -221,4 +224,17 @@ function setupCosmosListener(cosmosSDK: OkoCosmosWalletInterface) {
       },
     });
   }
+}
+
+function setupSolListener(solSDK: OkoSvmWalletInterface) {
+  const setPublicKeyEd25519 = useUserInfoState.getState().setPublicKeyEd25519;
+
+  console.log("[Demo] Setting up Sol accountChanged listener");
+  solSDK.on("accountChanged", () => {
+    const ed25519Key = solSDK.state.publicKeyRaw;
+    console.log("[Demo] Sol accountChanged event received:", {
+      ed25519Key: ed25519Key ? "exists" : "null",
+    });
+    setPublicKeyEd25519(ed25519Key);
+  });
 }

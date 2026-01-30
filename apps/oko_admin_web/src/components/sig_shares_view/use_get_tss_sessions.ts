@@ -10,12 +10,14 @@ type UseGetTSSSessionsListProps = {
   page?: number;
   nodeId?: string;
   customerId?: string;
+  curveType?: string;
 };
 
 export function useGetTSSSessionsList({
   page = 0,
   nodeId,
   customerId,
+  curveType,
 }: UseGetTSSSessionsListProps) {
   const { token } = useAppState();
 
@@ -26,7 +28,7 @@ export function useGetTSSSessionsList({
       has_prev: boolean;
     };
   }>({
-    queryKey: ["tss_sessions_list", token, page, nodeId, customerId],
+    queryKey: ["tss_sessions_list", token, page, nodeId, customerId, curveType],
     enabled: !!token,
     placeholderData: keepPreviousData,
     queryFn: async () => {
@@ -41,6 +43,7 @@ export function useGetTSSSessionsList({
         offset,
         node_id: nodeId,
         customer_id: customerId,
+        curve_type: curveType,
       });
 
       if (!response.success) {

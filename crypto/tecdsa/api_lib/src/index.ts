@@ -51,7 +51,7 @@ import {
   type SignInResponse,
   type SignInResponseV2,
 } from "@oko-wallet/oko-types/user";
-import type { KeygenBodyV2 } from "@oko-wallet/oko-types/tss";
+import type { KeygenRequestBodyV2 } from "@oko-wallet/oko-types/tss";
 import {
   type ErrorCode,
   type OkoApiErrorResponse,
@@ -198,7 +198,7 @@ export async function reqKeygen(
 
 export async function reqKeygenV2(
   endpoint: string,
-  payload: KeygenBodyV2,
+  payload: KeygenRequestBodyV2,
   authToken: string,
 ) {
   const resp: OkoApiResponse<SignInResponseV2> = await makePostRequest(

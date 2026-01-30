@@ -7,10 +7,10 @@ import {
   WalletDisconnectButton,
 } from "@solana/wallet-adapter-react-ui";
 import { WalletAdapterProvider } from "@/components/WalletAdapterProvider";
-import { useOkoSol } from "@/hooks/use_oko_sol";
+import { useOkoSvm } from "@/hooks/use_oko_svm";
 
 function WalletAdapterContent() {
-  const { isInitialized, isInitializing } = useOkoSol();
+  const { isInitialized, isInitializing } = useOkoSvm();
   const { publicKey, connected, wallet, wallets } = useWallet();
 
   useEffect(() => {

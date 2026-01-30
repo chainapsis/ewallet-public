@@ -1,15 +1,14 @@
-import type { FC, MouseEvent } from "react";
-
 import { CheckCircleOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/check_circle_outlined";
 import { CopyOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/copy_outlined";
 import { EmptyStateIcon } from "@oko-wallet/oko-common-ui/icons/empty_state_icon";
 import { QrCodeIcon } from "@oko-wallet/oko-common-ui/icons/qr_code_icon";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import { AddressQrModal } from "@oko-wallet-user-dashboard/components/address_qr_modal/address_qr_modal";
-import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
-import { useCopyToClipboard } from "@oko-wallet-user-dashboard/hooks/use_copy_to_clipboard";
+import type { FC, MouseEvent } from "react";
 
 import styles from "./address_item.module.scss";
+import { AddressQrModal } from "@oko-wallet-user-dashboard/components/address_qr_modal/address_qr_modal";
+import { useCopyToClipboard } from "@oko-wallet-user-dashboard/hooks/use_copy_to_clipboard";
+import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
 
 interface AddressItemProps {
   chainInfo: ModularChainInfo;

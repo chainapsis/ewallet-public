@@ -15,13 +15,13 @@ export async function startTelemetryReporterRuntime(
     intervalSeconds,
   );
 
-  const run = async () => {
+  async function run() {
     try {
       await reportTelemetry(db, publicKey, okoApiBaseUrl, reportPassword);
     } catch (err) {
       logger.error("Telemetry reporter runtime error: %s", err);
     }
-  };
+  }
 
   // Initial run
   run();
@@ -45,6 +45,8 @@ async function reportTelemetry(
 
   // 2. Send Report
   const url = `${baseUrl}/tss/v1/ks_node/telemetry`;
+  console.log("telemetry url: %s", url);
+
   try {
     const response = await fetch(url, {
       method: "POST",
@@ -61,7 +63,7 @@ async function reportTelemetry(
 
     if (!response.ok) {
       logger.error(
-        "Failed to report telemetry to OKO API: %s %s",
+        "Telemetry response contains error, stats: %s, text: %s",
         response.status,
         response.statusText,
       );

@@ -17,6 +17,7 @@ export interface KeygenEd25519Request {
   keygen_2: KeygenEd25519OutputWithPublicKey;
   email?: string;
   name?: string;
+  metadata?: Record<string, unknown>;
 }
 
 export type KeygenEd25519Body = {

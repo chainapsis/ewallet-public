@@ -283,15 +283,17 @@ export async function getTssSessions(
   offset: number,
   node_id?: string,
   customer_id?: string,
+  curve_type?: string,
 ): Promise<Result<TssSessionWithCustomerAndUser[], string>> {
   try {
     const baseQuery = `
-SELECT 
+SELECT
   s.*,
   c.label AS customer_label,
   c.url AS customer_url,
   encode(w.public_key, 'hex') AS wallet_public_key,
-  u.email AS user_email
+  u.email AS user_email,
+  w.curve_type AS curve_type
 FROM tss_sessions s
 JOIN customers c ON s.customer_id = c.customer_id
 LEFT JOIN oko_wallets w ON s.wallet_id = w.wallet_id
@@ -315,6 +317,12 @@ LEFT JOIN oko_users u ON w.user_id = u.user_id
     if (customer_id) {
       conditions.push(`s.customer_id = $${paramIndex}`);
       queryParams.push(customer_id);
+      paramIndex++;
+    }
+
+    if (curve_type) {
+      conditions.push(`w.curve_type = $${paramIndex}`);
+      queryParams.push(curve_type);
       paramIndex++;
     }
 

@@ -52,6 +52,7 @@ export async function googleAuthMiddleware(
       // in google, use google sub as identifier with prefix
       user_identifier: `google_${result.data.sub}`,
       email: result.data.email,
+      metadata: result.data as unknown as Record<string, unknown>,
     };
 
     next();

@@ -1,12 +1,12 @@
 "use client";
 
-import type { FC } from "react";
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import { ExternalLinkOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/external_link_outlined";
 import { EmptyStateIcon } from "@oko-wallet/oko-common-ui/icons/empty_state_icon";
+import { ExternalLinkOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/external_link_outlined";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import type { FC } from "react";
 
-import { useChain } from "@oko-wallet-user-dashboard/hooks/queries";
 import styles from "./tx_history_support_item.module.scss";
+import { useChain } from "@oko-wallet-user-dashboard/hooks/queries";
 
 export type TxHistorySupportItemProps = {
   chainId: string;

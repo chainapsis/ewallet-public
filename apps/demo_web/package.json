@@ -23,7 +23,7 @@
     "@oko-wallet/oko-sdk-core": "^0.1.2-alpha.1",
     "@oko-wallet/oko-sdk-cosmos": "^0.1.2-alpha.1",
     "@oko-wallet/oko-sdk-eth": "^0.1.2-alpha.1",
-    "@oko-wallet/oko-sdk-sol": "workspace:*",
+    "@oko-wallet/oko-sdk-svm": "workspace:*",
     "@oko-wallet/stdlib-js": "^0.0.2-rc.44",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",

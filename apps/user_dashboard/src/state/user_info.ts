@@ -1,6 +1,6 @@
+import type { AuthType } from "@oko-wallet/oko-types/auth";
 import { create } from "zustand";
 import { combine, createJSONStorage, persist } from "zustand/middleware";
-import type { AuthType } from "@oko-wallet/oko-types/auth";
 
 interface UserInfoState {
   email: string | null;
