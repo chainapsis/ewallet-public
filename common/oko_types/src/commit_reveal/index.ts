@@ -34,3 +34,8 @@ export interface CreateSessionParams {
   id_token_hash: string;
   expires_at: Date;
 }
+
+export interface CommitRevealParams {
+  cr_session_id: string;
+  cr_signature: string;
+}

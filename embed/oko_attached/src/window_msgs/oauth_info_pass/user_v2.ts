@@ -27,7 +27,14 @@ import {
   registerKeyShareEd25519V2,
   reshareKeySharesV2,
   reshareRegisterV2,
+  type KsnCommitRevealParams,
 } from "@oko-wallet-attached/requests/ks_node_v2";
+import {
+  commitAll,
+  createOkoApiSignature,
+  createKsnSignature,
+  type KsnCommitTarget,
+} from "@oko-wallet-attached/crypto/commit_reveal";
 import type { ReshareRequestV2 } from "@oko-wallet/oko-types/user";
 import {
   decodeKeyShareStringToPoint256,
@@ -109,20 +116,61 @@ export async function handleNewUserV2(
   }
   const secp256k1UserKeyShares = splitUserKeySharesRes.data;
 
+  // 4. Commit to oko_api and KSN nodes
+  const ksnCommitTargets: KsnCommitTarget[] = keyshareNodeMeta.nodes.map(
+    (node) => ({
+      nodeUrl: node.endpoint,
+      operationType: "sign_up" as const,
+    }),
+  );
+  const commitRes = await commitAll(
+    "sign_up",
+    authType,
+    idToken,
+    ksnCommitTargets,
+    ksnCommitTargets.length, // all nodes for sign_up
+  );
+  if (!commitRes.success) {
+    return {
+      success: false,
+      err: { type: "sign_in_request_fail", error: commitRes.err },
+    };
+  }
+  const { session } = commitRes.data;
+
   // 5. Send key shares by both curves to ks nodes using V2 API
   const registerKeySharesResults: Result<void, string>[] = await Promise.all(
-    secp256k1UserKeyShares.map((keyShareByNode, index) =>
-      registerKeySharesV2(keyShareByNode.node.endpoint, idToken, authType, {
-        secp256k1: {
-          public_key: secp256k1Keygen1.public_key.toHex(),
-          share: encodePoint256ToKeyShareString(keyShareByNode.share),
+    secp256k1UserKeyShares.map((keyShareByNode, index) => {
+      const ksnSigRes = createKsnSignature(
+        session,
+        keyShareByNode.node.endpoint,
+        "register",
+      );
+      if (!ksnSigRes.success) {
+        return Promise.resolve({ success: false, err: ksnSigRes.err } as const);
+      }
+      const commitRevealParams: KsnCommitRevealParams = {
+        cr_session_id: session.session_id,
+        cr_signature: ksnSigRes.data,
+        auth_type: authType,
+      };
+      return registerKeySharesV2(
+        keyShareByNode.node.endpoint,
+        idToken,
+        authType,
+        {
+          secp256k1: {
+            public_key: secp256k1Keygen1.public_key.toHex(),
+            share: encodePoint256ToKeyShareString(keyShareByNode.share),
+          },
+          ed25519: {
+            public_key: ed25519Keygen1.public_key.toHex(),
+            share: teddsaKeyShareToHex(ed25519UserKeyShares[index].share),
+          },
         },
-        ed25519: {
-          public_key: ed25519Keygen1.public_key.toHex(),
-          share: teddsaKeyShareToHex(ed25519UserKeyShares[index].share),
-        },
-      }),
-    ),
+        commitRevealParams,
+      );
+    }),
   );
   const registerErrResults = registerKeySharesResults.filter(
     (result) => result.success === false,
@@ -138,6 +186,13 @@ export async function handleNewUserV2(
   }
 
   // 6. Call V2 keygen API with both curve types
+  const okoApiSigRes = createOkoApiSignature(session, "keygen");
+  if (!okoApiSigRes.success) {
+    return {
+      success: false,
+      err: { type: "sign_in_request_fail", error: okoApiSigRes.err },
+    };
+  }
   const reqKeygenV2Res = await reqKeygenV2(
     TSS_V2_ENDPOINT,
     {
@@ -156,6 +211,10 @@ export async function handleNewUserV2(
       },
     },
     idToken,
+    {
+      cr_session_id: session.session_id,
+      cr_signature: okoApiSigRes.data,
+    },
   );
   if (reqKeygenV2Res.success === false) {
     return {

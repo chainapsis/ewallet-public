@@ -62,7 +62,10 @@ export function setKsnNodePubkey(
   return {
     ...session,
     ksn_node_pubkeys: { ...session.ksn_node_pubkeys, [nodeUrl]: nodePubkey },
-    ksn_operation_types: { ...session.ksn_operation_types, [nodeUrl]: operationType },
+    ksn_operation_types: {
+      ...session.ksn_operation_types,
+      [nodeUrl]: operationType,
+    },
   };
 }
 
@@ -90,7 +93,11 @@ export async function commitAll(
   ksnThreshold: number,
 ): Promise<Result<CommitAllResult, string>> {
   // 1. Create session
-  const sessionRes = createCommitRevealSession(operationType, authType, idToken);
+  const sessionRes = createCommitRevealSession(
+    operationType,
+    authType,
+    idToken,
+  );
   if (!sessionRes.success) {
     return { success: false, err: sessionRes.err };
   }
@@ -116,7 +123,10 @@ export async function commitAll(
   const shuffledTargets = [...ksnCommitTargets];
   for (let i = shuffledTargets.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
-    [shuffledTargets[i], shuffledTargets[j]] = [shuffledTargets[j], shuffledTargets[i]];
+    [shuffledTargets[i], shuffledTargets[j]] = [
+      shuffledTargets[j],
+      shuffledTargets[i],
+    ];
   }
 
   const committedNodes: string[] = [];
