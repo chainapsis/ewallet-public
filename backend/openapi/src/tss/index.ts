@@ -1,3 +1,4 @@
+export * from "./commit_reveal";
 export * from "./keygen_ed25519";
 export * from "./presign";
 export * from "./request";
