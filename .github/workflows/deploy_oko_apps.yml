@@ -14,7 +14,7 @@ on:
         required: true
         type: choice
         options:
-          - 'demo'
+          - 'demo_web'
 
 jobs:
   publish:
