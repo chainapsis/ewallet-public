@@ -71,6 +71,7 @@ export async function handleNewUserV2(
   idToken: string,
   keyshareNodeMeta: KeyShareNodeMetaWithNodeStatusInfo,
   authType: AuthType,
+  apiKey?: string,
   referralInfo?: ReferralInfo | null,
 ): Promise<Result<UserSignInResultV2, OAuthSignInError>> {
   // 1. secp256k1 keygen
@@ -156,6 +157,7 @@ export async function handleNewUserV2(
       },
     },
     idToken,
+    apiKey,
   );
   if (reqKeygenV2Res.success === false) {
     return {
@@ -208,9 +210,10 @@ export async function handleExistingUserV2(
   keyshareNodeMetaSecp256k1: KeyShareNodeMetaWithNodeStatusInfo,
   keyshareNodeMetaEd25519: KeyShareNodeMetaWithNodeStatusInfo,
   authType: AuthType,
+  apiKey?: string,
 ): Promise<Result<UserSignInResultV2, OAuthSignInError>> {
   // 1. Sign in to API server
-  const signInResult = await signInV2(idToken, authType);
+  const signInResult = await signInV2(idToken, authType, apiKey);
   if (!signInResult.success) {
     return { success: false, err: signInResult.err };
   }
@@ -439,6 +442,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
   keyshareNodeMetaSecp256k1: KeyShareNodeMetaWithNodeStatusInfo,
   keyshareNodeMetaEd25519: KeyShareNodeMetaWithNodeStatusInfo,
   authType: AuthType,
+  apiKey?: string,
 ): Promise<Result<UserSignInResultV2, OAuthSignInError>> {
   // 1. ed25519 keygen and split
   const ed25519KeygenSplitRes = await runEd25519KeygenAndSplit(
@@ -493,6 +497,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
       },
     },
     idToken,
+    apiKey,
   );
   if (reqKeygenEd25519Res.success === false) {
     return {
@@ -612,9 +617,10 @@ export async function handleReshareV2(
   authType: AuthType,
   secp256k1NeedsReshare: boolean,
   ed25519NeedsReshare: boolean,
+  apiKey?: string,
 ): Promise<Result<UserSignInResultV2, OAuthSignInError>> {
   // 1. Sign in to API server to get public keys and server verifying share
-  const signInResult = await signInV2(idToken, authType);
+  const signInResult = await signInV2(idToken, authType, apiKey);
   if (!signInResult.success) {
     return { success: false, err: signInResult.err };
   }
@@ -713,6 +719,7 @@ export async function handleReshareAndEd25519Keygen(
   keyshareNodeMetaSecp256k1: KeyShareNodeMetaWithNodeStatusInfo,
   keyshareNodeMetaEd25519: KeyShareNodeMetaWithNodeStatusInfo,
   authType: AuthType,
+  apiKey?: string,
 ): Promise<Result<UserSignInResultV2, OAuthSignInError>> {
   // 1. Classify nodes
   const activeNodes = keyshareNodeMetaSecp256k1.nodes.filter(
@@ -748,7 +755,7 @@ export async function handleReshareAndEd25519Keygen(
   } = ed25519KeygenSplitRes.data;
 
   // 3. Sign in to get the public key
-  const signInResult = await signInV2(idToken, authType);
+  const signInResult = await signInV2(idToken, authType, apiKey);
   if (!signInResult.success) {
     return { success: false, err: signInResult.err };
   }
@@ -894,6 +901,7 @@ export async function handleReshareAndEd25519Keygen(
       },
     },
     idToken,
+    apiKey,
   );
   if (reqKeygenEd25519Res.success === false) {
     return {
@@ -1092,11 +1100,12 @@ interface SignInRequestV2 {
 async function signInV2(
   idToken: string,
   authType: AuthType,
+  apiKey?: string,
 ): Promise<Result<SignInResponseV2, { type: "sign_in_request_fail"; error: string }>> {
   const signInRes = await makeAuthorizedOkoApiRequest<
     SignInRequestV2,
     SignInResponseV2
-  >("user/signin", idToken, { auth_type: authType }, TSS_V2_ENDPOINT);
+  >("user/signin", idToken, { auth_type: authType }, TSS_V2_ENDPOINT, apiKey);
 
   if (!signInRes.success) {
     console.error("[attached] sign in failed, err: %s", signInRes.err);

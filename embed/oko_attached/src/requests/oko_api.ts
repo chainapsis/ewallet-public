@@ -47,15 +47,21 @@ export async function makeAuthorizedOkoApiRequest<T, R>(
   idToken: string,
   args: T,
   baseUrl: string = TSS_V1_ENDPOINT,
+  apiKey?: string,
 ): Promise<Result<OkoApiResponse<R>, FetchError>> {
   let resp;
   try {
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${idToken}`,
+      "Content-Type": "application/json",
+    };
+    if (apiKey) {
+      headers["x-api-key"] = apiKey;
+    }
+
     resp = await fetch(`${baseUrl}/${path}`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${idToken}`,
-        "Content-Type": "application/json",
-      },
+      headers,
       body: JSON.stringify(args),
     });
   } catch (err: any) {
