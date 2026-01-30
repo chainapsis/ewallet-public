@@ -5,9 +5,16 @@ import type {
   CommitResponseData,
 } from "@oko-wallet/oko-api-openapi/tss";
 import type { Result } from "@oko-wallet/stdlib-js";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
 
 import type { FetchError } from "./types";
 import { OKO_API_ENDPOINT } from "./endpoints";
+
+export interface CommitRevealParams {
+  cr_session_id: string;
+  cr_signature: string;
+  auth_type: AuthType;
+}
 
 export const TSS_V1_ENDPOINT = `${OKO_API_ENDPOINT}/tss/v1`;
 export const TSS_V2_ENDPOINT = `${OKO_API_ENDPOINT}/tss/v2`;
@@ -52,7 +59,10 @@ export async function makeAuthorizedOkoApiRequest<T, R>(
   idToken: string,
   args: T,
   baseUrl: string = TSS_V1_ENDPOINT,
+  commitReveal?: CommitRevealParams,
 ): Promise<Result<OkoApiResponse<R>, FetchError>> {
+  const body = commitReveal ? { ...args, ...commitReveal } : args;
+
   let resp;
   try {
     resp = await fetch(`${baseUrl}/${path}`, {
@@ -61,7 +71,7 @@ export async function makeAuthorizedOkoApiRequest<T, R>(
         Authorization: `Bearer ${idToken}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(args),
+      body: JSON.stringify(body),
     });
   } catch (err: any) {
     return { success: false, err: err };
