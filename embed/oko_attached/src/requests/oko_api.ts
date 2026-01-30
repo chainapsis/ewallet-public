@@ -1,4 +1,9 @@
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { OperationType } from "@oko-wallet/oko-types/commit_reveal";
+import type {
+  CommitRequestBody,
+  CommitResponseData,
+} from "@oko-wallet/oko-api-openapi/tss";
 import type { Result } from "@oko-wallet/stdlib-js";
 
 import type { FetchError } from "./types";
@@ -75,4 +80,22 @@ export async function makeAuthorizedOkoApiRequest<T, R>(
   } catch (err: any) {
     return { success: false, err: err };
   }
+}
+
+export async function commitToOkoApi(
+  sessionId: string,
+  operationType: OperationType,
+  clientEphemeralPubkey: string,
+  idTokenHash: string,
+): Promise<Result<OkoApiResponse<CommitResponseData>, FetchError>> {
+  return makeOkoApiRequest<CommitRequestBody, CommitResponseData>(
+    "commit",
+    {
+      session_id: sessionId,
+      operation_type: operationType,
+      client_ephemeral_pubkey: clientEphemeralPubkey,
+      id_token_hash: idTokenHash,
+    },
+    TSS_V2_ENDPOINT,
+  );
 }

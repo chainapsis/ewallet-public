@@ -6,6 +6,11 @@ import type {
   ReshareKeyShareV2RequestBody,
   ReshareRegisterV2RequestBody,
 } from "@oko-wallet/ksn-interface/key_share";
+import type {
+  CommitRequestBody,
+  CommitResponseData,
+} from "@oko-wallet/ksn-interface/commit_reveal";
+import type { OperationType } from "@oko-wallet/ksn-interface/commit_reveal";
 import type { NodeStatusInfo } from "@oko-wallet/oko-types/tss";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { Result } from "@oko-wallet/stdlib-js";
@@ -467,6 +472,56 @@ export async function reshareRegisterV2(
     return {
       success: false,
       err: `Failed to reshare register in ${ksNodeEndpoint}: ${String(e)}`,
+    };
+  }
+}
+
+/**
+ * Commit to a KS node for commit-reveal scheme.
+ */
+export async function commitToKsNode(
+  nodeEndpoint: string,
+  sessionId: string,
+  operationType: OperationType,
+  clientEphemeralPubkey: string,
+  idTokenHash: string,
+): Promise<Result<CommitResponseData, string>> {
+  const body: CommitRequestBody = {
+    session_id: sessionId,
+    operation_type: operationType,
+    client_ephemeral_pubkey: clientEphemeralPubkey,
+    id_token_hash: idTokenHash,
+  };
+
+  try {
+    const response = await fetch(`${nodeEndpoint}/keyshare/v2/commit`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      return {
+        success: false,
+        err: `Failed to commit: status(${response.status}) in ${nodeEndpoint}`,
+      };
+    }
+
+    const data = (await response.json()) as KSNodeApiResponse<CommitResponseData>;
+    if (data.success === false) {
+      return {
+        success: false,
+        err: `Failed to commit: ${data.code || "UNKNOWN_ERROR"} in ${nodeEndpoint}`,
+      };
+    }
+
+    return { success: true, data: data.data };
+  } catch (e) {
+    return {
+      success: false,
+      err: `Failed to commit in ${nodeEndpoint}: ${String(e)}`,
     };
   }
 }

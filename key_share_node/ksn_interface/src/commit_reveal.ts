@@ -39,3 +39,15 @@ export interface CreateSessionParams {
   id_token_hash: string;
   expires_at: Date;
 }
+
+export interface CommitRequestBody {
+  session_id: string;
+  operation_type: OperationType;
+  client_ephemeral_pubkey: string;
+  id_token_hash: string;
+}
+
+export interface CommitResponseData {
+  node_pubkey: string;
+  node_signature: string;
+}
