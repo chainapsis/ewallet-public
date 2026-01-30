@@ -1,8 +1,9 @@
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { OperationType } from "@oko-wallet/oko-types/commit_reveal";
+import type { OperationType as KsnOperationType } from "@oko-wallet/ksn-interface/commit_reveal";
 import type { Result } from "@oko-wallet/stdlib-js";
 
-import type { ClientCommitRevealSession } from "./types";
+import type { ClientCommitRevealSession, KsnCommitTarget } from "./types";
 import {
   generateSessionId,
   generateClientKeypair,
@@ -38,6 +39,7 @@ export function createCommitRevealSession(
       auth_type: authType,
       id_token: idToken,
       ksn_node_pubkeys: {},
+      ksn_operation_types: {},
       created_at: now,
       expires_at: new Date(now.getTime() + SESSION_TIMEOUT_MS),
     },
@@ -55,10 +57,12 @@ export function setKsnNodePubkey(
   session: ClientCommitRevealSession,
   nodeUrl: string,
   nodePubkey: string,
+  operationType: KsnOperationType,
 ): ClientCommitRevealSession {
   return {
     ...session,
     ksn_node_pubkeys: { ...session.ksn_node_pubkeys, [nodeUrl]: nodePubkey },
+    ksn_operation_types: { ...session.ksn_operation_types, [nodeUrl]: operationType },
   };
 }
 
@@ -71,12 +75,14 @@ export interface CommitAllResult {
 /**
  * Commit to oko_api and KSN nodes in parallel.
  * Creates a commit-reveal session and sends commit requests to all nodes.
+ * Supports per-node KSN operation types for reshare scenarios where ACTIVE and new nodes
+ * use different operation types.
  */
 export async function commitAll(
   operationType: OperationType,
   authType: AuthType,
   idToken: string,
-  ksnNodeUrls: string[],
+  ksnCommitTargets: KsnCommitTarget[],
 ): Promise<Result<CommitAllResult, string>> {
   // 1. Create session
   const sessionRes = createCommitRevealSession(operationType, authType, idToken);
@@ -95,14 +101,14 @@ export async function commitAll(
       clientPubkeyHex,
       session.id_token_hash,
     ),
-    ...ksnNodeUrls.map((nodeUrl) =>
+    ...ksnCommitTargets.map((target) =>
       commitToKsNode(
-        nodeUrl,
+        target.nodeUrl,
         session.session_id,
-        operationType,
+        target.operationType,
         clientPubkeyHex,
         session.id_token_hash,
-      ).then((res) => ({ nodeUrl, res })),
+      ).then((res) => ({ nodeUrl: target.nodeUrl, operationType: target.operationType, res })),
     ),
   ]);
 
@@ -120,9 +126,9 @@ export async function commitAll(
   const ksnCommittedNodes: string[] = [];
   for (const result of ksnResults) {
     if (result.status === "fulfilled") {
-      const { nodeUrl, res } = result.value;
+      const { nodeUrl, operationType: ksnOpType, res } = result.value;
       if (res.success) {
-        session = setKsnNodePubkey(session, nodeUrl, res.data.node_pubkey);
+        session = setKsnNodePubkey(session, nodeUrl, res.data.node_pubkey, ksnOpType);
         ksnCommittedNodes.push(nodeUrl);
       }
     }

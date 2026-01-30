@@ -29,16 +29,21 @@ export function createKsnSignature(
   apiName: KsnApiName,
 ): Result<string, string> {
   const nodePubkey = session.ksn_node_pubkeys[nodeUrl];
+  const operationType = session.ksn_operation_types[nodeUrl];
   if (!nodePubkey) {
     return { success: false, err: `KSN node pubkey not found for ${nodeUrl}` };
   }
+  if (!operationType) {
+    return { success: false, err: `KSN operation type not found for ${nodeUrl}` };
+  }
+  // Use node-specific operation type for signature
   return createRevealSignature(
     session.client_keypair.privateKey,
     nodePubkey,
     session.session_id,
     session.auth_type,
     session.id_token,
-    session.operation_type,
+    operationType,
     apiName,
   );
 }
