@@ -2,6 +2,7 @@
 
 import {
   OkoSvmWallet,
+  registerWalletStandard,
   type WalletStandardConfig,
 } from "@oko-wallet/oko-sdk-svm";
 import {
@@ -63,11 +64,11 @@ export function useOkoSvm() {
       setError(null);
 
       try {
-        // Initialize OkoSvmWallet with wallet-standard registration
+        // chain_id format: "namespace:genesisHash"
         const svmWalletResult = OkoSvmWallet.init({
           api_key: process.env.NEXT_PUBLIC_OKO_API_KEY!,
           sdk_endpoint: process.env.NEXT_PUBLIC_OKO_SDK_ENDPOINT,
-          wallet_standard: [SOLANA_CONFIG],
+          chain_id: SOLANA_MAINNET_CHAIN,
         });
 
         if (!svmWalletResult.success) {
@@ -83,7 +84,9 @@ export function useOkoSvm() {
         const wallet = svmWallet.okoWallet;
         setOkoWallet(wallet);
 
-        // Wait for initialization (wallet-standard registration happens automatically)
+        // Register wallet-standard
+        registerWalletStandard(svmWallet, [SOLANA_CONFIG]);
+
         await svmWallet.waitUntilInitialized;
         console.log(
           "[sandbox_sol] Oko wallet initialized and registered with wallet-standard",

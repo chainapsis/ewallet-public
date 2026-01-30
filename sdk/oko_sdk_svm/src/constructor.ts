@@ -5,6 +5,7 @@ import type {
   OkoSvmWalletInterface,
   OkoSvmWalletInternal,
   OkoSvmWalletStaticInterface,
+  OkoSvmWalletChainOptions,
 } from "./types";
 import { SvmWalletEventEmitter } from "./emitter";
 import { lazyInit } from "./private/lazy_init";
@@ -12,11 +13,14 @@ import { lazyInit } from "./private/lazy_init";
 export const OkoSvmWallet = function (
   this: OkoSvmWalletInternal,
   okoWallet: OkoWalletInterface,
+  chainOptions: OkoSvmWalletChainOptions,
 ) {
   this.okoWallet = okoWallet;
+  this._chainOptions = chainOptions;
   this.state = {
     publicKey: null,
     publicKeyRaw: null,
+    chainId: chainOptions.chain_id,
   };
   this.publicKey = null;
   this.connecting = false;

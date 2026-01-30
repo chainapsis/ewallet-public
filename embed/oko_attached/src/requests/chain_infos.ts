@@ -33,11 +33,19 @@ export async function getAllChainsCached(): Promise<ChainInfo[]> {
   return queryClient.ensureQueryData(allChainsQuery);
 }
 
-// CHECK: filter logic is correct?
+const COSMOS_CHAIN_DISCRIMINATOR = "bech32Config";
+
 export function filterCosmosChains(chains: ChainInfo[]): ChainInfo[] {
-  return chains.filter((c) => !c.chainId.startsWith("eip155:"));
+  return chains.filter((c) => COSMOS_CHAIN_DISCRIMINATOR in c);
 }
 
 export function filterEthChains(chains: ChainInfo[]): ChainInfo[] {
   return chains.filter((c) => c.chainId.startsWith("eip155:"));
+}
+
+export async function getChainByChainId(
+  chainId: string,
+): Promise<ChainInfo | null> {
+  const chains = await getAllChainsCached();
+  return chains.find((c) => c.chainId === chainId) ?? null;
 }

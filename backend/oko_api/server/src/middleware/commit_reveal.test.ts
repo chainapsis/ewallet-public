@@ -44,7 +44,7 @@ function generateRandomHex(bytes: number): string {
   return randomBytes(bytes).toString("hex");
 }
 
-describe("commit_reveal_middleware_basic_validation_test", () => {
+describe("commit_reveal_middleware_test", () => {
   let pool: Pool;
   let app: express.Application;
 
