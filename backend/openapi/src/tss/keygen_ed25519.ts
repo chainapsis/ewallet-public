@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { registry } from "../registry";
+import { CommitRevealRequestFieldsSchema } from "./commit_reveal";
 
 const TeddsaKeygenOutputSchema = registry.register(
   "TeddsaKeygenOutput",
@@ -22,9 +23,11 @@ const TeddsaKeygenOutputSchema = registry.register(
 
 export const KeygenEd25519RequestSchema = registry.register(
   "TssKeygenEd25519Request",
-  z.object({
-    keygen_2: TeddsaKeygenOutputSchema.openapi({
-      description: "Server's keygen output from centralized key generation",
-    }),
-  }),
+  z
+    .object({
+      keygen_2: TeddsaKeygenOutputSchema.openapi({
+        description: "Server's keygen output from centralized key generation",
+      }),
+    })
+    .merge(CommitRevealRequestFieldsSchema),
 );

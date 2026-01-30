@@ -7,16 +7,15 @@ import {
   createCommitRevealApiCall,
   updateCommitRevealSessionState,
   hasCommitRevealApiBeenCalled,
-} from "@oko-wallet/ksn-pg-interface/commit_reveal";
-import type {
-  ApiName,
-  CommitRevealSession,
-} from "@oko-wallet/ksn-interface/commit_reveal";
+} from "@oko-wallet/oko-pg-interface/commit_reveal";
+import type { ApiName, CommitRevealSession } from "@oko-wallet/oko-types/commit_reveal";
+import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
 
-import { ErrorCodeMap } from "@oko-wallet-ksn-server/error";
-import { isApiAllowed, isFinalApi } from "@oko-wallet-ksn-server/commit_reveal";
-import type { ServerState } from "@oko-wallet-ksn-server/state";
-import { logger } from "@oko-wallet-ksn-server/logger";
+import {
+  isApiAllowed,
+  isFinalApi,
+} from "@oko-wallet-api/commit_reveal";
+import type { ServerState } from "@oko-wallet/oko-api-server-state";
 
 const DEFAULT_AUTH_TYPE = "google";
 
@@ -170,7 +169,8 @@ export function commitRevealMiddleware(apiName: ApiName) {
       return;
     }
 
-    const nodePubkeyHex = state.serverKeypair.publicKey.toHex();
+    // Verify signature: message = node_pubkey + session_id + auth_type + id_token + operation_type + api_name
+    const nodePubkeyHex = state.server_keypair.publicKey.toHex();
     const message = makeSigMessage({
       nodePubkeyHex,
       cr_session_id,
@@ -245,7 +245,7 @@ export function commitRevealMiddleware(apiName: ApiName) {
           await client.query("COMMIT");
         } catch (err) {
           await client.query("ROLLBACK");
-          logger.error(
+          state.logger.error(
             "Failed to record API call for session %s: %s",
             cr_session_id,
             err,

@@ -1,11 +1,3 @@
-/**
- * E2E Integration Tests for Commit-Reveal + KeyShare v2 APIs
- *
- * Tests the full flow:
- * 1. Commit phase - POST /keyshare/v2/commit
- * 2. Reveal + API call - POST /keyshare/v2/xxx with commit-reveal signature
- * 3. Verify data persistence and session state updates
- */
 import request from "supertest";
 import express from "express";
 import { Pool } from "pg";
@@ -18,12 +10,12 @@ import {
   convertEddsaSignatureToBytes,
 } from "@oko-wallet/crypto-js/node/ecdhe";
 import { sha256 } from "@oko-wallet/crypto-js";
+import type { OperationType } from "@oko-wallet/ksn-interface/commit_reveal";
+import { getCommitRevealSessionBySessionId } from "@oko-wallet/ksn-pg-interface/commit_reveal";
 
 import { connectPG, resetPgDatabase } from "@oko-wallet-ksn-server/database";
 import { testPgConfig } from "@oko-wallet-ksn-server/database/test_config";
 import type { ServerState } from "@oko-wallet-ksn-server/state";
-import type { OperationType } from "@oko-wallet/ksn-interface/commit_reveal";
-import { getCommitRevealSessionBySessionId } from "@oko-wallet/ksn-pg-interface/commit_reveal";
 import { checkKeyShareV2 } from "@oko-wallet-ksn-server/api/key_share";
 import { commitRevealMiddleware } from "@oko-wallet-ksn-server/middlewares";
 import { keyshareV2Register } from "./register";
@@ -149,7 +141,7 @@ function mockOAuthMiddleware(
   next();
 }
 
-describe("e2e_commit_reveal_keyshare_test", () => {
+describe("key_share_v2_commit_reveal_e2e_test", () => {
   let pool: Pool;
   let app: express.Application;
 

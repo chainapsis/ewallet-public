@@ -1,15 +1,15 @@
 import request from "supertest";
 import express from "express";
-import { Pool } from "pg";
-import dayjs from "dayjs";
+import type { Pool } from "pg";
 import { Bytes } from "@oko-wallet/bytes";
 import { randomBytes } from "node:crypto";
 import { v4 as uuidv4 } from "uuid";
+import { createPgConn } from "@oko-wallet/postgres-lib";
+import winston from "winston";
 
-import { connectPG, resetPgDatabase } from "@oko-wallet-ksn-server/database";
-import { testPgConfig } from "@oko-wallet-ksn-server/database/test_config";
-import type { ServerState } from "@oko-wallet-ksn-server/state";
-import { commit } from "./commit";
+import { testPgConfig } from "@oko-wallet-api/database/test_config";
+import { resetPgDatabase } from "@oko-wallet-api/testing/database";
+import { commitRevealCommit } from "./commit";
 
 // Mock keypair for testing
 const privateKeyRes = Bytes.fromHexString(
@@ -28,6 +28,12 @@ const mockServerKeypair = {
   publicKey: publicKeyRes.data,
 };
 
+const testLogger = winston.createLogger({
+  level: "error",
+  silent: true,
+  transports: [new winston.transports.Console()],
+});
+
 function generateRandomHex(bytes: number): string {
   return randomBytes(bytes).toString("hex");
 }
@@ -38,7 +44,7 @@ describe("commit_route_test", () => {
 
   beforeAll(async () => {
     const config = testPgConfig;
-    const createPostgresRes = await connectPG({
+    const createPostgresRes = await createPgConn({
       database: config.database,
       host: config.host,
       password: config.password,
@@ -57,18 +63,11 @@ describe("commit_route_test", () => {
     app = express();
     app.use(express.json());
 
-    app.post("/keyshare/v2/commit", commit);
+    app.post("/tss/v2/commit", commitRevealCommit);
 
-    app.locals = {
-      db: pool,
-      encryptionSecret: "temp_enc_secret",
-      serverKeypair: mockServerKeypair,
-      telegram_bot_token: "temp_telegram_bot_token",
-      is_db_backup_checked: false,
-      launch_time: dayjs().toISOString(),
-      git_hash: "",
-      version: "",
-    } satisfies ServerState;
+    app.locals.db = pool;
+    app.locals.server_keypair = mockServerKeypair;
+    app.locals.logger = testLogger;
   });
 
   beforeEach(async () => {
@@ -79,7 +78,7 @@ describe("commit_route_test", () => {
     await pool.end();
   });
 
-  const testEndpoint = "/keyshare/v2/commit";
+  const testEndpoint = "/tss/v2/commit";
 
   const createValidBody = () => ({
     session_id: uuidv4(),
@@ -138,21 +137,6 @@ describe("commit_route_test", () => {
       expect(response.body.data).toBeDefined();
     });
 
-    it("should successfully create session with register_reshare operation", async () => {
-      const body = {
-        ...createValidBody(),
-        operation_type: "register_reshare",
-      };
-
-      const response = await request(app)
-        .post(testEndpoint)
-        .send(body)
-        .expect(200);
-
-      expect(response.body.success).toBe(true);
-      expect(response.body.data).toBeDefined();
-    });
-
     it("should successfully create session with add_ed25519 operation", async () => {
       const body = {
         ...createValidBody(),
@@ -189,6 +173,56 @@ describe("commit_route_test", () => {
       expect(response1.body.success).toBe(true);
       expect(response2.body.success).toBe(true);
       expect(response3.body.success).toBe(true);
+    });
+  });
+
+  describe("session verification", () => {
+    it("should create session in COMMITTED state", async () => {
+      const body = createValidBody();
+
+      await request(app).post(testEndpoint).send(body).expect(200);
+
+      // Verify session was created in DB
+      const result = await pool.query(
+        'SELECT * FROM "commit_reveal_sessions" WHERE session_id = $1',
+        [body.session_id],
+      );
+
+      expect(result.rows.length).toBe(1);
+      expect(result.rows[0].state).toBe("COMMITTED");
+      expect(result.rows[0].operation_type).toBe(body.operation_type);
+      expect(result.rows[0].id_token_hash).toBe(body.id_token_hash);
+    });
+
+    it("should set expires_at to approximately 5 minutes from now", async () => {
+      const body = createValidBody();
+      const beforeRequest = new Date();
+
+      await request(app).post(testEndpoint).send(body).expect(200);
+
+      const afterRequest = new Date();
+
+      const result = await pool.query(
+        'SELECT * FROM "commit_reveal_sessions" WHERE session_id = $1',
+        [body.session_id],
+      );
+
+      expect(result.rows.length).toBe(1);
+
+      const expiresAt = new Date(result.rows[0].expires_at);
+      const expectedMinExpiresAt = new Date(
+        beforeRequest.getTime() + 5 * 60 * 1000 - 1000,
+      );
+      const expectedMaxExpiresAt = new Date(
+        afterRequest.getTime() + 5 * 60 * 1000 + 1000,
+      );
+
+      expect(expiresAt.getTime()).toBeGreaterThanOrEqual(
+        expectedMinExpiresAt.getTime(),
+      );
+      expect(expiresAt.getTime()).toBeLessThanOrEqual(
+        expectedMaxExpiresAt.getTime(),
+      );
     });
   });
 
@@ -325,7 +359,7 @@ describe("commit_route_test", () => {
       expect(response.body.msg).toContain("id_token_hash");
     });
 
-    it("should return 500 when session_id is missing (DB error)", async () => {
+    it("should return 500 when session_id is missing", async () => {
       const body = createValidBody();
       const { session_id, ...bodyWithoutSessionId } = body;
 
@@ -337,7 +371,7 @@ describe("commit_route_test", () => {
       expect(response.body.success).toBe(false);
     });
 
-    it("should return 500 when operation_type is missing (DB error)", async () => {
+    it("should return 500 when operation_type is missing", async () => {
       const body = createValidBody();
       const { operation_type, ...bodyWithoutOperationType } = body;
 
@@ -371,56 +405,6 @@ describe("commit_route_test", () => {
         .expect(400);
 
       expect(response.body.success).toBe(false);
-    });
-  });
-
-  describe("session verification", () => {
-    it("should create session in COMMITTED state", async () => {
-      const body = createValidBody();
-
-      await request(app).post(testEndpoint).send(body).expect(200);
-
-      // Verify session was created in DB
-      const result = await pool.query(
-        'SELECT * FROM "2_commit_reveal_sessions" WHERE session_id = $1',
-        [body.session_id],
-      );
-
-      expect(result.rows.length).toBe(1);
-      expect(result.rows[0].state).toBe("COMMITTED");
-      expect(result.rows[0].operation_type).toBe(body.operation_type);
-      expect(result.rows[0].id_token_hash).toBe(body.id_token_hash);
-    });
-
-    it("should set expires_at to approximately 5 minutes from now", async () => {
-      const body = createValidBody();
-      const beforeRequest = new Date();
-
-      await request(app).post(testEndpoint).send(body).expect(200);
-
-      const afterRequest = new Date();
-
-      const result = await pool.query(
-        'SELECT * FROM "2_commit_reveal_sessions" WHERE session_id = $1',
-        [body.session_id],
-      );
-
-      expect(result.rows.length).toBe(1);
-
-      const expiresAt = new Date(result.rows[0].expires_at);
-      const expectedMinExpiresAt = new Date(
-        beforeRequest.getTime() + 5 * 60 * 1000 - 1000,
-      );
-      const expectedMaxExpiresAt = new Date(
-        afterRequest.getTime() + 5 * 60 * 1000 + 1000,
-      );
-
-      expect(expiresAt.getTime()).toBeGreaterThanOrEqual(
-        expectedMinExpiresAt.getTime(),
-      );
-      expect(expiresAt.getTime()).toBeLessThanOrEqual(
-        expectedMaxExpiresAt.getTime(),
-      );
     });
   });
 });
