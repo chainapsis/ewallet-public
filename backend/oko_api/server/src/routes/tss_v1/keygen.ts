@@ -13,12 +13,15 @@ import { registry } from "@oko-wallet/oko-api-openapi";
 import { KeygenRequestSchema } from "@oko-wallet/oko-api-openapi/tss";
 
 import { runKeygen } from "@oko-wallet-api/api/tss/v1/keygen";
+import { saveUserCustomerConnection } from "@oko-wallet-api/api/tss/connection";
 import {
   type OAuthAuthenticatedRequest,
   oauthMiddleware,
 } from "@oko-wallet-api/middleware/auth/oauth";
 import { tssActivateMiddleware } from "@oko-wallet-api/middleware/auth/tss_activate";
-import type { OAuthLocals } from "@oko-wallet-api/middleware/auth/types";
+import type { OAuthLocalsWithAPIKey } from "@oko-wallet-api/middleware/auth/types";
+import { apiKeyMiddleware } from "@oko-wallet-api/middleware/auth/api_key_auth";
+import { getUserByEmailAndAuthType } from "@oko-wallet/oko-pg-interface/oko_users";
 
 export function setKeygenV1Routes(router: Router) {
   registry.registerPath({
@@ -79,11 +82,12 @@ export function setKeygenV1Routes(router: Router) {
   });
   router.post(
     "/keygen",
+    apiKeyMiddleware,
     oauthMiddleware,
     tssActivateMiddleware,
     async (
       req: OAuthAuthenticatedRequest<KeygenBody>,
-      res: Response<OkoApiResponse<SignInResponse>, OAuthLocals>,
+      res: Response<OkoApiResponse<SignInResponse>, OAuthLocalsWithAPIKey>,
     ) => {
       const state = req.app.locals;
       const oauthUser = res.locals.oauth_user;
@@ -124,6 +128,22 @@ export function setKeygenV1Routes(router: Router) {
         res.status(ErrorCodeMap[runKeygenRes.code] ?? 500).json(runKeygenRes);
         return;
       }
+
+      getUserByEmailAndAuthType(state.db, user_identifier, auth_type)
+        .then((userRes) => {
+          const apiKey = res.locals.api_key;
+          if (userRes.success && userRes.data) {
+            saveUserCustomerConnection(
+              state.db,
+              state.logger,
+              userRes.data.user_id,
+              apiKey.customer_id,
+            );
+          }
+        })
+        .catch((err) => {
+          state.logger.error(`[keygen] Error inserting user-customer connection: ${err}`);
+        });
 
       res.status(200).json({
         success: true,

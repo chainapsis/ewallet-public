@@ -32,12 +32,15 @@ import {
   updateWalletKSNodesForReshare,
 } from "@oko-wallet-api/api/tss/v1/user";
 import { verifyUserToken } from "@oko-wallet-api/api/tss/keplr_auth";
+import { saveUserCustomerConnection } from "@oko-wallet-api/api/tss/connection";
 import { tssActivateMiddleware } from "@oko-wallet-api/middleware/auth/tss_activate";
 import {
   type OAuthAuthenticatedRequest,
   oauthMiddleware,
 } from "@oko-wallet-api/middleware/auth/oauth";
-import type { OAuthLocals } from "@oko-wallet-api/middleware/auth/types";
+import type { OAuthLocals, OAuthLocalsWithAPIKey } from "@oko-wallet-api/middleware/auth/types";
+import { apiKeyMiddleware } from "@oko-wallet-api/middleware/auth/api_key_auth";
+import { getUserByEmailAndAuthType } from "@oko-wallet/oko-pg-interface/oko_users";
 
 export function setUserV1Routes(router: Router) {
   registry.registerPath({
@@ -178,11 +181,12 @@ export function setUserV1Routes(router: Router) {
   });
   router.post(
     "/user/signin",
+    apiKeyMiddleware,
     oauthMiddleware,
     tssActivateMiddleware,
     async (
       req: OAuthAuthenticatedRequest,
-      res: Response<OkoApiResponse<SignInResponse>, OAuthLocals>,
+      res: Response<OkoApiResponse<SignInResponse>, OAuthLocalsWithAPIKey>,
     ) => {
       const state = req.app.locals;
       const oauthUser = res.locals.oauth_user;
@@ -217,6 +221,22 @@ export function setUserV1Routes(router: Router) {
           .json(signInRes);
         return;
       }
+
+      getUserByEmailAndAuthType(state.db, user_identifier, auth_type)
+        .then((userRes) => {
+          const apiKey = res.locals.api_key;
+          if (userRes.success && userRes.data) {
+            saveUserCustomerConnection(
+              state.db,
+              state.logger,
+              userRes.data.user_id,
+              apiKey.customer_id,
+            );
+          }
+        })
+        .catch((err) => {
+          state.logger.error(`[signin] Error inserting user-customer connection: ${err}`);
+        });
 
       res.status(200).json({
         success: true,

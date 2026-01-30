@@ -13,8 +13,10 @@ import { registry } from "@oko-wallet/oko-api-openapi";
 import { KeygenRequestV2Schema } from "@oko-wallet/oko-api-openapi/tss";
 
 import { runKeygenV2 } from "@oko-wallet-api/api/tss/v2/keygen";
+import { saveUserCustomerConnection } from "@oko-wallet-api/api/tss/connection";
 import { type OAuthAuthenticatedRequest } from "@oko-wallet-api/middleware/auth/oauth";
-import type { OAuthLocals } from "@oko-wallet-api/middleware/auth/types";
+import type { OAuthLocalsWithAPIKey } from "@oko-wallet-api/middleware/auth/types";
+import { getUserByEmailAndAuthType } from "@oko-wallet/oko-pg-interface/oko_users";
 
 registry.registerPath({
   method: "post",
@@ -76,7 +78,7 @@ registry.registerPath({
 
 export async function keygenV2(
   req: OAuthAuthenticatedRequest<KeygenBodyV2>,
-  res: Response<OkoApiResponse<SignInResponseV2>, OAuthLocals>,
+  res: Response<OkoApiResponse<SignInResponseV2>, OAuthLocalsWithAPIKey>,
 ) {
   const state = req.app.locals;
   const oauthUser = res.locals.oauth_user;
@@ -118,6 +120,22 @@ export async function keygenV2(
     res.status(ErrorCodeMap[runKeygenRes.code] ?? 500).json(runKeygenRes);
     return;
   }
+
+  getUserByEmailAndAuthType(state.db, user_identifier, auth_type)
+    .then((userRes) => {
+      const apiKey = res.locals.api_key;
+      if (userRes.success && userRes.data) {
+        saveUserCustomerConnection(
+          state.db,
+          state.logger,
+          userRes.data.user_id,
+          apiKey.customer_id,
+        );
+      }
+    })
+    .catch((err) => {
+      state.logger.error(`[keygen_v2] Error inserting user-customer connection: ${err}`);
+    });
 
   res.status(200).json({
     success: true,
