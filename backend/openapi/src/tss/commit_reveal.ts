@@ -2,7 +2,7 @@ import { z } from "zod";
 import { registry } from "@oko-wallet/oko-api-openapi";
 
 export const OperationTypeSchema = z
-  .enum(["sign_in", "sign_up", "sign_in_reshare", "add_ed25519"])
+  .enum(["sign_in", "sign_up", "sign_in_reshare", "sign_in_reshare_ed25519", "add_ed25519"])
   .describe("Operation type for commit-reveal session");
 
 // POST /tss/v2/commit-reveal/commit

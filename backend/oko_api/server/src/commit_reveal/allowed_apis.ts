@@ -7,6 +7,7 @@ export const ALLOWED_APIS = {
   sign_in: ["signin"],
   sign_up: ["keygen"],
   sign_in_reshare: ["signin", "reshare"],
+  sign_in_reshare_ed25519: ["signin", "reshare", "keygen_ed25519"],
   add_ed25519: ["keygen_ed25519"],
 };
 
@@ -14,6 +15,7 @@ export const FINAL_APIS = {
   sign_in: ["signin"],
   sign_up: ["keygen"],
   sign_in_reshare: ["reshare"],
+  sign_in_reshare_ed25519: ["keygen_ed25519"],
   add_ed25519: ["keygen_ed25519"],
 };
 
