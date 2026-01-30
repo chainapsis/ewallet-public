@@ -16,6 +16,7 @@ import {
   TSS_V2_ENDPOINT,
   SOCIAL_LOGIN_V2_ENDPOINT,
 } from "@oko-wallet-attached/requests/oko_api";
+import type { CommitRevealParams } from "@oko-wallet/oko-types/commit_reveal";
 import { combineUserShares } from "@oko-wallet-attached/crypto/combine";
 import type { UserSignInResultV2 } from "@oko-wallet-attached/window_msgs/types";
 import type { FetchError } from "@oko-wallet-attached/requests/types";
@@ -27,7 +28,6 @@ import {
   registerKeyShareEd25519V2,
   reshareKeySharesV2,
   reshareRegisterV2,
-  type KsnCommitRevealParams,
 } from "@oko-wallet-attached/requests/ks_node_v2";
 import {
   commitAll,
@@ -149,10 +149,9 @@ export async function handleNewUserV2(
       if (!ksnSigRes.success) {
         return Promise.resolve({ success: false, err: ksnSigRes.err } as const);
       }
-      const commitRevealParams: KsnCommitRevealParams = {
+      const commitRevealParams: CommitRevealParams = {
         cr_session_id: session.session_id,
         cr_signature: ksnSigRes.data,
-        auth_type: authType,
       };
       return registerKeySharesV2(
         keyShareByNode.node.endpoint,
@@ -268,14 +267,45 @@ export async function handleExistingUserV2(
   keyshareNodeMetaEd25519: KeyShareNodeMetaWithNodeStatusInfo,
   authType: AuthType,
 ): Promise<Result<UserSignInResultV2, OAuthSignInError>> {
-  // 1. Sign in to API server
-  const signInResult = await signInV2(idToken, authType);
+  // 1. Commit to oko_api and KSN nodes
+  const ksnCommitTargets: KsnCommitTarget[] =
+    keyshareNodeMetaSecp256k1.nodes.map((node) => ({
+      nodeUrl: node.endpoint,
+      operationType: "sign_in" as const,
+    }));
+  const commitRes = await commitAll(
+    "sign_in",
+    authType,
+    idToken,
+    ksnCommitTargets,
+    keyshareNodeMetaSecp256k1.threshold, // threshold for sign_in
+  );
+  if (!commitRes.success) {
+    return {
+      success: false,
+      err: { type: "sign_in_request_fail", error: commitRes.err },
+    };
+  }
+  const { session } = commitRes.data;
+
+  // 2. Sign in to API server
+  const okoApiSigRes = createOkoApiSignature(session, "signin");
+  if (!okoApiSigRes.success) {
+    return {
+      success: false,
+      err: { type: "sign_in_request_fail", error: okoApiSigRes.err },
+    };
+  }
+  const signInResult = await signInV2(idToken, authType, {
+    cr_session_id: session.session_id,
+    cr_signature: okoApiSigRes.data,
+  });
   if (!signInResult.success) {
     return { success: false, err: signInResult.err };
   }
   const signInResp = signInResult.data;
 
-  // 2. Request secp256k1 and ed25519 shares from KS nodes using V2 API
+  // 3. Request secp256k1 and ed25519 shares from KS nodes using V2 API
   const requestSharesRes = await requestKeySharesV2(
     idToken,
     keyshareNodeMetaSecp256k1.nodes,
@@ -285,6 +315,8 @@ export async function handleExistingUserV2(
       secp256k1: signInResp.user.public_key_secp256k1,
       ed25519: signInResp.user.public_key_ed25519,
     },
+    (nodeEndpoint) =>
+      createKsnCommitRevealParams(session, nodeEndpoint, "get_key_shares"),
   );
   if (!requestSharesRes.success) {
     const error = requestSharesRes.err;
@@ -1145,17 +1177,44 @@ interface SignInRequestV2 {
 }
 
 /**
+ * Create commit-reveal params for KSN API calls.
+ */
+function createKsnCommitRevealParams(
+  session: Parameters<typeof createKsnSignature>[0],
+  nodeEndpoint: string,
+  apiName: Parameters<typeof createKsnSignature>[2],
+): CommitRevealParams | undefined {
+  const ksnSigRes = createKsnSignature(session, nodeEndpoint, apiName);
+  if (!ksnSigRes.success) {
+    return undefined;
+  }
+  return {
+    cr_session_id: session.session_id,
+    cr_signature: ksnSigRes.data,
+  };
+}
+
+/**
  * Sign in to API server and return user data.
  * Used by handlers that need to authenticate before requesting shares.
  */
 async function signInV2(
   idToken: string,
   authType: AuthType,
-): Promise<Result<SignInResponseV2, { type: "sign_in_request_fail"; error: string }>> {
+  commitReveal?: CommitRevealParams,
+): Promise<
+  Result<SignInResponseV2, { type: "sign_in_request_fail"; error: string }>
+> {
   const signInRes = await makeAuthorizedOkoApiRequest<
     SignInRequestV2,
     SignInResponseV2
-  >("user/signin", idToken, { auth_type: authType }, TSS_V2_ENDPOINT);
+  >(
+    "user/signin",
+    idToken,
+    { auth_type: authType },
+    TSS_V2_ENDPOINT,
+    commitReveal,
+  );
 
   if (!signInRes.success) {
     console.error("[attached] sign in failed, err: %s", signInRes.err);

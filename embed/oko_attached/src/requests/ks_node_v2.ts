@@ -13,14 +13,9 @@ import type {
 import type { OperationType } from "@oko-wallet/ksn-interface/commit_reveal";
 import type { NodeStatusInfo } from "@oko-wallet/oko-types/tss";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
+import type { CommitRevealParams } from "@oko-wallet/oko-types/commit_reveal";
 import type { Result } from "@oko-wallet/stdlib-js";
 import type { KSNodeApiResponse } from "@oko-wallet/ksn-interface/response";
-
-export interface KsnCommitRevealParams {
-  cr_session_id: string;
-  cr_signature: string;
-  auth_type: AuthType;
-}
 
 export interface RequestKeySharesV2Result {
   secp256k1?: string; // share hex string
@@ -55,7 +50,7 @@ export async function requestKeySharesV2(
   },
   getCommitRevealParams?: (
     nodeEndpoint: string,
-  ) => KsnCommitRevealParams | undefined,
+  ) => CommitRevealParams | undefined,
 ): Promise<Result<KeySharesByNode[], RequestKeySharesV2Error>> {
   const shuffledNodes = [...allNodes];
   for (let i = shuffledNodes.length - 1; i > 0; i -= 1) {
@@ -144,7 +139,7 @@ async function requestKeyShareFromNodeV2(
     ed25519?: string;
   },
   maxRetries: number = 2,
-  commitReveal?: KsnCommitRevealParams,
+  commitReveal?: CommitRevealParams,
 ): Promise<Result<KeySharesByNode, string>> {
   const body: GetKeyShareV2WithCRRequestBody = {
     auth_type: authType,
@@ -246,7 +241,7 @@ export async function registerKeySharesV2(
     secp256k1?: { public_key: string; share: string };
     ed25519?: { public_key: string; share: string };
   },
-  commitReveal?: KsnCommitRevealParams,
+  commitReveal?: CommitRevealParams,
 ): Promise<Result<void, string>> {
   const body: RegisterKeyShareV2WithCRRequestBody = {
     auth_type: authType,
@@ -320,7 +315,7 @@ export async function registerKeyShareEd25519V2(
   authType: AuthType,
   publicKey: string,
   share: string,
-  commitReveal?: KsnCommitRevealParams,
+  commitReveal?: CommitRevealParams,
 ): Promise<Result<void, string>> {
   const body: RegisterEd25519V2WithCRRequestBody = {
     auth_type: authType,
@@ -387,7 +382,7 @@ export async function reshareKeySharesV2(
     secp256k1?: { public_key: string; share: string };
     ed25519?: { public_key: string; share: string };
   },
-  commitReveal?: KsnCommitRevealParams,
+  commitReveal?: CommitRevealParams,
 ): Promise<Result<void, string>> {
   const body: ReshareKeyShareV2WithCRRequestBody = {
     auth_type: authType,
@@ -456,7 +451,7 @@ export async function reshareRegisterV2(
     secp256k1?: { public_key: string; share: string };
     ed25519?: { public_key: string; share: string };
   },
-  commitReveal?: KsnCommitRevealParams,
+  commitReveal?: CommitRevealParams,
 ): Promise<Result<void, string>> {
   const body: ReshareRegisterV2WithCRRequestBody = {
     auth_type: authType,
