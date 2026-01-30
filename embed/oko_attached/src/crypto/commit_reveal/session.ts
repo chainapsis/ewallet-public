@@ -73,16 +73,21 @@ export interface CommitAllResult {
 }
 
 /**
- * Commit to oko_api and KSN nodes in parallel.
- * Creates a commit-reveal session and sends commit requests to all nodes.
- * Supports per-node KSN operation types for reshare scenarios where ACTIVE and new nodes
- * use different operation types.
+ * Commit to oko_api and KSN nodes.
+ * Creates a commit-reveal session and sends commit requests.
+ *
+ * @param ksnThreshold - Number of KSN nodes that must successfully commit.
+ *   - For sign_in: pass the MPC threshold (e.g., 2)
+ *   - For register/reshare: pass targets.length (all nodes must succeed)
+ *
+ * Shuffles nodes and tries threshold first, retries with backup on failure.
  */
 export async function commitAll(
   operationType: OperationType,
   authType: AuthType,
   idToken: string,
   ksnCommitTargets: KsnCommitTarget[],
+  ksnThreshold: number,
 ): Promise<Result<CommitAllResult, string>> {
   // 1. Create session
   const sessionRes = createCommitRevealSession(operationType, authType, idToken);
@@ -93,62 +98,91 @@ export async function commitAll(
 
   const clientPubkeyHex = session.client_keypair.publicKey.toHex();
 
-  // 2. Commit to oko_api and KSN nodes in parallel
-  const [okoApiResult, ...ksnResults] = await Promise.allSettled([
-    commitToOkoApi(
-      session.session_id,
-      operationType,
-      clientPubkeyHex,
-      session.id_token_hash,
-    ),
-    ...ksnCommitTargets.map((target) =>
-      commitToKsNode(
-        target.nodeUrl,
-        session.session_id,
-        target.operationType,
-        clientPubkeyHex,
-        session.id_token_hash,
-      ).then((res) => ({ nodeUrl: target.nodeUrl, operationType: target.operationType, res })),
-    ),
-  ]);
+  // 2. Commit to oko_api
+  const okoApiResult = await commitToOkoApi(
+    session.session_id,
+    operationType,
+    clientPubkeyHex,
+    session.id_token_hash,
+  );
 
-  // 3. Process oko_api result
-  let okoApiCommitted = false;
-  if (okoApiResult.status === "fulfilled" && okoApiResult.value.success) {
-    const apiResponse = okoApiResult.value.data;
-    if (apiResponse.success) {
-      session = setOkoApiNodePubkey(session, apiResponse.data.node_pubkey);
-      okoApiCommitted = true;
-    }
-  }
-
-  // 4. Process KSN results
-  const ksnCommittedNodes: string[] = [];
-  for (const result of ksnResults) {
-    if (result.status === "fulfilled") {
-      const { nodeUrl, operationType: ksnOpType, res } = result.value;
-      if (res.success) {
-        session = setKsnNodePubkey(session, nodeUrl, res.data.node_pubkey, ksnOpType);
-        ksnCommittedNodes.push(nodeUrl);
-      }
-    }
-  }
-
-  // 5. Check if we have enough commits
-  if (!okoApiCommitted) {
+  if (!okoApiResult.success || !okoApiResult.data.success) {
     return { success: false, err: "Failed to commit to oko_api" };
   }
+  session = setOkoApiNodePubkey(session, okoApiResult.data.data.node_pubkey);
 
-  if (ksnCommittedNodes.length === 0) {
-    return { success: false, err: "Failed to commit to any KSN node" };
+  // 3. Commit to KSN nodes
+  // Shuffle nodes
+  const shuffledTargets = [...ksnCommitTargets];
+  for (let i = shuffledTargets.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffledTargets[i], shuffledTargets[j]] = [shuffledTargets[j], shuffledTargets[i]];
+  }
+
+  const committedNodes: string[] = [];
+  let targetsToTry = shuffledTargets.slice(0, ksnThreshold);
+  let backupTargets = shuffledTargets.slice(ksnThreshold);
+
+  while (committedNodes.length < ksnThreshold && targetsToTry.length > 0) {
+    const results = await Promise.allSettled(
+      targetsToTry.map((target) =>
+        commitToKsNode(
+          target.nodeUrl,
+          session.session_id,
+          target.operationType,
+          clientPubkeyHex,
+          session.id_token_hash,
+        ).then((res) => ({
+          nodeUrl: target.nodeUrl,
+          operationType: target.operationType,
+          res,
+        })),
+      ),
+    );
+
+    const failedTargets: KsnCommitTarget[] = [];
+
+    for (let i = 0; i < results.length; i++) {
+      const result = results[i];
+      const target = targetsToTry[i];
+
+      if (result.status === "fulfilled" && result.value.res.success) {
+        session = setKsnNodePubkey(
+          session,
+          result.value.nodeUrl,
+          result.value.res.data.node_pubkey,
+          result.value.operationType,
+        );
+        committedNodes.push(result.value.nodeUrl);
+      } else {
+        failedTargets.push(target);
+      }
+    }
+
+    if (committedNodes.length >= ksnThreshold) {
+      break;
+    }
+
+    // Try backup nodes for failed ones
+    targetsToTry = [];
+    for (let i = 0; i < failedTargets.length && backupTargets.length > 0; i++) {
+      targetsToTry.push(backupTargets.shift()!);
+    }
+  }
+
+  if (committedNodes.length < ksnThreshold) {
+    return {
+      success: false,
+      err: `Insufficient KSN commits: got ${committedNodes.length}, need ${ksnThreshold}`,
+    };
   }
 
   return {
     success: true,
     data: {
       session,
-      okoApiCommitted,
-      ksnCommittedNodes,
+      okoApiCommitted: true,
+      ksnCommittedNodes: committedNodes,
     },
   };
 }
