@@ -352,6 +352,31 @@ describe("commit_reveal_middleware_test", () => {
       expect(response.body.success).toBe(true);
     });
 
+    it("should pass middleware with valid signature for sign_in_reshare_ed25519 operation", async () => {
+      const ctx = createTestContext({
+        operationType: "sign_in_reshare_ed25519",
+        apiName: "register_ed25519",
+      });
+      await createSession(pool, ctx);
+
+      const signature = createRevealSignature(
+        ctx,
+        mockServerKeypair.publicKey.toHex(),
+      );
+
+      const response = await request(app)
+        .post("/test/register_ed25519")
+        .set("Authorization", `Bearer ${ctx.idToken}`)
+        .send({
+          cr_session_id: ctx.sessionId,
+          cr_signature: signature,
+          auth_type: ctx.authType,
+        })
+        .expect(200);
+
+      expect(response.body.success).toBe(true);
+    });
+
     it("should default auth_type to google if not provided", async () => {
       const ctx = createTestContext({
         operationType: "sign_in",
@@ -1140,6 +1165,78 @@ describe("commit_reveal_middleware_test", () => {
 
       await request(app)
         .post("/test/get_key_shares")
+        .set("Authorization", `Bearer ${ctx.idToken}`)
+        .send({
+          cr_session_id: ctx.sessionId,
+          cr_signature: signature,
+          auth_type: ctx.authType,
+        })
+        .expect(200);
+
+      // Wait for res.on('finish') to complete
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Verify session is COMPLETED
+      const sessionRes = await getCommitRevealSessionBySessionId(
+        pool,
+        ctx.sessionId,
+      );
+      if (!sessionRes.success) {
+        throw new Error(`Failed to get session: ${sessionRes.err}`);
+      }
+      expect(sessionRes.data?.state).toBe("COMPLETED");
+    });
+
+    it("should NOT update session to COMPLETED when non-final API is called for sign_in_reshare_ed25519", async () => {
+      const ctx = createTestContext({
+        operationType: "sign_in_reshare_ed25519",
+        apiName: "get_key_shares", // NOT final API for sign_in_reshare_ed25519 (final is register_ed25519)
+      });
+      await createSession(pool, ctx);
+
+      const signature = createRevealSignature(
+        ctx,
+        mockServerKeypair.publicKey.toHex(),
+      );
+
+      await request(app)
+        .post("/test/get_key_shares")
+        .set("Authorization", `Bearer ${ctx.idToken}`)
+        .send({
+          cr_session_id: ctx.sessionId,
+          cr_signature: signature,
+          auth_type: ctx.authType,
+        })
+        .expect(200);
+
+      // Wait for res.on('finish') to complete
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Verify session is still COMMITTED (not COMPLETED)
+      const sessionRes = await getCommitRevealSessionBySessionId(
+        pool,
+        ctx.sessionId,
+      );
+      if (!sessionRes.success) {
+        throw new Error(`Failed to get session: ${sessionRes.err}`);
+      }
+      expect(sessionRes.data?.state).toBe("COMMITTED");
+    });
+
+    it("should update session to COMPLETED when final API is called for sign_in_reshare_ed25519", async () => {
+      const ctx = createTestContext({
+        operationType: "sign_in_reshare_ed25519",
+        apiName: "register_ed25519", // final API for sign_in_reshare_ed25519
+      });
+      await createSession(pool, ctx);
+
+      const signature = createRevealSignature(
+        ctx,
+        mockServerKeypair.publicKey.toHex(),
+      );
+
+      await request(app)
+        .post("/test/register_ed25519")
         .set("Authorization", `Bearer ${ctx.idToken}`)
         .send({
           cr_session_id: ctx.sessionId,

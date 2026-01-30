@@ -7,6 +7,7 @@ export const operationTypeSchema = z
     "sign_in",
     "sign_up",
     "sign_in_reshare",
+    "sign_in_reshare_ed25519",
     "register_reshare",
     "add_ed25519",
   ])
