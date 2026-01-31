@@ -1,4 +1,4 @@
-name: Deploy Oko Apps
+name: Deploy Oko Attached
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PRJ_ID__OKO_ATTACHED }}
