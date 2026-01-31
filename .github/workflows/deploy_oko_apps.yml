@@ -5,8 +5,8 @@ env:
 on:
   workflow_dispatch:
     inputs:
-      tag:
-        description: "Target tag for deployment (format: develop/v0.0.1 or release/v0.0.1)"
+      git_tag:
+        description: "Git tag for deployment (format: develop/v0.0.1 or release/v0.0.1)"
         required: true
         type: string
       app:
@@ -35,7 +35,7 @@ jobs:
       - name: Check git tag
         run: node ./internals/github/dist/validate_git_tag.js
         env:
-          TARGET_TAG: "${{ inputs.targetTag }}"
+          GIT_TAG: "${{ inputs.git_tag }}"
 
       - name: Enable Corepack
         run: corepack enable
