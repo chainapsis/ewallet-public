@@ -1,5 +1,6 @@
 .vars
 .secrets
+.input
 
 # Hidden files are not copied to Docker instances
 !dist
