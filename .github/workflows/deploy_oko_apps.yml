@@ -15,6 +15,9 @@ on:
         type: choice
         options:
           - 'demo_web'
+          - 'oko_attached'
+          - 'user_dashboard'
+          - 'ct_dashboard'
 
 jobs:
   publish:
