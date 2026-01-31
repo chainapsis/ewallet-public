@@ -1,5 +1,5 @@
 async function main() {
-    const demoAppId = process.env.VERCEL_PROJECT_ID__OKO_DEMO_WEB;
+    const demoWebId = process.env.VERCEL_PROJECT_ID__OKO_DEMO_WEB;
     const ctDashboardId = process.env.VERCEL_PROJECT_ID__CT_DASHBOARD;
     const userDashboardId = process.env.VERCEL_PROJECT_ID__USER_DASHBOARD;
     const attachedId = process.env.VERCEL_PROJECT_ID__OKO_ATTACHED;
@@ -8,7 +8,7 @@ async function main() {
     let projId;
     switch (okoApp) {
         case "demo_web":
-            projId = demoAppId;
+            projId = demoWebId;
             break;
         case "ct_dashboard":
             projId = ctDashboardId;
@@ -23,6 +23,7 @@ async function main() {
             console.error("oko app invalid, app: %s", okoApp);
             process.exit(1);
     }
+    console.log("Found vercel project id, id: %s", projId);
     console.log(JSON.stringify(projId));
 }
 main().then();
