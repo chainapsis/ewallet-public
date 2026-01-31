@@ -40,13 +40,31 @@ jobs:
         env:
           GIT_TAG: "${{ inputs.git_tag }}"
 
-      - name: Set Vercel Project Id 4
+      - name: Set Vercel Project Id
+        id: vercel_project
         run: |
-          PROJ_ID=$(node ./internals/github/dist/get_vercel_proj_id.js)
-          echo $PROJ_ID
-      #     echo "VERCEL_PROJECT_ID=$PROJ_ID" >> "$GITHUB_OUTPUT"
-        env:
-          OKO_APP: "${{ inputs.oko_app }}"
+          case "${{ inputs.oko_app }}" in
+            demo_web)
+              echo "VERCEL_PROJECT_ID=$VERCEL_PROJECT_ID__OKO_DEMO_WEB" >> 
+                "$GITHUB_ENV"
+              ;;
+            ct_dashboard)
+              echo "VERCEL_PROJECT_ID=$VERCEL_PROJECT_ID__CT_DASHBOARD" >> 
+                "$GITHUB_ENV"
+              ;;
+            user_dashboard)
+              echo "VERCEL_PROJECT_ID=$VERCEL_PROJECT_ID__USER_DASHBOARD" >> 
+               "$GITHUB_ENV"
+              ;;
+            oko_attached)
+              echo "VERCEL_PROJECT_ID=$VERCEL_PROJECT_ID__OKO_ATTACHED" >> 
+              "$GITHUB_ENV"
+              ;;
+            *)
+              echo "Unknown app: ${{ inputs.oko_app }}"
+              exit 1
+              ;;
+          esac
       #
       # - name: Enable Corepack
       #   run: corepack enable
