@@ -7,7 +7,7 @@
     "apps/user_dashboard",
     "backend/admin_api",
     "backend/oko_api/server",
-    "backend/oko_api/error_codes",
+    "backend/oko_api_error_codes",
     "backend/oko_api_server_state",
     "backend/oko_pg_interface",
     "backend/ct_dashboard_api",
@@ -44,6 +44,6 @@
     "ui/oko_common_ui"
   ],
   "npmClient": "yarn",
-  "version": "0.1.2-alpha.2",
+  "version": "0.1.2-alpha.4",
   "$schema": "node_modules/lerna/schemas/lerna-schema.json"
 }

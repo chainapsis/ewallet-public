@@ -1,3 +1,5 @@
+import type { FC } from "react";
+
 import type { BasicIconProps } from "./types";
 
 export const EmptyStateIcon: FC<BasicIconProps> = ({
@@ -13,6 +15,7 @@ export const EmptyStateIcon: FC<BasicIconProps> = ({
       fill="none"
       className={className}
     >
+      <title>Empty state</title>
       <g clipPath="url(#clip0_239_3873)">
         <rect width="28" height="28" rx="14" fill="#F5F5F5" />
         <mask

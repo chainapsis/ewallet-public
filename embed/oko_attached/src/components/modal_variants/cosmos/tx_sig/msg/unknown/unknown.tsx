@@ -18,7 +18,9 @@ export const UnknownMessage: FC<UnknownMessageProps> = ({ msg }) => {
   useEffect(() => {
     const rootEl = contentRef.current;
     const sentinelEl = sentinelRef.current;
-    if (!rootEl || !sentinelEl) return;
+    if (!rootEl || !sentinelEl) {
+      return;
+    }
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -32,7 +34,7 @@ export const UnknownMessage: FC<UnknownMessageProps> = ({ msg }) => {
     );
     observer.observe(sentinelEl);
     return () => observer.disconnect();
-  }, [defaultMsg]);
+  }, []);
 
   const handleCollapse = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
     e.stopPropagation();
@@ -54,14 +56,23 @@ export const UnknownMessage: FC<UnknownMessageProps> = ({ msg }) => {
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       className={containerClassName}
       onClick={isCollapse ? handleCollapse : undefined}
     >
-      <div className={styles.titleRow} onClick={handleCollapse}>
+      <div
+        className={styles.titleRow}
+        onClick={handleCollapse}
+        role="button"
+        tabIndex={0}
+      >
         <Typography color="brand-primary" size="xs" weight="medium">
           {type}
         </Typography>
         <div
+          role="button"
+          tabIndex={0}
           onClick={() => setIsCollapse(!isCollapse)}
           className={styles.collapseButton}
         >

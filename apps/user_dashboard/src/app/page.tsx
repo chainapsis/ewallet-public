@@ -1,5 +1,4 @@
 import styles from "./page.module.scss";
-import { ToastCloseButton } from "@oko-wallet-common-ui/toast/toast";
 import { Authorized } from "@oko-wallet-user-dashboard/components/authorized/authorized";
 import { ConnectedApps } from "@oko-wallet-user-dashboard/components/connected_apps/connected_apps";
 import { DashboardBody } from "@oko-wallet-user-dashboard/components/dashboard_body/dashboard_body";
