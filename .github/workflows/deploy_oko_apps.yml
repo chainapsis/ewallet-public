@@ -32,6 +32,11 @@ jobs:
       - name: Check Node version
         run: node -v
 
+      - name: Check git tag
+        run: node ./internals/github/dist/validate_git.tag.js
+        env:
+          TARGET_TAG: "${{ inputs.targetTag }}"
+
       - name: Enable Corepack
         run: corepack enable
 
