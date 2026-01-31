@@ -20,7 +20,6 @@ export async function typeCheck(..._args: any[]) {
     paths.sandbox_simple_host,
     paths.sandbox_sol,
     paths.oko_api_server,
-    // paths.tss_api,
     paths.admin_api,
     paths.ct_dashboard_api,
     paths.oko_attached,
@@ -28,9 +27,7 @@ export async function typeCheck(..._args: any[]) {
     paths.demo_web,
     paths.oko_admin_web,
     paths.ct_dashboard_web,
-    // TODO: @rita only temporary until the update on the other package
-    // "modular chain info" is done
-    // paths.user_dashboard,
+    paths.user_dashboard,
   ];
 
   // NOTE: Currently not used
