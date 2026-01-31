@@ -1,6 +1,7 @@
 .vars
 .secrets
 .input
+.env
 
 # Hidden files are not copied to Docker instances
 !dist

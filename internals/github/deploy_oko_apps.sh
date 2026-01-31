@@ -14,5 +14,6 @@ act --workflows ".github/workflows/deploy_oko_apps.yml" \
     --secret-file "./internals/github/.secrets" \
     --var-file "./internals/github/.vars" \
     --input-file "./internals/github/.input" \
+    --env-file "./internals/github/.env" \
     -s ACTIONS_STEP_DEBUG=true \
     --container-architecture linux/amd64
