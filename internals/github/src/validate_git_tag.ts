@@ -1,3 +1,6 @@
+const DEVELOP = "develop/v";
+const RELEASE = "release/v";
+
 async function main() {
   const tag = process.env.TARGET_TAG;
 
@@ -7,7 +10,13 @@ async function main() {
     process.exit(1);
   }
 
-  console.log("tag", tag);
+  if (!tag.startsWith(DEVELOP) || !tag.startsWith(RELEASE)) {
+    console.error("Not a valid tag, tag: %s", tag);
+
+    process.exit(1);
+  }
+
+  console.log("Git tag: %s", tag);
 }
 
 main().then();
