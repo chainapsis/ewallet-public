@@ -20,9 +20,7 @@ export async function doBuildPkgs() {
     paths.teddsa_interface,
     paths.ksn_interface,
     paths.tecdsa_interface,
-    // paths.sdk_core,
-    // paths.sdk_cosmos,
-    // paths.sdk_eth,
+    paths.github,
   ];
 
   console.log("Building packages, total (%s)", pkgsInOrder.length);
