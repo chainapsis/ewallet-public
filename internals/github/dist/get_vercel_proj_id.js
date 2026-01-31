@@ -3,6 +3,7 @@ async function main() {
     const ctDashboardId = process.env.VERCEL_PROJECT_ID__CT_DASHBOARD;
     const userDashboardId = process.env.VERCEL_PROJECT_ID__USER_DASHBOARD;
     const attachedId = process.env.VERCEL_PROJECT_ID__OKO_ATTACHED;
+    console.log("Project id list demoWeb: %s", demoWebId);
     const okoApp = process.env.OKO_APP;
     console.log("oko app: %s", okoApp);
     let projId;

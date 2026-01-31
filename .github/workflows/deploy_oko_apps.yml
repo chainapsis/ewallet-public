@@ -40,27 +40,28 @@ jobs:
         env:
           GIT_TAG: "${{ inputs.git_tag }}"
 
-      - name: Set Vercel Project Id 2
+      - name: Set Vercel Project Id 4
         run: |
           PROJ_ID=$(node ./internals/github/dist/get_vercel_proj_id.js)
-          echo "VERCEL_PROJECT_ID=$PROJ_ID" >> "$GITHUB_OUTPUT"
+          echo $PROJ_ID
+      #     echo "VERCEL_PROJECT_ID=$PROJ_ID" >> "$GITHUB_OUTPUT"
         env:
           OKO_APP: "${{ inputs.oko_app }}"
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Yarn version
-        run: yarn -v
-
-      - name: Install Vercel CLI
-        run: npm install -g vercel@latest
-
-      - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Build Project Artifacts
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+      #
+      # - name: Enable Corepack
+      #   run: corepack enable
+      #
+      # - name: Yarn version
+      #   run: yarn -v
+      #
+      # - name: Install Vercel CLI
+      #   run: npm install -g vercel@latest
+      #
+      # - name: Pull Vercel Environment Information
+      #   run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      #
+      # - name: Build Project Artifacts
+      #   run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      #
+      # - name: Deploy Project Artifacts to Vercel
+      #   run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
