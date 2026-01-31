@@ -31,32 +31,6 @@ jobs:
         run: node ./internals/github/dist/validate_git_tag.js
         env:
           GIT_TAG: "${{ inputs.git_tag }}"
-
-      - name: Set Vercel Project Id
-        id: vercel_project
-        run: |
-          case "${{ inputs.oko_app }}" in
-            demo_web)
-              echo "VERCEL_PROJECT_ID=$VERCEL_PRJ_ID__OKO_DEMO_WEB" >> \
-                "$GITHUB_ENV"
-              ;;
-            ct_dashboard)
-              echo "VERCEL_PROJECT_ID=$VERCEL_PRJ_ID__CT_DASHBOARD" >> \
-                "$GITHUB_ENV"
-              ;;
-            user_dashboard)
-              echo "VERCEL_PROJECT_ID=$VERCEL_PRJ_ID__USER_DASHBOARD" >> \
-               "$GITHUB_ENV"
-              ;;
-            oko_attached)
-              echo "VERCEL_PROJECT_ID=$VERCEL_PRJ_ID__OKO_ATTACHED" >> \
-              "$GITHUB_ENV"
-              ;;
-            *)
-              echo "Unknown app: ${{ inputs.oko_app }}"
-              exit 1
-              ;;
-          esac
       
       - name: Enable Corepack
         run: corepack enable
