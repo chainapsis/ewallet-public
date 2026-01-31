@@ -20,3 +20,5 @@ async function main() {
 }
 
 main().then();
+
+export {};

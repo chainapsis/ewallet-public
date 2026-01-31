@@ -1,4 +1,3 @@
-"use strict";
 const DEVELOP = "develop/v";
 const RELEASE = "release/v";
 async function main() {
@@ -14,3 +13,4 @@ async function main() {
     console.log("Git tag: %s", tag);
 }
 main().then();
+export {};

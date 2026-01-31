@@ -1,7 +1,7 @@
 name: Deploy Oko Apps
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  # VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 on:
   workflow_dispatch:
     inputs:
@@ -9,7 +9,7 @@ on:
         description: "Git tag for deployment (format: develop/v0.0.1 or release/v0.0.1)"
         required: true
         type: string
-      app:
+      oko_app:
         description: 'App'
         required: true
         type: choice
@@ -36,6 +36,13 @@ jobs:
         run: node ./internals/github/dist/validate_git_tag.js
         env:
           GIT_TAG: "${{ inputs.git_tag }}"
+
+      - name: Set Vercel Project Id
+        run: |
+          PROJ_ID=$(node ./internals/github/dist/get_vercel_proj_id.js)
+          echo "VERCEL_PROJECT_ID=$PROJ_ID" >> "$GITHUB_OUTPUT"
+        env:
+          OKO_APP: "${{ inputs.oko_app }}"
 
       - name: Enable Corepack
         run: corepack enable
