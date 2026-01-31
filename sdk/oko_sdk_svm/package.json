@@ -31,9 +31,8 @@
     "directory": "sdk/oko_sdk_svm"
   },
   "scripts": {
-    "clean": "del-cli dist tsconfig.rollup.tsbuildinfo",
-    "rollup-build": "rollup -c --configPlugin typescript",
-    "build": "yarn clean && yarn rollup-build && tsc-alias",
+    "clean": "del-cli dist",
+    "build": "tsx ./scripts/build.ts",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "prepublishOnly": "yarn build"
   },
