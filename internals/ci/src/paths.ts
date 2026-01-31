@@ -7,6 +7,8 @@ const __dirname = dirname(__filename);
 export const paths = (function () {
   const root = path.join(__dirname, "../../../");
 
+  const github = path.join(root, "internals/github");
+
   const ksn_interface = path.join(
     __dirname,
     "../../../key_share_node/ksn_interface/",
@@ -138,6 +140,7 @@ export const paths = (function () {
 
   return {
     root,
+    github,
     stdlib,
     dotenv,
     example_cosmoskit_nextjs,

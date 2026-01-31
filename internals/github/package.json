@@ -1,0 +1,22 @@
+{
+  "private": true,
+  "name": "@oko-wallet/github",
+  "type": "module",
+  "scripts": {
+    "clean": "del-cli dist",
+    "build": "yarn clean && tsc"
+  },
+  "dependencies": {
+    "chalk": "^5.5.0",
+    "commander": "^12.1.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^24.10.1",
+    "del-cli": "^6.0.0",
+    "jest": "^30.1.3",
+    "ts-jest": "^29.4.5",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}
