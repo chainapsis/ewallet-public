@@ -1,15 +1,15 @@
 async function main() {
-  const demoAppId = process.env.VERCEL_PROJECT_ID__OKO_DEMO_APP;
-  const ctDashboardId = process.env.VERCEL_PROJECT_ID__OKO_DEMO_APP;
-  const userDashboardId = process.env.VERCEL_PROJECT_ID__OKO_DEMO_APP;
-  const attachedId = process.env.VERCEL_PROJECT_ID__OKO_DEMO_APP;
+  const demoAppId = process.env.VERCEL_PROJECT_ID__OKO_DEMO_WEB;
+  const ctDashboardId = process.env.VERCEL_PROJECT_ID__CT_DASHBOARD;
+  const userDashboardId = process.env.VERCEL_PROJECT_ID__USER_DASHBOARD;
+  const attachedId = process.env.VERCEL_PROJECT_ID__OKO_ATTACHED;
 
   const okoApp = process.env.OKO_APP;
   console.log("oko app: %s", okoApp);
 
   let projId: string;
   switch (okoApp) {
-    case "demo_app":
+    case "demo_web":
       projId = demoAppId!;
       break;
 
