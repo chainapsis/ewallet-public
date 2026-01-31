@@ -13,14 +13,6 @@ on:
           "Git tag for deployment (format: develop/v0.0.1 or release/v0.0.1)"
         required: true
         type: string
-      oko_app:
-        description: 'App'
-        required: true
-        type: choice
-        options:
-          - 'demo_web'
-          - 'user_dashboard'
-          - 'ct_dashboard'
 
 jobs:
   publish:
@@ -80,29 +72,20 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
-      # - name: Setup Rust
-      #   uses: dtolnay/rust-toolchain@nightly
-      #
-      # - name: Build CS packages
-      #   run: yarn ci build_cs
-      #
-      # - name: Build Frost packages
-      #   run: yarn ci build_frost
-
       - name: Build internal packages
         run: yarn ci build_pkgs
 
       - name: Build SDK packages
         run: yarn ci build_sdk
 
-      - name: Install Vercel CLI
-        run: npm install -g vercel@latest
-
-      - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Build Project Artifacts
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+      # - name: Install Vercel CLI
+      #   run: npm install -g vercel@latest
+      #
+      # - name: Pull Vercel Environment Information
+      #   run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      #
+      # - name: Build Project Artifacts
+      #   run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      #
+      # - name: Deploy Project Artifacts to Vercel
+      #   run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}

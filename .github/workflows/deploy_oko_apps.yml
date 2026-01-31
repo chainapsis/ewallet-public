@@ -80,15 +80,6 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
-      # - name: Setup Rust
-      #   uses: dtolnay/rust-toolchain@nightly
-      #
-      # - name: Build CS packages
-      #   run: yarn ci build_cs
-      #
-      # - name: Build Frost packages
-      #   run: yarn ci build_frost
-
       - name: Build internal packages
         run: yarn ci build_pkgs
 
