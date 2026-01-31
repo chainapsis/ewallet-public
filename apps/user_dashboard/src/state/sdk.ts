@@ -265,6 +265,8 @@ export const useSDKState = create(
       const initRes = OkoSvmWallet.init({
         api_key: OKO_SDK_API_KEY,
         sdk_endpoint: OKO_SDK_ENDPOINT,
+        // TODO: @dan
+        chain_id: "solana:mainnet",
       });
 
       if (initRes.success) {

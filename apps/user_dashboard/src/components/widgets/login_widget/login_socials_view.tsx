@@ -8,7 +8,7 @@ import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { FC } from "react";
 
 import styles from "./login_widget.module.scss";
-import { DiscordIcon } from "@oko-wallet-common-ui/icons/discord_icon";
+import { DiscordIcon } from "@oko-wallet/oko-common-ui/icons/discord_icon";
 
 export interface LoginSocialsViewProps {
   onBack: () => void;
@@ -22,7 +22,12 @@ export const LoginSocialsView: FC<LoginSocialsViewProps> = ({
   return (
     <>
       <div className={styles.backRow}>
-        <div className={styles.backIcon} onClick={onBack}>
+        <div
+          className={styles.backIcon}
+          onClick={onBack}
+          role="button"
+          tabIndex={0}
+        >
           <ChevronLeftIcon size={24} color={"var(--fg-primary)"} />
         </div>
         <Typography
