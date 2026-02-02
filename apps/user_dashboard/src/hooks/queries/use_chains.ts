@@ -28,7 +28,7 @@ interface KeplrChainsResponse {
 }
 
 async function fetchChains(): Promise<ModularChainInfo[]> {
-  const response = await fetch(`${KEPLR_API_ENDPOINT}/v1/chains`);
+  const response = await fetch(`${KEPLR_API_ENDPOINT}/v1/chains/all`);
   if (!response.ok) {
     throw new Error(`Failed to fetch chains: ${response.statusText}`);
   }
