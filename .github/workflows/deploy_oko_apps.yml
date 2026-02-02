@@ -31,11 +31,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.git_tag }}
-
-      - name: Check git tag
-        run: node ./internals/github/dist/validate_git_tag.js
-        env:
-          GIT_TAG: "${{ inputs.git_tag }}"
+          token: ${{ secrets.GITHUB_PAT }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -44,6 +40,11 @@ jobs:
 
       - name: Check Node version
         run: node -v
+
+      - name: Check git tag
+        run: node ./internals/github/dist/validate_git_tag.js
+        env:
+          GIT_TAG: "${{ inputs.git_tag }}"
 
       - name: Set Vercel Project Id
         id: vercel_project
