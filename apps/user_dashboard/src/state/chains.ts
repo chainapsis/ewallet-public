@@ -38,9 +38,35 @@ export function getChainIdentifier(chainId: string): string {
 }
 
 type UserKey = `${AuthType}/${string}`;
+const ANONYMOUS_USER_KEY = "__anonymous__";
 
 function createUserKey(authType: AuthType, email: string): UserKey {
   return `${authType}/${email.trim()}`;
+}
+
+function resolveKey(state: ChainPreferencesState): string {
+  return state.activeUserKey ?? ANONYMOUS_USER_KEY;
+}
+
+function getEnabledChains(state: ChainPreferencesState): string[] {
+  return (
+    state.enabledChainsByUser[resolveKey(state)] ?? [...DEFAULT_ENABLED_CHAINS]
+  );
+}
+
+function updateEnabledChains(
+  state: ChainPreferencesState,
+  updater: (chains: Set<string>) => void,
+): Pick<ChainPreferencesState, "enabledChainsByUser"> {
+  const key = resolveKey(state);
+  const chains = new Set(getEnabledChains(state));
+  updater(chains);
+  return {
+    enabledChainsByUser: {
+      ...state.enabledChainsByUser,
+      [key]: Array.from(chains),
+    },
+  };
 }
 
 interface ChainPreferencesState {
@@ -66,8 +92,7 @@ export const useChainStore = create<
       activeUserKey: null,
 
       setActiveUser: (authType, email) => {
-        const userKey = createUserKey(authType, email);
-        set({ activeUserKey: userKey });
+        set({ activeUserKey: createUserKey(authType, email) });
       },
 
       clearActiveUser: () => {
@@ -75,73 +100,29 @@ export const useChainStore = create<
       },
 
       enableChains: (...chainIds) => {
-        const { activeUserKey, enabledChainsByUser } = get();
-        if (!activeUserKey) {
-          return;
-        }
-
-        const currentEnabled = enabledChainsByUser[activeUserKey] ?? [
-          ...DEFAULT_ENABLED_CHAINS,
-        ];
-        const enabledSet = new Set(currentEnabled);
-
-        for (const chainId of chainIds) {
-          enabledSet.add(getChainIdentifier(chainId));
-        }
-
-        set({
-          enabledChainsByUser: {
-            ...enabledChainsByUser,
-            [activeUserKey]: Array.from(enabledSet),
-          },
-        });
+        set(
+          updateEnabledChains(get(), (chains) => {
+            for (const id of chainIds) {
+              chains.add(getChainIdentifier(id));
+            }
+          }),
+        );
       },
 
       disableChains: (...chainIds) => {
-        const { activeUserKey, enabledChainsByUser } = get();
-        if (!activeUserKey) {
-          return;
-        }
-
-        const currentEnabled = enabledChainsByUser[activeUserKey] ?? [
-          ...DEFAULT_ENABLED_CHAINS,
-        ];
-        const enabledSet = new Set(currentEnabled);
-
-        for (const chainId of chainIds) {
-          enabledSet.delete(getChainIdentifier(chainId));
-        }
-
-        set({
-          enabledChainsByUser: {
-            ...enabledChainsByUser,
-            [activeUserKey]: Array.from(enabledSet),
-          },
-        });
-      },
-
-      isChainEnabled: (chainId) => {
-        const { activeUserKey, enabledChainsByUser } = get();
-        if (!activeUserKey) {
-          return false;
-        }
-
-        const enabled = enabledChainsByUser[activeUserKey] ?? [
-          ...DEFAULT_ENABLED_CHAINS,
-        ];
-        const identifier = getChainIdentifier(chainId);
-        return enabled.includes(identifier);
-      },
-
-      getEnabledChainIds: () => {
-        const { activeUserKey, enabledChainsByUser } = get();
-        if (!activeUserKey) {
-          return [...DEFAULT_ENABLED_CHAINS];
-        }
-        return (
-          enabledChainsByUser[activeUserKey] ?? [...DEFAULT_ENABLED_CHAINS]
+        set(
+          updateEnabledChains(get(), (chains) => {
+            for (const id of chainIds) {
+              chains.delete(getChainIdentifier(id));
+            }
+          }),
         );
       },
+
+      isChainEnabled: (chainId) =>
+        getEnabledChains(get()).includes(getChainIdentifier(chainId)),
+
+      getEnabledChainIds: () => getEnabledChains(get()),
     }),
     {
       name: STORAGE_KEY,
