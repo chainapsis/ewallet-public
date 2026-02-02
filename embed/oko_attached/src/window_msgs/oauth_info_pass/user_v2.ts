@@ -791,7 +791,7 @@ export async function handleReshareV2(
   }
   const session = commitRes.data;
 
-  // 3. Sign in to API server with commit-reveal
+  // 3. Sign in to Oko API
   const signInCommitRevealRes = createOkoApiCommitRevealParams(
     session,
     "signin",

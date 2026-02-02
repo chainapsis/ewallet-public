@@ -73,6 +73,7 @@ export function setKsnNodePubkey(
  * Commit to oko_api and KSN nodes.
  * Creates a commit-reveal session and sends commit requests.
  *
+ * @param okoApiOperationType - Operation type for oko_api commit
  * @param ksnThreshold - Number of KSN nodes that must successfully commit.
  *   - For sign_in: pass the MPC threshold (e.g., 2)
  *   - For register/reshare: pass targets.length (all nodes must succeed)
@@ -80,7 +81,7 @@ export function setKsnNodePubkey(
  * Shuffles nodes and tries threshold first, retries with backup on failure.
  */
 export async function commitAll(
-  operationType: OperationType,
+  okoApiOperationType: OperationType,
   authType: AuthType,
   idToken: string,
   ksnCommitTargets: KsnCommitTarget[],
@@ -88,7 +89,7 @@ export async function commitAll(
 ): Promise<Result<ClientCommitRevealSession, string>> {
   // 1. Create session
   const sessionRes = createCommitRevealSession(
-    operationType,
+    okoApiOperationType,
     authType,
     idToken,
   );
@@ -102,7 +103,7 @@ export async function commitAll(
   // 2. Commit to oko_api
   const okoApiResult = await commitToOkoApi(
     session.session_id,
-    operationType,
+    okoApiOperationType,
     clientPubkeyHex,
     session.id_token_hash,
   );
