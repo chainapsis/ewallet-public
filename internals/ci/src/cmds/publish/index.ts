@@ -51,7 +51,7 @@ token.",
 
   const publishRet = spawnSync(
     "yarn",
-    ["lerna", "publish", "from-package", "--loglevel", "verbose"],
+    ["lerna", "publish", "from-package", "--yes", "--loglevel", "verbose"],
     {
       cwd: paths.root,
       stdio: "inherit",
