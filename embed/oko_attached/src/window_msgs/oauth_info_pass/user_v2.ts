@@ -184,13 +184,16 @@ export async function handleNewUserV2(
   }
 
   // 6. Call V2 keygen API with both curve types
-  const keygenCommitReveal = createOkoApiCommitRevealParams(session, "keygen");
-  if (!keygenCommitReveal) {
+  const keygenCommitRevealRes = createOkoApiCommitRevealParams(
+    session,
+    "keygen",
+  );
+  if (!keygenCommitRevealRes.success) {
     return {
       success: false,
       err: {
         type: "sign_in_request_fail",
-        error: "Failed to create commit-reveal params",
+        error: keygenCommitRevealRes.err,
       },
     };
   }
@@ -212,7 +215,7 @@ export async function handleNewUserV2(
       },
     },
     idToken,
-    keygenCommitReveal,
+    keygenCommitRevealRes.data,
   );
   if (reqKeygenV2Res.success === false) {
     return {
@@ -288,17 +291,24 @@ export async function handleExistingUserV2(
   const { session } = commitRes.data;
 
   // 2. Sign in to API server
-  const signInCommitReveal = createOkoApiCommitRevealParams(session, "signin");
-  if (!signInCommitReveal) {
+  const signInCommitRevealRes = createOkoApiCommitRevealParams(
+    session,
+    "signin",
+  );
+  if (!signInCommitRevealRes.success) {
     return {
       success: false,
       err: {
         type: "sign_in_request_fail",
-        error: "Failed to create commit-reveal params",
+        error: signInCommitRevealRes.err,
       },
     };
   }
-  const signInResult = await signInV2(idToken, authType, signInCommitReveal);
+  const signInResult = await signInV2(
+    idToken,
+    authType,
+    signInCommitRevealRes.data,
+  );
   if (!signInResult.success) {
     return { success: false, err: signInResult.err };
   }
@@ -603,16 +613,16 @@ export async function handleExistingUserNeedsEd25519Keygen(
   }
 
   // 4. Call keygenEd25519 API with commit-reveal
-  const keygenEd25519CommitReveal = createOkoApiCommitRevealParams(
+  const keygenEd25519CommitRevealRes = createOkoApiCommitRevealParams(
     session,
     "keygen_ed25519",
   );
-  if (!keygenEd25519CommitReveal) {
+  if (!keygenEd25519CommitRevealRes.success) {
     return {
       success: false,
       err: {
         type: "sign_in_request_fail",
-        error: "Failed to create commit-reveal params",
+        error: keygenEd25519CommitRevealRes.err,
       },
     };
   }
@@ -630,7 +640,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
       },
     },
     idToken,
-    keygenEd25519CommitReveal,
+    keygenEd25519CommitRevealRes.data,
   );
   if (reqKeygenEd25519Res.success === false) {
     return {
@@ -790,17 +800,24 @@ export async function handleReshareV2(
   const { session } = commitRes.data;
 
   // 3. Sign in to API server with commit-reveal
-  const signInCommitReveal = createOkoApiCommitRevealParams(session, "signin");
-  if (!signInCommitReveal) {
+  const signInCommitRevealRes = createOkoApiCommitRevealParams(
+    session,
+    "signin",
+  );
+  if (!signInCommitRevealRes.success) {
     return {
       success: false,
       err: {
         type: "reshare_fail",
-        error: "Failed to create commit-reveal params",
+        error: signInCommitRevealRes.err,
       },
     };
   }
-  const signInResult = await signInV2(idToken, authType, signInCommitReveal);
+  const signInResult = await signInV2(
+    idToken,
+    authType,
+    signInCommitRevealRes.data,
+  );
   if (!signInResult.success) {
     return { success: false, err: signInResult.err };
   }

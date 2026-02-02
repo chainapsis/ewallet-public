@@ -437,12 +437,12 @@ export async function reshareUserKeySharesV2(
     }
 
     // Create commit-reveal params for oko_api reshare
-    const reshareCommitReveal = createOkoApiCommitRevealParams(
+    const reshareCommitRevealRes = createOkoApiCommitRevealParams(
       session,
       "reshare",
     );
-    if (!reshareCommitReveal) {
-      return { success: false, err: "Failed to create commit-reveal params" };
+    if (!reshareCommitRevealRes.success) {
+      return { success: false, err: reshareCommitRevealRes.err };
     }
 
     const updateRes = await makeAuthorizedOkoApiRequest<ReshareRequestV2, void>(
@@ -452,7 +452,7 @@ export async function reshareUserKeySharesV2(
         wallets: reshareWallets,
       },
       TSS_V2_ENDPOINT,
-      reshareCommitReveal,
+      reshareCommitRevealRes.data,
     );
     if (!updateRes.success) {
       return {

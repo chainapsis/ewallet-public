@@ -57,14 +57,17 @@ export function createKsnSignature(
 export function createOkoApiCommitRevealParams(
   session: ClientCommitRevealSession,
   apiName: OkoApiName,
-): CommitRevealParams | undefined {
+): Result<CommitRevealParams, string> {
   const sigRes = createOkoApiSignature(session, apiName);
   if (!sigRes.success) {
-    return undefined;
+    return { success: false, err: sigRes.err };
   }
   return {
-    cr_session_id: session.session_id,
-    cr_signature: sigRes.data,
+    success: true,
+    data: {
+      cr_session_id: session.session_id,
+      cr_signature: sigRes.data,
+    },
   };
 }
 
