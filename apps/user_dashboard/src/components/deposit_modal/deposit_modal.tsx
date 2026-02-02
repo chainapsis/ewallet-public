@@ -21,7 +21,7 @@ import styles from "./deposit_modal.module.scss";
 import { SearchEmptyView } from "@oko-wallet-user-dashboard/components/search_empty_view";
 import { useEnabledChains } from "@oko-wallet-user-dashboard/hooks/queries";
 import {
-  useBech32Addresses,
+  useCosmosAddresses,
   useEthAddress,
   useSVMAddress,
 } from "@oko-wallet-user-dashboard/hooks/queries/use_addresses";
@@ -29,7 +29,6 @@ import { useSearch } from "@oko-wallet-user-dashboard/hooks/use_search";
 import { DEFAULT_ENABLED_CHAINS } from "@oko-wallet-user-dashboard/state/chains";
 import { getChainIdentifier } from "@oko-wallet-user-dashboard/utils/chain";
 import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
-import { isCosmosChainId } from "@oko-wallet-user-dashboard/utils/chain";
 
 const ecosystemFilterOptions = [
   "All Chains",
@@ -73,14 +72,7 @@ export const DepositModal: FC<DepositModalProps> = ({ renderTrigger }) => {
   // Get addresses using TanStack Query hooks
   const { address: ethAddress } = useEthAddress();
   const { address: svmAddress } = useSVMAddress();
-  const cosmosChainIds = useMemo(
-    () =>
-      visibleChains
-        .filter((chain) => isCosmosChainId(chain.chainId))
-        .map((chain) => chain.chainId),
-    [visibleChains],
-  );
-  const { addresses: bech32Addresses } = useBech32Addresses(cosmosChainIds);
+  const { addresses: cosmosAddresses } = useCosmosAddresses();
 
   const searchedChainInfos = useSearch(
     visibleChains,
@@ -141,7 +133,7 @@ export const DepositModal: FC<DepositModalProps> = ({ renderTrigger }) => {
     if (chain.svm) {
       return svmAddress === null ? undefined : svmAddress;
     }
-    return bech32Addresses[chain.chainId];
+    return cosmosAddresses[chain.chainId];
   };
 
   return (

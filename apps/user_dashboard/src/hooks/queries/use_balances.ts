@@ -1,9 +1,8 @@
 import { Connection, PublicKey } from "@solana/web3.js";
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
 
 import {
-  useBech32Addresses,
+  useCosmosAddresses,
   useEthAddress,
   useSVMAddress,
 } from "./use_addresses";
@@ -15,7 +14,6 @@ import type {
   RawBalance,
   TokenBalance,
 } from "@oko-wallet-user-dashboard/types/token";
-import { isCosmosChainId } from "@oko-wallet-user-dashboard/utils/chain";
 import { calculateUsdValue } from "@oko-wallet-user-dashboard/utils/format_token_amount";
 
 /**
@@ -23,10 +21,10 @@ import { calculateUsdValue } from "@oko-wallet-user-dashboard/utils/format_token
  */
 async function fetchCosmosBalances(
   restEndpoint: string,
-  bech32Address: string,
+  cosmosAddress: string,
 ): Promise<RawBalance[]> {
   const response = await fetch(
-    `${restEndpoint}/cosmos/bank/v1beta1/balances/${bech32Address}`,
+    `${restEndpoint}/cosmos/bank/v1beta1/balances/${cosmosAddress}`,
   );
   if (!response.ok) {
     throw new Error(`Failed to fetch balances: ${response.statusText}`);
@@ -100,26 +98,22 @@ export function useChainBalances(
   // Get addresses using TanStack Query hooks
   const { address: ethAddress } = useEthAddress();
   const { address: svmAddress } = useSVMAddress();
-  const cosmosChainIds = useMemo(
-    () => (chainId && isCosmos ? [chainId] : []),
-    [chainId, isCosmos],
-  );
-  const { addresses: bech32Addresses } = useBech32Addresses(cosmosChainIds);
-  const bech32Address = chainId ? bech32Addresses[chainId] : undefined;
+  const { addresses: cosmosAddresses } = useCosmosAddresses();
+  const cosmosAddress = chainId ? cosmosAddresses[chainId] : undefined;
 
   // Cosmos balances query
   const cosmosQuery = useQuery({
-    queryKey: ["balances", "cosmos", chainId, bech32Address],
+    queryKey: ["balances", "cosmos", chainId, cosmosAddress],
     queryFn: async () => {
-      if (!chainInfo?.cosmos?.rest || !bech32Address) {
+      if (!chainInfo?.cosmos?.rest || !cosmosAddress) {
         return [];
       }
-      return fetchCosmosBalances(chainInfo.cosmos.rest, bech32Address);
+      return fetchCosmosBalances(chainInfo.cosmos.rest, cosmosAddress);
     },
     enabled:
       (options?.enabled ?? true) &&
       isCosmos &&
-      !!bech32Address &&
+      !!cosmosAddress &&
       !!chainInfo?.cosmos?.rest,
     staleTime: 30 * 1000, // 30 seconds
     refetchInterval: 60 * 1000, // 1 minute
@@ -185,15 +179,8 @@ export function useAllBalances() {
   const { address: ethAddress, isLoading: ethLoading } = useEthAddress();
   const { address: svmAddress, isLoading: svmLoading } =
     useSVMAddress();
-  const cosmosChainIds = useMemo(
-    () =>
-      enabledChains
-        .filter((chain) => isCosmosChainId(chain.chainId))
-        .map((chain) => chain.chainId),
-    [enabledChains],
-  );
-  const { addresses: bech32Addresses, isLoading: addressesLoading } =
-    useBech32Addresses(cosmosChainIds);
+  const { addresses: cosmosAddresses, isLoading: addressesLoading } =
+    useCosmosAddresses();
 
   // Create queries for all chains
   const balanceQueries = useQueries({
@@ -201,15 +188,15 @@ export function useAllBalances() {
       const isCosmos = chain.cosmos !== undefined;
       const isEvm = chain.evm !== undefined;
       const isSVM = chain.svm !== undefined;
-      const bech32Address = isCosmos
-        ? bech32Addresses[chain.chainId]
+      const cosmosAddress = isCosmos
+        ? cosmosAddresses[chain.chainId]
         : undefined;
 
       return {
         queryKey: [
           "balances",
           chain.chainId,
-          bech32Address,
+          cosmosAddress,
           ethAddress,
           svmAddress,
         ],
@@ -217,11 +204,11 @@ export function useAllBalances() {
           const results: TokenBalance[] = [];
 
           // Fetch Cosmos balances
-          if (isCosmos && bech32Address && chain.cosmos?.rest) {
+          if (isCosmos && cosmosAddress && chain.cosmos?.rest) {
             try {
               const rawBalances = await fetchCosmosBalances(
                 chain.cosmos.rest,
-                bech32Address,
+                cosmosAddress,
               );
 
               for (const bal of rawBalances) {
@@ -232,7 +219,7 @@ export function useAllBalances() {
                   results.push({
                     chainInfo: chain,
                     token: { currency, amount: bal.amount },
-                    address: bech32Address,
+                    address: cosmosAddress,
                     priceUsd: currency.coinGeckoId
                       ? priceMap[currency.coinGeckoId]
                       : undefined,
@@ -305,7 +292,7 @@ export function useAllBalances() {
           return results;
         },
         enabled:
-          (isCosmos && !!bech32Address) ||
+          (isCosmos && !!cosmosAddress) ||
           (isEvm && !!ethAddress) ||
           (isSVM && !!svmAddress),
         staleTime: 30 * 1000,

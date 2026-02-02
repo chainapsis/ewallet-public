@@ -4,6 +4,7 @@
  */
 
 import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 
 import {
   selectCosmosInitialized,
@@ -15,10 +16,8 @@ import {
   useSDKState,
 } from "@oko-wallet-user-dashboard/state/sdk";
 import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
-import {
-  isEvmOnlyChain,
-  isSVMChainId,
-} from "@oko-wallet-user-dashboard/utils/chain";
+import { useEnabledChains } from "./use_chains";
+import { isEvmOnlyChain } from "@oko-wallet-user-dashboard/utils/chain";
 
 /**
  * Hook to get ETH address
@@ -72,96 +71,54 @@ export function useSVMAddress() {
 }
 
 /**
- * Hook to get Bech32 address for a specific chain
- */
-export function useBech32Address(chainId: string | undefined) {
-  const okoCosmos = useSDKState(selectCosmosSDK);
-  const isInitialized = useSDKState(selectCosmosInitialized);
-
-  // Skip for non-cosmos chains
-  const isCosmosChain = Boolean(
-    chainId &&
-      !chainId.startsWith("eip155:") &&
-      !chainId.startsWith("bip122:") &&
-      !chainId.startsWith("starknet:") &&
-      !chainId.startsWith("solana:"),
-  );
-
-  const query = useQuery({
-    queryKey: ["address", "bech32", chainId],
-    queryFn: async () => {
-      if (!okoCosmos || !chainId) {
-        return null;
-      }
-      try {
-        const key = await okoCosmos.getKey(chainId);
-        return key?.bech32Address ?? null;
-      } catch (error) {
-        console.error(`Failed to fetch bech32 address for ${chainId}:`, error);
-        return null;
-      }
-    },
-    enabled: !!okoCosmos && isInitialized && !!chainId && isCosmosChain,
-    staleTime: Infinity,
-    gcTime: Infinity,
-  });
-
-  return {
-    address: query.data,
-    isLoading: query.isLoading,
-    error: query.error,
-  };
-}
-
-/**
  * Hook to get address for a chain (auto-detects chain type)
  */
 export function useChainAddress(chainInfo: ModularChainInfo | undefined) {
   const { address: ethAddress, isLoading: ethLoading } = useEthAddress();
-  const { address: svmAddress, isLoading: svmLoading } =
-    useSVMAddress();
-  const { address: bech32Address, isLoading: bech32Loading } = useBech32Address(
-    chainInfo &&
-      !isEvmOnlyChain(chainInfo) &&
-      !isSVMChainId(chainInfo.chainId)
-      ? chainInfo.chainId
-      : undefined,
-  );
+  const { address: svmAddress, isLoading: svmLoading } = useSVMAddress();
+  const { addresses: cosmosAddresses, isLoading: cosmosLoading } =
+    useCosmosAddresses();
 
   if (!chainInfo) {
     return { address: undefined, isLoading: false };
+  }
+
+  if (chainInfo.svm) {
+    return { address: svmAddress, isLoading: svmLoading };
   }
 
   if (isEvmOnlyChain(chainInfo)) {
     return { address: ethAddress, isLoading: ethLoading };
   }
 
-  if (isSVMChainId(chainInfo.chainId)) {
-    return { address: svmAddress, isLoading: svmLoading };
+  if (chainInfo.cosmos) {
+    return {
+      address: cosmosAddresses[chainInfo.chainId],
+      isLoading: cosmosLoading,
+    };
   }
 
-  return { address: bech32Address, isLoading: bech32Loading };
+  return { address: undefined, isLoading: false };
 }
 
 /**
- * Hook to prefetch bech32 addresses for multiple chains
- * Useful for batch loading addresses for a list of chains
+ * Hook to fetch Cosmos addresses for all enabled Cosmos chains
  */
-export function useBech32Addresses(chainIds: string[]) {
+export function useCosmosAddresses() {
   const okoCosmos = useSDKState(selectCosmosSDK);
   const isInitialized = useSDKState(selectCosmosInitialized);
+  const { enabledChains } = useEnabledChains();
 
-  // Filter to cosmos-only chains
-  const cosmosChainIds = chainIds.filter(
-    (id) =>
-      !id.startsWith("eip155:") &&
-      !id.startsWith("bip122:") &&
-      !id.startsWith("starknet:") &&
-      !id.startsWith("solana:"),
+  const cosmosChainIds = useMemo(
+    () =>
+      enabledChains
+        .filter((chain) => !!chain.cosmos)
+        .map((chain) => chain.chainId),
+    [enabledChains],
   );
 
   const query = useQuery({
-    queryKey: ["addresses", "bech32", cosmosChainIds.sort().join(",")],
+    queryKey: ["addresses", "cosmos", cosmosChainIds.sort().join(",")],
     queryFn: async () => {
       if (!okoCosmos) {
         return {};
@@ -176,7 +133,7 @@ export function useBech32Addresses(chainIds: string[]) {
             results[chainId] = key?.bech32Address;
           } catch (error) {
             console.error(
-              `Failed to fetch bech32 address for ${chainId}:`,
+              `Failed to fetch cosmos address for ${chainId}:`,
               error,
             );
             results[chainId] = undefined;
