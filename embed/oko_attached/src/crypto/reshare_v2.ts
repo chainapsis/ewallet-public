@@ -376,6 +376,7 @@ export async function reshareUserKeySharesV2(
           session,
           nodeInfo.node.endpoint,
           apiName,
+          true, // cr_final: true - reshare/reshare_register is the final KSN call
         );
         if (!commitRevealRes.success) {
           return {
@@ -438,6 +439,7 @@ export async function reshareUserKeySharesV2(
     const reshareCommitRevealRes = createOkoApiCommitRevealParams(
       session,
       "reshare",
+      true, // cr_final: true - reshare is the final oko_api call
     );
     if (!reshareCommitRevealRes.success) {
       return { success: false, err: reshareCommitRevealRes.err };

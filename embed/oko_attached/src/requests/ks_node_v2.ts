@@ -40,6 +40,8 @@ export interface KeySharesByNode {
 /**
  * Request key shares from multiple KS nodes using V2 API.
  * Supports requesting both secp256k1 and ed25519 shares in a single request.
+ *
+ * @param isFinal - If true, marks this as the final KSN API call for the session (cr_final: true)
  */
 export async function requestKeySharesV2(
   idToken: string,
@@ -51,6 +53,7 @@ export async function requestKeySharesV2(
     ed25519?: string; // public key hex
   },
   commitRevealSession?: ClientCommitRevealSession,
+  isFinal: boolean = false,
 ): Promise<Result<KeySharesByNode[], RequestKeySharesV2Error>> {
   const shuffledNodes = [...allNodes];
   for (let i = shuffledNodes.length - 1; i > 0; i -= 1) {
@@ -70,6 +73,7 @@ export async function requestKeySharesV2(
               commitRevealSession,
               node.endpoint,
               "get_key_shares",
+              isFinal,
             )
           : undefined;
         if (commitReveal && !commitReveal.success) {

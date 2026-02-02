@@ -143,6 +143,7 @@ export async function handleNewUserV2(
         session,
         keyShareByNode.node.endpoint,
         "register",
+        true, // cr_final: true - register is the only KSN call for sign_up
       );
       if (!commitRevealRes.success) {
         return { success: false, err: commitRevealRes.err };
@@ -182,6 +183,7 @@ export async function handleNewUserV2(
   const keygenCommitRevealRes = createOkoApiCommitRevealParams(
     session,
     "keygen",
+    true, // cr_final: true - keygen is the only oko_api call for sign_up
   );
   if (!keygenCommitRevealRes.success) {
     return {
@@ -288,6 +290,7 @@ export async function handleExistingUserV2(
   const signInCommitRevealRes = createOkoApiCommitRevealParams(
     session,
     "signin",
+    true, // cr_final: true - signin is the only oko_api call for normal sign_in
   );
   if (!signInCommitRevealRes.success) {
     return {
@@ -319,6 +322,7 @@ export async function handleExistingUserV2(
       ed25519: signInResp.user.public_key_ed25519,
     },
     session,
+    true, // cr_final: true - get_key_shares is the only KSN call for normal sign_in
   );
   if (!requestSharesRes.success) {
     const error = requestSharesRes.err;
@@ -605,6 +609,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
   const keygenEd25519CommitRevealRes = createOkoApiCommitRevealParams(
     session,
     "keygen_ed25519",
+    true, // cr_final: true - keygen_ed25519 is the only oko_api call
   );
   if (!keygenEd25519CommitRevealRes.success) {
     return {
@@ -651,6 +656,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
       secp256k1: secp256k1PublicKey,
     },
     session,
+    true, // cr_final: true - get_key_shares is the final KSN call
   );
   if (!requestSharesRes.success) {
     const error = requestSharesRes.err;
@@ -1069,6 +1075,7 @@ export async function handleReshareAndEd25519Keygen(
             session,
             node.endpoint,
             "reshare_register",
+            true, // cr_final: true - reshare_register is the final KSN call for new nodes
           );
           if (!commitRevealRes.success) {
             return { success: false, err: commitRevealRes.err };
@@ -1119,6 +1126,7 @@ export async function handleReshareAndEd25519Keygen(
             session,
             node.endpoint,
             "register_ed25519",
+            true, // cr_final: true - register_ed25519 is the final KSN call for ACTIVE nodes
           );
           if (!registerEd25519CommitRevealRes.success) {
             return { success: false, err: registerEd25519CommitRevealRes.err };
@@ -1147,10 +1155,11 @@ export async function handleReshareAndEd25519Keygen(
     };
   }
 
-  // 9. Update Oko API reshare status (must be before keygen_ed25519 which is FINAL)
+  // 9. Update Oko API reshare status (not final - keygen_ed25519 comes after)
   const reshareCommitRevealRes = createOkoApiCommitRevealParams(
     session,
     "reshare",
+    false, // cr_final: false - keygen_ed25519 is the final oko_api call
   );
   if (!reshareCommitRevealRes.success) {
     return {
@@ -1183,6 +1192,7 @@ export async function handleReshareAndEd25519Keygen(
   const keygenEd25519CommitRevealRes = createOkoApiCommitRevealParams(
     session,
     "keygen_ed25519",
+    true, // cr_final: true - keygen_ed25519 is the final oko_api call
   );
   if (!keygenEd25519CommitRevealRes.success) {
     return {
