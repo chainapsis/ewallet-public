@@ -3,12 +3,6 @@ env:
   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 on:
   workflow_dispatch:
-    # inputs:
-      # git_tag:
-      #   description: >
-      #     "Git tag at which publishing happens"
-      #   required: true
-      #   type: string
 
 jobs:
   publish:
