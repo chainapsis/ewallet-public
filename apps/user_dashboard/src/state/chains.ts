@@ -9,7 +9,6 @@ import type { AuthType } from "@oko-wallet/oko-types/auth";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-import { SOLANA_MAINNET } from "@oko-wallet-user-dashboard/config/solana";
 import type {
   CosmosChainInfo,
   ModularChainInfo,
@@ -18,7 +17,7 @@ import type {
 const STORAGE_KEY = "oko:user_dashboard:chains";
 export const DEFAULT_ENABLED_CHAINS = [
   "eip155:1",
-  SOLANA_MAINNET.chainId,
+  "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
   "cosmoshub",
   "osmosis",
 ] as const;
@@ -154,26 +153,59 @@ export const useChainStore = create<
   ),
 );
 
-/**
- * Transform Keplr API chain to ModularChainInfo
- */
 export function transformKeplrChain(chain: CosmosChainInfo): ModularChainInfo {
-  return {
+  const isSVM = !!chain.svm;
+  const isCosmos = !!chain.bech32Config;
+  const isEVM = !!chain.evm;
+
+  const base = {
     chainId: chain.chainId,
     chainName: chain.chainName,
     chainSymbolImageUrl: chain.chainSymbolImageUrl,
     isTestnet: chain.isTestnet,
-    isNative: true,
-    cosmos: chain,
-    evm: chain.evm
-      ? {
-          chainId: chain.evm.chainId,
-          rpc: chain.evm.rpc,
-          currencies: chain.currencies,
-          feeCurrencies: chain.feeCurrencies,
-          bip44: chain.bip44,
-          features: chain.features,
-        }
-      : undefined,
   };
+
+  if (isSVM) {
+    return {
+      ...base,
+      solana: {
+        rpc: chain.svm!.rpc,
+        currencies: chain.currencies,
+      },
+    };
+  }
+
+  if (isCosmos) {
+    return {
+      ...base,
+      isNative: true,
+      cosmos: chain,
+      evm: isEVM
+        ? {
+            chainId: chain.evm!.chainId,
+            rpc: chain.evm!.rpc,
+            currencies: chain.currencies,
+            feeCurrencies: chain.feeCurrencies,
+            bip44: chain.bip44,
+            features: chain.features,
+          }
+        : undefined,
+    };
+  }
+
+  if (isEVM) {
+    return {
+      ...base,
+      evm: {
+        chainId: chain.evm!.chainId,
+        rpc: chain.evm!.rpc,
+        currencies: chain.currencies,
+        feeCurrencies: chain.feeCurrencies,
+        bip44: chain.bip44,
+        features: chain.features,
+      },
+    };
+  }
+
+  return base;
 }

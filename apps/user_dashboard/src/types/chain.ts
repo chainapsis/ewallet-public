@@ -52,6 +52,10 @@ export interface CosmosChainInfo {
     readonly chainId: number;
     readonly rpc: string;
   };
+  readonly svm?: {
+    readonly rpc: string;
+    readonly websocket?: string;
+  };
 }
 
 // EVM-only chain info
