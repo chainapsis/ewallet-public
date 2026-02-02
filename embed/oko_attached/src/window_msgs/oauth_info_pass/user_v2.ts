@@ -41,27 +41,23 @@ import {
 } from "@oko-wallet-attached/crypto/commit_reveal";
 import type { ReshareRequestV2 } from "@oko-wallet/oko-types/user";
 import {
-  decodeKeyShareStringToPoint256,
+  decodeSecp256k1SharesByNode,
   encodePoint256ToKeyShareString,
 } from "@oko-wallet-attached/crypto/key_share_utils";
-import type { UserKeySharePointByNode } from "@oko-wallet/oko-types/user_key_share";
 import { runKeygen } from "@oko-wallet/cait-sith-keplr-hooks";
 import {
-  runTeddsaKeygen,
   serializeKeyPackage,
   serializePublicKeyPackage,
-  type TeddsaKeygenOutputBytes,
 } from "@oko-wallet/teddsa-hooks";
 import { reqKeygenEd25519 } from "@oko-wallet/teddsa-api-lib";
 import { reqKeygenV2 } from "@oko-wallet/api-lib";
 
 import type { ReferralInfo } from "@oko-wallet-attached/store/memory/types";
-import { teddsaKeygenToHex } from "@oko-wallet-attached/crypto/keygen_ed25519";
 import {
-  splitTeddsaSigningShare,
-  extractSigningShare,
-  combineTeddsaShares,
-} from "@oko-wallet-attached/crypto/sss_ed25519";
+  teddsaKeygenToHex,
+  runEd25519KeygenAndSplit,
+} from "@oko-wallet-attached/crypto/keygen_ed25519";
+import { combineTeddsaShares } from "@oko-wallet-attached/crypto/sss_ed25519";
 import {
   teddsaKeyShareToHex,
   hexToTeddsaKeyShare,
@@ -1272,112 +1268,6 @@ export async function handleReshareAndEd25519Keygen(
       isNewUser: false,
       email: reqKeygenEd25519Res.data.user.email ?? null,
       name: reqKeygenEd25519Res.data.user.name ?? null,
-    },
-  };
-}
-
-/**
- * Decode secp256k1 shares from hex strings to Point256 format.
- * Used by multiple handlers that need to process shares from KS nodes.
- */
-async function decodeSecp256k1SharesByNode(
-  sharesData: Array<{
-    node: { name: string; endpoint: string };
-    shares: { secp256k1?: string };
-  }>,
-): Promise<
-  Result<
-    UserKeySharePointByNode[],
-    { type: "key_share_combine_fail"; error: string }
-  >
-> {
-  const sharesByNode: UserKeySharePointByNode[] = [];
-
-  for (const item of sharesData) {
-    const shareHex = item.shares.secp256k1;
-    if (!shareHex) {
-      return {
-        success: false,
-        err: {
-          type: "key_share_combine_fail",
-          error: `secp256k1 share missing from node: ${item.node.name}`,
-        },
-      };
-    }
-    const point256Res = decodeKeyShareStringToPoint256(shareHex);
-    if (point256Res.success === false) {
-      return {
-        success: false,
-        err: {
-          type: "key_share_combine_fail",
-          error: `secp256k1 decode err: ${point256Res.err}`,
-        },
-      };
-    }
-    sharesByNode.push({
-      node: item.node,
-      share: point256Res.data,
-    });
-  }
-
-  return { success: true, data: sharesByNode };
-}
-
-interface Ed25519KeygenSplitResult {
-  keygen1: TeddsaKeygenOutputBytes;
-  keygen2: TeddsaKeygenOutputBytes;
-  userKeyShares: TeddsaKeyShareByNode[];
-}
-
-/**
- * Run ed25519 keygen and split the signing share for distribution to KS nodes.
- * Used by handlers that need to create new ed25519 wallets.
- */
-async function runEd25519KeygenAndSplit(
-  keyshareNodeMeta: KeyShareNodeMetaWithNodeStatusInfo,
-): Promise<
-  Result<
-    Ed25519KeygenSplitResult,
-    { type: "sign_in_request_fail"; error: string }
-  >
-> {
-  // 1. ed25519 keygen
-  const ed25519KeygenRes = await runTeddsaKeygen();
-  if (ed25519KeygenRes.success === false) {
-    return {
-      success: false,
-      err: { type: "sign_in_request_fail", error: ed25519KeygenRes.err },
-    };
-  }
-  const { keygen_1: keygen1, keygen_2: keygen2 } = ed25519KeygenRes.data;
-
-  // 2. Extract signing share from key package
-  const signingShareRes = extractSigningShare(keygen1.key_package);
-  if (signingShareRes.success === false) {
-    return {
-      success: false,
-      err: { type: "sign_in_request_fail", error: signingShareRes.err },
-    };
-  }
-
-  // 3. Split signing share for distribution
-  const splitRes = await splitTeddsaSigningShare(
-    signingShareRes.data,
-    keyshareNodeMeta,
-  );
-  if (splitRes.success === false) {
-    return {
-      success: false,
-      err: { type: "sign_in_request_fail", error: splitRes.err },
-    };
-  }
-
-  return {
-    success: true,
-    data: {
-      keygen1,
-      keygen2,
-      userKeyShares: splitRes.data,
     },
   };
 }
