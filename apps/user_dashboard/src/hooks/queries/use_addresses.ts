@@ -17,7 +17,7 @@ import {
 import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
 import {
   isEvmOnlyChain,
-  isSolanaChainId,
+  isSVMChainId,
 } from "@oko-wallet-user-dashboard/utils/chain";
 
 /**
@@ -47,10 +47,7 @@ export function useEthAddress() {
   };
 }
 
-/**
- * Hook to get Solana address
- */
-export function useSolanaAddress() {
+export function useSVMAddress() {
   const okoSvm = useSDKState(selectSolSDK);
   const isInitialized = useSDKState(selectSolInitialized);
 
@@ -121,12 +118,12 @@ export function useBech32Address(chainId: string | undefined) {
  */
 export function useChainAddress(chainInfo: ModularChainInfo | undefined) {
   const { address: ethAddress, isLoading: ethLoading } = useEthAddress();
-  const { address: solanaAddress, isLoading: solanaLoading } =
-    useSolanaAddress();
+  const { address: svmAddress, isLoading: svmLoading } =
+    useSVMAddress();
   const { address: bech32Address, isLoading: bech32Loading } = useBech32Address(
     chainInfo &&
       !isEvmOnlyChain(chainInfo) &&
-      !isSolanaChainId(chainInfo.chainId)
+      !isSVMChainId(chainInfo.chainId)
       ? chainInfo.chainId
       : undefined,
   );
@@ -139,8 +136,8 @@ export function useChainAddress(chainInfo: ModularChainInfo | undefined) {
     return { address: ethAddress, isLoading: ethLoading };
   }
 
-  if (isSolanaChainId(chainInfo.chainId)) {
-    return { address: solanaAddress, isLoading: solanaLoading };
+  if (isSVMChainId(chainInfo.chainId)) {
+    return { address: svmAddress, isLoading: svmLoading };
   }
 
   return { address: bech32Address, isLoading: bech32Loading };

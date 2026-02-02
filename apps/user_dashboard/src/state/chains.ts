@@ -168,7 +168,7 @@ export function transformKeplrChain(chain: CosmosChainInfo): ModularChainInfo {
   if (isSVM) {
     return {
       ...base,
-      solana: {
+      svm: {
         rpc: chain.svm!.rpc,
         currencies: chain.currencies,
       },

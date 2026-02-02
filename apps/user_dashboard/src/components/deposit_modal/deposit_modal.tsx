@@ -23,7 +23,7 @@ import { useEnabledChains } from "@oko-wallet-user-dashboard/hooks/queries";
 import {
   useBech32Addresses,
   useEthAddress,
-  useSolanaAddress,
+  useSVMAddress,
 } from "@oko-wallet-user-dashboard/hooks/queries/use_addresses";
 import { useSearch } from "@oko-wallet-user-dashboard/hooks/use_search";
 import {
@@ -37,7 +37,7 @@ const ecosystemFilterOptions = [
   "All Chains",
   "Cosmos",
   "EVM",
-  "Solana",
+  "SVM",
 ] as const;
 type EcosystemFilter = (typeof ecosystemFilterOptions)[number];
 
@@ -68,13 +68,13 @@ export const DepositModal: FC<DepositModalProps> = ({ renderTrigger }) => {
   // Get enabled chains with cosmos, evm, or solana modules
   const visibleChains = useMemo(() => {
     return enabledChains.filter(
-      (chain) => chain.cosmos || chain.evm || chain.solana,
+      (chain) => chain.cosmos || chain.evm || chain.svm,
     );
   }, [enabledChains]);
 
   // Get addresses using TanStack Query hooks
   const { address: ethAddress } = useEthAddress();
-  const { address: solanaAddress } = useSolanaAddress();
+  const { address: svmAddress } = useSVMAddress();
   const cosmosChainIds = useMemo(
     () =>
       visibleChains
@@ -104,8 +104,8 @@ export const DepositModal: FC<DepositModalProps> = ({ renderTrigger }) => {
             return !!chain.cosmos;
           case "EVM":
             return !!chain.evm;
-          case "Solana":
-            return !!chain.solana;
+          case "SVM":
+            return !!chain.svm;
           default:
             throw new Error("unreachable");
         }
@@ -140,8 +140,8 @@ export const DepositModal: FC<DepositModalProps> = ({ renderTrigger }) => {
     if (chain.evm) {
       return ethAddress === null ? undefined : ethAddress;
     }
-    if (chain.solana) {
-      return solanaAddress === null ? undefined : solanaAddress;
+    if (chain.svm) {
+      return svmAddress === null ? undefined : svmAddress;
     }
     return bech32Addresses[chain.chainId];
   };

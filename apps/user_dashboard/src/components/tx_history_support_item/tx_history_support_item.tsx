@@ -7,7 +7,6 @@ import type { FC } from "react";
 
 import { useChain, useChainAddress } from "@oko-wallet-user-dashboard/hooks/queries";
 import styles from "./tx_history_support_item.module.scss";
-import { useChain } from "@oko-wallet-user-dashboard/hooks/queries";
 
 export type TxHistorySupportItemProps = {
   chainId: string;

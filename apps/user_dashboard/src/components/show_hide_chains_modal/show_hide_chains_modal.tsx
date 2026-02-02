@@ -69,7 +69,7 @@ export const ShowHideChainsModal: FC<ShowHideChainsModalProps> = ({
 
   // Filter chains that have cosmos, evm, or solana modules
   const visibleChains = useMemo(() => {
-    return chains.filter((chain) => chain.cosmos || chain.evm || chain.solana);
+    return chains.filter((chain) => chain.cosmos || chain.evm || chain.svm);
   }, [chains]);
 
   // Search configuration
@@ -89,8 +89,8 @@ export const ShowHideChainsModal: FC<ShowHideChainsModalProps> = ({
           if (chain.evm) {
             return chain.evm.currencies[0]?.coinDenom || "";
           }
-          if (chain.solana) {
-            return chain.solana.currencies[0]?.coinDenom || "";
+          if (chain.svm) {
+            return chain.svm.currencies[0]?.coinDenom || "";
           }
           return "";
         },
@@ -238,8 +238,8 @@ export const ShowHideChainsModal: FC<ShowHideChainsModalProps> = ({
                         case "EVM": {
                           return !!chain.evm;
                         }
-                        case "Solana": {
-                          return !!chain.solana;
+                        case "SVM": {
+                          return !!chain.svm;
                         }
                         default: {
                           return false;

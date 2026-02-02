@@ -39,17 +39,10 @@ export function isCosmosChainId(chainId: string): boolean {
   );
 }
 
-/**
- * Check if chainId is for a Solana chain
- * Solana chains use the "solana:" prefix with genesis hash (e.g., "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp")
- */
-export function isSolanaChainId(chainId: string): boolean {
+export function isSVMChainId(chainId: string): boolean {
   return chainId.startsWith("solana:");
 }
 
-/**
- * Check if chainInfo has Solana support
- */
-export function hasSolanaSupport(chainInfo: ModularChainInfo): boolean {
-  return chainInfo.solana !== undefined;
+export function hasSVMSupport(chainInfo: ModularChainInfo): boolean {
+  return chainInfo.svm !== undefined;
 }
