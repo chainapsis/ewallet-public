@@ -16,6 +16,8 @@ export async function publish(..._args: any[]) {
   console.log("Publishing packages...");
 
   console.log(`\
+If you are running this locally,
+
 1. Ensure you have "npm logged-in in the first place. \
 It's "npm login", not "yarn npm login".
 2. git remote "origin" needs to be set up in case you use an alias.
