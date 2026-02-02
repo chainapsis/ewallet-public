@@ -57,6 +57,7 @@ export function createKsnSignature(
 export function createOkoApiCommitRevealParams(
   session: ClientCommitRevealSession,
   apiName: OkoApiName,
+  isFinal: boolean = false,
 ): Result<CommitRevealParams, string> {
   const sigRes = createOkoApiSignature(session, apiName);
   if (!sigRes.success) {
@@ -67,6 +68,7 @@ export function createOkoApiCommitRevealParams(
     data: {
       cr_session_id: session.session_id,
       cr_signature: sigRes.data,
+      cr_final: isFinal,
     },
   };
 }
@@ -75,6 +77,7 @@ export function createKsnCommitRevealParams(
   session: ClientCommitRevealSession,
   nodeEndpoint: string,
   apiName: KsnApiName,
+  isFinal: boolean = false,
 ): Result<CommitRevealParams, string> {
   const ksnSigRes = createKsnSignature(session, nodeEndpoint, apiName);
   if (!ksnSigRes.success) {
@@ -85,6 +88,7 @@ export function createKsnCommitRevealParams(
     data: {
       cr_session_id: session.session_id,
       cr_signature: ksnSigRes.data,
+      cr_final: isFinal,
     },
   };
 }

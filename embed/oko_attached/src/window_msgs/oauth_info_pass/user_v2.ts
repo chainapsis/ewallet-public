@@ -127,7 +127,6 @@ export async function handleNewUserV2(
     authType,
     idToken,
     ksnCommitTargets,
-    ksnCommitTargets.length, // all nodes for sign_up
   );
   if (!commitRes.success) {
     return {
@@ -265,7 +264,7 @@ export async function handleExistingUserV2(
   keyshareNodeMetaEd25519: KeyShareNodeMetaWithNodeStatusInfo,
   authType: AuthType,
 ): Promise<Result<UserSignInResultV2, OAuthSignInError>> {
-  // 1. Commit to oko_api and KSN nodes
+  // 1. Commit to oko_api and ks nodes
   const ksnCommitTargets: KsnCommitTarget[] =
     keyshareNodeMetaSecp256k1.nodes.map((node) => ({
       nodeUrl: node.endpoint,
@@ -276,7 +275,6 @@ export async function handleExistingUserV2(
     authType,
     idToken,
     ksnCommitTargets,
-    keyshareNodeMetaSecp256k1.threshold, // threshold for sign_in
   );
   if (!commitRes.success) {
     return {
@@ -560,7 +558,6 @@ export async function handleExistingUserNeedsEd25519Keygen(
     authType,
     idToken,
     ksnCommitTargets,
-    ksnCommitTargets.length, // all nodes for add_ed25519
   );
   if (!commitRes.success) {
     return {
@@ -764,7 +761,7 @@ export async function handleReshareV2(
       n.wallet_status === "UNRECOVERABLE_DATA_LOSS",
   );
 
-  // 2. Commit to oko_api and KSN nodes
+  // 2. Commit to oko_api and ks nodes
   const ksnCommitTargets: KsnCommitTarget[] = [
     ...activeNodes.map((node) => ({
       nodeUrl: node.endpoint,
@@ -780,7 +777,6 @@ export async function handleReshareV2(
     authType,
     idToken,
     ksnCommitTargets,
-    ksnCommitTargets.length, // all nodes for reshare
   );
   if (!commitRes.success) {
     return {
@@ -947,7 +943,7 @@ export async function handleReshareAndEd25519Keygen(
     userKeyShares: ed25519UserKeyShares,
   } = ed25519KeygenSplitRes.data;
 
-  // 3. Commit to oko_api and KSN nodes
+  // 3. Commit to oko_api and ks nodes
   const ksnCommitTargets: KsnCommitTarget[] = [
     ...activeNodes.map((node) => ({
       nodeUrl: node.endpoint,
@@ -963,7 +959,6 @@ export async function handleReshareAndEd25519Keygen(
     authType,
     idToken,
     ksnCommitTargets,
-    ksnCommitTargets.length, // all nodes for reshare
   );
   if (!commitRes.success) {
     return {
