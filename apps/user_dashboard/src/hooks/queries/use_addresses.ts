@@ -52,7 +52,7 @@ export function useSVMAddress() {
   const isInitialized = useSDKState(selectSolInitialized);
 
   const query = useQuery({
-    queryKey: ["address", "solana"],
+    queryKey: ["address", "svm"],
     queryFn: async () => {
       if (!okoSvm) {
         return null;

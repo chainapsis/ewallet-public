@@ -1,3 +1,8 @@
+import {
+  ETHEREUM_MAINNET_CHAIN_ID,
+  SOLANA_MAINNET_CHAIN_ID,
+} from "@oko-wallet-user-dashboard/utils/chain";
+
 export const TRANSACTION_HISTORY_SUPPORT_LIST = [
   {
     chainId: "cosmoshub-4",
@@ -6,13 +11,13 @@ export const TRANSACTION_HISTORY_SUPPORT_LIST = [
     addressPath: "/address",
   },
   {
-    chainId: "eip155:1",
+    chainId: ETHEREUM_MAINNET_CHAIN_ID,
     explorerName: "Etherscan",
     explorerUrl: "https://etherscan.io",
     addressPath: "/address",
   },
   {
-    chainId: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+    chainId: SOLANA_MAINNET_CHAIN_ID,
     explorerName: "Solscan",
     explorerUrl: "https://solscan.io",
     addressPath: "/account",

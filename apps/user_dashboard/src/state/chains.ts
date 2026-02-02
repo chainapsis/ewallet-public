@@ -8,12 +8,16 @@ import type { AuthType } from "@oko-wallet/oko-types/auth";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-import { getChainIdentifier } from "@oko-wallet-user-dashboard/utils/chain";
+import {
+  ETHEREUM_MAINNET_CHAIN_ID,
+  SOLANA_MAINNET_CHAIN_ID,
+  getChainIdentifier,
+} from "@oko-wallet-user-dashboard/utils/chain";
 
 const STORAGE_KEY = "oko:user_dashboard:chains";
 export const DEFAULT_ENABLED_CHAINS = [
-  "eip155:1",
-  "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+  ETHEREUM_MAINNET_CHAIN_ID,
+  SOLANA_MAINNET_CHAIN_ID,
   "cosmoshub",
   "osmosis",
 ] as const;
