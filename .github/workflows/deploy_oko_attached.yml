@@ -1,4 +1,4 @@
-name: Deploy Oko Apps
+name: Deploy Oko Attached
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PRJ_ID__OKO_ATTACHED }}
@@ -18,6 +18,9 @@ jobs:
     steps:
       - name: Checkout self repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.git_tag }}
+          token: ${{ secrets.GITHUB_PAT }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
