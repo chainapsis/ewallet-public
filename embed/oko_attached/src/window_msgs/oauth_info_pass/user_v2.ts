@@ -31,8 +31,9 @@ import {
 } from "@oko-wallet-attached/requests/ks_node_v2";
 import {
   commitAll,
-  createOkoApiSignature,
+  createOkoApiCommitRevealParams,
   createKsnSignature,
+  createKsnCommitRevealParams,
   type KsnCommitTarget,
 } from "@oko-wallet-attached/crypto/commit_reveal";
 import type { ReshareRequestV2 } from "@oko-wallet/oko-types/user";
@@ -185,11 +186,11 @@ export async function handleNewUserV2(
   }
 
   // 6. Call V2 keygen API with both curve types
-  const okoApiSigRes = createOkoApiSignature(session, "keygen");
-  if (!okoApiSigRes.success) {
+  const keygenCommitReveal = createOkoApiCommitRevealParams(session, "keygen");
+  if (!keygenCommitReveal) {
     return {
       success: false,
-      err: { type: "sign_in_request_fail", error: okoApiSigRes.err },
+      err: { type: "sign_in_request_fail", error: "Failed to create commit-reveal params" },
     };
   }
   const reqKeygenV2Res = await reqKeygenV2(
@@ -210,10 +211,7 @@ export async function handleNewUserV2(
       },
     },
     idToken,
-    {
-      cr_session_id: session.session_id,
-      cr_signature: okoApiSigRes.data,
-    },
+    keygenCommitReveal,
   );
   if (reqKeygenV2Res.success === false) {
     return {
@@ -289,17 +287,14 @@ export async function handleExistingUserV2(
   const { session } = commitRes.data;
 
   // 2. Sign in to API server
-  const okoApiSigRes = createOkoApiSignature(session, "signin");
-  if (!okoApiSigRes.success) {
+  const signInCommitReveal = createOkoApiCommitRevealParams(session, "signin");
+  if (!signInCommitReveal) {
     return {
       success: false,
-      err: { type: "sign_in_request_fail", error: okoApiSigRes.err },
+      err: { type: "sign_in_request_fail", error: "Failed to create commit-reveal params" },
     };
   }
-  const signInResult = await signInV2(idToken, authType, {
-    cr_session_id: session.session_id,
-    cr_signature: okoApiSigRes.data,
-  });
+  const signInResult = await signInV2(idToken, authType, signInCommitReveal);
   if (!signInResult.success) {
     return { success: false, err: signInResult.err };
   }
@@ -704,8 +699,51 @@ export async function handleReshareV2(
   secp256k1NeedsReshare: boolean,
   ed25519NeedsReshare: boolean,
 ): Promise<Result<UserSignInResultV2, OAuthSignInError>> {
-  // 1. Sign in to API server to get public keys and server verifying share
-  const signInResult = await signInV2(idToken, authType);
+  // 1. Classify nodes for commit targets
+  const activeNodes = keyshareNodeMetaSecp256k1.nodes.filter(
+    (n) => n.wallet_status === "ACTIVE",
+  );
+  const newNodes = keyshareNodeMetaSecp256k1.nodes.filter(
+    (n) =>
+      n.wallet_status === "NOT_REGISTERED" ||
+      n.wallet_status === "UNRECOVERABLE_DATA_LOSS",
+  );
+
+  // 2. Commit to oko_api and KSN nodes
+  const ksnCommitTargets: KsnCommitTarget[] = [
+    ...activeNodes.map((node) => ({
+      nodeUrl: node.endpoint,
+      operationType: "sign_in_reshare" as const,
+    })),
+    ...newNodes.map((node) => ({
+      nodeUrl: node.endpoint,
+      operationType: "register_reshare" as const,
+    })),
+  ];
+  const commitRes = await commitAll(
+    "sign_in_reshare",
+    authType,
+    idToken,
+    ksnCommitTargets,
+    ksnCommitTargets.length, // all nodes for reshare
+  );
+  if (!commitRes.success) {
+    return {
+      success: false,
+      err: { type: "reshare_fail", error: commitRes.err },
+    };
+  }
+  const { session } = commitRes.data;
+
+  // 3. Sign in to API server with commit-reveal
+  const signInCommitReveal = createOkoApiCommitRevealParams(session, "signin");
+  if (!signInCommitReveal) {
+    return {
+      success: false,
+      err: { type: "reshare_fail", error: "Failed to create commit-reveal params" },
+    };
+  }
+  const signInResult = await signInV2(idToken, authType, signInCommitReveal);
   if (!signInResult.success) {
     return { success: false, err: signInResult.err };
   }
@@ -754,7 +792,7 @@ export async function handleReshareV2(
     };
   }
 
-  // 2. Call reshareUserKeySharesV2
+  // 4. Call reshareUserKeySharesV2 with commit-reveal session
   const reshareRes = await reshareUserKeySharesV2(
     idToken,
     authType,
@@ -769,6 +807,7 @@ export async function handleReshareV2(
       serverVerifyingShare: serverVerifyingShareRes.data,
       needsReshare: ed25519NeedsReshare,
     },
+    session,
   );
   if (!reshareRes.success) {
     return {
@@ -1174,24 +1213,6 @@ async function runEd25519KeygenAndSplit(
 
 interface SignInRequestV2 {
   auth_type: AuthType;
-}
-
-/**
- * Create commit-reveal params for KSN API calls.
- */
-function createKsnCommitRevealParams(
-  session: Parameters<typeof createKsnSignature>[0],
-  nodeEndpoint: string,
-  apiName: Parameters<typeof createKsnSignature>[2],
-): CommitRevealParams | undefined {
-  const ksnSigRes = createKsnSignature(session, nodeEndpoint, apiName);
-  if (!ksnSigRes.success) {
-    return undefined;
-  }
-  return {
-    cr_session_id: session.session_id,
-    cr_signature: ksnSigRes.data,
-  };
 }
 
 /**

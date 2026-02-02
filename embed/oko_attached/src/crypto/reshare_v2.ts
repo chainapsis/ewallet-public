@@ -14,6 +14,12 @@ import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { PublicKeyPackageRaw } from "@oko-wallet/oko-types/teddsa";
 import type { ReshareRequestV2 } from "@oko-wallet/oko-types/user";
 
+import type { ClientCommitRevealSession } from "./commit_reveal/types";
+import {
+  createKsnCommitRevealParams,
+  createOkoApiCommitRevealParams,
+} from "./commit_reveal/signature";
+
 import {
   type KeySharesByNode,
   requestKeySharesV2,
@@ -127,12 +133,14 @@ export interface ReshareV2Result {
  * @param authType - Authentication type
  * @param secp256k1 - secp256k1 wallet info (needsReshare flag determines if reshare is needed)
  * @param ed25519 - ed25519 wallet info (needsReshare flag determines if reshare is needed)
+ * @param session - Commit-reveal session for frontrunning protection
  */
 export async function reshareUserKeySharesV2(
   idToken: string,
   authType: AuthType,
   secp256k1: ReshareWalletInfoSecp256k1,
   ed25519: ReshareWalletInfoEd25519,
+  session: ClientCommitRevealSession,
 ): Promise<Result<ReshareV2Result, string>> {
   const secp256k1NeedsReshare = secp256k1.needsReshare;
   const ed25519NeedsReshare = ed25519.needsReshare;
@@ -178,6 +186,8 @@ export async function reshareUserKeySharesV2(
       secp256k1.keyshareNodeMeta.threshold,
       authType,
       { secp256k1: secp256k1.publicKey.toHex() },
+      (nodeEndpoint) =>
+        createKsnCommitRevealParams(session, nodeEndpoint, "get_key_shares"),
     ),
     requestKeySharesV2(
       idToken,
@@ -185,6 +195,8 @@ export async function reshareUserKeySharesV2(
       ed25519.keyshareNodeMeta.threshold,
       authType,
       { ed25519: ed25519.publicKey.toHex() },
+      (nodeEndpoint) =>
+        createKsnCommitRevealParams(session, nodeEndpoint, "get_key_shares"),
     ),
   ]);
 
@@ -360,12 +372,27 @@ export async function reshareUserKeySharesV2(
           ed25519ResharedNodes.push(nodeInfo.node);
         }
 
+        // Create commit-reveal params for this node
+        const apiName = isNewNode ? "reshare_register" : "reshare";
+        const commitRevealParams = createKsnCommitRevealParams(
+          session,
+          nodeInfo.node.endpoint,
+          apiName,
+        );
+        if (!commitRevealParams) {
+          return {
+            success: false,
+            err: "Failed to create commit-reveal params",
+          } as const;
+        }
+
         if (isNewNode) {
           return reshareRegisterV2(
             nodeInfo.node.endpoint,
             idToken,
             authType,
             wallets,
+            commitRevealParams,
           );
         } else {
           return reshareKeySharesV2(
@@ -373,6 +400,7 @@ export async function reshareUserKeySharesV2(
             idToken,
             authType,
             wallets,
+            commitRevealParams,
           );
         }
       }),
@@ -407,6 +435,15 @@ export async function reshareUserKeySharesV2(
       };
     }
 
+    // Create commit-reveal params for oko_api reshare
+    const reshareCommitReveal = createOkoApiCommitRevealParams(
+      session,
+      "reshare",
+    );
+    if (!reshareCommitReveal) {
+      return { success: false, err: "Failed to create commit-reveal params" };
+    }
+
     const updateRes = await makeAuthorizedOkoApiRequest<ReshareRequestV2, void>(
       "user/reshare",
       idToken,
@@ -414,6 +451,7 @@ export async function reshareUserKeySharesV2(
         wallets: reshareWallets,
       },
       TSS_V2_ENDPOINT,
+      reshareCommitReveal,
     );
     if (!updateRes.success) {
       return {

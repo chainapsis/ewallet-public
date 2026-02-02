@@ -1,4 +1,7 @@
-import type { ApiName as OkoApiName } from "@oko-wallet/oko-types/commit_reveal";
+import type {
+  ApiName as OkoApiName,
+  CommitRevealParams,
+} from "@oko-wallet/oko-types/commit_reveal";
 import type { ApiName as KsnApiName } from "@oko-wallet/ksn-interface/commit_reveal";
 import type { Result } from "@oko-wallet/stdlib-js";
 
@@ -34,9 +37,12 @@ export function createKsnSignature(
     return { success: false, err: `KSN node pubkey not found for ${nodeUrl}` };
   }
   if (!operationType) {
-    return { success: false, err: `KSN operation type not found for ${nodeUrl}` };
+    return {
+      success: false,
+      err: `KSN operation type not found for ${nodeUrl}`,
+    };
   }
-  // Use node-specific operation type for signature
+
   return createRevealSignature(
     session.client_keypair.privateKey,
     nodePubkey,
@@ -46,4 +52,33 @@ export function createKsnSignature(
     operationType,
     apiName,
   );
+}
+
+export function createOkoApiCommitRevealParams(
+  session: ClientCommitRevealSession,
+  apiName: OkoApiName,
+): CommitRevealParams | undefined {
+  const sigRes = createOkoApiSignature(session, apiName);
+  if (!sigRes.success) {
+    return undefined;
+  }
+  return {
+    cr_session_id: session.session_id,
+    cr_signature: sigRes.data,
+  };
+}
+
+export function createKsnCommitRevealParams(
+  session: ClientCommitRevealSession,
+  nodeEndpoint: string,
+  apiName: KsnApiName,
+): CommitRevealParams | undefined {
+  const ksnSigRes = createKsnSignature(session, nodeEndpoint, apiName);
+  if (!ksnSigRes.success) {
+    return undefined;
+  }
+  return {
+    cr_session_id: session.session_id,
+    cr_signature: ksnSigRes.data,
+  };
 }
