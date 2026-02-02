@@ -71,7 +71,7 @@ export const ShowHideChainsModal: FC<ShowHideChainsModalProps> = ({
     setSearchQuery(e.target.value);
   };
 
-  // Filter chains that have cosmos, evm, or solana modules
+  // Filter chains that have cosmos, evm, or svm modules
   const visibleChains = useMemo(() => {
     return chains.filter((chain) => chain.cosmos || chain.evm || chain.svm);
   }, [chains]);

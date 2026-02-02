@@ -65,9 +65,6 @@ async function fetchEvmBalance(
   return BigInt(data.result).toString();
 }
 
-/**
- * Fetch Solana native balance
- */
 async function fetchSVMBalance(
   rpcEndpoint: string,
   address: string,
@@ -137,9 +134,9 @@ export function useChainBalances(
     refetchInterval: 60 * 1000,
   });
 
-  // Solana native balance query
+  // SVM native balance query
   const svmQuery = useQuery({
-    queryKey: ["balances", "solana", chainId, svmAddress],
+    queryKey: ["balances", "svm", chainId, svmAddress],
     queryFn: async () => {
       if (!chainInfo?.svm?.rpc || !svmAddress) {
         return "0";
@@ -261,7 +258,6 @@ export function useAllBalances() {
             }
           }
 
-          // Fetch Solana native balance
           if (isSVM && svmAddress && chain.svm?.rpc) {
             try {
               const balance = await fetchSVMBalance(
@@ -283,7 +279,7 @@ export function useAllBalances() {
               }
             } catch (error) {
               console.error(
-                `Failed to fetch Solana balance for ${chain.chainId}:`,
+                `Failed to fetch SVM balance for ${chain.chainId}:`,
                 error,
               );
             }

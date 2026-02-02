@@ -62,7 +62,6 @@ export const DepositModal: FC<DepositModalProps> = ({ renderTrigger }) => {
 
   const searchFields = ["chainName"];
 
-  // Get enabled chains with cosmos, evm, or solana modules
   const visibleChains = useMemo(() => {
     return enabledChains.filter(
       (chain) => chain.cosmos || chain.evm || chain.svm,
