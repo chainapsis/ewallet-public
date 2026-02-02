@@ -1,7 +1,6 @@
 import type {
   CheckEmailRequest,
   CheckEmailResponseV2,
-  SignInResponseV2,
 } from "@oko-wallet/oko-types/user";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { KeyShareNodeMetaWithNodeStatusInfo } from "@oko-wallet/oko-types/tss";
@@ -14,9 +13,9 @@ import {
   makeAuthorizedOkoApiRequest,
   makeOkoApiRequest,
   TSS_V2_ENDPOINT,
-  SOCIAL_LOGIN_V2_ENDPOINT,
+  signInV2,
+  saveReferralV2,
 } from "@oko-wallet-attached/requests/oko_api";
-import type { CommitRevealParams } from "@oko-wallet/oko-types/commit_reveal";
 import { combineUserShares } from "@oko-wallet-attached/crypto/combine";
 import type { UserSignInResultV2 } from "@oko-wallet-attached/window_msgs/types";
 import type { FetchError } from "@oko-wallet-attached/requests/types";
@@ -1140,37 +1139,6 @@ export async function handleReshareAndEd25519Keygen(
   };
 }
 
-interface SaveReferralRequest {
-  origin: string;
-  utm_source: string | null;
-  utm_campaign: string | null;
-}
-
-interface SaveReferralResponse {
-  referral_id: string;
-}
-
-async function saveReferralV2(
-  authToken: string,
-  data: SaveReferralRequest,
-): Promise<void> {
-  const res = await makeAuthorizedOkoApiRequest<
-    SaveReferralRequest,
-    SaveReferralResponse
-  >("referral", authToken, data, SOCIAL_LOGIN_V2_ENDPOINT);
-
-  if (!res.success) {
-    throw new Error(
-      `Save referral V2 fetch failed: ${JSON.stringify(res.err)}`,
-    );
-  }
-
-  const apiResponse = res.data;
-  if (!apiResponse.success) {
-    throw new Error(`Save referral V2 API error: ${apiResponse.msg}`);
-  }
-}
-
 /**
  * Decode secp256k1 shares from hex strings to Point256 format.
  * Used by multiple handlers that need to process shares from KS nodes.
@@ -1275,56 +1243,4 @@ async function runEd25519KeygenAndSplit(
       userKeyShares: splitRes.data,
     },
   };
-}
-
-interface SignInRequestV2 {
-  auth_type: AuthType;
-}
-
-/**
- * Sign in to API server and return user data.
- * Used by handlers that need to authenticate before requesting shares.
- */
-async function signInV2(
-  idToken: string,
-  authType: AuthType,
-  commitReveal?: CommitRevealParams,
-): Promise<
-  Result<SignInResponseV2, { type: "sign_in_request_fail"; error: string }>
-> {
-  const signInRes = await makeAuthorizedOkoApiRequest<
-    SignInRequestV2,
-    SignInResponseV2
-  >(
-    "user/signin",
-    idToken,
-    { auth_type: authType },
-    TSS_V2_ENDPOINT,
-    commitReveal,
-  );
-
-  if (!signInRes.success) {
-    console.error("[attached] sign in failed, err: %s", signInRes.err);
-    return {
-      success: false,
-      err: { type: "sign_in_request_fail", error: signInRes.err.toString() },
-    };
-  }
-
-  const apiResponse = signInRes.data;
-  if (!apiResponse.success) {
-    console.error(
-      "[attached] sign in request failed, err: %s",
-      apiResponse.msg,
-    );
-    return {
-      success: false,
-      err: {
-        type: "sign_in_request_fail",
-        error: `code: ${apiResponse.code}`,
-      },
-    };
-  }
-
-  return { success: true, data: apiResponse.data };
 }

@@ -7,6 +7,13 @@ import type {
   CommitRequestBody,
   CommitResponseData,
 } from "@oko-wallet/oko-api-openapi/tss";
+import type {
+  SignInRequest,
+  SignInResponseV2,
+  SaveReferralRequest,
+  SaveReferralResponse,
+} from "@oko-wallet/oko-types/user";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { Result } from "@oko-wallet/stdlib-js";
 
 import type { FetchError } from "./types";
@@ -104,4 +111,63 @@ export async function commitToOkoApi(
     },
     TSS_V2_ENDPOINT,
   );
+}
+
+export async function signInV2(
+  idToken: string,
+  authType: AuthType,
+  commitReveal?: CommitRevealParams,
+): Promise<
+  Result<SignInResponseV2, { type: "sign_in_request_fail"; error: string }>
+> {
+  const signInRes = await makeAuthorizedOkoApiRequest<
+    SignInRequest,
+    SignInResponseV2
+  >("user/signin", idToken, { auth_type: authType }, TSS_V2_ENDPOINT, commitReveal);
+
+  if (!signInRes.success) {
+    console.error("[attached] sign in failed, err: %s", signInRes.err);
+    return {
+      success: false,
+      err: { type: "sign_in_request_fail", error: signInRes.err.toString() },
+    };
+  }
+
+  const apiResponse = signInRes.data;
+  if (!apiResponse.success) {
+    console.error(
+      "[attached] sign in request failed, err: %s",
+      apiResponse.msg,
+    );
+    return {
+      success: false,
+      err: {
+        type: "sign_in_request_fail",
+        error: `code: ${apiResponse.code}`,
+      },
+    };
+  }
+
+  return { success: true, data: apiResponse.data };
+}
+
+export async function saveReferralV2(
+  authToken: string,
+  data: SaveReferralRequest,
+): Promise<void> {
+  const res = await makeAuthorizedOkoApiRequest<
+    SaveReferralRequest,
+    SaveReferralResponse
+  >("referral", authToken, data, SOCIAL_LOGIN_V2_ENDPOINT);
+
+  if (!res.success) {
+    throw new Error(
+      `Save referral V2 fetch failed: ${JSON.stringify(res.err)}`,
+    );
+  }
+
+  const apiResponse = res.data;
+  if (!apiResponse.success) {
+    throw new Error(`Save referral V2 API error: ${apiResponse.msg}`);
+  }
 }
