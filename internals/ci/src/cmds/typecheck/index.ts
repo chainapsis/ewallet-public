@@ -61,9 +61,14 @@ export async function typeCheck(..._args: any[]) {
   }
 }
 
-async function runTypeCheck(pkgPath: string): Promise<void> {
+async function runTypeCheck(workerId: number, pkgPath: string): Promise<void> {
   const name = await getPkgName(pkgPath);
-  console.log("%s %s", chalk.cyanBright.bold("Checking"), name);
+  console.log(
+    "%s %s %s",
+    chalk.magentaBright.bold(`wk-${workerId}`),
+    chalk.cyanBright.bold("Checking"),
+    name,
+  );
 
   return new Promise((resolve, reject) => {
     const child = spawn("yarn", ["run", "tsc", "--noEmit"], {
@@ -77,7 +82,12 @@ async function runTypeCheck(pkgPath: string): Promise<void> {
 
     child.on("close", (code) => {
       if (code === 0) {
-        console.log("%s %s", chalk.bold.green("Ok"), name);
+        console.log(
+          "%s %s %s",
+          chalk.magenta.bold(`wk-${workerId}`),
+          chalk.bold.green("Ok"),
+          name,
+        );
         resolve();
       } else {
         reject(new Error(`Type check failed for ${name}`));
@@ -88,20 +98,27 @@ async function runTypeCheck(pkgPath: string): Promise<void> {
 
 async function runWithConcurrency(
   paths: string[],
-  fn: (path: string) => Promise<void>,
+  fn: (workerId: number, path: string) => Promise<void>,
   concurrency: number,
 ): Promise<void> {
   const queue = [...paths];
 
-  async function worker(): Promise<void> {
+  async function worker(id: number): Promise<void> {
     while (queue.length > 0) {
       const item = queue.shift();
       if (item) {
-        await fn(item);
+        await fn(id, item);
       }
     }
   }
 
-  const workers = Array.from({ length: concurrency }, () => worker());
+  // const workers = Array.from({ length: concurrency }, () => worker());
+
+  console.log("Spawning %s workers", concurrency);
+  const workers = [];
+  for (let idx = 0; idx < concurrency; idx += 1) {
+    workers.push(worker(idx));
+  }
+
   await Promise.all(workers);
 }
