@@ -6,7 +6,7 @@ on:
     inputs:
       git_tag:
         description: >
-          "Git tag for deployment (format: develop/v0.0.1 or release/v0.0.1)"
+          "Git tag at which publishing happens"
         required: true
         type: string
 
@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout self repository
         uses: actions/checkout@v4
+        with: 
+          ref: ${{ inputs.git_tag }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -25,11 +27,6 @@ jobs:
 
       - name: Check Node version
         run: node -v
-
-      - name: Check git tag
-        run: node ./internals/github/dist/validate_git_tag.js
-        env:
-          GIT_TAG: "${{ inputs.git_tag }}"
       
       - name: Enable Corepack
         run: corepack enable
