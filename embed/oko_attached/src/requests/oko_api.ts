@@ -116,7 +116,7 @@ export async function commitToOkoApi(
 export async function signInV2(
   idToken: string,
   authType: AuthType,
-  commitReveal?: CommitRevealParams,
+  commitReveal: CommitRevealParams,
 ): Promise<
   Result<SignInResponseV2, { type: "sign_in_request_fail"; error: string }>
 > {

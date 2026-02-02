@@ -902,6 +902,11 @@ export async function handleReshareV2(
 /**
  * Handle reshare for secp256k1 + keygen for ed25519 (scenario 6).
  * Called when user has secp256k1 wallet, needs reshare, and needs ed25519 keygen.
+ *
+ * Commit-reveal:
+ * - oko_api: sign_in_reshare_ed25519
+ * - KSN ACTIVE nodes: sign_in_reshare_ed25519
+ * - KSN new nodes: register_reshare
  */
 export async function handleReshareAndEd25519Keygen(
   idToken: string,
@@ -913,7 +918,7 @@ export async function handleReshareAndEd25519Keygen(
   const activeNodes = keyshareNodeMetaSecp256k1.nodes.filter(
     (n) => n.wallet_status === "ACTIVE",
   );
-  const additionalNodes = keyshareNodeMetaSecp256k1.nodes.filter(
+  const newNodes = keyshareNodeMetaSecp256k1.nodes.filter(
     (n) =>
       n.wallet_status === "NOT_REGISTERED" ||
       n.wallet_status === "UNRECOVERABLE_DATA_LOSS",
@@ -942,15 +947,55 @@ export async function handleReshareAndEd25519Keygen(
     userKeyShares: ed25519UserKeyShares,
   } = ed25519KeygenSplitRes.data;
 
-  // 3. Sign in to get the public key
-  const signInResult = await signInV2(idToken, authType);
+  // 3. Commit to oko_api and KSN nodes
+  const ksnCommitTargets: KsnCommitTarget[] = [
+    ...activeNodes.map((node) => ({
+      nodeUrl: node.endpoint,
+      operationType: "sign_in_reshare_ed25519" as const,
+    })),
+    ...newNodes.map((node) => ({
+      nodeUrl: node.endpoint,
+      operationType: "register_reshare" as const,
+    })),
+  ];
+  const commitRes = await commitAll(
+    "sign_in_reshare_ed25519",
+    authType,
+    idToken,
+    ksnCommitTargets,
+    ksnCommitTargets.length, // all nodes for reshare
+  );
+  if (!commitRes.success) {
+    return {
+      success: false,
+      err: { type: "reshare_fail", error: commitRes.err },
+    };
+  }
+  const session = commitRes.data;
+
+  // 4. Sign in to get the public key
+  const signInCommitRevealRes = createOkoApiCommitRevealParams(
+    session,
+    "signin",
+  );
+  if (!signInCommitRevealRes.success) {
+    return {
+      success: false,
+      err: { type: "reshare_fail", error: signInCommitRevealRes.err },
+    };
+  }
+  const signInResult = await signInV2(
+    idToken,
+    authType,
+    signInCommitRevealRes.data,
+  );
   if (!signInResult.success) {
     return { success: false, err: signInResult.err };
   }
   const signInResp = signInResult.data;
   const secp256k1PublicKey = signInResp.user.public_key_secp256k1;
 
-  // 4. Request secp256k1 shares with public key
+  // 5. Request secp256k1 shares with public key
   const requestSecp256k1SharesRes = await requestKeySharesV2(
     idToken,
     activeNodes,
@@ -959,6 +1004,7 @@ export async function handleReshareAndEd25519Keygen(
     {
       secp256k1: secp256k1PublicKey,
     },
+    session,
   );
   if (!requestSecp256k1SharesRes.success) {
     return {
@@ -970,7 +1016,7 @@ export async function handleReshareAndEd25519Keygen(
     };
   }
 
-  // 5. Decode secp256k1 shares (filter out items without shares for reshare case)
+  // 6. Decode secp256k1 shares (filter out items without shares for reshare case)
   const itemsWithSecp256k1 = requestSecp256k1SharesRes.data.filter(
     (item) => item.shares.secp256k1,
   );
@@ -986,10 +1032,10 @@ export async function handleReshareAndEd25519Keygen(
     };
   }
 
-  // 6. Expand secp256k1 shares to additional nodes
+  // 7. Expand secp256k1 shares to new nodes
   const secp256k1ExpandRes = await runExpandShares(
     secp256k1DecodeRes.data,
-    additionalNodes,
+    newNodes,
     keyshareNodeMetaSecp256k1.threshold,
   );
   if (!secp256k1ExpandRes.success) {
@@ -999,7 +1045,7 @@ export async function handleReshareAndEd25519Keygen(
     };
   }
 
-  // 7. Send shares to KSN
+  // 8. Send shares to KSN
   // For ACTIVE nodes: reshare secp256k1 + register ed25519
   // For new nodes: reshare/register both
   const allNodes = keyshareNodeMetaSecp256k1.nodes;
@@ -1024,18 +1070,40 @@ export async function handleReshareAndEd25519Keygen(
 
         if (isNewNode) {
           // New node: reshare/register both curves
-          return reshareRegisterV2(node.endpoint, idToken, authType, {
-            secp256k1: {
-              public_key: secp256k1PublicKey,
-              share: encodePoint256ToKeyShareString(secp256k1Share.share),
+          const commitRevealRes = createKsnCommitRevealParams(
+            session,
+            node.endpoint,
+            "reshare_register",
+          );
+          if (!commitRevealRes.success) {
+            return { success: false, err: commitRevealRes.err };
+          }
+          return reshareRegisterV2(
+            node.endpoint,
+            idToken,
+            authType,
+            {
+              secp256k1: {
+                public_key: secp256k1PublicKey,
+                share: encodePoint256ToKeyShareString(secp256k1Share.share),
+              },
+              ed25519: {
+                public_key: ed25519Keygen1.public_key.toHex(),
+                share: teddsaKeyShareToHex(ed25519Share.share),
+              },
             },
-            ed25519: {
-              public_key: ed25519Keygen1.public_key.toHex(),
-              share: teddsaKeyShareToHex(ed25519Share.share),
-            },
-          });
+            commitRevealRes.data,
+          );
         } else {
           // ACTIVE node: reshare secp256k1 + register ed25519 separately
+          const reshareCommitRevealRes = createKsnCommitRevealParams(
+            session,
+            node.endpoint,
+            "reshare",
+          );
+          if (!reshareCommitRevealRes.success) {
+            return { success: false, err: reshareCommitRevealRes.err };
+          }
           const reshareSecp256k1Res = await reshareKeySharesV2(
             node.endpoint,
             idToken,
@@ -1046,17 +1114,27 @@ export async function handleReshareAndEd25519Keygen(
                 share: encodePoint256ToKeyShareString(secp256k1Share.share),
               },
             },
+            reshareCommitRevealRes.data,
           );
           if (!reshareSecp256k1Res.success) {
             return reshareSecp256k1Res;
           }
 
+          const registerEd25519CommitRevealRes = createKsnCommitRevealParams(
+            session,
+            node.endpoint,
+            "register_ed25519",
+          );
+          if (!registerEd25519CommitRevealRes.success) {
+            return { success: false, err: registerEd25519CommitRevealRes.err };
+          }
           return registerKeyShareEd25519V2(
             node.endpoint,
             idToken,
             authType,
             ed25519Keygen1.public_key.toHex(),
             teddsaKeyShareToHex(ed25519Share.share),
+            registerEd25519CommitRevealRes.data,
           );
         }
       },
@@ -1074,7 +1152,17 @@ export async function handleReshareAndEd25519Keygen(
     };
   }
 
-  // 8. Call keygenEd25519 API
+  // 9. Call keygenEd25519 API
+  const keygenEd25519CommitRevealRes = createOkoApiCommitRevealParams(
+    session,
+    "keygen_ed25519",
+  );
+  if (!keygenEd25519CommitRevealRes.success) {
+    return {
+      success: false,
+      err: { type: "reshare_fail", error: keygenEd25519CommitRevealRes.err },
+    };
+  }
   const reqKeygenEd25519Res = await reqKeygenEd25519(
     TSS_V2_ENDPOINT,
     {
@@ -1089,6 +1177,7 @@ export async function handleReshareAndEd25519Keygen(
       },
     },
     idToken,
+    keygenEd25519CommitRevealRes.data,
   );
   if (reqKeygenEd25519Res.success === false) {
     return {
@@ -1097,7 +1186,17 @@ export async function handleReshareAndEd25519Keygen(
     };
   }
 
-  // 9. Update Oko API reshare status
+  // 10. Update Oko API reshare status
+  const reshareCommitRevealRes = createOkoApiCommitRevealParams(
+    session,
+    "reshare",
+  );
+  if (!reshareCommitRevealRes.success) {
+    return {
+      success: false,
+      err: { type: "reshare_fail", error: reshareCommitRevealRes.err },
+    };
+  }
   const resharedNodes = secp256k1ExpandRes.data.reshared_user_key_shares.map(
     (s) => s.node,
   );
@@ -1113,12 +1212,13 @@ export async function handleReshareAndEd25519Keygen(
       },
     },
     TSS_V2_ENDPOINT,
+    reshareCommitRevealRes.data,
   );
   if (!updateRes.success) {
     console.warn("[attached] Failed to update reshare status:", updateRes.err);
   }
 
-  // 10. Convert ed25519 keygen1 to hex format for storage
+  // 11. Convert ed25519 keygen1 to hex format for storage
   const keyPackageEd25519Hex = teddsaKeygenToHex(ed25519Keygen1);
 
   return {
