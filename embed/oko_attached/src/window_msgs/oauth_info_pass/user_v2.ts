@@ -138,19 +138,16 @@ export async function handleNewUserV2(
   }
   const { session } = commitRes.data;
 
-  // 5. Send key shares by both curves to ks nodes using V2 API
+  // 5. Send key shares by both curves to ks nodes using registerKeySharesV2
   const registerKeySharesResults: Result<void, string>[] = await Promise.all(
-    secp256k1UserKeyShares.map((keyShareByNode, index) => {
+    secp256k1UserKeyShares.map(async (keyShareByNode, index) => {
       const commitRevealRes = createKsnCommitRevealParams(
         session,
         keyShareByNode.node.endpoint,
         "register",
       );
       if (!commitRevealRes.success) {
-        return Promise.resolve({
-          success: false,
-          err: commitRevealRes.err,
-        } as const);
+        return { success: false, err: commitRevealRes.err };
       }
       return registerKeySharesV2(
         keyShareByNode.node.endpoint,
@@ -577,17 +574,14 @@ export async function handleExistingUserNeedsEd25519Keygen(
 
   // 3. Send ed25519 key shares to ks nodes using V2 API
   const registerEd25519Results: Result<void, string>[] = await Promise.all(
-    keyshareNodeMetaEd25519.nodes.map((node, index) => {
+    keyshareNodeMetaEd25519.nodes.map(async (node, index) => {
       const commitRevealRes = createKsnCommitRevealParams(
         session,
         node.endpoint,
         "register_ed25519",
       );
       if (!commitRevealRes.success) {
-        return Promise.resolve({
-          success: false,
-          err: commitRevealRes.err,
-        } as const);
+        return { success: false, err: commitRevealRes.err } as const;
       }
       return registerKeyShareEd25519V2(
         node.endpoint,
