@@ -69,12 +69,6 @@ export function setKsnNodePubkey(
   };
 }
 
-export interface CommitAllResult {
-  session: ClientCommitRevealSession;
-  okoApiCommitted: boolean;
-  ksnCommittedNodes: string[];
-}
-
 /**
  * Commit to oko_api and KSN nodes.
  * Creates a commit-reveal session and sends commit requests.
@@ -91,7 +85,7 @@ export async function commitAll(
   idToken: string,
   ksnCommitTargets: KsnCommitTarget[],
   ksnThreshold: number,
-): Promise<Result<CommitAllResult, string>> {
+): Promise<Result<ClientCommitRevealSession, string>> {
   // 1. Create session
   const sessionRes = createCommitRevealSession(
     operationType,
@@ -187,12 +181,5 @@ export async function commitAll(
     };
   }
 
-  return {
-    success: true,
-    data: {
-      session,
-      okoApiCommitted: true,
-      ksnCommittedNodes: committedNodes,
-    },
-  };
+  return { success: true, data: session };
 }

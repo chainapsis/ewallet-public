@@ -136,7 +136,7 @@ export async function handleNewUserV2(
       err: { type: "sign_in_request_fail", error: commitRes.err },
     };
   }
-  const { session } = commitRes.data;
+  const session = commitRes.data;
 
   // 5. Send key shares by both curves to ks nodes using registerKeySharesV2
   const registerKeySharesResults: Result<void, string>[] = await Promise.all(
@@ -285,7 +285,7 @@ export async function handleExistingUserV2(
       err: { type: "sign_in_request_fail", error: commitRes.err },
     };
   }
-  const { session } = commitRes.data;
+  const session = commitRes.data;
 
   // 2. Sign in to API server
   const signInCommitRevealRes = createOkoApiCommitRevealParams(
@@ -549,7 +549,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
     userKeyShares: ed25519UserKeyShares,
   } = ed25519KeygenSplitRes.data;
 
-  // 2. Commit to oko_api and KSN nodes
+  // 2. Commit to oko_api and ks nodes
   const ksnCommitTargets: KsnCommitTarget[] = keyshareNodeMetaEd25519.nodes.map(
     (node) => ({
       nodeUrl: node.endpoint,
@@ -569,7 +569,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
       err: { type: "sign_in_request_fail", error: commitRes.err },
     };
   }
-  const { session } = commitRes.data;
+  const session = commitRes.data;
 
   // 3. Send ed25519 key shares to ks nodes using V2 API
   const registerEd25519Results: Result<void, string>[] = await Promise.all(
@@ -789,7 +789,7 @@ export async function handleReshareV2(
       err: { type: "reshare_fail", error: commitRes.err },
     };
   }
-  const { session } = commitRes.data;
+  const session = commitRes.data;
 
   // 3. Sign in to API server with commit-reveal
   const signInCommitRevealRes = createOkoApiCommitRevealParams(
