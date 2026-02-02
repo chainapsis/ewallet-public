@@ -92,19 +92,7 @@ export async function handleNewUserV2(
   const { keygen_1: secp256k1Keygen1, keygen_2: secp256k1Keygen2 } =
     secp256k1KeygenRes.data;
 
-  // 2. ed25519 keygen and split
-  const ed25519KeygenSplitRes =
-    await runEd25519KeygenAndSplit(keyshareNodeMeta);
-  if (ed25519KeygenSplitRes.success === false) {
-    return { success: false, err: ed25519KeygenSplitRes.err };
-  }
-  const {
-    keygen1: ed25519Keygen1,
-    keygen2: ed25519Keygen2,
-    userKeyShares: ed25519UserKeyShares,
-  } = ed25519KeygenSplitRes.data;
-
-  // 3. secp256k1 key share split
+  // 2. secp256k1 key share split
   const splitUserKeySharesRes = await splitUserKeyShares(
     secp256k1Keygen1,
     keyshareNodeMeta,
@@ -117,11 +105,23 @@ export async function handleNewUserV2(
   }
   const secp256k1UserKeyShares = splitUserKeySharesRes.data;
 
-  // 4. Commit to oko_api and KSN nodes
+  // 3. ed25519 keygen and split
+  const ed25519KeygenSplitRes =
+    await runEd25519KeygenAndSplit(keyshareNodeMeta);
+  if (ed25519KeygenSplitRes.success === false) {
+    return { success: false, err: ed25519KeygenSplitRes.err };
+  }
+  const {
+    keygen1: ed25519Keygen1,
+    keygen2: ed25519Keygen2,
+    userKeyShares: ed25519UserKeyShares,
+  } = ed25519KeygenSplitRes.data;
+
+  // 4. Commit to oko_api and ks nodes
   const ksnCommitTargets: KsnCommitTarget[] = keyshareNodeMeta.nodes.map(
     (node) => ({
       nodeUrl: node.endpoint,
-      operationType: "sign_up" as const,
+      operationType: "sign_up",
     }),
   );
   const commitRes = await commitAll(
@@ -190,7 +190,10 @@ export async function handleNewUserV2(
   if (!keygenCommitReveal) {
     return {
       success: false,
-      err: { type: "sign_in_request_fail", error: "Failed to create commit-reveal params" },
+      err: {
+        type: "sign_in_request_fail",
+        error: "Failed to create commit-reveal params",
+      },
     };
   }
   const reqKeygenV2Res = await reqKeygenV2(
@@ -291,7 +294,10 @@ export async function handleExistingUserV2(
   if (!signInCommitReveal) {
     return {
       success: false,
-      err: { type: "sign_in_request_fail", error: "Failed to create commit-reveal params" },
+      err: {
+        type: "sign_in_request_fail",
+        error: "Failed to create commit-reveal params",
+      },
     };
   }
   const signInResult = await signInV2(idToken, authType, signInCommitReveal);
@@ -539,17 +545,51 @@ export async function handleExistingUserNeedsEd25519Keygen(
     userKeyShares: ed25519UserKeyShares,
   } = ed25519KeygenSplitRes.data;
 
-  // 2. Send ed25519 key shares to ks nodes using V2 API
+  // 2. Commit to oko_api and KSN nodes
+  const ksnCommitTargets: KsnCommitTarget[] = keyshareNodeMetaEd25519.nodes.map(
+    (node) => ({
+      nodeUrl: node.endpoint,
+      operationType: "add_ed25519" as const,
+    }),
+  );
+  const commitRes = await commitAll(
+    "add_ed25519",
+    authType,
+    idToken,
+    ksnCommitTargets,
+    ksnCommitTargets.length, // all nodes for add_ed25519
+  );
+  if (!commitRes.success) {
+    return {
+      success: false,
+      err: { type: "sign_in_request_fail", error: commitRes.err },
+    };
+  }
+  const { session } = commitRes.data;
+
+  // 3. Send ed25519 key shares to ks nodes using V2 API
   const registerEd25519Results: Result<void, string>[] = await Promise.all(
-    keyshareNodeMetaEd25519.nodes.map((node, index) =>
-      registerKeyShareEd25519V2(
+    keyshareNodeMetaEd25519.nodes.map((node, index) => {
+      const commitRevealParams = createKsnCommitRevealParams(
+        session,
+        node.endpoint,
+        "register_ed25519",
+      );
+      if (!commitRevealParams) {
+        return Promise.resolve({
+          success: false,
+          err: "Failed to create commit-reveal params",
+        } as const);
+      }
+      return registerKeyShareEd25519V2(
         node.endpoint,
         idToken,
         authType,
         ed25519Keygen1.public_key.toHex(),
         teddsaKeyShareToHex(ed25519UserKeyShares[index].share),
-      ),
-    ),
+        commitRevealParams,
+      );
+    }),
   );
   const registerEd25519ErrResults = registerEd25519Results.filter(
     (result) => result.success === false,
@@ -564,7 +604,20 @@ export async function handleExistingUserNeedsEd25519Keygen(
     };
   }
 
-  // 4. Call keygenEd25519 API
+  // 4. Call keygenEd25519 API with commit-reveal
+  const keygenEd25519CommitReveal = createOkoApiCommitRevealParams(
+    session,
+    "keygen_ed25519",
+  );
+  if (!keygenEd25519CommitReveal) {
+    return {
+      success: false,
+      err: {
+        type: "sign_in_request_fail",
+        error: "Failed to create commit-reveal params",
+      },
+    };
+  }
   const reqKeygenEd25519Res = await reqKeygenEd25519(
     TSS_V2_ENDPOINT,
     {
@@ -579,6 +632,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
       },
     },
     idToken,
+    keygenEd25519CommitReveal,
   );
   if (reqKeygenEd25519Res.success === false) {
     return {
@@ -599,6 +653,8 @@ export async function handleExistingUserNeedsEd25519Keygen(
     {
       secp256k1: secp256k1PublicKey,
     },
+    (nodeEndpoint) =>
+      createKsnCommitRevealParams(session, nodeEndpoint, "get_key_shares"),
   );
   if (!requestSharesRes.success) {
     const error = requestSharesRes.err;
@@ -740,7 +796,10 @@ export async function handleReshareV2(
   if (!signInCommitReveal) {
     return {
       success: false,
-      err: { type: "reshare_fail", error: "Failed to create commit-reveal params" },
+      err: {
+        type: "reshare_fail",
+        error: "Failed to create commit-reveal params",
+      },
     };
   }
   const signInResult = await signInV2(idToken, authType, signInCommitReveal);
