@@ -16,6 +16,7 @@ import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { CommitRevealParams } from "@oko-wallet/oko-types/commit_reveal";
 import type { Result } from "@oko-wallet/stdlib-js";
 import type { KSNodeApiResponse } from "@oko-wallet/ksn-interface/response";
+
 import type { ClientCommitRevealSession } from "@oko-wallet-attached/crypto/commit_reveal/types";
 import { createKsnCommitRevealParams } from "@oko-wallet-attached/crypto/commit_reveal/signature";
 
@@ -38,6 +39,15 @@ export interface KeySharesByNode {
 }
 
 /**
+ * Result type for requestKeySharesV2 when continueOnWalletNotFound is true.
+ * Contains both successful shares and nodes that need reshare.
+ */
+export interface RequestKeySharesV2SuccessWithReshare {
+  shares: KeySharesByNode[];
+  nodesNeedingReshare: NodeStatusInfo[];
+}
+
+/**
  * Request key shares from multiple KS nodes using V2 API.
  * Supports requesting both secp256k1 and ed25519 shares in a single request.
  *
@@ -55,6 +65,62 @@ export async function requestKeySharesV2(
   commitRevealSession?: ClientCommitRevealSession,
   isFinal: boolean = false,
 ): Promise<Result<KeySharesByNode[], RequestKeySharesV2Error>> {
+  const result = await requestKeySharesV2WithReshareInfo(
+    idToken,
+    allNodes,
+    threshold,
+    authType,
+    wallets,
+    commitRevealSession,
+    isFinal,
+    false, // continueOnWalletNotFound = false for backward compatibility
+  );
+
+  if (!result.success) {
+    return result;
+  }
+
+  // If there are nodes needing reshare but continueOnWalletNotFound was false,
+  // this shouldn't happen, but handle it just in case
+  if (result.data.nodesNeedingReshare.length > 0) {
+    return {
+      success: false,
+      err: {
+        code: "WALLET_NOT_FOUND",
+        affectedNode: {
+          name: result.data.nodesNeedingReshare[0].name,
+          endpoint: result.data.nodesNeedingReshare[0].endpoint,
+        },
+      },
+    };
+  }
+
+  return { success: true, data: result.data.shares };
+}
+
+/**
+ * Request key shares from multiple KS nodes using V2 API.
+ * Supports auto-reshare by continuing when WALLET_NOT_FOUND is encountered.
+ *
+ * @param isFinal - If true, marks this as the final KSN API call for the session (cr_final: true)
+ * @param continueOnWalletNotFound - If true, continues collecting shares from other nodes when
+ *   a node returns WALLET_NOT_FOUND, and returns the list of nodes needing reshare
+ */
+export async function requestKeySharesV2WithReshareInfo(
+  idToken: string,
+  allNodes: NodeStatusInfo[],
+  threshold: number,
+  authType: AuthType,
+  wallets: {
+    secp256k1?: string; // public key hex
+    ed25519?: string; // public key hex
+  },
+  commitRevealSession?: ClientCommitRevealSession,
+  isFinal: boolean = false,
+  continueOnWalletNotFound: boolean = false,
+): Promise<
+  Result<RequestKeySharesV2SuccessWithReshare, RequestKeySharesV2Error>
+> {
   const shuffledNodes = [...allNodes];
   for (let i = shuffledNodes.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -62,6 +128,7 @@ export async function requestKeySharesV2(
   }
 
   const succeeded: KeySharesByNode[] = [];
+  const nodesNeedingReshare: NodeStatusInfo[] = [];
   let nodesToTry = shuffledNodes.slice(0, threshold);
   let backupNodes = shuffledNodes.slice(threshold);
 
@@ -108,23 +175,35 @@ export async function requestKeySharesV2(
           errorCode === "WALLET_NOT_FOUND" ||
           errorCode === "KEY_SHARE_NOT_FOUND"
         ) {
-          return {
-            success: false,
-            err: {
-              code: "WALLET_NOT_FOUND",
-              affectedNode: { name: node.name, endpoint: node.endpoint },
-            },
-          };
+          if (continueOnWalletNotFound) {
+            // Track this node as needing reshare and continue
+            nodesNeedingReshare.push(node);
+            // Try a backup node instead
+            if (backupNodes.length > 0) {
+              failedNodes.push(node); // This will trigger backup node usage
+            }
+          } else {
+            return {
+              success: false,
+              err: {
+                code: "WALLET_NOT_FOUND",
+                affectedNode: { name: node.name, endpoint: node.endpoint },
+              },
+            };
+          }
+        } else {
+          failedNodes.push(node);
         }
-
-        failedNodes.push(node);
       }
     }
 
     if (succeeded.length >= threshold) {
       return {
         success: true,
-        data: succeeded.slice(0, threshold),
+        data: {
+          shares: succeeded.slice(0, threshold),
+          nodesNeedingReshare,
+        },
       };
     }
 
