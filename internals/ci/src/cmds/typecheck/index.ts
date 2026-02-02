@@ -86,31 +86,22 @@ async function runTypeCheck(pkgPath: string): Promise<void> {
   });
 }
 
-async function runWithConcurrency<T>(
-  items: T[],
-  fn: (item: T) => Promise<void>,
+async function runWithConcurrency(
+  paths: string[],
+  fn: (path: string) => Promise<void>,
   concurrency: number,
 ): Promise<void> {
-  const queue = [...items];
-  const inFlight: Promise<void>[] = [];
+  const queue = [...paths];
 
-  while (queue.length > 0 || inFlight.length > 0) {
-    while (inFlight.length < concurrency && queue.length > 0) {
-      const item = queue.shift()!;
-      const promise = fn(item).then(
-        () => {
-          inFlight.splice(inFlight.indexOf(promise), 1);
-        },
-        (err) => {
-          inFlight.splice(inFlight.indexOf(promise), 1);
-          throw err;
-        },
-      );
-      inFlight.push(promise);
-    }
-
-    if (inFlight.length > 0) {
-      await Promise.race(inFlight);
+  async function worker(): Promise<void> {
+    while (queue.length > 0) {
+      const item = queue.shift();
+      if (item) {
+        await fn(item);
+      }
     }
   }
+
+  const workers = Array.from({ length: concurrency }, () => worker());
+  await Promise.all(workers);
 }
