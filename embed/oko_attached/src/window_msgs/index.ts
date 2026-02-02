@@ -14,6 +14,17 @@ import { handleGetAuthType } from "./get_auth_type";
 import { handleGetCosmosChain } from "./get_cosmos_chain_info";
 import { handleOAuthInfoPassV2 } from "./oauth_info_pass";
 import { handleGetEthChain } from "./get_eth_chain_info";
+import { handleGetConnectedApps } from "./get_connected_apps";
+
+//NOTE: Since this method can only be used within user_dashboard,
+// Define ExtendedOkoWalletMsg to extend the type
+type OkoWalletMsgGetConnectedApps = {
+  target: "oko_attached";
+  msg_type: "__get_connected_apps__";
+  payload: null;
+};
+
+type ExtendedOkoWalletMsg = OkoWalletMsg | OkoWalletMsgGetConnectedApps;
 
 export function makeMsgHandler() {
   return async function msgHandler(event: MessageEvent) {
@@ -25,7 +36,7 @@ export function makeMsgHandler() {
 
     const port = event.ports[0];
 
-    const message = event.data as OkoWalletMsg;
+    const message = event.data as ExtendedOkoWalletMsg;
 
     if (message.target === "oko_attached" || message.target === "oko_sdk") {
       console.debug("[attached] msg recv", event.data);
@@ -107,6 +118,11 @@ export function makeMsgHandler() {
       // @NOTE: Switch to handleOAuthInfoPassV2 for ed25519 support
       case "oauth_info_pass": {
         await handleOAuthInfoPassV2(ctx, message);
+        break;
+      }
+
+      case "__get_connected_apps__": {
+        await handleGetConnectedApps(ctx);
         break;
       }
 
