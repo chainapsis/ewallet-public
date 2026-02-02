@@ -18,7 +18,7 @@ jobs:
       - name: Checkout self repository
         uses: actions/checkout@v4
         with: 
-          ref: ${{ inputs.git_tag }}
+          ref: v0.1.2-alpha.5
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
