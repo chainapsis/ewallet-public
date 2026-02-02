@@ -1,8 +1,5 @@
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 
-export const ETHEREUM_MAINNET_CHAIN_ID = "eip155:1";
-export const SOLANA_MAINNET_CHAIN_ID = "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp";
-
 import type {
   CosmosChainInfo,
   ModularChainInfo,
