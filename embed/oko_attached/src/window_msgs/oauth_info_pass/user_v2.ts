@@ -553,7 +553,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
   const ksnCommitTargets: KsnCommitTarget[] = keyshareNodeMetaEd25519.nodes.map(
     (node) => ({
       nodeUrl: node.endpoint,
-      operationType: "add_ed25519" as const,
+      operationType: "add_ed25519",
     }),
   );
   const commitRes = await commitAll(
@@ -571,7 +571,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
   }
   const session = commitRes.data;
 
-  // 3. Send ed25519 key shares to ks nodes using V2 API
+  // 3. Send ed25519 key shares to ks nodes using registerKeyShareEd25519V2
   const registerEd25519Results: Result<void, string>[] = await Promise.all(
     keyshareNodeMetaEd25519.nodes.map(async (node, index) => {
       const commitRevealRes = createKsnCommitRevealParams(
@@ -580,7 +580,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
         "register_ed25519",
       );
       if (!commitRevealRes.success) {
-        return { success: false, err: commitRevealRes.err } as const;
+        return { success: false, err: commitRevealRes.err };
       }
       return registerKeyShareEd25519V2(
         node.endpoint,
@@ -605,7 +605,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
     };
   }
 
-  // 4. Call keygenEd25519 API with commit-reveal
+  // 4. Call keygenEd25519 Oko API
   const keygenEd25519CommitRevealRes = createOkoApiCommitRevealParams(
     session,
     "keygen_ed25519",
@@ -645,7 +645,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
   // 5. Get secp256k1 public key from keygenEd25519 response
   const secp256k1PublicKey = reqKeygenEd25519Res.data.user.public_key_secp256k1;
 
-  // 6. Request secp256k1 shares from KS nodes using V2 API
+  // 6. Request secp256k1 shares from ks nodes using requestKeySharesV2
   const requestSharesRes = await requestKeySharesV2(
     idToken,
     keyshareNodeMetaSecp256k1.nodes,

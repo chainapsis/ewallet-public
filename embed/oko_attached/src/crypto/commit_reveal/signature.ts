@@ -34,12 +34,12 @@ export function createKsnSignature(
   const nodePubkey = session.ksn_node_pubkeys[nodeUrl];
   const operationType = session.ksn_operation_types[nodeUrl];
   if (!nodePubkey) {
-    return { success: false, err: `KSN node pubkey not found for ${nodeUrl}` };
+    return { success: false, err: `ks node pubkey not found for ${nodeUrl}` };
   }
   if (!operationType) {
     return {
       success: false,
-      err: `KSN operation type not found for ${nodeUrl}`,
+      err: `ks operation type not found for ${nodeUrl}`,
     };
   }
 
