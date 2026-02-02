@@ -26,10 +26,8 @@ import {
   useSVMAddress,
 } from "@oko-wallet-user-dashboard/hooks/queries/use_addresses";
 import { useSearch } from "@oko-wallet-user-dashboard/hooks/use_search";
-import {
-  DEFAULT_ENABLED_CHAINS,
-  getChainIdentifier,
-} from "@oko-wallet-user-dashboard/state/chains";
+import { DEFAULT_ENABLED_CHAINS } from "@oko-wallet-user-dashboard/state/chains";
+import { getChainIdentifier } from "@oko-wallet-user-dashboard/utils/chain";
 import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
 import { isCosmosChainId } from "@oko-wallet-user-dashboard/utils/chain";
 

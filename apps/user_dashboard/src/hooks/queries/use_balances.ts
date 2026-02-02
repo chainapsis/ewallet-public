@@ -9,7 +9,7 @@ import {
 } from "./use_addresses";
 import { useEnabledChains } from "./use_chains";
 import { usePrices } from "./use_prices";
-import { getChainIdentifier } from "@oko-wallet-user-dashboard/state/chains";
+import { getChainIdentifier } from "@oko-wallet-user-dashboard/utils/chain";
 import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
 import type {
   RawBalance,

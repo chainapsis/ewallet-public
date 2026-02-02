@@ -9,10 +9,12 @@ import { useMemo } from "react";
 import { KEPLR_API_ENDPOINT } from "@oko-wallet-user-dashboard/fetch";
 import {
   DEFAULT_ENABLED_CHAINS,
-  getChainIdentifier,
-  transformKeplrChain,
   useChainStore,
 } from "@oko-wallet-user-dashboard/state/chains";
+import {
+  getChainIdentifier,
+  transformKeplrChain,
+} from "@oko-wallet-user-dashboard/utils/chain";
 import type {
   CosmosChainInfo,
   ModularChainInfo,

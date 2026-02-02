@@ -2,7 +2,84 @@
  * Chain utility functions
  */
 
-import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
+
+import type {
+  CosmosChainInfo,
+  ModularChainInfo,
+} from "@oko-wallet-user-dashboard/types/chain";
+
+// Cache for ChainIdHelper.parse() results
+const chainIdentifierCache = new Map<string, string>();
+
+/**
+ * Get chain identifier with caching to avoid repeated parsing
+ */
+export function getChainIdentifier(chainId: string): string {
+  let identifier = chainIdentifierCache.get(chainId);
+  if (!identifier) {
+    identifier = ChainIdHelper.parse(chainId).identifier;
+    chainIdentifierCache.set(chainId, identifier);
+  }
+  return identifier;
+}
+
+export function transformKeplrChain(chain: CosmosChainInfo): ModularChainInfo {
+  const isSVM = !!chain.svm;
+  const isCosmos = !!chain.bech32Config;
+  const isEVM = !!chain.evm;
+
+  const base = {
+    chainId: chain.chainId,
+    chainName: chain.chainName,
+    chainSymbolImageUrl: chain.chainSymbolImageUrl,
+    isTestnet: chain.isTestnet,
+  };
+
+  if (isSVM) {
+    return {
+      ...base,
+      svm: {
+        rpc: chain.svm!.rpc,
+        currencies: chain.currencies,
+      },
+    };
+  }
+
+  if (isCosmos) {
+    return {
+      ...base,
+      isNative: true,
+      cosmos: chain,
+      evm: isEVM
+        ? {
+            chainId: chain.evm!.chainId,
+            rpc: chain.evm!.rpc,
+            currencies: chain.currencies,
+            feeCurrencies: chain.feeCurrencies,
+            bip44: chain.bip44,
+            features: chain.features,
+          }
+        : undefined,
+    };
+  }
+
+  if (isEVM) {
+    return {
+      ...base,
+      evm: {
+        chainId: chain.evm!.chainId,
+        rpc: chain.evm!.rpc,
+        currencies: chain.currencies,
+        feeCurrencies: chain.feeCurrencies,
+        bip44: chain.bip44,
+        features: chain.features,
+      },
+    };
+  }
+
+  return base;
+}
 
 /**
  * Check if chainInfo is an EVM-only chain (e.g., Ethereum mainnet)

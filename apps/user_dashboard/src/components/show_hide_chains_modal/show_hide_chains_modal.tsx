@@ -26,9 +26,9 @@ import {
 import { useSearch } from "@oko-wallet-user-dashboard/hooks/use_search";
 import {
   DEFAULT_ENABLED_CHAINS,
-  getChainIdentifier,
   useChainStore,
 } from "@oko-wallet-user-dashboard/state/chains";
+import { getChainIdentifier } from "@oko-wallet-user-dashboard/utils/chain";
 import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
 import type { TokenBalance } from "@oko-wallet-user-dashboard/types/token";
 
@@ -43,6 +43,10 @@ export const ShowHideChainsModal: FC<ShowHideChainsModalProps> = ({
   const isChainEnabled = useChainStore((state) => state.isChainEnabled);
   const enableChains = useChainStore((state) => state.enableChains);
   const disableChains = useChainStore((state) => state.disableChains);
+  const enabledChainsByUser = useChainStore(
+    (state) => state.enabledChainsByUser,
+  );
+  const activeUserKey = useChainStore((state) => state.activeUserKey);
 
   const { balancesByChainIdentifier } = useAllBalances();
 
@@ -147,7 +151,7 @@ export const ShowHideChainsModal: FC<ShowHideChainsModalProps> = ({
 
       return a.chainName.localeCompare(b.chainName);
     });
-  }, [searchedChains, isChainEnabled]);
+  }, [searchedChains, isChainEnabled, enabledChainsByUser, activeUserKey]);
 
   const getTokenBalances = useCallback(
     (chainId: string): TokenBalance[] => {
