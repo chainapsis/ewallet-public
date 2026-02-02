@@ -16,6 +16,8 @@ import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { CommitRevealParams } from "@oko-wallet/oko-types/commit_reveal";
 import type { Result } from "@oko-wallet/stdlib-js";
 import type { KSNodeApiResponse } from "@oko-wallet/ksn-interface/response";
+import type { ClientCommitRevealSession } from "@oko-wallet-attached/crypto/commit_reveal/types";
+import { createKsnCommitRevealParams } from "@oko-wallet-attached/crypto/commit_reveal/signature";
 
 export interface RequestKeySharesV2Result {
   secp256k1?: string; // share hex string
@@ -48,9 +50,7 @@ export async function requestKeySharesV2(
     secp256k1?: string; // public key hex
     ed25519?: string; // public key hex
   },
-  getCommitRevealParams?: (
-    nodeEndpoint: string,
-  ) => Result<CommitRevealParams, string> | undefined,
+  commitRevealSession?: ClientCommitRevealSession,
 ): Promise<Result<KeySharesByNode[], RequestKeySharesV2Error>> {
   const shuffledNodes = [...allNodes];
   for (let i = shuffledNodes.length - 1; i > 0; i -= 1) {
@@ -64,18 +64,24 @@ export async function requestKeySharesV2(
 
   while (succeeded.length < threshold && nodesToTry.length > 0) {
     const results = await Promise.allSettled(
-      nodesToTry.map((node) => {
-        const commitRevealRes = getCommitRevealParams?.(node.endpoint);
-        const commitReveal = commitRevealRes?.success
-          ? commitRevealRes.data
+      nodesToTry.map(async (node) => {
+        const commitReveal = commitRevealSession
+          ? createKsnCommitRevealParams(
+              commitRevealSession,
+              node.endpoint,
+              "get_key_shares",
+            )
           : undefined;
+        if (commitReveal && !commitReveal.success) {
+          return { success: false, err: commitReveal.err } as const;
+        }
         return requestKeyShareFromNodeV2(
           idToken,
           node,
           authType,
           wallets,
           2,
-          commitReveal,
+          commitReveal?.data,
         );
       }),
     );

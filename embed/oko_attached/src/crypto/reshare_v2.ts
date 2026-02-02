@@ -186,8 +186,7 @@ export async function reshareUserKeySharesV2(
       secp256k1.keyshareNodeMeta.threshold,
       authType,
       { secp256k1: secp256k1.publicKey.toHex() },
-      (nodeEndpoint) =>
-        createKsnCommitRevealParams(session, nodeEndpoint, "get_key_shares"),
+      session,
     ),
     requestKeySharesV2(
       idToken,
@@ -195,8 +194,7 @@ export async function reshareUserKeySharesV2(
       ed25519.keyshareNodeMeta.threshold,
       authType,
       { ed25519: ed25519.publicKey.toHex() },
-      (nodeEndpoint) =>
-        createKsnCommitRevealParams(session, nodeEndpoint, "get_key_shares"),
+      session,
     ),
   ]);
 

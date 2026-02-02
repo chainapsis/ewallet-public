@@ -311,7 +311,7 @@ export async function handleExistingUserV2(
   }
   const signInResp = signInResult.data;
 
-  // 3. Request secp256k1 and ed25519 shares from KS nodes using V2 API
+  // 3. Request secp256k1 and ed25519 shares from ks nodes using requestKeySharesV2
   const requestSharesRes = await requestKeySharesV2(
     idToken,
     keyshareNodeMetaSecp256k1.nodes,
@@ -321,8 +321,7 @@ export async function handleExistingUserV2(
       secp256k1: signInResp.user.public_key_secp256k1,
       ed25519: signInResp.user.public_key_ed25519,
     },
-    (nodeEndpoint) =>
-      createKsnCommitRevealParams(session, nodeEndpoint, "get_key_shares"),
+    session,
   );
   if (!requestSharesRes.success) {
     const error = requestSharesRes.err;
@@ -655,8 +654,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
     {
       secp256k1: secp256k1PublicKey,
     },
-    (nodeEndpoint) =>
-      createKsnCommitRevealParams(session, nodeEndpoint, "get_key_shares"),
+    session,
   );
   if (!requestSharesRes.success) {
     const error = requestSharesRes.err;
