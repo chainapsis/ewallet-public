@@ -8,3 +8,7 @@ export const CAN_RESEND_CODE_INTERVAL_SECONDS = 60;
 
 export const CUSTOMER_ISSUER = "https://api.oko.app";
 export const CUSTOMER_AUDIENCE = "https://api.oko.app";
+
+export const USER_ISSUER = "https://api.oko.app";
+export const USER_AUDIENCE = "https://api.oko.app";
+export const USER_TOKEN_EXPIRATION_WINDOW = 1 * 24 * 60 * 60 * 1000; // 1 day in ms

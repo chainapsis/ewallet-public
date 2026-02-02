@@ -1,19 +1,25 @@
 import express, { type IRouter, type Response } from "express";
+import type { Pool } from "pg";
 
 import { setUserAuthRoutes } from "@oko-wallet-usrd-api/routes/user_auth";
 import { setUserRoutes } from "@oko-wallet-usrd-api/routes/user";
 import {
-  customerJwtMiddleware,
-  type CustomerAuthenticatedRequest,
+  userJwtMiddleware,
+  type UserAuthenticatedRequest,
 } from "@oko-wallet-usrd-api/middleware/auth";
 import type { OkoApiResponse } from "@oko-wallet-types/api_response";
-import type { Customer } from "@oko-wallet-types/customers";
+import type { ConnectedApp } from "@oko-wallet/oko-types/user_dashboard";
 import { registry } from "@oko-wallet/oko-api-openapi";
 import {
   ErrorResponseSchema,
   SuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/common";
 import { CustomerAuthHeaderSchema } from "@oko-wallet/oko-api-openapi/ct_dashboard";
+import { getWalletById } from "@oko-wallet/oko-pg-interface/oko_wallets";
+import { getConnectionsByUserId } from "@oko-wallet/oko-pg-interface/user_customer_connections";
+import { getCustomer } from "@oko-wallet/oko-pg-interface/customers";
+
+
 
 export function makeUserRouter() {
   const router = express.Router() as IRouter;
@@ -23,11 +29,12 @@ export function makeUserRouter() {
 
   registry.registerPath({
     method: "post",
-    path: "/user_dashboard/v1/customer/get_connected_apps",
-    tags: ["Customer Dashboard"],
+    path: "/user_dashboard/v1/get_connected_apps",
+    tags: ["User Dashboard"],
     summary: "Get connected apps",
-    description: "Retrieves connected applications for the authenticated user",
-    security: [{ customerAuth: [] }],
+    description:
+      "Retrieves connected applications for the authenticated user (uses TSS API JWT)",
+    security: [{ userAuth: [] }],
     request: {
       headers: CustomerAuthHeaderSchema,
     },
@@ -59,45 +66,70 @@ export function makeUserRouter() {
     },
   });
   router.post(
-    "/customer/get_connected_apps",
-    customerJwtMiddleware,
-    async (
-      req: CustomerAuthenticatedRequest,
-      res: Response<OkoApiResponse<Customer>>,
-    ) => {
+    "/get_connected_apps",
+    userJwtMiddleware,
+    async (req: UserAuthenticatedRequest, res: Response<OkoApiResponse<ConnectedApp[]>>) => {
       try {
-        const state = req.app.locals as any;
+        const state = req.app.locals as { db: Pool };
+        const { wallet_id_secp256k1 } = res.locals.user as {
+          email: string;
+          wallet_id_secp256k1: string;
+          wallet_id_ed25519: string;
+        };
 
-        //   const customerRes = await getCustomerByUserId(
-        //     state.db,
-        //     res.locals.user_id,
-        //   );
-        //
-        //   if (!customerRes.success) {
-        //     res.status(500).json({
-        //       success: false,
-        //       code: "UNKNOWN_ERROR",
-        //       msg: customerRes.err,
-        //     });
-        //     return;
-        //   }
-        //
-        //   if (customerRes.data === null) {
-        //     res.status(404).json({
-        //       success: false,
-        //       code: "CUSTOMER_NOT_FOUND",
-        //       msg: "Customer not found",
-        //     });
-        //     return;
-        //   }
-        //
-        //   res.status(200).json({
-        //     success: true,
-        //     data: customerRes.data,
-        //   });
-        //   return;
+        const walletRes = await getWalletById(state.db, wallet_id_secp256k1);
+        if (!walletRes.success) {
+          res.status(500).json({
+            success: false,
+            code: "UNKNOWN_ERROR",
+            msg: walletRes.err,
+          });
+          return;
+        }
+
+        if (!walletRes.data) {
+          res.status(404).json({
+            success: false,
+            code: "WALLET_NOT_FOUND",
+            msg: "Wallet not found",
+          });
+          return;
+        }
+
+        const userId = walletRes.data.user_id;
+
+        const connectionsRes = await getConnectionsByUserId(state.db, userId);
+        if (!connectionsRes.success) {
+          res.status(500).json({
+            success: false,
+            code: "UNKNOWN_ERROR",
+            msg: connectionsRes.err,
+          });
+          return;
+        }
+
+        const apps: ConnectedApp[] = await Promise.all(
+          connectionsRes.data.map(async (conn) => {
+            const customerRes = await getCustomer(state.db, conn.customer_id);
+            const customer = customerRes.success ? customerRes.data : null;
+            return {
+              customer_id: conn.customer_id,
+              label: customer?.label ?? null,
+              logo_url: customer?.logo_url ?? null,
+              url: customer?.url ?? null,
+              connected_at: conn.created_at.toISOString(),
+              state: conn.state,
+            };
+          }),
+        );
+
+        res.status(200).json({
+          success: true,
+          data: apps,
+        });
+        return;
       } catch (error) {
-        console.error("Get customer info error:", error);
+        console.error("Get connected apps error:", error);
         res.status(500).json({
           success: false,
           code: "UNKNOWN_ERROR",
