@@ -1,10 +1,6 @@
 name: Publish Node packages
 env:
-  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PRJ_ID__OKO_DEMO_WEB: ${{ secrets.VERCEL_PRJ_ID__OKO_DEMO_WEB }}
-  VERCEL_PRJ_ID__CT_DASHBOARD: ${{ secrets.VERCEL_PRJ_ID__CT_DASHBOARD }}
-  VERCEL_PRJ_ID__USER_DASHBOARD: ${{ secrets.VERCEL_PRJ_ID__USER_DASHBOARD }}
-  VERCEL_PRJ_ID__OKO_ATTACHED: ${{ secrets.VERCEL_PRJ_ID__OKO_ATTACHED }}
+  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 on:
   workflow_dispatch:
     inputs:
@@ -17,8 +13,6 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-22.04
-    # container:
-    #   image: node:22.0.0-alpine
     timeout-minutes: 60
     steps:
       - name: Checkout self repository
@@ -51,3 +45,6 @@ jobs:
 
       - name: Build SDK packages
         run: yarn ci build_sdk
+
+      - name: Lerna publish
+        run: yarn ci publish
