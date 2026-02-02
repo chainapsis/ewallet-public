@@ -11,7 +11,7 @@ import {
 import type { ApiName } from "@oko-wallet/ksn-interface/commit_reveal";
 
 import { ErrorCodeMap } from "@oko-wallet-ksn-server/error";
-import { isApiAllowed, isFinalApi } from "@oko-wallet-ksn-server/commit_reveal";
+import { isApiAllowed } from "@oko-wallet-ksn-server/commit_reveal";
 import type { ServerState } from "@oko-wallet-ksn-server/state";
 import { logger } from "@oko-wallet-ksn-server/logger";
 
@@ -20,6 +20,7 @@ const DEFAULT_AUTH_TYPE = "google";
 export interface CommitRevealBody {
   cr_session_id: string;
   cr_signature: string; // 128 chars hex (64 bytes)
+  cr_final?: boolean;
   auth_type?: string;
 }
 
@@ -231,7 +232,7 @@ export function commitRevealMiddleware(apiName: ApiName) {
             signatureRes.data.toUint8Array(),
           );
 
-          if (isFinalApi(session.operation_type, apiName)) {
+          if (body.cr_final) {
             await updateCommitRevealSessionState(
               client,
               cr_session_id,

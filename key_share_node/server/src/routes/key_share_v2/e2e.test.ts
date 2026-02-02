@@ -553,9 +553,9 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
 
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // Now sign_in_reshare flow
+      // Now sign_in flow for reshare
       const reshareCtx = createE2ETestContext({
-        operationType: "sign_in_reshare",
+        operationType: "sign_in",
         userIdentifier: signUpCtx.userIdentifier,
       });
       const reshareIdTokenHash = computeIdTokenHash(
@@ -645,8 +645,8 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
     });
   });
 
-  describe("sign_in_reshare_ed25519 flow (commit → get_key_shares → reshare → register_ed25519)", () => {
-    it("should complete sign_in_reshare_ed25519 flow with all three API calls", async () => {
+  describe("add_ed25519 flow (commit → get_key_shares → reshare → register_ed25519)", () => {
+    it("should complete add_ed25519 flow with all three API calls", async () => {
       // First, register a user
       const signUpCtx = createE2ETestContext({ operationType: "sign_up" });
       const signUpIdTokenHash = computeIdTokenHash(
@@ -696,9 +696,9 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
 
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // Now sign_in_reshare_ed25519 flow
+      // Now add_ed25519 flow
       const reshareEd25519Ctx = createE2ETestContext({
-        operationType: "sign_in_reshare_ed25519",
+        operationType: "add_ed25519",
         userIdentifier: signUpCtx.userIdentifier,
       });
       const reshareEd25519IdTokenHash = computeIdTokenHash(
@@ -706,7 +706,7 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
         reshareEd25519Ctx.idToken,
       );
 
-      // Commit for sign_in_reshare_ed25519
+      // Commit for add_ed25519
       await request(app)
         .post("/keyshare/v2/commit")
         .send({
@@ -751,7 +751,7 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
         expect(sessionRes.data?.state).toBe("COMMITTED");
       }
 
-      // Step 2: reshare (non-final API for sign_in_reshare_ed25519)
+      // Step 2: reshare (non-final API for add_ed25519)
       const reshareSignature = createRevealSignature(
         reshareEd25519Ctx,
         mockServerKeypair.publicKey.toHex(),
@@ -777,7 +777,7 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
 
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // Verify session is still COMMITTED (reshare is not final for sign_in_reshare_ed25519)
+      // Verify session is still COMMITTED (reshare is not final for add_ed25519)
       sessionRes = await getCommitRevealSessionBySessionId(
         pool,
         reshareEd25519Ctx.sessionId,
@@ -787,7 +787,7 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
         expect(sessionRes.data?.state).toBe("COMMITTED");
       }
 
-      // Step 3: register_ed25519 (final API for sign_in_reshare_ed25519)
+      // Step 3: register_ed25519 (final API for add_ed25519)
       // Use a different ed25519 public key to avoid DUPLICATE_PUBLIC_KEY error
       const registerEd25519Signature = createRevealSignature(
         reshareEd25519Ctx,
@@ -823,13 +823,13 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
       }
     });
 
-    it("should reject register (not register_ed25519) for sign_in_reshare_ed25519", async () => {
+    it("should reject register (not register_ed25519) for add_ed25519", async () => {
       const ctx = createE2ETestContext({
-        operationType: "sign_in_reshare_ed25519",
+        operationType: "add_ed25519",
       });
       const idTokenHash = computeIdTokenHash(ctx.authType, ctx.idToken);
 
-      // Commit with sign_in_reshare_ed25519 operation
+      // Commit with add_ed25519 operation
       await request(app)
         .post("/keyshare/v2/commit")
         .send({
@@ -840,7 +840,7 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
         })
         .expect(200);
 
-      // Try to call register (not allowed for sign_in_reshare_ed25519)
+      // Try to call register (not allowed for add_ed25519)
       const registerSignature = createRevealSignature(
         ctx,
         mockServerKeypair.publicKey.toHex(),

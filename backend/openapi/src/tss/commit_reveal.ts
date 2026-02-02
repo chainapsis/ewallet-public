@@ -2,7 +2,7 @@ import { z } from "zod";
 import { registry } from "@oko-wallet/oko-api-openapi";
 
 export const OperationTypeSchema = z
-  .enum(["sign_in", "sign_up", "sign_in_reshare", "sign_in_reshare_ed25519", "add_ed25519"])
+  .enum(["sign_in", "sign_up", "add_ed25519"])
   .describe("Operation type for commit-reveal session");
 
 // POST /tss/v2/commit-reveal/commit
@@ -98,6 +98,11 @@ export const CommitRevealRequestFieldsSchema = z.object({
       example:
         "c3d4e5f6789012345678901234567890123456789012345678901234567890abc3d4e5f6789012345678901234567890123456789012345678901234567890ab",
     }),
+  cr_final: z
+    .boolean()
+    .optional()
+    .describe("Whether this is the final API call for the session (completes the session)")
+    .openapi({ example: true }),
   auth_type: z
     .string()
     .optional()

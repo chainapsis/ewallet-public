@@ -768,15 +768,15 @@ export async function handleReshareV2(
   const ksnCommitTargets: KsnCommitTarget[] = [
     ...activeNodes.map((node) => ({
       nodeUrl: node.endpoint,
-      operationType: "sign_in_reshare" as const,
+      operationType: "sign_in" as const,
     })),
     ...newNodes.map((node) => ({
       nodeUrl: node.endpoint,
-      operationType: "register_reshare" as const,
+      operationType: "sign_in" as const,
     })),
   ];
   const commitRes = await commitAll(
-    "sign_in_reshare",
+    "sign_in",
     authType,
     idToken,
     ksnCommitTargets,
@@ -951,15 +951,15 @@ export async function handleReshareAndEd25519Keygen(
   const ksnCommitTargets: KsnCommitTarget[] = [
     ...activeNodes.map((node) => ({
       nodeUrl: node.endpoint,
-      operationType: "sign_in_reshare_ed25519" as const,
+      operationType: "add_ed25519" as const,
     })),
     ...newNodes.map((node) => ({
       nodeUrl: node.endpoint,
-      operationType: "register_reshare" as const,
+      operationType: "add_ed25519" as const,
     })),
   ];
   const commitRes = await commitAll(
-    "sign_in_reshare_ed25519",
+    "add_ed25519",
     authType,
     idToken,
     ksnCommitTargets,
@@ -1152,7 +1152,39 @@ export async function handleReshareAndEd25519Keygen(
     };
   }
 
-  // 9. Call keygenEd25519 API
+  // 9. Update Oko API reshare status (must be before keygen_ed25519 which is FINAL)
+  const reshareCommitRevealRes = createOkoApiCommitRevealParams(
+    session,
+    "reshare",
+  );
+  if (!reshareCommitRevealRes.success) {
+    return {
+      success: false,
+      err: { type: "reshare_fail", error: reshareCommitRevealRes.err },
+    };
+  }
+  const resharedNodes = secp256k1ExpandRes.data.reshared_user_key_shares.map(
+    (s) => s.node,
+  );
+  const updateRes = await makeAuthorizedOkoApiRequest<ReshareRequestV2, void>(
+    "user/reshare",
+    idToken,
+    {
+      wallets: {
+        secp256k1: {
+          public_key: secp256k1PublicKey,
+          reshared_key_shares: resharedNodes,
+        },
+      },
+    },
+    TSS_V2_ENDPOINT,
+    reshareCommitRevealRes.data,
+  );
+  if (!updateRes.success) {
+    console.warn("[attached] Failed to update reshare status:", updateRes.err);
+  }
+
+  // 10. Call keygenEd25519 API (FINAL - must be last oko_api call)
   const keygenEd25519CommitRevealRes = createOkoApiCommitRevealParams(
     session,
     "keygen_ed25519",
@@ -1184,38 +1216,6 @@ export async function handleReshareAndEd25519Keygen(
       success: false,
       err: { type: "sign_in_request_fail", error: reqKeygenEd25519Res.msg },
     };
-  }
-
-  // 10. Update Oko API reshare status
-  const reshareCommitRevealRes = createOkoApiCommitRevealParams(
-    session,
-    "reshare",
-  );
-  if (!reshareCommitRevealRes.success) {
-    return {
-      success: false,
-      err: { type: "reshare_fail", error: reshareCommitRevealRes.err },
-    };
-  }
-  const resharedNodes = secp256k1ExpandRes.data.reshared_user_key_shares.map(
-    (s) => s.node,
-  );
-  const updateRes = await makeAuthorizedOkoApiRequest<ReshareRequestV2, void>(
-    "user/reshare",
-    idToken,
-    {
-      wallets: {
-        secp256k1: {
-          public_key: secp256k1PublicKey,
-          reshared_key_shares: resharedNodes,
-        },
-      },
-    },
-    TSS_V2_ENDPOINT,
-    reshareCommitRevealRes.data,
-  );
-  if (!updateRes.success) {
-    console.warn("[attached] Failed to update reshare status:", updateRes.err);
   }
 
   // 11. Convert ed25519 keygen1 to hex format for storage

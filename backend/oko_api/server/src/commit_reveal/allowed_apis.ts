@@ -3,20 +3,10 @@ import type {
   ApiName,
 } from "@oko-wallet/oko-types/commit_reveal";
 
-export const ALLOWED_APIS = {
-  sign_in: ["signin"],
+export const ALLOWED_APIS: Record<OperationType, ApiName[]> = {
   sign_up: ["keygen"],
-  sign_in_reshare: ["signin", "reshare"],
-  sign_in_reshare_ed25519: ["signin", "reshare", "keygen_ed25519"],
-  add_ed25519: ["keygen_ed25519"],
-};
-
-export const FINAL_APIS = {
-  sign_in: ["signin"],
-  sign_up: ["keygen"],
-  sign_in_reshare: ["reshare"],
-  sign_in_reshare_ed25519: ["keygen_ed25519"],
-  add_ed25519: ["keygen_ed25519"],
+  sign_in: ["signin", "reshare"],
+  add_ed25519: ["signin", "reshare", "keygen_ed25519"],
 };
 
 export function isApiAllowed(
@@ -24,11 +14,4 @@ export function isApiAllowed(
   apiName: ApiName,
 ): boolean {
   return ALLOWED_APIS[operationType].includes(apiName);
-}
-
-export function isFinalApi(
-  operationType: OperationType,
-  apiName: ApiName,
-): boolean {
-  return FINAL_APIS[operationType].includes(apiName);
 }

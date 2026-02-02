@@ -1,9 +1,4 @@
-export type OperationType =
-  | "sign_in"
-  | "sign_up"
-  | "sign_in_reshare"
-  | "sign_in_reshare_ed25519"
-  | "add_ed25519";
+export type OperationType = "sign_in" | "sign_up" | "add_ed25519";
 
 export type ApiName = "signin" | "keygen" | "reshare" | "keygen_ed25519";
 
@@ -38,4 +33,5 @@ export interface CreateSessionParams {
 export interface CommitRevealParams {
   cr_session_id: string;
   cr_signature: string;
+  cr_final?: boolean;
 }
