@@ -31,9 +31,11 @@ security issues.`);
 
     let token = fs.readFileSync(tokenPath).toString();
     token = token.trim();
-    console.log("NPM_TOKEN: %s", token.substring(0, 6));
 
-    console.log("We will overwrite NPM_TOKEN env variable");
+    console.log(
+      "We will overwrite NPM_TOKEN with the value in this file, val: %s",
+      token.substring(0, 8),
+    );
     process.env.NPM_TOKEN = token;
   }
 
