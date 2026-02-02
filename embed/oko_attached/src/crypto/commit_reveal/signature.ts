@@ -72,13 +72,16 @@ export function createKsnCommitRevealParams(
   session: ClientCommitRevealSession,
   nodeEndpoint: string,
   apiName: KsnApiName,
-): CommitRevealParams | undefined {
+): Result<CommitRevealParams, string> {
   const ksnSigRes = createKsnSignature(session, nodeEndpoint, apiName);
   if (!ksnSigRes.success) {
-    return undefined;
+    return { success: false, err: ksnSigRes.err };
   }
   return {
-    cr_session_id: session.session_id,
-    cr_signature: ksnSigRes.data,
+    success: true,
+    data: {
+      cr_session_id: session.session_id,
+      cr_signature: ksnSigRes.data,
+    },
   };
 }

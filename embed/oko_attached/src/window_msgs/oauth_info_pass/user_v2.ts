@@ -32,7 +32,6 @@ import {
 import {
   commitAll,
   createOkoApiCommitRevealParams,
-  createKsnSignature,
   createKsnCommitRevealParams,
   type KsnCommitTarget,
 } from "@oko-wallet-attached/crypto/commit_reveal";
@@ -142,18 +141,17 @@ export async function handleNewUserV2(
   // 5. Send key shares by both curves to ks nodes using V2 API
   const registerKeySharesResults: Result<void, string>[] = await Promise.all(
     secp256k1UserKeyShares.map((keyShareByNode, index) => {
-      const ksnSigRes = createKsnSignature(
+      const commitRevealRes = createKsnCommitRevealParams(
         session,
         keyShareByNode.node.endpoint,
         "register",
       );
-      if (!ksnSigRes.success) {
-        return Promise.resolve({ success: false, err: ksnSigRes.err } as const);
+      if (!commitRevealRes.success) {
+        return Promise.resolve({
+          success: false,
+          err: commitRevealRes.err,
+        } as const);
       }
-      const commitRevealParams: CommitRevealParams = {
-        cr_session_id: session.session_id,
-        cr_signature: ksnSigRes.data,
-      };
       return registerKeySharesV2(
         keyShareByNode.node.endpoint,
         idToken,
@@ -168,7 +166,7 @@ export async function handleNewUserV2(
             share: teddsaKeyShareToHex(ed25519UserKeyShares[index].share),
           },
         },
-        commitRevealParams,
+        commitRevealRes.data,
       );
     }),
   );
@@ -570,15 +568,15 @@ export async function handleExistingUserNeedsEd25519Keygen(
   // 3. Send ed25519 key shares to ks nodes using V2 API
   const registerEd25519Results: Result<void, string>[] = await Promise.all(
     keyshareNodeMetaEd25519.nodes.map((node, index) => {
-      const commitRevealParams = createKsnCommitRevealParams(
+      const commitRevealRes = createKsnCommitRevealParams(
         session,
         node.endpoint,
         "register_ed25519",
       );
-      if (!commitRevealParams) {
+      if (!commitRevealRes.success) {
         return Promise.resolve({
           success: false,
-          err: "Failed to create commit-reveal params",
+          err: commitRevealRes.err,
         } as const);
       }
       return registerKeyShareEd25519V2(
@@ -587,7 +585,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
         authType,
         ed25519Keygen1.public_key.toHex(),
         teddsaKeyShareToHex(ed25519UserKeyShares[index].share),
-        commitRevealParams,
+        commitRevealRes.data,
       );
     }),
   );

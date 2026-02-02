@@ -374,17 +374,18 @@ export async function reshareUserKeySharesV2(
 
         // Create commit-reveal params for this node
         const apiName = isNewNode ? "reshare_register" : "reshare";
-        const commitRevealParams = createKsnCommitRevealParams(
+        const commitRevealRes = createKsnCommitRevealParams(
           session,
           nodeInfo.node.endpoint,
           apiName,
         );
-        if (!commitRevealParams) {
+        if (!commitRevealRes.success) {
           return {
             success: false,
-            err: "Failed to create commit-reveal params",
+            err: commitRevealRes.err,
           } as const;
         }
+        const commitRevealParams = commitRevealRes.data;
 
         if (isNewNode) {
           return reshareRegisterV2(

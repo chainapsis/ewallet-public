@@ -50,7 +50,7 @@ export async function requestKeySharesV2(
   },
   getCommitRevealParams?: (
     nodeEndpoint: string,
-  ) => CommitRevealParams | undefined,
+  ) => Result<CommitRevealParams, string> | undefined,
 ): Promise<Result<KeySharesByNode[], RequestKeySharesV2Error>> {
   const shuffledNodes = [...allNodes];
   for (let i = shuffledNodes.length - 1; i > 0; i -= 1) {
@@ -64,16 +64,20 @@ export async function requestKeySharesV2(
 
   while (succeeded.length < threshold && nodesToTry.length > 0) {
     const results = await Promise.allSettled(
-      nodesToTry.map((node) =>
-        requestKeyShareFromNodeV2(
+      nodesToTry.map((node) => {
+        const commitRevealRes = getCommitRevealParams?.(node.endpoint);
+        const commitReveal = commitRevealRes?.success
+          ? commitRevealRes.data
+          : undefined;
+        return requestKeyShareFromNodeV2(
           idToken,
           node,
           authType,
           wallets,
           2,
-          getCommitRevealParams?.(node.endpoint),
-        ),
-      ),
+          commitReveal,
+        );
+      }),
     );
 
     const failedNodes: NodeStatusInfo[] = [];
