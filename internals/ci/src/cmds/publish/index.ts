@@ -31,7 +31,7 @@ security issues.`);
 
     let token = fs.readFileSync(tokenPath).toString();
     token = token.trim();
-    console.log("NPM_TOKEN: %s", token);
+    console.log("NPM_TOKEN: %s", token.substring(0, 6));
 
     console.log("We will overwrite NPM_TOKEN env variable");
     process.env.NPM_TOKEN = token;
@@ -45,6 +45,8 @@ token.",
     );
 
     process.exit(1);
+  } else {
+    console.log("NPM_TOKEN is provided");
   }
 
   const publishRet = spawnSync(
