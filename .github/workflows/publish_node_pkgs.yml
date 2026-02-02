@@ -18,7 +18,8 @@ jobs:
       - name: Checkout self repository
         uses: actions/checkout@v4
         with: 
-          ref: v0.1.2-alpha.5
+          ref: ${{ inputs.git_tag }}
+          token: ${{ secrets.GITHUB_PAT }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
