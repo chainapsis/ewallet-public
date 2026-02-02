@@ -544,8 +544,8 @@ describe("commit_reveal_middleware_test", () => {
   describe("operation-api validation", () => {
     it("should return 400 when api is not allowed for operation", async () => {
       const ctx = createTestContext({
-        operationType: "sign_in", // sign_in only allows get_key_shares
-        apiName: "register", // register is for sign_up
+        operationType: "sign_in", // sign_in doesn't allow register_ed25519
+        apiName: "register_ed25519", // register_ed25519 is for add_ed25519 only
       });
       await createSession(pool, ctx);
 
@@ -555,7 +555,7 @@ describe("commit_reveal_middleware_test", () => {
       );
 
       const response = await request(app)
-        .post("/test/register") // Trying to call register with sign_in operation
+        .post("/test/register_ed25519") // Trying to call register_ed25519 with sign_in operation
         .set("Authorization", `Bearer ${ctx.idToken}`)
         .send({
           cr_session_id: ctx.sessionId,

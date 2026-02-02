@@ -231,6 +231,7 @@ describe("tss_v2_commit_reveal_e2e_test", () => {
           cr_session_id: sessionId,
           cr_signature: signature,
           auth_type: authType,
+          cr_final: true,
         })
         .expect(200);
 
@@ -292,6 +293,7 @@ describe("tss_v2_commit_reveal_e2e_test", () => {
           cr_session_id: sessionId,
           cr_signature: signature,
           auth_type: authType,
+          cr_final: true,
         })
         .expect(200);
 
@@ -366,6 +368,7 @@ describe("tss_v2_commit_reveal_e2e_test", () => {
           cr_session_id: sessionId,
           cr_signature: signature,
           auth_type: authType,
+          cr_final: true,
         })
         .expect(200);
 
@@ -374,13 +377,13 @@ describe("tss_v2_commit_reveal_e2e_test", () => {
 
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // Session should be COMPLETED (signin is final for sign_in)
+      // Session should be COMPLETED (cr_final is true)
       expect(await getSessionState(sessionId)).toBe("COMPLETED");
     });
   });
 
-  describe("sign_in_reshare flow (commit -> signin -> reshare)", () => {
-    it("should complete full sign_in_reshare flow", async () => {
+  describe("sign_in reshare flow (commit -> signin -> reshare)", () => {
+    it("should complete full sign_in flow with reshare", async () => {
       const sessionId = uuidv4();
       const authType = "google";
       const idToken = "test_id_token_for_reshare";
@@ -396,24 +399,24 @@ describe("tss_v2_commit_reveal_e2e_test", () => {
         throw new Error("Failed to compute hash");
       }
 
-      // Commit with sign_in_reshare operation
+      // Commit with sign_in operation
       await request(app)
         .post("/tss/v2/commit")
         .send({
           session_id: sessionId,
-          operation_type: "sign_in_reshare",
+          operation_type: "sign_in",
           client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
           id_token_hash: hashRes.data.toHex(),
         })
         .expect(200);
 
-      // Step 1: Signin (non-final for sign_in_reshare)
+      // Step 1: Signin (cr_final: false)
       const signinSignature = createValidSignature(
         clientKeypair,
         sessionId,
         authType,
         idToken,
-        "sign_in_reshare",
+        "sign_in",
         "signin",
       );
 
@@ -424,21 +427,22 @@ describe("tss_v2_commit_reveal_e2e_test", () => {
           cr_session_id: sessionId,
           cr_signature: signinSignature,
           auth_type: authType,
+          cr_final: false,
         })
         .expect(200);
 
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // Session should still be COMMITTED (signin is not final for sign_in_reshare)
+      // Session should still be COMMITTED (cr_final is false)
       expect(await getSessionState(sessionId)).toBe("COMMITTED");
 
-      // Step 2: Reshare (final for sign_in_reshare)
+      // Step 2: Reshare (cr_final: true)
       const reshareSignature = createValidSignature(
         clientKeypair,
         sessionId,
         authType,
         idToken,
-        "sign_in_reshare",
+        "sign_in",
         "reshare",
       );
 
@@ -449,6 +453,7 @@ describe("tss_v2_commit_reveal_e2e_test", () => {
           cr_session_id: sessionId,
           cr_signature: reshareSignature,
           auth_type: authType,
+          cr_final: true,
         })
         .expect(200);
 
@@ -511,6 +516,7 @@ describe("tss_v2_commit_reveal_e2e_test", () => {
           cr_session_id: sessionId,
           cr_signature: signature,
           auth_type: authType,
+          cr_final: true,
         })
         .expect(200);
 
@@ -526,8 +532,8 @@ describe("tss_v2_commit_reveal_e2e_test", () => {
     });
   });
 
-  describe("sign_in_reshare_ed25519 flow (commit -> signin -> reshare -> keygen_ed25519)", () => {
-    it("should complete full sign_in_reshare_ed25519 flow", async () => {
+  describe("add_ed25519 flow with reshare (commit -> signin -> reshare -> keygen_ed25519)", () => {
+    it("should complete full add_ed25519 flow with reshare", async () => {
       const sessionId = uuidv4();
       const authType = "google";
       const idToken = "test_id_token_for_reshare_ed25519";
@@ -543,24 +549,24 @@ describe("tss_v2_commit_reveal_e2e_test", () => {
         throw new Error("Failed to compute hash");
       }
 
-      // Commit with sign_in_reshare_ed25519 operation
+      // Commit with add_ed25519 operation
       await request(app)
         .post("/tss/v2/commit")
         .send({
           session_id: sessionId,
-          operation_type: "sign_in_reshare_ed25519",
+          operation_type: "add_ed25519",
           client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
           id_token_hash: hashRes.data.toHex(),
         })
         .expect(200);
 
-      // Step 1: Signin (non-final for sign_in_reshare_ed25519)
+      // Step 1: Signin (cr_final: false)
       const signinSignature = createValidSignature(
         clientKeypair,
         sessionId,
         authType,
         idToken,
-        "sign_in_reshare_ed25519",
+        "add_ed25519",
         "signin",
       );
 
@@ -571,21 +577,22 @@ describe("tss_v2_commit_reveal_e2e_test", () => {
           cr_session_id: sessionId,
           cr_signature: signinSignature,
           auth_type: authType,
+          cr_final: false,
         })
         .expect(200);
 
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // Session should still be COMMITTED (signin is not final)
+      // Session should still be COMMITTED (cr_final is false)
       expect(await getSessionState(sessionId)).toBe("COMMITTED");
 
-      // Step 2: Reshare (non-final for sign_in_reshare_ed25519)
+      // Step 2: Reshare (cr_final: false)
       const reshareSignature = createValidSignature(
         clientKeypair,
         sessionId,
         authType,
         idToken,
-        "sign_in_reshare_ed25519",
+        "add_ed25519",
         "reshare",
       );
 
@@ -596,21 +603,22 @@ describe("tss_v2_commit_reveal_e2e_test", () => {
           cr_session_id: sessionId,
           cr_signature: reshareSignature,
           auth_type: authType,
+          cr_final: false,
         })
         .expect(200);
 
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // Session should still be COMMITTED (reshare is not final for sign_in_reshare_ed25519)
+      // Session should still be COMMITTED (cr_final is false)
       expect(await getSessionState(sessionId)).toBe("COMMITTED");
 
-      // Step 3: Keygen ed25519 (final for sign_in_reshare_ed25519)
+      // Step 3: Keygen ed25519 (cr_final: true)
       const keygenEd25519Signature = createValidSignature(
         clientKeypair,
         sessionId,
         authType,
         idToken,
-        "sign_in_reshare_ed25519",
+        "add_ed25519",
         "keygen_ed25519",
       );
 
@@ -621,6 +629,7 @@ describe("tss_v2_commit_reveal_e2e_test", () => {
           cr_session_id: sessionId,
           cr_signature: keygenEd25519Signature,
           auth_type: authType,
+          cr_final: true,
         })
         .expect(200);
 
@@ -638,7 +647,7 @@ describe("tss_v2_commit_reveal_e2e_test", () => {
       expect(await getApiCallCount(sessionId, "keygen_ed25519")).toBe(1);
     });
 
-    it("should reject keygen (not keygen_ed25519) for sign_in_reshare_ed25519", async () => {
+    it("should reject keygen (not keygen_ed25519) for add_ed25519", async () => {
       const sessionId = uuidv4();
       const authType = "google";
       const idToken = "test_id_token_reject_keygen";
@@ -654,24 +663,24 @@ describe("tss_v2_commit_reveal_e2e_test", () => {
         throw new Error("Failed to compute hash");
       }
 
-      // Commit with sign_in_reshare_ed25519 operation
+      // Commit with add_ed25519 operation
       await request(app)
         .post("/tss/v2/commit")
         .send({
           session_id: sessionId,
-          operation_type: "sign_in_reshare_ed25519",
+          operation_type: "add_ed25519",
           client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
           id_token_hash: hashRes.data.toHex(),
         })
         .expect(200);
 
-      // Try to call keygen (not allowed for sign_in_reshare_ed25519)
+      // Try to call keygen (not allowed for add_ed25519)
       const keygenSignature = createValidSignature(
         clientKeypair,
         sessionId,
         authType,
         idToken,
-        "sign_in_reshare_ed25519",
+        "add_ed25519",
         "keygen",
       );
 
@@ -688,7 +697,7 @@ describe("tss_v2_commit_reveal_e2e_test", () => {
       expect(response.body.success).toBe(false);
       expect(response.body.code).toBe("INVALID_REQUEST");
       expect(response.body.msg).toContain("keygen");
-      expect(response.body.msg).toContain("sign_in_reshare_ed25519");
+      expect(response.body.msg).toContain("add_ed25519");
     });
   });
 });
