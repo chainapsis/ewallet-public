@@ -23,8 +23,9 @@ registry.registerPath({
   path: "/keyshare/v2/reshare/register",
   tags: ["Key Share v2", "Commit-Reveal"],
   summary: "Register key shares during reshare (new node)",
+  deprecated: true,
   description:
-    "Register key shares for an existing user when a new node joins during reshare. Unlike /register, the user must already exist. Requires commit-reveal authentication.",
+    "DEPRECATED: Use POST /keyshare/v2/reshare instead, which now supports upsert behavior. Register key shares for an existing user when a new node joins during reshare. Unlike /register, the user must already exist. Requires commit-reveal authentication.",
   security: [{ oauthAuth: [] }],
   request: {
     body: {

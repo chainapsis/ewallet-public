@@ -255,9 +255,12 @@ export type WalletReshareInfo<PK extends Bytes32 | Bytes33> = {
   share: Bytes64;
 };
 
+/**
+ * Both wallets are required for reshare
+ */
 export type WalletsReshareRequest = {
-  secp256k1?: WalletReshareInfo<Bytes33>;
-  ed25519?: WalletReshareInfo<Bytes32>;
+  secp256k1: WalletReshareInfo<Bytes33>;
+  ed25519: WalletReshareInfo<Bytes32>;
 };
 
 /**
@@ -268,9 +271,12 @@ export type WalletReshareInfoBody = {
   share: string; // hex string (64 bytes)
 };
 
+/**
+ * Both wallets are required for reshare
+ */
 export type WalletsReshareRequestBody = {
-  secp256k1?: WalletReshareInfoBody;
-  ed25519?: WalletReshareInfoBody;
+  secp256k1: WalletReshareInfoBody;
+  ed25519: WalletReshareInfoBody;
 };
 
 export interface ReshareKeyShareV2Request {

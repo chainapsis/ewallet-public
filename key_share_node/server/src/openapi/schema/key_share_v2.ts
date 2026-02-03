@@ -216,31 +216,23 @@ const walletReshareInfoSchema = z.object({
   share: shareSchema.describe("Key share in hex string format (64 bytes)"),
 });
 
-export const walletsReshareRequestBodySchema = z
-  .object({
-    secp256k1: walletReshareInfoSchema
-      .optional()
-      .describe("secp256k1 wallet reshare info"),
-    ed25519: walletReshareInfoSchema
-      .optional()
-      .describe("ed25519 wallet reshare info"),
-  })
-  .refine((data) => data.secp256k1 || data.ed25519, {
-    message: "At least one of secp256k1 or ed25519 must be provided",
-  });
+export const walletsReshareRequestBodySchema = z.object({
+  secp256k1: walletReshareInfoSchema.describe("secp256k1 wallet reshare info"),
+  ed25519: walletReshareInfoSchema.describe("ed25519 wallet reshare info"),
+});
 
 export const ReshareKeyShareV2RequestBodySchema = registry.register(
   "ReshareKeyShareV2RequestBody",
   z
     .object({
       wallets: walletsReshareRequestBodySchema.describe(
-        "Object with curve_type as key and wallet reshare info as value",
+        "Both secp256k1 and ed25519 wallet reshare info are required",
       ),
     })
     .merge(commitRevealRequestFieldsSchema)
     .openapi("ReshareKeyShareV2RequestBody", {
       description:
-        "Request payload for resharing multiple key shares at once. Requires commit-reveal session.",
+        "Request payload for resharing multiple key shares at once. Both wallets are required. Requires commit-reveal session.",
     }),
 );
 

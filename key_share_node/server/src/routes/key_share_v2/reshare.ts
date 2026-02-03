@@ -24,7 +24,7 @@ registry.registerPath({
   tags: ["Key Share v2", "Commit-Reveal"],
   summary: "Reshare multiple key shares",
   description:
-    "Validate and update reshared_at timestamp for multiple key shares. Validates that provided shares match existing shares. Requires commit-reveal authentication.",
+    "Upsert key shares for multiple wallets. For existing wallets: validates that provided share matches existing share, then updates reshared_at. For non-existent wallets: registers new wallet with provided share. If user doesn't exist on this node, creates the user. Requires commit-reveal authentication.",
   security: [{ oauthAuth: [] }],
   request: {
     body: {
@@ -92,25 +92,12 @@ registry.registerPath({
       },
     },
     404: {
-      description: "Not found - User, wallet, key share or session not found",
+      description:
+        "Not found - Session not found or key share not found for existing wallet",
       content: {
         "application/json": {
           schema: ErrorResponseSchema,
           examples: {
-            USER_NOT_FOUND: {
-              value: {
-                success: false,
-                code: "USER_NOT_FOUND",
-                msg: "User not found",
-              },
-            },
-            WALLET_NOT_FOUND: {
-              value: {
-                success: false,
-                code: "WALLET_NOT_FOUND",
-                msg: "Wallet not found for curve_type: secp256k1",
-              },
-            },
             KEY_SHARE_NOT_FOUND: {
               value: {
                 success: false,
