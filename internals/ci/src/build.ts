@@ -8,13 +8,14 @@ import { runWithConcurrency } from "@oko-wallet-ci/concurrency";
  * Builds packages in stages. Each stage runs concurrently,
  * but stages execute sequentially (stage N+1 waits for stage N).
  */
-export async function buildInStages(stages: string[][], concurrency = 4) {
+export async function buildInStages(stages: string[][], concurrency: number) {
   const totalPkgs = stages.flat().length;
   console.log(
     "Building packages in %s stages, total (%s)",
     stages.length,
     totalPkgs,
   );
+  console.log("Concurrency (max): %s", concurrency);
 
   for (let stageIdx = 0; stageIdx < stages.length; stageIdx++) {
     const stage = stages[stageIdx];

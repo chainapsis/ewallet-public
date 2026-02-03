@@ -12,5 +12,5 @@ export async function doBuildSDK() {
     [paths.sdk_cosmos_kit],
   ];
 
-  await buildInStages(stages);
+  await buildInStages(stages, 4);
 }
