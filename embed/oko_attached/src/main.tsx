@@ -42,6 +42,6 @@ if (!rootEl.innerHTML) {
     // StrictMode is disabled because it causes double sign-up or sign-in
     // <StrictMode>
     <RouterProvider router={router} />,
-    // </StrictMㄴode>,
+    // </StrictMode>,
   );
 }

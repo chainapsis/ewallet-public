@@ -10,7 +10,7 @@ const ecosystemFilterOptions = [
   "All Chains",
   "Cosmos",
   "EVM",
-  "Solana",
+  "SVM",
 ] as const;
 
 type SelectedFilters = {

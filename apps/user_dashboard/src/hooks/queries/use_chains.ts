@@ -6,18 +6,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
-import {
-  SOLANA_DEVNET,
-  SOLANA_MAINNET,
-  SOLANA_TESTNET,
-} from "@oko-wallet-user-dashboard/config/solana";
 import { KEPLR_API_ENDPOINT } from "@oko-wallet-user-dashboard/fetch";
 import {
   DEFAULT_ENABLED_CHAINS,
-  getChainIdentifier,
-  transformKeplrChain,
   useChainStore,
 } from "@oko-wallet-user-dashboard/state/chains";
+import {
+  getChainIdentifier,
+  transformKeplrChain,
+} from "@oko-wallet-user-dashboard/utils/chain";
 import type {
   CosmosChainInfo,
   ModularChainInfo,
@@ -28,7 +25,7 @@ interface KeplrChainsResponse {
 }
 
 async function fetchChains(): Promise<ModularChainInfo[]> {
-  const response = await fetch(`${KEPLR_API_ENDPOINT}/v1/chains`);
+  const response = await fetch(`${KEPLR_API_ENDPOINT}/v1/chains/all`);
   if (!response.ok) {
     throw new Error(`Failed to fetch chains: ${response.statusText}`);
   }
@@ -49,14 +46,8 @@ export function useChains() {
     retry: 1,
   });
 
-  // Merge Keplr chains with non-Cosmos chains (Solana, etc.)
-  const allChains = useMemo(() => {
-    const keplrChains = query.data ?? [];
-    return [...keplrChains, SOLANA_MAINNET, SOLANA_DEVNET, SOLANA_TESTNET];
-  }, [query.data]);
-
   return {
-    chains: allChains,
+    chains: query.data ?? [],
     isLoading: query.isLoading,
     error: query.error,
     refetch: query.refetch,

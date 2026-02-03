@@ -18,6 +18,10 @@
   display: flex;
   align-items: center;
   gap: 4px;
+
+  img {
+    border-radius: 50%;
+  }
 }
 
 .explorerName {
