@@ -1,7 +1,6 @@
-import { spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import chalk from "chalk";
 
-import { expectSuccess } from "@oko-wallet-ci/expect";
 import { getPkgName } from "@oko-wallet-ci/pkg_name";
 import { runWithConcurrency } from "@oko-wallet-ci/concurrency";
 
@@ -36,18 +35,49 @@ export async function buildInStages(stages: string[][], concurrency = 4) {
           name,
         );
 
-        const ret = spawnSync("yarn", ["run", "build"], {
-          cwd: pkgPath,
-          stdio: "inherit",
-        });
+        return new Promise((resolve, reject) => {
+          const child = spawn("yarn", ["run", "build"], {
+            cwd: pkgPath,
+            // stdio: "inherit",
+          });
 
-        expectSuccess(ret, `build ${name} failed`);
-        console.log(
-          "%s %s %s",
-          chalk.blueBright.bold(`wk-${workerId}`),
-          chalk.bold.green("Done"),
-          name,
-        );
+          child.stdout.on("data", (data) => {
+            console.log(
+              "%s %s",
+              chalk.blueBright.bold(`${workerId}|`),
+              data.toString().trimEnd(),
+            );
+          });
+
+          child.stderr.on("data", (data) => {
+            console.log(
+              "%s %s",
+              chalk.blueBright.bold(`${workerId}|`),
+              data.toString().trimEnd(),
+            );
+          });
+
+          child.on("error", (err) => {
+            reject(
+              new Error(`wk-${workerId} \
+Failed to build for ${name}: ${err.message}`),
+            );
+          });
+
+          child.on("close", (code) => {
+            if (code === 0) {
+              console.log(
+                "%s %s %s",
+                chalk.blueBright.bold(`wk-${workerId}`),
+                chalk.bold.green("Ok"),
+                name,
+              );
+              resolve();
+            } else {
+              reject(new Error(`Type check failed for ${name}`));
+            }
+          });
+        });
       },
       Math.min(concurrency, stage.length),
     );
