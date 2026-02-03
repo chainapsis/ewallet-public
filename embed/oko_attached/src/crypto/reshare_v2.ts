@@ -121,23 +121,6 @@ export interface ReshareV2Result {
   publicKeyPackageEd25519: string; // hex-encoded PublicKeyPackageRaw JSON
 }
 
-/**
- * Reshare user key shares selectively per wallet.
- *
- * This function handles the full reshare flow:
- * 1. Classify nodes by status per wallet (ACTIVE vs NOT_REGISTERED/UNRECOVERABLE)
- * 2. Request existing shares from ACTIVE nodes
- * 3. Expand shares only for wallets that need reshare (based on needsReshare flag)
- * 4. Send new shares to KSN only for wallets that need reshare
- * 5. Update Oko API
- * 6. Return client's keyshare1 and KeyPackage
- *
- * @param idToken - JWT token for authentication
- * @param authType - Authentication type
- * @param secp256k1 - secp256k1 wallet info (needsReshare flag determines if reshare is needed)
- * @param ed25519 - ed25519 wallet info (needsReshare flag determines if reshare is needed)
- * @param session - Commit-reveal session for frontrunning protection
- */
 export async function reshareUserKeySharesV2(
   idToken: string,
   authType: AuthType,

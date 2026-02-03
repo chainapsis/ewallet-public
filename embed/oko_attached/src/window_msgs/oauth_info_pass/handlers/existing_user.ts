@@ -8,10 +8,7 @@ import type { Result } from "@oko-wallet/stdlib-js";
 import { type OAuthSignInError } from "@oko-wallet/oko-sdk-core";
 import { Bytes, type Bytes32 } from "@oko-wallet/bytes";
 
-import {
-  signInV2,
-  TSS_V2_ENDPOINT,
-} from "@oko-wallet-attached/requests/oko_api";
+import { signInV2 } from "@oko-wallet-attached/requests/oko_api";
 import { combineUserShares } from "@oko-wallet-attached/crypto/combine";
 import type { UserSignInResultV2 } from "@oko-wallet-attached/window_msgs/types";
 import {
@@ -114,7 +111,8 @@ export async function handleExistingUserV2(
     };
   }
 
-  const { shares: keySharesByNode, nodesNeedingReshare } = requestSharesRes.data;
+  const { shares: keySharesByNode, nodesNeedingReshare } =
+    requestSharesRes.data;
   const needsReshare = nodesNeedingReshare.length > 0;
 
   if (needsReshare) {

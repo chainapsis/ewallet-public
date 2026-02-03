@@ -4,10 +4,7 @@ import type { Result } from "@oko-wallet/stdlib-js";
 import { type OAuthSignInError } from "@oko-wallet/oko-sdk-core";
 import { Bytes } from "@oko-wallet/bytes";
 
-import {
-  signInV2,
-  TSS_V2_ENDPOINT,
-} from "@oko-wallet-attached/requests/oko_api";
+import { signInV2 } from "@oko-wallet-attached/requests/oko_api";
 import type { UserSignInResultV2 } from "@oko-wallet-attached/window_msgs/types";
 import { reshareUserKeySharesV2 } from "@oko-wallet-attached/crypto/reshare_v2";
 import {
