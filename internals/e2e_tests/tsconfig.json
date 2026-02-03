@@ -20,7 +20,11 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
-      "@e2e/*": ["./src/*"]
+      "@e2e/*": ["./src/*"],
+      "@oko-wallet-api/*": ["../../backend/oko_api/server/src/*"],
+      "@oko-wallet-ksn-server/*": ["../../key_share_node/server/src/*"],
+      "@oko-wallet-types/*": ["../../common/oko_types/src/*"],
+      "@oko-wallet-oko-pg-interface/*": ["../../backend/oko_pg_interface/src/*"]
     }
   },
   "include": ["src/**/*"],
