@@ -31,6 +31,9 @@ export function createOkoApiApp(
   app.locals.db = pool;
   app.locals.server_keypair = serverKeypair;
   app.locals.logger = testLogger;
+  app.locals.jwt_secret = "test_jwt_secret";
+  app.locals.jwt_expires_in = "7d";
+  app.locals.encryption_secret = "test_encryption_secret";
 
   app.post("/tss/v2/commit", commitRevealCommit);
 

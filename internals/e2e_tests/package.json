@@ -15,6 +15,7 @@
     "@oko-wallet/oko-types": "workspace:*",
     "@oko-wallet/postgres-lib": "workspace:*",
     "@oko-wallet/stdlib-js": "workspace:*",
+    "@oko-wallet/teddsa-addon": "workspace:*",
     "express": "^4.21.1",
     "pg": "^8.16.3",
     "uuid": "^13.0.0",

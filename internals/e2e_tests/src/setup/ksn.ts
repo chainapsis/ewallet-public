@@ -6,6 +6,7 @@ import dayjs from "dayjs";
 import { commit } from "@oko-wallet-ksn-server/routes/key_share_v2/commit";
 import { commitRevealMiddleware } from "@oko-wallet-ksn-server/middlewares";
 import { keyshareV2Register } from "@oko-wallet-ksn-server/routes/key_share_v2/register";
+import { keyshareV2Check } from "@oko-wallet-ksn-server/routes/key_share_v2/check";
 import { getKeysharesV2 } from "@oko-wallet-ksn-server/routes/key_share_v2/get_key_shares";
 import { keyshareV2Reshare } from "@oko-wallet-ksn-server/routes/key_share_v2/reshare";
 import type { ServerState } from "@oko-wallet-ksn-server/state";
@@ -36,6 +37,7 @@ export function createKsnApp(
   } satisfies ServerState;
 
   app.post("/keyshare/v2/commit", commit);
+  app.post("/keyshare/v2/check", keyshareV2Check);
 
   app.post(
     "/keyshare/v2/register",

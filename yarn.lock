@@ -10697,6 +10697,7 @@ __metadata:
     "@oko-wallet/oko-types": "workspace:*"
     "@oko-wallet/postgres-lib": "workspace:*"
     "@oko-wallet/stdlib-js": "workspace:*"
+    "@oko-wallet/teddsa-addon": "workspace:*"
     "@types/express": "npm:^5.0.6"
     "@types/jest": "npm:^29.5.14"
     "@types/node": "npm:^24.10.1"
