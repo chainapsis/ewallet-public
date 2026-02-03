@@ -3,7 +3,7 @@ import type {
   ApiName,
 } from "@oko-wallet/oko-types/commit_reveal";
 
-export const ALLOWED_APIS: Record<OperationType, ApiName[]> = {
+export const ALLOWED_APIS = {
   sign_up: ["keygen"],
   sign_in: ["signin", "reshare"],
   add_ed25519: ["signin", "reshare", "keygen_ed25519"],
