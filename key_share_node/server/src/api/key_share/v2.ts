@@ -12,7 +12,6 @@ import type {
   RegisterKeyShareV2Request,
   RegisterEd25519V2Request,
   ReshareKeyShareV2Request,
-  ReshareRegisterV2Request,
 } from "@oko-wallet/ksn-interface/key_share";
 import type { KSNodeApiResponse } from "@oko-wallet/ksn-interface/response";
 
@@ -483,96 +482,3 @@ export async function reshareKeyShareV2(
   }
 }
 
-/**
- * Register key shares during reshare (v2) - for new node joining
- *
- * This is for the reshare scenario where a new node joins the network
- * and needs to register key shares for a user.
- * If the user doesn't exist on this node, it will be created.
- */
-export async function reshareRegisterV2(
-  db: Pool,
-  request: ReshareRegisterV2Request,
-  encryptionSecret: string,
-): Promise<KSNodeApiResponse<void>> {
-  const { user_auth_id, auth_type, wallets } = request;
-
-  try {
-    const getUserRes = await getUserByAuthTypeAndUserAuthId(
-      db,
-      auth_type,
-      user_auth_id,
-    );
-    if (getUserRes.success === false) {
-      logger.error("Failed to get user: %s", getUserRes.err);
-      return {
-        success: false,
-        code: "UNKNOWN_ERROR",
-        msg: "Failed to get user",
-      };
-    }
-
-    const existingUser = getUserRes.data;
-
-    const client = await db.connect();
-    try {
-      await client.query("BEGIN");
-
-      let userId: string;
-      if (existingUser === null) {
-        // New user on this node - create
-        const createUserRes = await createUser(client, auth_type, user_auth_id);
-        if (createUserRes.success === false) {
-          throw new Error(`Failed to createUser: ${createUserRes.err}`);
-        }
-        userId = createUserRes.data.user_id;
-      } else {
-        userId = existingUser.user_id;
-      }
-
-      // Register each wallet
-      if (wallets.secp256k1) {
-        const res = await registerWalletKeyShare(
-          client,
-          wallets.secp256k1,
-          userId,
-          "secp256k1",
-          encryptionSecret,
-        );
-        if (res.success === false) {
-          await client.query("ROLLBACK");
-          return res;
-        }
-      }
-
-      if (wallets.ed25519) {
-        const res = await registerWalletKeyShare(
-          client,
-          wallets.ed25519,
-          userId,
-          "ed25519",
-          encryptionSecret,
-        );
-        if (res.success === false) {
-          await client.query("ROLLBACK");
-          return res;
-        }
-      }
-
-      await client.query("COMMIT");
-      return { success: true, data: void 0 };
-    } catch (error) {
-      await client.query("ROLLBACK");
-      throw error;
-    } finally {
-      client.release();
-    }
-  } catch (error) {
-    logger.error("Failed to register key shares during reshare: %s", error);
-    return {
-      success: false,
-      code: "UNKNOWN_ERROR",
-      msg: "Failed to register key shares during reshare",
-    };
-  }
-}

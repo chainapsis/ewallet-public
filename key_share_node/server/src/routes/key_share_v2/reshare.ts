@@ -179,62 +179,70 @@ export async function keyshareV2Reshare(
   const state = req.app.locals;
   const body = req.body;
 
-  // Validate and convert wallets object
-  const validatedWallets: ReshareKeyShareV2Request["wallets"] = {};
+  // Both wallets are required
+  if (!body.wallets.secp256k1 || !body.wallets.ed25519) {
+    return res.status(400).json({
+      success: false,
+      code: "INVALID_REQUEST",
+      msg: "Both secp256k1 and ed25519 wallets are required",
+    });
+  }
 
   // Validate secp256k1
-  if (body.wallets.secp256k1) {
-    const publicKeyBytesRes = Bytes.fromHexString(
-      body.wallets.secp256k1.public_key,
-      33,
-    );
-    if (publicKeyBytesRes.success === false) {
-      return res.status(400).json({
-        success: false,
-        code: "PUBLIC_KEY_INVALID",
-        msg: `Public key is not valid for secp256k1: ${publicKeyBytesRes.err}`,
-      });
-    }
-    const shareBytesRes = Bytes.fromHexString(body.wallets.secp256k1.share, 64);
-    if (shareBytesRes.success === false) {
-      return res.status(400).json({
-        success: false,
-        code: "SHARE_INVALID",
-        msg: `Share is not valid for secp256k1: ${shareBytesRes.err}`,
-      });
-    }
-    validatedWallets.secp256k1 = {
-      public_key: publicKeyBytesRes.data,
-      share: shareBytesRes.data,
-    };
+  const secp256k1PublicKeyRes = Bytes.fromHexString(
+    body.wallets.secp256k1.public_key,
+    33,
+  );
+  if (!secp256k1PublicKeyRes.success) {
+    return res.status(400).json({
+      success: false,
+      code: "PUBLIC_KEY_INVALID",
+      msg: `Public key is not valid for secp256k1: ${secp256k1PublicKeyRes.err}`,
+    });
+  }
+  const secp256k1ShareRes = Bytes.fromHexString(
+    body.wallets.secp256k1.share,
+    64,
+  );
+  if (!secp256k1ShareRes.success) {
+    return res.status(400).json({
+      success: false,
+      code: "SHARE_INVALID",
+      msg: `Share is not valid for secp256k1: ${secp256k1ShareRes.err}`,
+    });
   }
 
   // Validate ed25519
-  if (body.wallets.ed25519) {
-    const publicKeyBytesRes = Bytes.fromHexString(
-      body.wallets.ed25519.public_key,
-      32,
-    );
-    if (publicKeyBytesRes.success === false) {
-      return res.status(400).json({
-        success: false,
-        code: "PUBLIC_KEY_INVALID",
-        msg: `Public key is not valid for ed25519: ${publicKeyBytesRes.err}`,
-      });
-    }
-    const shareBytesRes = Bytes.fromHexString(body.wallets.ed25519.share, 64);
-    if (shareBytesRes.success === false) {
-      return res.status(400).json({
-        success: false,
-        code: "SHARE_INVALID",
-        msg: `Share is not valid for ed25519: ${shareBytesRes.err}`,
-      });
-    }
-    validatedWallets.ed25519 = {
-      public_key: publicKeyBytesRes.data,
-      share: shareBytesRes.data,
-    };
+  const ed25519PublicKeyRes = Bytes.fromHexString(
+    body.wallets.ed25519.public_key,
+    32,
+  );
+  if (!ed25519PublicKeyRes.success) {
+    return res.status(400).json({
+      success: false,
+      code: "PUBLIC_KEY_INVALID",
+      msg: `Public key is not valid for ed25519: ${ed25519PublicKeyRes.err}`,
+    });
   }
+  const ed25519ShareRes = Bytes.fromHexString(body.wallets.ed25519.share, 64);
+  if (!ed25519ShareRes.success) {
+    return res.status(400).json({
+      success: false,
+      code: "SHARE_INVALID",
+      msg: `Share is not valid for ed25519: ${ed25519ShareRes.err}`,
+    });
+  }
+
+  const validatedWallets: ReshareKeyShareV2Request["wallets"] = {
+    secp256k1: {
+      public_key: secp256k1PublicKeyRes.data,
+      share: secp256k1ShareRes.data,
+    },
+    ed25519: {
+      public_key: ed25519PublicKeyRes.data,
+      share: ed25519ShareRes.data,
+    },
+  };
 
   const result = await reshareKeyShareV2(
     state.db,

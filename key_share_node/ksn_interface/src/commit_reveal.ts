@@ -4,7 +4,6 @@ export type ApiName =
   | "get_key_shares"
   | "register"
   | "reshare"
-  | "reshare_register"
   | "register_ed25519";
 
 export type SessionState = "COMMITTED" | "COMPLETED";

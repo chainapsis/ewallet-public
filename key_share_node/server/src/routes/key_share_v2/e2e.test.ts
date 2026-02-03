@@ -594,6 +594,7 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
           auth_type: reshareCtx.authType,
           wallets: {
             secp256k1: TEST_SECP256K1_PK,
+            ed25519: TEST_ED25519_PK,
           },
         })
         .expect(200);
@@ -610,7 +611,7 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
         expect(sessionRes.data?.state).toBe("COMMITTED");
       }
 
-      // Step 2: reshare (final API)
+      // Step 2: reshare (final API) - both wallets required
       const reshareSignature = createRevealSignature(
         reshareCtx,
         mockServerKeypair.publicKey.toHex(),
@@ -629,7 +630,11 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
           wallets: {
             secp256k1: {
               public_key: TEST_SECP256K1_PK,
-              share: secp256k1Share, // Must match the original share
+              share: secp256k1Share,
+            },
+            ed25519: {
+              public_key: TEST_ED25519_PK,
+              share: ed25519Share,
             },
           },
         })
@@ -739,6 +744,7 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
           auth_type: reshareEd25519Ctx.authType,
           wallets: {
             secp256k1: TEST_SECP256K1_PK,
+            ed25519: TEST_ED25519_PK,
           },
         })
         .expect(200);
@@ -755,7 +761,7 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
         expect(sessionRes.data?.state).toBe("COMMITTED");
       }
 
-      // Step 2: reshare (non-final API for add_ed25519)
+      // Step 2: reshare (non-final API for add_ed25519) - both wallets required
       const reshareSignature = createRevealSignature(
         reshareEd25519Ctx,
         mockServerKeypair.publicKey.toHex(),
@@ -774,6 +780,10 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
             secp256k1: {
               public_key: TEST_SECP256K1_PK,
               share: secp256k1Share,
+            },
+            ed25519: {
+              public_key: TEST_ED25519_PK,
+              share: ed25519Share,
             },
           },
         })

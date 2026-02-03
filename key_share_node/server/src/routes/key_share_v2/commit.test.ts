@@ -123,55 +123,10 @@ describe("commit_route_test", () => {
       expect(response.body.data.node_signature).toBeDefined();
     });
 
-    it("should successfully create session with sign_in_reshare operation", async () => {
-      const body = {
-        ...createValidBody(),
-        operation_type: "sign_in_reshare",
-      };
-
-      const response = await request(app)
-        .post(testEndpoint)
-        .send(body)
-        .expect(200);
-
-      expect(response.body.success).toBe(true);
-      expect(response.body.data).toBeDefined();
-    });
-
-    it("should successfully create session with register_reshare operation", async () => {
-      const body = {
-        ...createValidBody(),
-        operation_type: "register_reshare",
-      };
-
-      const response = await request(app)
-        .post(testEndpoint)
-        .send(body)
-        .expect(200);
-
-      expect(response.body.success).toBe(true);
-      expect(response.body.data).toBeDefined();
-    });
-
     it("should successfully create session with add_ed25519 operation", async () => {
       const body = {
         ...createValidBody(),
         operation_type: "add_ed25519",
-      };
-
-      const response = await request(app)
-        .post(testEndpoint)
-        .send(body)
-        .expect(200);
-
-      expect(response.body.success).toBe(true);
-      expect(response.body.data).toBeDefined();
-    });
-
-    it("should successfully create session with sign_in_reshare_ed25519 operation", async () => {
-      const body = {
-        ...createValidBody(),
-        operation_type: "sign_in_reshare_ed25519",
       };
 
       const response = await request(app)
