@@ -22,5 +22,6 @@ act --workflows "$WORKFLOW_FILE" \
     --var-file "./internals/github/.vars" \
     --input-file "./internals/github/.input" \
     --env-file "./internals/github/.env" \
+    --eventpath "./internals/github/.event.json" \
     -s ACTIONS_STEP_DEBUG=true \
     --container-architecture linux/amd64
