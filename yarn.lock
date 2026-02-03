@@ -10683,9 +10683,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@oko-wallet/e2e-tests@workspace:internals/e2e_tests":
+"@oko-wallet/e2e-tests@workspace:e2e_tests":
   version: 0.0.0-use.local
-  resolution: "@oko-wallet/e2e-tests@workspace:internals/e2e_tests"
+  resolution: "@oko-wallet/e2e-tests@workspace:e2e_tests"
   dependencies:
     "@oko-wallet/bytes": "workspace:*"
     "@oko-wallet/crypto-js": "workspace:*"

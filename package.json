@@ -4,7 +4,7 @@
     "packages": [
       "internals/ci",
       "internals/github",
-      "internals/e2e_tests",
+      "e2e_tests",
       "key_share_node/pg_interface",
       "key_share_node/server",
       "key_share_node/ksn_interface",
