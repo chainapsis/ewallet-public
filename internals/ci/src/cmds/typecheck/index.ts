@@ -3,6 +3,7 @@ import chalk from "chalk";
 
 import { paths } from "@oko-wallet-ci/paths";
 import { getPkgName } from "@oko-wallet-ci/pkg_name";
+import { runWithConcurrency } from "@oko-wallet-ci/concurrency";
 
 const DEFAULT_CONCURRENCY = 4;
 
@@ -65,7 +66,7 @@ async function runTypeCheck(workerId: number, pkgPath: string): Promise<void> {
   const name = await getPkgName(pkgPath);
   console.log(
     "%s %s %s",
-    chalk.magentaBright.bold(`wk-${workerId}`),
+    chalk.blueBright.bold(`wk-${workerId}`),
     chalk.cyanBright.bold("Checking"),
     name,
   );
@@ -84,7 +85,7 @@ async function runTypeCheck(workerId: number, pkgPath: string): Promise<void> {
       if (code === 0) {
         console.log(
           "%s %s %s",
-          chalk.magenta.bold(`wk-${workerId}`),
+          chalk.blueBright.bold(`wk-${workerId}`),
           chalk.bold.green("Ok"),
           name,
         );
@@ -94,31 +95,4 @@ async function runTypeCheck(workerId: number, pkgPath: string): Promise<void> {
       }
     });
   });
-}
-
-async function runWithConcurrency(
-  paths: string[],
-  fn: (workerId: number, path: string) => Promise<void>,
-  concurrency: number,
-): Promise<void> {
-  const queue = [...paths];
-
-  async function worker(id: number): Promise<void> {
-    while (queue.length > 0) {
-      const item = queue.shift();
-      if (item) {
-        await fn(id, item);
-      }
-    }
-  }
-
-  // const workers = Array.from({ length: concurrency }, () => worker());
-
-  console.log("Spawning %s workers", concurrency);
-  const workers = [];
-  for (let idx = 0; idx < concurrency; idx += 1) {
-    workers.push(worker(idx));
-  }
-
-  await Promise.all(workers);
 }
