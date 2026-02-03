@@ -47,16 +47,16 @@ jobs:
       - name: Run language check (lint)
         run: yarn ci lang_check
 
-  # rust-check:
-  #   name: Rust Check
-  #   runs-on: ubuntu-latest
-  #   if: ${{ always() }}
-  #   needs: [typecheck]
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #
-  #     - name: Setup Rust
-  #       uses: dtolnay/rust-toolchain@nightly
-  #
-  #     - name: Run cargo check
-  #       run: cargo check --workspace
+  rust-check:
+    name: Rust Check
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    needs: [typecheck]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@nightly
+
+      - name: Run cargo check
+        run: cargo check --workspace
