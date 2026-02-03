@@ -44,7 +44,7 @@ export async function buildInStages(stages: string[][], concurrency = 4) {
           child.stdout.on("data", (data) => {
             console.log(
               "%s %s",
-              chalk.blueBright.bold(`${workerId}|`),
+              chalk.blueBright.bold(`wk-${workerId}`),
               data.toString().trimEnd(),
             );
           });
@@ -52,7 +52,7 @@ export async function buildInStages(stages: string[][], concurrency = 4) {
           child.stderr.on("data", (data) => {
             console.log(
               "%s %s",
-              chalk.blueBright.bold(`${workerId}|`),
+              chalk.blueBright.bold(`wk-${workerId}`),
               data.toString().trimEnd(),
             );
           });
