@@ -2,6 +2,7 @@
 .secrets
 .input
 .env
+.event.json
 
 # Hidden files are not copied to Docker instances
 !dist

@@ -13,5 +13,5 @@ export async function doBuildPkgs() {
     [paths.teddsa_interface, paths.ksn_interface],
   ];
 
-  await buildInStages(stages);
+  await buildInStages(stages, 4);
 }
