@@ -53,3 +53,49 @@ export declare function napiSignRound2Ed25519(message: Array<number>, keyPackage
 export declare function napiAggregateEd25519(message: Array<number>, allCommitments: any, allSignatureShares: any, publicKeyPackage: Array<number>): NapiSignatureOutput
 /** Verify a signature against a public key. */
 export declare function napiVerifyEd25519(message: Array<number>, signature: Array<number>, publicKeyPackage: Array<number>): boolean
+/** Output from SSS split operation */
+export interface NapiSssSplitOutput {
+  key_packages: Array<NapiKeygenOutput>
+}
+/** Output from SSS extend operation */
+export interface NapiSssExtendOutput {
+  new_key_packages: Array<NapiKeygenOutput>
+  public_key_package: Array<number>
+}
+/**
+ * Split an Ed25519 signing share into SSS shares for distribution to KSN nodes.
+ *
+ * # Arguments
+ * * `signing_share` - The 32-byte signing share to split
+ * * `identifiers` - Array of 32-byte identifiers for each share (one per node)
+ * * `min_signers` - Minimum number of shares required to reconstruct (threshold)
+ *
+ * # Returns
+ * Key packages for each identifier
+ */
+export declare function napiSssSplitEd25519(signingShare: Array<number>, identifiers: Array<Array<number>>, minSigners: number): NapiSssSplitOutput
+/**
+ * Combine SSS shares to recover the original signing share.
+ *
+ * # Arguments
+ * * `key_packages` - Array of serialized key packages (at least min_signers required)
+ *
+ * # Returns
+ * The recovered 32-byte signing share
+ */
+export declare function napiSssCombineEd25519(keyPackages: Array<Array<number>>): Array<number>
+/**
+ * Extend existing shares to add new participants without changing the polynomial.
+ *
+ * This is used when a KSN node loses data and needs a new share computed from
+ * the remaining active nodes' shares.
+ *
+ * # Arguments
+ * * `key_packages` - Existing key packages from active nodes (at least min_signers required)
+ * * `new_identifiers` - 32-byte identifiers for the new participants
+ * * `public_key_package` - The existing public key package
+ *
+ * # Returns
+ * New key packages for the additional identifiers
+ */
+export declare function napiSssExtendEd25519(keyPackages: Array<Array<number>>, newIdentifiers: Array<Array<number>>, publicKeyPackage: Array<number>): NapiSssExtendOutput

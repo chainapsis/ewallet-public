@@ -9,6 +9,7 @@ import { keyshareV2Register } from "@oko-wallet-ksn-server/routes/key_share_v2/r
 import { keyshareV2Check } from "@oko-wallet-ksn-server/routes/key_share_v2/check";
 import { getKeysharesV2 } from "@oko-wallet-ksn-server/routes/key_share_v2/get_key_shares";
 import { keyshareV2Reshare } from "@oko-wallet-ksn-server/routes/key_share_v2/reshare";
+import { keyshareV2ReshareRegister } from "@oko-wallet-ksn-server/routes/key_share_v2/reshare_register";
 import type { ServerState } from "@oko-wallet-ksn-server/state";
 import { mockOAuthMiddleware } from "./mock_oauth";
 
@@ -58,6 +59,13 @@ export function createKsnApp(
     commitRevealMiddleware("reshare"),
     mockOAuthMiddleware,
     keyshareV2Reshare,
+  );
+
+  app.post(
+    "/keyshare/v2/reshare/register",
+    commitRevealMiddleware("reshare_register"),
+    mockOAuthMiddleware,
+    keyshareV2ReshareRegister,
   );
 
   return app;
