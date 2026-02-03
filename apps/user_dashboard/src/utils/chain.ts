@@ -1,20 +1,15 @@
-/**
- * Chain utility functions
- */
-
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
-
-export const ETHEREUM_MAINNET_CHAIN_ID = "eip155:1";
-export const SOLANA_MAINNET_CHAIN_ID = "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp";
 
 import type {
   CosmosChainInfo,
   ModularChainInfo,
 } from "@oko-wallet-user-dashboard/types/chain";
 
+export const ETHEREUM_MAINNET_CHAIN_ID = "eip155:1";
+export const SOLANA_MAINNET_CHAIN_ID =
+  "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp";
 
 const chainIdentifierCache = new Map<string, string>();
-
 
 export function getChainIdentifier(chainId: string): string {
   let identifier = chainIdentifierCache.get(chainId);
@@ -93,7 +88,6 @@ export function hasCosmosSupport(chainInfo: ModularChainInfo): boolean {
 export function hasEvmSupport(chainInfo: ModularChainInfo): boolean {
   return chainInfo.evm !== undefined;
 }
-
 
 export function hasSVMSupport(chainInfo: ModularChainInfo): boolean {
   return chainInfo.svm !== undefined;
