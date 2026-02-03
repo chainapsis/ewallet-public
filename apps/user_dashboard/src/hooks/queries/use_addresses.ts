@@ -107,7 +107,7 @@ export function useChainAddress(chainInfo: ModularChainInfo | undefined) {
 export function useCosmosAddresses() {
   const okoCosmos = useSDKState(selectCosmosSDK);
   const isInitialized = useSDKState(selectCosmosInitialized);
-  const { enabledChains } = useEnabledChains();
+  const { chains: enabledChains } = useEnabledChains();
 
   const cosmosChainIds = useMemo(
     () =>
