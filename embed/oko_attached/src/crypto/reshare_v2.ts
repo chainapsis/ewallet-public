@@ -1,4 +1,7 @@
-import type { KeyShareNodeMetaWithNodeStatusInfo } from "@oko-wallet/oko-types/tss";
+import type {
+  KeyShareNodeMetaWithNodeStatusInfo,
+  NodeStatusInfo,
+} from "@oko-wallet/oko-types/tss";
 import type {
   NodeNameAndEndpoint,
   UserKeySharePointByNode,
@@ -13,6 +16,12 @@ import type { Bytes32, Bytes33 } from "@oko-wallet/bytes";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { PublicKeyPackageRaw } from "@oko-wallet/oko-types/teddsa";
 import type { ReshareRequestV2 } from "@oko-wallet/oko-types/user";
+
+import type { ClientCommitRevealSession } from "./commit_reveal/types";
+import {
+  createKsnCommitRevealParams,
+  createOkoApiCommitRevealParams,
+} from "./commit_reveal/signature";
 
 import {
   type KeySharesByNode,
@@ -127,12 +136,14 @@ export interface ReshareV2Result {
  * @param authType - Authentication type
  * @param secp256k1 - secp256k1 wallet info (needsReshare flag determines if reshare is needed)
  * @param ed25519 - ed25519 wallet info (needsReshare flag determines if reshare is needed)
+ * @param session - Commit-reveal session for frontrunning protection
  */
 export async function reshareUserKeySharesV2(
   idToken: string,
   authType: AuthType,
   secp256k1: ReshareWalletInfoSecp256k1,
   ed25519: ReshareWalletInfoEd25519,
+  session: ClientCommitRevealSession,
 ): Promise<Result<ReshareV2Result, string>> {
   const secp256k1NeedsReshare = secp256k1.needsReshare;
   const ed25519NeedsReshare = ed25519.needsReshare;
@@ -178,6 +189,7 @@ export async function reshareUserKeySharesV2(
       secp256k1.keyshareNodeMeta.threshold,
       authType,
       { secp256k1: secp256k1.publicKey.toHex() },
+      session,
     ),
     requestKeySharesV2(
       idToken,
@@ -185,6 +197,7 @@ export async function reshareUserKeySharesV2(
       ed25519.keyshareNodeMeta.threshold,
       authType,
       { ed25519: ed25519.publicKey.toHex() },
+      session,
     ),
   ]);
 
@@ -360,12 +373,29 @@ export async function reshareUserKeySharesV2(
           ed25519ResharedNodes.push(nodeInfo.node);
         }
 
+        // Create commit-reveal params for this node
+        const apiName = isNewNode ? "reshare_register" : "reshare";
+        const commitRevealRes = createKsnCommitRevealParams(
+          session,
+          nodeInfo.node.endpoint,
+          apiName,
+          true, // cr_final: true - reshare/reshare_register is the final KSN call
+        );
+        if (!commitRevealRes.success) {
+          return {
+            success: false,
+            err: commitRevealRes.err,
+          } as const;
+        }
+        const commitRevealParams = commitRevealRes.data;
+
         if (isNewNode) {
           return reshareRegisterV2(
             nodeInfo.node.endpoint,
             idToken,
             authType,
             wallets,
+            commitRevealParams,
           );
         } else {
           return reshareKeySharesV2(
@@ -373,6 +403,7 @@ export async function reshareUserKeySharesV2(
             idToken,
             authType,
             wallets,
+            commitRevealParams,
           );
         }
       }),
@@ -407,6 +438,16 @@ export async function reshareUserKeySharesV2(
       };
     }
 
+    // Create commit-reveal params for oko_api reshare
+    const reshareCommitRevealRes = createOkoApiCommitRevealParams(
+      session,
+      "reshare",
+      true, // cr_final: true - reshare is the final oko_api call
+    );
+    if (!reshareCommitRevealRes.success) {
+      return { success: false, err: reshareCommitRevealRes.err };
+    }
+
     const updateRes = await makeAuthorizedOkoApiRequest<ReshareRequestV2, void>(
       "user/reshare",
       idToken,
@@ -414,6 +455,7 @@ export async function reshareUserKeySharesV2(
         wallets: reshareWallets,
       },
       TSS_V2_ENDPOINT,
+      reshareCommitRevealRes.data,
     );
     if (!updateRes.success) {
       return {
@@ -463,6 +505,284 @@ export async function reshareUserKeySharesV2(
     success: true,
     data: {
       keyshare1Secp256k1: secp256k1Result.originalSecret,
+      keyPackageEd25519: Buffer.from(
+        JSON.stringify(keyPackageToRaw(keyPackage)),
+      ).toString("hex"),
+      publicKeyPackageEd25519: Buffer.from(
+        JSON.stringify(publicKeyPackageRaw),
+      ).toString("hex"),
+    },
+  };
+}
+
+export interface ExpandAndSendReshareParams {
+  idToken: string;
+  authType: AuthType;
+  session: ClientCommitRevealSession;
+  nodesNeedingReshare: NodeStatusInfo[];
+  secp256k1?: {
+    shares: UserKeySharePointByNode[];
+    threshold: number;
+    publicKey: string;
+  };
+  ed25519?: {
+    shares: TeddsaKeyShareByNode[];
+    threshold: number;
+    verifyingKey: Bytes32;
+    publicKey: string;
+  };
+}
+
+export interface ExpandAndSendReshareResult {
+  keyshare1Secp256k1?: string;
+  signingShare?: Bytes32;
+}
+
+export async function expandAndSendReshareV2(
+  params: ExpandAndSendReshareParams,
+): Promise<Result<ExpandAndSendReshareResult, string>> {
+  const {
+    idToken,
+    authType,
+    session,
+    nodesNeedingReshare,
+    secp256k1,
+    ed25519,
+  } = params;
+
+  // Validate at least one wallet type is provided
+  if (!secp256k1 && !ed25519) {
+    return {
+      success: false,
+      err: "At least one of secp256k1 or ed25519 must be provided",
+    };
+  }
+
+  // 1. Expand secp256k1 shares (if provided)
+  let secp256k1ExpandRes:
+    | Awaited<ReturnType<typeof runExpandShares>>
+    | undefined;
+  let keyshare1Secp256k1: string | undefined;
+
+  if (secp256k1) {
+    secp256k1ExpandRes = await runExpandShares(
+      secp256k1.shares,
+      nodesNeedingReshare,
+      secp256k1.threshold,
+    );
+    if (!secp256k1ExpandRes.success) {
+      return { success: false, err: secp256k1ExpandRes.err };
+    }
+    keyshare1Secp256k1 = secp256k1ExpandRes.data.original_secret.toHex();
+  }
+
+  // 2. Expand ed25519 shares (if provided)
+  let ed25519ExpandRes:
+    | Awaited<ReturnType<typeof expandTeddsaSigningShare>>
+    | undefined;
+  let signingShare: Bytes32 | undefined;
+
+  if (ed25519) {
+    ed25519ExpandRes = await expandTeddsaSigningShare(
+      ed25519.shares,
+      nodesNeedingReshare,
+      ed25519.threshold,
+      ed25519.verifyingKey,
+    );
+    if (!ed25519ExpandRes.success) {
+      return { success: false, err: ed25519ExpandRes.err };
+    }
+    signingShare = ed25519ExpandRes.data.original_signing_share;
+  }
+
+  // 3. Send reshared shares to nodes needing reshare
+  const sendResults = await Promise.all(
+    nodesNeedingReshare.map(async (node) => {
+      const commitRevealRes = createKsnCommitRevealParams(
+        session,
+        node.endpoint,
+        "reshare_register",
+        true, // cr_final: true - reshare_register is the final KSN call
+      );
+      if (!commitRevealRes.success) {
+        return { success: false, err: commitRevealRes.err };
+      }
+
+      // Build wallets payload
+      const wallets: {
+        secp256k1?: { public_key: string; share: string };
+        ed25519?: { public_key: string; share: string };
+      } = {};
+
+      if (secp256k1 && secp256k1ExpandRes?.success) {
+        const share = secp256k1ExpandRes.data.reshared_user_key_shares.find(
+          (s) => s.node.endpoint === node.endpoint,
+        );
+        if (!share) {
+          return {
+            success: false,
+            err: `secp256k1 share not found for node ${node.name}`,
+          };
+        }
+        wallets.secp256k1 = {
+          public_key: secp256k1.publicKey,
+          share: encodePoint256ToKeyShareString(share.share),
+        };
+      }
+
+      if (ed25519 && ed25519ExpandRes?.success) {
+        const share = ed25519ExpandRes.data.reshared_shares.find(
+          (s) => s.node.endpoint === node.endpoint,
+        );
+        if (!share) {
+          return {
+            success: false,
+            err: `ed25519 share not found for node ${node.name}`,
+          };
+        }
+        wallets.ed25519 = {
+          public_key: ed25519.publicKey,
+          share: teddsaKeyShareToHex(share.share),
+        };
+      }
+
+      return reshareRegisterV2(
+        node.endpoint,
+        idToken,
+        authType,
+        wallets,
+        commitRevealRes.data,
+      );
+    }),
+  );
+
+  const errResults = sendResults.filter((r) => !r.success);
+  if (errResults.length > 0) {
+    return {
+      success: false,
+      err: errResults.map((r) => (r as { err: string }).err).join("\n"),
+    };
+  }
+
+  // 4. Update Oko API reshare status
+  const reshareCommitRevealRes = createOkoApiCommitRevealParams(
+    session,
+    "reshare",
+    true, // cr_final: true - reshare is the final oko_api call
+  );
+  if (!reshareCommitRevealRes.success) {
+    return { success: false, err: reshareCommitRevealRes.err };
+  }
+
+  // Build wallets for oko_api
+  const reshareWallets: ReshareRequestV2["wallets"] = {};
+  if (secp256k1) {
+    reshareWallets.secp256k1 = {
+      public_key: secp256k1.publicKey,
+      reshared_key_shares: nodesNeedingReshare.map((n) => ({
+        name: n.name,
+        endpoint: n.endpoint,
+      })),
+    };
+  }
+  if (ed25519) {
+    reshareWallets.ed25519 = {
+      public_key: ed25519.publicKey,
+      reshared_key_shares: nodesNeedingReshare.map((n) => ({
+        name: n.name,
+        endpoint: n.endpoint,
+      })),
+    };
+  }
+
+  const updateRes = await makeAuthorizedOkoApiRequest<ReshareRequestV2, void>(
+    "user/reshare",
+    idToken,
+    { wallets: reshareWallets },
+    TSS_V2_ENDPOINT,
+    reshareCommitRevealRes.data,
+  );
+  if (!updateRes.success) {
+    console.warn(
+      "[reshare_v2] Failed to update reshare status:",
+      updateRes.err,
+    );
+  }
+
+  return {
+    success: true,
+    data: {
+      keyshare1Secp256k1,
+      signingShare,
+    },
+  };
+}
+
+/**
+ * Parameters for buildKeyPackageResult.
+ */
+export interface BuildKeyPackageParams {
+  signingShare: Bytes32;
+  verifyingKey: Bytes32;
+  serverVerifyingShare: Bytes32;
+  threshold: number;
+}
+
+/**
+ * Result of buildKeyPackageResult.
+ */
+export interface BuildKeyPackageResult {
+  keyPackageEd25519: string; // hex-encoded KeyPackageRaw JSON
+  publicKeyPackageEd25519: string; // hex-encoded PublicKeyPackageRaw JSON
+}
+
+/**
+ * Build KeyPackage and PublicKeyPackage from signing share.
+ *
+ * This is the common logic for reconstructing ed25519 key packages
+ * after combining or expanding shares.
+ */
+export function buildKeyPackageResult(
+  params: BuildKeyPackageParams,
+): Result<BuildKeyPackageResult, string> {
+  const { signingShare, verifyingKey, serverVerifyingShare, threshold } =
+    params;
+
+  const clientIdentifierRes = getClientFrostIdentifier();
+  if (!clientIdentifierRes.success) {
+    return { success: false, err: clientIdentifierRes.err };
+  }
+
+  const serverIdentifierRes = getServerFrostIdentifier();
+  if (!serverIdentifierRes.success) {
+    return { success: false, err: serverIdentifierRes.err };
+  }
+
+  const keyPackage = reconstructKeyPackage(
+    signingShare,
+    clientIdentifierRes.data,
+    verifyingKey,
+    threshold,
+  );
+
+  const clientVerifyingShare = computeVerifyingShare(signingShare);
+  const publicKeyPackageRaw: PublicKeyPackageRaw = {
+    verifying_shares: [
+      {
+        identifier: clientIdentifierRes.data.toHex(),
+        share: [...clientVerifyingShare.toUint8Array()],
+      },
+      {
+        identifier: serverIdentifierRes.data.toHex(),
+        share: [...serverVerifyingShare.toUint8Array()],
+      },
+    ],
+    verifying_key: [...verifyingKey.toUint8Array()],
+  };
+
+  return {
+    success: true,
+    data: {
       keyPackageEd25519: Buffer.from(
         JSON.stringify(keyPackageToRaw(keyPackage)),
       ).toString("hex"),

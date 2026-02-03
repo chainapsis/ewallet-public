@@ -277,9 +277,9 @@ describe("commit_reveal_middleware_test", () => {
       expect(response.body.success).toBe(true);
     });
 
-    it("should pass middleware with valid signature for sign_in_reshare operation", async () => {
+    it("should pass middleware with valid signature for sign_in operation with reshare", async () => {
       const ctx = createTestContext({
-        operationType: "sign_in_reshare",
+        operationType: "sign_in",
         apiName: "reshare",
       });
       await createSession(pool, ctx);
@@ -302,9 +302,9 @@ describe("commit_reveal_middleware_test", () => {
       expect(response.body.success).toBe(true);
     });
 
-    it("should pass middleware with valid signature for register_reshare operation", async () => {
+    it("should pass middleware with valid signature for sign_in operation with reshare_register", async () => {
       const ctx = createTestContext({
-        operationType: "register_reshare",
+        operationType: "sign_in",
         apiName: "reshare_register",
       });
       await createSession(pool, ctx);
@@ -328,6 +328,31 @@ describe("commit_reveal_middleware_test", () => {
     });
 
     it("should pass middleware with valid signature for add_ed25519 operation", async () => {
+      const ctx = createTestContext({
+        operationType: "add_ed25519",
+        apiName: "register_ed25519",
+      });
+      await createSession(pool, ctx);
+
+      const signature = createRevealSignature(
+        ctx,
+        mockServerKeypair.publicKey.toHex(),
+      );
+
+      const response = await request(app)
+        .post("/test/register_ed25519")
+        .set("Authorization", `Bearer ${ctx.idToken}`)
+        .send({
+          cr_session_id: ctx.sessionId,
+          cr_signature: signature,
+          auth_type: ctx.authType,
+        })
+        .expect(200);
+
+      expect(response.body.success).toBe(true);
+    });
+
+    it("should pass middleware with valid signature for add_ed25519 operation with register_ed25519", async () => {
       const ctx = createTestContext({
         operationType: "add_ed25519",
         apiName: "register_ed25519",
@@ -519,8 +544,8 @@ describe("commit_reveal_middleware_test", () => {
   describe("operation-api validation", () => {
     it("should return 400 when api is not allowed for operation", async () => {
       const ctx = createTestContext({
-        operationType: "sign_in", // sign_in only allows get_key_shares
-        apiName: "register", // register is for sign_up
+        operationType: "sign_in", // sign_in doesn't allow register_ed25519
+        apiName: "register_ed25519", // register_ed25519 is for add_ed25519 only
       });
       await createSession(pool, ctx);
 
@@ -530,7 +555,7 @@ describe("commit_reveal_middleware_test", () => {
       );
 
       const response = await request(app)
-        .post("/test/register") // Trying to call register with sign_in operation
+        .post("/test/register_ed25519") // Trying to call register_ed25519 with sign_in operation
         .set("Authorization", `Bearer ${ctx.idToken}`)
         .send({
           cr_session_id: ctx.sessionId,
@@ -544,9 +569,9 @@ describe("commit_reveal_middleware_test", () => {
       expect(response.body.msg).toContain("not allowed");
     });
 
-    it("should allow get_key_shares for sign_in_reshare operation", async () => {
+    it("should allow get_key_shares for sign_in operation", async () => {
       const ctx = createTestContext({
-        operationType: "sign_in_reshare",
+        operationType: "sign_in",
         apiName: "get_key_shares",
       });
       await createSession(pool, ctx);
@@ -569,9 +594,9 @@ describe("commit_reveal_middleware_test", () => {
       expect(response.body.success).toBe(true);
     });
 
-    it("should allow get_key_shares for register_reshare operation", async () => {
+    it("should allow get_key_shares for add_ed25519 operation", async () => {
       const ctx = createTestContext({
-        operationType: "register_reshare",
+        operationType: "add_ed25519",
         apiName: "get_key_shares",
       });
       await createSession(pool, ctx);
@@ -845,10 +870,9 @@ describe("commit_reveal_middleware_test", () => {
     });
 
     it("should return 409 when same API is called twice with same session (pre-check)", async () => {
-      // Use sign_in_reshare because get_key_shares is NOT the final API
-      // (reshare is final), so session stays COMMITTED after first call
+      // Use sign_in with cr_final: false so session stays COMMITTED after first call
       const ctx = createTestContext({
-        operationType: "sign_in_reshare",
+        operationType: "sign_in",
         apiName: "get_key_shares",
       });
       await createSession(pool, ctx);
@@ -858,7 +882,7 @@ describe("commit_reveal_middleware_test", () => {
         mockServerKeypair.publicKey.toHex(),
       );
 
-      // First call should succeed
+      // First call should succeed (cr_final: false keeps session COMMITTED)
       await request(app)
         .post("/test/get_key_shares")
         .set("Authorization", `Bearer ${ctx.idToken}`)
@@ -866,6 +890,7 @@ describe("commit_reveal_middleware_test", () => {
           cr_session_id: ctx.sessionId,
           cr_signature: signature,
           auth_type: ctx.authType,
+          cr_final: false,
         })
         .expect(200);
 
@@ -880,6 +905,7 @@ describe("commit_reveal_middleware_test", () => {
           cr_session_id: ctx.sessionId,
           cr_signature: signature,
           auth_type: ctx.authType,
+          cr_final: false,
         })
         .expect(409);
 
@@ -892,7 +918,7 @@ describe("commit_reveal_middleware_test", () => {
       // verification fails first because the message includes the api_name.
       // So this returns 400 INVALID_SIGNATURE, not 409.
       const ctx = createTestContext({
-        operationType: "sign_in_reshare", // sign_in_reshare allows multiple APIs
+        operationType: "sign_in", // sign_in allows multiple APIs
         apiName: "get_key_shares",
       });
       await createSession(pool, ctx);
@@ -910,6 +936,7 @@ describe("commit_reveal_middleware_test", () => {
           cr_session_id: ctx.sessionId,
           cr_signature: signature,
           auth_type: ctx.authType,
+          cr_final: false,
         })
         .expect(200);
 
@@ -930,9 +957,9 @@ describe("commit_reveal_middleware_test", () => {
       expect(response.body.code).toBe("INVALID_SIGNATURE");
     });
 
-    it("should allow different APIs with different signatures for sign_in_reshare operation", async () => {
+    it("should allow different APIs with different signatures for sign_in operation", async () => {
       const ctx1 = createTestContext({
-        operationType: "sign_in_reshare",
+        operationType: "sign_in",
         apiName: "get_key_shares",
       });
       await createSession(pool, ctx1);
@@ -942,7 +969,7 @@ describe("commit_reveal_middleware_test", () => {
         mockServerKeypair.publicKey.toHex(),
       );
 
-      // First call to get_key_shares (non-final API)
+      // First call to get_key_shares (cr_final: false)
       await request(app)
         .post("/test/get_key_shares")
         .set("Authorization", `Bearer ${ctx1.idToken}`)
@@ -950,6 +977,7 @@ describe("commit_reveal_middleware_test", () => {
           cr_session_id: ctx1.sessionId,
           cr_signature: signature1,
           auth_type: ctx1.authType,
+          cr_final: false,
         })
         .expect(200);
 
@@ -966,7 +994,7 @@ describe("commit_reveal_middleware_test", () => {
         mockServerKeypair.publicKey.toHex(),
       );
 
-      // Call reshare (final API) with different signature
+      // Call reshare (cr_final: true) with different signature
       const response = await request(app)
         .post("/test/reshare")
         .set("Authorization", `Bearer ${ctx2.idToken}`)
@@ -974,6 +1002,7 @@ describe("commit_reveal_middleware_test", () => {
           cr_session_id: ctx2.sessionId,
           cr_signature: signature2,
           auth_type: ctx2.authType,
+          cr_final: true,
         })
         .expect(200);
 
@@ -981,11 +1010,11 @@ describe("commit_reveal_middleware_test", () => {
     });
   });
 
-  describe("final API and session completion", () => {
-    it("should update session to COMPLETED when final API is called for sign_in", async () => {
+  describe("cr_final and session completion", () => {
+    it("should update session to COMPLETED when cr_final is true for sign_in", async () => {
       const ctx = createTestContext({
         operationType: "sign_in",
-        apiName: "get_key_shares", // final API for sign_in
+        apiName: "get_key_shares",
       });
       await createSession(pool, ctx);
 
@@ -1001,6 +1030,7 @@ describe("commit_reveal_middleware_test", () => {
           cr_session_id: ctx.sessionId,
           cr_signature: signature,
           auth_type: ctx.authType,
+          cr_final: true,
         })
         .expect(200);
 
@@ -1018,10 +1048,10 @@ describe("commit_reveal_middleware_test", () => {
       expect(sessionRes.data?.state).toBe("COMPLETED");
     });
 
-    it("should update session to COMPLETED when final API is called for sign_up", async () => {
+    it("should update session to COMPLETED when cr_final is true for sign_up", async () => {
       const ctx = createTestContext({
         operationType: "sign_up",
-        apiName: "register", // final API for sign_up
+        apiName: "register",
       });
       await createSession(pool, ctx);
 
@@ -1037,6 +1067,7 @@ describe("commit_reveal_middleware_test", () => {
           cr_session_id: ctx.sessionId,
           cr_signature: signature,
           auth_type: ctx.authType,
+          cr_final: true,
         })
         .expect(200);
 
@@ -1054,10 +1085,10 @@ describe("commit_reveal_middleware_test", () => {
       expect(sessionRes.data?.state).toBe("COMPLETED");
     });
 
-    it("should NOT update session to COMPLETED when non-final API is called for sign_in_reshare", async () => {
+    it("should NOT update session to COMPLETED when cr_final is false", async () => {
       const ctx = createTestContext({
-        operationType: "sign_in_reshare",
-        apiName: "get_key_shares", // NOT final API for sign_in_reshare (final is reshare)
+        operationType: "sign_in",
+        apiName: "get_key_shares",
       });
       await createSession(pool, ctx);
 
@@ -1073,6 +1104,7 @@ describe("commit_reveal_middleware_test", () => {
           cr_session_id: ctx.sessionId,
           cr_signature: signature,
           auth_type: ctx.authType,
+          cr_final: false,
         })
         .expect(200);
 
@@ -1090,10 +1122,10 @@ describe("commit_reveal_middleware_test", () => {
       expect(sessionRes.data?.state).toBe("COMMITTED");
     });
 
-    it("should update session to COMPLETED when final API is called for sign_in_reshare", async () => {
+    it("should update session to COMPLETED when cr_final is true for sign_in with reshare", async () => {
       const ctx = createTestContext({
-        operationType: "sign_in_reshare",
-        apiName: "reshare", // final API for sign_in_reshare
+        operationType: "sign_in",
+        apiName: "reshare",
       });
       await createSession(pool, ctx);
 
@@ -1109,6 +1141,7 @@ describe("commit_reveal_middleware_test", () => {
           cr_session_id: ctx.sessionId,
           cr_signature: signature,
           auth_type: ctx.authType,
+          cr_final: true,
         })
         .expect(200);
 
@@ -1126,10 +1159,47 @@ describe("commit_reveal_middleware_test", () => {
       expect(sessionRes.data?.state).toBe("COMPLETED");
     });
 
-    it("should update session to COMPLETED when final API is called for add_ed25519", async () => {
+    it("should update session to COMPLETED when cr_final is true for add_ed25519", async () => {
       const ctx = createTestContext({
         operationType: "add_ed25519",
-        apiName: "get_key_shares", // final API for add_ed25519
+        apiName: "register_ed25519",
+      });
+      await createSession(pool, ctx);
+
+      const signature = createRevealSignature(
+        ctx,
+        mockServerKeypair.publicKey.toHex(),
+      );
+
+      await request(app)
+        .post("/test/register_ed25519")
+        .set("Authorization", `Bearer ${ctx.idToken}`)
+        .send({
+          cr_session_id: ctx.sessionId,
+          cr_signature: signature,
+          auth_type: ctx.authType,
+          cr_final: true,
+        })
+        .expect(200);
+
+      // Wait for res.on('finish') to complete
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Verify session is COMPLETED
+      const sessionRes = await getCommitRevealSessionBySessionId(
+        pool,
+        ctx.sessionId,
+      );
+      if (!sessionRes.success) {
+        throw new Error(`Failed to get session: ${sessionRes.err}`);
+      }
+      expect(sessionRes.data?.state).toBe("COMPLETED");
+    });
+
+    it("should NOT update session to COMPLETED when cr_final is false for add_ed25519", async () => {
+      const ctx = createTestContext({
+        operationType: "add_ed25519",
+        apiName: "get_key_shares",
       });
       await createSession(pool, ctx);
 
@@ -1145,13 +1215,14 @@ describe("commit_reveal_middleware_test", () => {
           cr_session_id: ctx.sessionId,
           cr_signature: signature,
           auth_type: ctx.authType,
+          cr_final: false,
         })
         .expect(200);
 
       // Wait for res.on('finish') to complete
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // Verify session is COMPLETED
+      // Verify session is still COMMITTED (not COMPLETED)
       const sessionRes = await getCommitRevealSessionBySessionId(
         pool,
         ctx.sessionId,
@@ -1159,13 +1230,13 @@ describe("commit_reveal_middleware_test", () => {
       if (!sessionRes.success) {
         throw new Error(`Failed to get session: ${sessionRes.err}`);
       }
-      expect(sessionRes.data?.state).toBe("COMPLETED");
+      expect(sessionRes.data?.state).toBe("COMMITTED");
     });
 
-    it("should NOT update session to COMPLETED when API fails", async () => {
+    it("should NOT update session to COMPLETED when API fails even with cr_final true", async () => {
       const ctx = createTestContext({
         operationType: "sign_in",
-        apiName: "get_key_shares", // final API for sign_in
+        apiName: "get_key_shares",
       });
       await createSession(pool, ctx);
 
@@ -1181,6 +1252,7 @@ describe("commit_reveal_middleware_test", () => {
           cr_session_id: ctx.sessionId,
           cr_signature: signature,
           auth_type: ctx.authType,
+          cr_final: true,
         })
         .expect(500);
 

@@ -72,6 +72,10 @@ export type CheckEmailResponseV2 =
   | CheckEmailResponseV2NeedsEd25519Keygen
   | CheckEmailResponseV2BothWallets;
 
+export interface SignInRequest {
+  auth_type: AuthType;
+}
+
 export interface SignInResponse {
   token: string;
   user: {
@@ -133,6 +137,16 @@ export interface ReshareRequestV2 {
     secp256k1?: ReshareWalletInfo;
     ed25519?: ReshareWalletInfo;
   };
+}
+
+export interface SaveReferralRequest {
+  origin: string;
+  utm_source: string | null;
+  utm_campaign: string | null;
+}
+
+export interface SaveReferralResponse {
+  referral_id: string;
 }
 
 export { NodeNameAndEndpoint };

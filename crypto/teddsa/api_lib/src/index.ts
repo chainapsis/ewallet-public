@@ -11,6 +11,7 @@ import type {
   OkoApiErrorResponse,
   OkoApiResponse,
 } from "@oko-wallet/oko-types/api_response";
+import type { CommitRevealParams } from "@oko-wallet/oko-types/commit_reveal";
 
 interface MiddlewareErrorResponse {
   error: string;
@@ -120,11 +121,13 @@ export async function reqKeygenEd25519(
   endpoint: string,
   payload: KeygenEd25519RequestBody,
   authToken: string,
+  commitReveal?: CommitRevealParams,
 ) {
+  const body = commitReveal ? { ...payload, ...commitReveal } : payload;
   const resp: OkoApiResponse<SignInResponseV2> = await makePostRequest(
     endpoint,
     "keygen_ed25519",
-    payload,
+    body,
     authToken,
   );
   return resp;
