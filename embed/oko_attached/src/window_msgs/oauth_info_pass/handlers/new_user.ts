@@ -139,7 +139,7 @@ export async function handleNewUserV2(
     };
   }
 
-  // 6. Call V2 keygen API with both curve types
+  // 6. Call Oko API keygenV2
   const keygenCommitRevealRes = createOkoApiCommitRevealParams(
     session,
     "keygen",
@@ -154,6 +154,7 @@ export async function handleNewUserV2(
       },
     };
   }
+
   const reqKeygenV2Res = await reqKeygenV2(
     TSS_V2_ENDPOINT,
     {
