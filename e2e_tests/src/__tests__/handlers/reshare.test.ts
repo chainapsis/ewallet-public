@@ -14,7 +14,7 @@ import {
   createRevealSignature,
 } from "@e2e/utils/signature";
 
-describe("op: reshare (upsert)", () => {
+describe("e2e_test_reshare", () => {
   let ctx: TestContext;
 
   const TEST_USER_ID = "reshare_user_123";
@@ -76,14 +76,12 @@ describe("op: reshare (upsert)", () => {
     const sss = sssSplitEd25519(signingShare, nodeIdentifiers, 2);
 
     // Commit to oko_api
-    const okoCommit = await request(ctx.okoApiApp)
-      .post("/tss/v2/commit")
-      .send({
-        session_id: sessionId,
-        operation_type: "sign_up",
-        client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
-        id_token_hash: idTokenHash,
-      });
+    const okoCommit = await request(ctx.okoApiApp).post("/tss/v2/commit").send({
+      session_id: sessionId,
+      operation_type: "sign_up",
+      client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
+      id_token_hash: idTokenHash,
+    });
     expect(okoCommit.status).toBe(200);
     const okoNodePk = okoCommit.body.data.node_pubkey;
 
@@ -128,8 +126,14 @@ describe("op: reshare (upsert)", () => {
         .send({
           auth_type: AUTH_TYPE,
           wallets: {
-            secp256k1: { public_key: secp256k1PublicKey, share: nodeShares[i].secp256k1Share },
-            ed25519: { public_key: ed25519PublicKeyHex, share: nodeShares[i].ed25519Share },
+            secp256k1: {
+              public_key: secp256k1PublicKey,
+              share: nodeShares[i].secp256k1Share,
+            },
+            ed25519: {
+              public_key: ed25519PublicKeyHex,
+              share: nodeShares[i].ed25519Share,
+            },
           },
           cr_session_id: sessionId,
           cr_signature: regSig,
@@ -153,10 +157,15 @@ describe("op: reshare (upsert)", () => {
       .set("Authorization", `Bearer ${SIGNUP_ID_TOKEN}`)
       .send({
         auth_type: AUTH_TYPE,
-        keygen_2_secp256k1: { public_key: secp256k1PublicKey, private_share: "e".repeat(64) },
+        keygen_2_secp256k1: {
+          public_key: secp256k1PublicKey,
+          private_share: "e".repeat(64),
+        },
         keygen_2_ed25519: {
           key_package: serverOut.key_package,
-          public_key_package: Buffer.from(serverOut.public_key_package).toString("hex"),
+          public_key_package: Buffer.from(
+            serverOut.public_key_package,
+          ).toString("hex"),
           identifier: serverOut.identifier,
           public_key: ed25519Pk,
         },
@@ -174,14 +183,12 @@ describe("op: reshare (upsert)", () => {
     const idHash = computeIdTokenHash(AUTH_TYPE, SIGNIN_ID_TOKEN);
 
     // Commit oko_api & KSN with operation = reshare
-    const okoCommit = await request(ctx.okoApiApp)
-      .post("/tss/v2/commit")
-      .send({
-        session_id: sessionId,
-        operation_type: "reshare",
-        client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
-        id_token_hash: idHash,
-      });
+    const okoCommit = await request(ctx.okoApiApp).post("/tss/v2/commit").send({
+      session_id: sessionId,
+      operation_type: "reshare",
+      client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
+      id_token_hash: idHash,
+    });
     expect(okoCommit.status).toBe(200);
     const okoNodePk = okoCommit.body.data.node_pubkey;
 
@@ -199,7 +206,11 @@ describe("op: reshare (upsert)", () => {
       .post("/tss/v2/user/signin")
       .set("x-mock-user-id", TEST_USER_ID)
       .set("Authorization", `Bearer ${SIGNIN_ID_TOKEN}`)
-      .send({ auth_type: AUTH_TYPE, cr_session_id: sessionId, cr_signature: signinSig });
+      .send({
+        auth_type: AUTH_TYPE,
+        cr_session_id: sessionId,
+        cr_signature: signinSig,
+      });
     expect(signin.status).toBe(200);
 
     for (let i = 0; i < ctx.ksnApps.length; i++) {
@@ -230,8 +241,14 @@ describe("op: reshare (upsert)", () => {
         .send({
           auth_type: AUTH_TYPE,
           wallets: {
-            secp256k1: { public_key: secp256k1PublicKey, share: nodeShares[i].secp256k1Share },
-            ed25519: { public_key: ed25519PublicKeyHex, share: nodeShares[i].ed25519Share },
+            secp256k1: {
+              public_key: secp256k1PublicKey,
+              share: nodeShares[i].secp256k1Share,
+            },
+            ed25519: {
+              public_key: ed25519PublicKeyHex,
+              share: nodeShares[i].ed25519Share,
+            },
           },
           cr_session_id: sessionId,
           cr_signature: sig,
@@ -259,11 +276,15 @@ describe("op: reshare (upsert)", () => {
     ed25519PublicKeyHex = Buffer.from(edPk).toString("hex");
     secp256k1PublicKey = "03" + "a".repeat(64);
 
-    const sss = sssSplitEd25519(new Uint8Array(clientShares.signing_share), [
-      generateNodeIdentifier(0),
-      generateNodeIdentifier(1),
-      generateNodeIdentifier(2),
-    ], 2);
+    const sss = sssSplitEd25519(
+      new Uint8Array(clientShares.signing_share),
+      [
+        generateNodeIdentifier(0),
+        generateNodeIdentifier(1),
+        generateNodeIdentifier(2),
+      ],
+      2,
+    );
     nodeShares = [];
     for (let i = 0; i < 2; i++) {
       const ksnCommit = await request(ctx.ksnApps[i])
@@ -277,8 +298,13 @@ describe("op: reshare (upsert)", () => {
       expect(ksnCommit.status).toBe(200);
       const kpBytes = new Uint8Array(sss.key_packages[i].key_package);
       const shares = extractKeyPackageSharesEd25519(kpBytes);
-      const edShare = Buffer.from(shares.signing_share).toString("hex") + Buffer.from(shares.verifying_share).toString("hex");
-      nodeShares[i] = { secp256k1Share: generateSecp256k1Share(i), ed25519Share: edShare };
+      const edShare =
+        Buffer.from(shares.signing_share).toString("hex") +
+        Buffer.from(shares.verifying_share).toString("hex");
+      nodeShares[i] = {
+        secp256k1Share: generateSecp256k1Share(i),
+        ed25519Share: edShare,
+      };
 
       const regSig = createRevealSignature(
         clientKeypair.privateKey,
@@ -296,8 +322,14 @@ describe("op: reshare (upsert)", () => {
         .send({
           auth_type: AUTH_TYPE,
           wallets: {
-            secp256k1: { public_key: secp256k1PublicKey, share: nodeShares[i].secp256k1Share },
-            ed25519: { public_key: ed25519PublicKeyHex, share: nodeShares[i].ed25519Share },
+            secp256k1: {
+              public_key: secp256k1PublicKey,
+              share: nodeShares[i].secp256k1Share,
+            },
+            ed25519: {
+              public_key: ed25519PublicKeyHex,
+              share: nodeShares[i].ed25519Share,
+            },
           },
           cr_session_id: sessionId,
           cr_signature: regSig,
@@ -321,7 +353,9 @@ describe("op: reshare (upsert)", () => {
     const shareForNode2 = (() => {
       const kpBytes = new Uint8Array(sss.key_packages[2].key_package);
       const shares = extractKeyPackageSharesEd25519(kpBytes);
-      const edShare = Buffer.from(shares.signing_share).toString("hex") + Buffer.from(shares.verifying_share).toString("hex");
+      const edShare =
+        Buffer.from(shares.signing_share).toString("hex") +
+        Buffer.from(shares.verifying_share).toString("hex");
       return { secp256k1: generateSecp256k1Share(2), ed25519: edShare };
     })();
 
@@ -341,8 +375,14 @@ describe("op: reshare (upsert)", () => {
       .send({
         auth_type: AUTH_TYPE,
         wallets: {
-          secp256k1: { public_key: secp256k1PublicKey, share: shareForNode2.secp256k1 },
-          ed25519: { public_key: ed25519PublicKeyHex, share: shareForNode2.ed25519 },
+          secp256k1: {
+            public_key: secp256k1PublicKey,
+            share: shareForNode2.secp256k1,
+          },
+          ed25519: {
+            public_key: ed25519PublicKeyHex,
+            share: shareForNode2.ed25519,
+          },
         },
         cr_session_id: reshareSession,
         cr_signature: sig2,
@@ -382,7 +422,10 @@ describe("op: reshare (upsert)", () => {
       .send({
         auth_type: AUTH_TYPE,
         wallets: {
-          secp256k1: { public_key: secp256k1PublicKey, share: nodeShares[0].secp256k1Share },
+          secp256k1: {
+            public_key: secp256k1PublicKey,
+            share: nodeShares[0].secp256k1Share,
+          },
           // ed25519 missing
         },
         cr_session_id: sessionId,
@@ -425,7 +468,10 @@ describe("op: reshare (upsert)", () => {
         auth_type: AUTH_TYPE,
         wallets: {
           secp256k1: { public_key: secp256k1PublicKey, share: "ff".repeat(64) }, // wrong
-          ed25519: { public_key: ed25519PublicKeyHex, share: nodeShares[0].ed25519Share },
+          ed25519: {
+            public_key: ed25519PublicKeyHex,
+            share: nodeShares[0].ed25519Share,
+          },
         },
         cr_session_id: sessionId,
         cr_signature: sig,
@@ -467,8 +513,14 @@ describe("op: reshare (upsert)", () => {
       .send({
         auth_type: AUTH_TYPE,
         wallets: {
-          secp256k1: { public_key: secp256k1PublicKey, share: nodeShares[0].secp256k1Share },
-          ed25519: { public_key: ed25519PublicKeyHex, share: nodeShares[0].ed25519Share },
+          secp256k1: {
+            public_key: secp256k1PublicKey,
+            share: nodeShares[0].secp256k1Share,
+          },
+          ed25519: {
+            public_key: ed25519PublicKeyHex,
+            share: nodeShares[0].ed25519Share,
+          },
         },
         cr_session_id: sessionId,
         cr_signature: sig,
@@ -476,5 +528,4 @@ describe("op: reshare (upsert)", () => {
     expect(res.status).toBe(400);
     expect(res.body.code).toBe("INVALID_SIGNATURE");
   });
-
 });

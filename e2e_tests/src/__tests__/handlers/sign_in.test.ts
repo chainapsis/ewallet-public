@@ -14,7 +14,7 @@ import {
   createRevealSignature,
 } from "@e2e/utils/signature";
 
-describe("op: signin (sign_in flow)", () => {
+describe("e2e_test_sign_in", () => {
   let ctx: TestContext;
 
   const TEST_USER_ID = "existing_user_123";
@@ -192,14 +192,12 @@ describe("op: signin (sign_in flow)", () => {
     const idTokenHash = computeIdTokenHash(AUTH_TYPE, SIGNIN_ID_TOKEN);
 
     // oko_api commit
-    const okoCommit = await request(ctx.okoApiApp)
-      .post("/tss/v2/commit")
-      .send({
-        session_id: sessionId,
-        operation_type: "sign_in",
-        client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
-        id_token_hash: idTokenHash,
-      });
+    const okoCommit = await request(ctx.okoApiApp).post("/tss/v2/commit").send({
+      session_id: sessionId,
+      operation_type: "sign_in",
+      client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
+      id_token_hash: idTokenHash,
+    });
     expect(okoCommit.status).toBe(200);
     const okoNodePk = okoCommit.body.data.node_pubkey;
 
@@ -232,7 +230,11 @@ describe("op: signin (sign_in flow)", () => {
       .post("/tss/v2/user/signin")
       .set("x-mock-user-id", TEST_USER_ID)
       .set("Authorization", `Bearer ${SIGNIN_ID_TOKEN}`)
-      .send({ auth_type: AUTH_TYPE, cr_session_id: sessionId, cr_signature: signinSig });
+      .send({
+        auth_type: AUTH_TYPE,
+        cr_session_id: sessionId,
+        cr_signature: signinSig,
+      });
     expect(signinRes.status).toBe(200);
     expect(signinRes.body.success).toBe(true);
 
@@ -273,14 +275,12 @@ describe("op: signin (sign_in flow)", () => {
     const nonToken = "non_existent_token";
     const idTokenHash = computeIdTokenHash(AUTH_TYPE, nonToken);
 
-    const okoCommit = await request(ctx.okoApiApp)
-      .post("/tss/v2/commit")
-      .send({
-        session_id: sessionId,
-        operation_type: "sign_in",
-        client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
-        id_token_hash: idTokenHash,
-      });
+    const okoCommit = await request(ctx.okoApiApp).post("/tss/v2/commit").send({
+      session_id: sessionId,
+      operation_type: "sign_in",
+      client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
+      id_token_hash: idTokenHash,
+    });
     expect(okoCommit.status).toBe(200);
     const okoNodePk = okoCommit.body.data.node_pubkey;
 
@@ -297,7 +297,11 @@ describe("op: signin (sign_in flow)", () => {
       .post("/tss/v2/user/signin")
       .set("x-mock-user-id", "non_existent_user")
       .set("Authorization", `Bearer ${nonToken}`)
-      .send({ auth_type: AUTH_TYPE, cr_session_id: sessionId, cr_signature: sig });
+      .send({
+        auth_type: AUTH_TYPE,
+        cr_session_id: sessionId,
+        cr_signature: sig,
+      });
     expect(res.status).toBe(404);
     expect(res.body.code).toBe("USER_NOT_FOUND");
   });
@@ -308,14 +312,12 @@ describe("op: signin (sign_in flow)", () => {
     const sessionId = generateSessionId();
     const idTokenHash = computeIdTokenHash(AUTH_TYPE, SIGNIN_ID_TOKEN);
 
-    const okoCommit = await request(ctx.okoApiApp)
-      .post("/tss/v2/commit")
-      .send({
-        session_id: sessionId,
-        operation_type: "sign_in",
-        client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
-        id_token_hash: idTokenHash,
-      });
+    const okoCommit = await request(ctx.okoApiApp).post("/tss/v2/commit").send({
+      session_id: sessionId,
+      operation_type: "sign_in",
+      client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
+      id_token_hash: idTokenHash,
+    });
     expect(okoCommit.status).toBe(200);
     const okoNodePk = okoCommit.body.data.node_pubkey;
 
@@ -332,7 +334,11 @@ describe("op: signin (sign_in flow)", () => {
       .post("/tss/v2/user/signin")
       .set("x-mock-user-id", TEST_USER_ID)
       .set("Authorization", `Bearer ${SIGNIN_ID_TOKEN}`)
-      .send({ auth_type: AUTH_TYPE, cr_session_id: sessionId, cr_signature: sig });
+      .send({
+        auth_type: AUTH_TYPE,
+        cr_session_id: sessionId,
+        cr_signature: sig,
+      });
     expect(res.status).toBe(400);
     expect(res.body.code).toBe("INVALID_SIGNATURE");
   });
@@ -473,20 +479,22 @@ describe("op: signin (sign_in flow)", () => {
     const edPk = frostKeygen.public_key;
     const edPkHex = Buffer.from(edPk).toString("hex");
     const secpPk = "03" + "a".repeat(64);
-    const sss = sssSplitEd25519(new Uint8Array(shares.signing_share), [
-      generateNodeIdentifier(0),
-      generateNodeIdentifier(1),
-      generateNodeIdentifier(2),
-    ], 2);
+    const sss = sssSplitEd25519(
+      new Uint8Array(shares.signing_share),
+      [
+        generateNodeIdentifier(0),
+        generateNodeIdentifier(1),
+        generateNodeIdentifier(2),
+      ],
+      2,
+    );
 
-    const okoCommit = await request(ctx.okoApiApp)
-      .post("/tss/v2/commit")
-      .send({
-        session_id: sessionId,
-        operation_type: "sign_up",
-        client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
-        id_token_hash: idTokenHash,
-      });
+    const okoCommit = await request(ctx.okoApiApp).post("/tss/v2/commit").send({
+      session_id: sessionId,
+      operation_type: "sign_up",
+      client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
+      id_token_hash: idTokenHash,
+    });
     expect(okoCommit.status).toBe(200);
     const okoNodePk = okoCommit.body.data.node_pubkey;
 
@@ -503,7 +511,9 @@ describe("op: signin (sign_in flow)", () => {
       expect(ksnCommit.status).toBe(200);
       const kpBytes = new Uint8Array(sss.key_packages[i].key_package);
       const sh = extractKeyPackageSharesEd25519(kpBytes);
-      const edShare = Buffer.from(sh.signing_share).toString("hex") + Buffer.from(sh.verifying_share).toString("hex");
+      const edShare =
+        Buffer.from(sh.signing_share).toString("hex") +
+        Buffer.from(sh.verifying_share).toString("hex");
 
       const regSig = createRevealSignature(
         clientKeypair.privateKey,
@@ -546,10 +556,15 @@ describe("op: signin (sign_in flow)", () => {
       .set("Authorization", `Bearer ${SIGNUP_ID_TOKEN}`)
       .send({
         auth_type: AUTH_TYPE,
-        keygen_2_secp256k1: { public_key: secpPk, private_share: "e".repeat(64) },
+        keygen_2_secp256k1: {
+          public_key: secpPk,
+          private_share: "e".repeat(64),
+        },
         keygen_2_ed25519: {
           key_package: serverOut.key_package,
-          public_key_package: Buffer.from(serverOut.public_key_package).toString("hex"),
+          public_key_package: Buffer.from(
+            serverOut.public_key_package,
+          ).toString("hex"),
           identifier: serverOut.identifier,
           public_key: edPk,
         },
@@ -586,7 +601,11 @@ describe("op: signin (sign_in flow)", () => {
       .post("/tss/v2/user/signin")
       .set("x-mock-user-id", TEST_USER_ID)
       .set("Authorization", `Bearer ${SIGNIN_ID_TOKEN}`)
-      .send({ auth_type: AUTH_TYPE, cr_session_id: session2, cr_signature: signinSig2 });
+      .send({
+        auth_type: AUTH_TYPE,
+        cr_session_id: session2,
+        cr_signature: signinSig2,
+      });
     expect(signin2.status).toBe(200);
 
     // Try get_key_shares on third node with wrong public key → WALLET_NOT_FOUND
@@ -622,14 +641,19 @@ describe("op: signin (sign_in flow)", () => {
     expect(g3.body.code).toBe("WALLET_NOT_FOUND");
 
     // Report that node to oko_api with JWT (from keygen)
-    const nodeInfo = ctx.ksnUrls.map((url, i) => ({ name: `test_node_${i + 1}`, endpoint: url }));
+    const nodeInfo = ctx.ksnUrls.map((url, i) => ({
+      name: `test_node_${i + 1}`,
+      endpoint: url,
+    }));
     const reportRes = await request(ctx.okoApiApp)
       .post("/tss/v2/user/report_key_share_not_found")
       .set("Authorization", `Bearer ${jwt}`)
       .send({ nodes: [nodeInfo[2]] });
     expect(reportRes.status).toBe(200);
     expect(reportRes.body.success).toBe(true);
-    expect(reportRes.body.data.updated_count_secp256k1).toBeGreaterThanOrEqual(0);
+    expect(reportRes.body.data.updated_count_secp256k1).toBeGreaterThanOrEqual(
+      0,
+    );
     expect(reportRes.body.data.updated_count_ed25519).toBeGreaterThanOrEqual(0);
   });
 });

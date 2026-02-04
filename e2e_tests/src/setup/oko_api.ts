@@ -10,6 +10,8 @@ import { userSignInV2 } from "@oko-wallet-api/routes/tss_v2/user_signin";
 import { userReshareV2 } from "@oko-wallet-api/routes/tss_v2/user_reshare";
 import { reportKeyShareNotFound } from "@oko-wallet-api/routes/tss_v2/report_key_share_not_found";
 import { userJwtMiddlewareV2 } from "@oko-wallet-api/middleware/auth/keplr_auth";
+import { keygenEd25519 } from "@oko-wallet-api/routes/tss_v2/keygen_ed25519";
+import { runKeygen as runKeygenV1 } from "@oko-wallet-api/api/tss/v1/keygen";
 import { mockOAuthMiddleware } from "./mock_oauth";
 
 export interface OkoApiServerKeypair {
@@ -66,6 +68,48 @@ export function createOkoApiApp(
     userJwtMiddlewareV2,
     reportKeyShareNotFound,
   );
+
+  // v2 keygen ed25519 (commit-reveal + mock OAuth)
+  app.post(
+    "/tss/v2/keygen_ed25519",
+    commitRevealMiddleware("keygen_ed25519"),
+    mockOAuthMiddleware,
+    keygenEd25519,
+  );
+
+  // v1 keygen (secp256k1 only) using mock OAuth
+  app.post("/tss/v1/keygen", mockOAuthMiddleware, async (req, res) => {
+    const state = app.locals;
+    const oauthUser = res.locals.oauth_user;
+    const auth_type = oauthUser.type;
+    const user_identifier = oauthUser.user_identifier;
+    const body = req.body;
+
+    const jwtConfig = {
+      secret: state.jwt_secret,
+      expires_in: state.jwt_expires_in,
+    };
+
+    const result = await runKeygenV1(
+      state.db,
+      jwtConfig,
+      {
+        auth_type,
+        user_identifier,
+        keygen_2: body.keygen_2,
+        email: oauthUser.email,
+        name: oauthUser.name,
+        metadata: oauthUser.metadata,
+      },
+      state.encryption_secret,
+      state.logger,
+    );
+    if (!result.success) {
+      res.status(400).json(result);
+      return;
+    }
+    res.status(200).json({ success: true, data: result.data });
+  });
 
   return app;
 }

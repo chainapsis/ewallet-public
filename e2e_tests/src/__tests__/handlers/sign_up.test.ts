@@ -14,7 +14,7 @@ import {
   createRevealSignature,
 } from "@e2e/utils/signature";
 
-describe("op: keygen (sign_up flow)", () => {
+describe("e2e_test_sign_up", () => {
   let ctx: TestContext;
 
   const TEST_USER_ID = "new_user_123";
@@ -244,7 +244,10 @@ describe("op: keygen (sign_up flow)", () => {
       .send({
         auth_type: AUTH_TYPE,
         wallets: {
-          secp256k1: { public_key: "03" + "a".repeat(64), share: "c1".repeat(64) },
+          secp256k1: {
+            public_key: "03" + "a".repeat(64),
+            share: "c1".repeat(64),
+          },
           ed25519: { public_key: "b".repeat(64), share: "d1".repeat(64) },
         },
         cr_session_id: sessionId,
@@ -297,7 +300,10 @@ describe("op: keygen (sign_up flow)", () => {
       .send({
         auth_type: AUTH_TYPE,
         wallets: {
-          secp256k1: { public_key: "03" + "a".repeat(64), share: "c1".repeat(64) },
+          secp256k1: {
+            public_key: "03" + "a".repeat(64),
+            share: "c1".repeat(64),
+          },
           ed25519: { public_key: "b".repeat(64), share: "d1".repeat(64) },
         },
         cr_session_id: sessionId,
@@ -349,7 +355,10 @@ describe("op: keygen (sign_up flow)", () => {
       .send({
         auth_type: AUTH_TYPE,
         wallets: {
-          secp256k1: { public_key: "03" + "a".repeat(64), share: "c1".repeat(64) },
+          secp256k1: {
+            public_key: "03" + "a".repeat(64),
+            share: "c1".repeat(64),
+          },
           // ed25519 missing
         },
         cr_session_id: sessionId,
@@ -364,14 +373,12 @@ describe("op: keygen (sign_up flow)", () => {
     const sessionId = generateSessionId();
     const idTokenHash = computeIdTokenHash(AUTH_TYPE, SIGNUP_ID_TOKEN);
 
-    const commitRes = await request(ctx.okoApiApp)
-      .post("/tss/v2/commit")
-      .send({
-        session_id: sessionId,
-        operation_type: "sign_in", // wrong op
-        client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
-        id_token_hash: idTokenHash,
-      });
+    const commitRes = await request(ctx.okoApiApp).post("/tss/v2/commit").send({
+      session_id: sessionId,
+      operation_type: "sign_in", // wrong op
+      client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
+      id_token_hash: idTokenHash,
+    });
     expect(commitRes.status).toBe(200);
     const nodePubkey = commitRes.body.data.node_pubkey;
 
@@ -390,7 +397,10 @@ describe("op: keygen (sign_up flow)", () => {
       .set("Authorization", `Bearer ${SIGNUP_ID_TOKEN}`)
       .send({
         auth_type: AUTH_TYPE,
-        keygen_2_secp256k1: { public_key: "03" + "a".repeat(64), private_share: "e".repeat(64) },
+        keygen_2_secp256k1: {
+          public_key: "03" + "a".repeat(64),
+          private_share: "e".repeat(64),
+        },
         keygen_2_ed25519: {
           key_package: new Uint8Array(64),
           public_key_package: "",
@@ -415,14 +425,12 @@ describe("op: keygen (sign_up flow)", () => {
     const ed25519PublicKeyHex = Buffer.from(ed25519PublicKey).toString("hex");
     const secp256k1PublicKey = "03" + "a".repeat(64);
 
-    const commitRes = await request(ctx.okoApiApp)
-      .post("/tss/v2/commit")
-      .send({
-        session_id: sessionId,
-        operation_type: "sign_up",
-        client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
-        id_token_hash: idTokenHash,
-      });
+    const commitRes = await request(ctx.okoApiApp).post("/tss/v2/commit").send({
+      session_id: sessionId,
+      operation_type: "sign_up",
+      client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
+      id_token_hash: idTokenHash,
+    });
     expect(commitRes.status).toBe(200);
     const nodePubkey = commitRes.body.data.node_pubkey;
 
@@ -441,10 +449,15 @@ describe("op: keygen (sign_up flow)", () => {
       .set("Authorization", `Bearer ${SIGNUP_ID_TOKEN}`)
       .send({
         auth_type: AUTH_TYPE,
-        keygen_2_secp256k1: { public_key: secp256k1PublicKey, private_share: "e".repeat(64) },
+        keygen_2_secp256k1: {
+          public_key: secp256k1PublicKey,
+          private_share: "e".repeat(64),
+        },
         keygen_2_ed25519: {
           key_package: serverFrostOutput.key_package,
-          public_key_package: Buffer.from(serverFrostOutput.public_key_package).toString("hex"),
+          public_key_package: Buffer.from(
+            serverFrostOutput.public_key_package,
+          ).toString("hex"),
           identifier: serverFrostOutput.identifier,
           public_key: ed25519PublicKey,
         },
@@ -464,14 +477,12 @@ describe("op: keygen (sign_up flow)", () => {
     const frostKeygen = runKeygenCentralizedEd25519();
     const serverFrostOutput = frostKeygen.keygen_outputs[1];
 
-    const commitRes = await request(ctx.okoApiApp)
-      .post("/tss/v2/commit")
-      .send({
-        session_id: sessionId,
-        operation_type: "sign_up",
-        client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
-        id_token_hash: idTokenHash,
-      });
+    const commitRes = await request(ctx.okoApiApp).post("/tss/v2/commit").send({
+      session_id: sessionId,
+      operation_type: "sign_up",
+      client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
+      id_token_hash: idTokenHash,
+    });
     expect(commitRes.status).toBe(200);
     const nodePubkey = commitRes.body.data.node_pubkey;
 
@@ -490,10 +501,15 @@ describe("op: keygen (sign_up flow)", () => {
       .set("Authorization", `Bearer ${SIGNUP_ID_TOKEN}`)
       .send({
         auth_type: AUTH_TYPE,
-        keygen_2_secp256k1: { public_key: "03" + "a".repeat(64), private_share: "e".repeat(64) },
+        keygen_2_secp256k1: {
+          public_key: "03" + "a".repeat(64),
+          private_share: "e".repeat(64),
+        },
         keygen_2_ed25519: {
           key_package: serverFrostOutput.key_package,
-          public_key_package: Buffer.from(serverFrostOutput.public_key_package).toString("hex"),
+          public_key_package: Buffer.from(
+            serverFrostOutput.public_key_package,
+          ).toString("hex"),
           identifier: serverFrostOutput.identifier,
           public_key: frostKeygen.public_key,
         },
@@ -527,7 +543,11 @@ describe("op: keygen (sign_up flow)", () => {
       id[0] = i + 10;
       return id;
     });
-    const sss1 = sssSplitEd25519(new Uint8Array(shares1.signing_share), nodeIds, 2);
+    const sss1 = sssSplitEd25519(
+      new Uint8Array(shares1.signing_share),
+      nodeIds,
+      2,
+    );
 
     const okoCommit1 = await request(ctx.okoApiApp)
       .post("/tss/v2/commit")
@@ -562,7 +582,9 @@ describe("op: keygen (sign_up flow)", () => {
 
       const kpBytes = new Uint8Array(sss1.key_packages[i].key_package);
       const sh = extractKeyPackageSharesEd25519(kpBytes);
-      const edShare = Buffer.from(sh.signing_share).toString("hex") + Buffer.from(sh.verifying_share).toString("hex");
+      const edShare =
+        Buffer.from(sh.signing_share).toString("hex") +
+        Buffer.from(sh.verifying_share).toString("hex");
 
       const reg = await request(ctx.ksnApps[i])
         .post("/keyshare/v2/register")
@@ -571,7 +593,10 @@ describe("op: keygen (sign_up flow)", () => {
         .send({
           auth_type: AUTH_TYPE,
           wallets: {
-            secp256k1: { public_key: secpPk1, share: generateSecp256k1Share(i) },
+            secp256k1: {
+              public_key: secpPk1,
+              share: generateSecp256k1Share(i),
+            },
             ed25519: { public_key: edPkHex1, share: edShare },
           },
           cr_session_id: sessionId1,
@@ -595,10 +620,15 @@ describe("op: keygen (sign_up flow)", () => {
       .set("Authorization", `Bearer ${idToken1}`)
       .send({
         auth_type: AUTH_TYPE,
-        keygen_2_secp256k1: { public_key: secpPk1, private_share: "e".repeat(64) },
+        keygen_2_secp256k1: {
+          public_key: secpPk1,
+          private_share: "e".repeat(64),
+        },
         keygen_2_ed25519: {
           key_package: serverOut1.key_package,
-          public_key_package: Buffer.from(serverOut1.public_key_package).toString("hex"),
+          public_key_package: Buffer.from(
+            serverOut1.public_key_package,
+          ).toString("hex"),
           identifier: serverOut1.identifier,
           public_key: edPk1,
         },
@@ -639,10 +669,15 @@ describe("op: keygen (sign_up flow)", () => {
       .set("Authorization", `Bearer ${idToken2}`)
       .send({
         auth_type: AUTH_TYPE,
-        keygen_2_secp256k1: { public_key: secpPk1, private_share: "e".repeat(64) },
+        keygen_2_secp256k1: {
+          public_key: secpPk1,
+          private_share: "e".repeat(64),
+        },
         keygen_2_ed25519: {
           key_package: serverOut1.key_package,
-          public_key_package: Buffer.from(serverOut1.public_key_package).toString("hex"),
+          public_key_package: Buffer.from(
+            serverOut1.public_key_package,
+          ).toString("hex"),
           identifier: serverOut1.identifier,
           public_key: edPk1,
         },
