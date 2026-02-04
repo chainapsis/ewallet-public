@@ -32,6 +32,8 @@ interface UseConnectedAppsResult {
   error: GetConnectedAppsError | null;
 }
 
+//NOTE The __get_connected_apps__ message should only be called from the user_dashboard,
+// so it is not added to the SDK and is instead called separately in useConnectedApp. 
 export function useConnectedApps(): UseConnectedAppsResult {
   const cosmosSDK = useSDKState(selectCosmosSDK);
 
