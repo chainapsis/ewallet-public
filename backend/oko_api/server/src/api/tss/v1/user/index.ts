@@ -30,6 +30,7 @@ import type { Bytes33 } from "@oko-wallet/bytes";
 
 import { generateUserToken } from "@oko-wallet-api/api/tss/keplr_auth";
 import { checkKeyShareFromKSNodes } from "@oko-wallet-api/api/tss/ks_node";
+import { saveUserCustomerConnection } from "@oko-wallet-api/api/tss/connection";
 
 export async function signIn(
   db: Pool,
@@ -43,6 +44,7 @@ export async function signIn(
   email?: string,
   name?: string,
   metadata?: Record<string, unknown>,
+  customerId?: string,
 ): Promise<OkoApiResponse<SignInResponse>> {
   try {
     const getUserRes = await getUserByEmailAndAuthType(
@@ -105,6 +107,18 @@ export async function signIn(
         code: "UNKNOWN_ERROR",
         msg: `generateUserToken error: ${tokenResult.err}`,
       };
+    }
+
+    if (customerId) {
+      saveUserCustomerConnection(
+        db,
+        logger,
+        getUserRes.data.user_id,
+        customerId,
+      )
+        .catch((err) => {
+          logger.error(`signIn error inserting user-customer connection: ${err}`);
+        });
     }
 
     return {

@@ -25,7 +25,6 @@ import {
 } from "@oko-wallet/oko-api-openapi/tss";
 import { Bytes } from "@oko-wallet/bytes";
 import { registry } from "@oko-wallet/oko-api-openapi";
-import { getUserByEmailAndAuthType } from "@oko-wallet/oko-pg-interface/oko_users";
 
 import {
   signIn,
@@ -33,7 +32,6 @@ import {
   updateWalletKSNodesForReshare,
 } from "@oko-wallet-api/api/tss/v1/user";
 import { verifyUserToken } from "@oko-wallet-api/api/tss/keplr_auth";
-import { saveUserCustomerConnection } from "@oko-wallet-api/api/tss/connection";
 import { tssActivateMiddleware } from "@oko-wallet-api/middleware/auth/tss_activate";
 import {
   type OAuthAuthenticatedRequest,
@@ -189,6 +187,7 @@ export function setUserV1Routes(router: Router) {
       res: Response<OkoApiResponse<SignInResponse>, OAuthLocalsWithAPIKey>,
     ) => {
       const state = req.app.locals;
+      const apiKey = res.locals.api_key;
       const oauthUser = res.locals.oauth_user;
       const auth_type = oauthUser.type as AuthType;
       const user_identifier = oauthUser.user_identifier;
@@ -214,6 +213,7 @@ export function setUserV1Routes(router: Router) {
         oauthUser.email,
         oauthUser.name,
         oauthUser.metadata,
+        apiKey.customer_id,
       );
       if (signInRes.success === false) {
         res
@@ -221,22 +221,6 @@ export function setUserV1Routes(router: Router) {
           .json(signInRes);
         return;
       }
-
-      getUserByEmailAndAuthType(state.db, user_identifier, auth_type)
-        .then((userRes) => {
-          const apiKey = res.locals.api_key;
-          if (userRes.success && userRes.data) {
-            saveUserCustomerConnection(
-              state.db,
-              state.logger,
-              userRes.data.user_id,
-              apiKey.customer_id,
-            );
-          }
-        })
-        .catch((err) => {
-          state.logger.error(`[signin] Error inserting user-customer connection: ${err}`);
-        });
 
       res.status(200).json({
         success: true,

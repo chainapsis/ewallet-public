@@ -13,7 +13,6 @@ import { registry } from "@oko-wallet/oko-api-openapi";
 import { KeygenRequestSchema } from "@oko-wallet/oko-api-openapi/tss";
 
 import { runKeygen } from "@oko-wallet-api/api/tss/v1/keygen";
-import { saveUserCustomerConnection } from "@oko-wallet-api/api/tss/connection";
 import {
   type OAuthAuthenticatedRequest,
   oauthMiddleware,
@@ -21,7 +20,6 @@ import {
 import { tssActivateMiddleware } from "@oko-wallet-api/middleware/auth/tss_activate";
 import type { OAuthLocalsWithAPIKey } from "@oko-wallet-api/middleware/auth/types";
 import { apiKeyMiddleware } from "@oko-wallet-api/middleware/auth/api_key_auth";
-import { getUserByEmailAndAuthType } from "@oko-wallet/oko-pg-interface/oko_users";
 
 export function setKeygenV1Routes(router: Router) {
   registry.registerPath({
@@ -90,6 +88,7 @@ export function setKeygenV1Routes(router: Router) {
       res: Response<OkoApiResponse<SignInResponse>, OAuthLocalsWithAPIKey>,
     ) => {
       const state = req.app.locals;
+      const apiKey = res.locals.api_key;
       const oauthUser = res.locals.oauth_user;
       const auth_type = oauthUser.type as AuthType;
       const user_identifier = oauthUser.user_identifier;
@@ -122,28 +121,13 @@ export function setKeygenV1Routes(router: Router) {
         },
         state.encryption_secret,
         state.logger,
+        apiKey.customer_id,
       );
 
       if (runKeygenRes.success === false) {
         res.status(ErrorCodeMap[runKeygenRes.code] ?? 500).json(runKeygenRes);
         return;
       }
-
-      getUserByEmailAndAuthType(state.db, user_identifier, auth_type)
-        .then((userRes) => {
-          const apiKey = res.locals.api_key;
-          if (userRes.success && userRes.data) {
-            saveUserCustomerConnection(
-              state.db,
-              state.logger,
-              userRes.data.user_id,
-              apiKey.customer_id,
-            );
-          }
-        })
-        .catch((err) => {
-          state.logger.error(`[keygen] Error inserting user-customer connection: ${err}`);
-        });
 
       res.status(200).json({
         success: true,
