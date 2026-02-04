@@ -8,6 +8,9 @@ export interface UserCustomerConnection {
   state: string;
   created_at: Date;
   updated_at: Date;
+  label: string | null;
+  logo_url: string | null;
+  url: string | null;
 }
 
 export type ConnectionState = "ACTIVE" | "INACTIVE";
@@ -49,9 +52,11 @@ export async function getConnectionsByUserId(
 ): Promise<Result<UserCustomerConnection[], string>> {
   try {
     const query = `
-SELECT * FROM oko_user_customer_connections
-WHERE user_id = $1
-ORDER BY created_at DESC
+SELECT conn.*, c.label, c.logo_url, c.url
+FROM oko_user_customer_connections conn
+JOIN customers c ON conn.customer_id = c.customer_id AND c.status = 'ACTIVE'
+WHERE conn.user_id = $1
+ORDER BY conn.created_at DESC
 `;
     const result = await db.query<UserCustomerConnection>(query, [userId]);
 

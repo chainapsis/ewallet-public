@@ -4,7 +4,6 @@ import {
   SuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/common";
 import { CustomerAuthHeaderSchema } from "@oko-wallet/oko-api-openapi/ct_dashboard";
-import { getCustomer } from "@oko-wallet/oko-pg-interface/customers";
 import { getWalletById } from "@oko-wallet/oko-pg-interface/oko_wallets";
 import { getConnectionsByUserId } from "@oko-wallet/oko-pg-interface/user_customer_connections";
 import type { ConnectedApp } from "@oko-wallet/oko-types/user_dashboard";
@@ -109,20 +108,14 @@ export function makeUserRouter() {
           return;
         }
 
-        const apps: ConnectedApp[] = await Promise.all(
-          connectionsRes.data.map(async (conn) => {
-            const customerRes = await getCustomer(state.db, conn.customer_id);
-            const customer = customerRes.success ? customerRes.data : null;
-            return {
-              customer_id: conn.customer_id,
-              label: customer?.label ?? null,
-              logo_url: customer?.logo_url ?? null,
-              url: customer?.url ?? null,
-              connected_at: conn.created_at.toISOString(),
-              state: conn.state,
-            };
-          }),
-        );
+        const apps: ConnectedApp[] = connectionsRes.data.map((connection) => ({
+          customer_id: connection.customer_id,
+          label: connection.label,
+          logo_url: connection.logo_url,
+          url: connection.url,
+          connected_at: connection.created_at.toISOString(),
+          state: connection.state,
+        }));
 
         res.status(200).json({
           success: true,
