@@ -1,6 +1,8 @@
 name: CI
 
 on:
+  pull_request:
+    branches: [develop, main]
   issue_comment:
     types: [created, edited]
   push:
