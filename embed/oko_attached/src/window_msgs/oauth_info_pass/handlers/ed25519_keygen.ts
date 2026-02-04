@@ -64,6 +64,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
   } = ed25519KeygenSplitRes.data;
 
   // 2. Commit to oko_api and ks nodes
+  // For add_ed25519, all nodes must commit since we register ed25519 to all of them
   const ksnCommitTargets: KsnCommitTarget[] = nodes.map((node) => ({
     nodeUrl: node.endpoint,
     operationType: "add_ed25519",
@@ -73,6 +74,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
     authType,
     idToken,
     ksnCommitTargets,
+    nodes.length, // All nodes must commit
   );
   if (!commitRes.success) {
     return {
@@ -80,7 +82,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
       err: { type: "sign_in_request_fail", error: commitRes.err },
     };
   }
-  const session = commitRes.data;
+  const { session } = commitRes.data;
 
   // 3. Send ed25519 key shares to ks nodes using registerKeyShareEd25519V2
   const registerEd25519Results: Result<void, string>[] = await Promise.all(
@@ -354,16 +356,18 @@ export async function handleReshareAndEd25519Keygen(
     userKeyShares: ed25519UserKeyShares,
   } = ed25519KeygenSplitRes.data;
 
-  // 3. Commit to oko_api and ks nodes
+  // 3. Commit to oko_api and ks nodes with "add_ed25519_with_reshare" operation type
+  // For add_ed25519_with_reshare, all nodes must commit since we reshare to all of them
   const ksnCommitTargets: KsnCommitTarget[] = nodes.map((node) => ({
     nodeUrl: node.endpoint,
-    operationType: "add_ed25519" as const,
+    operationType: "add_ed25519_with_reshare" as const,
   }));
   const commitRes = await commitAll(
-    "add_ed25519",
+    "add_ed25519_with_reshare",
     authType,
     idToken,
     ksnCommitTargets,
+    nodes.length, // All nodes must commit for reshare
   );
   if (!commitRes.success) {
     return {
@@ -371,7 +375,7 @@ export async function handleReshareAndEd25519Keygen(
       err: { type: "reshare_fail", error: commitRes.err },
     };
   }
-  const session = commitRes.data;
+  const { session } = commitRes.data;
 
   // 4. Sign in to get the public key
   const signInCommitRevealRes = createOkoApiCommitRevealParams(

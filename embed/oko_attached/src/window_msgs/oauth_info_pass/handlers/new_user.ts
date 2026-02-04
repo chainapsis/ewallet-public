@@ -76,17 +76,18 @@ export async function handleNewUserV2(
   } = ed25519KeygenSplitRes.data;
 
   // 4. Commit to oko_api and ks nodes
-  const ksnCommitTargets: KsnCommitTarget[] = keyshareNodeMeta.nodes.map(
-    (node) => ({
-      nodeUrl: node.endpoint,
-      operationType: "sign_up",
-    }),
-  );
+  // For sign_up, all nodes must succeed since we register to all of them
+  const { threshold, nodes } = keyshareNodeMeta;
+  const ksnCommitTargets: KsnCommitTarget[] = nodes.map((node) => ({
+    nodeUrl: node.endpoint,
+    operationType: "sign_up",
+  }));
   const commitRes = await commitAll(
     "sign_up",
     authType,
     idToken,
     ksnCommitTargets,
+    nodes.length, // All nodes must commit for sign_up
   );
   if (!commitRes.success) {
     return {
@@ -94,7 +95,7 @@ export async function handleNewUserV2(
       err: { type: "sign_in_request_fail", error: commitRes.err },
     };
   }
-  const session = commitRes.data;
+  const { session } = commitRes.data;
 
   // 5. Send key shares by both curves to ks nodes using registerKeySharesV2
   const registerKeySharesResults: Result<void, string>[] = await Promise.all(

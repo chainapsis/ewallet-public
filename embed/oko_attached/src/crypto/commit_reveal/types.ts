@@ -24,3 +24,29 @@ export interface KsnCommitTarget {
   nodeUrl: string;
   operationType: KsnOperationType;
 }
+
+/**
+ * Result of a single KSN commit operation
+ */
+export interface KsnCommitResult {
+  nodeUrl: string;
+  operationType: KsnOperationType;
+  nodePubkey: string;
+}
+
+/**
+ * Result of commitAll with threshold-based early return.
+ *
+ * - readyNodes: Nodes that successfully committed (at least threshold count)
+ * - pendingCommits: Promises for nodes still in progress (can be awaited for backup)
+ * - failedNodes: Nodes that failed to commit
+ */
+export interface CommitAllResult {
+  session: ClientCommitRevealSession;
+  /** Nodes that successfully committed */
+  readyNodes: KsnCommitResult[];
+  /** Promises for nodes still in progress (for backup use) */
+  pendingCommits: Map<string, Promise<KsnCommitResult>>;
+  /** Nodes that failed to commit */
+  failedNodes: { nodeUrl: string; error: string }[];
+}

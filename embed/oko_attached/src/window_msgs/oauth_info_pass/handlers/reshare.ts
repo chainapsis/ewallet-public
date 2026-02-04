@@ -22,18 +22,20 @@ export async function handleReshareV2(
   keyshareNodeMeta: KeyShareNodeMetaWithNodeStatusInfo,
   authType: AuthType,
 ): Promise<Result<UserSignInResultV2, OAuthSignInError>> {
-  // 1. Prepare commit targets (all nodes)
-  const ksnCommitTargets: KsnCommitTarget[] = keyshareNodeMeta.nodes.map(
-    (node) => ({
-      nodeUrl: node.endpoint,
-      operationType: "sign_in" as const,
-    }),
-  );
+  const { threshold, nodes } = keyshareNodeMeta;
+
+  // 1. Prepare commit targets (all nodes) with "reshare" operation type
+  // For reshare, all nodes must commit since we send reshared shares to all of them
+  const ksnCommitTargets: KsnCommitTarget[] = nodes.map((node) => ({
+    nodeUrl: node.endpoint,
+    operationType: "reshare" as const,
+  }));
   const commitRes = await commitAll(
-    "sign_in",
+    "reshare",
     authType,
     idToken,
     ksnCommitTargets,
+    nodes.length, // All nodes must commit for reshare
   );
   if (!commitRes.success) {
     return {
@@ -41,7 +43,7 @@ export async function handleReshareV2(
       err: { type: "reshare_fail", error: commitRes.err },
     };
   }
-  const session = commitRes.data;
+  const { session } = commitRes.data;
 
   // 3. Sign in to Oko API
   const signInCommitRevealRes = createOkoApiCommitRevealParams(

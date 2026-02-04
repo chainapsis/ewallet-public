@@ -3,7 +3,12 @@ import type { OperationType } from "@oko-wallet/oko-types/commit_reveal";
 import type { OperationType as KsnOperationType } from "@oko-wallet/ksn-interface/commit_reveal";
 import type { Result } from "@oko-wallet/stdlib-js";
 
-import type { ClientCommitRevealSession, KsnCommitTarget } from "./types";
+import type {
+  ClientCommitRevealSession,
+  KsnCommitTarget,
+  KsnCommitResult,
+  CommitAllResult,
+} from "./types";
 import {
   generateSessionId,
   generateClientKeypair,
@@ -70,21 +75,26 @@ export function setKsnNodePubkey(
 }
 
 /**
- * Commit to oko_api and ks nodes.
- * Creates a commit-reveal session and sends commit requests.
+ * Commit to oko_api and ks nodes with threshold-based early return.
+ *
+ * Returns as soon as `threshold` nodes have successfully committed,
+ * allowing remaining nodes to be used as backups if needed.
  *
  * @param okoApiOperationType - Operation type for oko_api commit
+ * @param authType - Authentication type
+ * @param idToken - ID token
  * @param ksnCommitTargets - All ks nodes to commit to
+ * @param threshold - Minimum number of nodes that must succeed
  *
- * All nodes must successfully commit for the operation to proceed.
- * If any node fails, the entire operation fails and user must re-login.
+ * @returns CommitAllResult with ready nodes, pending commits, and failed nodes
  */
 export async function commitAll(
   okoApiOperationType: OperationType,
   authType: AuthType,
   idToken: string,
   ksnCommitTargets: KsnCommitTarget[],
-): Promise<Result<ClientCommitRevealSession, string>> {
+  threshold: number,
+): Promise<Result<CommitAllResult, string>> {
   // 1. Create session
   const sessionRes = createCommitRevealSession(
     okoApiOperationType,
@@ -98,62 +108,130 @@ export async function commitAll(
 
   const clientPubkeyHex = session.client_keypair.publicKey.toHex();
 
-  // 2. Commit to oko_api
+  // 2. Commit to oko_api first (must succeed)
   const okoApiResult = await commitToOkoApi(
     session.session_id,
     okoApiOperationType,
     clientPubkeyHex,
     session.id_token_hash,
   );
-
   if (!okoApiResult.success || !okoApiResult.data.success) {
     return { success: false, err: "Failed to commit to oko_api" };
   }
   session = setOkoApiNodePubkey(session, okoApiResult.data.data.node_pubkey);
 
-  // 3. Commit to all ks nodes in parallel
-  // All nodes must succeed for the operation to proceed
-  const results = await Promise.allSettled(
-    ksnCommitTargets.map((target) =>
-      commitToKsNode(
-        target.nodeUrl,
-        session.session_id,
-        target.operationType,
-        clientPubkeyHex,
-        session.id_token_hash,
-      ).then((res) => ({
-        nodeUrl: target.nodeUrl,
-        operationType: target.operationType,
-        res,
-      })),
-    ),
-  );
+  // 3. Start commits to all KSN nodes
+  const readyNodes: KsnCommitResult[] = [];
+  const failedNodes: { nodeUrl: string; error: string }[] = [];
+  const pendingCommits = new Map<string, Promise<KsnCommitResult>>();
 
-  const failedNodes: string[] = [];
+  // Create individual promises for each node
+  type CommitOutcome =
+    | { success: true; result: KsnCommitResult }
+    | { success: false; error: string };
 
-  for (const result of results) {
-    if (result.status === "fulfilled" && result.value.res.success) {
+  const nodePromises = ksnCommitTargets.map((target) => {
+    const promise = commitToKsNode(
+      target.nodeUrl,
+      session.session_id,
+      target.operationType,
+      clientPubkeyHex,
+      session.id_token_hash,
+    ).then((res): CommitOutcome => {
+      if (res.success) {
+        return {
+          success: true,
+          result: {
+            nodeUrl: target.nodeUrl,
+            operationType: target.operationType,
+            nodePubkey: res.data.node_pubkey,
+          },
+        };
+      }
+      return { success: false, error: res.err };
+    });
+
+    return { target, promise };
+  });
+
+  // Add all to pending initially (for backup use later)
+  for (const { target, promise } of nodePromises) {
+    pendingCommits.set(
+      target.nodeUrl,
+      promise.then((outcome) => {
+        if (!outcome.success) {
+          throw new Error(outcome.error);
+        }
+        return outcome.result;
+      }),
+    );
+  }
+
+  // Race to get threshold successful commits
+  const remainingPromises = [...nodePromises];
+
+  while (readyNodes.length < threshold && remainingPromises.length > 0) {
+    // Wait for the first one to complete
+    const raceResult = await Promise.race(
+      remainingPromises.map(async ({ target, promise }, index) => {
+        const outcome = await promise;
+        return { index, target, outcome };
+      }),
+    );
+
+    // Remove from remaining
+    remainingPromises.splice(raceResult.index, 1);
+
+    if (raceResult.outcome.success) {
+      // Success - add to ready nodes and update session
+      const result = raceResult.outcome.result;
+      readyNodes.push(result);
+      pendingCommits.delete(raceResult.target.nodeUrl);
       session = setKsnNodePubkey(
         session,
-        result.value.nodeUrl,
-        result.value.res.data.node_pubkey,
-        result.value.operationType,
+        result.nodeUrl,
+        result.nodePubkey,
+        result.operationType,
       );
     } else {
-      const nodeUrl =
-        result.status === "fulfilled"
-          ? result.value.nodeUrl
-          : "unknown";
-      failedNodes.push(nodeUrl);
+      // Failed - add to failed nodes with actual API error
+      failedNodes.push({
+        nodeUrl: raceResult.target.nodeUrl,
+        error: raceResult.outcome.error,
+      });
+      pendingCommits.delete(raceResult.target.nodeUrl);
     }
   }
 
-  if (failedNodes.length > 0) {
+  // Check if we have enough nodes
+  if (readyNodes.length < threshold) {
     return {
       success: false,
-      err: `Failed to commit to ks nodes: ${failedNodes.join(", ")}`,
+      err: `Insufficient nodes committed: got ${readyNodes.length}, need ${threshold}`,
     };
   }
 
-  return { success: true, data: session };
+  // Move remaining promises to pendingCommits (for backup use)
+  // They're already in pendingCommits, just need to update with proper promises
+  for (const { target, promise } of remainingPromises) {
+    pendingCommits.set(
+      target.nodeUrl,
+      promise.then((outcome) => {
+        if (!outcome.success) {
+          throw new Error(outcome.error);
+        }
+        return outcome.result;
+      }),
+    );
+  }
+
+  return {
+    success: true,
+    data: {
+      session,
+      readyNodes,
+      pendingCommits,
+      failedNodes,
+    },
+  };
 }

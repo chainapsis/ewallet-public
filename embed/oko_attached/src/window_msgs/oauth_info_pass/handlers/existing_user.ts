@@ -39,6 +39,7 @@ export async function handleExistingUserV2(
   const { threshold, nodes } = keyshareNodeMeta;
 
   // 1. Commit to oko_api and ks nodes
+  // For sign_in, we need at least threshold nodes to get shares
   const ksnCommitTargets: KsnCommitTarget[] = nodes.map((node) => ({
     nodeUrl: node.endpoint,
     operationType: "sign_in" as const,
@@ -48,6 +49,7 @@ export async function handleExistingUserV2(
     authType,
     idToken,
     ksnCommitTargets,
+    threshold,
   );
   if (!commitRes.success) {
     return {
@@ -55,7 +57,7 @@ export async function handleExistingUserV2(
       err: { type: "sign_in_request_fail", error: commitRes.err },
     };
   }
-  const session = commitRes.data;
+  const { session } = commitRes.data;
 
   // 2. Sign in to API server
   const signInCommitRevealRes = createOkoApiCommitRevealParams(
