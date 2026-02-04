@@ -221,8 +221,8 @@ export async function handleExistingUserV2(
       };
     }
     // Both are guaranteed to exist when secp256k1 and ed25519 are provided
-    keyshare1Secp256k1 = reshareRes.data.keyshare1Secp256k1!;
-    signingShare = reshareRes.data.signingShare!;
+    keyshare1Secp256k1 = reshareRes.data.keyshare1Secp256k1;
+    signingShare = reshareRes.data.signingShare;
 
     console.log("[attached] auto-reshare completed successfully");
   } else {

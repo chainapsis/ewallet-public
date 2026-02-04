@@ -7,6 +7,8 @@ import {
 import type {
   CheckEmailResponseV2,
   ReshareReason,
+  ReportKeyShareNotFoundRequest,
+  ReportKeyShareNotFoundResponse,
   SignInResponseV2,
   User,
 } from "@oko-wallet/oko-types/user";
@@ -21,6 +23,7 @@ import {
   getWalletKSNodesByWalletId,
   getKSNodesByServerUrl,
   upsertWalletKSNodes,
+  updateWalletKSNodeStatusToDataLoss,
 } from "@oko-wallet/oko-pg-interface/ks_nodes";
 import type {
   WalletKSNodeStatus,
@@ -678,4 +681,104 @@ async function calculateSecp256k1OnlyCheckInfo(
       active_nodes_below_threshold: activeNodeCount < globalThreshold,
     },
   };
+}
+
+/**
+ * Report key share not found from KS nodes.
+ * Updates wallet_ks_nodes status to UNRECOVERABLE_DATA_LOSS.
+ * Called when client receives KEY_SHARE_NOT_FOUND from a node that was expected to be ACTIVE.
+ */
+export async function reportKeyShareNotFoundV2(
+  db: Pool,
+  request: ReportKeyShareNotFoundRequest,
+  logger: Logger,
+): Promise<OkoApiResponse<ReportKeyShareNotFoundResponse>> {
+  try {
+    const { wallet_id_secp256k1, wallet_id_ed25519, nodes } = request;
+
+    if (nodes.length === 0) {
+      return {
+        success: false,
+        code: "INVALID_REQUEST",
+        msg: "No nodes provided",
+      };
+    }
+
+    // 1. Validate nodes exist and get their IDs
+    const serverUrls = nodes.map((n) => n.endpoint);
+    const ksNodesRes = await getKSNodesByServerUrl(db, serverUrls);
+    if (!ksNodesRes.success) {
+      logger.error("Failed to get ks nodes by server_url", ksNodesRes.err);
+      return {
+        success: false,
+        code: "UNKNOWN_ERROR",
+        msg: ksNodesRes.err,
+      };
+    }
+
+    const ksNodes = ksNodesRes.data;
+    if (ksNodes.length === 0) {
+      return {
+        success: false,
+        code: "KS_NODE_NOT_FOUND",
+        msg: "No valid nodes found",
+      };
+    }
+
+    const nodeIds = ksNodes.map((n) => n.node_id);
+
+    // 2. Update both wallets' ks_nodes status
+    const updateSecp256k1Res = await updateWalletKSNodeStatusToDataLoss(
+      db,
+      wallet_id_secp256k1,
+      nodeIds,
+    );
+    if (!updateSecp256k1Res.success) {
+      logger.error(
+        "Failed to update secp256k1 wallet ks nodes",
+        updateSecp256k1Res.err,
+      );
+      return {
+        success: false,
+        code: "UNKNOWN_ERROR",
+        msg: updateSecp256k1Res.err,
+      };
+    }
+
+    const updateEd25519Res = await updateWalletKSNodeStatusToDataLoss(
+      db,
+      wallet_id_ed25519,
+      nodeIds,
+    );
+    if (!updateEd25519Res.success) {
+      logger.error(
+        "Failed to update ed25519 wallet ks nodes",
+        updateEd25519Res.err,
+      );
+      return {
+        success: false,
+        code: "UNKNOWN_ERROR",
+        msg: updateEd25519Res.err,
+      };
+    }
+
+    logger.info(
+      `Reported key share not found: secp256k1=${updateSecp256k1Res.data}, ed25519=${updateEd25519Res.data}`,
+    );
+
+    return {
+      success: true,
+      data: {
+        updated_count_secp256k1: updateSecp256k1Res.data,
+        updated_count_ed25519: updateEd25519Res.data,
+      },
+    };
+  } catch (error) {
+    logger.error("reportKeyShareNotFoundV2 error", error);
+    return {
+      success: false,
+      code: "UNKNOWN_ERROR",
+      msg: String(error),
+    };
+  }
 }

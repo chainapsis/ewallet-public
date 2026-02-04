@@ -132,4 +132,27 @@ export interface SaveReferralResponse {
   referral_id: string;
 }
 
+/**
+ * HTTP request body for reporting key share not found.
+ * Called when client receives KEY_SHARE_NOT_FOUND from nodes that were expected to be ACTIVE.
+ */
+export interface ReportKeyShareNotFoundBody {
+  nodes: NodeNameAndEndpoint[];
+}
+
+/**
+ * Internal service request for reporting key share not found.
+ * Includes wallet IDs from JWT authentication.
+ */
+export interface ReportKeyShareNotFoundRequest {
+  wallet_id_secp256k1: string;
+  wallet_id_ed25519: string;
+  nodes: NodeNameAndEndpoint[];
+}
+
+export interface ReportKeyShareNotFoundResponse {
+  updated_count_secp256k1: number;
+  updated_count_ed25519: number;
+}
+
 export { NodeNameAndEndpoint };

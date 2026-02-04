@@ -451,26 +451,22 @@ export async function reshareKeySharesV2(
   idToken: string,
   authType: AuthType,
   wallets: {
-    secp256k1?: { public_key: string; share: string };
-    ed25519?: { public_key: string; share: string };
+    secp256k1: { public_key: string; share: string };
+    ed25519: { public_key: string; share: string };
   },
   commitReveal: CommitRevealParams,
 ): Promise<Result<void, string>> {
   const body: ReshareKeyShareV2WithCRRequestBody = {
     auth_type: authType,
     wallets: {
-      ...(wallets.secp256k1 && {
-        secp256k1: {
-          public_key: wallets.secp256k1.public_key,
-          share: wallets.secp256k1.share,
-        },
-      }),
-      ...(wallets.ed25519 && {
-        ed25519: {
-          public_key: wallets.ed25519.public_key,
-          share: wallets.ed25519.share,
-        },
-      }),
+      secp256k1: {
+        public_key: wallets.secp256k1.public_key,
+        share: wallets.secp256k1.share,
+      },
+      ed25519: {
+        public_key: wallets.ed25519.public_key,
+        share: wallets.ed25519.share,
+      },
     },
     cr_session_id: commitReveal.cr_session_id,
     cr_signature: commitReveal.cr_signature,

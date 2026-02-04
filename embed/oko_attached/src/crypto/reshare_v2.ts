@@ -344,12 +344,12 @@ export interface ExpandAndSendReshareParams {
   authType: AuthType;
   session: ClientCommitRevealSession;
   nodesNeedingReshare: NodeStatusInfo[];
-  secp256k1?: {
+  secp256k1: {
     shares: UserKeySharePointByNode[];
     threshold: number;
     publicKey: string;
   };
-  ed25519?: {
+  ed25519: {
     shares: TeddsaKeyShareByNode[];
     threshold: number;
     verifyingKey: Bytes32;
@@ -358,8 +358,8 @@ export interface ExpandAndSendReshareParams {
 }
 
 export interface ExpandAndSendReshareResult {
-  keyshare1Secp256k1?: string;
-  signingShare?: Bytes32;
+  keyshare1Secp256k1: string;
+  signingShare: Bytes32;
 }
 
 export async function expandAndSendReshareV2(
@@ -374,50 +374,28 @@ export async function expandAndSendReshareV2(
     ed25519,
   } = params;
 
-  // Validate at least one wallet type is provided
-  if (!secp256k1 && !ed25519) {
-    return {
-      success: false,
-      err: "At least one of secp256k1 or ed25519 must be provided",
-    };
+  // 1. Expand secp256k1 shares
+  const secp256k1ExpandRes = await runExpandShares(
+    secp256k1.shares,
+    nodesNeedingReshare,
+    secp256k1.threshold,
+  );
+  if (!secp256k1ExpandRes.success) {
+    return { success: false, err: secp256k1ExpandRes.err };
   }
+  const keyshare1Secp256k1 = secp256k1ExpandRes.data.original_secret.toHex();
 
-  // 1. Expand secp256k1 shares (if provided)
-  let secp256k1ExpandRes:
-    | Awaited<ReturnType<typeof runExpandShares>>
-    | undefined;
-  let keyshare1Secp256k1: string | undefined;
-
-  if (secp256k1) {
-    secp256k1ExpandRes = await runExpandShares(
-      secp256k1.shares,
-      nodesNeedingReshare,
-      secp256k1.threshold,
-    );
-    if (!secp256k1ExpandRes.success) {
-      return { success: false, err: secp256k1ExpandRes.err };
-    }
-    keyshare1Secp256k1 = secp256k1ExpandRes.data.original_secret.toHex();
+  // 2. Expand ed25519 shares
+  const ed25519ExpandRes = await expandTeddsaSigningShare(
+    ed25519.shares,
+    nodesNeedingReshare,
+    ed25519.threshold,
+    ed25519.verifyingKey,
+  );
+  if (!ed25519ExpandRes.success) {
+    return { success: false, err: ed25519ExpandRes.err };
   }
-
-  // 2. Expand ed25519 shares (if provided)
-  let ed25519ExpandRes:
-    | Awaited<ReturnType<typeof expandTeddsaSigningShare>>
-    | undefined;
-  let signingShare: Bytes32 | undefined;
-
-  if (ed25519) {
-    ed25519ExpandRes = await expandTeddsaSigningShare(
-      ed25519.shares,
-      nodesNeedingReshare,
-      ed25519.threshold,
-      ed25519.verifyingKey,
-    );
-    if (!ed25519ExpandRes.success) {
-      return { success: false, err: ed25519ExpandRes.err };
-    }
-    signingShare = ed25519ExpandRes.data.original_signing_share;
-  }
+  const signingShare = ed25519ExpandRes.data.original_signing_share;
 
   // 3. Send reshared shares to nodes needing reshare (unified reshare API handles upsert)
   const sendResults = await Promise.all(
@@ -432,43 +410,38 @@ export async function expandAndSendReshareV2(
         return { success: false, err: commitRevealRes.err };
       }
 
-      // Build wallets payload
-      const wallets: {
-        secp256k1?: { public_key: string; share: string };
-        ed25519?: { public_key: string; share: string };
-      } = {};
-
-      if (secp256k1 && secp256k1ExpandRes?.success) {
-        const share = secp256k1ExpandRes.data.reshared_user_key_shares.find(
+      // Find shares for this node
+      const secp256k1Share =
+        secp256k1ExpandRes.data.reshared_user_key_shares.find(
           (s) => s.node.endpoint === node.endpoint,
         );
-        if (!share) {
-          return {
-            success: false,
-            err: `secp256k1 share not found for node ${node.name}`,
-          };
-        }
-        wallets.secp256k1 = {
+      if (!secp256k1Share) {
+        return {
+          success: false,
+          err: `secp256k1 share not found for node ${node.name}`,
+        };
+      }
+
+      const ed25519Share = ed25519ExpandRes.data.reshared_shares.find(
+        (s) => s.node.endpoint === node.endpoint,
+      );
+      if (!ed25519Share) {
+        return {
+          success: false,
+          err: `ed25519 share not found for node ${node.name}`,
+        };
+      }
+
+      const wallets = {
+        secp256k1: {
           public_key: secp256k1.publicKey,
-          share: encodePoint256ToKeyShareString(share.share),
-        };
-      }
-
-      if (ed25519 && ed25519ExpandRes?.success) {
-        const share = ed25519ExpandRes.data.reshared_shares.find(
-          (s) => s.node.endpoint === node.endpoint,
-        );
-        if (!share) {
-          return {
-            success: false,
-            err: `ed25519 share not found for node ${node.name}`,
-          };
-        }
-        wallets.ed25519 = {
+          share: encodePoint256ToKeyShareString(secp256k1Share.share),
+        },
+        ed25519: {
           public_key: ed25519.publicKey,
-          share: teddsaKeyShareToHex(share.share),
-        };
-      }
+          share: teddsaKeyShareToHex(ed25519Share.share),
+        },
+      };
 
       return reshareKeySharesV2(
         node.endpoint,
@@ -489,13 +462,6 @@ export async function expandAndSendReshareV2(
   }
 
   // 4. Update Oko API reshare status
-  // Both wallets must be provided for V2 reshare
-  if (!secp256k1 || !ed25519) {
-    return {
-      success: false,
-      err: "Both secp256k1 and ed25519 must be provided for V2 reshare",
-    };
-  }
 
   const reshareCommitRevealRes = createOkoApiCommitRevealParams(
     session,
