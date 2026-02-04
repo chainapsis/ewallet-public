@@ -33,14 +33,14 @@ import {
   handleNewUser,
   handleReshare,
 } from "./user";
+import { checkUserExistsV2 } from "./handlers/check_user";
+import { handleNewUserV2 } from "./handlers/new_user";
+import { handleExistingUserV2 } from "./handlers/existing_user";
+import { handleReshareV2 } from "./handlers/reshare";
 import {
-  checkUserExistsV2,
-  handleNewUserV2,
-  handleExistingUserV2,
   handleExistingUserNeedsEd25519Keygen,
-  handleReshareV2,
   handleReshareAndEd25519Keygen,
-} from "./user_v2";
+} from "./handlers/ed25519_keygen";
 import { bail } from "./errors";
 import { getCredentialsFromPayload } from "./validate_social_login";
 

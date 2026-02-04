@@ -70,20 +70,12 @@ describe("commit_reveal_middleware_test", () => {
     app.use(express.json());
 
     // Test routes with middleware
-    app.post(
-      "/test/keygen",
-      commitRevealMiddleware("keygen"),
-      (_req, res) => {
-        res.status(200).json({ success: true, data: { message: "keygen ok" } });
-      },
-    );
-    app.post(
-      "/test/signin",
-      commitRevealMiddleware("signin"),
-      (_req, res) => {
-        res.status(200).json({ success: true, data: { message: "signin ok" } });
-      },
-    );
+    app.post("/test/keygen", commitRevealMiddleware("keygen"), (_req, res) => {
+      res.status(200).json({ success: true, data: { message: "keygen ok" } });
+    });
+    app.post("/test/signin", commitRevealMiddleware("signin"), (_req, res) => {
+      res.status(200).json({ success: true, data: { message: "signin ok" } });
+    });
 
     app.locals.db = pool;
     app.locals.server_keypair = mockServerKeypair;
@@ -320,7 +312,9 @@ describe("commit_reveal_middleware_test", () => {
 
       // Compute hash with original token
       const hashRes = sha256(`${authType}${originalIdToken}`);
-      if (!hashRes.success) throw new Error("Failed to compute hash");
+      if (!hashRes.success) {
+        throw new Error("Failed to compute hash");
+      }
       const idTokenHash = hashRes.data.toHex();
 
       await createSession({
@@ -353,7 +347,9 @@ describe("commit_reveal_middleware_test", () => {
 
       // Compute hash with original auth_type
       const hashRes = sha256(`${originalAuthType}${idToken}`);
-      if (!hashRes.success) throw new Error("Failed to compute hash");
+      if (!hashRes.success) {
+        throw new Error("Failed to compute hash");
+      }
       const idTokenHash = hashRes.data.toHex();
 
       await createSession({
@@ -387,7 +383,9 @@ describe("commit_reveal_middleware_test", () => {
       const idToken = "test_id_token";
 
       const hashRes = sha256(`${authType}${idToken}`);
-      if (!hashRes.success) throw new Error("Failed to compute hash");
+      if (!hashRes.success) {
+        throw new Error("Failed to compute hash");
+      }
 
       await createSession({
         session_id: sessionId,
@@ -416,7 +414,9 @@ describe("commit_reveal_middleware_test", () => {
       const idToken = "test_id_token";
 
       const hashRes = sha256(`${authType}${idToken}`);
-      if (!hashRes.success) throw new Error("Failed to compute hash");
+      if (!hashRes.success) {
+        throw new Error("Failed to compute hash");
+      }
 
       await createSession({
         session_id: sessionId,
@@ -446,11 +446,15 @@ describe("commit_reveal_middleware_test", () => {
 
       // Generate client keypair
       const clientKeypairRes = generateEddsaKeypair();
-      if (!clientKeypairRes.success) throw new Error("Failed to generate keypair");
+      if (!clientKeypairRes.success) {
+        throw new Error("Failed to generate keypair");
+      }
       const clientKeypair = clientKeypairRes.data;
 
       const hashRes = sha256(`${authType}${idToken}`);
-      if (!hashRes.success) throw new Error("Failed to compute hash");
+      if (!hashRes.success) {
+        throw new Error("Failed to compute hash");
+      }
 
       await createSession({
         session_id: sessionId,
@@ -462,10 +466,14 @@ describe("commit_reveal_middleware_test", () => {
       // Sign wrong message
       const wrongMessage = "wrong_message";
       const signRes = signMessage(wrongMessage, clientKeypair.privateKey);
-      if (!signRes.success) throw new Error("Failed to sign message");
+      if (!signRes.success) {
+      throw new Error("Failed to sign message");
+    }
 
       const sigBytesRes = convertEddsaSignatureToBytes(signRes.data);
-      if (!sigBytesRes.success) throw new Error("Failed to convert signature");
+      if (!sigBytesRes.success) {
+      throw new Error("Failed to convert signature");
+    }
 
       const response = await request(app)
         .post("/test/keygen")
@@ -496,7 +504,9 @@ describe("commit_reveal_middleware_test", () => {
       const wrongKeypair = wrongKeypairRes.data;
 
       const hashRes = sha256(`${authType}${idToken}`);
-      if (!hashRes.success) throw new Error("Failed to compute hash");
+      if (!hashRes.success) {
+        throw new Error("Failed to compute hash");
+      }
 
       // Create session with client keypair
       await createSession({
@@ -510,10 +520,14 @@ describe("commit_reveal_middleware_test", () => {
       const nodePubkeyHex = mockServerKeypair.publicKey.toHex();
       const message = `${nodePubkeyHex}${sessionId}${authType}${idToken}sign_upkeygen`;
       const signRes = signMessage(message, wrongKeypair.privateKey);
-      if (!signRes.success) throw new Error("Failed to sign message");
+      if (!signRes.success) {
+      throw new Error("Failed to sign message");
+    }
 
       const sigBytesRes = convertEddsaSignatureToBytes(signRes.data);
-      if (!sigBytesRes.success) throw new Error("Failed to convert signature");
+      if (!sigBytesRes.success) {
+      throw new Error("Failed to convert signature");
+    }
 
       const response = await request(app)
         .post("/test/keygen")
@@ -537,11 +551,15 @@ describe("commit_reveal_middleware_test", () => {
 
       // Compute hash with google as auth_type (default)
       const hashRes = sha256(`google${idToken}`);
-      if (!hashRes.success) throw new Error("Failed to compute hash");
+      if (!hashRes.success) {
+        throw new Error("Failed to compute hash");
+      }
 
       // Generate client keypair
       const clientKeypairRes = generateEddsaKeypair();
-      if (!clientKeypairRes.success) throw new Error("Failed to generate keypair");
+      if (!clientKeypairRes.success) {
+        throw new Error("Failed to generate keypair");
+      }
       const clientKeypair = clientKeypairRes.data;
 
       await createSession({
@@ -555,10 +573,14 @@ describe("commit_reveal_middleware_test", () => {
       const nodePubkeyHex = mockServerKeypair.publicKey.toHex();
       const message = `${nodePubkeyHex}${sessionId}google${idToken}sign_upkeygen`;
       const signRes = signMessage(message, clientKeypair.privateKey);
-      if (!signRes.success) throw new Error("Failed to sign message");
+      if (!signRes.success) {
+      throw new Error("Failed to sign message");
+    }
 
       const sigBytesRes = convertEddsaSignatureToBytes(signRes.data);
-      if (!sigBytesRes.success) throw new Error("Failed to convert signature");
+      if (!sigBytesRes.success) {
+      throw new Error("Failed to convert signature");
+    }
 
       // Send without auth_type - should default to google
       const response = await request(app)
@@ -608,17 +630,39 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
     app.post("/test/signin", commitRevealMiddleware("signin"), (_req, res) => {
       res.status(200).json({ success: true, data: { message: "signin ok" } });
     });
-    app.post("/test/reshare", commitRevealMiddleware("reshare"), (_req, res) => {
-      res.status(200).json({ success: true, data: { message: "reshare ok" } });
-    });
-    app.post("/test/keygen_ed25519", commitRevealMiddleware("keygen_ed25519"), (_req, res) => {
-      res.status(200).json({ success: true, data: { message: "keygen_ed25519 ok" } });
-    });
+    app.post(
+      "/test/reshare",
+      commitRevealMiddleware("reshare"),
+      (_req, res) => {
+        res
+          .status(200)
+          .json({ success: true, data: { message: "reshare ok" } });
+      },
+    );
+    app.post(
+      "/test/keygen_ed25519",
+      commitRevealMiddleware("keygen_ed25519"),
+      (_req, res) => {
+        res
+          .status(200)
+          .json({ success: true, data: { message: "keygen_ed25519 ok" } });
+      },
+    );
 
     // Route that fails
-    app.post("/test/keygen_fail", commitRevealMiddleware("keygen"), (_req, res) => {
-      res.status(500).json({ success: false, code: "INTERNAL_ERROR", msg: "Simulated failure" });
-    });
+    app.post(
+      "/test/keygen_fail",
+      commitRevealMiddleware("keygen"),
+      (_req, res) => {
+        res
+          .status(500)
+          .json({
+            success: false,
+            code: "INTERNAL_ERROR",
+            msg: "Simulated failure",
+          });
+      },
+    );
 
     app.locals.db = pool;
     app.locals.server_keypair = mockServerKeypair;
@@ -665,7 +709,10 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
     return result.rows[0]?.state ?? null;
   }
 
-  async function getApiCallCount(sessionId: string, apiName: string): Promise<number> {
+  async function getApiCallCount(
+    sessionId: string,
+    apiName: string,
+  ): Promise<number> {
     const result = await pool.query(
       `SELECT COUNT(*) as count FROM "commit_reveal_api_calls" WHERE session_id = $1 AND api_name = $2`,
       [sessionId, apiName],
@@ -684,10 +731,14 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
     const nodePubkeyHex = mockServerKeypair.publicKey.toHex();
     const message = `${nodePubkeyHex}${sessionId}${authType}${idToken}${operationType}${apiName}`;
     const signRes = signMessage(message, clientKeypair.privateKey);
-    if (!signRes.success) throw new Error("Failed to sign message");
+    if (!signRes.success) {
+      throw new Error("Failed to sign message");
+    }
 
     const sigBytesRes = convertEddsaSignatureToBytes(signRes.data);
-    if (!sigBytesRes.success) throw new Error("Failed to convert signature");
+    if (!sigBytesRes.success) {
+      throw new Error("Failed to convert signature");
+    }
 
     return sigBytesRes.data.toHex();
   }
@@ -699,11 +750,15 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
       const idToken = "test_id_token";
 
       const clientKeypairRes = generateEddsaKeypair();
-      if (!clientKeypairRes.success) throw new Error("Failed to generate keypair");
+      if (!clientKeypairRes.success) {
+        throw new Error("Failed to generate keypair");
+      }
       const clientKeypair = clientKeypairRes.data;
 
       const hashRes = sha256(`${authType}${idToken}`);
-      if (!hashRes.success) throw new Error("Failed to compute hash");
+      if (!hashRes.success) {
+        throw new Error("Failed to compute hash");
+      }
 
       await createSession({
         session_id: sessionId,
@@ -747,11 +802,15 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
       const idToken = "test_id_token";
 
       const clientKeypairRes = generateEddsaKeypair();
-      if (!clientKeypairRes.success) throw new Error("Failed to generate keypair");
+      if (!clientKeypairRes.success) {
+        throw new Error("Failed to generate keypair");
+      }
       const clientKeypair = clientKeypairRes.data;
 
       const hashRes = sha256(`${authType}${idToken}`);
-      if (!hashRes.success) throw new Error("Failed to compute hash");
+      if (!hashRes.success) {
+        throw new Error("Failed to compute hash");
+      }
 
       await createSession({
         session_id: sessionId,
@@ -792,11 +851,15 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
       const idToken = "test_id_token";
 
       const clientKeypairRes = generateEddsaKeypair();
-      if (!clientKeypairRes.success) throw new Error("Failed to generate keypair");
+      if (!clientKeypairRes.success) {
+        throw new Error("Failed to generate keypair");
+      }
       const clientKeypair = clientKeypairRes.data;
 
       const hashRes = sha256(`${authType}${idToken}`);
-      if (!hashRes.success) throw new Error("Failed to compute hash");
+      if (!hashRes.success) {
+        throw new Error("Failed to compute hash");
+      }
 
       await createSession({
         session_id: sessionId,
@@ -850,18 +913,22 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
     });
   });
 
-  describe("final API and session completion", () => {
-    it("should change session to COMPLETED on final API success", async () => {
+  describe("cr_final and session completion", () => {
+    it("should change session to COMPLETED when cr_final is true", async () => {
       const sessionId = uuidv4();
       const authType = "google";
       const idToken = "test_id_token";
 
       const clientKeypairRes = generateEddsaKeypair();
-      if (!clientKeypairRes.success) throw new Error("Failed to generate keypair");
+      if (!clientKeypairRes.success) {
+        throw new Error("Failed to generate keypair");
+      }
       const clientKeypair = clientKeypairRes.data;
 
       const hashRes = sha256(`${authType}${idToken}`);
-      if (!hashRes.success) throw new Error("Failed to compute hash");
+      if (!hashRes.success) {
+        throw new Error("Failed to compute hash");
+      }
 
       await createSession({
         session_id: sessionId,
@@ -889,32 +956,37 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
           cr_session_id: sessionId,
           cr_signature: signature,
           auth_type: authType,
+          cr_final: true,
         })
         .expect(200);
 
       // Wait for async finish handler
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // After: COMPLETED (keygen is final for sign_up)
+      // After: COMPLETED (cr_final is true)
       expect(await getSessionState(sessionId)).toBe("COMPLETED");
     });
 
-    it("should keep session COMMITTED on non-final API success", async () => {
+    it("should keep session COMMITTED when cr_final is false", async () => {
       const sessionId = uuidv4();
       const authType = "google";
       const idToken = "test_id_token";
 
       const clientKeypairRes = generateEddsaKeypair();
-      if (!clientKeypairRes.success) throw new Error("Failed to generate keypair");
+      if (!clientKeypairRes.success) {
+        throw new Error("Failed to generate keypair");
+      }
       const clientKeypair = clientKeypairRes.data;
 
       const hashRes = sha256(`${authType}${idToken}`);
-      if (!hashRes.success) throw new Error("Failed to compute hash");
+      if (!hashRes.success) {
+        throw new Error("Failed to compute hash");
+      }
 
-      // sign_in_reshare allows signin (non-final) then reshare (final)
+      // sign_in allows signin and reshare
       await createSession({
         session_id: sessionId,
-        operation_type: "sign_in_reshare",
+        operation_type: "sign_in",
         client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
         id_token_hash: hashRes.data.toHex(),
       });
@@ -924,7 +996,7 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
         sessionId,
         authType,
         idToken,
-        "sign_in_reshare",
+        "sign_in",
         "signin",
       );
 
@@ -938,13 +1010,14 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
           cr_session_id: sessionId,
           cr_signature: signature,
           auth_type: authType,
+          cr_final: false,
         })
         .expect(200);
 
       // Wait for async finish handler
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // After: still COMMITTED (signin is not final for sign_in_reshare)
+      // After: still COMMITTED (cr_final is false)
       expect(await getSessionState(sessionId)).toBe("COMMITTED");
     });
 
@@ -954,11 +1027,15 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
       const idToken = "test_id_token";
 
       const clientKeypairRes = generateEddsaKeypair();
-      if (!clientKeypairRes.success) throw new Error("Failed to generate keypair");
+      if (!clientKeypairRes.success) {
+        throw new Error("Failed to generate keypair");
+      }
       const clientKeypair = clientKeypairRes.data;
 
       const hashRes = sha256(`${authType}${idToken}`);
-      if (!hashRes.success) throw new Error("Failed to compute hash");
+      if (!hashRes.success) {
+        throw new Error("Failed to compute hash");
+      }
 
       await createSession({
         session_id: sessionId,
@@ -1004,11 +1081,15 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
       const idToken = "test_id_token";
 
       const clientKeypairRes = generateEddsaKeypair();
-      if (!clientKeypairRes.success) throw new Error("Failed to generate keypair");
+      if (!clientKeypairRes.success) {
+        throw new Error("Failed to generate keypair");
+      }
       const clientKeypair = clientKeypairRes.data;
 
       const hashRes = sha256(`${authType}${idToken}`);
-      if (!hashRes.success) throw new Error("Failed to compute hash");
+      if (!hashRes.success) {
+        throw new Error("Failed to compute hash");
+      }
 
       await createSession({
         session_id: sessionId,
@@ -1046,11 +1127,15 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
       const idToken = "test_id_token";
 
       const clientKeypairRes = generateEddsaKeypair();
-      if (!clientKeypairRes.success) throw new Error("Failed to generate keypair");
+      if (!clientKeypairRes.success) {
+        throw new Error("Failed to generate keypair");
+      }
       const clientKeypair = clientKeypairRes.data;
 
       const hashRes = sha256(`${authType}${idToken}`);
-      if (!hashRes.success) throw new Error("Failed to compute hash");
+      if (!hashRes.success) {
+        throw new Error("Failed to compute hash");
+      }
 
       await createSession({
         session_id: sessionId,
@@ -1088,11 +1173,15 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
       const idToken = "test_id_token";
 
       const clientKeypairRes = generateEddsaKeypair();
-      if (!clientKeypairRes.success) throw new Error("Failed to generate keypair");
+      if (!clientKeypairRes.success) {
+        throw new Error("Failed to generate keypair");
+      }
       const clientKeypair = clientKeypairRes.data;
 
       const hashRes = sha256(`${authType}${idToken}`);
-      if (!hashRes.success) throw new Error("Failed to compute hash");
+      if (!hashRes.success) {
+        throw new Error("Failed to compute hash");
+      }
 
       await createSession({
         session_id: sessionId,
@@ -1124,21 +1213,25 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
       expect(response.body.data.message).toBe("signin ok");
     });
 
-    it("reshare route: should pass with sign_in_reshare operation", async () => {
+    it("reshare route: should pass with sign_in operation", async () => {
       const sessionId = uuidv4();
       const authType = "google";
       const idToken = "test_id_token";
 
       const clientKeypairRes = generateEddsaKeypair();
-      if (!clientKeypairRes.success) throw new Error("Failed to generate keypair");
+      if (!clientKeypairRes.success) {
+        throw new Error("Failed to generate keypair");
+      }
       const clientKeypair = clientKeypairRes.data;
 
       const hashRes = sha256(`${authType}${idToken}`);
-      if (!hashRes.success) throw new Error("Failed to compute hash");
+      if (!hashRes.success) {
+        throw new Error("Failed to compute hash");
+      }
 
       await createSession({
         session_id: sessionId,
-        operation_type: "sign_in_reshare",
+        operation_type: "sign_in",
         client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
         id_token_hash: hashRes.data.toHex(),
       });
@@ -1148,7 +1241,7 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
         sessionId,
         authType,
         idToken,
-        "sign_in_reshare",
+        "sign_in",
         "reshare",
       );
 
@@ -1164,6 +1257,165 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
 
       expect(response.body.success).toBe(true);
       expect(response.body.data.message).toBe("reshare ok");
+    });
+
+    it("add_ed25519: should allow signin, reshare, keygen_ed25519 in sequence with cr_final", async () => {
+      const sessionId = uuidv4();
+      const authType = "google";
+      const idToken = "test_id_token";
+
+      const clientKeypairRes = generateEddsaKeypair();
+      if (!clientKeypairRes.success) {
+        throw new Error("Failed to generate keypair");
+      }
+      const clientKeypair = clientKeypairRes.data;
+
+      const hashRes = sha256(`${authType}${idToken}`);
+      if (!hashRes.success) {
+        throw new Error("Failed to compute hash");
+      }
+
+      await createSession({
+        session_id: sessionId,
+        operation_type: "add_ed25519",
+        client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
+        id_token_hash: hashRes.data.toHex(),
+      });
+
+      // 1. signin (cr_final: false)
+      const signinSignature = createValidSignature(
+        clientKeypair,
+        sessionId,
+        authType,
+        idToken,
+        "add_ed25519",
+        "signin",
+      );
+
+      const signinResponse = await request(app)
+        .post("/test/signin")
+        .set("Authorization", `Bearer ${idToken}`)
+        .send({
+          cr_session_id: sessionId,
+          cr_signature: signinSignature,
+          auth_type: authType,
+          cr_final: false,
+        })
+        .expect(200);
+
+      expect(signinResponse.body.success).toBe(true);
+
+      // Wait for async handler
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Session should still be COMMITTED
+      expect(await getSessionState(sessionId)).toBe("COMMITTED");
+
+      // 2. reshare (cr_final: false)
+      const reshareSignature = createValidSignature(
+        clientKeypair,
+        sessionId,
+        authType,
+        idToken,
+        "add_ed25519",
+        "reshare",
+      );
+
+      const reshareResponse = await request(app)
+        .post("/test/reshare")
+        .set("Authorization", `Bearer ${idToken}`)
+        .send({
+          cr_session_id: sessionId,
+          cr_signature: reshareSignature,
+          auth_type: authType,
+          cr_final: false,
+        })
+        .expect(200);
+
+      expect(reshareResponse.body.success).toBe(true);
+
+      // Wait for async handler
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Session should still be COMMITTED
+      expect(await getSessionState(sessionId)).toBe("COMMITTED");
+
+      // 3. keygen_ed25519 (cr_final: true)
+      const keygenSignature = createValidSignature(
+        clientKeypair,
+        sessionId,
+        authType,
+        idToken,
+        "add_ed25519",
+        "keygen_ed25519",
+      );
+
+      const keygenResponse = await request(app)
+        .post("/test/keygen_ed25519")
+        .set("Authorization", `Bearer ${idToken}`)
+        .send({
+          cr_session_id: sessionId,
+          cr_signature: keygenSignature,
+          auth_type: authType,
+          cr_final: true,
+        })
+        .expect(200);
+
+      expect(keygenResponse.body.success).toBe(true);
+
+      // Wait for async handler
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Session should now be COMPLETED
+      expect(await getSessionState(sessionId)).toBe("COMPLETED");
+    });
+
+    it("add_ed25519: should reject keygen (not allowed)", async () => {
+      const sessionId = uuidv4();
+      const authType = "google";
+      const idToken = "test_id_token";
+
+      const clientKeypairRes = generateEddsaKeypair();
+      if (!clientKeypairRes.success) {
+        throw new Error("Failed to generate keypair");
+      }
+      const clientKeypair = clientKeypairRes.data;
+
+      const hashRes = sha256(`${authType}${idToken}`);
+      if (!hashRes.success) {
+        throw new Error("Failed to compute hash");
+      }
+
+      await createSession({
+        session_id: sessionId,
+        operation_type: "add_ed25519",
+        client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
+        id_token_hash: hashRes.data.toHex(),
+      });
+
+      const signature = createValidSignature(
+        clientKeypair,
+        sessionId,
+        authType,
+        idToken,
+        "add_ed25519",
+        "keygen",
+      );
+
+      const response = await request(app)
+        .post("/test/keygen")
+        .set("Authorization", `Bearer ${idToken}`)
+        .send({
+          cr_session_id: sessionId,
+          cr_signature: signature,
+          auth_type: authType,
+        })
+        .expect(400);
+
+      expect(response.body.success).toBe(false);
+      expect(response.body.code).toBe("INVALID_REQUEST");
+      expect(response.body.msg).toContain("keygen");
+      expect(response.body.msg).toContain("add_ed25519");
     });
   });
 });

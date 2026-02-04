@@ -1,0 +1,42 @@
+name: Publish Node packages
+env:
+  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout self repository
+        uses: actions/checkout@v4
+        with: 
+          ref: ${{ inputs.git_tag }}
+          token: ${{ secrets.GITHUB_PAT }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Check Node version
+        run: node -v
+      
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Yarn version
+        run: yarn -v
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build internal packages
+        run: yarn ci build_pkgs
+
+      - name: Build SDK packages
+        run: yarn ci build_sdk
+
+      - name: Lerna publish
+        run: yarn ci publish

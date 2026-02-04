@@ -1,8 +1,8 @@
 name: CI
 
 on:
-  pull_request:
-    branches: [develop, main]
+  issue_comment:
+    types: [created, edited]
   push:
     branches: [develop, main]
 
@@ -10,6 +10,11 @@ jobs:
   typecheck:
     name: TypeScript Typecheck
     runs-on: ubuntu-latest
+
+    if: |
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/typecheck')
+
     steps:
       - uses: actions/checkout@v4
 
@@ -45,6 +50,8 @@ jobs:
   rust-check:
     name: Rust Check
     runs-on: ubuntu-latest
+    if: ${{ always() }}
+    needs: [typecheck]
     steps:
       - uses: actions/checkout@v4
 

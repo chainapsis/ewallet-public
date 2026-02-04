@@ -1,327 +1,159 @@
-/**
- * Commit-Reveal Session Management
- */
-
-import type { Bytes32 } from "@oko-wallet/bytes";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
+import type { OperationType } from "@oko-wallet/oko-types/commit_reveal";
+import type { OperationType as KsnOperationType } from "@oko-wallet/ksn-interface/commit_reveal";
 import type { Result } from "@oko-wallet/stdlib-js";
 
-import type {
-  CommitRevealSession,
-  CommitRevealSessionState,
-  CreateSessionOptions,
-  NodeStatus,
-  EncryptedToken,
-} from "./types";
-import type { ClientEcdheKeypair } from "./utils";
+import type { ClientCommitRevealSession, KsnCommitTarget } from "./types";
 import {
   generateSessionId,
   generateClientKeypair,
-  calculateTokenHash,
-  calculateExpiresAt,
-  isSessionExpired,
+  computeIdTokenHash,
+  SESSION_TIMEOUT_MS,
 } from "./utils";
+import { commitToOkoApi } from "@oko-wallet-attached/requests/oko_api";
+import { commitToKsNode } from "@oko-wallet-attached/requests/ks_node_v2";
 
-// ============================================================================
-// Session Creation
-// ============================================================================
-
-export interface CreateSessionResult {
-  session: CommitRevealSession;
-  keypair: ClientEcdheKeypair;
-}
-
-/**
- * Create a new commit-reveal session.
- */
-export function createSession(
-  options: CreateSessionOptions,
-): Result<CreateSessionResult, string> {
-  const sessionId = generateSessionId();
-
-  const keypairResult = generateClientKeypair();
-  if (!keypairResult.success) {
-    return { success: false, err: keypairResult.err };
+export function createCommitRevealSession(
+  operationType: OperationType,
+  authType: AuthType,
+  idToken: string,
+): Result<ClientCommitRevealSession, string> {
+  const keypairRes = generateClientKeypair();
+  if (!keypairRes.success) {
+    return { success: false, err: keypairRes.err };
   }
 
-  const tokenHashResult = calculateTokenHash(
-    options.oauth_token,
-    options.sdk_version,
-  );
-  if (!tokenHashResult.success) {
-    return { success: false, err: tokenHashResult.err };
+  const hashRes = computeIdTokenHash(authType, idToken);
+  if (!hashRes.success) {
+    return { success: false, err: hashRes.err };
   }
 
   const now = new Date();
-
-  const session: CommitRevealSession = {
-    session_id: sessionId,
-    session_type: "OAUTH_COMMIT_REVEAL",
-    client_public_key: keypairResult.data.publicKey,
-    sdk_version: options.sdk_version,
-    user_email: options.user_email,
-    public_key: options.wallet_public_key,
-    token_hash: tokenHashResult.data,
-    state: "INITIALIZED",
-    created_at: now,
-    updated_at: now,
-    expires_at: calculateExpiresAt(now),
-    commit_phase: {
-      nodes_committed: [],
-      total_nodes: options.node_urls.length,
-      encrypted_tokens: {},
-      node_public_keys: {},
-    },
-    reveal_phase: {
-      nodes_revealed: [],
-      total_nodes: options.node_urls.length,
-    },
-    operation_type: options.operation_type,
-  };
-
   return {
     success: true,
-    data: { session, keypair: keypairResult.data },
+    data: {
+      session_id: generateSessionId(),
+      operation_type: operationType,
+      client_keypair: keypairRes.data,
+      id_token_hash: hashRes.data,
+      auth_type: authType,
+      id_token: idToken,
+      ksn_node_pubkeys: {},
+      ksn_operation_types: {},
+      created_at: now,
+      expires_at: new Date(now.getTime() + SESSION_TIMEOUT_MS),
+    },
   };
 }
 
-// ============================================================================
-// State Management
-// ============================================================================
-
-/**
- * Update session state.
- */
-export function updateState(
-  session: CommitRevealSession,
-  newState: CommitRevealSessionState,
-): CommitRevealSession {
-  return {
-    ...session,
-    state: newState,
-    updated_at: new Date(),
-  };
+export function setOkoApiNodePubkey(
+  session: ClientCommitRevealSession,
+  nodePubkey: string,
+): ClientCommitRevealSession {
+  return { ...session, oko_api_node_pubkey: nodePubkey };
 }
 
-/**
- * Check if state transition is valid.
- */
-export function canTransitionTo(
-  session: CommitRevealSession,
-  targetState: CommitRevealSessionState,
-): boolean {
-  if (isSessionExpired(session.expires_at)) {
-    return targetState === "TIMEOUT";
-  }
-
-  const transitions: Record<
-    CommitRevealSessionState,
-    CommitRevealSessionState[]
-  > = {
-    INITIALIZED: ["COMMIT_PHASE", "FAILED", "TIMEOUT"],
-    COMMIT_PHASE: ["COMMITTED", "FAILED", "TIMEOUT"],
-    COMMITTED: ["REVEAL_PHASE", "FAILED", "TIMEOUT", "ROLLED_BACK"],
-    REVEAL_PHASE: ["COMPLETED", "FAILED", "TIMEOUT", "ROLLED_BACK"],
-    COMPLETED: [],
-    FAILED: ["ROLLED_BACK"],
-    TIMEOUT: ["ROLLED_BACK"],
-    ROLLED_BACK: [],
-  };
-
-  return transitions[session.state]?.includes(targetState) ?? false;
-}
-
-// ============================================================================
-// Commit Phase
-// ============================================================================
-
-/**
- * Record Oko Server's public key after init.
- */
-export function setOkoServerPublicKey(
-  session: CommitRevealSession,
-  publicKey: Bytes32,
-): CommitRevealSession {
-  return {
-    ...session,
-    oko_server_public_key: publicKey,
-    state: "COMMIT_PHASE",
-    updated_at: new Date(),
-  };
-}
-
-/**
- * Record successful node commit.
- */
-export function recordNodeCommit(
-  session: CommitRevealSession,
+export function setKsnNodePubkey(
+  session: ClientCommitRevealSession,
   nodeUrl: string,
-  nodeName: string,
-  nodePublicKey: Bytes32,
-): CommitRevealSession {
-  const status: NodeStatus = {
-    node_name: nodeName,
-    node_url: nodeUrl,
-    status: "SUCCESS",
-    timestamp: new Date(),
-  };
-
+  nodePubkey: string,
+  operationType: KsnOperationType,
+): ClientCommitRevealSession {
   return {
     ...session,
-    updated_at: new Date(),
-    commit_phase: {
-      ...session.commit_phase,
-      nodes_committed: [...session.commit_phase.nodes_committed, status],
-      node_public_keys: {
-        ...session.commit_phase.node_public_keys,
-        [nodeUrl]: nodePublicKey,
-      },
+    ksn_node_pubkeys: { ...session.ksn_node_pubkeys, [nodeUrl]: nodePubkey },
+    ksn_operation_types: {
+      ...session.ksn_operation_types,
+      [nodeUrl]: operationType,
     },
   };
 }
 
 /**
- * Record failed node commit.
+ * Commit to oko_api and ks nodes.
+ * Creates a commit-reveal session and sends commit requests.
+ *
+ * @param okoApiOperationType - Operation type for oko_api commit
+ * @param ksnCommitTargets - All ks nodes to commit to
+ *
+ * All nodes must successfully commit for the operation to proceed.
+ * If any node fails, the entire operation fails and user must re-login.
  */
-export function recordNodeCommitFailure(
-  session: CommitRevealSession,
-  nodeUrl: string,
-  nodeName: string,
-  errorMessage: string,
-): CommitRevealSession {
-  const status: NodeStatus = {
-    node_name: nodeName,
-    node_url: nodeUrl,
-    status: "FAILED",
-    error_message: errorMessage,
-    timestamp: new Date(),
-  };
-
-  return {
-    ...session,
-    updated_at: new Date(),
-    commit_phase: {
-      ...session.commit_phase,
-      nodes_committed: [...session.commit_phase.nodes_committed, status],
-    },
-  };
-}
-
-/**
- * Store encrypted token for a node.
- */
-export function storeEncryptedToken(
-  session: CommitRevealSession,
-  nodeUrl: string,
-  encryptedToken: EncryptedToken,
-): CommitRevealSession {
-  return {
-    ...session,
-    updated_at: new Date(),
-    commit_phase: {
-      ...session.commit_phase,
-      encrypted_tokens: {
-        ...session.commit_phase.encrypted_tokens,
-        [nodeUrl]: encryptedToken,
-      },
-    },
-  };
-}
-
-// ============================================================================
-// Reveal Phase
-// ============================================================================
-
-/**
- * Record successful node reveal.
- */
-export function recordNodeReveal(
-  session: CommitRevealSession,
-  nodeUrl: string,
-  nodeName: string,
-): CommitRevealSession {
-  const status: NodeStatus = {
-    node_name: nodeName,
-    node_url: nodeUrl,
-    status: "SUCCESS",
-    timestamp: new Date(),
-  };
-
-  return {
-    ...session,
-    updated_at: new Date(),
-    reveal_phase: {
-      ...session.reveal_phase,
-      nodes_revealed: [...session.reveal_phase.nodes_revealed, status],
-    },
-  };
-}
-
-/**
- * Record failed node reveal.
- */
-export function recordNodeRevealFailure(
-  session: CommitRevealSession,
-  nodeUrl: string,
-  nodeName: string,
-  errorMessage: string,
-): CommitRevealSession {
-  const status: NodeStatus = {
-    node_name: nodeName,
-    node_url: nodeUrl,
-    status: "FAILED",
-    error_message: errorMessage,
-    timestamp: new Date(),
-  };
-
-  return {
-    ...session,
-    updated_at: new Date(),
-    reveal_phase: {
-      ...session.reveal_phase,
-      nodes_revealed: [...session.reveal_phase.nodes_revealed, status],
-    },
-  };
-}
-
-// ============================================================================
-// Status Helpers
-// ============================================================================
-
-export function getSuccessfulCommitCount(session: CommitRevealSession): number {
-  return session.commit_phase.nodes_committed.filter(
-    (n) => n.status === "SUCCESS",
-  ).length;
-}
-
-export function getSuccessfulRevealCount(session: CommitRevealSession): number {
-  return session.reveal_phase.nodes_revealed.filter(
-    (n) => n.status === "SUCCESS",
-  ).length;
-}
-
-export function isCommitPhaseComplete(session: CommitRevealSession): boolean {
-  return (
-    session.commit_phase.nodes_committed.length ===
-    session.commit_phase.total_nodes
+export async function commitAll(
+  okoApiOperationType: OperationType,
+  authType: AuthType,
+  idToken: string,
+  ksnCommitTargets: KsnCommitTarget[],
+): Promise<Result<ClientCommitRevealSession, string>> {
+  // 1. Create session
+  const sessionRes = createCommitRevealSession(
+    okoApiOperationType,
+    authType,
+    idToken,
   );
-}
+  if (!sessionRes.success) {
+    return { success: false, err: sessionRes.err };
+  }
+  let session = sessionRes.data;
 
-export function isRevealPhaseComplete(session: CommitRevealSession): boolean {
-  return (
-    session.reveal_phase.nodes_revealed.length ===
-    session.reveal_phase.total_nodes
+  const clientPubkeyHex = session.client_keypair.publicKey.toHex();
+
+  // 2. Commit to oko_api
+  const okoApiResult = await commitToOkoApi(
+    session.session_id,
+    okoApiOperationType,
+    clientPubkeyHex,
+    session.id_token_hash,
   );
-}
 
-export function meetsThreshold(
-  session: CommitRevealSession,
-  threshold: number,
-): boolean {
-  if (session.state === "COMMIT_PHASE" || session.state === "COMMITTED") {
-    return getSuccessfulCommitCount(session) >= threshold;
+  if (!okoApiResult.success || !okoApiResult.data.success) {
+    return { success: false, err: "Failed to commit to oko_api" };
   }
-  if (session.state === "REVEAL_PHASE" || session.state === "COMPLETED") {
-    return getSuccessfulRevealCount(session) >= threshold;
+  session = setOkoApiNodePubkey(session, okoApiResult.data.data.node_pubkey);
+
+  // 3. Commit to all ks nodes in parallel
+  // All nodes must succeed for the operation to proceed
+  const results = await Promise.allSettled(
+    ksnCommitTargets.map((target) =>
+      commitToKsNode(
+        target.nodeUrl,
+        session.session_id,
+        target.operationType,
+        clientPubkeyHex,
+        session.id_token_hash,
+      ).then((res) => ({
+        nodeUrl: target.nodeUrl,
+        operationType: target.operationType,
+        res,
+      })),
+    ),
+  );
+
+  const failedNodes: string[] = [];
+
+  for (const result of results) {
+    if (result.status === "fulfilled" && result.value.res.success) {
+      session = setKsnNodePubkey(
+        session,
+        result.value.nodeUrl,
+        result.value.res.data.node_pubkey,
+        result.value.operationType,
+      );
+    } else {
+      const nodeUrl =
+        result.status === "fulfilled"
+          ? result.value.nodeUrl
+          : "unknown";
+      failedNodes.push(nodeUrl);
+    }
   }
-  return false;
+
+  if (failedNodes.length > 0) {
+    return {
+      success: false,
+      err: `Failed to commit to ks nodes: ${failedNodes.join(", ")}`,
+    };
+  }
+
+  return { success: true, data: session };
 }

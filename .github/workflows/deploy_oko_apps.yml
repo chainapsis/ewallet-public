@@ -25,12 +25,13 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-22.04
-    # container:
-    #   image: node:22.0.0-alpine
     timeout-minutes: 60
     steps:
       - name: Checkout self repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.git_tag }}
+          token: ${{ secrets.GITHUB_PAT }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -79,15 +80,6 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --immutable
-
-      # - name: Setup Rust
-      #   uses: dtolnay/rust-toolchain@nightly
-      #
-      # - name: Build CS packages
-      #   run: yarn ci build_cs
-      #
-      # - name: Build Frost packages
-      #   run: yarn ci build_frost
 
       - name: Build internal packages
         run: yarn ci build_pkgs

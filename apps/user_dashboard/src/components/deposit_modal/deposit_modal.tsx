@@ -21,23 +21,20 @@ import styles from "./deposit_modal.module.scss";
 import { SearchEmptyView } from "@oko-wallet-user-dashboard/components/search_empty_view";
 import { useEnabledChains } from "@oko-wallet-user-dashboard/hooks/queries";
 import {
-  useBech32Addresses,
+  useCosmosAddresses,
   useEthAddress,
-  useSolanaAddress,
+  useSVMAddress,
 } from "@oko-wallet-user-dashboard/hooks/queries/use_addresses";
 import { useSearch } from "@oko-wallet-user-dashboard/hooks/use_search";
-import {
-  DEFAULT_ENABLED_CHAINS,
-  getChainIdentifier,
-} from "@oko-wallet-user-dashboard/state/chains";
+import { DEFAULT_ENABLED_CHAINS } from "@oko-wallet-user-dashboard/state/chains";
+import { getChainIdentifier } from "@oko-wallet-user-dashboard/utils/chain";
 import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
-import { isCosmosChainId } from "@oko-wallet-user-dashboard/utils/chain";
 
 const ecosystemFilterOptions = [
   "All Chains",
   "Cosmos",
   "EVM",
-  "Solana",
+  "SVM",
 ] as const;
 type EcosystemFilter = (typeof ecosystemFilterOptions)[number];
 
@@ -65,24 +62,16 @@ export const DepositModal: FC<DepositModalProps> = ({ renderTrigger }) => {
 
   const searchFields = ["chainName"];
 
-  // Get enabled chains with cosmos, evm, or solana modules
   const visibleChains = useMemo(() => {
     return enabledChains.filter(
-      (chain) => chain.cosmos || chain.evm || chain.solana,
+      (chain) => chain.cosmos || chain.evm || chain.svm,
     );
   }, [enabledChains]);
 
   // Get addresses using TanStack Query hooks
   const { address: ethAddress } = useEthAddress();
-  const { address: solanaAddress } = useSolanaAddress();
-  const cosmosChainIds = useMemo(
-    () =>
-      visibleChains
-        .filter((chain) => isCosmosChainId(chain.chainId))
-        .map((chain) => chain.chainId),
-    [visibleChains],
-  );
-  const { addresses: bech32Addresses } = useBech32Addresses(cosmosChainIds);
+  const { address: svmAddress } = useSVMAddress();
+  const { addresses: cosmosAddresses } = useCosmosAddresses();
 
   const searchedChainInfos = useSearch(
     visibleChains,
@@ -104,8 +93,8 @@ export const DepositModal: FC<DepositModalProps> = ({ renderTrigger }) => {
             return !!chain.cosmos;
           case "EVM":
             return !!chain.evm;
-          case "Solana":
-            return !!chain.solana;
+          case "SVM":
+            return !!chain.svm;
           default:
             throw new Error("unreachable");
         }
@@ -140,10 +129,10 @@ export const DepositModal: FC<DepositModalProps> = ({ renderTrigger }) => {
     if (chain.evm) {
       return ethAddress === null ? undefined : ethAddress;
     }
-    if (chain.solana) {
-      return solanaAddress === null ? undefined : solanaAddress;
+    if (chain.svm) {
+      return svmAddress === null ? undefined : svmAddress;
     }
-    return bech32Addresses[chain.chainId];
+    return cosmosAddresses[chain.chainId];
   };
 
   return (

@@ -1,14 +1,11 @@
-import { dirname, join } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
-import { Worker } from "node:worker_threads";
+import { spawn } from "node:child_process";
 import chalk from "chalk";
 
 import { paths } from "@oko-wallet-ci/paths";
+import { getPkgName } from "@oko-wallet-ci/pkg_name";
+import { runWithConcurrency } from "@oko-wallet-ci/concurrency";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const WORKER_COUNT = 4;
+const DEFAULT_CONCURRENCY = 4;
 
 export async function typeCheck(..._args: any[]) {
   const pkgPaths = [
@@ -40,25 +37,17 @@ export async function typeCheck(..._args: any[]) {
     paths.example_multi_ecosystem_react,
   ];
 
-  console.log("Type checking, total (%s)", pkgPaths.length);
+  const concurrency = DEFAULT_CONCURRENCY;
 
-  const chunckedPaths = chunkArr(pkgPaths, WORKER_COUNT);
-
-  const proms: Promise<number>[] = [];
-  const workers: Worker[] = [];
-  for (let idx = 0; idx < chunckedPaths.length; idx += 1) {
-    const { worker, promise } = spawnWorker(
-      `worker-${idx}`,
-      chunckedPaths[idx],
-    );
-
-    proms.push(promise);
-    workers.push(worker);
-  }
+  console.log(
+    "Type checking, total (%s), concurrency (%s)",
+    pkgPaths.length,
+    concurrency,
+  );
 
   try {
     const since = Date.now();
-    await Promise.all(proms);
+    await runWithConcurrency(pkgPaths, runTypeCheck, concurrency);
     const now = Date.now();
 
     console.log("Took %sms", now - since);
@@ -68,76 +57,42 @@ export async function typeCheck(..._args: any[]) {
       `All ${pkgPaths.length} ok!`,
     );
   } catch (err: any) {
-    console.log(
-      "%s type checking, terminating all workers, original error: %s",
-      chalk.red.bold("Error"),
-      err,
-    );
-
-    for (let idx = 0; idx < workers.length; idx += 1) {
-      workers[idx].terminate();
-    }
-
+    console.log("%s type checking: %s", chalk.red.bold("Error"), err.message);
     process.exit(1);
   }
 }
 
-export function spawnWorker(workerName: string, pkgPaths: string[]) {
-  const scriptPath = join(__dirname, "./worker.ts");
-  const scriptUrl = pathToFileURL(scriptPath).href;
-
-  const worker = new Worker(
-    // NOTE: Register runtime hook, if not, scripts in a worker thread run on
-    // NodeJS runtime, not TSX (or any TypeScript runtime).
-    `import('tsx/esm/api')
-        .then(({ register }) => {
-          register();
-          import('${scriptUrl}')
-        })`,
-    {
-      workerData: pkgPaths,
-      eval: true,
-    },
+async function runTypeCheck(workerId: number, pkgPath: string): Promise<void> {
+  const name = await getPkgName(pkgPath);
+  console.log(
+    "%s %s %s",
+    chalk.blueBright.bold(`wk-${workerId}`),
+    chalk.cyanBright.bold("Checking"),
+    name,
   );
 
-  const promise = new Promise<number>((resolve, reject) => {
-    console.log(
-      "Spawn worker (%s), checking %s pkgs, script path: %s",
-      workerName,
-      pkgPaths.length,
-      scriptUrl,
-    );
-
-    worker.on("message", (msg) => {
-      console.log("%s %s", chalk.cyanBright.bold(workerName), msg);
+  return new Promise((resolve, reject) => {
+    const child = spawn("yarn", ["run", "tsc", "--noEmit"], {
+      cwd: pkgPath,
+      stdio: "inherit",
     });
 
-    worker.on("error", reject);
+    child.on("error", (err) => {
+      reject(new Error(`Failed to start tsc for ${name}: ${err.message}`));
+    });
 
-    worker.on("exit", (code) => {
-      if (code !== 0) {
-        reject(new Error(`Worker stopped with exit code ${code}`));
+    child.on("close", (code) => {
+      if (code === 0) {
+        console.log(
+          "%s %s %s",
+          chalk.blueBright.bold(`wk-${workerId}`),
+          chalk.bold.green("Ok"),
+          name,
+        );
+        resolve();
       } else {
-        resolve(0);
+        reject(new Error(`Type check failed for ${name}`));
       }
     });
   });
-
-  return { worker, promise };
-}
-
-function chunkArr(arr: any[], chunkCount: number) {
-  const ret: any[][] = [];
-  for (let i = 0; i < chunkCount; i += 1) {
-    ret.push([]);
-  }
-
-  let currArrIdx = 0;
-  for (let i = 0; i < arr.length; i += 1) {
-    ret[currArrIdx].push(arr[i]);
-
-    currArrIdx = (currArrIdx + 1) % chunkCount;
-  }
-
-  return ret;
 }

@@ -1,9 +1,4 @@
-export type OperationType =
-  | "sign_in"
-  | "sign_up"
-  | "sign_in_reshare"
-  | "register_reshare"
-  | "add_ed25519";
+export type OperationType = "sign_in" | "sign_up" | "add_ed25519";
 
 export type ApiName =
   | "get_key_shares"
@@ -38,4 +33,16 @@ export interface CreateSessionParams {
   client_ephemeral_pubkey: Uint8Array;
   id_token_hash: string;
   expires_at: Date;
+}
+
+export interface CommitRequestBody {
+  session_id: string;
+  operation_type: OperationType;
+  client_ephemeral_pubkey: string;
+  id_token_hash: string;
+}
+
+export interface CommitResponseData {
+  node_pubkey: string;
+  node_signature: string;
 }
