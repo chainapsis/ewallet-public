@@ -149,9 +149,7 @@ describe("handleNewUserV2", () => {
         },
         keygen_2_ed25519: {
           key_package: serverFrostOutput.key_package,
-          public_key_package: Buffer.from(
-            serverFrostOutput.public_key_package,
-          ).toString("hex"),
+          public_key_package: serverFrostOutput.public_key_package,
           identifier: serverFrostOutput.identifier,
           public_key: ed25519PublicKey,
         },
