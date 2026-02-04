@@ -13,6 +13,7 @@ import {
   makeAuthorizedOkoApiRequest,
   signInV2,
   TSS_V2_ENDPOINT,
+  reportKeyShareNotFound,
 } from "@oko-wallet-attached/requests/oko_api";
 import { combineUserShares } from "@oko-wallet-attached/crypto/combine";
 import type { UserSignInResultV2 } from "@oko-wallet-attached/window_msgs/types";
@@ -53,7 +54,8 @@ export async function handleExistingUserNeedsEd25519Keygen(
   const { threshold, nodes } = keyshareNodeMeta;
 
   // 1. ed25519 keygen and split
-  const ed25519KeygenSplitRes = await runEd25519KeygenAndSplit(keyshareNodeMeta);
+  const ed25519KeygenSplitRes =
+    await runEd25519KeygenAndSplit(keyshareNodeMeta);
   if (ed25519KeygenSplitRes.success === false) {
     return { success: false, err: ed25519KeygenSplitRes.err };
   }
@@ -188,120 +190,38 @@ export async function handleExistingUserNeedsEd25519Keygen(
 
   const { shares: keySharesByNode, notFoundNodes } = requestSharesRes.data;
 
-  // Track nodes needing reshare for auto-reshare (will be removed in Task 5.6)
-  const nodesNeedingReshare = notFoundNodes;
-  const needsReshare = nodesNeedingReshare.length > 0;
-
-  if (needsReshare) {
-    console.log(
-      "[attached] auto-reshare: detected %d nodes needing secp256k1 reshare",
-      nodesNeedingReshare.length,
-    );
-  }
-
   // 7. Decode secp256k1 shares
   const secp256k1DecodeRes = await decodeSecp256k1SharesByNode(keySharesByNode);
   if (!secp256k1DecodeRes.success) {
     return { success: false, err: secp256k1DecodeRes.err };
   }
 
-  // 8. Auto-reshare if needed, or just combine secp256k1 shares
-  let keyshare1Secp256k1: string;
+  // 8. Combine secp256k1 shares
+  const keyshare1Secp256k1Res = await combineUserShares(
+    secp256k1DecodeRes.data,
+    threshold,
+  );
+  if (keyshare1Secp256k1Res.success === false) {
+    return {
+      success: false,
+      err: {
+        type: "key_share_combine_fail",
+        error: `secp256k1 combine err: ${keyshare1Secp256k1Res.err}`,
+      },
+    };
+  }
+  const keyshare1Secp256k1 = keyshare1Secp256k1Res.data;
 
-  if (needsReshare) {
+  // 9. Report nodes that returned KEY_SHARE_NOT_FOUND
+  if (notFoundNodes.length > 0) {
     console.log(
-      "[attached] auto-reshare: expanding secp256k1 and sending to %d nodes",
-      nodesNeedingReshare.length,
+      "[attached] reporting %d nodes with KEY_SHARE_NOT_FOUND",
+      notFoundNodes.length,
     );
-
-    // Expand secp256k1 shares
-    const secp256k1ExpandRes = await runExpandShares(
-      secp256k1DecodeRes.data,
-      nodesNeedingReshare,
-      threshold,
-    );
-    if (!secp256k1ExpandRes.success) {
-      return {
-        success: false,
-        err: { type: "reshare_fail", error: secp256k1ExpandRes.err },
-      };
-    }
-    keyshare1Secp256k1 = secp256k1ExpandRes.data.original_secret.toHex();
-
-    // Send reshared shares to nodes (both secp256k1 and ed25519)
-    const sendResults = await Promise.all(
-      secp256k1ExpandRes.data.reshared_user_key_shares.map(
-        async (secp256k1Share) => {
-          const ed25519Share = ed25519UserKeyShares.find(
-            (s) => s.node.endpoint === secp256k1Share.node.endpoint,
-          );
-          if (!ed25519Share) {
-            return {
-              success: false,
-              err: `ed25519 share not found for node ${secp256k1Share.node.name}`,
-            };
-          }
-
-          const commitRevealRes = createKsnCommitRevealParams(
-            session,
-            secp256k1Share.node.endpoint,
-            "reshare",
-          );
-          if (!commitRevealRes.success) {
-            return { success: false, err: commitRevealRes.err };
-          }
-
-          return reshareKeySharesV2(
-            secp256k1Share.node.endpoint,
-            idToken,
-            authType,
-            {
-              secp256k1: {
-                public_key: secp256k1PublicKey,
-                share: encodePoint256ToKeyShareString(secp256k1Share.share),
-              },
-              ed25519: {
-                public_key: ed25519Keygen1.public_key.toHex(),
-                share: teddsaKeyShareToHex(ed25519Share.share),
-              },
-            },
-            commitRevealRes.data,
-          );
-        },
-      ),
-    );
-
-    const errResults = sendResults.filter((r) => !r.success);
-    if (errResults.length > 0) {
-      return {
-        success: false,
-        err: {
-          type: "reshare_fail",
-          error: errResults.map((r) => (r as { err: string }).err).join("\n"),
-        },
-      };
-    }
-
-    console.log("[attached] auto-reshare completed successfully");
-  } else {
-    // No reshare needed - just combine shares
-    const keyshare1Secp256k1Res = await combineUserShares(
-      secp256k1DecodeRes.data,
-      threshold,
-    );
-    if (keyshare1Secp256k1Res.success === false) {
-      return {
-        success: false,
-        err: {
-          type: "key_share_combine_fail",
-          error: `secp256k1 combine err: ${keyshare1Secp256k1Res.err}`,
-        },
-      };
-    }
-    keyshare1Secp256k1 = keyshare1Secp256k1Res.data;
+    reportKeyShareNotFound(reqKeygenEd25519Res.data.token, notFoundNodes);
   }
 
-  // 9. Convert ed25519 keygen1 to hex format for storage
+  // 10. Convert ed25519 keygen1 to hex format for storage
   const keyPackageEd25519Hex = teddsaKeygenToHex(ed25519Keygen1);
 
   return {
@@ -351,7 +271,8 @@ export async function handleReshareAndEd25519Keygen(
   }
 
   // 2. ed25519 keygen and split
-  const ed25519KeygenSplitRes = await runEd25519KeygenAndSplit(keyshareNodeMeta);
+  const ed25519KeygenSplitRes =
+    await runEd25519KeygenAndSplit(keyshareNodeMeta);
   if (ed25519KeygenSplitRes.success === false) {
     return { success: false, err: ed25519KeygenSplitRes.err };
   }
@@ -411,7 +332,10 @@ export async function handleReshareAndEd25519Keygen(
         (s) => s.node.endpoint === node.endpoint,
       );
       if (!nodeShare) {
-        return { success: false, err: `ed25519 share not found for ${node.name}` };
+        return {
+          success: false,
+          err: `ed25519 share not found for ${node.name}`,
+        };
       }
       const commitRevealRes = createKsnCommitRevealParams(
         session,
