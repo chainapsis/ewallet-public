@@ -12,7 +12,7 @@ export interface PgDatabaseConfig {
 }
 
 export const okoApiDbConfig: PgDatabaseConfig = {
-  database: "oko_dev",
+  database: "oko_api_e2e_test",
   host: "localhost",
   password: "postgres",
   user: "postgres",
@@ -21,7 +21,7 @@ export const okoApiDbConfig: PgDatabaseConfig = {
 };
 
 export const createKsnDbConfig = (nodeId: number): PgDatabaseConfig => ({
-  database: `key_share_node_dev${nodeId}`,
+  database: `ksn_e2e_test_${nodeId}`,
   host: "localhost",
   password: "postgres",
   user: "postgres",
@@ -101,30 +101,26 @@ export async function ensureDatabaseExists(
 }
 
 export async function initializeOkoApiSchema(pool: Pool): Promise<void> {
-  const hasTable = await pool.query(
-    `SELECT 1 FROM information_schema.tables WHERE table_name = 'ewallet_users'`,
-  );
-  if (hasTable.rows.length > 0) return;
-
+  // Create oko_api tables expected by oko_pg_interface
   await pool.query(`
-    CREATE TABLE IF NOT EXISTS ewallet_users (
+    CREATE TABLE IF NOT EXISTS oko_users (
       user_id uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
       email varchar(255) NOT NULL,
-      auth_type varchar(64) DEFAULT 'google' NOT NULL,
-      status varchar(32) DEFAULT 'ACTIVE' NOT NULL,
+      auth_type varchar(64) NOT NULL,
+      metadata jsonb NULL,
       created_at timestamptz DEFAULT now() NOT NULL,
       updated_at timestamptz DEFAULT now() NOT NULL,
-      CONSTRAINT ewallet_users_email_auth_type_key UNIQUE (email, auth_type)
+      CONSTRAINT oko_users_email_auth_type_key UNIQUE (email, auth_type)
     );
 
-    CREATE TABLE IF NOT EXISTS ewallet_wallets (
+    CREATE TABLE IF NOT EXISTS oko_wallets (
       wallet_id uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
       user_id uuid NOT NULL,
       curve_type varchar(16) NOT NULL,
       public_key bytea NOT NULL UNIQUE,
-      status varchar(32) DEFAULT 'ACTIVE' NOT NULL,
       enc_tss_share bytea NOT NULL,
       sss_threshold int2 DEFAULT 2 NOT NULL,
+      status varchar(32) DEFAULT 'ACTIVE' NOT NULL,
       metadata jsonb NULL,
       created_at timestamptz DEFAULT now() NOT NULL,
       updated_at timestamptz DEFAULT now() NOT NULL
@@ -194,10 +190,10 @@ export async function seedOkoApiTestData(
   ksnUrls: string[],
 ): Promise<void> {
   // Check if already seeded
-  const hasData = await pool.query(
-    `SELECT 1 FROM key_share_node_meta LIMIT 1`,
-  );
-  if (hasData.rows.length > 0) return;
+  const hasData = await pool.query(`SELECT 1 FROM key_share_node_meta LIMIT 1`);
+  if (hasData.rows.length > 0) {
+    return;
+  }
 
   // Seed key_share_node_meta
   await pool.query(`
@@ -217,7 +213,9 @@ export async function initializeKsnSchema(pool: Pool): Promise<void> {
   const hasTable = await pool.query(
     `SELECT 1 FROM information_schema.tables WHERE table_name = '2_users'`,
   );
-  if (hasTable.rows.length > 0) return;
+  if (hasTable.rows.length > 0) {
+    return;
+  }
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS "2_users" (
