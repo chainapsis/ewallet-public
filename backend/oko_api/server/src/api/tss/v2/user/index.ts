@@ -3,6 +3,7 @@ import type { Logger } from "winston";
 import {
   getActiveWalletByUserIdAndCurveType,
   getWalletByPublicKey,
+  getWalletByIdWithAuthInfo,
 } from "@oko-wallet/oko-pg-interface/oko_wallets";
 import type {
   CheckEmailResponseV2,
@@ -32,12 +33,13 @@ import type {
 } from "@oko-wallet/oko-types/tss";
 import { getKeyShareNodeMeta } from "@oko-wallet/oko-pg-interface/key_share_node_meta";
 import type { Wallet } from "@oko-wallet/oko-types/wallets";
-import type { Bytes32, Bytes33 } from "@oko-wallet/bytes";
+import { Bytes, type Bytes32, type Bytes33 } from "@oko-wallet/bytes";
 import { decryptDataAsync } from "@oko-wallet/crypto-js/node";
 import type { Result } from "@oko-wallet/stdlib-js";
 
 import { generateUserTokenV2 } from "@oko-wallet-api/api/tss/keplr_auth";
 import { checkKeyShareFromKSNodesV2 } from "@oko-wallet-api/api/tss/ks_node";
+import { requestCheckKeyShareV2 } from "@oko-wallet-api/requests";
 
 // Higher = worse (needs more attention)
 const STATUS_SEVERITY: Record<WalletKSNodeStatus, number> = {
@@ -687,6 +689,9 @@ async function calculateSecp256k1OnlyCheckInfo(
  * Report key share not found from KS nodes.
  * Updates wallet_ks_nodes status to UNRECOVERABLE_DATA_LOSS.
  * Called when client receives KEY_SHARE_NOT_FOUND from a node that was expected to be ACTIVE.
+ *
+ * Server-side verification: Before marking nodes as data loss, the server
+ * directly verifies with each KSN node to confirm the keyshare is actually missing.
  */
 export async function reportKeyShareNotFoundV2(
   db: Pool,
@@ -704,11 +709,83 @@ export async function reportKeyShareNotFoundV2(
       };
     }
 
-    // 1. Validate nodes exist and get their IDs
+    // 1. Get wallet info with email and auth_type
+    const [secp256k1WalletRes, ed25519WalletRes] = await Promise.all([
+      getWalletByIdWithAuthInfo(db, wallet_id_secp256k1),
+      getWalletByIdWithAuthInfo(db, wallet_id_ed25519),
+    ]);
+
+    if (!secp256k1WalletRes.success) {
+      return {
+        success: false,
+        code: "UNKNOWN_ERROR",
+        msg: `getWalletByIdWithAuthInfo (secp256k1): ${secp256k1WalletRes.err}`,
+      };
+    }
+    if (!ed25519WalletRes.success) {
+      return {
+        success: false,
+        code: "UNKNOWN_ERROR",
+        msg: `getWalletByIdWithAuthInfo (ed25519): ${ed25519WalletRes.err}`,
+      };
+    }
+
+    const secp256k1Wallet = secp256k1WalletRes.data;
+    const ed25519Wallet = ed25519WalletRes.data;
+
+    if (!secp256k1Wallet || !ed25519Wallet) {
+      return {
+        success: false,
+        code: "WALLET_NOT_FOUND",
+        msg: "Wallet not found",
+      };
+    }
+
+    // Validate that both wallets belong to the same user
+    if (
+      secp256k1Wallet.email !== ed25519Wallet.email ||
+      secp256k1Wallet.auth_type !== ed25519Wallet.auth_type
+    ) {
+      return {
+        success: false,
+        code: "FORBIDDEN",
+        msg: "Wallet user mismatch",
+      };
+    }
+
+    const userEmail = secp256k1Wallet.email;
+    const authType = secp256k1Wallet.auth_type as AuthType;
+    const secp256k1PublicKeyRes = Bytes.fromUint8Array(
+      new Uint8Array(secp256k1Wallet.public_key),
+      33,
+    );
+    const ed25519PublicKeyRes = Bytes.fromUint8Array(
+      new Uint8Array(ed25519Wallet.public_key),
+      32,
+    );
+
+    if (!secp256k1PublicKeyRes.success) {
+      return {
+        success: false,
+        code: "UNKNOWN_ERROR",
+        msg: `Invalid secp256k1 public key: ${secp256k1PublicKeyRes.err}`,
+      };
+    }
+    if (!ed25519PublicKeyRes.success) {
+      return {
+        success: false,
+        code: "UNKNOWN_ERROR",
+        msg: `Invalid ed25519 public key: ${ed25519PublicKeyRes.err}`,
+      };
+    }
+
+    const secp256k1PublicKey = secp256k1PublicKeyRes.data;
+    const ed25519PublicKey = ed25519PublicKeyRes.data;
+
+    // 2. Validate nodes exist and get their IDs
     const serverUrls = nodes.map((n) => n.endpoint);
     const ksNodesRes = await getKSNodesByServerUrl(db, serverUrls);
     if (!ksNodesRes.success) {
-      logger.error("Failed to get ks nodes by server_url", ksNodesRes.err);
       return {
         success: false,
         code: "UNKNOWN_ERROR",
@@ -725,13 +802,70 @@ export async function reportKeyShareNotFoundV2(
       };
     }
 
-    const nodeIds = ksNodes.map((n) => n.node_id);
+    // 3. Server-side verification: Check each node to confirm keyshare is missing
+    const verifiedMissingNodeIds: string[] = [];
 
-    // 2. Update both wallets' ks_nodes status
+    const verifyResults = await Promise.allSettled(
+      ksNodes.map(async (ksNode) => {
+        const checkRes = await requestCheckKeyShareV2(
+          ksNode.server_url,
+          userEmail,
+          authType,
+          {
+            secp256k1: secp256k1PublicKey,
+            ed25519: ed25519PublicKey,
+          },
+        );
+
+        return {
+          nodeId: ksNode.node_id,
+          nodeName: ksNode.node_name,
+          checkRes,
+        };
+      }),
+    );
+
+    for (const result of verifyResults) {
+      if (result.status === "rejected") {
+        // Node is unreachable - treat as potential data loss
+        logger.warn(
+          `KSN node unreachable during verification: ${result.reason}`,
+        );
+        continue;
+      }
+
+      const { nodeId, nodeName, checkRes } = result.value;
+
+      if (!checkRes.success) {
+        // Error checking - log but don't mark as data loss without confirmation
+        logger.warn(`KSN check failed for node ${nodeName}: ${checkRes.msg}`);
+        continue;
+      }
+
+      // Only mark as data loss if keyshare is confirmed missing
+      const secp256k1Missing = !checkRes.data.secp256k1?.exists;
+      const ed25519Missing = !checkRes.data.ed25519?.exists;
+
+      if (secp256k1Missing || ed25519Missing) {
+        verifiedMissingNodeIds.push(nodeId);
+      }
+    }
+
+    if (verifiedMissingNodeIds.length === 0) {
+      return {
+        success: true,
+        data: {
+          updated_count_secp256k1: 0,
+          updated_count_ed25519: 0,
+        },
+      };
+    }
+
+    // 4. Update both wallets' ks_nodes status only for verified missing nodes
     const updateSecp256k1Res = await updateWalletKSNodeStatusToDataLoss(
       db,
       wallet_id_secp256k1,
-      nodeIds,
+      verifiedMissingNodeIds,
     );
     if (!updateSecp256k1Res.success) {
       logger.error(
@@ -748,7 +882,7 @@ export async function reportKeyShareNotFoundV2(
     const updateEd25519Res = await updateWalletKSNodeStatusToDataLoss(
       db,
       wallet_id_ed25519,
-      nodeIds,
+      verifiedMissingNodeIds,
     );
     if (!updateEd25519Res.success) {
       logger.error(
@@ -761,10 +895,6 @@ export async function reportKeyShareNotFoundV2(
         msg: updateEd25519Res.err,
       };
     }
-
-    logger.info(
-      `Reported key share not found: secp256k1=${updateSecp256k1Res.data}, ed25519=${updateEd25519Res.data}`,
-    );
 
     return {
       success: true,
