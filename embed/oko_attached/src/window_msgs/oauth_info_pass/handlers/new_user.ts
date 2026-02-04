@@ -103,7 +103,6 @@ export async function handleNewUserV2(
         session,
         keyShareByNode.node.endpoint,
         "register",
-        true, // cr_final: true - register is the only KSN call for sign_up
       );
       if (!commitRevealRes.success) {
         return { success: false, err: commitRevealRes.err };
@@ -143,7 +142,6 @@ export async function handleNewUserV2(
   const keygenCommitRevealRes = createOkoApiCommitRevealParams(
     session,
     "keygen",
-    true, // cr_final: true - keygen is the only oko_api call for sign_up
   );
   if (!keygenCommitRevealRes.success) {
     return {

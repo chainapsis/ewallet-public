@@ -138,6 +138,36 @@ describe("commit_route_test", () => {
       expect(response.body.data).toBeDefined();
     });
 
+    it("should successfully create session with reshare operation", async () => {
+      const body = {
+        ...createValidBody(),
+        operation_type: "reshare",
+      };
+
+      const response = await request(app)
+        .post(testEndpoint)
+        .send(body)
+        .expect(200);
+
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toBeDefined();
+    });
+
+    it("should successfully create session with add_ed25519_with_reshare operation", async () => {
+      const body = {
+        ...createValidBody(),
+        operation_type: "add_ed25519_with_reshare",
+      };
+
+      const response = await request(app)
+        .post(testEndpoint)
+        .send(body)
+        .expect(200);
+
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toBeDefined();
+    });
+
     it("should create multiple sessions with different session_ids", async () => {
       const body1 = createValidBody();
       const body2 = createValidBody();

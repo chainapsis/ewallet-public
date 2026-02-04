@@ -117,11 +117,9 @@ export async function handleExistingUserNeedsEd25519Keygen(
   }
 
   // 4. Call keygenEd25519 Oko API
-  // Use cr_final=false because secp256k1 reshare might be needed
   const keygenEd25519CommitRevealRes = createOkoApiCommitRevealParams(
     session,
     "keygen_ed25519",
-    false, // cr_final: false - secp256k1 reshare might come after
   );
   if (!keygenEd25519CommitRevealRes.success) {
     return {
@@ -170,7 +168,6 @@ export async function handleExistingUserNeedsEd25519Keygen(
       ed25519: ed25519Keygen1.public_key.toHex(),
     },
     session,
-    false, // isFinal: false - reshare might come after
   );
   if (!requestSharesRes.success) {
     const error = requestSharesRes.err;
@@ -242,7 +239,6 @@ export async function handleExistingUserNeedsEd25519Keygen(
             session,
             secp256k1Share.node.endpoint,
             "reshare",
-            true, // cr_final: true - reshare is the final KSN call for this node
           );
           if (!commitRevealRes.success) {
             return { success: false, err: commitRevealRes.err };
@@ -542,7 +538,6 @@ export async function handleReshareAndEd25519Keygen(
           session,
           node.endpoint,
           "register_ed25519",
-          true, // cr_final: true - final KSN call for this node
         );
         if (!registerEd25519CommitRevealRes.success) {
           return { success: false, err: registerEd25519CommitRevealRes.err };
@@ -574,7 +569,6 @@ export async function handleReshareAndEd25519Keygen(
   const keygenEd25519CommitRevealRes = createOkoApiCommitRevealParams(
     session,
     "keygen_ed25519",
-    false, // cr_final: false - reshare comes after
   );
   if (!keygenEd25519CommitRevealRes.success) {
     return {
@@ -609,7 +603,6 @@ export async function handleReshareAndEd25519Keygen(
   const reshareCommitRevealRes = createOkoApiCommitRevealParams(
     session,
     "reshare",
-    true, // cr_final: true - reshare is the final oko_api call
   );
   if (!reshareCommitRevealRes.success) {
     return {

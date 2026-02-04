@@ -61,7 +61,6 @@ export async function handleExistingUserV2(
   const signInCommitRevealRes = createOkoApiCommitRevealParams(
     session,
     "signin",
-    false, // cr_final: false - because reshare might be needed
   );
   if (!signInCommitRevealRes.success) {
     return {
@@ -94,7 +93,6 @@ export async function handleExistingUserV2(
       ed25519: signInResp.user.public_key_ed25519,
     },
     session,
-    false, // isFinal: false - reshare might come after
   );
   if (!requestSharesRes.success) {
     const error = requestSharesRes.err;

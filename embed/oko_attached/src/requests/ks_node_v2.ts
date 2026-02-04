@@ -49,8 +49,6 @@ export interface RequestKeySharesV2SuccessWithReshare {
 /**
  * Request key shares from multiple KS nodes using V2 API.
  * Supports requesting both secp256k1 and ed25519 shares in a single request.
- *
- * @param isFinal - If true, marks this as the final KSN API call for the session (cr_final: true)
  */
 export async function requestKeySharesV2(
   idToken: string,
@@ -62,7 +60,6 @@ export async function requestKeySharesV2(
     ed25519: string; // public key hex
   },
   commitRevealSession: ClientCommitRevealSession,
-  isFinal: boolean = false,
 ): Promise<Result<KeySharesByNode[], RequestKeySharesV2Error>> {
   const result = await requestKeySharesV2WithReshareInfo(
     idToken,
@@ -71,7 +68,6 @@ export async function requestKeySharesV2(
     authType,
     wallets,
     commitRevealSession,
-    isFinal,
   );
 
   if (!result.success) {
@@ -100,8 +96,6 @@ export async function requestKeySharesV2(
  * Request key shares from multiple KS nodes using V2 API.
  * Supports auto-reshare by continuing when WALLET_NOT_FOUND is encountered.
  * Nodes that return WALLET_NOT_FOUND are tracked in nodesNeedingReshare.
- *
- * @param isFinal - If true, marks this as the final KSN API call for the session (cr_final: true)
  */
 export async function requestKeySharesV2WithReshareInfo(
   idToken: string,
@@ -113,7 +107,6 @@ export async function requestKeySharesV2WithReshareInfo(
     ed25519?: string; // public key hex
   },
   commitRevealSession: ClientCommitRevealSession,
-  isFinal: boolean = false,
 ): Promise<
   Result<RequestKeySharesV2SuccessWithReshare, RequestKeySharesV2Error>
 > {
@@ -135,7 +128,6 @@ export async function requestKeySharesV2WithReshareInfo(
           commitRevealSession,
           node.endpoint,
           "get_key_shares",
-          isFinal,
         );
         if (!commitReveal.success) {
           return { success: false, err: commitReveal.err } as const;

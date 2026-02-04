@@ -3,7 +3,13 @@ import { z } from "zod";
 import { registry } from "../doc";
 
 export const operationTypeSchema = z
-  .enum(["sign_in", "sign_up", "add_ed25519"])
+  .enum([
+    "sign_up",
+    "sign_in",
+    "reshare",
+    "add_ed25519",
+    "add_ed25519_with_reshare",
+  ])
   .describe("Operation type for commit-reveal session");
 
 // POST /keyshare/v2/commit
@@ -99,11 +105,6 @@ export const commitRevealRequestFieldsSchema = z.object({
       example:
         "c3d4e5f6789012345678901234567890123456789012345678901234567890abc3d4e5f6789012345678901234567890123456789012345678901234567890ab",
     }),
-  cr_final: z
-    .boolean()
-    .optional()
-    .describe("Whether this is the final API call for the session (completes the session)")
-    .openapi({ example: true }),
   auth_type: z
     .string()
     .optional()
