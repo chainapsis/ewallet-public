@@ -160,7 +160,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
   const secp256k1PublicKey = reqKeygenEd25519Res.data.user.public_key_secp256k1;
 
   // 6. Request both shares from ks nodes (ed25519 was just registered in step 3)
-  // Use continueOnWalletNotFound=true to support auto-reshare
+  // Nodes with WALLET_NOT_FOUND will be tracked for auto-reshare
   const requestSharesRes = await requestKeySharesV2WithReshareInfo(
     idToken,
     nodes,
@@ -172,7 +172,6 @@ export async function handleExistingUserNeedsEd25519Keygen(
     },
     session,
     false, // isFinal: false - reshare might come after
-    true, // continueOnWalletNotFound: true for auto-reshare
   );
   if (!requestSharesRes.success) {
     const error = requestSharesRes.err;

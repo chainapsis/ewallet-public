@@ -72,7 +72,6 @@ export async function requestKeySharesV2(
     wallets,
     commitRevealSession,
     isFinal,
-    false, // continueOnWalletNotFound = false for backward compatibility
   );
 
   if (!result.success) {
@@ -100,10 +99,9 @@ export async function requestKeySharesV2(
 /**
  * Request key shares from multiple KS nodes using V2 API.
  * Supports auto-reshare by continuing when WALLET_NOT_FOUND is encountered.
+ * Nodes that return WALLET_NOT_FOUND are tracked in nodesNeedingReshare.
  *
  * @param isFinal - If true, marks this as the final KSN API call for the session (cr_final: true)
- * @param continueOnWalletNotFound - If true, continues collecting shares from other nodes when
- *   a node returns WALLET_NOT_FOUND, and returns the list of nodes needing reshare
  */
 export async function requestKeySharesV2WithReshareInfo(
   idToken: string,
@@ -114,9 +112,8 @@ export async function requestKeySharesV2WithReshareInfo(
     secp256k1?: string; // public key hex
     ed25519?: string; // public key hex
   },
-  commitRevealSession?: ClientCommitRevealSession,
+  commitRevealSession: ClientCommitRevealSession,
   isFinal: boolean = false,
-  continueOnWalletNotFound: boolean = false,
 ): Promise<
   Result<RequestKeySharesV2SuccessWithReshare, RequestKeySharesV2Error>
 > {
@@ -134,15 +131,13 @@ export async function requestKeySharesV2WithReshareInfo(
   while (succeeded.length < threshold && nodesToTry.length > 0) {
     const results = await Promise.allSettled(
       nodesToTry.map(async (node) => {
-        const commitReveal = commitRevealSession
-          ? createKsnCommitRevealParams(
-              commitRevealSession,
-              node.endpoint,
-              "get_key_shares",
-              isFinal,
-            )
-          : undefined;
-        if (commitReveal && !commitReveal.success) {
+        const commitReveal = createKsnCommitRevealParams(
+          commitRevealSession,
+          node.endpoint,
+          "get_key_shares",
+          isFinal,
+        );
+        if (!commitReveal.success) {
           return { success: false, err: commitReveal.err } as const;
         }
         return requestKeyShareFromNodeV2(
@@ -151,7 +146,7 @@ export async function requestKeySharesV2WithReshareInfo(
           authType,
           wallets,
           2,
-          commitReveal?.data,
+          commitReveal.data,
         );
       }),
     );
@@ -174,21 +169,11 @@ export async function requestKeySharesV2WithReshareInfo(
           errorCode === "WALLET_NOT_FOUND" ||
           errorCode === "KEY_SHARE_NOT_FOUND"
         ) {
-          if (continueOnWalletNotFound) {
-            // Track this node as needing reshare and continue
-            nodesNeedingReshare.push(node);
-            // Try a backup node instead
-            if (backupNodes.length > 0) {
-              failedNodes.push(node); // This will trigger backup node usage
-            }
-          } else {
-            return {
-              success: false,
-              err: {
-                code: "WALLET_NOT_FOUND",
-                affectedNode: { name: node.name, endpoint: node.endpoint },
-              },
-            };
+          // Track this node as needing reshare and continue
+          nodesNeedingReshare.push(node);
+          // Try a backup node instead
+          if (backupNodes.length > 0) {
+            failedNodes.push(node); // This will trigger backup node usage
           }
         } else {
           failedNodes.push(node);
@@ -231,7 +216,7 @@ async function requestKeyShareFromNodeV2(
     ed25519?: string;
   },
   maxRetries: number = 2,
-  commitReveal?: CommitRevealParams,
+  commitReveal: CommitRevealParams,
 ): Promise<Result<KeySharesByNode, string>> {
   const body: GetKeyShareV2WithCRRequestBody = {
     auth_type: authType,
@@ -239,10 +224,8 @@ async function requestKeyShareFromNodeV2(
       ...(wallets.secp256k1 && { secp256k1: wallets.secp256k1 }),
       ...(wallets.ed25519 && { ed25519: wallets.ed25519 }),
     },
-    ...(commitReveal && {
-      cr_session_id: commitReveal.cr_session_id,
-      cr_signature: commitReveal.cr_signature,
-    }),
+    cr_session_id: commitReveal.cr_session_id,
+    cr_signature: commitReveal.cr_signature,
   };
 
   let attempt = 0;
@@ -334,7 +317,7 @@ export async function registerKeySharesV2(
     secp256k1?: { public_key: string; share: string };
     ed25519?: { public_key: string; share: string };
   },
-  commitReveal?: CommitRevealParams,
+  commitReveal: CommitRevealParams,
 ): Promise<Result<void, string>> {
   const body: RegisterKeyShareV2WithCRRequestBody = {
     auth_type: authType,
@@ -352,10 +335,8 @@ export async function registerKeySharesV2(
         },
       }),
     },
-    ...(commitReveal && {
-      cr_session_id: commitReveal.cr_session_id,
-      cr_signature: commitReveal.cr_signature,
-    }),
+    cr_session_id: commitReveal.cr_session_id,
+    cr_signature: commitReveal.cr_signature,
   };
 
   try {
@@ -408,16 +389,14 @@ export async function registerKeyShareEd25519V2(
   authType: AuthType,
   publicKey: string,
   share: string,
-  commitReveal?: CommitRevealParams,
+  commitReveal: CommitRevealParams,
 ): Promise<Result<void, string>> {
   const body: RegisterEd25519V2WithCRRequestBody = {
     auth_type: authType,
     public_key: publicKey,
     share,
-    ...(commitReveal && {
-      cr_session_id: commitReveal.cr_session_id,
-      cr_signature: commitReveal.cr_signature,
-    }),
+    cr_session_id: commitReveal.cr_session_id,
+    cr_signature: commitReveal.cr_signature,
   };
 
   try {
@@ -475,7 +454,7 @@ export async function reshareKeySharesV2(
     secp256k1?: { public_key: string; share: string };
     ed25519?: { public_key: string; share: string };
   },
-  commitReveal?: CommitRevealParams,
+  commitReveal: CommitRevealParams,
 ): Promise<Result<void, string>> {
   const body: ReshareKeyShareV2WithCRRequestBody = {
     auth_type: authType,
@@ -493,10 +472,8 @@ export async function reshareKeySharesV2(
         },
       }),
     },
-    ...(commitReveal && {
-      cr_session_id: commitReveal.cr_session_id,
-      cr_signature: commitReveal.cr_signature,
-    }),
+    cr_session_id: commitReveal.cr_session_id,
+    cr_signature: commitReveal.cr_signature,
   };
 
   try {

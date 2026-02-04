@@ -58,11 +58,10 @@ export async function handleExistingUserV2(
   const session = commitRes.data;
 
   // 2. Sign in to API server
-  // Use cr_final=false because reshare might be needed
   const signInCommitRevealRes = createOkoApiCommitRevealParams(
     session,
     "signin",
-    false, // cr_final: false - reshare might come after
+    false, // cr_final: false - because reshare might be needed
   );
   if (!signInCommitRevealRes.success) {
     return {
@@ -84,7 +83,7 @@ export async function handleExistingUserV2(
   const signInResp = signInResult.data;
 
   // 3. Request secp256k1 and ed25519 shares from ks nodes
-  // Use continueOnWalletNotFound=true to support auto-reshare
+  // Nodes with WALLET_NOT_FOUND will be tracked for auto-reshare
   const requestSharesRes = await requestKeySharesV2WithReshareInfo(
     idToken,
     nodes,
@@ -96,7 +95,6 @@ export async function handleExistingUserV2(
     },
     session,
     false, // isFinal: false - reshare might come after
-    true, // continueOnWalletNotFound: true for auto-reshare
   );
   if (!requestSharesRes.success) {
     const error = requestSharesRes.err;
