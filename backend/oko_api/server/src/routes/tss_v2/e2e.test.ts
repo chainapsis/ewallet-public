@@ -436,7 +436,7 @@ describe("tss_v2_commit_reveal_e2e_test", () => {
       // Session should still be COMMITTED (cr_final is false)
       expect(await getSessionState(sessionId)).toBe("COMMITTED");
 
-      // Step 2: Reshare (cr_final: true)
+      // Step 2: Reshare (cr_final: true) - V2 schema requires both wallets
       const reshareSignature = createValidSignature(
         clientKeypair,
         sessionId,
@@ -454,6 +454,13 @@ describe("tss_v2_commit_reveal_e2e_test", () => {
           cr_signature: reshareSignature,
           auth_type: authType,
           cr_final: true,
+          // V2 schema: both secp256k1 and ed25519 public keys required
+          secp256k1_public_key: "02" + "a".repeat(64),
+          ed25519_public_key: "b".repeat(64),
+          reshared_key_shares: [
+            { name: "node1", endpoint: "http://localhost:3001" },
+            { name: "node2", endpoint: "http://localhost:3002" },
+          ],
         })
         .expect(200);
 
@@ -586,7 +593,7 @@ describe("tss_v2_commit_reveal_e2e_test", () => {
       // Session should still be COMMITTED (cr_final is false)
       expect(await getSessionState(sessionId)).toBe("COMMITTED");
 
-      // Step 2: Reshare (cr_final: false)
+      // Step 2: Reshare (cr_final: false) - V2 schema requires both wallets
       const reshareSignature = createValidSignature(
         clientKeypair,
         sessionId,
@@ -604,6 +611,13 @@ describe("tss_v2_commit_reveal_e2e_test", () => {
           cr_signature: reshareSignature,
           auth_type: authType,
           cr_final: false,
+          // V2 schema: both secp256k1 and ed25519 public keys required
+          secp256k1_public_key: "02" + "a".repeat(64),
+          ed25519_public_key: "b".repeat(64),
+          reshared_key_shares: [
+            { name: "node1", endpoint: "http://localhost:3001" },
+            { name: "node2", endpoint: "http://localhost:3002" },
+          ],
         })
         .expect(200);
 
