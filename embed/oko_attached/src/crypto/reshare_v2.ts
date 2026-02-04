@@ -25,7 +25,7 @@ import {
 
 import {
   type KeySharesByNode,
-  requestKeySharesV2,
+  requestKeyShares,
   reshareKeySharesV2,
 } from "@oko-wallet-attached/requests/ks_node_v2";
 import {
@@ -143,17 +143,17 @@ export async function reshareUserKeySharesV2(
   }
 
   // 2. Request existing shares from ACTIVE nodes
-  const sharesRes = await requestKeySharesV2(
+  const sharesRes = await requestKeyShares({
     idToken,
-    activeNodes,
-    threshold,
     authType,
-    {
+    wallets: {
       secp256k1: secp256k1.publicKey.toHex(),
       ed25519: ed25519.publicKey.toHex(),
     },
+    threshold,
     session,
-  );
+    nodes: activeNodes,
+  });
 
   if (!sharesRes.success) {
     return {

@@ -15,7 +15,7 @@ import {
   expandAndSendReshareV2,
   buildKeyPackageResult,
 } from "@oko-wallet-attached/crypto/reshare_v2";
-import { requestKeySharesV2WithReshareInfo } from "@oko-wallet-attached/requests/ks_node_v2";
+import { requestKeySharesWithBackup } from "@oko-wallet-attached/requests/ks_node_v2";
 import {
   commitAll,
   createOkoApiCommitRevealParams,
@@ -57,7 +57,7 @@ export async function handleExistingUserV2(
       err: { type: "sign_in_request_fail", error: commitRes.err },
     };
   }
-  const { session } = commitRes.data;
+  const { session, readyNodes, pendingCommits } = commitRes.data;
 
   // 2. Sign in to API server
   const signInCommitRevealRes = createOkoApiCommitRevealParams(
@@ -84,18 +84,20 @@ export async function handleExistingUserV2(
   const signInResp = signInResult.data;
 
   // 3. Request secp256k1 and ed25519 shares from ks nodes
-  // Nodes with WALLET_NOT_FOUND will be tracked for auto-reshare
-  const requestSharesRes = await requestKeySharesV2WithReshareInfo(
+  // Uses readyNodes first, falls back to pendingCommits if needed
+  const requestSharesRes = await requestKeySharesWithBackup({
     idToken,
-    nodes,
-    threshold,
     authType,
-    {
+    wallets: {
       secp256k1: signInResp.user.public_key_secp256k1,
       ed25519: signInResp.user.public_key_ed25519,
     },
+    threshold,
     session,
-  );
+    readyNodes,
+    pendingCommits,
+    allNodes: nodes,
+  });
   if (!requestSharesRes.success) {
     const error = requestSharesRes.err;
     console.error(
@@ -109,8 +111,10 @@ export async function handleExistingUserV2(
     };
   }
 
-  const { shares: keySharesByNode, nodesNeedingReshare } =
-    requestSharesRes.data;
+  const { shares: keySharesByNode, notFoundNodes } = requestSharesRes.data;
+
+  // Track nodes needing reshare for auto-reshare (will be removed in Task 5.6)
+  const nodesNeedingReshare = notFoundNodes;
   const needsReshare = nodesNeedingReshare.length > 0;
 
   if (needsReshare) {

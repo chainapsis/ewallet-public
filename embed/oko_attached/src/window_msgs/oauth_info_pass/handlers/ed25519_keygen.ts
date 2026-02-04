@@ -18,8 +18,8 @@ import { combineUserShares } from "@oko-wallet-attached/crypto/combine";
 import type { UserSignInResultV2 } from "@oko-wallet-attached/window_msgs/types";
 import { runExpandShares } from "@oko-wallet-attached/crypto/reshare";
 import {
-  requestKeySharesV2,
-  requestKeySharesV2WithReshareInfo,
+  requestKeySharesWithBackup,
+  requestKeyShares,
   registerKeyShareEd25519V2,
   reshareKeySharesV2,
 } from "@oko-wallet-attached/requests/ks_node_v2";
@@ -82,7 +82,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
       err: { type: "sign_in_request_fail", error: commitRes.err },
     };
   }
-  const { session } = commitRes.data;
+  const { session, readyNodes, pendingCommits } = commitRes.data;
 
   // 3. Send ed25519 key shares to ks nodes using registerKeyShareEd25519V2
   const registerEd25519Results: Result<void, string>[] = await Promise.all(
@@ -159,18 +159,20 @@ export async function handleExistingUserNeedsEd25519Keygen(
   const secp256k1PublicKey = reqKeygenEd25519Res.data.user.public_key_secp256k1;
 
   // 6. Request both shares from ks nodes (ed25519 was just registered in step 3)
-  // Nodes with WALLET_NOT_FOUND will be tracked for auto-reshare
-  const requestSharesRes = await requestKeySharesV2WithReshareInfo(
+  // Uses readyNodes first, falls back to pendingCommits if needed
+  const requestSharesRes = await requestKeySharesWithBackup({
     idToken,
-    nodes,
-    threshold,
     authType,
-    {
+    wallets: {
       secp256k1: secp256k1PublicKey,
       ed25519: ed25519Keygen1.public_key.toHex(),
     },
+    threshold,
     session,
-  );
+    readyNodes,
+    pendingCommits,
+    allNodes: nodes,
+  });
   if (!requestSharesRes.success) {
     const error = requestSharesRes.err;
     console.error(
@@ -184,7 +186,10 @@ export async function handleExistingUserNeedsEd25519Keygen(
     };
   }
 
-  const { shares: keySharesByNode, nodesNeedingReshare } = requestSharesRes.data;
+  const { shares: keySharesByNode, notFoundNodes } = requestSharesRes.data;
+
+  // Track nodes needing reshare for auto-reshare (will be removed in Task 5.6)
+  const nodesNeedingReshare = notFoundNodes;
   const needsReshare = nodesNeedingReshare.length > 0;
 
   if (needsReshare) {
@@ -439,18 +444,18 @@ export async function handleReshareAndEd25519Keygen(
     };
   }
 
-  // 6. Request both shares from ACTIVE nodes
-  const requestSharesRes = await requestKeySharesV2(
+  // 6. Request both shares from ACTIVE nodes (no backup logic needed for reshare)
+  const requestSharesRes = await requestKeyShares({
     idToken,
-    activeNodes,
-    threshold,
     authType,
-    {
+    wallets: {
       secp256k1: secp256k1PublicKey,
       ed25519: ed25519Keygen1.public_key.toHex(),
     },
+    threshold,
     session,
-  );
+    nodes: activeNodes,
+  });
   if (!requestSharesRes.success) {
     return {
       success: false,
