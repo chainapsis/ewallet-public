@@ -7,18 +7,24 @@ import {
   useSVMAddress,
 } from "./use_addresses";
 import { useEnabledChains } from "./use_chains";
-import { usePrices } from "./use_prices";
-import { getChainIdentifier } from "@oko-wallet-user-dashboard/utils/chain";
-import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
+import { fetchPrices, usePrices } from "./use_prices";
+import {
+  getAlchemyEndpoint,
+  isAlchemySupported,
+} from "@oko-wallet-user-dashboard/constants/alchemy";
+import { fetchErc20TokenBalances } from "@oko-wallet-user-dashboard/fetch/erc20_token_balances";
+import { useAssetMetaStore } from "@oko-wallet-user-dashboard/store/asset_meta";
+import type {
+  Currency,
+  ModularChainInfo,
+} from "@oko-wallet-user-dashboard/types/chain";
 import type {
   RawBalance,
   TokenBalance,
 } from "@oko-wallet-user-dashboard/types/token";
+import { getChainIdentifier } from "@oko-wallet-user-dashboard/utils/chain";
 import { calculateUsdValue } from "@oko-wallet-user-dashboard/utils/format_token_amount";
 
-/**
- * Fetch Cosmos balances from LCD endpoint
- */
 async function fetchCosmosBalances(
   restEndpoint: string,
   cosmosAddress: string,
@@ -34,9 +40,6 @@ async function fetchCosmosBalances(
   return (data.balances ?? []) as RawBalance[];
 }
 
-/**
- * Fetch EVM native balance
- */
 async function fetchEvmBalance(
   rpcEndpoint: string,
   address: string,
@@ -61,7 +64,6 @@ async function fetchEvmBalance(
     throw new Error(data.error.message);
   }
 
-  // Convert hex to decimal string
   return BigInt(data.result).toString();
 }
 
@@ -72,7 +74,6 @@ async function fetchSVMBalance(
   const connection = new Connection(rpcEndpoint);
   const pubkey = new PublicKey(address);
   const balance = await connection.getBalance(pubkey);
-  // Return as lamports string (similar to wei for EVM)
   return balance.toString();
 }
 
@@ -80,9 +81,6 @@ interface UseBalancesOptions {
   enabled?: boolean;
 }
 
-/**
- * Hook to fetch balances for a specific chain
- */
 export function useChainBalances(
   chainInfo: ModularChainInfo | undefined,
   options?: UseBalancesOptions,
@@ -92,13 +90,11 @@ export function useChainBalances(
   const isCosmos = chainInfo?.cosmos !== undefined;
   const isSVM = chainInfo?.svm !== undefined;
 
-  // Get addresses using TanStack Query hooks
   const { address: ethAddress } = useEthAddress();
   const { address: svmAddress } = useSVMAddress();
   const { addresses: cosmosAddresses } = useCosmosAddresses();
   const cosmosAddress = chainId ? cosmosAddresses[chainId] : undefined;
 
-  // Cosmos balances query
   const cosmosQuery = useQuery({
     queryKey: ["balances", "cosmos", chainId, cosmosAddress],
     queryFn: async () => {
@@ -112,11 +108,10 @@ export function useChainBalances(
       isCosmos &&
       !!cosmosAddress &&
       !!chainInfo?.cosmos?.rest,
-    staleTime: 30 * 1000, // 30 seconds
-    refetchInterval: 60 * 1000, // 1 minute
+    staleTime: 30 * 1000,
+    refetchInterval: 60 * 1000,
   });
 
-  // EVM native balance query
   const evmQuery = useQuery({
     queryKey: ["balances", "evm", chainId, ethAddress],
     queryFn: async () => {
@@ -134,7 +129,6 @@ export function useChainBalances(
     refetchInterval: 60 * 1000,
   });
 
-  // SVM native balance query
   const svmQuery = useQuery({
     queryKey: ["balances", "svm", chainId, svmAddress],
     queryFn: async () => {
@@ -164,22 +158,19 @@ export function useChainBalances(
   };
 }
 
-/**
- * Hook to fetch balances for all enabled chains
- */
 export function useAllBalances() {
   const { chains: enabledChains, isLoading: chainsLoading } =
     useEnabledChains();
   const { priceMap, isLoading: pricesLoading } = usePrices();
+  const resolveTokenMetadata = useAssetMetaStore(
+    (state) => state.resolveTokenMetadata,
+  );
 
-  // Get addresses using TanStack Query hooks
   const { address: ethAddress, isLoading: ethLoading } = useEthAddress();
-  const { address: svmAddress, isLoading: svmLoading } =
-    useSVMAddress();
+  const { address: svmAddress, isLoading: svmLoading } = useSVMAddress();
   const { addresses: cosmosAddresses, isLoading: addressesLoading } =
     useCosmosAddresses();
 
-  // Create queries for all chains
   const balanceQueries = useQueries({
     queries: enabledChains.map((chain) => {
       const isCosmos = chain.cosmos !== undefined;
@@ -200,7 +191,6 @@ export function useAllBalances() {
         queryFn: async (): Promise<TokenBalance[]> => {
           const results: TokenBalance[] = [];
 
-          // Fetch Cosmos balances
           if (isCosmos && cosmosAddress && chain.cosmos?.rest) {
             try {
               const rawBalances = await fetchCosmosBalances(
@@ -233,7 +223,6 @@ export function useAllBalances() {
             }
           }
 
-          // Fetch EVM native balance
           if (isEvm && ethAddress && chain.evm?.rpc) {
             try {
               const balance = await fetchEvmBalance(chain.evm.rpc, ethAddress);
@@ -258,12 +247,105 @@ export function useAllBalances() {
             }
           }
 
+          if (
+            isEvm &&
+            ethAddress &&
+            chain.evm?.chainId &&
+            isAlchemySupported(chain.evm.chainId)
+          ) {
+            try {
+              const alchemyEndpoint = getAlchemyEndpoint(chain.evm.chainId);
+              const erc20Balances = await fetchErc20TokenBalances(
+                alchemyEndpoint,
+                ethAddress,
+              );
+
+              if (erc20Balances.length > 0) {
+                const knownCurrencyMap = new Map<string, Currency>();
+                for (const c of chain.evm?.currencies ?? []) {
+                  if (c.coinMinimalDenom.startsWith("erc20:")) {
+                    const addr = c.coinMinimalDenom.slice(6).toLowerCase();
+                    knownCurrencyMap.set(addr, c);
+                  }
+                }
+
+                const unknownTokens: {
+                  chainIdentifier: string;
+                  contractAddress: string;
+                }[] = [];
+                for (const tb of erc20Balances) {
+                  if (!knownCurrencyMap.has(tb.contractAddress)) {
+                    unknownTokens.push({
+                      chainIdentifier: getChainIdentifier(chain.chainId),
+                      contractAddress: tb.contractAddress,
+                    });
+                  }
+                }
+
+                const resolvedMap =
+                  unknownTokens.length > 0
+                    ? await resolveTokenMetadata(unknownTokens)
+                    : new Map<string, Currency>();
+
+                const missingPriceIds: string[] = [];
+                for (const tb of erc20Balances) {
+                  const currency =
+                    knownCurrencyMap.get(tb.contractAddress) ??
+                    resolvedMap.get(tb.contractAddress);
+                  if (
+                    currency?.coinGeckoId &&
+                    priceMap[currency.coinGeckoId] === undefined
+                  ) {
+                    missingPriceIds.push(currency.coinGeckoId);
+                  }
+                }
+
+                const erc20PriceMap: Record<string, number> = {};
+                if (missingPriceIds.length > 0) {
+                  try {
+                    const priceResponse = await fetchPrices(missingPriceIds);
+                    for (const [coinId, data] of Object.entries(
+                      priceResponse,
+                    )) {
+                      erc20PriceMap[coinId] = data.usd;
+                    }
+                  } catch {
+                  }
+                }
+
+                for (const tb of erc20Balances) {
+                  const currency =
+                    knownCurrencyMap.get(tb.contractAddress) ??
+                    resolvedMap.get(tb.contractAddress);
+
+                  if (currency) {
+                    const price = currency.coinGeckoId
+                      ? (priceMap[currency.coinGeckoId] ??
+                        erc20PriceMap[currency.coinGeckoId])
+                      : undefined;
+
+                    results.push({
+                      chainInfo: chain,
+                      token: { currency, amount: tb.tokenBalance },
+                      address: ethAddress,
+                      priceUsd: price,
+                      isFetching: false,
+                      error: undefined,
+                    });
+                  }
+                }
+              }
+            } catch (error) {
+              console.error(
+                `Failed to fetch ERC20 balances for ${chain.chainId}:`,
+                error,
+              );
+            }
+          }
+
           if (isSVM && svmAddress && chain.svm?.rpc) {
             try {
-              const balance = await fetchSVMBalance(
-                chain.svm.rpc,
-                svmAddress,
-              );
+              const balance = await fetchSVMBalance(chain.svm.rpc, svmAddress);
               const nativeCurrency = chain.svm.currencies[0];
               if (nativeCurrency && BigInt(balance) > BigInt(0)) {
                 results.push({
@@ -297,11 +379,9 @@ export function useAllBalances() {
     }),
   });
 
-  // Aggregate all balances
   const allBalances = balanceQueries
     .flatMap((query) => query.data ?? [])
     .sort((a, b) => {
-      // Sort by USD value (descending)
       const aValue =
         a.priceUsd && a.token.currency.coinDecimals
           ? calculateUsdValue(
@@ -321,7 +401,6 @@ export function useAllBalances() {
       return bValue - aValue;
     });
 
-  // Group balances by chain identifier
   const balancesByChainIdentifier = new Map();
   for (const balance of allBalances) {
     const identifier = getChainIdentifier(balance.chainInfo.chainId);
@@ -349,9 +428,6 @@ export function useAllBalances() {
   };
 }
 
-/**
- * Calculate total USD value of all balances
- */
 export function useTotalBalance() {
   const { balances, isLoading } = useAllBalances();
 
@@ -359,7 +435,6 @@ export function useTotalBalance() {
   for (const bal of balances) {
     if (!bal.priceUsd) {
       continue;
-      // return sum;
     }
 
     totalUsd += calculateUsdValue(

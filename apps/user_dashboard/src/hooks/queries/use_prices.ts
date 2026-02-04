@@ -1,13 +1,9 @@
-/**
- * Price fetching with TanStack Query
- * Replaces CoinGeckoPriceStore from @keplr-wallet/stores
- */
-
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 import { useEnabledChains } from "./use_chains";
 import { COINGECKO_ENDPOINT } from "@oko-wallet-user-dashboard/fetch";
+import { useAssetMetaStore } from "@oko-wallet-user-dashboard/store/asset_meta";
 
 interface PriceResponse {
   [coinId: string]: {
@@ -16,7 +12,7 @@ interface PriceResponse {
   };
 }
 
-async function fetchPrices(coinIds: string[]): Promise<PriceResponse> {
+export async function fetchPrices(coinIds: string[]): Promise<PriceResponse> {
   if (coinIds.length === 0) {
     return {};
   }
@@ -33,9 +29,6 @@ async function fetchPrices(coinIds: string[]): Promise<PriceResponse> {
   return response.json();
 }
 
-/**
- * Get all CoinGecko IDs from enabled chains
- */
 function extractCoinGeckoIds(
   chains: {
     cosmos?: { currencies: { coinGeckoId?: string }[] };
@@ -64,27 +57,28 @@ function extractCoinGeckoIds(
   return [...new Set(ids)];
 }
 
-/**
- * Hook to fetch prices for all tokens in enabled chains
- */
 export function usePrices() {
   const { chains: enabledChains } = useEnabledChains();
 
-  const coinGeckoIds = useMemo(
-    () => extractCoinGeckoIds(enabledChains),
-    [enabledChains],
+  const getCachedCoinGeckoIds = useAssetMetaStore(
+    (state) => state.getCachedCoinGeckoIds,
   );
+
+  const coinGeckoIds = useMemo(() => {
+    const chainIds = extractCoinGeckoIds(enabledChains);
+    const dynamicIds = getCachedCoinGeckoIds();
+    return [...new Set([...chainIds, ...dynamicIds])];
+  }, [enabledChains, getCachedCoinGeckoIds]);
 
   const query = useQuery({
     queryKey: ["prices", coinGeckoIds],
     queryFn: () => fetchPrices(coinGeckoIds),
     enabled: coinGeckoIds.length > 0,
-    staleTime: 60 * 1000, // 1 minute
-    refetchInterval: 2 * 60 * 1000, // 2 minutes
+    staleTime: 60 * 1000,
+    refetchInterval: 2 * 60 * 1000,
     retry: 1,
   });
 
-  // Create a map of coinGeckoId -> price
   const priceMap = useMemo(() => {
     const map: Record<string, number> = {};
     if (query.data) {
@@ -104,9 +98,6 @@ export function usePrices() {
   };
 }
 
-/**
- * Hook to get price for a specific token
- */
 export function useTokenPrice(coinGeckoId: string | undefined) {
   const { priceMap, isLoading } = usePrices();
 
@@ -116,9 +107,6 @@ export function useTokenPrice(coinGeckoId: string | undefined) {
   };
 }
 
-/**
- * Calculate USD value for a token amount
- */
 export function calculateUsdValue(
   amount: string,
   decimals: number,
