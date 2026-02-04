@@ -1,5 +1,5 @@
-import type { Pool, PoolClient } from "pg";
 import type { Result } from "@oko-wallet/stdlib-js";
+import type { Pool, PoolClient } from "pg";
 
 export interface UserCustomerConnection {
   connection_id: string;
@@ -43,7 +43,6 @@ RETURNING *
   }
 }
 
-
 export async function getConnectionsByUserId(
   db: Pool | PoolClient,
   userId: string,
@@ -67,4 +66,3 @@ ORDER BY created_at DESC
     };
   }
 }
-

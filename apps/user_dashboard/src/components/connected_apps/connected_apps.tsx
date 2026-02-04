@@ -9,7 +9,6 @@ import styles from "./connected_apps.module.scss";
 import { S3_BUCKET_URL } from "@oko-wallet-user-dashboard/fetch";
 import { useConnectedApps } from "@oko-wallet-user-dashboard/hooks/use_connected_apps";
 
-
 const emptyImage = `${S3_BUCKET_URL}/assets/oko_user_dashboard_connected_app_empty.webp`;
 const emptyImageAlt = `${S3_BUCKET_URL}/assets/oko_user_dashboard_connected_app_empty.png`;
 const placeholderImage = `${S3_BUCKET_URL}/assets/oko_user_dashboard_connected_app_placeholder.webp`;

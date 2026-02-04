@@ -28,9 +28,9 @@ import {
   DEFAULT_ENABLED_CHAINS,
   useChainStore,
 } from "@oko-wallet-user-dashboard/state/chains";
-import { getChainIdentifier } from "@oko-wallet-user-dashboard/utils/chain";
 import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
 import type { TokenBalance } from "@oko-wallet-user-dashboard/types/token";
+import { getChainIdentifier } from "@oko-wallet-user-dashboard/utils/chain";
 
 interface ShowHideChainsModalProps {
   renderTrigger: (props: { onOpen: () => void }) => ReactNode;

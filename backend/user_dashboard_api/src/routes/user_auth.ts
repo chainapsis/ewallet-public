@@ -1,23 +1,5 @@
-import { Router, type Response } from "express";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
-import type {
-  SendVerificationRequest,
-  VerifyAndLoginRequest,
-  SignInRequest,
-  ChangePasswordRequest,
-  SendVerificationResponse,
-  LoginResponse,
-  ChangePasswordResponse,
-} from "@oko-wallet/oko-types/ct_dashboard";
+import { comparePassword, hashPassword } from "@oko-wallet/crypto-js";
 import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
-import {
-  getCTDUserWithCustomerAndPasswordHashByEmail,
-  updateCustomerDashboardUserPassword,
-  verifyCustomerDashboardUserEmail,
-  getCTDUserWithCustomerByEmail,
-} from "@oko-wallet/oko-pg-interface/customer_dashboard_users";
-import { hashPassword, comparePassword } from "@oko-wallet/crypto-js";
-import { verifyEmailCode } from "@oko-wallet/oko-pg-interface/email_verifications";
 import { registry } from "@oko-wallet/oko-api-openapi";
 import { ErrorResponseSchema } from "@oko-wallet/oko-api-openapi/common";
 import {
@@ -30,17 +12,35 @@ import {
   SignInRequestSchema,
   VerifyAndLoginRequestSchema,
 } from "@oko-wallet/oko-api-openapi/ct_dashboard";
+import {
+  getCTDUserWithCustomerAndPasswordHashByEmail,
+  getCTDUserWithCustomerByEmail,
+  updateCustomerDashboardUserPassword,
+  verifyCustomerDashboardUserEmail,
+} from "@oko-wallet/oko-pg-interface/customer_dashboard_users";
+import { verifyEmailCode } from "@oko-wallet/oko-pg-interface/email_verifications";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type {
+  ChangePasswordRequest,
+  ChangePasswordResponse,
+  LoginResponse,
+  SendVerificationRequest,
+  SendVerificationResponse,
+  SignInRequest,
+  VerifyAndLoginRequest,
+} from "@oko-wallet/oko-types/ct_dashboard";
+import type { Response, Router } from "express";
 
 import { generateCustomerToken } from "@oko-wallet-usrd-api/auth";
-import { sendEmailVerificationCode } from "@oko-wallet-usrd-api/email/send";
 import {
   CHANGED_PASSWORD_MIN_LENGTH,
   EMAIL_REGEX,
   SIX_DIGITS_REGEX,
 } from "@oko-wallet-usrd-api/constants";
+import { sendEmailVerificationCode } from "@oko-wallet-usrd-api/email/send";
 import {
-  customerJwtMiddleware,
   type CustomerAuthenticatedRequest,
+  customerJwtMiddleware,
 } from "@oko-wallet-usrd-api/middleware/auth";
 import { rateLimitMiddleware } from "@oko-wallet-usrd-api/middleware/rate_limit";
 

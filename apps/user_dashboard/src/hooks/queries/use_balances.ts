@@ -8,12 +8,12 @@ import {
 } from "./use_addresses";
 import { useEnabledChains } from "./use_chains";
 import { usePrices } from "./use_prices";
-import { getChainIdentifier } from "@oko-wallet-user-dashboard/utils/chain";
 import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
 import type {
   RawBalance,
   TokenBalance,
 } from "@oko-wallet-user-dashboard/types/token";
+import { getChainIdentifier } from "@oko-wallet-user-dashboard/utils/chain";
 import { calculateUsdValue } from "@oko-wallet-user-dashboard/utils/format_token_amount";
 
 /**
@@ -174,8 +174,7 @@ export function useAllBalances() {
 
   // Get addresses using TanStack Query hooks
   const { address: ethAddress, isLoading: ethLoading } = useEthAddress();
-  const { address: svmAddress, isLoading: svmLoading } =
-    useSVMAddress();
+  const { address: svmAddress, isLoading: svmLoading } = useSVMAddress();
   const { addresses: cosmosAddresses, isLoading: addressesLoading } =
     useCosmosAddresses();
 
@@ -260,10 +259,7 @@ export function useAllBalances() {
 
           if (isSVM && svmAddress && chain.svm?.rpc) {
             try {
-              const balance = await fetchSVMBalance(
-                chain.svm.rpc,
-                svmAddress,
-              );
+              const balance = await fetchSVMBalance(chain.svm.rpc, svmAddress);
               const nativeCurrency = chain.svm.currencies[0];
               if (nativeCurrency && BigInt(balance) > BigInt(0)) {
                 results.push({

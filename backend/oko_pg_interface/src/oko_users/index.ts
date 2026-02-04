@@ -1,8 +1,8 @@
+import type { AuthType } from "@oko-wallet/oko-types/auth";
+import type { User } from "@oko-wallet/oko-types/user";
+import type { Result } from "@oko-wallet/stdlib-js";
 import type { Pool, PoolClient } from "pg";
 import { v4 as uuidv4 } from "uuid";
-import type { Result } from "@oko-wallet/stdlib-js";
-import type { User } from "@oko-wallet/oko-types/user";
-import type { AuthType } from "@oko-wallet/oko-types/auth";
 
 export async function createUser(
   db: Pool,
@@ -19,7 +19,12 @@ INSERT INTO oko_users (
 )
 RETURNING *
 `;
-    const values = [uuidv4(), email, auth_type, metadata ? JSON.stringify(metadata) : null];
+    const values = [
+      uuidv4(),
+      email,
+      auth_type,
+      metadata ? JSON.stringify(metadata) : null,
+    ];
 
     const result = await db.query<User>(query, values);
 
@@ -88,7 +93,10 @@ WHERE user_id = $1
 RETURNING *
 `;
 
-    const result = await db.query<User>(query, [userId, JSON.stringify(metadata)]);
+    const result = await db.query<User>(query, [
+      userId,
+      JSON.stringify(metadata),
+    ]);
 
     const row = result.rows[0];
     if (!row) {

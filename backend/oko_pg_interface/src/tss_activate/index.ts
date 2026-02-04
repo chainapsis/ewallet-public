@@ -1,9 +1,10 @@
+import type { Result } from "@oko-wallet/stdlib-js";
+import type { Pool } from "pg";
+
 import type {
   TssActivationKey,
   TssActivationSetting,
 } from "@oko-wallet-types/tss_activate";
-import type { Result } from "@oko-wallet/stdlib-js";
-import type { Pool } from "pg";
 
 export async function insertTssActivationSetting(
   db: Pool,

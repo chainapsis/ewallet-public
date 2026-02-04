@@ -1,34 +1,34 @@
-import { Router, type Response } from "express";
-import sharp from "sharp";
-import { randomUUID } from "crypto";
+import { uploadToS3 } from "@oko-wallet/aws";
+import { registry } from "@oko-wallet/oko-api-openapi";
+import { ErrorResponseSchema } from "@oko-wallet/oko-api-openapi/common";
+import {
+  CustomerAuthHeaderSchema,
+  GetCustomerApiKeysRequestSchema,
+  GetCustomerApiKeysSuccessResponseSchema,
+  GetCustomerInfoSuccessResponseSchema,
+} from "@oko-wallet/oko-api-openapi/ct_dashboard";
+import { getAPIKeysByCustomerId } from "@oko-wallet/oko-pg-interface/api_keys";
+import {
+  getCustomerByUserId,
+  updateCustomerInfo,
+} from "@oko-wallet/oko-pg-interface/customers";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { APIKey } from "@oko-wallet/oko-types/ct_dashboard";
 import type {
   Customer,
   UpdateCustomerInfoRequest,
   UpdateCustomerInfoResponse,
 } from "@oko-wallet/oko-types/customers";
-import {
-  getCustomerByUserId,
-  updateCustomerInfo,
-} from "@oko-wallet/oko-pg-interface/customers";
-import { getAPIKeysByCustomerId } from "@oko-wallet/oko-pg-interface/api_keys";
-import type { APIKey } from "@oko-wallet/oko-types/ct_dashboard";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
-import { ErrorResponseSchema } from "@oko-wallet/oko-api-openapi/common";
-import { registry } from "@oko-wallet/oko-api-openapi";
-import { CustomerAuthHeaderSchema } from "@oko-wallet/oko-api-openapi/ct_dashboard";
-import {
-  GetCustomerApiKeysRequestSchema,
-  GetCustomerApiKeysSuccessResponseSchema,
-  GetCustomerInfoSuccessResponseSchema,
-} from "@oko-wallet/oko-api-openapi/ct_dashboard";
-import { uploadToS3 } from "@oko-wallet/aws";
+import { randomUUID } from "crypto";
+import type { Response, Router } from "express";
+import sharp from "sharp";
 
 import {
-  customerJwtMiddleware,
   type CustomerAuthenticatedRequest,
+  customerJwtMiddleware,
 } from "@oko-wallet-usrd-api/middleware/auth";
-import { rateLimitMiddleware } from "@oko-wallet-usrd-api/middleware/rate_limit";
 import { multerMiddleware } from "@oko-wallet-usrd-api/middleware/multer";
+import { rateLimitMiddleware } from "@oko-wallet-usrd-api/middleware/rate_limit";
 
 export function setUserRoutes(router: Router) {
   registry.registerPath({

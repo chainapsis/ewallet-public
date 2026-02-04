@@ -4,8 +4,8 @@ import Image from "next/image";
 import type { FC } from "react";
 
 import styles from "./whole_page_loading.module.scss";
-import { OkoLoader } from "@oko-wallet-user-dashboard/components/loader/oko_loader";
 import { DashboardHeader } from "@oko-wallet-user-dashboard/components/dashboard_header/dashboard_header";
+import { OkoLoader } from "@oko-wallet-user-dashboard/components/loader/oko_loader";
 import { SignInImage } from "@oko-wallet-user-dashboard/components/sign_in_image/sign_in_image";
 
 export const WholePageLoading: FC = () => {

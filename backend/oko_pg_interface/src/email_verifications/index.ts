@@ -1,13 +1,13 @@
-import { Pool } from "pg";
-import { v4 as uuidv4 } from "uuid";
 import {
-  type EmailVerification,
   type CreateEmailVerificationRequest,
-  type VerifyEmailRequest,
+  type EmailVerification,
   EmailVerificationStatus,
+  type VerifyEmailRequest,
   type VerifyEmailResponse,
 } from "@oko-wallet/oko-types/ct_dashboard";
 import type { Result } from "@oko-wallet/stdlib-js";
+import type { Pool } from "pg";
+import { v4 as uuidv4 } from "uuid";
 
 export async function createEmailVerification(
   db: Pool,

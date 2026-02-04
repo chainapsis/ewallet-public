@@ -1,25 +1,23 @@
-import express, { type IRouter, type Response } from "express";
-import type { Pool } from "pg";
-
-import { setUserAuthRoutes } from "@oko-wallet-usrd-api/routes/user_auth";
-import { setUserRoutes } from "@oko-wallet-usrd-api/routes/user";
-import {
-  userJwtMiddleware,
-  type UserAuthenticatedRequest,
-} from "@oko-wallet-usrd-api/middleware/auth";
-import type { OkoApiResponse } from "@oko-wallet-types/api_response";
-import type { ConnectedApp } from "@oko-wallet/oko-types/user_dashboard";
 import { registry } from "@oko-wallet/oko-api-openapi";
 import {
   ErrorResponseSchema,
   SuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/common";
 import { CustomerAuthHeaderSchema } from "@oko-wallet/oko-api-openapi/ct_dashboard";
+import { getCustomer } from "@oko-wallet/oko-pg-interface/customers";
 import { getWalletById } from "@oko-wallet/oko-pg-interface/oko_wallets";
 import { getConnectionsByUserId } from "@oko-wallet/oko-pg-interface/user_customer_connections";
-import { getCustomer } from "@oko-wallet/oko-pg-interface/customers";
+import type { ConnectedApp } from "@oko-wallet/oko-types/user_dashboard";
+import express, { type IRouter, type Response } from "express";
+import type { Pool } from "pg";
 
-
+import type { OkoApiResponse } from "@oko-wallet-types/api_response";
+import {
+  type UserAuthenticatedRequest,
+  userJwtMiddleware,
+} from "@oko-wallet-usrd-api/middleware/auth";
+import { setUserRoutes } from "@oko-wallet-usrd-api/routes/user";
+import { setUserAuthRoutes } from "@oko-wallet-usrd-api/routes/user_auth";
 
 export function makeUserRouter() {
   const router = express.Router() as IRouter;
@@ -68,7 +66,10 @@ export function makeUserRouter() {
   router.post(
     "/get_connected_apps",
     userJwtMiddleware,
-    async (req: UserAuthenticatedRequest, res: Response<OkoApiResponse<ConnectedApp[]>>) => {
+    async (
+      req: UserAuthenticatedRequest,
+      res: Response<OkoApiResponse<ConnectedApp[]>>,
+    ) => {
       try {
         const state = req.app.locals as { db: Pool };
         const { wallet_id_secp256k1 } = res.locals.user as {

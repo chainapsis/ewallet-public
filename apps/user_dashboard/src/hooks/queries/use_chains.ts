@@ -11,14 +11,14 @@ import {
   DEFAULT_ENABLED_CHAINS,
   useChainStore,
 } from "@oko-wallet-user-dashboard/state/chains";
-import {
-  getChainIdentifier,
-  transformKeplrChain,
-} from "@oko-wallet-user-dashboard/utils/chain";
 import type {
   CosmosChainInfo,
   ModularChainInfo,
 } from "@oko-wallet-user-dashboard/types/chain";
+import {
+  getChainIdentifier,
+  transformKeplrChain,
+} from "@oko-wallet-user-dashboard/utils/chain";
 
 interface KeplrChainsResponse {
   chains: CosmosChainInfo[];

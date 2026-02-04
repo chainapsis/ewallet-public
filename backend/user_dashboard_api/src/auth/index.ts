@@ -1,19 +1,25 @@
-import dayjs from "dayjs";
-import jwt from "jsonwebtoken";
 import type { TokenResult } from "@oko-wallet/oko-types/auth";
 import type {
   CustomerTokenPayload,
+  CustomerVerifyResult,
   GenerateCustomerTokenArgs,
   VerifyCustomerTokenArgs,
-  CustomerVerifyResult,
 } from "@oko-wallet/oko-types/ct_dashboard";
 import type {
   UserTokenPayload,
   UserTokenPayloadV2,
 } from "@oko-wallet/oko-types/tss";
 import type { Result } from "@oko-wallet/stdlib-js";
-import { CUSTOMER_ISSUER, CUSTOMER_AUDIENCE, USER_ISSUER, USER_AUDIENCE, USER_TOKEN_EXPIRATION_WINDOW } from "../constants";
+import dayjs from "dayjs";
+import jwt from "jsonwebtoken";
 
+import {
+  CUSTOMER_AUDIENCE,
+  CUSTOMER_ISSUER,
+  USER_AUDIENCE,
+  USER_ISSUER,
+  USER_TOKEN_EXPIRATION_WINDOW,
+} from "../constants";
 
 export type UserTokenJWTPayload = UserTokenPayload & jwt.JwtPayload;
 export type UserTokenJWTPayloadV2 = UserTokenPayloadV2 & jwt.JwtPayload;
