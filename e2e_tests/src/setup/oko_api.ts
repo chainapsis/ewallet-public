@@ -8,6 +8,8 @@ import { commitRevealMiddleware } from "@oko-wallet-api/middleware/commit_reveal
 import { keygenV2 } from "@oko-wallet-api/routes/tss_v2/keygen";
 import { userSignInV2 } from "@oko-wallet-api/routes/tss_v2/user_signin";
 import { userReshareV2 } from "@oko-wallet-api/routes/tss_v2/user_reshare";
+import { reportKeyShareNotFound } from "@oko-wallet-api/routes/tss_v2/report_key_share_not_found";
+import { userJwtMiddlewareV2 } from "@oko-wallet-api/middleware/auth/keplr_auth";
 import { mockOAuthMiddleware } from "./mock_oauth";
 
 export interface OkoApiServerKeypair {
@@ -56,6 +58,13 @@ export function createOkoApiApp(
     commitRevealMiddleware("reshare"),
     mockOAuthMiddleware,
     userReshareV2,
+  );
+
+  // JWT-authenticated route (no commit-reveal): report nodes with missing keyshares
+  app.post(
+    "/tss/v2/user/report_key_share_not_found",
+    userJwtMiddlewareV2,
+    reportKeyShareNotFound,
   );
 
   return app;
