@@ -3,7 +3,7 @@ import { z } from "zod";
 import { registry } from "../registry";
 import { CommitRevealRequestFieldsSchema } from "./commit_reveal";
 
-const OAuthTypeSchema = z.enum(["google", "auth0"]).openapi({
+const OAuthTypeSchema = z.enum(["google", "auth0", "x", "telegram", "discord"]).openapi({
   description: "OAuth provider type",
   example: "google",
 });
@@ -101,6 +101,7 @@ export const ReshareRequestV2Schema = registry.register(
   "TssUserReshareRequestV2",
   z
     .object({
+      auth_type: OAuthTypeSchema,
       secp256k1_public_key: z.string().openapi({
         description: "secp256k1 public key in hex format",
       }),

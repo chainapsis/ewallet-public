@@ -550,6 +550,7 @@ export async function handleReshareAndEd25519Keygen(
     "user/reshare",
     idToken,
     {
+      auth_type: authType,
       secp256k1_public_key: secp256k1PublicKey,
       ed25519_public_key: reqKeygenEd25519Res.data.user.public_key_ed25519,
       reshared_key_shares: resharedNodes,

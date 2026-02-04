@@ -117,6 +117,7 @@ export type ReshareRequestBody = OAuthRequest<ReshareRequest>;
  * V2 Reshare request body for /tss/v2/user/reshare endpoint.
  */
 export interface ReshareRequestV2 {
+  auth_type: AuthType;
   secp256k1_public_key: string;
   ed25519_public_key: string;
   reshared_key_shares: NodeNameAndEndpoint[];

@@ -149,7 +149,6 @@ export async function reshareUserKeySharesV2(
     session,
     nodes: activeNodes,
   });
-
   if (!sharesRes.success) {
     return {
       success: false,
@@ -159,7 +158,6 @@ export async function reshareUserKeySharesV2(
 
   // 3. Process secp256k1
   const secp256k1SharesByNode = convertSecp256k1Shares(sharesRes.data);
-
   const secp256k1ExpandRes = await runExpandShares(
     secp256k1SharesByNode,
     additionalNodes,
@@ -175,7 +173,6 @@ export async function reshareUserKeySharesV2(
 
   // 4. Process ed25519
   const ed25519SharesByNode = convertEd25519Shares(sharesRes.data);
-
   const ed25519ExpandRes = await expandTeddsaSigningShare(
     ed25519SharesByNode,
     additionalNodes,
@@ -190,7 +187,7 @@ export async function reshareUserKeySharesV2(
     resharedShares: ed25519ExpandRes.data.reshared_shares,
   };
 
-  // 5. Send new shares to ALL nodes (unified reshare API handles upsert)
+  // 5. Send new shares to ALL nodes
   const allNodes = nodes;
   const resharedNodes: NodeNameAndEndpoint[] = [];
 
@@ -222,7 +219,7 @@ export async function reshareUserKeySharesV2(
         },
       };
 
-      // Create commit-reveal params for this node (always use "reshare" - upsert handles new/existing)
+      // Create commit-reveal params for this node
       const commitRevealRes = createKsnCommitRevealParams(
         session,
         node.endpoint,
@@ -268,6 +265,7 @@ export async function reshareUserKeySharesV2(
     "user/reshare",
     idToken,
     {
+      auth_type: authType,
       secp256k1_public_key: secp256k1.publicKey.toHex(),
       ed25519_public_key: ed25519.publicKey.toHex(),
       reshared_key_shares: resharedNodes,

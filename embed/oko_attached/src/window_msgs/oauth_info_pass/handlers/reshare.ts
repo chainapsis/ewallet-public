@@ -15,14 +15,14 @@ import {
 
 /**
  * Handle reshare for existing user with both secp256k1 and ed25519 wallets.
- * Called when checkEmailV2 indicates needs_reshare (unified at user level).
+ * Called when checkEmailV2 indicates needs_reshare.
  */
 export async function handleReshareV2(
   idToken: string,
   keyshareNodeMeta: KeyShareNodeMetaWithNodeStatusInfo,
   authType: AuthType,
 ): Promise<Result<UserSignInResultV2, OAuthSignInError>> {
-  const { threshold, nodes } = keyshareNodeMeta;
+  const { nodes } = keyshareNodeMeta;
 
   // 1. Prepare commit targets (all nodes) with "reshare" operation type
   // For reshare, all nodes must commit since we send reshared shares to all of them
