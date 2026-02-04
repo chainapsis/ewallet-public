@@ -48,6 +48,7 @@ export async function handleExistingUser(
       auth_type: authType,
     },
     TSS_V1_ENDPOINT,
+    undefined,
     apiKey,
   );
   if (!signInRes.success) {
@@ -109,9 +110,9 @@ export async function handleExistingUser(
         nodes: keyshareNodeMeta.nodes.map((n) =>
           n.name === error.affectedNode.name
             ? {
-                ...n,
-                wallet_status: "UNRECOVERABLE_DATA_LOSS" as WalletKSNodeStatus,
-              }
+              ...n,
+              wallet_status: "UNRECOVERABLE_DATA_LOSS" as WalletKSNodeStatus,
+            }
             : n,
         ),
       };
@@ -338,6 +339,7 @@ export async function handleReshare(
       auth_type: authType,
     },
     TSS_V1_ENDPOINT,
+    undefined,
     apiKey,
   );
   if (!signInRes.success) {

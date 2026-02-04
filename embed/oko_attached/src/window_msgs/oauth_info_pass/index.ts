@@ -436,7 +436,6 @@ export async function handleUserSignInV2(
         secp256k1Meta,
         ed25519Meta,
         authType,
-        apiKey,
       );
       if (!signInRes.success) {
         return {
@@ -456,7 +455,6 @@ export async function handleUserSignInV2(
       secp256k1Meta,
       ed25519Meta,
       authType,
-      apiKey,
     );
     if (!signInRes.success) {
       return {
@@ -497,7 +495,7 @@ export async function handleUserSignInV2(
       authType,
       secp256k1NeedsReshare,
       ed25519NeedsReshare,
-      apiKey,
+      apiKey
     );
     if (!signInRes.success) {
       return {

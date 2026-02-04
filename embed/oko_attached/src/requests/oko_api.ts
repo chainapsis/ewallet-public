@@ -123,13 +123,14 @@ export async function signInV2(
   idToken: string,
   authType: AuthType,
   commitReveal: CommitRevealParams,
+  apiKey?: string,
 ): Promise<
   Result<SignInResponseV2, { type: "sign_in_request_fail"; error: string }>
 > {
   const signInRes = await makeAuthorizedOkoApiRequest<
     SignInRequest,
     SignInResponseV2
-  >("user/signin", idToken, { auth_type: authType }, TSS_V2_ENDPOINT, commitReveal);
+  >("user/signin", idToken, { auth_type: authType }, TSS_V2_ENDPOINT, commitReveal, apiKey);
 
   if (!signInRes.success) {
     console.error("[attached] sign in failed, err: %s", signInRes.err);

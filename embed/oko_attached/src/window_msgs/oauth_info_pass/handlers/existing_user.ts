@@ -39,6 +39,7 @@ export async function handleExistingUserV2(
   keyshareNodeMetaSecp256k1: KeyShareNodeMetaWithNodeStatusInfo,
   keyshareNodeMetaEd25519: KeyShareNodeMetaWithNodeStatusInfo,
   authType: AuthType,
+  apiKey?: string,
 ): Promise<Result<UserSignInResultV2, OAuthSignInError>> {
   // 1. Commit to oko_api and ks nodes
   const ksnCommitTargets: KsnCommitTarget[] =
@@ -80,6 +81,7 @@ export async function handleExistingUserV2(
     idToken,
     authType,
     signInCommitRevealRes.data,
+    apiKey,
   );
   if (!signInResult.success) {
     return { success: false, err: signInResult.err };

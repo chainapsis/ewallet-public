@@ -27,6 +27,7 @@ export async function handleReshareV2(
   authType: AuthType,
   secp256k1NeedsReshare: boolean,
   ed25519NeedsReshare: boolean,
+  apiKey?: string,
 ): Promise<Result<UserSignInResultV2, OAuthSignInError>> {
   // 1. Classify nodes for commit targets
   const activeNodes = keyshareNodeMetaSecp256k1.nodes.filter(
@@ -81,6 +82,7 @@ export async function handleReshareV2(
     idToken,
     authType,
     signInCommitRevealRes.data,
+    apiKey,
   );
   if (!signInResult.success) {
     return { success: false, err: signInResult.err };
