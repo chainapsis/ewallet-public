@@ -107,6 +107,7 @@ export async function initializeOkoApiSchema(pool: Pool): Promise<void> {
       user_id uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
       email varchar(255) NOT NULL,
       auth_type varchar(64) NOT NULL,
+      status varchar(32) DEFAULT 'ACTIVE' NOT NULL,
       metadata jsonb NULL,
       created_at timestamptz DEFAULT now() NOT NULL,
       updated_at timestamptz DEFAULT now() NOT NULL,
@@ -182,6 +183,9 @@ export async function initializeOkoApiSchema(pool: Pool): Promise<void> {
       updated_at timestamptz DEFAULT now() NOT NULL,
       CONSTRAINT wallet_ks_nodes_wallet_id_node_id_key UNIQUE (wallet_id, node_id)
     );
+    -- Ensure status column exists on oko_users
+    ALTER TABLE oko_users
+      ADD COLUMN IF NOT EXISTS status varchar(32) DEFAULT 'ACTIVE' NOT NULL;
   `);
 }
 

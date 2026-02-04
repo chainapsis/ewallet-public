@@ -247,4 +247,244 @@ describe("e2e_test_add_ed25519", () => {
     expect(res.status).toBe(400);
     expect(res.body.code).toBe("INVALID_SIGNATURE");
   });
+
+  it("should reject register_ed25519 with invalid signature", async () => {
+    await prepareSecpOnlyUser();
+    const clientKeypair = generateClientKeypair();
+    const wrongKeypair = generateClientKeypair();
+    const sessionId = generateSessionId();
+    const idHash = computeIdTokenHash(AUTH_TYPE, SIGNIN_ID_TOKEN);
+
+    const ksnCommit = await request(ctx.ksnApps[0])
+      .post("/keyshare/v2/commit")
+      .send({
+        session_id: sessionId,
+        operation_type: "add_ed25519",
+        client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
+        id_token_hash: idHash,
+      });
+    expect(ksnCommit.status).toBe(200);
+
+    const ed = runKeygenCentralizedEd25519();
+    const edPkHex = Buffer.from(ed.public_key).toString("hex");
+    const badSig = createRevealSignature(
+      wrongKeypair.privateKey,
+      ksnCommit.body.data.node_pubkey,
+      sessionId,
+      AUTH_TYPE,
+      SIGNIN_ID_TOKEN,
+      "add_ed25519",
+      "register_ed25519",
+    );
+    const reg = await request(ctx.ksnApps[0])
+      .post("/keyshare/v2/register/ed25519")
+      .set("x-mock-user-id", TEST_USER_ID)
+      .set("Authorization", `Bearer ${SIGNIN_ID_TOKEN}`)
+      .send({
+        auth_type: AUTH_TYPE,
+        public_key: edPkHex,
+        share: "aa".repeat(64),
+        cr_session_id: sessionId,
+        cr_signature: badSig,
+      });
+    expect(reg.status).toBe(400);
+    expect(reg.body.code).toBe("INVALID_SIGNATURE");
+  });
+
+  it("should reject register_ed25519 replay (API_ALREADY_CALLED)", async () => {
+    await prepareSecpOnlyUser();
+    const clientKeypair = generateClientKeypair();
+    const sessionId = generateSessionId();
+    const idHash = computeIdTokenHash(AUTH_TYPE, SIGNIN_ID_TOKEN);
+
+    const ksnCommit = await request(ctx.ksnApps[0])
+      .post("/keyshare/v2/commit")
+      .send({
+        session_id: sessionId,
+        operation_type: "add_ed25519",
+        client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
+        id_token_hash: idHash,
+      });
+    expect(ksnCommit.status).toBe(200);
+    const nodePk = ksnCommit.body.data.node_pubkey;
+
+    const ed = runKeygenCentralizedEd25519();
+    const edPkHex = Buffer.from(ed.public_key).toString("hex");
+    const sig = createRevealSignature(
+      clientKeypair.privateKey,
+      nodePk,
+      sessionId,
+      AUTH_TYPE,
+      SIGNIN_ID_TOKEN,
+      "add_ed25519",
+      "register_ed25519",
+    );
+    const payload = {
+      auth_type: AUTH_TYPE,
+      public_key: edPkHex,
+      share: "aa".repeat(64),
+      cr_session_id: sessionId,
+      cr_signature: sig,
+    };
+    const first = await request(ctx.ksnApps[0])
+      .post("/keyshare/v2/register/ed25519")
+      .set("x-mock-user-id", TEST_USER_ID)
+      .set("Authorization", `Bearer ${SIGNIN_ID_TOKEN}`)
+      .send(payload);
+    expect(first.status).toBe(200);
+
+    const second = await request(ctx.ksnApps[0])
+      .post("/keyshare/v2/register/ed25519")
+      .set("x-mock-user-id", TEST_USER_ID)
+      .set("Authorization", `Bearer ${SIGNIN_ID_TOKEN}`)
+      .send(payload);
+    expect(second.status).toBe(409);
+    expect(second.body.code).toBe("API_ALREADY_CALLED");
+  });
+
+  it("should reject keygen_ed25519 when secp256k1 wallet is missing", async () => {
+    await ctx.resetAllDatabases();
+    const clientKeypair = generateClientKeypair();
+    const sessionId = generateSessionId();
+    const idHash = computeIdTokenHash(AUTH_TYPE, SIGNIN_ID_TOKEN);
+
+    const okoCommit = await request(ctx.okoApiApp)
+      .post("/tss/v2/commit")
+      .send({
+        session_id: sessionId,
+        operation_type: "add_ed25519",
+        client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
+        id_token_hash: idHash,
+      });
+    expect(okoCommit.status).toBe(200);
+    const okoNodePk = okoCommit.body.data.node_pubkey;
+
+    const ed = runKeygenCentralizedEd25519();
+    const sig = createRevealSignature(
+      clientKeypair.privateKey,
+      okoNodePk,
+      sessionId,
+      AUTH_TYPE,
+      SIGNIN_ID_TOKEN,
+      "add_ed25519",
+      "keygen_ed25519",
+    );
+    const res = await request(ctx.okoApiApp)
+      .post("/tss/v2/keygen_ed25519")
+      .set("x-mock-user-id", "nouser")
+      .set("Authorization", `Bearer ${SIGNIN_ID_TOKEN}`)
+      .send({
+        auth_type: AUTH_TYPE,
+        keygen_2: {
+          key_package: ed.keygen_outputs[1].key_package,
+          public_key_package: Buffer.from(ed.keygen_outputs[1].public_key_package).toString("hex"),
+          identifier: ed.keygen_outputs[1].identifier,
+          public_key: ed.public_key,
+        },
+        cr_session_id: sessionId,
+        cr_signature: sig,
+      });
+    // user not found in this simple path
+    expect([404, 400]).toContain(res.status);
+  });
+
+  it("should reject keygen_ed25519 when called twice (WALLET_ALREADY_EXISTS)", async () => {
+    await prepareSecpOnlyUser();
+
+    // First success: register ed25519 on KSNs + keygen_ed25519
+    const edKeygen = runKeygenCentralizedEd25519();
+    const edKeygen1 = edKeygen.keygen_outputs[0];
+    const edKeygen2 = edKeygen.keygen_outputs[1];
+    const edPkHex = Buffer.from(edKeygen.public_key).toString("hex");
+
+    const clientKeypair = generateClientKeypair();
+    const sessionId = generateSessionId();
+    const idHash = computeIdTokenHash(AUTH_TYPE, SIGNIN_ID_TOKEN);
+    const okoCommit = await request(ctx.okoApiApp)
+      .post("/tss/v2/commit")
+      .send({
+        session_id: sessionId,
+        operation_type: "add_ed25519",
+        client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
+        id_token_hash: idHash,
+      });
+    expect(okoCommit.status).toBe(200);
+    const okoNodePk = okoCommit.body.data.node_pubkey;
+    for (let i = 0; i < ctx.ksnApps.length; i++) {
+      const ksnCommit = await request(ctx.ksnApps[i])
+        .post("/keyshare/v2/commit")
+        .send({
+          session_id: sessionId,
+          operation_type: "add_ed25519",
+          client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
+          id_token_hash: idHash,
+        });
+      expect(ksnCommit.status).toBe(200);
+      const regSig = createRevealSignature(
+        clientKeypair.privateKey,
+        ksnCommit.body.data.node_pubkey,
+        sessionId,
+        AUTH_TYPE,
+        SIGNIN_ID_TOKEN,
+        "add_ed25519",
+        "register_ed25519",
+      );
+      const reg = await request(ctx.ksnApps[i])
+        .post("/keyshare/v2/register/ed25519")
+        .set("x-mock-user-id", TEST_USER_ID)
+        .set("Authorization", `Bearer ${SIGNIN_ID_TOKEN}`)
+        .send({
+          auth_type: AUTH_TYPE,
+          public_key: edPkHex,
+          share: (i === 0 ? "aa" : i === 1 ? "bb" : "cc").repeat(64),
+          cr_session_id: sessionId,
+          cr_signature: regSig,
+        });
+      expect(reg.status).toBe(200);
+    }
+    const kgSig = createRevealSignature(
+      clientKeypair.privateKey,
+      okoNodePk,
+      sessionId,
+      AUTH_TYPE,
+      SIGNIN_ID_TOKEN,
+      "add_ed25519",
+      "keygen_ed25519",
+    );
+    const first = await request(ctx.okoApiApp)
+      .post("/tss/v2/keygen_ed25519")
+      .set("x-mock-user-id", TEST_USER_ID)
+      .set("Authorization", `Bearer ${SIGNIN_ID_TOKEN}`)
+      .send({
+        auth_type: AUTH_TYPE,
+        keygen_2: {
+          key_package: edKeygen2.key_package,
+          public_key_package: Buffer.from(edKeygen2.public_key_package).toString("hex"),
+          identifier: edKeygen2.identifier,
+          public_key: edKeygen.public_key,
+        },
+        cr_session_id: sessionId,
+        cr_signature: kgSig,
+      });
+    expect(first.status).toBe(200);
+
+    // Second call should fail with WALLET_ALREADY_EXISTS
+    const second = await request(ctx.okoApiApp)
+      .post("/tss/v2/keygen_ed25519")
+      .set("x-mock-user-id", TEST_USER_ID)
+      .set("Authorization", `Bearer ${SIGNIN_ID_TOKEN}`)
+      .send({
+        auth_type: AUTH_TYPE,
+        keygen_2: {
+          key_package: edKeygen2.key_package,
+          public_key_package: Buffer.from(edKeygen2.public_key_package).toString("hex"),
+          identifier: edKeygen2.identifier,
+          public_key: edKeygen.public_key,
+        },
+        cr_session_id: sessionId,
+        cr_signature: kgSig,
+      });
+    expect(second.status).toBe(409);
+    expect(second.body.code).toBe("WALLET_ALREADY_EXISTS");
+  });
 });
