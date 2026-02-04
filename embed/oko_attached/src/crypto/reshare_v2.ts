@@ -282,52 +282,23 @@ export async function reshareUserKeySharesV2(
     };
   }
 
-  // 7. Build result
-  const clientIdentifierRes = getClientFrostIdentifier();
-  if (!clientIdentifierRes.success) {
-    return { success: false, err: clientIdentifierRes.err };
-  }
-
-  const serverIdentifierRes = getServerFrostIdentifier();
-  if (!serverIdentifierRes.success) {
-    return { success: false, err: serverIdentifierRes.err };
-  }
-
-  const keyPackage = reconstructKeyPackage(
-    ed25519Result.originalSigningShare,
-    clientIdentifierRes.data,
-    ed25519.publicKey,
+  // 7. Build KeyPackage and PublicKeyPackage
+  const keyPackageRes = buildKeyPackageResult({
+    signingShare: ed25519Result.originalSigningShare,
+    verifyingKey: ed25519.publicKey,
+    serverVerifyingShare: ed25519.serverVerifyingShare,
     threshold,
-  );
-
-  // Build PublicKeyPackageRaw
-  const clientVerifyingShare = computeVerifyingShare(
-    ed25519Result.originalSigningShare,
-  );
-  const publicKeyPackageRaw: PublicKeyPackageRaw = {
-    verifying_shares: [
-      {
-        identifier: clientIdentifierRes.data.toHex(),
-        share: [...clientVerifyingShare.toUint8Array()],
-      },
-      {
-        identifier: serverIdentifierRes.data.toHex(),
-        share: [...ed25519.serverVerifyingShare.toUint8Array()],
-      },
-    ],
-    verifying_key: [...ed25519.publicKey.toUint8Array()],
-  };
+  });
+  if (!keyPackageRes.success) {
+    return { success: false, err: keyPackageRes.err };
+  }
 
   return {
     success: true,
     data: {
       keyshare1Secp256k1: secp256k1Result.originalSecret,
-      keyPackageEd25519: Buffer.from(
-        JSON.stringify(keyPackageToRaw(keyPackage)),
-      ).toString("hex"),
-      publicKeyPackageEd25519: Buffer.from(
-        JSON.stringify(publicKeyPackageRaw),
-      ).toString("hex"),
+      keyPackageEd25519: keyPackageRes.data.keyPackageEd25519,
+      publicKeyPackageEd25519: keyPackageRes.data.publicKeyPackageEd25519,
     },
   };
 }

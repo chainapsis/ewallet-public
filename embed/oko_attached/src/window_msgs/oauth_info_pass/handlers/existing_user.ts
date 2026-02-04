@@ -1,9 +1,5 @@
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { KeyShareNodeMetaWithNodeStatusInfo } from "@oko-wallet/oko-types/tss";
-import {
-  hexToTeddsaKeyShare,
-  type TeddsaKeyShareByNode,
-} from "@oko-wallet/oko-types/user_key_share";
 import type { Result } from "@oko-wallet/stdlib-js";
 import { type OAuthSignInError } from "@oko-wallet/oko-sdk-core";
 import { Bytes } from "@oko-wallet/bytes";
@@ -21,7 +17,10 @@ import {
   createOkoApiCommitRevealParams,
   type KsnCommitTarget,
 } from "@oko-wallet-attached/crypto/commit_reveal";
-import { decodeSecp256k1SharesByNode } from "@oko-wallet-attached/crypto/key_share_utils";
+import {
+  decodeSecp256k1SharesByNode,
+  decodeEd25519SharesByNode,
+} from "@oko-wallet-attached/crypto/key_share_utils";
 import { combineTeddsaShares } from "@oko-wallet-attached/crypto/sss_ed25519";
 
 /**
@@ -29,7 +28,6 @@ import { combineTeddsaShares } from "@oko-wallet-attached/crypto/sss_ed25519";
  * Called when checkEmailV2 returns CheckEmailResponseV2BothWallets.
  *
  * If some nodes return KEY_SHARE_NOT_FOUND, reports them to oko_api
- * so they're marked as UNRECOVERABLE_DATA_LOSS for the next login's reshare.
  */
 export async function handleExistingUserV2(
   idToken: string,
@@ -113,43 +111,18 @@ export async function handleExistingUserV2(
 
   const { shares: keySharesByNode, notFoundNodes } = requestSharesRes.data;
 
-  // 4. Decode and combine secp256k1 shares
+  // 4. Decode shares
   const secp256k1DecodeRes = await decodeSecp256k1SharesByNode(keySharesByNode);
   if (!secp256k1DecodeRes.success) {
     return { success: false, err: secp256k1DecodeRes.err };
   }
 
-  // 5. Combine ed25519 shares
-  const ed25519SharesByNode: TeddsaKeyShareByNode[] = [];
-  for (const item of keySharesByNode) {
-    const shareHex = item.shares.ed25519;
-    if (!shareHex) {
-      return {
-        success: false,
-        err: {
-          type: "key_share_combine_fail",
-          error: `ed25519 share missing from node: ${item.node.name}`,
-        },
-      };
-    }
-    try {
-      const teddsaShare = hexToTeddsaKeyShare(shareHex);
-      ed25519SharesByNode.push({
-        node: item.node,
-        share: teddsaShare,
-      });
-    } catch (e) {
-      return {
-        success: false,
-        err: {
-          type: "key_share_combine_fail",
-          error: `ed25519 decode err: ${String(e)}`,
-        },
-      };
-    }
+  const ed25519DecodeRes = decodeEd25519SharesByNode(keySharesByNode);
+  if (!ed25519DecodeRes.success) {
+    return { success: false, err: ed25519DecodeRes.err };
   }
 
-  // Get verifying_key from public key
+  // 5. Parse verifying_key from public key
   const verifyingKeyRes = Bytes.fromHexString(
     signInResp.user.public_key_ed25519,
     32,
@@ -180,7 +153,24 @@ export async function handleExistingUserV2(
     };
   }
 
-  // 6. Combine shares
+  // 6. Combine ed25519 shares
+  const signingShareRes = await combineTeddsaShares(
+    ed25519DecodeRes.data,
+    threshold,
+    verifyingKey,
+  );
+  if (!signingShareRes.success) {
+    return {
+      success: false,
+      err: {
+        type: "key_share_combine_fail",
+        error: `ed25519 combine err: ${signingShareRes.err}`,
+      },
+    };
+  }
+  const signingShare = signingShareRes.data;
+
+  // 7. Combine secp256k1 shares
   const keyshare1Secp256k1Res = await combineUserShares(
     secp256k1DecodeRes.data,
     threshold,
@@ -196,23 +186,7 @@ export async function handleExistingUserV2(
   }
   const keyshare1Secp256k1 = keyshare1Secp256k1Res.data;
 
-  const signingShareRes = await combineTeddsaShares(
-    ed25519SharesByNode,
-    threshold,
-    verifyingKey,
-  );
-  if (!signingShareRes.success) {
-    return {
-      success: false,
-      err: {
-        type: "key_share_combine_fail",
-        error: `ed25519 combine err: ${signingShareRes.err}`,
-      },
-    };
-  }
-  const signingShare = signingShareRes.data;
-
-  // 7. Build KeyPackage and PublicKeyPackage
+  // 8. Build KeyPackage and PublicKeyPackage
   const keyPackageRes = buildKeyPackageResult({
     signingShare,
     verifyingKey,
@@ -229,7 +203,7 @@ export async function handleExistingUserV2(
     };
   }
 
-  // 8. Report nodes that returned KEY_SHARE_NOT_FOUND
+  // 9. Report nodes that returned KEY_SHARE_NOT_FOUND
   if (notFoundNodes.length > 0) {
     console.log(
       "[attached] reporting %d nodes with KEY_SHARE_NOT_FOUND",

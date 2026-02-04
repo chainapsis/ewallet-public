@@ -77,7 +77,7 @@ export async function handleNewUserV2(
 
   // 4. Commit to oko_api and ks nodes
   // For sign_up, all nodes must succeed since we register to all of them
-  const { threshold, nodes } = keyshareNodeMeta;
+  const { nodes } = keyshareNodeMeta;
   const ksnCommitTargets: KsnCommitTarget[] = nodes.map((node) => ({
     nodeUrl: node.endpoint,
     operationType: "sign_up",
