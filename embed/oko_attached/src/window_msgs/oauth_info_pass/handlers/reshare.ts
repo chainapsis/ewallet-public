@@ -15,37 +15,20 @@ import {
 
 /**
  * Handle reshare for existing user with both secp256k1 and ed25519 wallets.
- * Called when checkEmailV2 indicates needs_reshare for either curve.
+ * Called when checkEmailV2 indicates needs_reshare (unified at user level).
  */
 export async function handleReshareV2(
   idToken: string,
-  keyshareNodeMetaSecp256k1: KeyShareNodeMetaWithNodeStatusInfo,
-  keyshareNodeMetaEd25519: KeyShareNodeMetaWithNodeStatusInfo,
+  keyshareNodeMeta: KeyShareNodeMetaWithNodeStatusInfo,
   authType: AuthType,
-  secp256k1NeedsReshare: boolean,
-  ed25519NeedsReshare: boolean,
 ): Promise<Result<UserSignInResultV2, OAuthSignInError>> {
-  // 1. Classify nodes for commit targets
-  const activeNodes = keyshareNodeMetaSecp256k1.nodes.filter(
-    (n) => n.wallet_status === "ACTIVE",
-  );
-  const newNodes = keyshareNodeMetaSecp256k1.nodes.filter(
-    (n) =>
-      n.wallet_status === "NOT_REGISTERED" ||
-      n.wallet_status === "UNRECOVERABLE_DATA_LOSS",
-  );
-
-  // 2. Commit to oko_api and ks nodes
-  const ksnCommitTargets: KsnCommitTarget[] = [
-    ...activeNodes.map((node) => ({
+  // 1. Prepare commit targets (all nodes)
+  const ksnCommitTargets: KsnCommitTarget[] = keyshareNodeMeta.nodes.map(
+    (node) => ({
       nodeUrl: node.endpoint,
       operationType: "sign_in" as const,
-    })),
-    ...newNodes.map((node) => ({
-      nodeUrl: node.endpoint,
-      operationType: "sign_in" as const,
-    })),
-  ];
+    }),
+  );
   const commitRes = await commitAll(
     "sign_in",
     authType,
@@ -131,16 +114,11 @@ export async function handleReshareV2(
   const reshareRes = await reshareUserKeySharesV2(
     idToken,
     authType,
-    {
-      publicKey: publicKeySecp256k1Res.data,
-      keyshareNodeMeta: keyshareNodeMetaSecp256k1,
-      needsReshare: secp256k1NeedsReshare,
-    },
+    keyshareNodeMeta,
+    { publicKey: publicKeySecp256k1Res.data },
     {
       publicKey: publicKeyEd25519Res.data,
-      keyshareNodeMeta: keyshareNodeMetaEd25519,
       serverVerifyingShare: serverVerifyingShareRes.data,
-      needsReshare: ed25519NeedsReshare,
     },
     session,
   );

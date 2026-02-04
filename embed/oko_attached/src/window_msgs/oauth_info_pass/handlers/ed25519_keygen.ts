@@ -23,7 +23,6 @@ import {
   requestKeySharesV2WithReshareInfo,
   registerKeyShareEd25519V2,
   reshareKeySharesV2,
-  reshareRegisterV2,
 } from "@oko-wallet-attached/requests/ks_node_v2";
 import {
   commitAll,
@@ -49,14 +48,13 @@ import {
  */
 export async function handleExistingUserNeedsEd25519Keygen(
   idToken: string,
-  keyshareNodeMetaSecp256k1: KeyShareNodeMetaWithNodeStatusInfo,
-  keyshareNodeMetaEd25519: KeyShareNodeMetaWithNodeStatusInfo,
+  keyshareNodeMeta: KeyShareNodeMetaWithNodeStatusInfo,
   authType: AuthType,
 ): Promise<Result<UserSignInResultV2, OAuthSignInError>> {
+  const { threshold, nodes } = keyshareNodeMeta;
+
   // 1. ed25519 keygen and split
-  const ed25519KeygenSplitRes = await runEd25519KeygenAndSplit(
-    keyshareNodeMetaEd25519,
-  );
+  const ed25519KeygenSplitRes = await runEd25519KeygenAndSplit(keyshareNodeMeta);
   if (ed25519KeygenSplitRes.success === false) {
     return { success: false, err: ed25519KeygenSplitRes.err };
   }
@@ -67,12 +65,10 @@ export async function handleExistingUserNeedsEd25519Keygen(
   } = ed25519KeygenSplitRes.data;
 
   // 2. Commit to oko_api and ks nodes
-  const ksnCommitTargets: KsnCommitTarget[] = keyshareNodeMetaEd25519.nodes.map(
-    (node) => ({
-      nodeUrl: node.endpoint,
-      operationType: "add_ed25519",
-    }),
-  );
+  const ksnCommitTargets: KsnCommitTarget[] = nodes.map((node) => ({
+    nodeUrl: node.endpoint,
+    operationType: "add_ed25519",
+  }));
   const commitRes = await commitAll(
     "add_ed25519",
     authType,
@@ -89,7 +85,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
 
   // 3. Send ed25519 key shares to ks nodes using registerKeyShareEd25519V2
   const registerEd25519Results: Result<void, string>[] = await Promise.all(
-    keyshareNodeMetaEd25519.nodes.map(async (node, index) => {
+    nodes.map(async (node, index) => {
       const commitRevealRes = createKsnCommitRevealParams(
         session,
         node.endpoint,
@@ -163,15 +159,16 @@ export async function handleExistingUserNeedsEd25519Keygen(
   // 5. Get secp256k1 public key from keygenEd25519 response
   const secp256k1PublicKey = reqKeygenEd25519Res.data.user.public_key_secp256k1;
 
-  // 6. Request secp256k1 shares from ks nodes
+  // 6. Request both shares from ks nodes (ed25519 was just registered in step 3)
   // Use continueOnWalletNotFound=true to support auto-reshare
   const requestSharesRes = await requestKeySharesV2WithReshareInfo(
     idToken,
-    keyshareNodeMetaSecp256k1.nodes,
-    keyshareNodeMetaSecp256k1.threshold,
+    nodes,
+    threshold,
     authType,
     {
       secp256k1: secp256k1PublicKey,
+      ed25519: ed25519Keygen1.public_key.toHex(),
     },
     session,
     false, // isFinal: false - reshare might come after
@@ -222,7 +219,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
       nodesNeedingReshare,
       secp256k1: {
         shares: secp256k1DecodeRes.data,
-        threshold: keyshareNodeMetaSecp256k1.threshold,
+        threshold,
         publicKey: secp256k1PublicKey,
       },
       // ed25519 is not provided - already registered via register_ed25519
@@ -241,7 +238,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
     // No reshare needed - just combine shares
     const keyshare1Secp256k1Res = await combineUserShares(
       secp256k1DecodeRes.data,
-      keyshareNodeMetaSecp256k1.threshold,
+      threshold,
     );
     if (keyshare1Secp256k1Res.success === false) {
       return {
@@ -281,27 +278,20 @@ export async function handleExistingUserNeedsEd25519Keygen(
  * Called when user has secp256k1 wallet, needs reshare, and needs ed25519 keygen.
  *
  * Commit-reveal:
- * - oko_api: sign_in_reshare_ed25519
- * - KSN ACTIVE nodes: sign_in_reshare_ed25519
- * - KSN new nodes: register_reshare
+ * - oko_api: sign_in + reshare + keygen_ed25519
+ * - KSN: reshare (upsert) + register_ed25519
  */
 export async function handleReshareAndEd25519Keygen(
   idToken: string,
-  keyshareNodeMetaSecp256k1: KeyShareNodeMetaWithNodeStatusInfo,
-  keyshareNodeMetaEd25519: KeyShareNodeMetaWithNodeStatusInfo,
+  keyshareNodeMeta: KeyShareNodeMetaWithNodeStatusInfo,
   authType: AuthType,
 ): Promise<Result<UserSignInResultV2, OAuthSignInError>> {
-  // 1. Classify nodes
-  const activeNodes = keyshareNodeMetaSecp256k1.nodes.filter(
-    (n) => n.wallet_status === "ACTIVE",
-  );
-  const newNodes = keyshareNodeMetaSecp256k1.nodes.filter(
-    (n) =>
-      n.wallet_status === "NOT_REGISTERED" ||
-      n.wallet_status === "UNRECOVERABLE_DATA_LOSS",
-  );
+  const { threshold, nodes } = keyshareNodeMeta;
 
-  if (activeNodes.length < keyshareNodeMetaSecp256k1.threshold) {
+  // 1. Classify nodes
+  const activeNodes = nodes.filter((n) => n.wallet_status === "ACTIVE");
+
+  if (activeNodes.length < threshold) {
     return {
       success: false,
       err: {
@@ -312,9 +302,7 @@ export async function handleReshareAndEd25519Keygen(
   }
 
   // 2. ed25519 keygen and split
-  const ed25519KeygenSplitRes = await runEd25519KeygenAndSplit(
-    keyshareNodeMetaEd25519,
-  );
+  const ed25519KeygenSplitRes = await runEd25519KeygenAndSplit(keyshareNodeMeta);
   if (ed25519KeygenSplitRes.success === false) {
     return { success: false, err: ed25519KeygenSplitRes.err };
   }
@@ -325,16 +313,10 @@ export async function handleReshareAndEd25519Keygen(
   } = ed25519KeygenSplitRes.data;
 
   // 3. Commit to oko_api and ks nodes
-  const ksnCommitTargets: KsnCommitTarget[] = [
-    ...activeNodes.map((node) => ({
-      nodeUrl: node.endpoint,
-      operationType: "add_ed25519" as const,
-    })),
-    ...newNodes.map((node) => ({
-      nodeUrl: node.endpoint,
-      operationType: "add_ed25519" as const,
-    })),
-  ];
+  const ksnCommitTargets: KsnCommitTarget[] = nodes.map((node) => ({
+    nodeUrl: node.endpoint,
+    operationType: "add_ed25519" as const,
+  }));
   const commitRes = await commitAll(
     "add_ed25519",
     authType,
@@ -371,33 +353,72 @@ export async function handleReshareAndEd25519Keygen(
   const signInResp = signInResult.data;
   const secp256k1PublicKey = signInResp.user.public_key_secp256k1;
 
-  // 5. Request secp256k1 shares with public key
-  const requestSecp256k1SharesRes = await requestKeySharesV2(
-    idToken,
-    activeNodes,
-    keyshareNodeMetaSecp256k1.threshold,
-    authType,
-    {
-      secp256k1: secp256k1PublicKey,
-    },
-    session,
+  // 5. Register ed25519 to ACTIVE nodes first (so we can request both wallets)
+  const registerEd25519Results: Result<void, string>[] = await Promise.all(
+    activeNodes.map(async (node) => {
+      const nodeShare = ed25519UserKeyShares.find(
+        (s) => s.node.endpoint === node.endpoint,
+      );
+      if (!nodeShare) {
+        return { success: false, err: `ed25519 share not found for ${node.name}` };
+      }
+      const commitRevealRes = createKsnCommitRevealParams(
+        session,
+        node.endpoint,
+        "register_ed25519",
+      );
+      if (!commitRevealRes.success) {
+        return { success: false, err: commitRevealRes.err };
+      }
+      return registerKeyShareEd25519V2(
+        node.endpoint,
+        idToken,
+        authType,
+        ed25519Keygen1.public_key.toHex(),
+        teddsaKeyShareToHex(nodeShare.share),
+        commitRevealRes.data,
+      );
+    }),
   );
-  if (!requestSecp256k1SharesRes.success) {
+  const registerEd25519ErrResults = registerEd25519Results.filter(
+    (r) => !r.success,
+  );
+  if (registerEd25519ErrResults.length > 0) {
     return {
       success: false,
       err: {
         type: "reshare_fail",
-        error: `Failed to request secp256k1 shares: ${requestSecp256k1SharesRes.err.code}`,
+        error: registerEd25519ErrResults.map((r) => r.err).join("\n"),
       },
     };
   }
 
-  // 6. Decode secp256k1 shares (filter out items without shares for reshare case)
-  const itemsWithSecp256k1 = requestSecp256k1SharesRes.data.filter(
-    (item) => item.shares.secp256k1,
+  // 6. Request both shares from ACTIVE nodes
+  const requestSharesRes = await requestKeySharesV2(
+    idToken,
+    activeNodes,
+    threshold,
+    authType,
+    {
+      secp256k1: secp256k1PublicKey,
+      ed25519: ed25519Keygen1.public_key.toHex(),
+    },
+    session,
   );
-  const secp256k1DecodeRes =
-    await decodeSecp256k1SharesByNode(itemsWithSecp256k1);
+  if (!requestSharesRes.success) {
+    return {
+      success: false,
+      err: {
+        type: "reshare_fail",
+        error: `Failed to request shares: ${requestSharesRes.err.code}`,
+      },
+    };
+  }
+
+  // 7. Decode secp256k1 shares
+  const secp256k1DecodeRes = await decodeSecp256k1SharesByNode(
+    requestSharesRes.data,
+  );
   if (!secp256k1DecodeRes.success) {
     return {
       success: false,
@@ -408,11 +429,16 @@ export async function handleReshareAndEd25519Keygen(
     };
   }
 
-  // 7. Expand secp256k1 shares to new nodes
+  // 8. Expand secp256k1 shares to additional nodes
+  const additionalNodes = nodes.filter(
+    (n) =>
+      n.wallet_status === "NOT_REGISTERED" ||
+      n.wallet_status === "UNRECOVERABLE_DATA_LOSS",
+  );
   const secp256k1ExpandRes = await runExpandShares(
     secp256k1DecodeRes.data,
-    newNodes,
-    keyshareNodeMetaSecp256k1.threshold,
+    additionalNodes,
+    threshold,
   );
   if (!secp256k1ExpandRes.success) {
     return {
@@ -421,10 +447,7 @@ export async function handleReshareAndEd25519Keygen(
     };
   }
 
-  // 8. Send shares to KSN
-  // For ACTIVE nodes: reshare secp256k1 + register ed25519
-  // For new nodes: reshare/register both
-  const allNodes = keyshareNodeMetaSecp256k1.nodes;
+  // 8. Send shares to KSN (unified reshare API handles upsert for both wallets)
   const sendResults = await Promise.all(
     secp256k1ExpandRes.data.reshared_user_key_shares.map(
       async (secp256k1Share) => {
@@ -436,85 +459,56 @@ export async function handleReshareAndEd25519Keygen(
         }
 
         const node = secp256k1Share.node;
-        const nodeStatus = allNodes.find(
-          (n) => n.endpoint === node.endpoint,
-        )?.wallet_status;
 
-        const isNewNode =
-          nodeStatus === "NOT_REGISTERED" ||
-          nodeStatus === "UNRECOVERABLE_DATA_LOSS";
-
-        if (isNewNode) {
-          // New node: reshare/register both curves
-          const commitRevealRes = createKsnCommitRevealParams(
-            session,
-            node.endpoint,
-            "reshare_register",
-            true, // cr_final: true - reshare_register is the final KSN call for new nodes
-          );
-          if (!commitRevealRes.success) {
-            return { success: false, err: commitRevealRes.err };
-          }
-          return reshareRegisterV2(
-            node.endpoint,
-            idToken,
-            authType,
-            {
-              secp256k1: {
-                public_key: secp256k1PublicKey,
-                share: encodePoint256ToKeyShareString(secp256k1Share.share),
-              },
-              ed25519: {
-                public_key: ed25519Keygen1.public_key.toHex(),
-                share: teddsaKeyShareToHex(ed25519Share.share),
-              },
-            },
-            commitRevealRes.data,
-          );
-        } else {
-          // ACTIVE node: reshare secp256k1 + register ed25519 separately
-          const reshareCommitRevealRes = createKsnCommitRevealParams(
-            session,
-            node.endpoint,
-            "reshare",
-          );
-          if (!reshareCommitRevealRes.success) {
-            return { success: false, err: reshareCommitRevealRes.err };
-          }
-          const reshareSecp256k1Res = await reshareKeySharesV2(
-            node.endpoint,
-            idToken,
-            authType,
-            {
-              secp256k1: {
-                public_key: secp256k1PublicKey,
-                share: encodePoint256ToKeyShareString(secp256k1Share.share),
-              },
-            },
-            reshareCommitRevealRes.data,
-          );
-          if (!reshareSecp256k1Res.success) {
-            return reshareSecp256k1Res;
-          }
-
-          const registerEd25519CommitRevealRes = createKsnCommitRevealParams(
-            session,
-            node.endpoint,
-            "register_ed25519",
-            true, // cr_final: true - register_ed25519 is the final KSN call for ACTIVE nodes
-          );
-          if (!registerEd25519CommitRevealRes.success) {
-            return { success: false, err: registerEd25519CommitRevealRes.err };
-          }
-          return registerKeyShareEd25519V2(
-            node.endpoint,
-            idToken,
-            authType,
-            ed25519Keygen1.public_key.toHex(),
-            teddsaKeyShareToHex(ed25519Share.share),
-            registerEd25519CommitRevealRes.data,
-          );
+        // Use unified reshare API for all nodes (upsert handles ACTIVE vs new)
+        const commitRevealRes = createKsnCommitRevealParams(
+          session,
+          node.endpoint,
+          "reshare",
+        );
+        if (!commitRevealRes.success) {
+          return { success: false, err: commitRevealRes.err };
         }
+
+        // First: reshare with both wallets (secp256k1 verified/registered, ed25519 registered)
+        const reshareRes = await reshareKeySharesV2(
+          node.endpoint,
+          idToken,
+          authType,
+          {
+            secp256k1: {
+              public_key: secp256k1PublicKey,
+              share: encodePoint256ToKeyShareString(secp256k1Share.share),
+            },
+            ed25519: {
+              public_key: ed25519Keygen1.public_key.toHex(),
+              share: teddsaKeyShareToHex(ed25519Share.share),
+            },
+          },
+          commitRevealRes.data,
+        );
+        if (!reshareRes.success) {
+          return reshareRes;
+        }
+
+        // Also register ed25519 separately (for proper ed25519 wallet association)
+        const registerEd25519CommitRevealRes = createKsnCommitRevealParams(
+          session,
+          node.endpoint,
+          "register_ed25519",
+          true, // cr_final: true - final KSN call for this node
+        );
+        if (!registerEd25519CommitRevealRes.success) {
+          return { success: false, err: registerEd25519CommitRevealRes.err };
+        }
+        return registerKeyShareEd25519V2(
+          node.endpoint,
+          idToken,
+          authType,
+          ed25519Keygen1.public_key.toHex(),
+          teddsaKeyShareToHex(ed25519Share.share),
+          registerEd25519CommitRevealRes.data,
+        );
       },
     ),
   );
@@ -530,44 +524,11 @@ export async function handleReshareAndEd25519Keygen(
     };
   }
 
-  // 9. Update Oko API reshare status (not final - keygen_ed25519 comes after)
-  const reshareCommitRevealRes = createOkoApiCommitRevealParams(
-    session,
-    "reshare",
-    false, // cr_final: false - keygen_ed25519 is the final oko_api call
-  );
-  if (!reshareCommitRevealRes.success) {
-    return {
-      success: false,
-      err: { type: "reshare_fail", error: reshareCommitRevealRes.err },
-    };
-  }
-  const resharedNodes = secp256k1ExpandRes.data.reshared_user_key_shares.map(
-    (s) => s.node,
-  );
-  const updateRes = await makeAuthorizedOkoApiRequest<ReshareRequestV2, void>(
-    "user/reshare",
-    idToken,
-    {
-      wallets: {
-        secp256k1: {
-          public_key: secp256k1PublicKey,
-          reshared_key_shares: resharedNodes,
-        },
-      },
-    },
-    TSS_V2_ENDPOINT,
-    reshareCommitRevealRes.data,
-  );
-  if (!updateRes.success) {
-    console.warn("[attached] Failed to update reshare status:", updateRes.err);
-  }
-
-  // 10. Call keygenEd25519 API (FINAL - must be last oko_api call)
+  // 9. Call keygenEd25519 API (creates ed25519 wallet on server)
   const keygenEd25519CommitRevealRes = createOkoApiCommitRevealParams(
     session,
     "keygen_ed25519",
-    true, // cr_final: true - keygen_ed25519 is the final oko_api call
+    false, // cr_final: false - reshare comes after
   );
   if (!keygenEd25519CommitRevealRes.success) {
     return {
@@ -596,6 +557,36 @@ export async function handleReshareAndEd25519Keygen(
       success: false,
       err: { type: "sign_in_request_fail", error: reqKeygenEd25519Res.msg },
     };
+  }
+
+  // 10. Update Oko API reshare status (FINAL - both wallets now exist)
+  const reshareCommitRevealRes = createOkoApiCommitRevealParams(
+    session,
+    "reshare",
+    true, // cr_final: true - reshare is the final oko_api call
+  );
+  if (!reshareCommitRevealRes.success) {
+    return {
+      success: false,
+      err: { type: "reshare_fail", error: reshareCommitRevealRes.err },
+    };
+  }
+  const resharedNodes = secp256k1ExpandRes.data.reshared_user_key_shares.map(
+    (s) => s.node,
+  );
+  const updateRes = await makeAuthorizedOkoApiRequest<ReshareRequestV2, void>(
+    "user/reshare",
+    idToken,
+    {
+      secp256k1_public_key: secp256k1PublicKey,
+      ed25519_public_key: reqKeygenEd25519Res.data.user.public_key_ed25519,
+      reshared_key_shares: resharedNodes,
+    },
+    TSS_V2_ENDPOINT,
+    reshareCommitRevealRes.data,
+  );
+  if (!updateRes.success) {
+    console.warn("[attached] Failed to update reshare status:", updateRes.err);
   }
 
   // 11. Convert ed25519 keygen1 to hex format for storage

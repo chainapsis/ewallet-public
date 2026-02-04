@@ -4,7 +4,6 @@ import type {
   RegisterKeyShareV2WithCRRequestBody,
   RegisterEd25519V2WithCRRequestBody,
   ReshareKeyShareV2WithCRRequestBody,
-  ReshareRegisterV2WithCRRequestBody,
 } from "@oko-wallet/ksn-interface/key_share";
 import type {
   CommitRequestBody,
@@ -21,8 +20,8 @@ import type { ClientCommitRevealSession } from "@oko-wallet-attached/crypto/comm
 import { createKsnCommitRevealParams } from "@oko-wallet-attached/crypto/commit_reveal/signature";
 
 export interface RequestKeySharesV2Result {
-  secp256k1?: string; // share hex string
-  ed25519?: string; // share hex string
+  secp256k1: string; // share hex string
+  ed25519: string; // share hex string
 }
 
 export interface RequestKeySharesV2Error {
@@ -59,10 +58,10 @@ export async function requestKeySharesV2(
   threshold: number,
   authType: AuthType,
   wallets: {
-    secp256k1?: string; // public key hex
-    ed25519?: string; // public key hex
+    secp256k1: string; // public key hex
+    ed25519: string; // public key hex
   },
-  commitRevealSession?: ClientCommitRevealSession,
+  commitRevealSession: ClientCommitRevealSession,
   isFinal: boolean = false,
 ): Promise<Result<KeySharesByNode[], RequestKeySharesV2Error>> {
   const result = await requestKeySharesV2WithReshareInfo(
@@ -289,13 +288,14 @@ async function requestKeyShareFromNodeV2(
         return { success: false, err: data.code || "UNKNOWN_ERROR" };
       }
 
-      const shares: RequestKeySharesV2Result = {};
-      if (data.data.secp256k1) {
-        shares.secp256k1 = data.data.secp256k1.share;
+      // KSN returns error if either wallet is missing, so both are guaranteed here
+      if (!data.data.secp256k1 || !data.data.ed25519) {
+        return { success: false, err: "MISSING_WALLET_DATA" };
       }
-      if (data.data.ed25519) {
-        shares.ed25519 = data.data.ed25519.share;
-      }
+      const shares: RequestKeySharesV2Result = {
+        secp256k1: data.data.secp256k1.share,
+        ed25519: data.data.ed25519.share,
+      };
 
       return {
         success: true,
@@ -529,78 +529,6 @@ export async function reshareKeySharesV2(
     return {
       success: false,
       err: `Failed to reshare key shares in ${ksNodeEndpoint}: ${String(e)}`,
-    };
-  }
-}
-
-/**
- * Register key shares on a new node during reshare scenario.
- */
-export async function reshareRegisterV2(
-  ksNodeEndpoint: string,
-  idToken: string,
-  authType: AuthType,
-  wallets: {
-    secp256k1?: { public_key: string; share: string };
-    ed25519?: { public_key: string; share: string };
-  },
-  commitReveal?: CommitRevealParams,
-): Promise<Result<void, string>> {
-  const body: ReshareRegisterV2WithCRRequestBody = {
-    auth_type: authType,
-    wallets: {
-      ...(wallets.secp256k1 && {
-        secp256k1: {
-          public_key: wallets.secp256k1.public_key,
-          share: wallets.secp256k1.share,
-        },
-      }),
-      ...(wallets.ed25519 && {
-        ed25519: {
-          public_key: wallets.ed25519.public_key,
-          share: wallets.ed25519.share,
-        },
-      }),
-    },
-    ...(commitReveal && {
-      cr_session_id: commitReveal.cr_session_id,
-      cr_signature: commitReveal.cr_signature,
-    }),
-  };
-
-  try {
-    const response = await fetch(
-      `${ksNodeEndpoint}/keyshare/v2/reshare/register`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      },
-    );
-
-    if (!response.ok) {
-      return {
-        success: false,
-        err: `Failed to reshare register: status(${response.status}) in ${ksNodeEndpoint}`,
-      };
-    }
-
-    const data = (await response.json()) as KSNodeApiResponse<void>;
-    if (data.success === false) {
-      return {
-        success: false,
-        err: `Failed to reshare register: ${data.code || "UNKNOWN_ERROR"} in ${ksNodeEndpoint}`,
-      };
-    }
-
-    return { success: true, data: void 0 };
-  } catch (e) {
-    return {
-      success: false,
-      err: `Failed to reshare register in ${ksNodeEndpoint}: ${String(e)}`,
     };
   }
 }

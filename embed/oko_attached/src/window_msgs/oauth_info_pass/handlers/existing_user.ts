@@ -26,23 +26,23 @@ import { combineTeddsaShares } from "@oko-wallet-attached/crypto/sss_ed25519";
 
 /**
  * Handle existing user who has both secp256k1 and ed25519 wallets.
- * Called when checkEmailV2 returns CheckEmailResponseV2ExistingUser with both wallets.
+ * Called when checkEmailV2 returns CheckEmailResponseV2BothWallets.
  *
  * Supports auto-reshare: if some nodes return WALLET_NOT_FOUND but we have
  * threshold shares from other nodes, automatically reshare to recover.
  */
 export async function handleExistingUserV2(
   idToken: string,
-  keyshareNodeMetaSecp256k1: KeyShareNodeMetaWithNodeStatusInfo,
-  keyshareNodeMetaEd25519: KeyShareNodeMetaWithNodeStatusInfo,
+  keyshareNodeMeta: KeyShareNodeMetaWithNodeStatusInfo,
   authType: AuthType,
 ): Promise<Result<UserSignInResultV2, OAuthSignInError>> {
+  const { threshold, nodes } = keyshareNodeMeta;
+
   // 1. Commit to oko_api and ks nodes
-  const ksnCommitTargets: KsnCommitTarget[] =
-    keyshareNodeMetaSecp256k1.nodes.map((node) => ({
-      nodeUrl: node.endpoint,
-      operationType: "sign_in" as const,
-    }));
+  const ksnCommitTargets: KsnCommitTarget[] = nodes.map((node) => ({
+    nodeUrl: node.endpoint,
+    operationType: "sign_in" as const,
+  }));
   const commitRes = await commitAll(
     "sign_in",
     authType,
@@ -87,8 +87,8 @@ export async function handleExistingUserV2(
   // Use continueOnWalletNotFound=true to support auto-reshare
   const requestSharesRes = await requestKeySharesV2WithReshareInfo(
     idToken,
-    keyshareNodeMetaSecp256k1.nodes,
-    keyshareNodeMetaSecp256k1.threshold,
+    nodes,
+    threshold,
     authType,
     {
       secp256k1: signInResp.user.public_key_secp256k1,
@@ -206,12 +206,12 @@ export async function handleExistingUserV2(
       nodesNeedingReshare,
       secp256k1: {
         shares: secp256k1DecodeRes.data,
-        threshold: keyshareNodeMetaSecp256k1.threshold,
+        threshold,
         publicKey: signInResp.user.public_key_secp256k1,
       },
       ed25519: {
         shares: ed25519SharesByNode,
-        threshold: keyshareNodeMetaEd25519.threshold,
+        threshold,
         verifyingKey,
         publicKey: signInResp.user.public_key_ed25519,
       },
@@ -231,7 +231,7 @@ export async function handleExistingUserV2(
     // No reshare needed - just combine shares
     const keyshare1Secp256k1Res = await combineUserShares(
       secp256k1DecodeRes.data,
-      keyshareNodeMetaSecp256k1.threshold,
+      threshold,
     );
     if (keyshare1Secp256k1Res.success === false) {
       return {
@@ -246,7 +246,7 @@ export async function handleExistingUserV2(
 
     const signingShareRes = await combineTeddsaShares(
       ed25519SharesByNode,
-      keyshareNodeMetaEd25519.threshold,
+      threshold,
       verifyingKey,
     );
     if (!signingShareRes.success) {
@@ -266,7 +266,7 @@ export async function handleExistingUserV2(
     signingShare,
     verifyingKey,
     serverVerifyingShare: serverVerifyingShareRes.data,
-    threshold: keyshareNodeMetaEd25519.threshold,
+    threshold,
   });
   if (!keyPackageRes.success) {
     return {
