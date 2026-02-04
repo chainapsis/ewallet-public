@@ -25,6 +25,7 @@ import {
 } from "@oko-wallet/oko-api-openapi/tss";
 import { Bytes } from "@oko-wallet/bytes";
 import { registry } from "@oko-wallet/oko-api-openapi";
+import { getUserByEmailAndAuthType } from "@oko-wallet/oko-pg-interface/oko_users";
 
 import {
   signIn,
@@ -40,7 +41,6 @@ import {
 } from "@oko-wallet-api/middleware/auth/oauth";
 import type { OAuthLocals, OAuthLocalsWithAPIKey } from "@oko-wallet-api/middleware/auth/types";
 import { apiKeyMiddleware } from "@oko-wallet-api/middleware/auth/api_key_auth";
-import { getUserByEmailAndAuthType } from "@oko-wallet/oko-pg-interface/oko_users";
 
 export function setUserV1Routes(router: Router) {
   registry.registerPath({

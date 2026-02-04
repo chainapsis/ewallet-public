@@ -9,13 +9,13 @@ import styles from "./connected_apps.module.scss";
 import { S3_BUCKET_URL } from "@oko-wallet-user-dashboard/fetch";
 import { useConnectedApps } from "@oko-wallet-user-dashboard/hooks/use_connected_apps";
 
-const emptyImage = `${S3_BUCKET_URL}/assets/oko_user_dashboard_connected_app_empty.webp`;
-const emptyImageAlt = `${S3_BUCKET_URL}/assets/oko_user_dashboard_connected_app_empty.png`;
-const placeholderImage = `${S3_BUCKET_URL}/assets/oko_user_dashboard_connected_app_placeholder.webp`;
-const placeholderImageAlt = `${S3_BUCKET_URL}/assets/oko_user_dashboard_connected_app_placeholder.png`;
+const EMPTY_IMAGE_URL = `${S3_BUCKET_URL}/assets/oko_user_dashboard_connected_app_empty.webp`;
+const EMPTY_IMAGE_ALT = `${S3_BUCKET_URL}/assets/oko_user_dashboard_connected_app_empty.png`;
+const PLACEHOLDER_IMAGE_URL = `${S3_BUCKET_URL}/assets/oko_user_dashboard_connected_app_placeholder.webp`;
+const PLACEHOLDER_IMAGE_ALT = `${S3_BUCKET_URL}/assets/oko_user_dashboard_connected_app_placeholder.png`;
 
 export const ConnectedApps: FC = () => {
-  const { apps, isLoading, error } = useConnectedApps();
+  const { data: apps, isLoading, isSuccess, error } = useConnectedApps();
 
   const isEmpty = apps.length === 0;
 
@@ -39,13 +39,13 @@ export const ConnectedApps: FC = () => {
         </div>
       )}
 
-      {error && (
+      {!isSuccess && (
         <Typography tagType="p" size="sm" weight="medium" color="tertiary">
           Error: {error.type}
         </Typography>
       )}
 
-      {!isLoading && !error && !isEmpty && (
+      {!isLoading && isSuccess && !isEmpty && (
         <div className={styles.appsList}>
           {apps.map((app) => (
             <div key={app.customer_id} className={styles.appItem}>
@@ -57,8 +57,8 @@ export const ConnectedApps: FC = () => {
                 />
               ) : (
                 <ImageWithAlt
-                  srcSet={placeholderImage}
-                  srcAlt={placeholderImageAlt}
+                  srcSet={PLACEHOLDER_IMAGE_URL}
+                  srcAlt={PLACEHOLDER_IMAGE_ALT}
                   alt="App logo placeholder"
                   className={styles.appLogo}
                 />
@@ -88,12 +88,12 @@ export const ConnectedApps: FC = () => {
         </div>
       )}
 
-      {!isLoading && !error && isEmpty && (
+      {!isLoading && isSuccess && isEmpty && (
         <div className={styles.emptyState}>
           <div className={styles.emptyImageWrapper}>
             <ImageWithAlt
-              srcSet={emptyImage}
-              srcAlt={emptyImageAlt}
+              srcSet={EMPTY_IMAGE_URL}
+              srcAlt={EMPTY_IMAGE_ALT}
               alt="Empty Connected Apps Image"
               className={styles.emptyImage}
             />

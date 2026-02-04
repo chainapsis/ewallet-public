@@ -16,7 +16,7 @@ import { handleOAuthInfoPassV2 } from "./oauth_info_pass";
 import { handleGetEthChain } from "./get_eth_chain_info";
 import { handleGetConnectedApps } from "./get_connected_apps";
 
-//NOTE: Since this method can only be used within user_dashboard,
+// NOTE: Since this method can only be used within user_dashboard,
 // Define ExtendedOkoWalletMsg to extend the type
 type OkoWalletMsgGetConnectedApps = {
   target: "oko_attached";

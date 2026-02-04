@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 
 import {
   selectCosmosSDK,
@@ -16,22 +17,30 @@ export interface ConnectedApp {
 }
 
 export type GetConnectedAppsError =
-  | { type: "unauthorized_origin" }
-  | { type: "not_authenticated" }
-  | { type: "fetch_error"; error: string };
+  | { type: "UNAUTHORIZED_ORIGIN" }
+  | { type: "NOT_AUTHENTICATED" }
+  | { type: "FETCH_ERROR"; msg: string };
 
 interface GetConnectedAppsAckPayload {
   success: boolean;
   data?: ConnectedApp[];
-  err?: GetConnectedAppsError;
+  error?: GetConnectedAppsError;
 }
 
-interface UseConnectedAppsResult {
-  apps: ConnectedApp[];
+
+type UseConnectedAppsResult = UseConnectedAppsSuccess | UseConnectedAppsError;
+interface UseConnectedAppsSuccess {
+  isSuccess: true;
+  data: ConnectedApp[];
   isLoading: boolean;
-  error: GetConnectedAppsError | null;
+  error: null;
 }
-
+interface UseConnectedAppsError {
+  isSuccess: false;
+  error: GetConnectedAppsError;
+  isLoading: boolean;
+  data: never[];
+}
 //NOTE The __get_connected_apps__ message should only be called from the user_dashboard,
 // so it is not added to the SDK and is instead called separately in useConnectedApp.
 export function useConnectedApps(): UseConnectedAppsResult {
@@ -60,8 +69,8 @@ export function useConnectedApps(): UseConnectedAppsResult {
         if (payload.success && payload.data) {
           return payload.data;
         }
-        if (payload.err) {
-          throw payload.err;
+        if (payload.error) {
+          throw payload.error;
         }
       }
 
@@ -70,5 +79,19 @@ export function useConnectedApps(): UseConnectedAppsResult {
     enabled: !!cosmosSDK,
   });
 
-  return { apps: data ?? [], isLoading, error: error ?? null };
+  if (error) {
+    return {
+      isSuccess: false,
+      error,
+      isLoading,
+      data: [],
+    };
+  }
+
+  return {
+    isSuccess: true,
+    data: data ?? [],
+    isLoading,
+    error: null,
+  };
 }

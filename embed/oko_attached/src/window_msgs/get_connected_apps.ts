@@ -6,8 +6,9 @@ import {
   USER_DASHBOARD_ORIGINS,
 } from "@oko-wallet-attached/requests/endpoints";
 
-//NOTE: Since this method can only be used within user_dashboard,
-//it is not exposed to the SDK, and its type is also defined within that file.
+// NOTE: Since this method can only be used within user_dashboard,
+// it is not exposed to the SDK, and its type is also defined within that file.
+
 interface ConnectedApp {
   customer_id: string;
   label: string | null;
@@ -17,16 +18,23 @@ interface ConnectedApp {
   state: string;
 }
 type GetConnectedAppsError =
-  | { type: "unauthorized_origin" }
-  | { type: "not_authenticated" }
-  | { type: "fetch_error"; error: string };
+  | { type: "UNAUTHORIZED_ORIGIN" }
+  | { type: "NOT_AUTHENTICATED" }
+  | { type: "FETCH_ERROR"; error: string };
+interface GetConnectedAppsAckSuccessPayload {
+  success: true;
+  data: ConnectedApp[];
+}
+interface GetConnectedAppsAckErrorPayload {
+  success: false;
+  error: GetConnectedAppsError;
+}
+type GetConnectedAppsAckPayload = GetConnectedAppsAckSuccessPayload | GetConnectedAppsAckErrorPayload;
 
 interface OkoWalletMsgGetConnectedAppsAck {
   target: "oko_sdk";
   msg_type: "__get_connected_apps_ack__";
-  payload:
-  | { success: true; data: ConnectedApp[] }
-  | { success: false; err: GetConnectedAppsError };
+  payload: GetConnectedAppsAckPayload;
 }
 
 export async function handleGetConnectedApps(
@@ -41,7 +49,7 @@ export async function handleGetConnectedApps(
     const ack: OkoWalletMsgGetConnectedAppsAck = {
       target: OKO_SDK_TARGET,
       msg_type: "__get_connected_apps_ack__",
-      payload: { success: false, err: { type: "unauthorized_origin" } },
+      payload: { success: false, error: { type: "UNAUTHORIZED_ORIGIN" } },
     };
     port.postMessage(ack);
     return;
@@ -52,7 +60,7 @@ export async function handleGetConnectedApps(
     const ack: OkoWalletMsgGetConnectedAppsAck = {
       target: OKO_SDK_TARGET,
       msg_type: "__get_connected_apps_ack__",
-      payload: { success: false, err: { type: "not_authenticated" } },
+      payload: { success: false, error: { type: "NOT_AUTHENTICATED" } },
     };
     port.postMessage(ack);
     return;
@@ -84,7 +92,7 @@ export async function handleGetConnectedApps(
       msg_type: "__get_connected_apps_ack__",
       payload: {
         success: false,
-        err: { type: "fetch_error", error: String(error) },
+        error: { type: "FETCH_ERROR", error: String(error) },
       },
     };
     port.postMessage(ack);

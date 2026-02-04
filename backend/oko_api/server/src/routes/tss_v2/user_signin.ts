@@ -12,12 +12,12 @@ import {
   SignInSuccessResponseV2Schema,
 } from "@oko-wallet/oko-api-openapi/tss";
 import { registry } from "@oko-wallet/oko-api-openapi";
+import { getUserByEmailAndAuthType } from "@oko-wallet/oko-pg-interface/oko_users";
 
 import { signInV2 } from "@oko-wallet-api/api/tss/v2/user";
 import { saveUserCustomerConnection } from "@oko-wallet-api/api/tss/connection";
 import { type OAuthAuthenticatedRequest } from "@oko-wallet-api/middleware/auth/oauth";
 import type { OAuthLocalsWithAPIKey } from "@oko-wallet-api/middleware/auth/types";
-import { getUserByEmailAndAuthType } from "@oko-wallet/oko-pg-interface/oko_users";
 
 registry.registerPath({
   method: "post",
