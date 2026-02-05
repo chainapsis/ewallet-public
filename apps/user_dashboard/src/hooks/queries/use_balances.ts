@@ -1,5 +1,5 @@
 import { Connection, PublicKey } from "@solana/web3.js";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
 
 import {
   useCosmosAddresses,
@@ -14,10 +14,7 @@ import {
 } from "@oko-wallet-user-dashboard/constants/alchemy";
 import { fetchErc20TokenBalances } from "@oko-wallet-user-dashboard/fetch/erc20_token_balances";
 import { useAssetMetaStore } from "@oko-wallet-user-dashboard/store/asset_meta";
-import type {
-  Currency,
-  ModularChainInfo,
-} from "@oko-wallet-user-dashboard/types/chain";
+import type { Currency } from "@oko-wallet-user-dashboard/types/chain";
 import type {
   RawBalance,
   TokenBalance,
@@ -75,87 +72,6 @@ async function fetchSVMBalance(
   const pubkey = new PublicKey(address);
   const balance = await connection.getBalance(pubkey);
   return balance.toString();
-}
-
-interface UseBalancesOptions {
-  enabled?: boolean;
-}
-
-export function useChainBalances(
-  chainInfo: ModularChainInfo | undefined,
-  options?: UseBalancesOptions,
-) {
-  const chainId = chainInfo?.chainId;
-  const isEvm = chainInfo?.evm !== undefined;
-  const isCosmos = chainInfo?.cosmos !== undefined;
-  const isSVM = chainInfo?.svm !== undefined;
-
-  const { address: ethAddress } = useEthAddress();
-  const { address: svmAddress } = useSVMAddress();
-  const { addresses: cosmosAddresses } = useCosmosAddresses();
-  const cosmosAddress = chainId ? cosmosAddresses[chainId] : undefined;
-
-  const cosmosQuery = useQuery({
-    queryKey: ["balances", "cosmos", chainId, cosmosAddress],
-    queryFn: async () => {
-      if (!chainInfo?.cosmos?.rest || !cosmosAddress) {
-        return [];
-      }
-      return fetchCosmosBalances(chainInfo.cosmos.rest, cosmosAddress);
-    },
-    enabled:
-      (options?.enabled ?? true) &&
-      isCosmos &&
-      !!cosmosAddress &&
-      !!chainInfo?.cosmos?.rest,
-    staleTime: 30 * 1000,
-    refetchInterval: 60 * 1000,
-  });
-
-  const evmQuery = useQuery({
-    queryKey: ["balances", "evm", chainId, ethAddress],
-    queryFn: async () => {
-      if (!chainInfo?.evm?.rpc || !ethAddress) {
-        return "0";
-      }
-      return fetchEvmBalance(chainInfo.evm.rpc, ethAddress);
-    },
-    enabled:
-      (options?.enabled ?? true) &&
-      isEvm &&
-      !!ethAddress &&
-      !!chainInfo?.evm?.rpc,
-    staleTime: 30 * 1000,
-    refetchInterval: 60 * 1000,
-  });
-
-  const svmQuery = useQuery({
-    queryKey: ["balances", "svm", chainId, svmAddress],
-    queryFn: async () => {
-      if (!chainInfo?.svm?.rpc || !svmAddress) {
-        return "0";
-      }
-      return fetchSVMBalance(chainInfo.svm.rpc, svmAddress);
-    },
-    enabled:
-      (options?.enabled ?? true) &&
-      isSVM &&
-      !!svmAddress &&
-      !!chainInfo?.svm?.rpc,
-    staleTime: 30 * 1000,
-    refetchInterval: 60 * 1000,
-  });
-
-  return {
-    cosmosBalances: cosmosQuery.data ?? [],
-    evmBalance: evmQuery.data ?? "0",
-    svmBalance: svmQuery.data ?? "0",
-    isLoading:
-      cosmosQuery.isLoading || evmQuery.isLoading || svmQuery.isLoading,
-    isFetching:
-      cosmosQuery.isFetching || evmQuery.isFetching || svmQuery.isFetching,
-    error: cosmosQuery.error || evmQuery.error || svmQuery.error,
-  };
 }
 
 export function useAllBalances() {
@@ -309,7 +225,11 @@ export function useAllBalances() {
                     )) {
                       erc20PriceMap[coinId] = data.usd;
                     }
-                  } catch {
+                  } catch (error) {
+                    console.error(
+                      `Failed to fetch ERC20 prices for ${chain.chainId}:`,
+                      error,
+                    );
                   }
                 }
 
