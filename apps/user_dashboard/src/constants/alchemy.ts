@@ -1,5 +1,9 @@
 const ALCHEMY_SUPPORTED_CHAIN_IDS: ReadonlySet<number> = new Set([
-  1, 8453, 42161, 10, 137,
+  1, // Ethereum
+  8453, // Base
+  42161, // Arbitrum
+  10, // Optimism
+  137, // Polygon
 ]);
 
 export function getAlchemyEndpoint(evmChainId: number): string {
