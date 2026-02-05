@@ -61,7 +61,10 @@ describe("front-running: sign_up operation", () => {
       .send({
         auth_type: AUTH_TYPE,
         wallets: {
-          secp256k1: { public_key: "03" + "a".repeat(64), share: "aa".repeat(64) },
+          secp256k1: {
+            public_key: "03" + "a".repeat(64),
+            share: "aa".repeat(64),
+          },
           ed25519: { public_key: "b".repeat(64), share: "bb".repeat(64) },
         },
         cr_session_id: sessionId,
@@ -98,7 +101,10 @@ describe("front-running: sign_up operation", () => {
     const payload = {
       auth_type: AUTH_TYPE,
       wallets: {
-        secp256k1: { public_key: "03" + "a".repeat(64), share: "aa".repeat(64) },
+        secp256k1: {
+          public_key: "03" + "a".repeat(64),
+          share: "aa".repeat(64),
+        },
         ed25519: { public_key: "b".repeat(64), share: "bb".repeat(64) },
       },
       cr_session_id: sessionId,
@@ -130,7 +136,12 @@ describe("front-running: sign_up operation", () => {
 
     const commit = await request(ctx.ksnApps[0])
       .post("/keyshare/v2/commit")
-      .send({ session_id: sessionId, operation_type: "sign_up", client_ephemeral_pubkey: client.publicKey.toHex(), id_token_hash: idHash });
+      .send({
+        session_id: sessionId,
+        operation_type: "sign_up",
+        client_ephemeral_pubkey: client.publicKey.toHex(),
+        id_token_hash: idHash,
+      });
     expect(commit.status).toBe(200);
 
     const sig = createRevealSignature(
@@ -146,7 +157,12 @@ describe("front-running: sign_up operation", () => {
       .post("/keyshare/v2")
       .set("x-mock-user-id", "userX")
       .set("Authorization", `Bearer ${TOKEN_A}`)
-      .send({ auth_type: AUTH_TYPE, wallets: { secp256k1: "03" + "a".repeat(64), ed25519: "b".repeat(64) }, cr_session_id: sessionId, cr_signature: sig });
+      .send({
+        auth_type: AUTH_TYPE,
+        wallets: { secp256k1: "03" + "a".repeat(64), ed25519: "b".repeat(64) },
+        cr_session_id: sessionId,
+        cr_signature: sig,
+      });
     expect(res.status).toBe(400);
     expect(res.body.code).toBe("INVALID_REQUEST");
   });
@@ -158,11 +174,21 @@ describe("front-running: sign_up operation", () => {
 
     const commitA = await request(ctx.ksnApps[0])
       .post("/keyshare/v2/commit")
-      .send({ session_id: sessionId, operation_type: "sign_up", client_ephemeral_pubkey: client.publicKey.toHex(), id_token_hash: idHash });
+      .send({
+        session_id: sessionId,
+        operation_type: "sign_up",
+        client_ephemeral_pubkey: client.publicKey.toHex(),
+        id_token_hash: idHash,
+      });
     expect(commitA.status).toBe(200);
     const commitB = await request(ctx.ksnApps[1])
       .post("/keyshare/v2/commit")
-      .send({ session_id: sessionId, operation_type: "sign_up", client_ephemeral_pubkey: client.publicKey.toHex(), id_token_hash: idHash });
+      .send({
+        session_id: sessionId,
+        operation_type: "sign_up",
+        client_ephemeral_pubkey: client.publicKey.toHex(),
+        id_token_hash: idHash,
+      });
     expect(commitB.status).toBe(200);
 
     // Signature bound to node A
@@ -184,7 +210,10 @@ describe("front-running: sign_up operation", () => {
       .send({
         auth_type: AUTH_TYPE,
         wallets: {
-          secp256k1: { public_key: "03" + "a".repeat(64), share: "aa".repeat(64) },
+          secp256k1: {
+            public_key: "03" + "a".repeat(64),
+            share: "aa".repeat(64),
+          },
           ed25519: { public_key: "b".repeat(64), share: "bb".repeat(64) },
         },
         cr_session_id: sessionId,
@@ -201,7 +230,12 @@ describe("front-running: sign_up operation", () => {
 
     const commit = await request(ctx.okoApiApp)
       .post("/tss/v2/commit")
-      .send({ session_id: sessionId, operation_type: "sign_up", client_ephemeral_pubkey: client.publicKey.toHex(), id_token_hash: idHash });
+      .send({
+        session_id: sessionId,
+        operation_type: "sign_up",
+        client_ephemeral_pubkey: client.publicKey.toHex(),
+        id_token_hash: idHash,
+      });
     expect(commit.status).toBe(200);
     const okoNodePk = commit.body.data.node_pubkey;
 
@@ -218,7 +252,11 @@ describe("front-running: sign_up operation", () => {
       .post("/tss/v2/user/signin")
       .set("x-mock-user-id", "userX")
       .set("Authorization", `Bearer ${TOKEN_A}`)
-      .send({ auth_type: AUTH_TYPE, cr_session_id: sessionId, cr_signature: sig });
+      .send({
+        auth_type: AUTH_TYPE,
+        cr_session_id: sessionId,
+        cr_signature: sig,
+      });
     expect(res.status).toBe(400);
     expect(res.body.code).toBe("INVALID_REQUEST");
   });

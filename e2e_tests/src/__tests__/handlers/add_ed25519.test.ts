@@ -352,14 +352,12 @@ describe("e2e_test_add_ed25519", () => {
     const sessionId = generateSessionId();
     const idHash = computeIdTokenHash(AUTH_TYPE, SIGNIN_ID_TOKEN);
 
-    const okoCommit = await request(ctx.okoApiApp)
-      .post("/tss/v2/commit")
-      .send({
-        session_id: sessionId,
-        operation_type: "add_ed25519",
-        client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
-        id_token_hash: idHash,
-      });
+    const okoCommit = await request(ctx.okoApiApp).post("/tss/v2/commit").send({
+      session_id: sessionId,
+      operation_type: "add_ed25519",
+      client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
+      id_token_hash: idHash,
+    });
     expect(okoCommit.status).toBe(200);
     const okoNodePk = okoCommit.body.data.node_pubkey;
 
@@ -381,7 +379,9 @@ describe("e2e_test_add_ed25519", () => {
         auth_type: AUTH_TYPE,
         keygen_2: {
           key_package: ed.keygen_outputs[1].key_package,
-          public_key_package: Buffer.from(ed.keygen_outputs[1].public_key_package).toString("hex"),
+          public_key_package: Buffer.from(
+            ed.keygen_outputs[1].public_key_package,
+          ).toString("hex"),
           identifier: ed.keygen_outputs[1].identifier,
           public_key: ed.public_key,
         },
@@ -404,14 +404,12 @@ describe("e2e_test_add_ed25519", () => {
     const clientKeypair = generateClientKeypair();
     const sessionId = generateSessionId();
     const idHash = computeIdTokenHash(AUTH_TYPE, SIGNIN_ID_TOKEN);
-    const okoCommit = await request(ctx.okoApiApp)
-      .post("/tss/v2/commit")
-      .send({
-        session_id: sessionId,
-        operation_type: "add_ed25519",
-        client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
-        id_token_hash: idHash,
-      });
+    const okoCommit = await request(ctx.okoApiApp).post("/tss/v2/commit").send({
+      session_id: sessionId,
+      operation_type: "add_ed25519",
+      client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
+      id_token_hash: idHash,
+    });
     expect(okoCommit.status).toBe(200);
     const okoNodePk = okoCommit.body.data.node_pubkey;
     for (let i = 0; i < ctx.ksnApps.length; i++) {
@@ -463,7 +461,9 @@ describe("e2e_test_add_ed25519", () => {
         auth_type: AUTH_TYPE,
         keygen_2: {
           key_package: edKeygen2.key_package,
-          public_key_package: Buffer.from(edKeygen2.public_key_package).toString("hex"),
+          public_key_package: Buffer.from(
+            edKeygen2.public_key_package,
+          ).toString("hex"),
           identifier: edKeygen2.identifier,
           public_key: edKeygen.public_key,
         },
@@ -484,7 +484,9 @@ describe("e2e_test_add_ed25519", () => {
         auth_type: AUTH_TYPE,
         keygen_2: {
           key_package: edKeygen2.key_package,
-          public_key_package: Buffer.from(edKeygen2.public_key_package).toString("hex"),
+          public_key_package: Buffer.from(
+            edKeygen2.public_key_package,
+          ).toString("hex"),
           identifier: edKeygen2.identifier,
           public_key: edKeygen.public_key,
         },
@@ -530,7 +532,9 @@ describe("e2e_test_add_ed25519", () => {
         auth_type: AUTH_TYPE,
         keygen_2: {
           key_package: edKeygen2.key_package,
-          public_key_package: Buffer.from(edKeygen2.public_key_package).toString("hex"),
+          public_key_package: Buffer.from(
+            edKeygen2.public_key_package,
+          ).toString("hex"),
           identifier: edKeygen2.identifier,
           public_key: edKeygen.public_key,
         },

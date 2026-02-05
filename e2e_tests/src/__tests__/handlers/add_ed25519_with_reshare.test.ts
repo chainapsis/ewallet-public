@@ -243,14 +243,12 @@ describe("e2e_test_add_ed25519_with_reshare", () => {
     const idHash = computeIdTokenHash(AUTH_TYPE, SIGNIN_ID_TOKEN);
 
     // Commit oko_api and KSN node 0
-    const okoCommit = await request(ctx.okoApiApp)
-      .post("/tss/v2/commit")
-      .send({
-        session_id: sessionId,
-        operation_type: "add_ed25519_with_reshare",
-        client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
-        id_token_hash: idHash,
-      });
+    const okoCommit = await request(ctx.okoApiApp).post("/tss/v2/commit").send({
+      session_id: sessionId,
+      operation_type: "add_ed25519_with_reshare",
+      client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
+      id_token_hash: idHash,
+    });
     expect(okoCommit.status).toBe(200);
     const ksnCommit = await request(ctx.ksnApps[0])
       .post("/keyshare/v2/commit")
@@ -334,14 +332,12 @@ describe("e2e_test_add_ed25519_with_reshare", () => {
     const clientKeypair = generateClientKeypair();
     const sessionId = generateSessionId();
     const idHash = computeIdTokenHash(AUTH_TYPE, SIGNIN_ID_TOKEN);
-    const okoCommit = await request(ctx.okoApiApp)
-      .post("/tss/v2/commit")
-      .send({
-        session_id: sessionId,
-        operation_type: "add_ed25519_with_reshare",
-        client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
-        id_token_hash: idHash,
-      });
+    const okoCommit = await request(ctx.okoApiApp).post("/tss/v2/commit").send({
+      session_id: sessionId,
+      operation_type: "add_ed25519_with_reshare",
+      client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
+      id_token_hash: idHash,
+    });
     expect(okoCommit.status).toBe(200);
     const ksnCommit0 = await request(ctx.ksnApps[0])
       .post("/keyshare/v2/commit")
@@ -460,25 +456,21 @@ describe("e2e_test_add_ed25519_with_reshare", () => {
     const clientKeypair = generateClientKeypair();
     const sessionId = generateSessionId();
     const idHash = computeIdTokenHash(AUTH_TYPE, SIGNIN_ID_TOKEN);
-    const okoCommit = await request(ctx.okoApiApp)
-      .post("/tss/v2/commit")
-      .send({
+    const okoCommit = await request(ctx.okoApiApp).post("/tss/v2/commit").send({
+      session_id: sessionId,
+      operation_type: "add_ed25519_with_reshare",
+      client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
+      id_token_hash: idHash,
+    });
+    expect(okoCommit.status).toBe(200);
+    const okoNodePk = okoCommit.body.data.node_pubkey;
+    for (let i = 0; i < ctx.ksnApps.length; i++) {
+      const c = await request(ctx.ksnApps[i]).post("/keyshare/v2/commit").send({
         session_id: sessionId,
         operation_type: "add_ed25519_with_reshare",
         client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
         id_token_hash: idHash,
       });
-    expect(okoCommit.status).toBe(200);
-    const okoNodePk = okoCommit.body.data.node_pubkey;
-    for (let i = 0; i < ctx.ksnApps.length; i++) {
-      const c = await request(ctx.ksnApps[i])
-        .post("/keyshare/v2/commit")
-        .send({
-          session_id: sessionId,
-          operation_type: "add_ed25519_with_reshare",
-          client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
-          id_token_hash: idHash,
-        });
       expect(c.status).toBe(200);
       const rSig = createRevealSignature(
         clientKeypair.privateKey,
