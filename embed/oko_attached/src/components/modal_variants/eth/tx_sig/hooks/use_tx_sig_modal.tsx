@@ -211,6 +211,7 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
     isSponsored,
     isSponsorshipAvailable,
     isRateLimited,
+    needsSponsorship,
     statusData: sponsorshipStatusData,
     remainingTimeMs: sponsorshipRemainingTimeMs,
     formattedRemainingTime: sponsorshipFormattedTime,
@@ -233,7 +234,7 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
   const showSponsorship =
     isSponsorshipSupported &&
     !isDemo &&
-    (hasSufficientBalanceForTotal === false || isSponsored);
+    (hasSufficientBalanceForTotal === false || isSponsored || isRateLimited);
 
   // Create sponsored fee info for UI
   const sponsoredFeeInfo: SponsoredFeeInfo | null = showSponsorship
@@ -256,7 +257,7 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
     !isSimulating &&
     !hasError &&
     (hasSufficientBalanceForTotal === true ||
-      isSponsorshipAvailable ||
+      (needsSponsorship && isSponsorshipAvailable) ||
       isSponsored);
 
   // Approve button should show loading when requesting sponsorship
@@ -492,10 +493,22 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
         isSponsorshipAvailable &&
         !isSponsored
       ) {
-        await requestSponsorship();
-        // The sponsorship flow will update state; signing will happen after balance is refreshed
-        // For now, we proceed with signing after sponsorship request
-        // In a real scenario, we might want to wait for tx confirmation
+        setIsLoading(true);
+        const topUpResult = await requestSponsorship();
+
+        // Wait for the top-up transaction to be confirmed
+        if (topUpResult?.txHash && publicClient) {
+          try {
+            await publicClient.waitForTransactionReceipt({
+              hash: topUpResult.txHash as `0x${string}`,
+              confirmations: 1,
+            });
+          } catch (e) {
+            console.warn("[fee-sponsorship] Failed to wait for tx receipt:", e);
+            // Continue anyway - the tx might still succeed
+          }
+        }
+        // Continue with signing after sponsorship is confirmed
       }
 
       setIsLoading(true);

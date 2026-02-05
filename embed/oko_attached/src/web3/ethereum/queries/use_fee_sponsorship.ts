@@ -202,13 +202,16 @@ export interface UseBaseSponsorshipFlowResult {
   isSponsorshipAvailable: boolean;
   isRateLimited: boolean;
 
+  // Whether sponsorship is needed (insufficient balance on supported chain)
+  needsSponsorship: boolean;
+
   // Status data
   statusData: FeeSponsorshipStatusResponse | undefined;
   remainingTimeMs: number;
   formattedRemainingTime: string;
 
   // Actions
-  requestSponsorship: () => Promise<void>;
+  requestSponsorship: () => Promise<{ txHash: string } | null>;
   resetSponsorship: () => void;
 
   // Error
@@ -239,12 +242,14 @@ export function useBaseSponsorshipFlow({
 
   const isSupported = isSponsorshipSupportedChain(chainId);
 
-  // Only check sponsorship status when balance is insufficient
+  // Sponsorship is needed when balance is insufficient on a supported chain
+  const needsSponsorship =
+    isSupported && hasSufficientBalance === false && !isSponsored;
+
+  // Check sponsorship status eagerly for supported chains (before balance check completes)
+  // This allows us to know if sponsorship is available while simulation is still running
   const shouldCheckStatus =
-    enabled &&
-    isSupported &&
-    hasSufficientBalance === false &&
-    sponsorshipState !== "success";
+    enabled && isSupported && sponsorshipState !== "success";
 
   const {
     data: statusData,
@@ -317,26 +322,31 @@ export function useBaseSponsorshipFlow({
     }
   }, [topUpError]);
 
-  const requestSponsorship = useCallback(async () => {
+  const requestSponsorship = useCallback(async (): Promise<{
+    txHash: string;
+  } | null> => {
     if (!estimatedFeeWei) {
-      return;
+      return null;
     }
 
     try {
       setSponsorshipState("requesting");
       setError(null);
 
-      // Request slightly more than estimated fee to account for gas price fluctuations
-      const amountWithBuffer = (estimatedFeeWei * BigInt(120)) / BigInt(100);
+      // Request 150% of estimated fee to account for gas price fluctuations
+      const amountWithBuffer = (estimatedFeeWei * BigInt(150)) / BigInt(100);
       const amountWei = amountWithBuffer.toString();
 
-      await requestTopUp(recipientAddress, amountWei);
+      const result = await requestTopUp(recipientAddress, amountWei);
 
       setSponsorshipState("success");
       setIsSponsored(true);
+
+      return { txHash: result.txHash };
     } catch (err) {
       setSponsorshipState("error");
       setError(err as FeeSponsorshipError);
+      return null;
     }
   }, [estimatedFeeWei, recipientAddress, requestTopUp]);
 
@@ -354,6 +364,7 @@ export function useBaseSponsorshipFlow({
     isSponsored,
     isSponsorshipAvailable: sponsorshipState === "available",
     isRateLimited: sponsorshipState === "rate_limited",
+    needsSponsorship,
 
     statusData,
     remainingTimeMs: remainingMs,

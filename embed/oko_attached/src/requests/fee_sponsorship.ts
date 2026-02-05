@@ -26,11 +26,20 @@ export interface FeeTopUpResponse {
 }
 
 export interface FeeSponsorshipStatusResponse {
-  chainId: string;
-  chainName: string;
-  recipientAddress: string;
+  chainId?: string;
+  chainName?: string;
+  recipientAddress?: string;
   available: boolean;
   remainingTimeMs?: number;
+}
+
+// Raw API response (may differ from our interface)
+interface FeeSponsorshipStatusApiResponse {
+  isTopUpAvailable: boolean;
+  remainingTimeMs?: number;
+  chainId?: string;
+  chainName?: string;
+  recipientAddress?: string;
 }
 
 export interface FeeSponsorshipError {
@@ -57,16 +66,15 @@ export async function checkFeeSponsorshipStatus(
     };
   }
 
+  const url = `${FEE_SPONSORSHIP_ENDPOINT}/evm/status/${chainId}?recipientAddress=${recipientAddress}`;
+
   try {
-    const resp = await fetch(
-      `${FEE_SPONSORSHIP_ENDPOINT}/evm/status/${chainId}?recipientAddress=${recipientAddress}`,
-      {
-        method: "GET",
-        headers: {
-          "X-API-Key": FEE_SPONSORSHIP_API_KEY,
-        },
+    const resp = await fetch(url, {
+      method: "GET",
+      headers: {
+        "X-API-Key": FEE_SPONSORSHIP_API_KEY,
       },
-    );
+    });
 
     if (!resp.ok) {
       const errorBody = await resp.json().catch(() => ({}));
@@ -81,7 +89,17 @@ export async function checkFeeSponsorshipStatus(
       };
     }
 
-    const data = (await resp.json()) as FeeSponsorshipStatusResponse;
+    const rawData = (await resp.json()) as FeeSponsorshipStatusApiResponse;
+
+    // Map API response to our interface
+    const data: FeeSponsorshipStatusResponse = {
+      chainId: rawData.chainId,
+      chainName: rawData.chainName,
+      recipientAddress: rawData.recipientAddress,
+      available: rawData.isTopUpAvailable,
+      remainingTimeMs: rawData.remainingTimeMs,
+    };
+
     return { success: true, data };
   } catch (err: any) {
     return {
