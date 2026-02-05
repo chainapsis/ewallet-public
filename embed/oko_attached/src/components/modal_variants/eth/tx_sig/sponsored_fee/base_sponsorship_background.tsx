@@ -24,7 +24,7 @@ const BASE_ASSETS = {
 
 export interface BaseSponsorshipBackgroundProps {
   isError?: boolean;
-  theme?: "light" | "dark" | null;
+  theme?: "light" | "dark" | "system" | null;
 }
 
 export const BaseSponsorshipBackground: FC<BaseSponsorshipBackgroundProps> = ({
@@ -33,7 +33,9 @@ export const BaseSponsorshipBackground: FC<BaseSponsorshipBackgroundProps> = ({
 }) => {
   const isDark = theme === "dark";
 
-  const patternUrl = isError ? BASE_ASSETS.patternGray : BASE_ASSETS.patternBlue;
+  const patternUrl = isError
+    ? BASE_ASSETS.patternGray
+    : BASE_ASSETS.patternBlue;
 
   const gradientUrl = isError
     ? isDark
