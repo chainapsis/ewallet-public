@@ -3,7 +3,7 @@ import { queryOptions } from "@tanstack/react-query";
 
 import { queryClient } from "@oko-wallet-attached/config/react_query";
 
-const CHAIN_INFO_ENDPOINT = "https://keplr-api.keplr.app/v1/chains";
+const CHAIN_INFO_ENDPOINT = "https://keplr-api.keplr.app/v1/chains/all";
 
 interface ChainInfoResponse {
   chains: ChainInfo[];

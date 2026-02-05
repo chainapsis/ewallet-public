@@ -9,7 +9,7 @@ import type { Result } from "@oko-wallet/stdlib-js";
 import type { KSNodeApiResponse } from "@oko-wallet/ksn-interface/response";
 
 import type { RequestSplitSharesError } from "../types/ks_node_request";
-import type { Bytes32, Bytes33 } from "@oko-wallet/bytes";
+import type { Bytes33 } from "@oko-wallet/bytes";
 import {
   decodeKeyShareStringToPoint256,
   encodePoint256ToKeyShareString,

@@ -1,20 +1,17 @@
 import type { Request, Response, NextFunction } from "express";
 import { Bytes } from "@oko-wallet/bytes";
 import { verifySignature } from "@oko-wallet/crypto-js/node/ecdhe";
-import { sha256 } from "@oko-wallet/crypto-js";
+import { sha256, buildRevealMessage } from "@oko-wallet/crypto-js";
 import {
   getCommitRevealSessionBySessionId,
   createCommitRevealApiCall,
   updateCommitRevealSessionState,
   hasCommitRevealApiBeenCalled,
 } from "@oko-wallet/ksn-pg-interface/commit_reveal";
-import type {
-  ApiName,
-  CommitRevealSession,
-} from "@oko-wallet/ksn-interface/commit_reveal";
+import type { ApiName } from "@oko-wallet/ksn-interface/commit_reveal";
 
 import { ErrorCodeMap } from "@oko-wallet-ksn-server/error";
-import { isApiAllowed, isFinalApi } from "@oko-wallet-ksn-server/commit_reveal";
+import { isApiAllowed } from "@oko-wallet-ksn-server/commit_reveal";
 import type { ServerState } from "@oko-wallet-ksn-server/state";
 import { logger } from "@oko-wallet-ksn-server/logger";
 
@@ -23,6 +20,7 @@ const DEFAULT_AUTH_TYPE = "google";
 export interface CommitRevealBody {
   cr_session_id: string;
   cr_signature: string; // 128 chars hex (64 bytes)
+  cr_final?: boolean;
   auth_type?: string;
 }
 
@@ -171,12 +169,12 @@ export function commitRevealMiddleware(apiName: ApiName) {
     }
 
     const nodePubkeyHex = state.serverKeypair.publicKey.toHex();
-    const message = makeSigMessage({
+    const message = buildRevealMessage({
       nodePubkeyHex,
-      cr_session_id,
+      sessionId: cr_session_id,
       authType,
       idToken,
-      session,
+      operationType: session.operation_type,
       apiName,
     });
     const rBytes = Bytes.fromUint8Array(
@@ -234,7 +232,7 @@ export function commitRevealMiddleware(apiName: ApiName) {
             signatureRes.data.toUint8Array(),
           );
 
-          if (isFinalApi(session.operation_type, apiName)) {
+          if (body.cr_final) {
             await updateCommitRevealSessionState(
               client,
               cr_session_id,
@@ -258,32 +256,4 @@ export function commitRevealMiddleware(apiName: ApiName) {
 
     next();
   };
-}
-
-export interface SigMessageArgs {
-  nodePubkeyHex: string;
-  cr_session_id: string;
-  authType: string;
-  idToken: string;
-  session: CommitRevealSession;
-  apiName: ApiName;
-}
-
-// message = node_pubkey + session_id + auth_type + id_token + operation_type + api_name
-function makeSigMessage({
-  nodePubkeyHex,
-  cr_session_id,
-  authType,
-  idToken,
-  session,
-  apiName,
-}: SigMessageArgs) {
-  return (
-    nodePubkeyHex +
-    cr_session_id +
-    authType +
-    idToken +
-    session.operation_type +
-    apiName
-  );
 }

@@ -29,15 +29,10 @@ import {
   requestSplitShares,
 } from "@oko-wallet-attached/requests/ks_node";
 import { runKeygen } from "@oko-wallet/cait-sith-keplr-hooks";
-import { runTeddsaKeygen } from "@oko-wallet/teddsa-hooks";
 import { reqKeygen } from "@oko-wallet/api-lib";
 import { Bytes } from "@oko-wallet/bytes";
 
 import type { ReferralInfo } from "@oko-wallet-attached/store/memory/types";
-import {
-  teddsaKeygenToHex,
-  type KeyPackageEd25519Hex,
-} from "@oko-wallet-attached/crypto/keygen_ed25519";
 
 export async function handleExistingUser(
   idToken: string,

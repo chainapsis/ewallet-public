@@ -29,6 +29,7 @@ export default function Page() {
               chainId={item.chainId}
               explorerName={item.explorerName}
               explorerUrl={item.explorerUrl}
+              addressPath={item.addressPath}
             />
           );
         })}

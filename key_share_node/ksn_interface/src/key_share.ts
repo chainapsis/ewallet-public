@@ -311,3 +311,46 @@ export interface ReshareRegisterV2RequestBody {
 // --- Internal Helper Types ---
 
 export type CheckWalletResult = { exists: boolean } | { error: string };
+
+// ============================================================================
+// v2 API Types with Commit-Reveal
+// ============================================================================
+
+/**
+ * Commit-reveal fields for KSN v2 API requests.
+ * Optional fields to support commit-reveal authentication scheme.
+ */
+export interface CommitRevealFields {
+  cr_session_id?: string;
+  cr_signature?: string;
+}
+
+/**
+ * GET /v2/keyshare request body with commit-reveal fields
+ */
+export type GetKeyShareV2WithCRRequestBody = GetKeyShareV2RequestBody &
+  CommitRevealFields;
+
+/**
+ * POST /v2/keyshare/register request body with commit-reveal fields
+ */
+export type RegisterKeyShareV2WithCRRequestBody =
+  RegisterKeyShareV2RequestBody & CommitRevealFields;
+
+/**
+ * POST /v2/keyshare/register/ed25519 request body with commit-reveal fields
+ */
+export type RegisterEd25519V2WithCRRequestBody = RegisterEd25519V2RequestBody &
+  CommitRevealFields;
+
+/**
+ * POST /v2/keyshare/reshare request body with commit-reveal fields
+ */
+export type ReshareKeyShareV2WithCRRequestBody = ReshareKeyShareV2RequestBody &
+  CommitRevealFields;
+
+/**
+ * POST /v2/keyshare/reshare/register request body with commit-reveal fields
+ */
+export type ReshareRegisterV2WithCRRequestBody = ReshareRegisterV2RequestBody &
+  CommitRevealFields;

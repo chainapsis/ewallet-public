@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import type { ChainInfo } from "@keplr-wallet/types";
 
-const CHAIN_INFO_ENDPOINT = "https://keplr-api.keplr.app/v1/chains";
+const CHAIN_INFO_ENDPOINT = "https://keplr-api.keplr.app/v1/chains/all";
 
 export function useGetChainInfos() {
   return useQuery({

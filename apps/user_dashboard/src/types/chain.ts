@@ -52,6 +52,10 @@ export interface CosmosChainInfo {
     readonly chainId: number;
     readonly rpc: string;
   };
+  readonly svm?: {
+    readonly rpc: string;
+    readonly websocket?: string;
+  };
 }
 
 // EVM-only chain info
@@ -65,13 +69,12 @@ export interface EVMChainInfo {
   readonly features?: string[];
 }
 
-// Solana chain info
-export interface SolanaChainInfo {
+export interface SVMChainInfo {
   readonly rpc: string;
   readonly currencies: Currency[];
 }
 
-export type ChainModule = "cosmos" | "evm" | "starknet" | "bitcoin" | "solana";
+export type ChainModule = "cosmos" | "evm" | "starknet" | "bitcoin" | "svm";
 
 // Unified chain info structure
 export interface ModularChainInfo {
@@ -82,7 +85,7 @@ export interface ModularChainInfo {
   readonly isNative?: boolean;
   readonly cosmos?: CosmosChainInfo;
   readonly evm?: EVMChainInfo;
-  readonly solana?: SolanaChainInfo;
+  readonly svm?: SVMChainInfo;
 }
 
 // Chain info with UI state

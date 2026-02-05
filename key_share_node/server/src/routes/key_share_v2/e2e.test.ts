@@ -46,6 +46,8 @@ const TEST_SECP256K1_PK =
   "028812785B3F855F677594A6FEB76CA3FD39F2CA36AC5A8454A1417C4232AC566D";
 const TEST_ED25519_PK =
   "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a";
+const TEST_ED25519_PK_2 =
+  "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c";
 const TEST_ENC_SECRET = "test_enc_secret";
 
 // Generate random 64-byte share (hex)
@@ -257,6 +259,7 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
           cr_session_id: ctx.sessionId,
           cr_signature: registerSignature,
           auth_type: ctx.authType,
+          cr_final: true,
           wallets: {
             secp256k1: {
               public_key: TEST_SECP256K1_PK,
@@ -338,6 +341,7 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
           cr_session_id: ctx.sessionId,
           cr_signature: registerSignature,
           auth_type: ctx.authType,
+          cr_final: true,
           wallets: {
             secp256k1: {
               public_key: TEST_SECP256K1_PK,
@@ -472,6 +476,7 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
           cr_session_id: signInCtx.sessionId,
           cr_signature: getSignature,
           auth_type: signInCtx.authType,
+          cr_final: true,
           wallets: {
             secp256k1: TEST_SECP256K1_PK,
             ed25519: TEST_ED25519_PK,
@@ -500,7 +505,7 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
     });
   });
 
-  describe("sign_in_reshare flow (commit → get_key_shares → reshare)", () => {
+  describe("sign_in reshare flow (commit → get_key_shares → reshare)", () => {
     it("should complete sign_in_reshare flow with multiple API calls", async () => {
       // First, register a user
       const signUpCtx = createE2ETestContext({ operationType: "sign_up" });
@@ -551,9 +556,9 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
 
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // Now sign_in_reshare flow
+      // Now sign_in flow for reshare
       const reshareCtx = createE2ETestContext({
-        operationType: "sign_in_reshare",
+        operationType: "sign_in",
         userIdentifier: signUpCtx.userIdentifier,
       });
       const reshareIdTokenHash = computeIdTokenHash(
@@ -620,6 +625,7 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
           cr_session_id: reshareCtx.sessionId,
           cr_signature: reshareSignature,
           auth_type: reshareCtx.authType,
+          cr_final: true,
           wallets: {
             secp256k1: {
               public_key: TEST_SECP256K1_PK,
@@ -640,6 +646,229 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
       if (sessionRes.success) {
         expect(sessionRes.data?.state).toBe("COMPLETED");
       }
+    });
+  });
+
+  describe("add_ed25519 flow (commit → get_key_shares → reshare → register_ed25519)", () => {
+    it("should complete add_ed25519 flow with all three API calls", async () => {
+      // First, register a user
+      const signUpCtx = createE2ETestContext({ operationType: "sign_up" });
+      const signUpIdTokenHash = computeIdTokenHash(
+        signUpCtx.authType,
+        signUpCtx.idToken,
+      );
+
+      await request(app)
+        .post("/keyshare/v2/commit")
+        .send({
+          session_id: signUpCtx.sessionId,
+          operation_type: signUpCtx.operationType,
+          client_ephemeral_pubkey: signUpCtx.clientKeypair.publicKey.toHex(),
+          id_token_hash: signUpIdTokenHash,
+        })
+        .expect(200);
+
+      const registerSignature = createRevealSignature(
+        signUpCtx,
+        mockServerKeypair.publicKey.toHex(),
+        "register",
+      );
+
+      const secp256k1Share = generateRandomShare();
+      const ed25519Share = generateRandomShare();
+
+      await request(app)
+        .post("/keyshare/v2/register")
+        .set("Authorization", `Bearer ${signUpCtx.idToken}`)
+        .set("x-mock-user-id", signUpCtx.userIdentifier)
+        .send({
+          cr_session_id: signUpCtx.sessionId,
+          cr_signature: registerSignature,
+          auth_type: signUpCtx.authType,
+          wallets: {
+            secp256k1: {
+              public_key: TEST_SECP256K1_PK,
+              share: secp256k1Share,
+            },
+            ed25519: {
+              public_key: TEST_ED25519_PK,
+              share: ed25519Share,
+            },
+          },
+        })
+        .expect(200);
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Now add_ed25519 flow
+      const reshareEd25519Ctx = createE2ETestContext({
+        operationType: "add_ed25519",
+        userIdentifier: signUpCtx.userIdentifier,
+      });
+      const reshareEd25519IdTokenHash = computeIdTokenHash(
+        reshareEd25519Ctx.authType,
+        reshareEd25519Ctx.idToken,
+      );
+
+      // Commit for add_ed25519
+      await request(app)
+        .post("/keyshare/v2/commit")
+        .send({
+          session_id: reshareEd25519Ctx.sessionId,
+          operation_type: reshareEd25519Ctx.operationType,
+          client_ephemeral_pubkey:
+            reshareEd25519Ctx.clientKeypair.publicKey.toHex(),
+          id_token_hash: reshareEd25519IdTokenHash,
+        })
+        .expect(200);
+
+      // Step 1: get_key_shares (non-final API)
+      const getSignature = createRevealSignature(
+        reshareEd25519Ctx,
+        mockServerKeypair.publicKey.toHex(),
+        "get_key_shares",
+      );
+
+      await request(app)
+        .post("/keyshare/v2")
+        .set("Authorization", `Bearer ${reshareEd25519Ctx.idToken}`)
+        .set("x-mock-user-id", reshareEd25519Ctx.userIdentifier)
+        .send({
+          cr_session_id: reshareEd25519Ctx.sessionId,
+          cr_signature: getSignature,
+          auth_type: reshareEd25519Ctx.authType,
+          wallets: {
+            secp256k1: TEST_SECP256K1_PK,
+          },
+        })
+        .expect(200);
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Verify session is still COMMITTED
+      let sessionRes = await getCommitRevealSessionBySessionId(
+        pool,
+        reshareEd25519Ctx.sessionId,
+      );
+      expect(sessionRes.success).toBe(true);
+      if (sessionRes.success) {
+        expect(sessionRes.data?.state).toBe("COMMITTED");
+      }
+
+      // Step 2: reshare (non-final API for add_ed25519)
+      const reshareSignature = createRevealSignature(
+        reshareEd25519Ctx,
+        mockServerKeypair.publicKey.toHex(),
+        "reshare",
+      );
+
+      await request(app)
+        .post("/keyshare/v2/reshare")
+        .set("Authorization", `Bearer ${reshareEd25519Ctx.idToken}`)
+        .set("x-mock-user-id", reshareEd25519Ctx.userIdentifier)
+        .send({
+          cr_session_id: reshareEd25519Ctx.sessionId,
+          cr_signature: reshareSignature,
+          auth_type: reshareEd25519Ctx.authType,
+          wallets: {
+            secp256k1: {
+              public_key: TEST_SECP256K1_PK,
+              share: secp256k1Share,
+            },
+          },
+        })
+        .expect(200);
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Verify session is still COMMITTED (reshare is not final for add_ed25519)
+      sessionRes = await getCommitRevealSessionBySessionId(
+        pool,
+        reshareEd25519Ctx.sessionId,
+      );
+      expect(sessionRes.success).toBe(true);
+      if (sessionRes.success) {
+        expect(sessionRes.data?.state).toBe("COMMITTED");
+      }
+
+      // Step 3: register_ed25519 (final API for add_ed25519)
+      // Use a different ed25519 public key to avoid DUPLICATE_PUBLIC_KEY error
+      const registerEd25519Signature = createRevealSignature(
+        reshareEd25519Ctx,
+        mockServerKeypair.publicKey.toHex(),
+        "register_ed25519",
+      );
+
+      const newEd25519Share = generateRandomShare();
+
+      await request(app)
+        .post("/keyshare/v2/register/ed25519")
+        .set("Authorization", `Bearer ${reshareEd25519Ctx.idToken}`)
+        .set("x-mock-user-id", reshareEd25519Ctx.userIdentifier)
+        .send({
+          cr_session_id: reshareEd25519Ctx.sessionId,
+          cr_signature: registerEd25519Signature,
+          auth_type: reshareEd25519Ctx.authType,
+          cr_final: true,
+          public_key: TEST_ED25519_PK_2,
+          share: newEd25519Share,
+        })
+        .expect(200);
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Verify session is now COMPLETED
+      sessionRes = await getCommitRevealSessionBySessionId(
+        pool,
+        reshareEd25519Ctx.sessionId,
+      );
+      expect(sessionRes.success).toBe(true);
+      if (sessionRes.success) {
+        expect(sessionRes.data?.state).toBe("COMPLETED");
+      }
+    });
+
+    it("should reject get_key_shares for sign_up operation", async () => {
+      const ctx = createE2ETestContext({
+        operationType: "sign_up",
+      });
+      const idTokenHash = computeIdTokenHash(ctx.authType, ctx.idToken);
+
+      // Commit with sign_up operation
+      await request(app)
+        .post("/keyshare/v2/commit")
+        .send({
+          session_id: ctx.sessionId,
+          operation_type: ctx.operationType,
+          client_ephemeral_pubkey: ctx.clientKeypair.publicKey.toHex(),
+          id_token_hash: idTokenHash,
+        })
+        .expect(200);
+
+      // Try to call get_key_shares (not allowed for sign_up)
+      const getKeySharesSignature = createRevealSignature(
+        ctx,
+        mockServerKeypair.publicKey.toHex(),
+        "get_key_shares",
+      );
+
+      const response = await request(app)
+        .post("/keyshare/v2")
+        .set("Authorization", `Bearer ${ctx.idToken}`)
+        .set("x-mock-user-id", ctx.userIdentifier)
+        .send({
+          cr_session_id: ctx.sessionId,
+          cr_signature: getKeySharesSignature,
+          auth_type: ctx.authType,
+          wallets: {
+            secp256k1: TEST_SECP256K1_PK,
+          },
+        })
+        .expect(400);
+
+      expect(response.body.success).toBe(false);
+      expect(response.body.code).toBe("INVALID_REQUEST");
+      expect(response.body.msg).toContain("not allowed");
     });
   });
 
@@ -891,31 +1120,23 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
         })
         .expect(200);
 
-      // Try to call register (not allowed for sign_in)
-      const registerSignature = createRevealSignature(
+      // Try to call register_ed25519 (not allowed for sign_in)
+      const registerEd25519Signature = createRevealSignature(
         ctx,
         mockServerKeypair.publicKey.toHex(),
-        "register",
+        "register_ed25519",
       );
 
       const response = await request(app)
-        .post("/keyshare/v2/register")
+        .post("/keyshare/v2/register/ed25519")
         .set("Authorization", `Bearer ${ctx.idToken}`)
         .set("x-mock-user-id", ctx.userIdentifier)
         .send({
           cr_session_id: ctx.sessionId,
-          cr_signature: registerSignature,
+          cr_signature: registerEd25519Signature,
           auth_type: ctx.authType,
-          wallets: {
-            secp256k1: {
-              public_key: TEST_SECP256K1_PK,
-              share: generateRandomShare(),
-            },
-            ed25519: {
-              public_key: TEST_ED25519_PK,
-              share: generateRandomShare(),
-            },
-          },
+          public_key: TEST_ED25519_PK,
+          share: generateRandomShare(),
         })
         .expect(400);
 

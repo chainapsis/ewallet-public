@@ -1,0 +1,100 @@
+name: Deploy Oko Apps
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PRJ_ID__OKO_DEMO_WEB: ${{ secrets.VERCEL_PRJ_ID__OKO_DEMO_WEB }}
+  VERCEL_PRJ_ID__CT_DASHBOARD: ${{ secrets.VERCEL_PRJ_ID__CT_DASHBOARD }}
+  VERCEL_PRJ_ID__USER_DASHBOARD: ${{ secrets.VERCEL_PRJ_ID__USER_DASHBOARD }}
+  VERCEL_PRJ_ID__OKO_ATTACHED: ${{ secrets.VERCEL_PRJ_ID__OKO_ATTACHED }}
+on:
+  workflow_dispatch:
+    inputs:
+      git_tag:
+        description: >
+          "Git tag for deployment (format: develop/v0.0.1 or release/v0.0.1)"
+        required: true
+        type: string
+      oko_app:
+        description: 'App'
+        required: true
+        type: choice
+        options:
+          - 'demo_web'
+          - 'user_dashboard'
+          - 'ct_dashboard'
+
+jobs:
+  publish:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout self repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.git_tag }}
+          token: ${{ secrets.GITHUB_PAT }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Check Node version
+        run: node -v
+
+      - name: Check git tag
+        run: node ./internals/github/dist/validate_git_tag.js
+        env:
+          GIT_TAG: "${{ inputs.git_tag }}"
+
+      - name: Set Vercel Project Id
+        id: vercel_project
+        run: |
+          case "${{ inputs.oko_app }}" in
+            demo_web)
+              echo "VERCEL_PROJECT_ID=$VERCEL_PRJ_ID__OKO_DEMO_WEB" >> \
+                "$GITHUB_ENV"
+              ;;
+            ct_dashboard)
+              echo "VERCEL_PROJECT_ID=$VERCEL_PRJ_ID__CT_DASHBOARD" >> \
+                "$GITHUB_ENV"
+              ;;
+            user_dashboard)
+              echo "VERCEL_PROJECT_ID=$VERCEL_PRJ_ID__USER_DASHBOARD" >> \
+               "$GITHUB_ENV"
+              ;;
+            oko_attached)
+              echo "VERCEL_PROJECT_ID=$VERCEL_PRJ_ID__OKO_ATTACHED" >> \
+              "$GITHUB_ENV"
+              ;;
+            *)
+              echo "Unknown app: ${{ inputs.oko_app }}"
+              exit 1
+              ;;
+          esac
+      
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Yarn version
+        run: yarn -v
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build internal packages
+        run: yarn ci build_pkgs
+
+      - name: Build SDK packages
+        run: yarn ci build_sdk
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy Project Artifacts to Vercel
+        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}

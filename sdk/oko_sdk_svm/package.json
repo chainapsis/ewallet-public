@@ -1,7 +1,6 @@
 {
   "name": "@oko-wallet/oko-sdk-svm",
-  "private": true,
-  "version": "^0.1.2-alpha.1",
+  "version": "0.1.2-alpha.5",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "type": "module",
@@ -31,14 +30,13 @@
     "directory": "sdk/oko_sdk_svm"
   },
   "scripts": {
-    "clean": "del-cli dist tsconfig.rollup.tsbuildinfo",
-    "rollup-build": "rollup -c --configPlugin typescript",
-    "build": "yarn clean && yarn rollup-build && tsc-alias",
+    "clean": "del-cli dist",
+    "build": "tsx ./scripts/build.ts",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
-    "@oko-wallet/oko-sdk-core": "^0.1.2-alpha.1",
+    "@oko-wallet/oko-sdk-core": "^0.1.2-alpha.5",
     "@oko-wallet/stdlib-js": "^0.0.2-rc.42",
     "@solana/wallet-standard-features": "^1.3.0",
     "@solana/web3.js": "^1.98.0",

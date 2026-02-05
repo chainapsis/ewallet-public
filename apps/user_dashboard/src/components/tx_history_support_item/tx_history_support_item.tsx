@@ -5,28 +5,35 @@ import { ExternalLinkOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/extern
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import type { FC } from "react";
 
+import { useChain, useChainAddress } from "@oko-wallet-user-dashboard/hooks/queries";
 import styles from "./tx_history_support_item.module.scss";
-import { useChain } from "@oko-wallet-user-dashboard/hooks/queries";
 
 export type TxHistorySupportItemProps = {
   chainId: string;
   explorerName: string;
   explorerUrl: string;
+  addressPath: string;
 };
 
 export const TxHistorySupportItem: FC<TxHistorySupportItemProps> = ({
   chainId,
   explorerName,
   explorerUrl,
+  addressPath,
 }) => {
   const { chain: chainInfo } = useChain(chainId);
+  const { address } = useChainAddress(chainInfo);
 
   const chainImage = chainInfo?.chainSymbolImageUrl;
   const chainName = chainInfo?.chainName ?? "Unknown Chain";
 
+  const href = address
+    ? `${explorerUrl}${addressPath}/${address}`
+    : explorerUrl;
+
   return (
     <a
-      href={explorerUrl}
+      href={href}
       target="_blank"
       rel="noopener noreferrer"
       className={styles.card}

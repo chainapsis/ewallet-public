@@ -16,6 +16,8 @@ export async function publish(..._args: any[]) {
   console.log("Publishing packages...");
 
   console.log(`\
+If you are running this locally,
+
 1. Ensure you have "npm logged-in in the first place. \
 It's "npm login", not "yarn npm login".
 2. git remote "origin" needs to be set up in case you use an alias.
@@ -31,9 +33,11 @@ security issues.`);
 
     let token = fs.readFileSync(tokenPath).toString();
     token = token.trim();
-    console.log("NPM_TOKEN: %s", token);
 
-    console.log("We will overwrite NPM_TOKEN env variable");
+    console.log(
+      "We will overwrite NPM_TOKEN with the value in this file, val: %s",
+      token.substring(0, 8),
+    );
     process.env.NPM_TOKEN = token;
   }
 
@@ -45,11 +49,13 @@ token.",
     );
 
     process.exit(1);
+  } else {
+    console.log("NPM_TOKEN is provided");
   }
 
   const publishRet = spawnSync(
     "yarn",
-    ["lerna", "publish", "from-package", "--loglevel", "verbose"],
+    ["lerna", "publish", "from-package", "--yes", "--loglevel", "verbose"],
     {
       cwd: paths.root,
       stdio: "inherit",

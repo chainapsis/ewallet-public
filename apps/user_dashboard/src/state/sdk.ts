@@ -18,6 +18,7 @@ import {
   OKO_SDK_API_KEY,
   OKO_SDK_ENDPOINT,
 } from "@oko-wallet-user-dashboard/fetch";
+import { SOLANA_MAINNET_CHAIN_ID } from "@oko-wallet-user-dashboard/utils/chain";
 
 // SDK type identifiers
 export type SDKType = "eth" | "cosmos" | "sol";
@@ -265,6 +266,7 @@ export const useSDKState = create(
       const initRes = OkoSvmWallet.init({
         api_key: OKO_SDK_API_KEY,
         sdk_endpoint: OKO_SDK_ENDPOINT,
+        chain_id: SOLANA_MAINNET_CHAIN_ID,
       });
 
       if (initRes.success) {

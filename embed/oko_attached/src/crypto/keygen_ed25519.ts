@@ -1,10 +1,19 @@
-import type { TeddsaKeygenOutputBytes } from "@oko-wallet/teddsa-hooks";
+import {
+  runTeddsaKeygen,
+  type TeddsaKeygenOutputBytes,
+} from "@oko-wallet/teddsa-hooks";
 import type {
   KeyPackageRaw,
   PublicKeyPackageRaw,
 } from "@oko-wallet/oko-types/teddsa";
 import type { Result } from "@oko-wallet/stdlib-js";
 import { Bytes, type Bytes32 } from "@oko-wallet/bytes";
+import type { KeyShareNodeMetaWithNodeStatusInfo } from "@oko-wallet/oko-types/tss";
+import type { TeddsaKeyShareByNode } from "@oko-wallet/oko-types/user_key_share";
+import {
+  extractSigningShare,
+  splitTeddsaSigningShare,
+} from "./sss_ed25519";
 
 export interface KeyPackageEd25519Hex {
   keyPackage: string;
@@ -125,5 +134,64 @@ export function extractKeyPackageHex(
     publicKeyPackage,
     identifier,
     publicKey,
+  };
+}
+
+export interface Ed25519KeygenSplitResult {
+  keygen1: TeddsaKeygenOutputBytes;
+  keygen2: TeddsaKeygenOutputBytes;
+  userKeyShares: TeddsaKeyShareByNode[];
+}
+
+/**
+ * Run ed25519 keygen and split the signing share for distribution to KS nodes.
+ * Used by handlers that need to create new ed25519 wallets.
+ */
+export async function runEd25519KeygenAndSplit(
+  keyshareNodeMeta: KeyShareNodeMetaWithNodeStatusInfo,
+): Promise<
+  Result<
+    Ed25519KeygenSplitResult,
+    { type: "sign_in_request_fail"; error: string }
+  >
+> {
+  // 1. ed25519 keygen
+  const ed25519KeygenRes = await runTeddsaKeygen();
+  if (ed25519KeygenRes.success === false) {
+    return {
+      success: false,
+      err: { type: "sign_in_request_fail", error: ed25519KeygenRes.err },
+    };
+  }
+  const { keygen_1: keygen1, keygen_2: keygen2 } = ed25519KeygenRes.data;
+
+  // 2. Extract signing share from key package
+  const signingShareRes = extractSigningShare(keygen1.key_package);
+  if (signingShareRes.success === false) {
+    return {
+      success: false,
+      err: { type: "sign_in_request_fail", error: signingShareRes.err },
+    };
+  }
+
+  // 3. Split signing share for distribution
+  const splitRes = await splitTeddsaSigningShare(
+    signingShareRes.data,
+    keyshareNodeMeta,
+  );
+  if (splitRes.success === false) {
+    return {
+      success: false,
+      err: { type: "sign_in_request_fail", error: splitRes.err },
+    };
+  }
+
+  return {
+    success: true,
+    data: {
+      keygen1,
+      keygen2,
+      userKeyShares: splitRes.data,
+    },
   };
 }

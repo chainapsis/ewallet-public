@@ -61,13 +61,13 @@ const DiscordCallbackIndexRoute = DiscordCallbackIndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/email': typeof EmailIndexRoute
-  '/telegram': typeof TelegramIndexRoute
-  '/discord/callback': typeof DiscordCallbackIndexRoute
-  '/email/callback': typeof EmailCallbackIndexRoute
-  '/google/callback': typeof GoogleCallbackIndexRoute
-  '/telegram/callback': typeof TelegramCallbackIndexRoute
-  '/x/callback': typeof XCallbackIndexRoute
+  '/email/': typeof EmailIndexRoute
+  '/telegram/': typeof TelegramIndexRoute
+  '/discord/callback/': typeof DiscordCallbackIndexRoute
+  '/email/callback/': typeof EmailCallbackIndexRoute
+  '/google/callback/': typeof GoogleCallbackIndexRoute
+  '/telegram/callback/': typeof TelegramCallbackIndexRoute
+  '/x/callback/': typeof XCallbackIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -94,13 +94,13 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/email'
-    | '/telegram'
-    | '/discord/callback'
-    | '/email/callback'
-    | '/google/callback'
-    | '/telegram/callback'
-    | '/x/callback'
+    | '/email/'
+    | '/telegram/'
+    | '/discord/callback/'
+    | '/email/callback/'
+    | '/google/callback/'
+    | '/telegram/callback/'
+    | '/x/callback/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -146,49 +146,49 @@ declare module '@tanstack/react-router' {
     '/telegram/': {
       id: '/telegram/'
       path: '/telegram'
-      fullPath: '/telegram'
+      fullPath: '/telegram/'
       preLoaderRoute: typeof TelegramIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/email/': {
       id: '/email/'
       path: '/email'
-      fullPath: '/email'
+      fullPath: '/email/'
       preLoaderRoute: typeof EmailIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/x/callback/': {
       id: '/x/callback/'
       path: '/x/callback'
-      fullPath: '/x/callback'
+      fullPath: '/x/callback/'
       preLoaderRoute: typeof XCallbackIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/telegram/callback/': {
       id: '/telegram/callback/'
       path: '/telegram/callback'
-      fullPath: '/telegram/callback'
+      fullPath: '/telegram/callback/'
       preLoaderRoute: typeof TelegramCallbackIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/google/callback/': {
       id: '/google/callback/'
       path: '/google/callback'
-      fullPath: '/google/callback'
+      fullPath: '/google/callback/'
       preLoaderRoute: typeof GoogleCallbackIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/email/callback/': {
       id: '/email/callback/'
       path: '/email/callback'
-      fullPath: '/email/callback'
+      fullPath: '/email/callback/'
       preLoaderRoute: typeof EmailCallbackIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/discord/callback/': {
       id: '/discord/callback/'
       path: '/discord/callback'
-      fullPath: '/discord/callback'
+      fullPath: '/discord/callback/'
       preLoaderRoute: typeof DiscordCallbackIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
