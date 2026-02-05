@@ -245,6 +245,28 @@ WHERE server_url = ANY($1) AND deleted_at IS NULL
   }
 }
 
+export async function getKSNodesByIds(
+  db: Pool | PoolClient,
+  nodeIds: string[],
+): Promise<Result<KeyShareNode[], string>> {
+  if (nodeIds.length === 0) {
+    return { success: true, data: [] };
+  }
+
+  const query = `
+SELECT *
+FROM key_share_nodes
+WHERE node_id = ANY($1) AND deleted_at IS NULL
+`;
+
+  try {
+    const result = await db.query<KeyShareNode>(query, [nodeIds]);
+    return { success: true, data: result.rows };
+  } catch (error) {
+    return { success: false, err: String(error) };
+  }
+}
+
 export async function insertKSNode(
   db: Pool | PoolClient,
   nodeName: string,

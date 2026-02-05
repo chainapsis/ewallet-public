@@ -307,6 +307,9 @@ describe("e2e_test_add_ed25519_with_reshare", () => {
       });
     expect(reg1.status).toBe(200);
 
+    // Wait briefly to ensure middleware recorded API call
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     // Replay with same payload
     const reg2 = await request(ctx.ksnApps[0])
       .post("/keyshare/v2/register/ed25519")
