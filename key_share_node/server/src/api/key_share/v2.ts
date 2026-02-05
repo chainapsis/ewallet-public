@@ -20,7 +20,6 @@ import {
   checkWalletKeyShare,
   getWalletKeyShare,
   registerWalletKeyShare,
-  reshareWalletKeyShare,
   upsertWalletKeyShare,
 } from "./helper";
 
@@ -481,4 +480,3 @@ export async function reshareKeyShareV2(
     };
   }
 }
-

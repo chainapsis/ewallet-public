@@ -856,7 +856,141 @@ describe("key_share_v2_test", () => {
       expect(result.success).toBe(true);
     });
 
-    it("5.4 failure - INVALID_REQUEST (missing secp256k1)", async () => {
+    it("5.4 success - wallet exists but key_share lost (data recovery)", async () => {
+      const secp256k1Pk = parseSecp256k1PublicKey(TEST_SECP256K1_PK);
+      const ed25519Pk = parseEd25519PublicKey(TEST_ED25519_PK);
+      const secp256k1Share = generateRandomShare();
+      const ed25519Share = generateRandomShare();
+      const newSecp256k1Share = generateRandomShare();
+      const newEd25519Share = generateRandomShare();
+
+      // Register both wallets with key shares
+      await registerKeyShareV2(
+        pool,
+        {
+          user_auth_id: TEST_USER_AUTH_ID,
+          auth_type: "google",
+          wallets: {
+            secp256k1: { public_key: secp256k1Pk, share: secp256k1Share },
+            ed25519: { public_key: ed25519Pk, share: ed25519Share },
+          },
+        },
+        TEST_ENC_SECRET,
+      );
+
+      // Simulate key_share data loss by deleting key_shares rows directly
+      await pool.query('DELETE FROM "2_key_shares"');
+
+      // Reshare should succeed by inserting new shares for existing wallets
+      const result = await reshareKeyShareV2(
+        pool,
+        {
+          user_auth_id: TEST_USER_AUTH_ID,
+          auth_type: "google",
+          wallets: {
+            secp256k1: { public_key: secp256k1Pk, share: newSecp256k1Share },
+            ed25519: { public_key: ed25519Pk, share: newEd25519Share },
+          },
+        },
+        TEST_ENC_SECRET,
+      );
+
+      expect(result.success).toBe(true);
+
+      // Verify the new shares are retrievable
+      const getResult = await getKeyShareV2(
+        pool,
+        {
+          user_auth_id: TEST_USER_AUTH_ID,
+          auth_type: "google",
+          wallets: {
+            secp256k1: secp256k1Pk,
+            ed25519: ed25519Pk,
+          },
+        },
+        TEST_ENC_SECRET,
+      );
+
+      expect(getResult.success).toBe(true);
+      if (getResult.success) {
+        expect(getResult.data.secp256k1?.share).toBe(newSecp256k1Share.toHex());
+        expect(getResult.data.ed25519?.share).toBe(newEd25519Share.toHex());
+      }
+    });
+
+    it("5.5 success - partial key_share loss (one wallet has share, other lost)", async () => {
+      const secp256k1Pk = parseSecp256k1PublicKey(TEST_SECP256K1_PK);
+      const ed25519Pk = parseEd25519PublicKey(TEST_ED25519_PK);
+      const secp256k1Share = generateRandomShare();
+      const ed25519Share = generateRandomShare();
+      const newEd25519Share = generateRandomShare();
+
+      // Register both wallets
+      const regResult = await registerKeyShareV2(
+        pool,
+        {
+          user_auth_id: TEST_USER_AUTH_ID,
+          auth_type: "google",
+          wallets: {
+            secp256k1: { public_key: secp256k1Pk, share: secp256k1Share },
+            ed25519: { public_key: ed25519Pk, share: ed25519Share },
+          },
+        },
+        TEST_ENC_SECRET,
+      );
+      expect(regResult.success).toBe(true);
+
+      // Delete only ed25519 key_share (simulate partial data loss)
+      // Get ed25519 wallet_id first
+      const walletRows = await pool.query(
+        `SELECT wallet_id FROM "2_wallets" WHERE curve_type = 'ed25519'`,
+      );
+      const ed25519WalletId = walletRows.rows[0].wallet_id;
+      await pool.query(
+        `DELETE FROM "2_key_shares" WHERE wallet_id = $1`,
+        [ed25519WalletId],
+      );
+
+      // Reshare: secp256k1 validates existing share, ed25519 inserts new share
+      const result = await reshareKeyShareV2(
+        pool,
+        {
+          user_auth_id: TEST_USER_AUTH_ID,
+          auth_type: "google",
+          wallets: {
+            secp256k1: { public_key: secp256k1Pk, share: secp256k1Share },
+            ed25519: { public_key: ed25519Pk, share: newEd25519Share },
+          },
+        },
+        TEST_ENC_SECRET,
+      );
+
+      expect(result.success).toBe(true);
+
+      // Verify both shares are retrievable
+      const getResult = await getKeyShareV2(
+        pool,
+        {
+          user_auth_id: TEST_USER_AUTH_ID,
+          auth_type: "google",
+          wallets: {
+            secp256k1: secp256k1Pk,
+            ed25519: ed25519Pk,
+          },
+        },
+        TEST_ENC_SECRET,
+      );
+
+      expect(getResult.success).toBe(true);
+      if (getResult.success) {
+        // secp256k1 should still have original share
+        expect(getResult.data.secp256k1?.share).toBe(secp256k1Share.toHex());
+        // ed25519 should have the new share
+        expect(getResult.data.ed25519?.share).toBe(newEd25519Share.toHex());
+      }
+    });
+
+    it("5.6 failure - INVALID_REQUEST (missing secp256k1)", async () => {
       const ed25519Pk = parseEd25519PublicKey(TEST_ED25519_PK);
       const ed25519Share = generateRandomShare();
 
@@ -878,7 +1012,7 @@ describe("key_share_v2_test", () => {
       }
     });
 
-    it("5.5 failure - INVALID_REQUEST (missing ed25519)", async () => {
+    it("5.7 failure - INVALID_REQUEST (missing ed25519)", async () => {
       const secp256k1Pk = parseSecp256k1PublicKey(TEST_SECP256K1_PK);
       const secp256k1Share = generateRandomShare();
 
@@ -900,7 +1034,7 @@ describe("key_share_v2_test", () => {
       }
     });
 
-    it("5.6 failure - RESHARE_FAILED (wrong secp256k1 share)", async () => {
+    it("5.8 failure - RESHARE_FAILED (wrong secp256k1 share)", async () => {
       const secp256k1Pk = parseSecp256k1PublicKey(TEST_SECP256K1_PK);
       const ed25519Pk = parseEd25519PublicKey(TEST_ED25519_PK);
       const secp256k1Share = generateRandomShare();
@@ -941,7 +1075,7 @@ describe("key_share_v2_test", () => {
       }
     });
 
-    it("5.7 failure - RESHARE_FAILED (wrong ed25519 share)", async () => {
+    it("5.9 failure - RESHARE_FAILED (wrong ed25519 share)", async () => {
       const secp256k1Pk = parseSecp256k1PublicKey(TEST_SECP256K1_PK);
       const ed25519Pk = parseEd25519PublicKey(TEST_ED25519_PK);
       const secp256k1Share = generateRandomShare();

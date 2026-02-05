@@ -1,4 +1,5 @@
 import { Pool } from "pg";
+import { Bytes } from "@oko-wallet/bytes";
 import type { Application } from "express";
 import type { Server } from "http";
 
@@ -28,16 +29,36 @@ export interface TestContext {
   resetAllDatabases: () => Promise<void>;
 }
 
-export async function createTestContext(): Promise<TestContext> {
+export async function createTestContext(
+  opts?: { ksnCount?: number },
+): Promise<TestContext> {
   // Ensure all databases exist
   await ensureDatabaseExists(okoApiDbConfig);
-  for (let i = 0; i < KSN_KEYPAIRS.length; i++) {
+  const targetKsnCount = opts?.ksnCount ?? KSN_KEYPAIRS.length;
+
+  // Build keypairs array up to targetKsnCount
+  const ksnKeypairs = [...KSN_KEYPAIRS];
+  if (ksnKeypairs.length < targetKsnCount) {
+    for (let i = ksnKeypairs.length; i < targetKsnCount; i++) {
+      const hexChar = ((i + 1) % 16).toString(16);
+      const privHex = hexChar.repeat(64);
+      const pubHex = (i % 2 === 0 ? "a" : "b").repeat(64);
+      const privRes = Bytes.fromHexString(privHex, 32);
+      const pubRes = Bytes.fromHexString(pubHex, 32);
+      if (!privRes.success || !pubRes.success) {
+        throw new Error("Failed to synthesize KSN keypair");
+      }
+      ksnKeypairs.push({ privateKey: privRes.data, publicKey: pubRes.data });
+    }
+  }
+
+  for (let i = 0; i < targetKsnCount; i++) {
     await ensureDatabaseExists(createKsnDbConfig(i + 1));
   }
 
   const okoApiPool = new Pool(okoApiDbConfig);
-  const ksnPools = KSN_KEYPAIRS.map(
-    (_, i) => new Pool(createKsnDbConfig(i + 1)),
+  const ksnPools = Array.from({ length: targetKsnCount }, (_, i) =>
+    new Pool(createKsnDbConfig(i + 1)),
   );
 
   // Initialize schemas
@@ -47,9 +68,7 @@ export async function createTestContext(): Promise<TestContext> {
   }
 
   const okoApiApp = createOkoApiApp(okoApiPool, OKO_API_KEYPAIR);
-  const ksnApps = ksnPools.map((pool, i) =>
-    createKsnApp(pool, KSN_KEYPAIRS[i]),
-  );
+  const ksnApps = ksnPools.map((pool, i) => createKsnApp(pool, ksnKeypairs[i]));
 
   // Start KSN HTTP servers
   const ksnServers: Server[] = [];

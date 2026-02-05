@@ -21,6 +21,7 @@ import type {
   KsnCommitResult,
 } from "@oko-wallet-attached/crypto/commit_reveal/types";
 import { createKsnCommitRevealParams } from "@oko-wallet-attached/crypto/commit_reveal/signature";
+import { setKsnNodePubkey } from "@oko-wallet-attached/crypto/commit_reveal/session";
 
 export interface KeySharesByNode {
   node: { name: string; endpoint: string };
@@ -74,11 +75,11 @@ export async function requestKeySharesWithBackup(params: {
     authType,
     wallets,
     threshold,
-    session,
     readyNodes,
     pendingCommits,
     allNodes,
   } = params;
+  let session = params.session;
 
   // Build endpoint -> NodeStatusInfo map for quick lookup
   const nodeInfoMap = new Map<string, NodeStatusInfo>();
@@ -96,6 +97,35 @@ export async function requestKeySharesWithBackup(params: {
   // Try ready nodes first, then pending nodes as backups
   const endpointsToTry = [...readyEndpoints];
   let backupIndex = 0;
+
+  // Helper to await next backup node and add to queue
+  async function tryAddBackupNode(): Promise<void> {
+    while (backupIndex < pendingEndpoints.length) {
+      const backupEndpoint = pendingEndpoints[backupIndex];
+      backupIndex++;
+
+      const pendingPromise = pendingCommits.get(backupEndpoint);
+      if (!pendingPromise) {
+        continue;
+      }
+
+      try {
+        const commitResult = await pendingPromise;
+        // Update session with backup node's pubkey so signature can be created
+        session = setKsnNodePubkey(
+          session,
+          commitResult.nodeUrl,
+          commitResult.nodePubkey,
+          commitResult.operationType,
+        );
+        endpointsToTry.push(backupEndpoint);
+        return;
+      } catch {
+        // Backup commit failed, try next
+        continue;
+      }
+    }
+  }
 
   while (succeededShares.length < threshold && endpointsToTry.length > 0) {
     const endpoint = endpointsToTry.shift()!;
@@ -121,28 +151,6 @@ export async function requestKeySharesWithBackup(params: {
     } else {
       // Other error, try backup
       await tryAddBackupNode();
-    }
-  }
-
-  // Helper to await next backup node and add to queue
-  async function tryAddBackupNode(): Promise<void> {
-    while (backupIndex < pendingEndpoints.length) {
-      const backupEndpoint = pendingEndpoints[backupIndex];
-      backupIndex++;
-
-      const pendingPromise = pendingCommits.get(backupEndpoint);
-      if (!pendingPromise) {
-        continue;
-      }
-
-      try {
-        await pendingPromise;
-        endpointsToTry.push(backupEndpoint);
-        return;
-      } catch {
-        // Backup commit failed, try next
-        continue;
-      }
     }
   }
 

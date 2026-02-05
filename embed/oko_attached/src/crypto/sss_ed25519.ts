@@ -49,6 +49,13 @@ export async function splitTeddsaSigningShare(
 
     const identifiers = identifiersRes.data.map((b) => [...b.toUint8Array()]);
 
+    // Build identifier hex -> node index map for correct matching
+    // (sss_split returns key_packages sorted by identifier via BTreeMap, not in input order)
+    const identifierToNodeIndex = new Map<string, number>();
+    for (let i = 0; i < identifiersRes.data.length; i++) {
+      identifierToNodeIndex.set(identifiersRes.data[i].toHex(), i);
+    }
+
     const splitOutput: SplitOutputRaw = wasmModule.sss_split(
       signingShareArr,
       identifiers,
@@ -77,10 +84,18 @@ export async function splitTeddsaSigningShare(
         };
       }
 
+      const nodeIndex = identifierToNodeIndex.get(idBytes.data.toHex());
+      if (nodeIndex === undefined) {
+        return {
+          success: false,
+          err: `No matching node for identifier: ${idBytes.data.toHex()}`,
+        };
+      }
+
       shares.push({
         node: {
-          name: keyshareNodeMeta.nodes[i].name,
-          endpoint: keyshareNodeMeta.nodes[i].endpoint,
+          name: keyshareNodeMeta.nodes[nodeIndex].name,
+          endpoint: keyshareNodeMeta.nodes[nodeIndex].endpoint,
         },
         share: {
           identifier: idBytes.data,
@@ -275,6 +290,7 @@ export async function expandTeddsaSigningShare(
     // 2. Convert existing shares to KeyPackageRaw format for sss_extend_shares
     const existingKeyPackages: KeyPackageRaw[] = existingShares.map((s) => {
       const verifyingShare = computeVerifyingShare(s.share.signing_share);
+
       return {
         identifier: [...s.share.identifier.toUint8Array()],
         signing_share: [...s.share.signing_share.toUint8Array()],
