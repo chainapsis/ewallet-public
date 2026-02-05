@@ -11,8 +11,13 @@ import type { FC, PropsWithChildren } from "react";
 import { OkoProvider } from "@oko-wallet-user-dashboard/components/oko_provider/oko_provider";
 
 function makeTanStackQueryClient() {
-  // Create a client
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
   return queryClient;
 }
 

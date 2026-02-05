@@ -76,7 +76,6 @@ export function usePrices() {
     enabled: coinGeckoIds.length > 0,
     staleTime: 60 * 1000,
     refetchInterval: 2 * 60 * 1000,
-    retry: 1,
   });
 
   const priceMap = useMemo(() => {
