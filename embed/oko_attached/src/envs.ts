@@ -13,4 +13,11 @@ export const envSchema = z.object({
   VITE_AMPLITUDE_API_KEY: z.string().optional().default(""),
   VITE_IPFS_GATEWAY_URL: z.string().optional().default(""),
   VITE_TELEGRAM_BOT_NAME: z.string(),
+
+  // Fee sponsorship (Base chain)
+  VITE_FEE_SPONSORSHIP_ENDPOINT: z
+    .string()
+    .optional()
+    .default("https://cosmos-fee-relayer.keplr.app"),
+  VITE_FEE_SPONSORSHIP_API_KEY: z.string().optional().default(""),
 });

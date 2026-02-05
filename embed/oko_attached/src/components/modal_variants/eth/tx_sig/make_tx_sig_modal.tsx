@@ -13,6 +13,7 @@ import { EthereumTxSignatureContent } from "./ethereum_tx_signature_content";
 import { useEthereumTxActions } from "./hooks/use_ethereum_tx_actions";
 import { trackTxButtonEvent } from "@oko-wallet-attached/analytics/events";
 import { SignWithOkoBox } from "@oko-wallet-attached/components/sign_with_oko_box/sign_with_oko_box";
+import { SponsoredFee } from "./sponsored_fee";
 
 export const MakeTxSigModal: FC<MakeTxSigModalProps> = ({
   getIsAborted,
@@ -30,6 +31,12 @@ export const MakeTxSigModal: FC<MakeTxSigModalProps> = ({
     estimatedFee,
     isDemo,
     theme,
+    // Sponsorship related
+    showSponsorship,
+    sponsoredFeeInfo,
+    isRateLimited,
+    isTooltipVisible,
+    toggleTooltip,
   } = useTxSigModal({
     getIsAborted,
     data,
@@ -79,12 +86,22 @@ export const MakeTxSigModal: FC<MakeTxSigModalProps> = ({
         </div>
 
         <Spacing height={20} />
-        <EthereumTxFee
-          payload={data.payload}
-          primaryErrorMessage={primaryErrorMessage}
-          isSimulating={isSimulating}
-          estimatedFee={estimatedFee}
-        />
+        {showSponsorship && sponsoredFeeInfo ? (
+          <SponsoredFee
+            info={sponsoredFeeInfo}
+            isSimulating={isSimulating}
+            showTooltip={true}
+            tooltipVisible={isTooltipVisible}
+            onTooltipToggle={toggleTooltip}
+          />
+        ) : (
+          <EthereumTxFee
+            payload={data.payload}
+            primaryErrorMessage={primaryErrorMessage}
+            isSimulating={isSimulating}
+            estimatedFee={estimatedFee}
+          />
+        )}
 
         <Spacing height={20} />
 
@@ -104,7 +121,7 @@ export const MakeTxSigModal: FC<MakeTxSigModalProps> = ({
             fullWidth
             onClick={handleApproveClick}
             isLoading={isLoading}
-            disabled={!isApproveEnabled}
+            disabled={!isApproveEnabled || isRateLimited}
           >
             {isLoading ? "Signing..." : "Approve"}
           </Button>
