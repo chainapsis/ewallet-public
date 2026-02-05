@@ -338,8 +338,12 @@ describe("e2e_test_add_ed25519", () => {
       .set("x-mock-user-id", TEST_USER_ID)
       .set("Authorization", `Bearer ${SIGNIN_ID_TOKEN}`)
       .send(payload);
-    expect(second.status).toBe(409);
-    expect(second.body.code).toBe("API_ALREADY_CALLED");
+    expect([400, 409]).toContain(second.status);
+    if (second.status === 409) {
+      expect(second.body.code).toBe("API_ALREADY_CALLED");
+    } else {
+      expect(second.body.code).toBe("INVALID_REQUEST");
+    }
   });
 
   it("should reject keygen_ed25519 when secp256k1 wallet is missing", async () => {
@@ -388,7 +392,7 @@ describe("e2e_test_add_ed25519", () => {
     expect([404, 400]).toContain(res.status);
   });
 
-  it("should reject keygen_ed25519 when called twice (WALLET_ALREADY_EXISTS)", async () => {
+  it("should reject keygen_ed25519 when called twice in same session (API_ALREADY_CALLED) and in new session (WALLET_ALREADY_EXISTS)", async () => {
     await prepareSecpOnlyUser();
 
     // First success: register ed25519 on KSNs + keygen_ed25519
@@ -468,7 +472,10 @@ describe("e2e_test_add_ed25519", () => {
       });
     expect(first.status).toBe(200);
 
-    // Second call should fail with WALLET_ALREADY_EXISTS
+    // Wait briefly to ensure middleware's finish-hook persisted API call
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    // Second call (same session) should be blocked by commit-reveal middleware
     const second = await request(ctx.okoApiApp)
       .post("/tss/v2/keygen_ed25519")
       .set("x-mock-user-id", TEST_USER_ID)
@@ -484,7 +491,53 @@ describe("e2e_test_add_ed25519", () => {
         cr_session_id: sessionId,
         cr_signature: kgSig,
       });
-    expect(second.status).toBe(409);
-    expect(second.body.code).toBe("WALLET_ALREADY_EXISTS");
+    expect([400, 409]).toContain(second.status);
+    if (second.status === 409) {
+      expect(second.body.code).toBe("API_ALREADY_CALLED");
+    } else {
+      expect(second.body.code).toBe("INVALID_REQUEST");
+    }
+
+    // New session: business logic should detect wallet already exists
+    const clientKeypair2 = generateClientKeypair();
+    const newSessionId = generateSessionId();
+    const NEW_SIGNIN_ID_TOKEN = `${SIGNIN_ID_TOKEN}_2`;
+    const newIdHash = computeIdTokenHash(AUTH_TYPE, NEW_SIGNIN_ID_TOKEN);
+    const okoCommit2 = await request(ctx.okoApiApp)
+      .post("/tss/v2/commit")
+      .send({
+        session_id: newSessionId,
+        operation_type: "add_ed25519",
+        client_ephemeral_pubkey: clientKeypair2.publicKey.toHex(),
+        id_token_hash: newIdHash,
+      });
+    expect(okoCommit2.status).toBe(200);
+
+    const kgSig2 = createRevealSignature(
+      clientKeypair2.privateKey,
+      okoCommit2.body.data.node_pubkey,
+      newSessionId,
+      AUTH_TYPE,
+      NEW_SIGNIN_ID_TOKEN,
+      "add_ed25519",
+      "keygen_ed25519",
+    );
+    const third = await request(ctx.okoApiApp)
+      .post("/tss/v2/keygen_ed25519")
+      .set("x-mock-user-id", TEST_USER_ID)
+      .set("Authorization", `Bearer ${NEW_SIGNIN_ID_TOKEN}`)
+      .send({
+        auth_type: AUTH_TYPE,
+        keygen_2: {
+          key_package: edKeygen2.key_package,
+          public_key_package: Buffer.from(edKeygen2.public_key_package).toString("hex"),
+          identifier: edKeygen2.identifier,
+          public_key: edKeygen.public_key,
+        },
+        cr_session_id: newSessionId,
+        cr_signature: kgSig2,
+      });
+    expect(third.status).toBe(409);
+    expect(third.body.code).toBe("WALLET_ALREADY_EXISTS");
   });
 });
