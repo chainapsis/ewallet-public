@@ -1,9 +1,11 @@
 "use client";
 
+import { AnchoredMenu } from "@oko-wallet/oko-common-ui/anchored_menu";
 import { Badge } from "@oko-wallet/oko-common-ui/badge";
 import { CopyOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/copy_outlined";
 import { EyeIcon } from "@oko-wallet/oko-common-ui/icons/eye";
 import { EyeOffIcon } from "@oko-wallet/oko-common-ui/icons/eye_off";
+import { ThreeDotsVerticalIcon } from "@oko-wallet/oko-common-ui/icons/three_dots_vertical";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import { TableCell, TableRow } from "@oko-wallet/oko-common-ui/table";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
@@ -13,14 +15,18 @@ import styles from "./api_key_list.module.scss";
 
 export type APIKeyItemRowProps = {
   apiKey: string;
+  keyId: string;
   status: "active" | "inactive";
   createdDate: string;
+  onDelete: (keyId: string) => void;
 };
 
 export const APIKeyItemRow: FC<APIKeyItemRowProps> = ({
   apiKey,
+  keyId,
   status,
   createdDate,
+  onDelete,
 }) => {
   const [isCopied, setIsCopied] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -94,6 +100,28 @@ export const APIKeyItemRow: FC<APIKeyItemRowProps> = ({
 
       <TableCell className={styles.dateCell}>
         {formatDate(createdDate)}
+      </TableCell>
+
+      <TableCell className={styles.actionCell}>
+        <AnchoredMenu
+          placement="bottom-end"
+          TriggerComponent={
+            <button type="button" className={styles.buttonIcon}>
+              <ThreeDotsVerticalIcon
+                color="var(--fg-quaternary)"
+                size={16}
+              />
+            </button>
+          }
+          menuItems={[
+            {
+              id: "delete",
+              label: "Delete",
+              onClick: () => onDelete(keyId),
+              className: styles.deleteMenuItem,
+            },
+          ]}
+        />
       </TableCell>
     </TableRow>
   );

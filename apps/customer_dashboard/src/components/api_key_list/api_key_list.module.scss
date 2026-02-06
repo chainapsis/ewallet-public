@@ -41,3 +41,15 @@
   vertical-align: middle;
   height: 100%;
 }
+
+.actionCell {
+  width: 48px;
+}
+
+.deleteMenuItem {
+  color: var(--error);
+
+  span {
+    color: var(--error);
+  }
+}

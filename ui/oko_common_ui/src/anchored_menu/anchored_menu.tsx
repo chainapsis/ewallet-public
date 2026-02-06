@@ -76,7 +76,7 @@ export const AnchoredMenu: FC<AnchoredMenuProps> = ({
               {menuItems.map((item) => (
                 <li
                   key={item.id}
-                  className={styles.menuItem}
+                  className={cn(styles.menuItem, item.className)}
                   role="menuitem"
                   onClick={() => handleMenuItemClick(item)}
                 >
@@ -106,6 +106,7 @@ export type AnchoredMenuItem = {
   label: string;
   onClick: () => void;
   icon?: ReactNode;
+  className?: string;
 };
 
 export type AnchoredMenuProps = {

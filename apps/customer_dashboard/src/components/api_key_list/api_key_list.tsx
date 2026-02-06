@@ -1,7 +1,9 @@
 "use client";
 
+import { Button } from "@oko-wallet/oko-common-ui/button";
+import { PlusIcon } from "@oko-wallet/oko-common-ui/icons/plus";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
-import type { FC } from "react";
+import { type FC, useState } from "react";
 import { flexRender } from "@tanstack/react-table";
 import {
   Table,
@@ -15,11 +17,36 @@ import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import { APIKeyItemRow } from "./api_key_item_row";
 import styles from "./api_key_list.module.scss";
 import { useAPIKeysTable } from "./use_api_keys_table";
-import { useAPIKeys } from "@oko-wallet-ct-dashboard/hooks/use_api_keys";
+import {
+  useAPIKeys,
+  useCreateAPIKey,
+} from "@oko-wallet-ct-dashboard/hooks/use_api_keys";
+import { displayToast } from "@oko-wallet-ct-dashboard/components/toast";
 
 export const APIKeyList: FC = () => {
   const { data: apiKeys } = useAPIKeys();
   const { table } = useAPIKeysTable(apiKeys ?? []);
+  const createAPIKey = useCreateAPIKey();
+  const [deleteTargetKeyId, setDeleteTargetKeyId] = useState<string | null>(
+    null,
+  );
+
+  const handleCreate = () => {
+    createAPIKey.mutate(undefined, {
+      onSuccess: () => {
+        displayToast({
+          variant: "success",
+          title: "API key created!",
+        });
+      },
+      onError: () => {
+        displayToast({
+          variant: "error",
+          title: "Failed to create API key",
+        });
+      },
+    });
+  };
 
   return (
     <div className={styles.wrapper}>
@@ -40,6 +67,17 @@ export const APIKeyList: FC = () => {
         </Typography>
       </div>
 
+      <Button
+        variant="primary"
+        size="md"
+        onClick={handleCreate}
+        disabled={createAPIKey.isPending}
+        isLoading={createAPIKey.isPending}
+      >
+        <PlusIcon size={20} color="currentColor" />
+        Create API Key
+      </Button>
+
       <Table variant="bordered">
         <TableHead>
           <TableRow>
@@ -58,8 +96,10 @@ export const APIKeyList: FC = () => {
             <APIKeyItemRow
               key={row.id}
               apiKey={row.getValue("hashed_key")}
+              keyId={row.original.key_id}
               status={row.original.is_active ? "active" : "inactive"}
               createdDate={row.getValue("created_at") || ""}
+              onDelete={setDeleteTargetKeyId}
             />
           ))}
         </TableBody>
