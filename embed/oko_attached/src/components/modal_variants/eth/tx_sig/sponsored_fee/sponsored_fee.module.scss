@@ -1,0 +1,134 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 0;
+  width: 100%;
+}
+
+.line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 18px;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.strikethrough {
+  text-decoration: line-through;
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--utility-blue-light-200, #b9e6fe);
+
+  [data-theme="dark"] & {
+    background: var(--utility-blue-light-50, #062c41);
+  }
+}
+
+.badgeText {
+  color: var(--utility-blue-light-600, #0086c9) !important;
+
+  [data-theme="dark"] & {
+    color: var(--utility-blue-light-500, #0ba5ec) !important;
+  }
+}
+
+.badgeError {
+  background: var(--bg-tertiary, #f5f5f5);
+
+  [data-theme="dark"] & {
+    background: var(--bg-tertiary, #1a1d24);
+  }
+}
+
+.infoIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+
+  display: flex;
+  padding: 12px 16px;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+
+  border-radius: 12px;
+  background: var(--bg-primary-solid, #181d27);
+  box-shadow: 0px 12px 16px -4px rgba(10, 13, 18, 0.08),
+    0px 4px 6px -2px rgba(10, 13, 18, 0.03);
+
+  min-width: 200px;
+  max-width: 280px;
+
+  [data-theme="dark"] & {
+    background: var(--bg-secondary, #22262f);
+  }
+
+  // Arrow
+  &::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 8px;
+    border-style: solid;
+    border-color: var(--bg-primary-solid, #181d27) transparent transparent
+      transparent;
+
+    [data-theme="dark"] & {
+      border-color: var(--bg-secondary, #22262f) transparent transparent
+        transparent;
+    }
+  }
+}
+
+.errorMessage {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.loadingMessage {
+  margin-top: 4px;
+}
+
+// Error state styles
+.error {
+  .badge {
+    background: var(--bg-tertiary, #f5f5f5);
+
+    [data-theme="dark"] & {
+      background: var(--bg-tertiary, #1a1d24);
+    }
+  }
+}

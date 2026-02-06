@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import type {
   MakeSigModalErrorAckPayload,
   MakeTxSignSigData,
@@ -24,6 +24,7 @@ import {
   useGetGasEstimation,
   useGetL1GasEstimation,
   useGetFeeCurrencyBalance,
+  useBaseSponsorshipFlow,
 } from "@oko-wallet-attached/web3/ethereum/queries";
 import { useMemoryState } from "@oko-wallet-attached/store/memory";
 import { DEMO_WEB_ORIGIN } from "@oko-wallet-attached/requests/endpoints";
@@ -33,6 +34,8 @@ import {
   OP_STACK_L1_DATA_FEE_FEATURE,
 } from "@oko-wallet-attached/web3/ethereum/constants";
 import { useSupportedEthChain } from "@oko-wallet-attached/web3/ethereum/hooks/use_supported_eth_chain";
+import { isSponsorshipSupportedChain } from "@oko-wallet-attached/requests/fee_sponsorship";
+import type { SponsoredFeeInfo } from "../sponsored_fee/types";
 
 export interface UseEthereumSigModalArgs {
   modalId: string;
@@ -67,6 +70,15 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
   const chainInfo = payload.chain_info;
   const isOpStack =
     chainInfo.features?.includes(OP_STACK_L1_DATA_FEE_FEATURE) ?? false;
+  const isSponsorshipSupported = isSponsorshipSupportedChain(
+    chainInfo.chain_id,
+  );
+
+  // Tooltip visibility state
+  const [isTooltipVisible, setIsTooltipVisible] = useState(false);
+  const toggleTooltip = useCallback(() => {
+    setIsTooltipVisible((prev) => !prev);
+  }, []);
 
   const { isSupportedChain, evmChain, isSupportChecked } = useSupportedEthChain(
     {
@@ -193,8 +205,63 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
 
   const isDemo = !!hostOrigin && hostOrigin === DEMO_WEB_ORIGIN;
 
+  // Fee sponsorship flow for Base chain
+  const {
+    sponsorshipState,
+    isSponsored,
+    isSponsorshipAvailable,
+    isRateLimited,
+    needsSponsorship,
+    statusData: sponsorshipStatusData,
+    remainingTimeMs: sponsorshipRemainingTimeMs,
+    formattedRemainingTime: sponsorshipFormattedTime,
+    requestSponsorship,
+    error: sponsorshipError,
+    errorMessage: sponsorshipErrorMessage,
+    isCheckingStatus: isSponsorshipChecking,
+    isRequestingTopUp: isSponsorshipRequesting,
+  } = useBaseSponsorshipFlow({
+    simulationKey,
+    chainId: chainInfo.chain_id,
+    recipientAddress: signer,
+    hostOrigin,
+    estimatedFeeWei: estimatedFee?.raw,
+    hasSufficientBalance: hasSufficientBalanceForTotal,
+    enabled: isSponsorshipSupported && !isDemo,
+  });
+
+  // Determine if sponsorship should be shown
+  const showSponsorship =
+    isSponsorshipSupported &&
+    !isDemo &&
+    (hasSufficientBalanceForTotal === false || isSponsored || isRateLimited);
+
+  // Create sponsored fee info for UI
+  const sponsoredFeeInfo: SponsoredFeeInfo | null = showSponsorship
+    ? {
+        state: sponsorshipState,
+        originalFee: estimatedFee?.formatted ?? "-",
+        remainingTimeMs: sponsorshipRemainingTimeMs,
+        formattedRemainingTime: isRateLimited
+          ? sponsorshipFormattedTime
+          : "5 min",
+        errorMessage: sponsorshipErrorMessage,
+      }
+    : null;
+
+  // Approve is enabled when:
+  // 1. Not simulating and no errors and sufficient balance, OR
+  // 2. Sponsorship is available (balance insufficient but can be sponsored), OR
+  // 3. Already sponsored
   const isApproveEnabled =
-    !isSimulating && !hasError && hasSufficientBalanceForTotal === true;
+    !isSimulating &&
+    !hasError &&
+    (hasSufficientBalanceForTotal === true ||
+      (needsSponsorship && isSponsorshipAvailable) ||
+      isSponsored);
+
+  // Approve button should show loading when requesting sponsorship
+  const isApproveLoading = isLoading || isSponsorshipRequesting;
 
   // adjust the transaction to be simulated
   useEffect(() => {
@@ -363,6 +430,26 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
     }
 
     if (hasSufficientBalanceForTotal === false) {
+      // If sponsorship is supported and available or sponsored, don't show error
+      if (isSponsorshipSupported && (isSponsorshipAvailable || isSponsored)) {
+        setPrimaryErrorMessage("");
+        return;
+      }
+      // If sponsorship is rate limited, show the timer instead of error
+      if (isSponsorshipSupported && isRateLimited) {
+        setPrimaryErrorMessage("");
+        return;
+      }
+      // If sponsorship failed, the error will be shown in sponsoredFeeInfo
+      if (isSponsorshipSupported && sponsorshipState === "error") {
+        setPrimaryErrorMessage("");
+        return;
+      }
+      // If sponsorship is checking, don't show error yet
+      if (isSponsorshipSupported && isSponsorshipChecking) {
+        setPrimaryErrorMessage("");
+        return;
+      }
       setPrimaryErrorMessage("Insufficient balance to cover the transaction");
       return;
     }
@@ -376,6 +463,12 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
     getFeeCurrencyBalanceError,
     getL1GasEstimationError,
     hasSufficientBalanceForTotal,
+    isSponsorshipSupported,
+    isSponsorshipAvailable,
+    isSponsored,
+    isRateLimited,
+    sponsorshipState,
+    isSponsorshipChecking,
   ]);
 
   function onReject() {
@@ -392,6 +485,30 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
     try {
       if (getIsAborted()) {
         return;
+      }
+
+      // If balance is insufficient and sponsorship is available, request sponsorship first
+      if (
+        hasSufficientBalanceForTotal === false &&
+        isSponsorshipAvailable &&
+        !isSponsored
+      ) {
+        setIsLoading(true);
+        const topUpResult = await requestSponsorship();
+
+        // Wait for the top-up transaction to be confirmed
+        if (topUpResult?.txHash && publicClient) {
+          try {
+            await publicClient.waitForTransactionReceipt({
+              hash: topUpResult.txHash as `0x${string}`,
+              confirmations: 1,
+            });
+          } catch (e) {
+            console.warn("[fee-sponsorship] Failed to wait for tx receipt:", e);
+            // Continue anyway - the tx might still succeed
+          }
+        }
+        // Continue with signing after sponsorship is confirmed
       }
 
       setIsLoading(true);
@@ -476,7 +593,7 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
   return {
     onReject,
     onApprove,
-    isLoading,
+    isLoading: isApproveLoading,
     isApproveEnabled,
     isDemo,
     isSimulating,
@@ -484,6 +601,13 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
     theme,
     primaryErrorMessage,
     simulatedTransaction,
+    // Sponsorship related
+    showSponsorship,
+    sponsoredFeeInfo,
+    isRateLimited,
+    isSponsorshipRequesting,
+    isTooltipVisible,
+    toggleTooltip,
   };
 }
 

@@ -1,0 +1,25 @@
+.gradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 172px;
+  background-size: cover;
+  background-position: bottom right;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.pattern {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 400px;
+  height: 172px;
+  background-size: cover;
+  background-position: bottom right;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 1;
+}

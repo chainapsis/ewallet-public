@@ -8,3 +8,4 @@ export * from "./use_supports_erc20_interface";
 export * from "./use_get_token_metadata";
 export * from "./use_get_ens_names";
 export * from "./use_get_ens_avatars";
+export * from "./use_fee_sponsorship";
