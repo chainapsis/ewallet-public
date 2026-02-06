@@ -46,6 +46,10 @@
   width: 48px;
 }
 
+.horizontalDots {
+  transform: rotate(90deg);
+}
+
 .deleteMenuItem {
   color: var(--error);
 

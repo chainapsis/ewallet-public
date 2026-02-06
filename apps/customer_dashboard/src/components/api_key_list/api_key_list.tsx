@@ -89,6 +89,7 @@ export const APIKeyList: FC = () => {
                 )}
               </TableHeaderCell>
             ))}
+            <TableHeaderCell className={styles.actionCell} />
           </TableRow>
         </TableHead>
         <TableBody>

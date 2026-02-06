@@ -59,7 +59,7 @@ export const APIKeyItemRow: FC<APIKeyItemRowProps> = ({
         >
           {isVisible
             ? apiKey
-            : apiKey.slice(0, apiKeyHalfLength) + "*".repeat(apiKeyHalfLength)}
+            : apiKey.slice(0, apiKeyHalfLength) + "•".repeat(apiKeyHalfLength)}
         </Typography>
 
         <Spacing width={8} />
@@ -110,6 +110,7 @@ export const APIKeyItemRow: FC<APIKeyItemRowProps> = ({
               <ThreeDotsVerticalIcon
                 color="var(--fg-quaternary)"
                 size={16}
+                className={styles.horizontalDots}
               />
             </button>
           }
@@ -133,10 +134,8 @@ function formatDate(dateString: string): string {
   }
 
   const date = new Date(dateString);
-  // This ensures consistent date formatting between server and client
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
