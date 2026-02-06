@@ -1,6 +1,8 @@
 import express from "express";
 
 import { changePassword } from "./change_password";
+import { createApiKey } from "./create_api_key";
+import { deleteApiKey } from "./delete_api_key";
 import { forgotPassword } from "./forgot_password";
 import { getCustomerApiKeys } from "./get_customer_api_keys";
 import { getCustomerInfo } from "./get_customer_info";
@@ -63,6 +65,18 @@ export function makeCustomerRouter() {
   router.post("/customer/info", customerJwtMiddleware, getCustomerInfo);
 
   router.post("/customer/api_keys", customerJwtMiddleware, getCustomerApiKeys);
+
+  router.post(
+    "/customer/api_keys/create",
+    customerJwtMiddleware,
+    createApiKey,
+  );
+
+  router.post(
+    "/customer/api_keys/delete",
+    customerJwtMiddleware,
+    deleteApiKey,
+  );
 
   router.post(
     "/customer/update_info",

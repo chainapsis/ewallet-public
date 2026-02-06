@@ -164,6 +164,37 @@ WHERE hashed_key = $2
   }
 }
 
+export async function deleteAPIKeyByKeyId(
+  db: Pool | PoolClient,
+  keyId: string,
+): Promise<Result<void, string>> {
+  const query = `
+DELETE FROM api_keys
+WHERE key_id = $1
+`;
+
+  try {
+    const result = await db.query(query, [keyId]);
+
+    if (result.rowCount === 0) {
+      return {
+        success: false,
+        err: `API key not found, key_id: ${keyId}`,
+      };
+    }
+
+    return {
+      success: true,
+      data: void 0,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      err: String(error),
+    };
+  }
+}
+
 export async function updateAPIKeyStatusByCustomerId(
   db: Pool | PoolClient,
   customerId: string,
