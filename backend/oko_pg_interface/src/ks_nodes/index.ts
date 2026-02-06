@@ -245,6 +245,28 @@ WHERE server_url = ANY($1) AND deleted_at IS NULL
   }
 }
 
+export async function getKSNodesByIds(
+  db: Pool | PoolClient,
+  nodeIds: string[],
+): Promise<Result<KeyShareNode[], string>> {
+  if (nodeIds.length === 0) {
+    return { success: true, data: [] };
+  }
+
+  const query = `
+SELECT *
+FROM key_share_nodes
+WHERE node_id = ANY($1) AND deleted_at IS NULL
+`;
+
+  try {
+    const result = await db.query<KeyShareNode>(query, [nodeIds]);
+    return { success: true, data: result.rows };
+  } catch (error) {
+    return { success: false, err: String(error) };
+  }
+}
+
 export async function insertKSNode(
   db: Pool | PoolClient,
   nodeName: string,
@@ -591,6 +613,46 @@ ON CONFLICT (wallet_id, node_id) DO UPDATE SET
     return {
       success: true,
       data: void 0,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      err: String(error),
+    };
+  }
+}
+
+export async function updateWalletKSNodeStatusToDataLoss(
+  db: Pool | PoolClient,
+  walletId: string,
+  nodeIds: string[],
+): Promise<Result<number, string>> {
+  if (nodeIds.length === 0) {
+    return {
+      success: true,
+      data: 0,
+    };
+  }
+
+  try {
+    const query = `
+UPDATE wallet_ks_nodes
+SET status = $1, updated_at = NOW()
+WHERE wallet_id = $2
+  AND node_id = ANY($3)
+  AND status = 'ACTIVE'
+`;
+    const values = [
+      "UNRECOVERABLE_DATA_LOSS" as WalletKSNodeStatus,
+      walletId,
+      nodeIds,
+    ];
+
+    const result = await db.query(query, values);
+
+    return {
+      success: true,
+      data: result.rowCount ?? 0,
     };
   } catch (error) {
     return {

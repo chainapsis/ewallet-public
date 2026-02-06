@@ -11,7 +11,7 @@ import {
 import type { ApiName } from "@oko-wallet/ksn-interface/commit_reveal";
 
 import { ErrorCodeMap } from "@oko-wallet-ksn-server/error";
-import { isApiAllowed } from "@oko-wallet-ksn-server/commit_reveal";
+import { isApiAllowed, isFinalApi } from "@oko-wallet-ksn-server/commit_reveal";
 import type { ServerState } from "@oko-wallet-ksn-server/state";
 import { logger } from "@oko-wallet-ksn-server/logger";
 
@@ -232,7 +232,7 @@ export function commitRevealMiddleware(apiName: ApiName) {
             signatureRes.data.toUint8Array(),
           );
 
-          if (body.cr_final) {
+          if (isFinalApi(session.operation_type, apiName)) {
             await updateCommitRevealSessionState(
               client,
               cr_session_id,

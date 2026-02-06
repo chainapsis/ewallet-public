@@ -128,8 +128,7 @@ export async function commitRevealCommit(
   });
 
   if (!createResult.success) {
-    // Check for duplicate key errors
-    if (createResult.err.includes("duplicate key")) {
+    if (createResult.err === "SESSION_ALREADY_EXISTS") {
       return res.status(409).json({
         success: false,
         code: "SESSION_ALREADY_EXISTS",

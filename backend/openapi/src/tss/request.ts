@@ -3,7 +3,7 @@ import { z } from "zod";
 import { registry } from "../registry";
 import { CommitRevealRequestFieldsSchema } from "./commit_reveal";
 
-const OAuthTypeSchema = z.enum(["google", "auth0"]).openapi({
+const OAuthTypeSchema = z.enum(["google", "auth0", "x", "telegram", "discord"]).openapi({
   description: "OAuth provider type",
   example: "google",
 });
@@ -97,43 +97,25 @@ export const KeygenRequestV2Schema = registry.register(
     .merge(CommitRevealRequestFieldsSchema),
 );
 
-const ReshareWalletInfoSchema = z.object({
-  public_key: z.string().openapi({
-    description: "Wallet public key in hex format",
-  }),
-  reshared_key_shares: z
-    .array(
-      z.object({
-        name: z.string().openapi({
-          description: "Key share node name",
-        }),
-        endpoint: z.string().openapi({
-          description: "Key share node endpoint",
-        }),
-      }),
-    )
-    .openapi({ description: "Reshared key shares for this wallet" }),
-});
-
 export const ReshareRequestV2Schema = registry.register(
   "TssUserReshareRequestV2",
   z
     .object({
-      wallets: z
-        .object({
-          secp256k1: ReshareWalletInfoSchema.openapi({
-            description: "secp256k1 wallet reshare info",
-          }).optional(),
-          ed25519: ReshareWalletInfoSchema.openapi({
-            description: "ed25519 wallet reshare info",
-          }).optional(),
-        })
-        .refine((data) => data.secp256k1 || data.ed25519, {
-          message: "At least one of secp256k1 or ed25519 must be provided",
-        })
-        .openapi({
-          description: "Wallet reshare info per curve type",
-        }),
+      auth_type: OAuthTypeSchema,
+      secp256k1_public_key: z.string().openapi({
+        description: "secp256k1 public key in hex format",
+      }),
+      ed25519_public_key: z.string().openapi({
+        description: "ed25519 public key in hex format",
+      }),
+      reshared_key_shares: z
+        .array(
+          z.object({
+            name: z.string().openapi({ description: "Key share node name" }),
+            endpoint: z.string().openapi({ description: "Key share node endpoint" }),
+          }),
+        )
+        .openapi({ description: "Nodes where reshare was completed" }),
     })
     .merge(CommitRevealRequestFieldsSchema),
 );

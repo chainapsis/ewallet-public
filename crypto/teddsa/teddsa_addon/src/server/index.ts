@@ -14,6 +14,9 @@ import {
   napiExtractKeyPackageSharesEd25519,
   napiReconstructKeyPackageEd25519,
   napiReconstructPublicKeyPackageEd25519,
+  napiSssSplitEd25519,
+  napiSssCombineEd25519,
+  napiSssExtendEd25519,
 } from "../../addon/index.js";
 
 // NOTE: NAPI-specific types (serialized bytes format)
@@ -144,5 +147,71 @@ export function reconstructPublicKeyPackageEd25519(
       Array.from(serverIdentifier),
       Array.from(verifyingKey),
     ),
+  );
+}
+
+// ============================================================================
+// SSS (Shamir's Secret Sharing) Functions
+// ============================================================================
+
+export interface NapiSssSplitOutput {
+  key_packages: NapiKeygenOutput[];
+}
+
+export interface NapiSssExtendOutput {
+  new_key_packages: NapiKeygenOutput[];
+  public_key_package: number[];
+}
+
+/**
+ * Split a signing share into SSS shares for distribution to KSN nodes.
+ *
+ * @param signingShare - 32-byte signing share to split
+ * @param identifiers - Array of 32-byte identifiers (one per node)
+ * @param minSigners - Minimum shares required to reconstruct (threshold)
+ * @returns Key packages for each identifier
+ */
+export function sssSplitEd25519(
+  signingShare: Uint8Array,
+  identifiers: Uint8Array[],
+  minSigners: number,
+): NapiSssSplitOutput {
+  return napiSssSplitEd25519(
+    Array.from(signingShare),
+    identifiers.map((id) => Array.from(id)),
+    minSigners,
+  );
+}
+
+/**
+ * Combine SSS shares to recover the original signing share.
+ *
+ * @param keyPackages - Serialized key packages (at least threshold required)
+ * @returns Recovered 32-byte signing share
+ */
+export function sssCombineEd25519(keyPackages: Uint8Array[]): Uint8Array {
+  return new Uint8Array(
+    napiSssCombineEd25519(keyPackages.map((kp) => Array.from(kp))),
+  );
+}
+
+/**
+ * Extend existing shares to add new participants without changing the polynomial.
+ * Used when a KSN node loses data and needs a new share computed from remaining nodes.
+ *
+ * @param keyPackages - Key packages from active nodes (at least threshold required)
+ * @param newIdentifiers - 32-byte identifiers for new participants
+ * @param publicKeyPackage - Existing public key package
+ * @returns New key packages for the additional identifiers
+ */
+export function sssExtendEd25519(
+  keyPackages: Uint8Array[],
+  newIdentifiers: Uint8Array[],
+  publicKeyPackage: Uint8Array,
+): NapiSssExtendOutput {
+  return napiSssExtendEd25519(
+    keyPackages.map((kp) => Array.from(kp)),
+    newIdentifiers.map((id) => Array.from(id)),
+    Array.from(publicKeyPackage),
   );
 }

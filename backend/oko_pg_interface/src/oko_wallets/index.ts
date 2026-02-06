@@ -6,6 +6,7 @@ import {
   type CreateWalletRequest,
   type Wallet,
   type WalletWithEmail,
+  type WalletWithAuthInfo,
   type WalletWithEmailAndKSNodes,
   type UserWithWallets,
 } from "@oko-wallet/oko-types/wallets";
@@ -108,6 +109,38 @@ LIMIT 1
     let wallet: WalletWithEmail | null = null;
     if (result.rows.length > 0) {
       wallet = result.rows[0] as WalletWithEmail;
+    }
+
+    return {
+      success: true,
+      data: wallet,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      err: String(error),
+    };
+  }
+}
+
+export async function getWalletByIdWithAuthInfo(
+  db: Pool | PoolClient,
+  walletId: string,
+): Promise<Result<WalletWithAuthInfo | null, string>> {
+  try {
+    const query = `
+SELECT w.*, u.email AS email, u.auth_type AS auth_type
+FROM oko_wallets w
+LEFT JOIN oko_users u ON w.user_id = u.user_id
+WHERE w.wallet_id = $1
+LIMIT 1
+`;
+
+    const result = await db.query(query, [walletId]);
+
+    let wallet: WalletWithAuthInfo | null = null;
+    if (result.rows.length > 0) {
+      wallet = result.rows[0] as WalletWithAuthInfo;
     }
 
     return {

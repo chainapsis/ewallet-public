@@ -193,10 +193,11 @@ export async function registerWalletKeyShare(
 }
 
 /**
- * Reshare a single wallet's key share
- * Validates that the provided share matches the existing share, then updates reshared_at
+ * Upsert a single wallet's key share (for unified reshare API)
+ * - If wallet exists: validate share matches, update reshared_at
+ * - If wallet doesn't exist: create new wallet + key share
  */
-export async function reshareWalletKeyShare(
+export async function upsertWalletKeyShare(
   db: Pool | PoolClient,
   walletInfo: WalletReshareInfo<PublicKeyBytes>,
   userId: string,
@@ -215,72 +216,122 @@ export async function reshareWalletKeyShare(
     };
   }
 
-  if (getWalletRes.data === null) {
-    return {
-      success: false,
-      code: "WALLET_NOT_FOUND",
-      msg: `Wallet not found for curve_type: ${curveType}`,
-    };
+  // Case 1: Wallet exists -> validate share and update reshared_at
+  if (getWalletRes.data !== null) {
+    if (getWalletRes.data.user_id !== userId) {
+      return {
+        success: false,
+        code: "UNAUTHORIZED",
+        msg: "Unauthorized: wallet belongs to different user",
+      };
+    }
+
+    const walletId = getWalletRes.data.wallet_id;
+
+    const getKeyShareRes = await getKeyShareByWalletId(db, walletId);
+    if (getKeyShareRes.success === false) {
+      logger.error("Failed to get key share: %s", getKeyShareRes.err);
+      return {
+        success: false,
+        code: "UNKNOWN_ERROR",
+        msg: "Failed to get key share",
+      };
+    }
+
+    if (getKeyShareRes.data === null) {
+      // Key share data lost but wallet exists - insert new share
+      const encryptedShare = await encryptDataAsync(
+        share.toHex(),
+        encryptionSecret,
+      );
+      const encryptedShareBuffer = Buffer.from(encryptedShare, "utf-8");
+
+      const createKeyShareRes = await createKeyShare(db, {
+        wallet_id: walletId,
+        enc_share: encryptedShareBuffer,
+      });
+      if (createKeyShareRes.success === false) {
+        logger.error("Failed to create key share: %s", createKeyShareRes.err);
+        return {
+          success: false,
+          code: "UNKNOWN_ERROR",
+          msg: "Failed to create key share",
+        };
+      }
+
+      return { success: true, data: void 0 };
+    }
+
+    const existingDecryptedShare = await decryptDataAsync(
+      getKeyShareRes.data.enc_share.toString("utf-8"),
+      encryptionSecret,
+    );
+
+    // NOTE: Use constant-time comparison to prevent timing attacks
+    const existingShareBuffer = Buffer.from(
+      existingDecryptedShare.toLowerCase(),
+      "utf-8",
+    );
+    const providedShareBuffer = Buffer.from(
+      share.toHex().toLowerCase(),
+      "utf-8",
+    );
+
+    if (
+      existingShareBuffer.length !== providedShareBuffer.length ||
+      !timingSafeEqual(existingShareBuffer, providedShareBuffer)
+    ) {
+      return {
+        success: false,
+        code: "RESHARE_FAILED",
+        msg: "Share mismatch",
+      };
+    }
+
+    const updateRes = await updateReshare(db, walletId);
+    if (updateRes.success === false) {
+      logger.error("Failed to update reshare: %s", updateRes.err);
+      return {
+        success: false,
+        code: "RESHARE_FAILED",
+        msg: "Failed to update reshare timestamp",
+      };
+    }
+
+    return { success: true, data: void 0 };
   }
 
-  if (getWalletRes.data.user_id !== userId) {
-    return {
-      success: false,
-      code: "UNAUTHORIZED",
-      msg: "Unauthorized: wallet belongs to different user",
-    };
-  }
-
-  const walletId = getWalletRes.data.wallet_id;
-
-  const getKeyShareRes = await getKeyShareByWalletId(db, walletId);
-  if (getKeyShareRes.success === false) {
-    logger.error("Failed to get key share: %s", getKeyShareRes.err);
+  // Case 2: Wallet doesn't exist -> create new wallet + key share
+  const createWalletRes = await createWallet(db, {
+    user_id: userId,
+    curve_type: curveType,
+    public_key: public_key.toUint8Array(),
+  });
+  if (createWalletRes.success === false) {
+    logger.error("Failed to create wallet: %s", createWalletRes.err);
     return {
       success: false,
       code: "UNKNOWN_ERROR",
-      msg: "Failed to get key share",
+      msg: "Failed to create wallet",
     };
   }
 
-  if (getKeyShareRes.data === null) {
-    return {
-      success: false,
-      code: "KEY_SHARE_NOT_FOUND",
-      msg: `Key share not found for curve_type: ${curveType}`,
-    };
-  }
-
-  const existingDecryptedShare = await decryptDataAsync(
-    getKeyShareRes.data.enc_share.toString("utf-8"),
+  const encryptedShare = await encryptDataAsync(
+    share.toHex(),
     encryptionSecret,
   );
+  const encryptedShareBuffer = Buffer.from(encryptedShare, "utf-8");
 
-  // NOTE: Use constant-time comparison to prevent timing attacks
-  const existingShareBuffer = Buffer.from(
-    existingDecryptedShare.toLowerCase(),
-    "utf-8",
-  );
-  const providedShareBuffer = Buffer.from(share.toHex().toLowerCase(), "utf-8");
-
-  if (
-    existingShareBuffer.length !== providedShareBuffer.length ||
-    !timingSafeEqual(existingShareBuffer, providedShareBuffer)
-  ) {
+  const createKeyShareRes = await createKeyShare(db, {
+    wallet_id: createWalletRes.data.wallet_id,
+    enc_share: encryptedShareBuffer,
+  });
+  if (createKeyShareRes.success === false) {
+    logger.error("Failed to create key share: %s", createKeyShareRes.err);
     return {
       success: false,
-      code: "RESHARE_FAILED",
-      msg: "Share mismatch",
-    };
-  }
-
-  const updateRes = await updateReshare(db, walletId);
-  if (updateRes.success === false) {
-    logger.error("Failed to update reshare: %s", updateRes.err);
-    return {
-      success: false,
-      code: "RESHARE_FAILED",
-      msg: "Failed to update reshare timestamp",
+      code: "UNKNOWN_ERROR",
+      msg: "Failed to create key share",
     };
   }
 

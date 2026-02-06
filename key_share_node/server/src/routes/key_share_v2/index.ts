@@ -9,7 +9,6 @@ import { keyshareV2Check } from "./check";
 import { keyshareV2Register } from "./register";
 import { registerKeyshareEd25519 } from "./ed25519";
 import { keyshareV2Reshare } from "./reshare";
-import { keyshareV2ReshareRegister } from "./reshare_register";
 import { commit } from "./commit";
 
 export function makeKeyshareV2Router() {
@@ -43,13 +42,6 @@ export function makeKeyshareV2Router() {
     commitRevealMiddleware("reshare"),
     bearerTokenMiddleware,
     keyshareV2Reshare,
-  );
-
-  router.post(
-    "/reshare/register",
-    commitRevealMiddleware("reshare_register"),
-    bearerTokenMiddleware,
-    keyshareV2ReshareRegister,
   );
 
   router.post("/commit", commit);

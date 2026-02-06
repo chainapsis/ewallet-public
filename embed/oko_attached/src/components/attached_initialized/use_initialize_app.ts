@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 // import { useSearchParams } from "next/navigation";
 import type { SignInSilentlyResponse } from "@oko-wallet/oko-types/user";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { OkoWalletMsgInit } from "@oko-wallet/oko-sdk-core";
 import type { Theme } from "@oko-wallet/oko-common-ui/theme";
 import { UTM_SOURCE, UTM_CAMPAIGN } from "@oko-wallet/oko-types/referral";
@@ -8,7 +9,10 @@ import { UTM_SOURCE, UTM_CAMPAIGN } from "@oko-wallet/oko-types/referral";
 import { initKeplrWasm } from "@oko-wallet-attached/wasm";
 import { useMemoryState } from "@oko-wallet-attached/store/memory";
 import { useAppState } from "@oko-wallet-attached/store/app";
-import { makeAuthorizedOkoApiRequest } from "@oko-wallet-attached/requests/oko_api";
+import {
+  makeAuthorizedOkoApiRequest,
+  TSS_V2_ENDPOINT,
+} from "@oko-wallet-attached/requests/oko_api";
 import { determineTheme, setColorScheme } from "./color_scheme";
 import { makeMsgHandler } from "@oko-wallet-attached/window_msgs";
 import {
@@ -97,7 +101,13 @@ export function useInitializeApp() {
         });
 
         const authToken = getAuthToken(hostOrigin);
-        await silentlyRefreshAuthToken(authToken, hostOrigin, setAuthToken);
+        const walletForAuth = getWallet(hostOrigin);
+        await silentlyRefreshAuthToken(
+          authToken,
+          hostOrigin,
+          setAuthToken,
+          walletForAuth?.authType,
+        );
 
         const oldTheme = getTheme(hostOrigin);
         const determinedThemeByCustomer = await determineTheme(
@@ -188,14 +198,16 @@ async function silentlyRefreshAuthToken(
   authToken: string | null,
   hostOrigin: string,
   setAuthToken: (hostOrigin: string, token: string | null) => void,
+  authType?: AuthType,
 ) {
   if (authToken) {
     const res = await makeAuthorizedOkoApiRequest<any, SignInSilentlyResponse>(
       "user/signin_silently",
       authToken,
       {
-        token: authToken,
+        auth_type: authType,
       },
+      TSS_V2_ENDPOINT,
     );
 
     if (!res.success) {

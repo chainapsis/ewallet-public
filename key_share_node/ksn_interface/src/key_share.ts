@@ -255,9 +255,12 @@ export type WalletReshareInfo<PK extends Bytes32 | Bytes33> = {
   share: Bytes64;
 };
 
+/**
+ * Both wallets are required for reshare
+ */
 export type WalletsReshareRequest = {
-  secp256k1?: WalletReshareInfo<Bytes33>;
-  ed25519?: WalletReshareInfo<Bytes32>;
+  secp256k1: WalletReshareInfo<Bytes33>;
+  ed25519: WalletReshareInfo<Bytes32>;
 };
 
 /**
@@ -268,9 +271,12 @@ export type WalletReshareInfoBody = {
   share: string; // hex string (64 bytes)
 };
 
+/**
+ * Both wallets are required for reshare
+ */
 export type WalletsReshareRequestBody = {
-  secp256k1?: WalletReshareInfoBody;
-  ed25519?: WalletReshareInfoBody;
+  secp256k1: WalletReshareInfoBody;
+  ed25519: WalletReshareInfoBody;
 };
 
 export interface ReshareKeyShareV2Request {
@@ -282,30 +288,6 @@ export interface ReshareKeyShareV2Request {
 export interface ReshareKeyShareV2RequestBody {
   auth_type: AuthType;
   wallets: WalletsReshareRequestBody;
-}
-
-// --- POST /v2/keyshare/reshare/register ---
-
-/**
- * Request for registering key shares during reshare (new node joining)
- * User must already exist (reshare scenario)
- * Wallets must NOT already exist on this node
- *
- * Reuses WalletsRegisterRequest since structure is identical
- */
-export interface ReshareRegisterV2Request {
-  user_auth_id: string;
-  auth_type: AuthType;
-  wallets: WalletsRegisterRequest;
-}
-
-/**
- * Request body for reshare register endpoint
- * Reuses WalletsRegisterRequestBody since structure is identical
- */
-export interface ReshareRegisterV2RequestBody {
-  auth_type: AuthType;
-  wallets: WalletsRegisterRequestBody;
 }
 
 // --- Internal Helper Types ---
@@ -347,10 +329,4 @@ export type RegisterEd25519V2WithCRRequestBody = RegisterEd25519V2RequestBody &
  * POST /v2/keyshare/reshare request body with commit-reveal fields
  */
 export type ReshareKeyShareV2WithCRRequestBody = ReshareKeyShareV2RequestBody &
-  CommitRevealFields;
-
-/**
- * POST /v2/keyshare/reshare/register request body with commit-reveal fields
- */
-export type ReshareRegisterV2WithCRRequestBody = ReshareRegisterV2RequestBody &
   CommitRevealFields;
