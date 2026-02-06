@@ -913,8 +913,8 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
     });
   });
 
-  describe("cr_final and session completion", () => {
-    it("should change session to COMPLETED when cr_final is true", async () => {
+  describe("FINAL_APIS and session completion", () => {
+    it("should change session to COMPLETED when calling final API (keygen for sign_up)", async () => {
       const sessionId = uuidv4();
       const authType = "google";
       const idToken = "test_id_token";
@@ -956,18 +956,17 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
           cr_session_id: sessionId,
           cr_signature: signature,
           auth_type: authType,
-          cr_final: true,
         })
         .expect(200);
 
       // Wait for async finish handler
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // After: COMPLETED (cr_final is true)
+      // After: COMPLETED (keygen is final API for sign_up)
       expect(await getSessionState(sessionId)).toBe("COMPLETED");
     });
 
-    it("should keep session COMMITTED when cr_final is false", async () => {
+    it("should change session to COMPLETED when calling final API (signin for sign_in)", async () => {
       const sessionId = uuidv4();
       const authType = "google";
       const idToken = "test_id_token";
@@ -983,7 +982,6 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
         throw new Error("Failed to compute hash");
       }
 
-      // sign_in allows signin and reshare
       await createSession({
         session_id: sessionId,
         operation_type: "sign_in",
@@ -1010,15 +1008,14 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
           cr_session_id: sessionId,
           cr_signature: signature,
           auth_type: authType,
-          cr_final: false,
         })
         .expect(200);
 
       // Wait for async finish handler
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // After: still COMMITTED (cr_final is false)
-      expect(await getSessionState(sessionId)).toBe("COMMITTED");
+      // After: COMPLETED (signin is final API for sign_in)
+      expect(await getSessionState(sessionId)).toBe("COMPLETED");
     });
 
     it("should not update session to COMPLETED on API failure", async () => {
@@ -1213,7 +1210,7 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
       expect(response.body.data.message).toBe("signin ok");
     });
 
-    it("reshare route: should pass with sign_in operation", async () => {
+    it("reshare route: should pass with reshare operation", async () => {
       const sessionId = uuidv4();
       const authType = "google";
       const idToken = "test_id_token";
@@ -1231,7 +1228,7 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
 
       await createSession({
         session_id: sessionId,
-        operation_type: "sign_in",
+        operation_type: "reshare",
         client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
         id_token_hash: hashRes.data.toHex(),
       });
@@ -1241,7 +1238,7 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
         sessionId,
         authType,
         idToken,
-        "sign_in",
+        "reshare",
         "reshare",
       );
 
@@ -1259,7 +1256,7 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
       expect(response.body.data.message).toBe("reshare ok");
     });
 
-    it("add_ed25519: should allow signin, reshare, keygen_ed25519 in sequence with cr_final", async () => {
+    it("add_ed25519_with_reshare: should allow signin, keygen_ed25519, reshare in sequence", async () => {
       const sessionId = uuidv4();
       const authType = "google";
       const idToken = "test_id_token";
@@ -1277,18 +1274,18 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
 
       await createSession({
         session_id: sessionId,
-        operation_type: "add_ed25519",
+        operation_type: "add_ed25519_with_reshare",
         client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
         id_token_hash: hashRes.data.toHex(),
       });
 
-      // 1. signin (cr_final: false)
+      // 1. signin (not final)
       const signinSignature = createValidSignature(
         clientKeypair,
         sessionId,
         authType,
         idToken,
-        "add_ed25519",
+        "add_ed25519_with_reshare",
         "signin",
       );
 
@@ -1299,7 +1296,6 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
           cr_session_id: sessionId,
           cr_signature: signinSignature,
           auth_type: authType,
-          cr_final: false,
         })
         .expect(200);
 
@@ -1311,42 +1307,13 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
       // Session should still be COMMITTED
       expect(await getSessionState(sessionId)).toBe("COMMITTED");
 
-      // 2. reshare (cr_final: false)
-      const reshareSignature = createValidSignature(
-        clientKeypair,
-        sessionId,
-        authType,
-        idToken,
-        "add_ed25519",
-        "reshare",
-      );
-
-      const reshareResponse = await request(app)
-        .post("/test/reshare")
-        .set("Authorization", `Bearer ${idToken}`)
-        .send({
-          cr_session_id: sessionId,
-          cr_signature: reshareSignature,
-          auth_type: authType,
-          cr_final: false,
-        })
-        .expect(200);
-
-      expect(reshareResponse.body.success).toBe(true);
-
-      // Wait for async handler
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      // Session should still be COMMITTED
-      expect(await getSessionState(sessionId)).toBe("COMMITTED");
-
-      // 3. keygen_ed25519 (cr_final: true)
+      // 2. keygen_ed25519 (not final)
       const keygenSignature = createValidSignature(
         clientKeypair,
         sessionId,
         authType,
         idToken,
-        "add_ed25519",
+        "add_ed25519_with_reshare",
         "keygen_ed25519",
       );
 
@@ -1357,7 +1324,6 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
           cr_session_id: sessionId,
           cr_signature: keygenSignature,
           auth_type: authType,
-          cr_final: true,
         })
         .expect(200);
 
@@ -1366,11 +1332,39 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
       // Wait for async handler
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // Session should now be COMPLETED
+      // Session should still be COMMITTED
+      expect(await getSessionState(sessionId)).toBe("COMMITTED");
+
+      // 3. reshare (final API for add_ed25519_with_reshare)
+      const reshareSignature = createValidSignature(
+        clientKeypair,
+        sessionId,
+        authType,
+        idToken,
+        "add_ed25519_with_reshare",
+        "reshare",
+      );
+
+      const reshareResponse = await request(app)
+        .post("/test/reshare")
+        .set("Authorization", `Bearer ${idToken}`)
+        .send({
+          cr_session_id: sessionId,
+          cr_signature: reshareSignature,
+          auth_type: authType,
+        })
+        .expect(200);
+
+      expect(reshareResponse.body.success).toBe(true);
+
+      // Wait for async handler
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Session should now be COMPLETED (reshare is final for add_ed25519_with_reshare)
       expect(await getSessionState(sessionId)).toBe("COMPLETED");
     });
 
-    it("add_ed25519: should reject keygen (not allowed)", async () => {
+    it("add_ed25519_with_reshare: should reject keygen (not allowed)", async () => {
       const sessionId = uuidv4();
       const authType = "google";
       const idToken = "test_id_token";
@@ -1388,7 +1382,7 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
 
       await createSession({
         session_id: sessionId,
-        operation_type: "add_ed25519",
+        operation_type: "add_ed25519_with_reshare",
         client_ephemeral_pubkey: clientKeypair.publicKey.toHex(),
         id_token_hash: hashRes.data.toHex(),
       });
@@ -1398,7 +1392,7 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
         sessionId,
         authType,
         idToken,
-        "add_ed25519",
+        "add_ed25519_with_reshare",
         "keygen",
       );
 
@@ -1415,7 +1409,7 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
       expect(response.body.success).toBe(false);
       expect(response.body.code).toBe("INVALID_REQUEST");
       expect(response.body.msg).toContain("keygen");
-      expect(response.body.msg).toContain("add_ed25519");
+      expect(response.body.msg).toContain("add_ed25519_with_reshare");
     });
   });
 });

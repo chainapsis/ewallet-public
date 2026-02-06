@@ -12,7 +12,10 @@ import type {
   SignInResponseV2,
   SaveReferralRequest,
   SaveReferralResponse,
+  ReportKeyShareNotFoundBody,
+  ReportKeyShareNotFoundResponse,
 } from "@oko-wallet/oko-types/user";
+import type { NodeStatusInfo } from "@oko-wallet/oko-types/tss";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { Result } from "@oko-wallet/stdlib-js";
 
@@ -176,5 +179,55 @@ export async function saveReferralV2(
   const apiResponse = res.data;
   if (!apiResponse.success) {
     throw new Error(`Save referral V2 API error: ${apiResponse.msg}`);
+  }
+}
+
+/**
+ * Report nodes that returned KEY_SHARE_NOT_FOUND during sign-in.
+ *
+ * This marks the nodes as UNRECOVERABLE_DATA_LOSS in oko_api,
+ * triggering a reshare on the next sign-in attempt.
+ *
+ * @param jwtToken - JWT token from sign-in response
+ * @param notFoundNodes - Nodes that returned KEY_SHARE_NOT_FOUND
+ */
+export async function reportKeyShareNotFound(
+  jwtToken: string,
+  notFoundNodes: NodeStatusInfo[],
+): Promise<void> {
+  if (notFoundNodes.length === 0) {
+    return;
+  }
+
+  const body: ReportKeyShareNotFoundBody = {
+    nodes: notFoundNodes.map((n) => ({ name: n.name, endpoint: n.endpoint })),
+  };
+
+  try {
+    const res = await fetch(
+      `${TSS_V2_ENDPOINT}/user/report_key_share_not_found`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${jwtToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      },
+    );
+
+    if (!res.ok) {
+      console.warn(
+        `[attached] reportKeyShareNotFound failed: HTTP ${res.status}`,
+      );
+      return;
+    }
+
+    const data = (await res.json()) as ReportKeyShareNotFoundResponse;
+    console.log(
+      `[attached] reportKeyShareNotFound: updated ${data.updated_count_secp256k1} secp256k1, ${data.updated_count_ed25519} ed25519`,
+    );
+  } catch (err) {
+    console.warn(`[attached] reportKeyShareNotFound error: ${String(err)}`);
   }
 }

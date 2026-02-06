@@ -1,0 +1,27 @@
+{
+  "action": "created",
+  "issue": {
+    "number": 1,
+    "pull_request": {
+      "url": "https://api.github.com",
+      "html_url": "https://github.com"
+    }
+  },
+  "comment": {
+    "body": "/typecheck This is a test comment from act.",
+    "user": {
+      "login": "octocat",
+      "id": 1
+    }
+  },
+  "repository": {
+    "name": "Hello-World",
+    "owner": {
+      "login": "octocat"
+    }
+  },
+  "sender": {
+    "login": "octocat",
+    "id": 1
+  }
+}

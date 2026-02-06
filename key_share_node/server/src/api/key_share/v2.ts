@@ -12,7 +12,6 @@ import type {
   RegisterKeyShareV2Request,
   RegisterEd25519V2Request,
   ReshareKeyShareV2Request,
-  ReshareRegisterV2Request,
 } from "@oko-wallet/ksn-interface/key_share";
 import type { KSNodeApiResponse } from "@oko-wallet/ksn-interface/response";
 
@@ -21,7 +20,7 @@ import {
   checkWalletKeyShare,
   getWalletKeyShare,
   registerWalletKeyShare,
-  reshareWalletKeyShare,
+  upsertWalletKeyShare,
 } from "./helper";
 
 /**
@@ -378,95 +377,34 @@ export async function registerEd25519V2(
 /**
  * Reshare multiple key shares at once (v2)
  *
- * Unlike v1, this endpoint accepts wallets as an object { secp256k1?: {...}, ed25519?: {...} }
- * Each wallet contains public_key and share for validation.
- * Validates that provided shares match existing shares, then updates reshared_at.
+ * This endpoint requires BOTH wallets: { secp256k1: {...}, ed25519: {...} }
+ * Each wallet contains public_key and share.
+ *
+ * For each wallet:
+ * - If wallet exists: validates that provided share matches existing share, then updates reshared_at
+ * - If wallet doesn't exist: registers new wallet with the provided share
+ *
+ * This unified approach eliminates the need for separate reshare/reshare_register APIs.
+ * Both wallets are always processed together to ensure consistency.
  */
 export async function reshareKeyShareV2(
-  db: Pool | PoolClient,
-  request: ReshareKeyShareV2Request,
-  encryptionSecret: string,
-): Promise<KSNodeApiResponse<void>> {
-  try {
-    const { user_auth_id, auth_type, wallets } = request;
-
-    const getUserRes = await getUserByAuthTypeAndUserAuthId(
-      db,
-      auth_type,
-      user_auth_id,
-    );
-    if (getUserRes.success === false) {
-      logger.error("Failed to get user: %s", getUserRes.err);
-      return {
-        success: false,
-        code: "USER_NOT_FOUND",
-        msg: "Failed to get user",
-      };
-    }
-
-    if (getUserRes.data === null) {
-      return {
-        success: false,
-        code: "USER_NOT_FOUND",
-        msg: "User not found",
-      };
-    }
-
-    const userId = getUserRes.data.user_id;
-
-    // Reshare each wallet
-    if (wallets.secp256k1) {
-      const res = await reshareWalletKeyShare(
-        db,
-        wallets.secp256k1,
-        userId,
-        "secp256k1",
-        encryptionSecret,
-      );
-      if (res.success === false) {
-        return res;
-      }
-    }
-
-    if (wallets.ed25519) {
-      const res = await reshareWalletKeyShare(
-        db,
-        wallets.ed25519,
-        userId,
-        "ed25519",
-        encryptionSecret,
-      );
-      if (res.success === false) {
-        return res;
-      }
-    }
-
-    return { success: true, data: void 0 };
-  } catch (error) {
-    logger.error("Failed to reshare key shares: %s", error);
-    return {
-      success: false,
-      code: "UNKNOWN_ERROR",
-      msg: "Failed to reshare key shares",
-    };
-  }
-}
-
-/**
- * Register key shares during reshare (v2) - for new node joining
- *
- * This is for the reshare scenario where a new node joins the network
- * and needs to register key shares for a user.
- * If the user doesn't exist on this node, it will be created.
- */
-export async function reshareRegisterV2(
   db: Pool,
-  request: ReshareRegisterV2Request,
+  request: ReshareKeyShareV2Request,
   encryptionSecret: string,
 ): Promise<KSNodeApiResponse<void>> {
   const { user_auth_id, auth_type, wallets } = request;
 
+  // Validate that both wallets are provided
+  if (!wallets.secp256k1 || !wallets.ed25519) {
+    return {
+      success: false,
+      code: "INVALID_REQUEST",
+      msg: "Both secp256k1 and ed25519 wallets are required",
+    };
+  }
+
   try {
+    // 1. Check if user exists
     const getUserRes = await getUserByAuthTypeAndUserAuthId(
       db,
       auth_type,
@@ -483,6 +421,7 @@ export async function reshareRegisterV2(
 
     const existingUser = getUserRes.data;
 
+    // 2. Start transaction for atomicity
     const client = await db.connect();
     try {
       await client.query("BEGIN");
@@ -499,33 +438,29 @@ export async function reshareRegisterV2(
         userId = existingUser.user_id;
       }
 
-      // Register each wallet
-      if (wallets.secp256k1) {
-        const res = await registerWalletKeyShare(
-          client,
-          wallets.secp256k1,
-          userId,
-          "secp256k1",
-          encryptionSecret,
-        );
-        if (res.success === false) {
-          await client.query("ROLLBACK");
-          return res;
-        }
+      // 3. Upsert both wallets (validate + update if exists, register if not)
+      const secp256k1Res = await upsertWalletKeyShare(
+        client,
+        wallets.secp256k1,
+        userId,
+        "secp256k1",
+        encryptionSecret,
+      );
+      if (secp256k1Res.success === false) {
+        await client.query("ROLLBACK");
+        return secp256k1Res;
       }
 
-      if (wallets.ed25519) {
-        const res = await registerWalletKeyShare(
-          client,
-          wallets.ed25519,
-          userId,
-          "ed25519",
-          encryptionSecret,
-        );
-        if (res.success === false) {
-          await client.query("ROLLBACK");
-          return res;
-        }
+      const ed25519Res = await upsertWalletKeyShare(
+        client,
+        wallets.ed25519,
+        userId,
+        "ed25519",
+        encryptionSecret,
+      );
+      if (ed25519Res.success === false) {
+        await client.query("ROLLBACK");
+        return ed25519Res;
       }
 
       await client.query("COMMIT");
@@ -537,11 +472,11 @@ export async function reshareRegisterV2(
       client.release();
     }
   } catch (error) {
-    logger.error("Failed to register key shares during reshare: %s", error);
+    logger.error("Failed to reshare key shares: %s", error);
     return {
       success: false,
       code: "UNKNOWN_ERROR",
-      msg: "Failed to register key shares during reshare",
+      msg: "Failed to reshare key shares",
     };
   }
 }

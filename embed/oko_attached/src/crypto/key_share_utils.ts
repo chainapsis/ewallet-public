@@ -1,8 +1,10 @@
 import type {
   Point256,
   UserKeySharePointByNode,
+  TeddsaKeyShareByNode,
 } from "@oko-wallet/oko-types/user_key_share";
 import { Bytes } from "@oko-wallet/bytes";
+import { hexToTeddsaKeyShare } from "@oko-wallet/oko-types/user_key_share";
 import type { Result } from "@oko-wallet/stdlib-js";
 
 export function decodeKeyShareStringToPoint256(
@@ -77,6 +79,48 @@ export async function decodeSecp256k1SharesByNode(
       node: item.node,
       share: point256Res.data,
     });
+  }
+
+  return { success: true, data: sharesByNode };
+}
+
+export function decodeEd25519SharesByNode(
+  sharesData: Array<{
+    node: { name: string; endpoint: string };
+    shares: { ed25519?: string };
+  }>,
+): Result<
+  TeddsaKeyShareByNode[],
+  { type: "key_share_combine_fail"; error: string }
+> {
+  const sharesByNode: TeddsaKeyShareByNode[] = [];
+
+  for (const item of sharesData) {
+    const shareHex = item.shares.ed25519;
+    if (!shareHex) {
+      return {
+        success: false,
+        err: {
+          type: "key_share_combine_fail",
+          error: `ed25519 share missing from node: ${item.node.name}`,
+        },
+      };
+    }
+    try {
+      const teddsaShare = hexToTeddsaKeyShare(shareHex);
+      sharesByNode.push({
+        node: item.node,
+        share: teddsaShare,
+      });
+    } catch (e) {
+      return {
+        success: false,
+        err: {
+          type: "key_share_combine_fail",
+          error: `ed25519 decode err: ${String(e)}`,
+        },
+      };
+    }
   }
 
   return { success: true, data: sharesByNode };

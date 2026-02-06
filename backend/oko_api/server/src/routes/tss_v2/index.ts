@@ -29,6 +29,8 @@ import { userSignInV2 } from "./user_signin";
 import { userReshareV2 } from "./user_reshare";
 import { userCheckEmailV2 } from "./user_check_email";
 import { commitRevealCommit } from "./commit";
+import { reportKeyShareNotFound } from "./report_key_share_not_found";
+import { userSignInSilentlyV2 } from "./user_signin_silently";
 
 export function makeTSSRouterV2() {
   const router = Router();
@@ -178,6 +180,18 @@ export function makeTSSRouterV2() {
   );
 
   router.post("/user/check", userCheckEmailV2);
+
+  router.post(
+    "/user/signin_silently",
+    tssActivateMiddleware,
+    userSignInSilentlyV2,
+  );
+
+  router.post(
+    "/user/report_key_share_not_found",
+    userJwtMiddlewareV2,
+    reportKeyShareNotFound,
+  );
 
   return router;
 }

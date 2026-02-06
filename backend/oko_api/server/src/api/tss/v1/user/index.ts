@@ -12,7 +12,10 @@ import type {
 } from "@oko-wallet/oko-types/user";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
-import { getUserByEmailAndAuthType, updateUserMetadata } from "@oko-wallet/oko-pg-interface/oko_users";
+import {
+  getUserByEmailAndAuthType,
+  updateUserMetadata,
+} from "@oko-wallet/oko-pg-interface/oko_users";
 import {
   getActiveKSNodes,
   getWalletKSNodesByWalletId,
@@ -69,9 +72,15 @@ export async function signIn(
 
     // Update user metadata on every sign-in
     if (metadata) {
-      const updateMetadataRes = await updateUserMetadata(db, getUserRes.data.user_id, metadata);
+      const updateMetadataRes = await updateUserMetadata(
+        db,
+        getUserRes.data.user_id,
+        metadata,
+      );
       if (updateMetadataRes.success === false) {
-        logger.error(`Failed to update user metadata: ${updateMetadataRes.err}`);
+        logger.error(
+          `Failed to update user metadata: ${updateMetadataRes.err}`,
+        );
       }
     }
 

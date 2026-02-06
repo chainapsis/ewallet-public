@@ -1,10 +1,14 @@
-export type OperationType = "sign_in" | "sign_up" | "add_ed25519";
+export type OperationType =
+  | "sign_up"
+  | "sign_in"
+  | "reshare"
+  | "add_ed25519"
+  | "add_ed25519_with_reshare";
 
 export type ApiName =
   | "get_key_shares"
   | "register"
   | "reshare"
-  | "reshare_register"
   | "register_ed25519";
 
 export type SessionState = "COMMITTED" | "COMPLETED";

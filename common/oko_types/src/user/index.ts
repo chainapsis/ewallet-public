@@ -27,16 +27,8 @@ export interface CheckEmailResponse {
   active_nodes_below_threshold: boolean;
 }
 
-export interface WalletCheckInfo {
-  keyshare_node_meta: KeyShareNodeMetaWithNodeStatusInfo;
-  needs_reshare: boolean;
-  reshare_reasons?: ReshareReason[];
-  active_nodes_below_threshold: boolean;
-}
-
 /**
  * Response when user does not exist or user exists but has no wallets.
- * Returns global keyshare node metadata for signup flow.
  */
 export interface CheckEmailResponseV2NotExists {
   exists: false;
@@ -46,25 +38,26 @@ export interface CheckEmailResponseV2NotExists {
 
 /**
  * Response when user exists with only secp256k1 wallet (legacy user).
- * Indicates that ed25519 keygen is required for full wallet setup.
+ * Client should: 1) ed25519 keygen first, 2) reshare if needed
  */
 export interface CheckEmailResponseV2NeedsEd25519Keygen {
   exists: true;
-  active_nodes_below_threshold: boolean;
   needs_keygen_ed25519: true;
-  secp256k1: WalletCheckInfo;
-  /** Global keyshare node metadata for ed25519 keygen */
   keyshare_node_meta: KeyShareNodeMetaWithNodeStatusInfo;
+  needs_reshare: boolean;
+  reshare_reasons?: ReshareReason[];
+  active_nodes_below_threshold: boolean;
 }
 
 /**
- * Response when user exists with both secp256k1 and ed25519 wallets.
- * Returns reshare status for each wallet type.
+ * Response when user exists with both wallets.
  */
 export interface CheckEmailResponseV2BothWallets {
   exists: true;
-  secp256k1: WalletCheckInfo;
-  ed25519: WalletCheckInfo;
+  keyshare_node_meta: KeyShareNodeMetaWithNodeStatusInfo;
+  needs_reshare: boolean;
+  reshare_reasons?: ReshareReason[];
+  active_nodes_below_threshold: boolean;
 }
 
 export type CheckEmailResponseV2 =
@@ -121,22 +114,13 @@ export interface ReshareRequest {
 export type ReshareRequestBody = OAuthRequest<ReshareRequest>;
 
 /**
- * Reshare info for a single wallet type.
- */
-export interface ReshareWalletInfo {
-  public_key: string; // hex public key
-  reshared_key_shares: NodeNameAndEndpoint[];
-}
-
-/**
  * V2 Reshare request body for /tss/v2/user/reshare endpoint.
- * Supports both secp256k1 and ed25519 wallets with per-wallet node lists.
  */
 export interface ReshareRequestV2 {
-  wallets: {
-    secp256k1?: ReshareWalletInfo;
-    ed25519?: ReshareWalletInfo;
-  };
+  auth_type: AuthType;
+  secp256k1_public_key: string;
+  ed25519_public_key: string;
+  reshared_key_shares: NodeNameAndEndpoint[];
 }
 
 export interface SaveReferralRequest {
@@ -147,6 +131,29 @@ export interface SaveReferralRequest {
 
 export interface SaveReferralResponse {
   referral_id: string;
+}
+
+/**
+ * HTTP request body for reporting key share not found.
+ * Called when client receives KEY_SHARE_NOT_FOUND from nodes that were expected to be ACTIVE.
+ */
+export interface ReportKeyShareNotFoundBody {
+  nodes: NodeNameAndEndpoint[];
+}
+
+/**
+ * Internal service request for reporting key share not found.
+ * Includes wallet IDs from JWT authentication.
+ */
+export interface ReportKeyShareNotFoundRequest {
+  wallet_id_secp256k1: string;
+  wallet_id_ed25519: string;
+  nodes: NodeNameAndEndpoint[];
+}
+
+export interface ReportKeyShareNotFoundResponse {
+  updated_count_secp256k1: number;
+  updated_count_ed25519: number;
 }
 
 export { NodeNameAndEndpoint };

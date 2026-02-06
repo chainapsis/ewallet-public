@@ -239,6 +239,14 @@ export function setUserV1Routes(router: Router) {
     security: [],
     request: {
       headers: UserAuthHeaderSchema,
+      body: {
+        required: false,
+        content: {
+          "application/json": {
+            schema: SignInRequestSchema,
+          },
+        },
+      },
     },
     responses: {
       200: {
@@ -271,7 +279,7 @@ export function setUserV1Routes(router: Router) {
     "/user/signin_silently",
     [tssActivateMiddleware],
     async (
-      req: Request<any, any, {}>,
+      req: Request<any, any, { auth_type?: string }>,
       res: Response<OkoApiResponse<SignInSilentlyResponse>>,
     ) => {
       const authHeader = req.headers.authorization;
@@ -287,6 +295,8 @@ export function setUserV1Routes(router: Router) {
 
       const token = authHeader.substring(7); // skip "Bearer "
       const state = req.app.locals;
+      // @NOTE: default to google if auth_type is not provided
+      const auth_type = (req.body?.auth_type ?? "google") as AuthType;
 
       const verifyTokenRes = verifyUserToken({
         token,
@@ -313,7 +323,7 @@ export function setUserV1Routes(router: Router) {
           const signInRes = await signIn(
             state.db,
             payload.email,
-            "google",
+            auth_type,
             {
               secret: state.jwt_secret,
               expires_in: state.jwt_expires_in,

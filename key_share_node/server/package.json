@@ -9,6 +9,9 @@
     "start": "tsx src/bin/launch/index.ts --node-id=1",
     "start_2": "tsx src/bin/launch/index.ts --node-id=2",
     "start_3": "tsx src/bin/launch/index.ts --node-id=3",
+    "start_4": "tsx src/bin/launch/index.ts --node-id=4",
+    "start_5": "tsx src/bin/launch/index.ts --node-id=5",
+    "start_6": "tsx src/bin/launch/index.ts --node-id=6",
     "rotate_keypair": "tsx src/bin/rotate_keypair.ts",
     "jest": "NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest"
   },

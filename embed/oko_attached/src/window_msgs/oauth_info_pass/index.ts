@@ -304,16 +304,8 @@ export async function handleOAuthInfoPassV2(
     const checkResult = checkEmailResp.data;
 
     // Highest-priority guard: active nodes below threshold → block all flows
-    // Check top-level for NotExists/NeedsEd25519Keygen, or per-wallet for BothWallets
-    const isActiveNodesBelowThreshold =
-      ("active_nodes_below_threshold" in checkResult &&
-        checkResult.active_nodes_below_threshold) ||
-      ("secp256k1" in checkResult &&
-        checkResult.secp256k1.active_nodes_below_threshold) ||
-      ("ed25519" in checkResult &&
-        checkResult.ed25519.active_nodes_below_threshold);
-
-    if (isActiveNodesBelowThreshold) {
+    // All response types now have unified active_nodes_below_threshold at top level
+    if (checkResult.active_nodes_below_threshold) {
       await bail(message, {
         type: "active_nodes_below_threshold",
       });
@@ -426,15 +418,13 @@ export async function handleUserSignInV2(
     "needs_keygen_ed25519" in checkResult &&
     checkResult.needs_keygen_ed25519
   ) {
-    const secp256k1Meta = checkResult.secp256k1.keyshare_node_meta;
-    const ed25519Meta = checkResult.keyshare_node_meta;
+    const keyshareNodeMeta = checkResult.keyshare_node_meta;
 
     // Scenario 6: secp256k1 needs reshare + ed25519 needs keygen
-    if (checkResult.secp256k1.needs_reshare) {
+    if (checkResult.needs_reshare) {
       const signInRes = await handleReshareAndEd25519Keygen(
         idToken,
-        secp256k1Meta,
-        ed25519Meta,
+        keyshareNodeMeta,
         authType,
       );
       if (!signInRes.success) {
@@ -452,8 +442,7 @@ export async function handleUserSignInV2(
     // Normal ed25519 keygen flow (no reshare needed)
     const signInRes = await handleExistingUserNeedsEd25519Keygen(
       idToken,
-      secp256k1Meta,
-      ed25519Meta,
+      keyshareNodeMeta,
       authType,
     );
     if (!signInRes.success) {
@@ -468,30 +457,14 @@ export async function handleUserSignInV2(
     };
   }
 
-  // Case 3: User exists with both wallets
-  if (!("ed25519" in checkResult)) {
-    return {
-      success: false,
-      err: {
-        type: "sign_in_request_fail",
-        error: "Expected ed25519 wallet info but not found",
-      },
-    };
-  }
+  // Case 3: User exists with both wallets (unified keyshare_node_meta)
+  const keyshareNodeMeta = checkResult.keyshare_node_meta;
 
-  const secp256k1Meta = checkResult.secp256k1.keyshare_node_meta;
-  const ed25519Meta = checkResult.ed25519.keyshare_node_meta;
-
-  // Check if reshare is needed for either wallet
-  const secp256k1NeedsReshare = checkResult.secp256k1.needs_reshare;
-  const ed25519NeedsReshare = checkResult.ed25519.needs_reshare;
-
-  if (secp256k1NeedsReshare || ed25519NeedsReshare) {
-    // V2 reshare flow
+  if (checkResult.needs_reshare) {
+    // V2 reshare flow (unified)
     const signInRes = await handleReshareV2(
       idToken,
-      secp256k1Meta,
-      ed25519Meta,
+      keyshareNodeMeta,
       authType,
       secp256k1NeedsReshare,
       ed25519NeedsReshare,
@@ -512,8 +485,7 @@ export async function handleUserSignInV2(
   // Normal sign in flow
   const signInRes = await handleExistingUserV2(
     idToken,
-    secp256k1Meta,
-    ed25519Meta,
+    keyshareNodeMeta,
     authType,
     apiKey,
   );

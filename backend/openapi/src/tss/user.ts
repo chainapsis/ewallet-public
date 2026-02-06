@@ -203,27 +203,6 @@ const KeyshareNodeMetaV2Schema = z
   })
   .openapi({ description: "Keyshare node metadata" });
 
-// V2: WalletCheckInfo schema for per-wallet reshare info
-const WalletCheckInfoSchema = registry.register(
-  "TssUserWalletCheckInfo",
-  z.object({
-    keyshare_node_meta: KeyshareNodeMetaV2Schema.openapi({
-      description: "Keyshare node metadata for this wallet",
-    }),
-    needs_reshare: z.boolean().openapi({
-      description: "True when wallet needs resharing",
-    }),
-    reshare_reasons: z
-      .array(ReshareReasonEnum)
-      .optional()
-      .openapi({ description: "Reasons why reshare is required" }),
-    active_nodes_below_threshold: z.boolean().openapi({
-      description:
-        "True when count of active KS nodes is below global SSS threshold",
-    }),
-  }),
-);
-
 // V2: CheckEmailResponseV2 - User does not exist or has no wallets
 const CheckEmailDataV2NotExistsSchema = registry.register(
   "TssUserCheckEmailDataV2NotExists",
@@ -248,18 +227,21 @@ const CheckEmailDataV2NeedsEd25519KeygenSchema = registry.register(
     exists: z.literal(true).openapi({
       description: "User exists",
     }),
-    active_nodes_below_threshold: z.boolean().openapi({
-      description:
-        "True when count of active KS nodes is below global SSS threshold",
-    }),
     needs_keygen_ed25519: z.literal(true).openapi({
       description: "Indicates ed25519 keygen is required",
     }),
-    secp256k1: WalletCheckInfoSchema.openapi({
-      description: "Reshare info for secp256k1 wallet",
-    }),
     keyshare_node_meta: KeyshareNodeMetaV2Schema.openapi({
-      description: "Global keyshare node metadata for ed25519 keygen",
+      description: "Keyshare node metadata (secp256k1-based)",
+    }),
+    needs_reshare: z.boolean().openapi({
+      description: "True if secp256k1 wallet needs resharing",
+    }),
+    reshare_reasons: z
+      .array(ReshareReasonEnum)
+      .optional()
+      .openapi({ description: "Reasons why reshare is required" }),
+    active_nodes_below_threshold: z.boolean().openapi({
+      description: "True when active nodes count is below threshold",
     }),
   }),
 );
@@ -271,11 +253,18 @@ const CheckEmailDataV2BothWalletsSchema = registry.register(
     exists: z.literal(true).openapi({
       description: "User exists",
     }),
-    secp256k1: WalletCheckInfoSchema.openapi({
-      description: "Reshare info for secp256k1 wallet",
+    keyshare_node_meta: KeyshareNodeMetaV2Schema.openapi({
+      description: "Unified keyshare node metadata",
     }),
-    ed25519: WalletCheckInfoSchema.openapi({
-      description: "Reshare info for ed25519 wallet",
+    needs_reshare: z.boolean().openapi({
+      description: "True if either wallet needs resharing",
+    }),
+    reshare_reasons: z
+      .array(ReshareReasonEnum)
+      .optional()
+      .openapi({ description: "Reasons why reshare is required" }),
+    active_nodes_below_threshold: z.boolean().openapi({
+      description: "True when active nodes count is below threshold",
     }),
   }),
 );

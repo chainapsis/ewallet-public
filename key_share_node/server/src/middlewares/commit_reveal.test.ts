@@ -192,14 +192,6 @@ describe("commit_reveal_middleware_test", () => {
     );
 
     app.post(
-      "/test/reshare_register",
-      commitRevealMiddleware("reshare_register"),
-      (_req, res) => {
-        res.status(200).json({ success: true, data: { message: "ok" } });
-      },
-    );
-
-    app.post(
       "/test/register_ed25519",
       commitRevealMiddleware("register_ed25519"),
       (_req, res) => {
@@ -277,9 +269,9 @@ describe("commit_reveal_middleware_test", () => {
       expect(response.body.success).toBe(true);
     });
 
-    it("should pass middleware with valid signature for sign_in operation with reshare", async () => {
+    it("should pass middleware with valid signature for reshare operation with reshare", async () => {
       const ctx = createTestContext({
-        operationType: "sign_in",
+        operationType: "reshare",
         apiName: "reshare",
       });
       await createSession(pool, ctx);
@@ -302,10 +294,10 @@ describe("commit_reveal_middleware_test", () => {
       expect(response.body.success).toBe(true);
     });
 
-    it("should pass middleware with valid signature for sign_in operation with reshare_register", async () => {
+    it("should pass middleware with valid signature for reshare operation with get_key_shares", async () => {
       const ctx = createTestContext({
-        operationType: "sign_in",
-        apiName: "reshare_register",
+        operationType: "reshare",
+        apiName: "get_key_shares",
       });
       await createSession(pool, ctx);
 
@@ -315,7 +307,7 @@ describe("commit_reveal_middleware_test", () => {
       );
 
       const response = await request(app)
-        .post("/test/reshare_register")
+        .post("/test/get_key_shares")
         .set("Authorization", `Bearer ${ctx.idToken}`)
         .send({
           cr_session_id: ctx.sessionId,

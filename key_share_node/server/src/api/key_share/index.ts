@@ -11,5 +11,4 @@ export {
   registerKeyShareV2,
   registerEd25519V2,
   reshareKeyShareV2,
-  reshareRegisterV2,
 } from "./v2";

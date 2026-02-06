@@ -23,6 +23,8 @@ import {
 import {
   createWalletKSNodes,
   getActiveKSNodes,
+  getWalletKSNodesByWalletId,
+  getKSNodesByIds,
 } from "@oko-wallet/oko-pg-interface/ks_nodes";
 import { getKeyShareNodeMeta } from "@oko-wallet/oko-pg-interface/key_share_node_meta";
 
@@ -73,9 +75,15 @@ export async function runKeygenV2(
 
       // Update user metadata if user already exists
       if (metadata) {
-        const updateMetadataRes = await updateUserMetadata(db, user.user_id, metadata);
+        const updateMetadataRes = await updateUserMetadata(
+          db,
+          user.user_id,
+          metadata,
+        );
         if (updateMetadataRes.success === false) {
-          logger.error(`Failed to update user metadata: ${updateMetadataRes.err}`);
+          logger.error(
+            `Failed to update user metadata: ${updateMetadataRes.err}`,
+          );
         }
       }
 
@@ -121,7 +129,12 @@ export async function runKeygenV2(
         };
       }
     } else {
-      const createUserRes = await createUser(db, user_identifier, auth_type, metadata);
+      const createUserRes = await createUser(
+        db,
+        user_identifier,
+        auth_type,
+        metadata,
+      );
       if (createUserRes.success === false) {
         return {
           success: false,
@@ -426,7 +439,8 @@ export async function runKeygenEd25519(
   logger: Logger,
 ): Promise<OkoApiResponse<SignInResponseV2>> {
   try {
-    const { auth_type, user_identifier, keygen_2, email, name, metadata } = keygenRequest;
+    const { auth_type, user_identifier, keygen_2, email, name, metadata } =
+      keygenRequest;
 
     const getUserRes = await getUserByEmailAndAuthType(
       db,
@@ -454,9 +468,15 @@ export async function runKeygenEd25519(
 
     // Update user metadata on keygen_ed25519
     if (metadata) {
-      const updateMetadataRes = await updateUserMetadata(db, user.user_id, metadata);
+      const updateMetadataRes = await updateUserMetadata(
+        db,
+        user.user_id,
+        metadata,
+      );
       if (updateMetadataRes.success === false) {
-        logger.error(`Failed to update user metadata: ${updateMetadataRes.err}`);
+        logger.error(
+          `Failed to update user metadata: ${updateMetadataRes.err}`,
+        );
       }
     }
 
@@ -538,22 +558,46 @@ export async function runKeygenEd25519(
     }
 
     // Check keyshare from KS nodes for ed25519
-    const getActiveKSNodesRes = await getActiveKSNodes(db);
-    if (getActiveKSNodesRes.success === false) {
+    // Option A: Use user's secp256k1 ACTIVE wallet_ks_nodes as verification set
+    const walletKsNodesRes = await getWalletKSNodesByWalletId(
+      db,
+      secp256k1Wallet.wallet_id,
+    );
+    if (walletKsNodesRes.success === false) {
       return {
         success: false,
         code: "UNKNOWN_ERROR",
-        msg: `getActiveKSNodes error: ${getActiveKSNodesRes.err}`,
+        msg: `getWalletKSNodesByWalletId error: ${walletKsNodesRes.err}`,
       };
     }
-    const activeKSNodes = getActiveKSNodesRes.data;
+    const activeNodeIds = walletKsNodesRes.data
+      .filter((n) => n.status === "ACTIVE")
+      .map((n) => n.node_id);
+
+    if (activeNodeIds.length === 0) {
+      return {
+        success: false,
+        code: "KEYSHARE_NODE_INSUFFICIENT",
+        msg: "no active ks nodes mapped for user (secp256k1)",
+      };
+    }
+
+    const getNodesByIdsRes = await getKSNodesByIds(db, activeNodeIds);
+    if (getNodesByIdsRes.success === false) {
+      return {
+        success: false,
+        code: "UNKNOWN_ERROR",
+        msg: `getKSNodesByIds error: ${getNodesByIdsRes.err}`,
+      };
+    }
+    const activeUserKSNodes = getNodesByIdsRes.data;
 
     const checkKeyshareV2Res = await checkKeyShareFromKSNodesV2(
       user_identifier,
       {
         ed25519: ed25519PublicKeyBytes,
       },
-      activeKSNodes,
+      activeUserKSNodes,
       auth_type,
     );
     if (checkKeyshareV2Res.success === false) {

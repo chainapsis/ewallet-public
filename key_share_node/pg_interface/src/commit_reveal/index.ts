@@ -17,6 +17,7 @@ INSERT INTO "2_commit_reveal_sessions" (
   id_token_hash, expires_at
 )
 VALUES ($1, $2, $3, $4, $5)
+ON CONFLICT DO NOTHING
 RETURNING *
 `;
     const values = [
@@ -30,7 +31,8 @@ RETURNING *
     const result = await db.query(query, values);
     const row = result.rows[0];
     if (!row) {
-      return { success: false, err: "Failed to create session" };
+      // No row returned means conflict with an existing unique key
+      return { success: false, err: "SESSION_ALREADY_EXISTS" };
     }
 
     return { success: true, data: row as CommitRevealSession };
