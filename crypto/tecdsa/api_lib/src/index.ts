@@ -186,12 +186,13 @@ export async function reqKeygen(
   endpoint: string,
   payload: KeygenRequestBody,
   authToken: string,
+  apiKey?: string,
 ) {
   const resp: OkoApiResponse<SignInResponse> = await makePostRequest(
     endpoint,
     "keygen",
     payload,
-    undefined,
+    apiKey,
     authToken,
   );
   return resp;
@@ -202,13 +203,14 @@ export async function reqKeygenV2(
   payload: KeygenRequestBodyV2,
   authToken: string,
   commitReveal: CommitRevealParams,
+  apiKey?: string,
 ) {
   const body = { ...payload, ...commitReveal };
   const resp: OkoApiResponse<SignInResponseV2> = await makePostRequest(
     endpoint,
     "keygen",
     body,
-    undefined,
+    apiKey,
     authToken,
   );
   return resp;

@@ -10,8 +10,8 @@ import { createJSONStorage, persist } from "zustand/middleware";
 
 import {
   ETHEREUM_MAINNET_CHAIN_ID,
-  SOLANA_MAINNET_CHAIN_ID,
   getChainIdentifier,
+  SOLANA_MAINNET_CHAIN_ID,
 } from "@oko-wallet-user-dashboard/utils/chain";
 
 const STORAGE_KEY = "oko:user_dashboard:chains";

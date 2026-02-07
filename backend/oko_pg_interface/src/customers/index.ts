@@ -1,11 +1,11 @@
-import { Pool, type PoolClient } from "pg";
-import type { Result } from "@oko-wallet/stdlib-js";
-import type { Customer } from "@oko-wallet/oko-types/customers";
-import { type CustomerAndCTDUser } from "@oko-wallet/oko-types/ct_dashboard";
 import type {
   DeleteCustomerRequest,
   DeleteCustomerResponse,
 } from "@oko-wallet/oko-types/admin";
+import type { CustomerAndCTDUser } from "@oko-wallet/oko-types/ct_dashboard";
+import type { Customer } from "@oko-wallet/oko-types/customers";
+import type { Result } from "@oko-wallet/stdlib-js";
+import type { Pool, PoolClient } from "pg";
 
 export async function insertCustomer(
   db: Pool | PoolClient,

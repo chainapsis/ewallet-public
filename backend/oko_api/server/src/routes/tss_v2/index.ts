@@ -39,6 +39,7 @@ export function makeTSSRouterV2() {
 
   router.post(
     "/keygen",
+    apiKeyMiddleware,
     oauthMiddleware,
     commitRevealMiddleware("keygen"),
     tssActivateMiddleware,
@@ -163,6 +164,7 @@ export function makeTSSRouterV2() {
 
   router.post(
     "/user/signin",
+    apiKeyMiddleware,
     oauthMiddleware,
     commitRevealMiddleware("signin"),
     tssActivateMiddleware,

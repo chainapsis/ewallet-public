@@ -21,6 +21,9 @@ export async function handleReshareV2(
   idToken: string,
   keyshareNodeMeta: KeyShareNodeMetaWithNodeStatusInfo,
   authType: AuthType,
+  secp256k1NeedsReshare: boolean,
+  ed25519NeedsReshare: boolean,
+  apiKey?: string,
 ): Promise<Result<UserSignInResultV2, OAuthSignInError>> {
   const { nodes } = keyshareNodeMeta;
 
@@ -63,6 +66,7 @@ export async function handleReshareV2(
     idToken,
     authType,
     signInCommitRevealRes.data,
+    apiKey,
   );
   if (!signInResult.success) {
     return { success: false, err: signInResult.err };

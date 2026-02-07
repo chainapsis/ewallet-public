@@ -5,8 +5,11 @@ import { ExternalLinkOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/extern
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import type { FC } from "react";
 
-import { useChain, useChainAddress } from "@oko-wallet-user-dashboard/hooks/queries";
 import styles from "./tx_history_support_item.module.scss";
+import {
+  useChain,
+  useChainAddress,
+} from "@oko-wallet-user-dashboard/hooks/queries";
 
 export type TxHistorySupportItemProps = {
   chainId: string;

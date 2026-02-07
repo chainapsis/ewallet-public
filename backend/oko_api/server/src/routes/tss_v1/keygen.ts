@@ -18,7 +18,8 @@ import {
   oauthMiddleware,
 } from "@oko-wallet-api/middleware/auth/oauth";
 import { tssActivateMiddleware } from "@oko-wallet-api/middleware/auth/tss_activate";
-import type { OAuthLocals } from "@oko-wallet-api/middleware/auth/types";
+import type { OAuthLocalsWithAPIKey } from "@oko-wallet-api/middleware/auth/types";
+import { apiKeyMiddleware } from "@oko-wallet-api/middleware/auth/api_key_auth";
 
 export function setKeygenV1Routes(router: Router) {
   registry.registerPath({
@@ -79,13 +80,15 @@ export function setKeygenV1Routes(router: Router) {
   });
   router.post(
     "/keygen",
+    apiKeyMiddleware,
     oauthMiddleware,
     tssActivateMiddleware,
     async (
       req: OAuthAuthenticatedRequest<KeygenBody>,
-      res: Response<OkoApiResponse<SignInResponse>, OAuthLocals>,
+      res: Response<OkoApiResponse<SignInResponse>, OAuthLocalsWithAPIKey>,
     ) => {
       const state = req.app.locals;
+      const apiKey = res.locals.api_key;
       const oauthUser = res.locals.oauth_user;
       const auth_type = oauthUser.type as AuthType;
       const user_identifier = oauthUser.user_identifier;
@@ -118,6 +121,7 @@ export function setKeygenV1Routes(router: Router) {
         },
         state.encryption_secret,
         state.logger,
+        apiKey.customer_id,
       );
 
       if (runKeygenRes.success === false) {

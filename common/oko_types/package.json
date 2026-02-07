@@ -29,7 +29,8 @@
     "./tss_activate": "./dist/tss_activate/index.js",
     "./social_login": "./dist/social_login/index.js",
     "./referral": "./dist/referral/index.js",
-    "./commit_reveal": "./dist/commit_reveal/index.js"
+    "./commit_reveal": "./dist/commit_reveal/index.js",
+    "./user_dashboard": "./dist/user_dashboard/index.js"
   },
   "dependencies": {
     "@oko-wallet/bytes": "^0.1.2-alpha.5",

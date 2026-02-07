@@ -6,6 +6,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
+import { useEnabledChains } from "./use_chains";
 import {
   selectCosmosInitialized,
   selectCosmosSDK,
@@ -16,7 +17,6 @@ import {
   useSDKState,
 } from "@oko-wallet-user-dashboard/state/sdk";
 import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
-import { useEnabledChains } from "./use_chains";
 import { isEvmOnlyChain } from "@oko-wallet-user-dashboard/utils/chain";
 
 /**

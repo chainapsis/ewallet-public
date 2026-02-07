@@ -122,6 +122,7 @@ export async function reqKeygenEd25519(
   payload: KeygenEd25519RequestBody,
   authToken: string,
   commitReveal?: CommitRevealParams,
+  apiKey?: string,
 ) {
   const body = commitReveal ? { ...payload, ...commitReveal } : payload;
   const resp: OkoApiResponse<SignInResponseV2> = await makePostRequest(
@@ -129,6 +130,7 @@ export async function reqKeygenEd25519(
     "keygen_ed25519",
     body,
     authToken,
+    apiKey,
   );
   return resp;
 }

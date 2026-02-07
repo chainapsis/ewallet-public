@@ -9,3 +9,6 @@ export const OKO_API_ENDPOINT = import.meta.env.VITE_OKO_API_ENDPOINT;
 
 export const OKO_PUBLIC_S3_BUCKET_URL = import.meta.env
   .VITE_PUBLIC_S3_BUCKET_URL;
+
+export const USER_DASHBOARD_ORIGINS = import.meta.env
+  .VITE_USER_DASHBOARD_ORIGINS;

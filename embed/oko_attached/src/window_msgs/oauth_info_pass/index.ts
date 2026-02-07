@@ -316,6 +316,7 @@ export async function handleOAuthInfoPassV2(
       idToken,
       checkResult,
       authType,
+      apiKey,
     );
     if (!handleUserSignInRes.success) {
       await bail(message, handleUserSignInRes.err);
@@ -388,6 +389,7 @@ export async function handleUserSignInV2(
   idToken: string,
   checkResult: CheckEmailResponseV2,
   authType: AuthType,
+  apiKey?: string,
 ): Promise<Result<UserSignInResultV2, OAuthSignInError>> {
   // Case 1: User doesn't exist - needs both secp256k1 and ed25519 keygen
   if (!checkResult.exists) {
@@ -396,6 +398,7 @@ export async function handleUserSignInV2(
       idToken,
       checkResult.keyshare_node_meta,
       authType,
+      apiKey,
       referralInfo,
     );
     if (!signInRes.success) {
@@ -463,6 +466,9 @@ export async function handleUserSignInV2(
       idToken,
       keyshareNodeMeta,
       authType,
+      secp256k1NeedsReshare,
+      ed25519NeedsReshare,
+      apiKey
     );
     if (!signInRes.success) {
       return {
@@ -481,6 +487,7 @@ export async function handleUserSignInV2(
     idToken,
     keyshareNodeMeta,
     authType,
+    apiKey,
   );
   if (!signInRes.success) {
     return {

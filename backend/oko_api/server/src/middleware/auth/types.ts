@@ -1,4 +1,5 @@
 import type { AuthType } from "@oko-wallet/oko-types/auth";
+import type { APIKey } from "@oko-wallet/oko-types/ct_dashboard";
 
 export interface OAuthBody {
   auth_type: AuthType;
@@ -17,4 +18,8 @@ export interface OAuthUser {
 
 export interface OAuthLocals {
   oauth_user: OAuthUser;
+}
+
+export interface OAuthLocalsWithAPIKey extends OAuthLocals {
+  api_key: APIKey;
 }

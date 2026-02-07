@@ -31,6 +31,7 @@ import { getKeyShareNodeMeta } from "@oko-wallet/oko-pg-interface/key_share_node
 import { generateUserTokenV2 } from "@oko-wallet-api/api/tss/keplr_auth";
 import { checkKeyShareFromKSNodesV2 } from "@oko-wallet-api/api/tss/ks_node";
 import { extractKeyPackageSharesEd25519 } from "@oko-wallet/teddsa-addon/src/server";
+import { saveUserCustomerConnection } from "../../connection";
 
 export async function runKeygenV2(
   db: Pool,
@@ -41,6 +42,7 @@ export async function runKeygenV2(
   keygenRequest: KeygenRequestV2,
   encryptionSecret: string,
   logger: Logger,
+  customerId: string,
 ): Promise<OkoApiResponse<SignInResponseV2>> {
   try {
     const {
@@ -387,6 +389,18 @@ export async function runKeygenV2(
         code: "FAILED_TO_GENERATE_TOKEN",
         msg: `generateUserToken error: ${tokenResult.err}`,
       };
+    }
+
+    if (customerId) {
+      saveUserCustomerConnection(
+        db,
+        logger,
+        user.user_id,
+        customerId,
+      )
+        .catch((err) => {
+          logger.error(`runKeygenV2 error inserting user-customer connection: ${err}`);
+        });
     }
 
     return {

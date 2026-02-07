@@ -25,6 +25,7 @@ import { getKeyShareNodeMeta } from "@oko-wallet/oko-pg-interface/key_share_node
 
 import { generateUserToken } from "@oko-wallet-api/api/tss/keplr_auth";
 import { checkKeyShareFromKSNodes } from "@oko-wallet-api/api/tss/ks_node";
+import { saveUserCustomerConnection } from "@oko-wallet-api/api/tss/connection";
 
 export async function runKeygen(
   db: Pool,
@@ -35,6 +36,7 @@ export async function runKeygen(
   keygenRequest: KeygenRequest,
   encryptionSecret: string,
   logger: Logger,
+  customerId: string,
 ): Promise<OkoApiResponse<SignInResponse>> {
   try {
     const { auth_type, user_identifier, keygen_2, email, name, metadata } = keygenRequest;
@@ -227,6 +229,10 @@ export async function runKeygen(
         msg: `generateUserToken error: ${tokenResult.err}`,
       };
     }
+
+    saveUserCustomerConnection(db, logger, user.user_id, customerId).catch((err) => {
+      logger.error(`runKeygen error inserting user-customer connection: ${err}`);
+    });
 
     return {
       success: true,

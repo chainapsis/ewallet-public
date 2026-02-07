@@ -1,6 +1,6 @@
-import { Pool, type PoolClient } from "pg";
 import type { OkoAdminUser } from "@oko-wallet/oko-types/admin";
 import type { Result } from "@oko-wallet/stdlib-js";
+import type { Pool, PoolClient } from "pg";
 
 export async function createAdmin(
   db: Pool | PoolClient,
