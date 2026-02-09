@@ -60,7 +60,7 @@ const ErrorMessage: React.FC<{ error: string }> = ({ error }) => {
       <Spacing height={32} />
 
       <a
-        href="https://oko-wallet.canny.io/bug-reports"
+        href="https://okowallet.userjot.com/board/report-bugs"
         target="_blank"
         rel="noopener noreferrer"
         className={styles.supportLink}
