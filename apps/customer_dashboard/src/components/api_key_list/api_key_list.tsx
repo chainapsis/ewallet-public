@@ -20,16 +20,42 @@ import { useAPIKeysTable } from "./use_api_keys_table";
 import {
   useAPIKeys,
   useCreateAPIKey,
+  useDeleteAPIKey,
 } from "@oko-wallet-ct-dashboard/hooks/use_api_keys";
 import { displayToast } from "@oko-wallet-ct-dashboard/components/toast";
+import { DeleteAPIKeyModal } from "./delete_api_key_modal";
 
 export const APIKeyList: FC = () => {
   const { data: apiKeys } = useAPIKeys();
   const { table } = useAPIKeysTable(apiKeys ?? []);
   const createAPIKey = useCreateAPIKey();
+  const deleteAPIKey = useDeleteAPIKey();
   const [deleteTargetKeyId, setDeleteTargetKeyId] = useState<string | null>(
     null,
   );
+
+  const deleteTargetKey = apiKeys?.find(
+    (key) => key.key_id === deleteTargetKeyId,
+  );
+
+  const handleDelete = () => {
+    if (!deleteTargetKeyId) return;
+    deleteAPIKey.mutate(deleteTargetKeyId, {
+      onSuccess: () => {
+        setDeleteTargetKeyId(null);
+        displayToast({
+          variant: "success",
+          title: "API key deleted!",
+        });
+      },
+      onError: () => {
+        displayToast({
+          variant: "error",
+          title: "Failed to delete API key",
+        });
+      },
+    });
+  };
 
   const handleCreate = () => {
     createAPIKey.mutate(undefined, {
@@ -105,6 +131,16 @@ export const APIKeyList: FC = () => {
           ))}
         </TableBody>
       </Table>
+
+      {deleteTargetKey && (
+        <DeleteAPIKeyModal
+          apiKey={deleteTargetKey.hashed_key}
+          isActive={deleteTargetKey.is_active}
+          onDelete={handleDelete}
+          onClose={() => setDeleteTargetKeyId(null)}
+          isDeleting={deleteAPIKey.isPending}
+        />
+      )}
     </div>
   );
 };
