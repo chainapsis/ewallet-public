@@ -121,9 +121,8 @@ export const APIKeyItemRow: FC<APIKeyItemRowProps> = ({
               id: "delete",
               label: "Delete",
               onClick: () => onDelete(keyId),
-              className: styles.deleteMenuItem,
               labelColor: "error-primary",
-              icon: <TrashIcon color="var(--text-error-primary)" size={24} />,
+              icon: <TrashIcon color="var(--fg-error-secondary, #f04438)" size={24} />,
             },
           ]}
         />
