@@ -75,6 +75,13 @@
   padding: 12px 24px 16px;
 }
 
+.errorIcon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
 .deleteButton {
   background: var(--bg-error-solid) !important;
   border-color: var(--bg-error-solid) !important;

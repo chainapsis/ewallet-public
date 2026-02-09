@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@oko-wallet/oko-common-ui/button";
+import { ErrorIcon } from "@oko-wallet/oko-common-ui/icons/error_icon";
 import { TrashIcon } from "@oko-wallet/oko-common-ui/icons/trash";
 import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
 import { Input } from "@oko-wallet/oko-common-ui/input";
@@ -27,14 +28,19 @@ export const DeleteAPIKeyModal: FC<DeleteAPIKeyModalProps> = ({
   isDeleting,
 }) => {
   const [confirmText, setConfirmText] = useState("");
-  const [hasAttempted, setHasAttempted] = useState(false);
+  const [showError, setShowError] = useState(false);
 
   const isConfirmed = confirmText === "Delete";
-  const showError = hasAttempted && !isConfirmed && confirmText.length > 0;
+
+  const handleBlur = () => {
+    if (confirmText.length > 0 && !isConfirmed) {
+      setShowError(true);
+    }
+  };
 
   const handleDelete = () => {
     if (!isConfirmed) {
-      setHasAttempted(true);
+      setShowError(true);
       return;
     }
     onDelete();
@@ -105,11 +111,19 @@ export const DeleteAPIKeyModal: FC<DeleteAPIKeyModalProps> = ({
             value={confirmText}
             onChange={(e) => {
               setConfirmText(e.target.value);
-              if (hasAttempted) {
-                setHasAttempted(false);
-              }
+              setShowError(false);
             }}
+            onBlur={handleBlur}
             error={showError ? "Confirmation text doesn't match." : undefined}
+            SideComponent={
+              showError ? (
+                <ErrorIcon
+                  color="var(--fg-error-primary)"
+                  size={16}
+                  className={styles.errorIcon}
+                />
+              ) : undefined
+            }
             fullWidth
           />
 
