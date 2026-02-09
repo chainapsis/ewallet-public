@@ -68,7 +68,14 @@ async function reportTelemetry(
         response.statusText,
       );
     }
-  } catch (error) {
-    logger.error("Error reporting telemetry: %s", error);
+  } catch (error: any) {
+    // logger.error("Error reporting telemetry: %s", error);
+
+    console.error("Fetch failed: %s", error?.message);
+
+    // Log the specific cause of the network error, e.g., ECONNREFUSED, ETIMEDOUT
+    if (error.cause) {
+      console.error("Cause: %s", error?.cause?.code);
+    }
   }
 }
