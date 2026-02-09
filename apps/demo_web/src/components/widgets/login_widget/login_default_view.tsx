@@ -75,7 +75,7 @@ export const LoginDefaultView: FC<LoginDefaultViewProps> = ({
       <div className={styles.getSupportRow}>
         <OkoLogoWithNameIcon width={52} height={20} theme={"light"} />
         <a
-          href="https://oko-wallet.canny.io/bug-reports"
+          href="https://okowallet.userjot.com/board/report-bugs"
           target="_blank"
           rel="noopener noreferrer"
           className={styles.supportLink}
