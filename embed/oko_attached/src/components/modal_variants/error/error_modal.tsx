@@ -88,7 +88,7 @@ export const ErrorModal: FC<ErrorModalProps> = ({ error }) => {
           <Spacing height={12} />
 
           <a
-            href="https://oko-wallet.canny.io/bug-reports"
+            href="https://okowallet.userjot.com/board/report-bugs"
             target="_blank"
             rel="noopener noreferrer"
             className={styles.supportLink}
