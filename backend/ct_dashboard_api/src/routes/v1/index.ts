@@ -14,10 +14,14 @@ import { customerJwtMiddleware } from "@oko-wallet-ctd-api/middleware/auth";
 import { customerLogoUploadMiddleware } from "@oko-wallet-ctd-api/middleware/multer";
 import { rateLimitMiddleware } from "@oko-wallet-ctd-api/middleware/rate_limit";
 
+const ONE_MINUTE_SEC = 1 * 60;
+
 export function makeCustomerRouter() {
   const router = express.Router();
 
-  router.use(rateLimitMiddleware({ windowSeconds: 10 * 60, maxRequests: 20 }));
+  router.use(
+    rateLimitMiddleware({ windowSeconds: ONE_MINUTE_SEC, maxRequests: 20 }),
+  );
 
   router.post("/customer/auth/forgot-password", forgotPassword);
 
