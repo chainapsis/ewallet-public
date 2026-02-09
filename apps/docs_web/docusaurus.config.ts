@@ -92,7 +92,7 @@ const config: Config = {
           items: [
             {
               label: "Oko integration support",
-              href: "https://oko-wallet.canny.io/integration-support-inquiries",
+              href: "https://okowallet.userjot.com/board/integration-support-inquiries",
             },
           ],
         },
