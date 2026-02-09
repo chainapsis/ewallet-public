@@ -38,7 +38,7 @@
 }
 
 .confirmIcon {
-  color: var(--fg-brand-primary, #313131);
+  color: var(--fg-primary, #181d27);
   position: relative;
   width: 20px;
   height: 20px;
@@ -51,7 +51,7 @@
     height: calc(100% + 8px);
     border-radius: 9999px;
     border: 2px solid;
-    border-color: rgba(#313131, 0.3);
+    border-color: rgba(#d92d20, 0.3);
   }
 
   .confirmIconOuterRing2 {
@@ -62,7 +62,7 @@
     height: calc(100% + 18px);
     border-radius: 9999px;
     border: 2px solid;
-    border-color: rgba(#313131, 0.1);
+    border-color: rgba(#d92d20, 0.1);
   }
 }
 
