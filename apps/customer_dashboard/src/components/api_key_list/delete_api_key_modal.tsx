@@ -28,19 +28,14 @@ export const DeleteAPIKeyModal: FC<DeleteAPIKeyModalProps> = ({
   isDeleting,
 }) => {
   const [confirmText, setConfirmText] = useState("");
-  const [showError, setShowError] = useState(false);
+  const [touched, setTouched] = useState(false);
 
   const isConfirmed = confirmText === "Delete";
-
-  const handleBlur = () => {
-    if (confirmText.length > 0 && !isConfirmed) {
-      setShowError(true);
-    }
-  };
+  const showError = touched && confirmText.length > 0 && !isConfirmed;
 
   const handleDelete = () => {
     if (!isConfirmed) {
-      setShowError(true);
+      setTouched(true);
       return;
     }
     onDelete();
@@ -111,9 +106,8 @@ export const DeleteAPIKeyModal: FC<DeleteAPIKeyModalProps> = ({
             value={confirmText}
             onChange={(e) => {
               setConfirmText(e.target.value);
-              setShowError(false);
             }}
-            onBlur={handleBlur}
+            onBlur={() => setTouched(true)}
             error={showError ? "Confirmation text doesn't match." : undefined}
             SideComponent={
               showError ? (
