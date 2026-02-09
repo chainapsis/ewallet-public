@@ -44,7 +44,7 @@ export const APIKeyList: FC = () => {
       onSuccess: () => {
         setDeleteTargetKeyId(null);
         displayToast({
-          variant: "success",
+          variant: "confirm",
           title: "API key deleted!",
         });
       },
