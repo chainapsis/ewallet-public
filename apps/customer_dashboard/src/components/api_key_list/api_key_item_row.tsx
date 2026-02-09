@@ -6,6 +6,7 @@ import { CopyOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/copy_outlined"
 import { EyeIcon } from "@oko-wallet/oko-common-ui/icons/eye";
 import { EyeOffIcon } from "@oko-wallet/oko-common-ui/icons/eye_off";
 import { ThreeDotsVerticalIcon } from "@oko-wallet/oko-common-ui/icons/three_dots_vertical";
+import { TrashIcon } from "@oko-wallet/oko-common-ui/icons/trash";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import { TableCell, TableRow } from "@oko-wallet/oko-common-ui/table";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
@@ -105,6 +106,7 @@ export const APIKeyItemRow: FC<APIKeyItemRowProps> = ({
       <TableCell className={styles.actionCell}>
         <AnchoredMenu
           placement="bottom-end"
+          className={styles.deleteMenu}
           TriggerComponent={
             <button type="button" className={styles.buttonIcon}>
               <ThreeDotsVerticalIcon
@@ -120,6 +122,8 @@ export const APIKeyItemRow: FC<APIKeyItemRowProps> = ({
               label: "Delete",
               onClick: () => onDelete(keyId),
               className: styles.deleteMenuItem,
+              labelColor: "error-primary",
+              icon: <TrashIcon color="var(--text-error-primary)" size={24} />,
             },
           ]}
         />

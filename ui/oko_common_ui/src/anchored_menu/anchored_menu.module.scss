@@ -5,7 +5,8 @@
 .menu {
   border-radius: 12px;
   border: 1px solid var(--border-secondary-alt);
-  background: var(--bg-secondary-alt);
+  background: var(--bg-primary, white);
+  overflow: clip;
 
   box-shadow: var(--shadow-lg);
 }
@@ -13,36 +14,40 @@
 .menuList {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 6px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .menuItem {
+  --menu-item-hover-bg: var(--bg-primary_hover, #fafafa);
+
   display: flex;
-  padding: 12px 14px 14px 14px;
+  padding: 0 6px;
   align-items: center;
   cursor: pointer;
+}
 
-  &:hover {
-    .menuItemLabel {
-      color: var(--text-secondary-hover);
-    }
+.menuItemContent {
+  display: flex;
+  flex: 1;
+  padding: 8px;
+  align-items: center;
+  border-radius: 6px;
+  gap: 8px;
+  overflow: clip;
+}
 
-    .menuItemIcon {
-      color: var(--fg-quaternary-hover);
-    }
-  }
+.menuItem:hover .menuItemContent {
+  background: var(--menu-item-hover-bg);
 }
 
 .menuItemIcon {
   display: flex;
   align-items: center;
   justify-content: center;
-
-  width: 16px;
-  height: 16px;
-  margin-right: 8px;
-
-  color: var(--fg-quaternary);
+  flex-shrink: 0;
 }
 
 .menuItemLabel {

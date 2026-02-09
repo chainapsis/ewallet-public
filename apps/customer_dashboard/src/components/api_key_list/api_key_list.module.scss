@@ -50,10 +50,10 @@
   transform: rotate(90deg);
 }
 
-.deleteMenuItem {
-  color: var(--text-error-primary);
+.deleteMenu {
+  min-width: 264px;
+}
 
-  span {
-    color: var(--text-error-primary);
-  }
+.deleteMenuItem {
+  --menu-item-hover-bg: var(--error-50, #fef3f2);
 }
