@@ -108,6 +108,11 @@ export const DeleteAPIKeyModal: FC<DeleteAPIKeyModalProps> = ({
               setConfirmText(e.target.value);
             }}
             onBlur={() => setTouched(true)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                setTouched(true);
+              }
+            }}
             error={showError ? "Confirmation text doesn't match." : undefined}
             SideComponent={
               showError ? (

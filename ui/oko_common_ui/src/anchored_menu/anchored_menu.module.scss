@@ -48,7 +48,8 @@
   overflow: clip;
 }
 
-.menuItem:hover .menuItemContent {
+/* Figma hover: Menu items wrapper bg changes from bg-primary to bg-primary_hover */
+.menuList:has(.menuItem:hover) {
   background: var(--bg-primary_hover, #fafafa);
 }
 

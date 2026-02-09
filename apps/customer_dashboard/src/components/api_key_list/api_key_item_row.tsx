@@ -110,8 +110,8 @@ export const APIKeyItemRow: FC<APIKeyItemRowProps> = ({
           TriggerComponent={
             <button type="button" className={styles.buttonIcon}>
               <ThreeDotsVerticalIcon
-                color="var(--fg-quaternary)"
-                size={16}
+                color="var(--fg-secondary, #414651)"
+                size={24}
                 className={styles.horizontalDots}
               />
             </button>
@@ -121,6 +121,7 @@ export const APIKeyItemRow: FC<APIKeyItemRowProps> = ({
               id: "delete",
               label: "Delete",
               onClick: () => onDelete(keyId),
+              className: styles.deleteMenuItem,
               labelColor: "error-primary",
               icon: <TrashIcon color="var(--fg-error-secondary, #f04438)" size={24} />,
             },

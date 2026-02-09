@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -12,7 +16,7 @@
     "verbatimModuleSyntax": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
     "plugins": [
       {
@@ -20,11 +24,25 @@
       }
     ],
     "paths": {
-      "@oko-wallet-ct-dashboard/*": ["./src/*"],
-      "@oko-wallet-common-ui/*": ["../../ui/oko_common_ui/src/*"],
-      "@oko-wallet-types/*": ["../../common/oko_types/src/*"]
+      "@oko-wallet-ct-dashboard/*": [
+        "./src/*"
+      ],
+      "@oko-wallet-common-ui/*": [
+        "../../ui/oko_common_ui/src/*"
+      ],
+      "@oko-wallet-types/*": [
+        "../../common/oko_types/src/*"
+      ]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
