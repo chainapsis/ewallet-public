@@ -73,7 +73,7 @@ export const DefaultView: FC<DefaultViewProps> = ({
         />
         <a
           className="oko-footer-link"
-          href="https://oko-wallet.canny.io/bug-reports"
+          href="https://okowallet.userjot.com/board/report-bugs"
           target="_blank"
           rel="noopener noreferrer"
         >
