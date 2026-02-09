@@ -83,15 +83,15 @@ export const DeleteAPIKeyModal: FC<DeleteAPIKeyModalProps> = ({
             })}
           >
             <Typography
-              size="md"
+              size={isActive ? "md" : "sm"}
               weight="medium"
-              color={isActive ? "error-primary" : "secondary"}
+              color={isActive ? "error-primary" : "tertiary"}
               tagType="p"
             >
               {apiKey}
             </Typography>
             {isActive && (
-              <Typography size="sm" color="error-primary">
+              <Typography size="sm" weight="regular" color="error-primary">
                 Any requests using this key will stop working immediately.
               </Typography>
             )}
