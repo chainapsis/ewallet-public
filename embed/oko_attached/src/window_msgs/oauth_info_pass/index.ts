@@ -1,48 +1,48 @@
-import type { Result } from "@oko-wallet/stdlib-js";
 import type {
+  OAuthSignInError,
   OkoWalletMsgOAuthInfoPass,
   OkoWalletMsgOAuthInfoPassAck,
   OkoWalletMsgOAuthSignInUpdate,
-  OAuthSignInError,
 } from "@oko-wallet/oko-sdk-core";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type {
   CheckEmailResponse,
   CheckEmailResponseV2,
 } from "@oko-wallet/oko-types/user";
-import type { AuthType } from "@oko-wallet/oko-types/auth";
+import type { Result } from "@oko-wallet/stdlib-js";
 
 import { sendMsgToWindow } from "../send";
+import { bail } from "./errors";
+import { checkUserExistsV2 } from "./handlers/check_user";
 import {
-  OKO_ATTACHED_POPUP,
-  OKO_SDK_TARGET,
-} from "@oko-wallet-attached/window_msgs/target";
-import type { MsgEventContext } from "@oko-wallet-attached/window_msgs/types";
-import { useAppState } from "@oko-wallet-attached/store/app";
-import { useMemoryState } from "@oko-wallet-attached/store/memory";
-import {
-  setUserId,
-  setUserProperties,
-} from "@oko-wallet-attached/analytics/amplitude";
-import type {
-  UserSignInResult,
-  UserSignInResultV2,
-} from "@oko-wallet-attached/window_msgs/types";
+  handleExistingUserNeedsEd25519Keygen,
+  handleReshareAndEd25519Keygen,
+} from "./handlers/ed25519_keygen";
+import { handleExistingUserV2 } from "./handlers/existing_user";
+import { handleNewUserV2 } from "./handlers/new_user";
+import { handleReshareV2 } from "./handlers/reshare";
 import {
   checkUserExists,
   handleExistingUser,
   handleNewUser,
   handleReshare,
 } from "./user";
-import { checkUserExistsV2 } from "./handlers/check_user";
-import { handleNewUserV2 } from "./handlers/new_user";
-import { handleExistingUserV2 } from "./handlers/existing_user";
-import { handleReshareV2 } from "./handlers/reshare";
-import {
-  handleExistingUserNeedsEd25519Keygen,
-  handleReshareAndEd25519Keygen,
-} from "./handlers/ed25519_keygen";
-import { bail } from "./errors";
 import { getCredentialsFromPayload } from "./validate_social_login";
+import {
+  setUserId,
+  setUserProperties,
+} from "@oko-wallet-attached/analytics/amplitude";
+import { useAppState } from "@oko-wallet-attached/store/app";
+import { useMemoryState } from "@oko-wallet-attached/store/memory";
+import {
+  OKO_ATTACHED_POPUP,
+  OKO_SDK_TARGET,
+} from "@oko-wallet-attached/window_msgs/target";
+import type {
+  MsgEventContext,
+  UserSignInResult,
+  UserSignInResultV2,
+} from "@oko-wallet-attached/window_msgs/types";
 
 export async function handleOAuthInfoPass(
   ctx: MsgEventContext,
@@ -466,9 +466,9 @@ export async function handleUserSignInV2(
       idToken,
       keyshareNodeMeta,
       authType,
-      secp256k1NeedsReshare,
-      ed25519NeedsReshare,
-      apiKey
+      // secp256k1NeedsReshare,
+      // ed25519NeedsReshare,
+      apiKey,
     );
     if (!signInRes.success) {
       return {

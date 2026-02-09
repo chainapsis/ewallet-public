@@ -1,37 +1,37 @@
 import { jest } from "@jest/globals";
-import { Pool } from "pg";
-import type { Logger } from "winston";
-import type { WalletStatus } from "@oko-wallet/oko-types/wallets";
-import {
-  type KeygenRequestV2,
-  type KeygenEd25519Request,
-} from "@oko-wallet/oko-types/tss";
-import { Participant } from "@oko-wallet/tecdsa-interface";
 import { napiRunKeygenClientCentralized } from "@oko-wallet/cait-sith-keplr-addon/addon";
-import {
-  runKeygenCentralizedEd25519,
-  extractKeyPackageSharesEd25519,
-} from "@oko-wallet/teddsa-addon/src/server";
-import {
-  insertKSNode,
-  getWalletKSNodesByWalletId,
-} from "@oko-wallet/oko-pg-interface/ks_nodes";
 import {
   decryptData,
   decryptDataAsync,
   encryptDataAsync,
 } from "@oko-wallet/crypto-js/node";
-import { createPgConn } from "@oko-wallet/postgres-lib";
+import { insertKeyShareNodeMeta } from "@oko-wallet/oko-pg-interface/key_share_node_meta";
+import {
+  getWalletKSNodesByWalletId,
+  insertKSNode,
+} from "@oko-wallet/oko-pg-interface/ks_nodes";
 import { createUser } from "@oko-wallet/oko-pg-interface/oko_users";
 import {
   createWallet,
   getWalletById,
 } from "@oko-wallet/oko-pg-interface/oko_wallets";
-import { insertKeyShareNodeMeta } from "@oko-wallet/oko-pg-interface/key_share_node_meta";
+import type {
+  KeygenEd25519Request,
+  KeygenRequestV2,
+} from "@oko-wallet/oko-types/tss";
+import type { WalletStatus } from "@oko-wallet/oko-types/wallets";
+import { createPgConn } from "@oko-wallet/postgres-lib";
+import { Participant } from "@oko-wallet/tecdsa-interface";
+import {
+  extractKeyPackageSharesEd25519,
+  runKeygenCentralizedEd25519,
+} from "@oko-wallet/teddsa-addon/src/server";
+import type { Pool } from "pg";
+import type { Logger } from "winston";
 
-import { resetPgDatabase } from "@oko-wallet-api/testing/database";
-import { testPgConfig } from "@oko-wallet-api/database/test_config";
 import { TEMP_ENC_SECRET } from "@oko-wallet-api/api/tss/utils";
+import { testPgConfig } from "@oko-wallet-api/database/test_config";
+import { resetPgDatabase } from "@oko-wallet-api/testing/database";
 
 const mockCheckKeyShareFromKSNodesV2 = jest.fn() as jest.Mock;
 
@@ -147,6 +147,7 @@ describe("keygen_v2_test", () => {
         keygenRequest,
         TEMP_ENC_SECRET,
         mockLogger,
+        "0",
       );
       if (keygenResponse.success === false) {
         console.error(keygenResponse);
@@ -291,6 +292,7 @@ describe("keygen_v2_test", () => {
         keygenRequest,
         TEMP_ENC_SECRET,
         mockLogger,
+        "0",
       );
       if (keygenResponse.success === true) {
         throw new Error("keygenV2 should fail");
@@ -351,6 +353,7 @@ describe("keygen_v2_test", () => {
         keygenRequest,
         TEMP_ENC_SECRET,
         mockLogger,
+        "0",
       );
       if (keygenResponse.success === true) {
         throw new Error("keygenV2 should fail");
@@ -408,6 +411,7 @@ describe("keygen_v2_test", () => {
         keygenRequest,
         TEMP_ENC_SECRET,
         mockLogger,
+        "0",
       );
       if (keygenResponse.success === true) {
         throw new Error("keygenV2 should fail");
@@ -462,6 +466,7 @@ describe("keygen_v2_test", () => {
         keygenRequest,
         TEMP_ENC_SECRET,
         mockLogger,
+        "0",
       );
       if (keygenResponse.success === true) {
         throw new Error("keygenV2 should fail");
@@ -514,6 +519,7 @@ describe("keygen_v2_test", () => {
         keygenRequest,
         TEMP_ENC_SECRET,
         mockLogger,
+        "0",
       );
       if (keygenResponse.success === true) {
         throw new Error("keygenV2 should fail");
@@ -567,6 +573,7 @@ describe("keygen_v2_test", () => {
         keygenRequest,
         TEMP_ENC_SECRET,
         mockLogger,
+        "0",
       );
       if (keygenResponse.success === true) {
         throw new Error("keygenV2 should fail");
@@ -618,6 +625,7 @@ describe("keygen_v2_test", () => {
         keygenRequest,
         TEMP_ENC_SECRET,
         mockLogger,
+        "0",
       );
       if (keygenResponse.success === true) {
         throw new Error("keygenV2 should fail");

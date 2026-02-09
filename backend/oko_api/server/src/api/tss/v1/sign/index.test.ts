@@ -1,6 +1,33 @@
 import { jest } from "@jest/globals";
-import { Pool } from "pg";
-import type { Logger } from "winston";
+import {
+  napiRunKeygenClientCentralized,
+  napiRunPresignClientStep1,
+  napiRunPresignClientStep2,
+  napiRunPresignClientStep3,
+  napiRunSignClientStep1V2,
+  napiRunSignClientStep2,
+  napiRunTriples2ClientStep1,
+  napiRunTriples2ClientStep2,
+  napiRunTriples2ClientStep3,
+  napiRunTriples2ClientStep4,
+  napiRunTriples2ClientStep5,
+  napiRunTriples2ClientStep6,
+  napiRunTriples2ClientStep7,
+  napiRunTriples2ClientStep8,
+  napiRunTriples2ClientStep9,
+  napiRunTriples2ClientStep10,
+  napiRunTriples2ClientStep11,
+} from "@oko-wallet/cait-sith-keplr-addon/addon";
+import { insertCustomer } from "@oko-wallet/oko-pg-interface/customers";
+import { insertKeyShareNodeMeta } from "@oko-wallet/oko-pg-interface/key_share_node_meta";
+import { insertKSNode } from "@oko-wallet/oko-pg-interface/ks_nodes";
+import { createUser } from "@oko-wallet/oko-pg-interface/oko_users";
+import { createWallet } from "@oko-wallet/oko-pg-interface/oko_wallets";
+import {
+  createTssSession,
+  createTssStage,
+  getTssStageWithSessionData,
+} from "@oko-wallet/oko-pg-interface/tss";
 import type {
   KeygenRequest,
   PresignStep1Request,
@@ -8,8 +35,6 @@ import type {
   PresignStep3Request,
   SignStep1Request,
   SignStep2Request,
-  TriplesStep10Request,
-  TriplesStep11Request,
   TriplesStep1Request,
   TriplesStep2Request,
   TriplesStep3Request,
@@ -19,6 +44,8 @@ import type {
   TriplesStep7Request,
   TriplesStep8Request,
   TriplesStep9Request,
+  TriplesStep10Request,
+  TriplesStep11Request,
 } from "@oko-wallet/oko-types/tss";
 import {
   PresignStageStatus,
@@ -27,50 +54,27 @@ import {
   TssSessionState,
   TssStageType,
 } from "@oko-wallet/oko-types/tss";
+import type { WalletStatus } from "@oko-wallet/oko-types/wallets";
+import { createPgConn } from "@oko-wallet/postgres-lib";
 import type {
   TECDSAPresignState,
   TECDSASignState,
   TECDSATriplesState,
 } from "@oko-wallet/tecdsa-interface";
 import { Participant } from "@oko-wallet/tecdsa-interface";
-import {
-  napiRunKeygenClientCentralized,
-  napiRunPresignClientStep1,
-  napiRunPresignClientStep2,
-  napiRunPresignClientStep3,
-  napiRunSignClientStep1V2,
-  napiRunSignClientStep2,
-  napiRunTriples2ClientStep1,
-  napiRunTriples2ClientStep10,
-  napiRunTriples2ClientStep11,
-  napiRunTriples2ClientStep2,
-  napiRunTriples2ClientStep3,
-  napiRunTriples2ClientStep4,
-  napiRunTriples2ClientStep5,
-  napiRunTriples2ClientStep6,
-  napiRunTriples2ClientStep7,
-  napiRunTriples2ClientStep8,
-  napiRunTriples2ClientStep9,
-} from "@oko-wallet/cait-sith-keplr-addon/addon";
-import {
-  createTssSession,
-  createTssStage,
-  getTssStageWithSessionData,
-} from "@oko-wallet/oko-pg-interface/tss";
-import { createPgConn } from "@oko-wallet/postgres-lib";
-import type { WalletStatus } from "@oko-wallet/oko-types/wallets";
-import { insertKSNode } from "@oko-wallet/oko-pg-interface/ks_nodes";
-import { insertCustomer } from "@oko-wallet/oko-pg-interface/customers";
-import { createWallet } from "@oko-wallet/oko-pg-interface/oko_wallets";
-import { createUser } from "@oko-wallet/oko-pg-interface/oko_users";
-import { insertKeyShareNodeMeta } from "@oko-wallet/oko-pg-interface/key_share_node_meta";
+import type { Pool } from "pg";
+import type { Logger } from "winston";
 
-import { resetPgDatabase } from "@oko-wallet-api/testing/database";
-import { testPgConfig } from "@oko-wallet-api/database/test_config";
+import { TEST_CUSTOMER } from "@oko-wallet-api/api/tss/tests";
+import { TEMP_ENC_SECRET } from "@oko-wallet-api/api/tss/utils";
+import {
+  runPresignStep1,
+  runPresignStep2,
+  runPresignStep3,
+} from "@oko-wallet-api/api/tss/v1/presign";
+import { runSignStep1, runSignStep2 } from "@oko-wallet-api/api/tss/v1/sign";
 import {
   runTriplesStep1,
-  runTriplesStep10,
-  runTriplesStep11,
   runTriplesStep2,
   runTriplesStep3,
   runTriplesStep4,
@@ -79,15 +83,11 @@ import {
   runTriplesStep7,
   runTriplesStep8,
   runTriplesStep9,
+  runTriplesStep10,
+  runTriplesStep11,
 } from "@oko-wallet-api/api/tss/v1/triples";
-import {
-  runPresignStep1,
-  runPresignStep2,
-  runPresignStep3,
-} from "@oko-wallet-api/api/tss/v1/presign";
-import { runSignStep1, runSignStep2 } from "@oko-wallet-api/api/tss/v1/sign";
-import { TEMP_ENC_SECRET } from "@oko-wallet-api/api/tss/utils";
-import { TEST_CUSTOMER } from "@oko-wallet-api/api/tss/tests";
+import { testPgConfig } from "@oko-wallet-api/database/test_config";
+import { resetPgDatabase } from "@oko-wallet-api/testing/database";
 
 const mockCheckKeyShareFromKSNodes = jest.fn() as jest.Mock;
 const mockCheckKeyShareFromKSNodesV2 = jest.fn() as jest.Mock;
@@ -161,6 +161,7 @@ async function setUpTssStage(pool: Pool) {
     keygenRequest,
     TEMP_ENC_SECRET,
     mockLogger,
+    "0",
   );
   if (keygenResponse.success === false) {
     console.error(keygenResponse);
