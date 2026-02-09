@@ -260,6 +260,45 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
       (needsSponsorship && isSponsorshipAvailable) ||
       isSponsored);
 
+  // DEBUG: log approve button state
+  console.log("[DEBUG:tx_sig] approve button state", {
+    isApproveEnabled,
+    isRateLimited,
+    // simulation
+    isSimulating,
+    isNonceFetching,
+    isFeeDataFetching,
+    isGasEstimationFetching,
+    isL1GasEstimationFetching,
+    isFeeCurrencyBalanceFetching,
+    // errors
+    hasError,
+    getNonceError,
+    getFeeDataError,
+    getGasEstimationError,
+    getL1GasEstimationError,
+    getFeeCurrencyBalanceError,
+    // balance
+    hasSufficientBalanceForTotal,
+    estimatedFee: estimatedFee
+      ? { raw: estimatedFee.raw.toString(), formatted: estimatedFee.formatted }
+      : null,
+    feeCurrencyBalance: feeCurrencyBalance
+      ? { amount: feeCurrencyBalance.amount.toString() }
+      : undefined,
+    txValue: originalTransaction?.value,
+    // sponsorship
+    isSponsorshipSupported,
+    sponsorshipState,
+    needsSponsorship,
+    isSponsorshipAvailable,
+    isSponsored,
+    sponsorshipErrorMessage,
+    // env
+    isDemo,
+    chainId: chainInfo.chain_id,
+  });
+
   // Approve button should show loading when requesting sponsorship
   const isApproveLoading = isLoading || isSponsorshipRequesting;
 

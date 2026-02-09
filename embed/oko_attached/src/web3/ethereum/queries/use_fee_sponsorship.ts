@@ -279,9 +279,30 @@ export function useBaseSponsorshipFlow({
     enabled: sponsorshipState === "rate_limited",
   });
 
+  // DEBUG: log sponsorship flow inputs
+  console.log("[DEBUG:sponsorship] flow inputs", {
+    chainId,
+    isSupported,
+    enabled,
+    hasApiKey: !!FEE_SPONSORSHIP_API_KEY,
+    apiKeyPrefix: FEE_SPONSORSHIP_API_KEY
+      ? FEE_SPONSORSHIP_API_KEY.slice(0, 6) + "..."
+      : "(empty)",
+    endpoint: FEE_SPONSORSHIP_ENDPOINT,
+    shouldCheckStatus,
+    hasSufficientBalance,
+    recipientAddress,
+    estimatedFeeWei: estimatedFeeWei?.toString(),
+  });
+
   // Update state based on status check result
   useEffect(() => {
     if (!shouldCheckStatus) {
+      console.log("[DEBUG:sponsorship] skipping status check", {
+        enabled,
+        isSupported,
+        sponsorshipState,
+      });
       return;
     }
 
@@ -291,12 +312,14 @@ export function useBaseSponsorshipFlow({
     }
 
     if (statusError) {
+      console.log("[DEBUG:sponsorship] status check error", statusError);
       setSponsorshipState("error");
       setError(statusError);
       return;
     }
 
     if (statusData) {
+      console.log("[DEBUG:sponsorship] status check result", statusData);
       if (statusData.available) {
         setSponsorshipState("available");
       } else if (statusData.remainingTimeMs && statusData.remainingTimeMs > 0) {
