@@ -241,8 +241,8 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
   const showSponsorship =
     isSponsorshipSupported &&
     !isDemo &&
-    hasSufficientBalanceForValue !== false &&
-    (hasSufficientBalanceForFee === false || isSponsored || isRateLimited);
+    hasSufficientBalanceForFee === false &&
+    hasSufficientBalanceForValue !== false;
 
   // Create sponsored fee info for UI
   const sponsoredFeeInfo: SponsoredFeeInfo | null = showSponsorship
