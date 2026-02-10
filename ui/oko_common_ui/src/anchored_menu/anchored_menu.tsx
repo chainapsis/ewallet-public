@@ -76,21 +76,23 @@ export const AnchoredMenu: FC<AnchoredMenuProps> = ({
               {menuItems.map((item) => (
                 <li
                   key={item.id}
-                  className={styles.menuItem}
+                  className={cn(styles.menuItem, item.className)}
                   role="menuitem"
                   onClick={() => handleMenuItemClick(item)}
                 >
-                  {item.icon && (
-                    <span className={styles.menuItemIcon}>{item.icon}</span>
-                  )}
-                  <Typography
-                    size="sm"
-                    weight="semibold"
-                    color="secondary"
-                    className={styles.menuItemLabel}
-                  >
-                    {item.label}
-                  </Typography>
+                  <div className={styles.menuItemContent}>
+                    {item.icon && (
+                      <span className={styles.menuItemIcon}>{item.icon}</span>
+                    )}
+                    <Typography
+                      size="sm"
+                      weight="semibold"
+                      color={item.labelColor ?? "secondary"}
+                      className={styles.menuItemLabel}
+                    >
+                      {item.label}
+                    </Typography>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -106,6 +108,8 @@ export type AnchoredMenuItem = {
   label: string;
   onClick: () => void;
   icon?: ReactNode;
+  className?: string;
+  labelColor?: Parameters<typeof Typography>[0]["color"];
 };
 
 export type AnchoredMenuProps = {

@@ -1,7 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useCustomerInfo } from "./use_customer_info";
-import { requestGetCustomerAPIKeys } from "@oko-wallet-ct-dashboard/fetch/customers";
+import {
+  requestCreateAPIKey,
+  requestDeleteAPIKey,
+  requestGetCustomerAPIKeys,
+} from "@oko-wallet-ct-dashboard/fetch/customers";
 import { useAppState } from "@oko-wallet-ct-dashboard/state";
 
 export const useAPIKeys = () => {
@@ -26,5 +30,44 @@ export const useAPIKeys = () => {
       return res.data;
     },
     enabled: !!token && !!user?.email && !!customer,
+  });
+};
+
+export const useCreateAPIKey = () => {
+  const token = useAppState((state) => state.token);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      const res = await requestCreateAPIKey({ token: token ?? "" });
+      if (!res.success) {
+        throw new Error(res.msg);
+      }
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["api-keys"] });
+    },
+  });
+};
+
+export const useDeleteAPIKey = () => {
+  const token = useAppState((state) => state.token);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (keyId: string) => {
+      const res = await requestDeleteAPIKey({
+        token: token ?? "",
+        key_id: keyId,
+      });
+      if (!res.success) {
+        throw new Error(res.msg);
+      }
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["api-keys"] });
+    },
   });
 };
