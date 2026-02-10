@@ -84,24 +84,20 @@
 
 .menuHeader {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--border-secondary);
+  padding: 6px;
 }
 
 .menuUserInfo {
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 6px 8px;
+  flex: 1;
+  min-width: 0;
 }
 
 .menuEmail {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.menuSectionLabel {
-  padding-top: 4px;
 }

@@ -1,0 +1,106 @@
+@use "../../styles/viewport.module.scss" as *;
+
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 64px;
+  align-items: flex-start;
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  min-width: 300px;
+}
+
+.headingIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  color: var(--fg-quaternary);
+}
+
+.stepBadge {
+  display: flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-secondary);
+}
+
+.content {
+  flex: 1 0 0;
+  min-width: 0;
+  max-width: 360px;
+  padding: 2px 0;
+}
+
+.loginSection {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--border-secondary);
+  padding-bottom: 32px;
+  margin-bottom: 32px;
+}
+
+.loginLabel {
+  margin-bottom: 12px;
+}
+
+.authCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 12px;
+}
+
+.authCardRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.warningSection {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 0 8px;
+  margin-bottom: 36px;
+}
+
+.warningItem {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.warningIconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 6px;
+  background-color: var(--bg-warning-secondary);
+  border-radius: 8px;
+  color: var(--text-warning-primary);
+}
+
+.warningText {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
