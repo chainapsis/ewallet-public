@@ -22,11 +22,7 @@ const MenuItemRow: FC<{
   item: AnchoredMenuItem;
   onClick: (item: AnchoredMenuItem) => void;
 }> = ({ item, onClick }) => (
-  <li
-    className={styles.menuItem}
-    role="menuitem"
-    onClick={() => onClick(item)}
-  >
+  <li className={styles.menuItem} role="menuitem" onClick={() => onClick(item)}>
     {item.icon && <span className={styles.menuItemIcon}>{item.icon}</span>}
     <Typography
       size="sm"
@@ -37,9 +33,7 @@ const MenuItemRow: FC<{
       {item.label}
     </Typography>
     {item.trailingIcon && (
-      <span className={styles.menuItemTrailingIcon}>
-        {item.trailingIcon}
-      </span>
+      <span className={styles.menuItemTrailingIcon}>{item.trailingIcon}</span>
     )}
   </li>
 );
@@ -82,18 +76,10 @@ export const AnchoredMenu: FC<AnchoredMenuProps> = ({
 
   const sectionsContent = menuSections ? (
     menuSections.map((section) => (
-      <ul
-        key={section.id}
-        className={styles.menuSection}
-        role="menu"
-      >
+      <ul key={section.id} className={styles.menuSection} role="menu">
         {section.label && (
           <li className={styles.menuSectionLabel}>
-            <Typography
-              size="xs"
-              weight="semibold"
-              color="tertiary"
-            >
+            <Typography size="xs" weight="semibold" color="tertiary">
               {section.label}
             </Typography>
           </li>
@@ -110,11 +96,7 @@ export const AnchoredMenu: FC<AnchoredMenuProps> = ({
   ) : (
     <ul className={styles.menuList} role="menu">
       {menuItems?.map((item) => (
-        <MenuItemRow
-          key={item.id}
-          item={item}
-          onClick={handleMenuItemClick}
-        />
+        <MenuItemRow key={item.id} item={item} onClick={handleMenuItemClick} />
       ))}
     </ul>
   );
@@ -138,28 +120,31 @@ export const AnchoredMenu: FC<AnchoredMenuProps> = ({
             className={cn(styles.menu, className)}
             {...getFloatingProps()}
           >
-            {footerSection ? (
-              <div className={styles.menuInner}>
-                {HeaderComponent}
-                {sectionsContent}
-              </div>
-            ) : (
-              <>
-                {HeaderComponent}
-                {sectionsContent}
-              </>
-            )}
-            {footerSection && (
-              <ul className={styles.menuFooter} role="menu">
-                {footerSection.items.map((item) => (
-                  <MenuItemRow
-                    key={item.id}
-                    item={item}
-                    onClick={handleMenuItemClick}
-                  />
-                ))}
-              </ul>
-            )}
+            {HeaderComponent}
+            <ul className={styles.menuList} role="menu">
+              {menuItems.map((item) => (
+                <li
+                  key={item.id}
+                  className={cn(styles.menuItem, item.className)}
+                  role="menuitem"
+                  onClick={() => handleMenuItemClick(item)}
+                >
+                  <div className={styles.menuItemContent}>
+                    {item.icon && (
+                      <span className={styles.menuItemIcon}>{item.icon}</span>
+                    )}
+                    <Typography
+                      size="sm"
+                      weight="semibold"
+                      color={item.labelColor ?? "secondary"}
+                      className={styles.menuItemLabel}
+                    >
+                      {item.label}
+                    </Typography>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
       </FloatingPortal>
@@ -172,13 +157,8 @@ export type AnchoredMenuItem = {
   label: string;
   onClick: () => void;
   icon?: ReactNode;
-  trailingIcon?: ReactNode;
-};
-
-export type AnchoredMenuSection = {
-  id: string;
-  label?: string;
-  items: AnchoredMenuItem[];
+  className?: string;
+  labelColor?: Parameters<typeof Typography>[0]["color"];
 };
 
 export type AnchoredMenuProps = {

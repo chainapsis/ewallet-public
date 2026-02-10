@@ -1,32 +1,34 @@
 import { registry } from "@oko-wallet/oko-api-openapi";
 import { ErrorResponseSchema } from "@oko-wallet/oko-api-openapi/common";
 import {
+  CreateApiKeySuccessResponseSchema,
   CustomerAuthHeaderSchema,
-  GetCustomerInfoSuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/ct_dashboard";
+import { insertAPIKey } from "@oko-wallet/oko-pg-interface/api_keys";
 import { getCustomerByUserId } from "@oko-wallet/oko-pg-interface/customers";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
-import type { Customer } from "@oko-wallet/oko-types/customers";
+import type { APIKey } from "@oko-wallet/oko-types/ct_dashboard";
+import { randomBytes } from "crypto";
 import type { Response } from "express";
 
 import type { CustomerAuthenticatedRequest } from "@oko-wallet-ctd-api/middleware/auth";
 
 registry.registerPath({
   method: "post",
-  path: "/customer_dashboard/v1/customer/info",
+  path: "/customer_dashboard/v1/customer/api_keys/create",
   tags: ["Customer Dashboard"],
-  summary: "Get customer information",
-  description: "Retrieves customer information for the authenticated user",
+  summary: "Create a new API key",
+  description: "Creates a new API key for the authenticated customer",
   security: [{ customerAuth: [] }],
   request: {
     headers: CustomerAuthHeaderSchema,
   },
   responses: {
     200: {
-      description: "Customer information retrieved successfully",
+      description: "API key created successfully",
       content: {
         "application/json": {
-          schema: GetCustomerInfoSuccessResponseSchema,
+          schema: CreateApiKeySuccessResponseSchema,
         },
       },
     },
@@ -57,9 +59,9 @@ registry.registerPath({
   },
 });
 
-export async function getCustomerInfo(
+export async function createApiKey(
   req: CustomerAuthenticatedRequest,
-  res: Response<OkoApiResponse<Customer>>,
+  res: Response<OkoApiResponse<APIKey>>,
 ) {
   try {
     const state = req.app.locals;
@@ -84,18 +86,32 @@ export async function getCustomerInfo(
       return;
     }
 
+    const apiKey = randomBytes(32).toString("hex");
+    const insertRes = await insertAPIKey(
+      state.db,
+      customerRes.data.customer_id,
+      apiKey,
+    );
+
+    if (!insertRes.success) {
+      res.status(500).json({
+        success: false,
+        code: "UNKNOWN_ERROR",
+        msg: insertRes.err,
+      });
+      return;
+    }
+
     res.status(200).json({
       success: true,
-      data: customerRes.data,
+      data: insertRes.data,
     });
-    return;
   } catch (error) {
-    console.error("Get customer info error:", error);
+    console.error("Create API key error:", error);
     res.status(500).json({
       success: false,
       code: "UNKNOWN_ERROR",
       msg: "Internal server error",
     });
-    return;
   }
 }

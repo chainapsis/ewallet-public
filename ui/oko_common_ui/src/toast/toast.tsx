@@ -10,7 +10,7 @@ import { Typography } from "@oko-wallet-common-ui/typography/typography";
 import { XCloseIcon } from "@oko-wallet-common-ui/icons/x_close";
 import styles from "./toast.module.scss";
 
-export type ToastVariant = "success" | "error" | "warning" | "info";
+export type ToastVariant = "success" | "error" | "warning" | "info" | "confirm";
 export type ToastItemProps = {
   title?: string;
   description?: string;
@@ -27,6 +27,16 @@ const SuccessToastIcon: FC = () => {
   );
 };
 
+const ConfirmToastIcon: FC = () => {
+  return (
+    <div className={styles.confirmIcon}>
+      <div className={styles.confirmIconOuterRing1} />
+      <div className={styles.confirmIconOuterRing2} />
+      <CheckCircleOutlinedIcon size={20} />
+    </div>
+  );
+};
+
 interface ToastIconProps {
   variant: ToastVariant;
 }
@@ -34,6 +44,8 @@ const ToastIcon: FC<ToastIconProps> = ({ variant }) => {
   switch (variant) {
     case "success":
       return <SuccessToastIcon />;
+    case "confirm":
+      return <ConfirmToastIcon />;
     case "error":
       return <ErrorIcon size={20} />;
     case "warning":

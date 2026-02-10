@@ -93,3 +93,36 @@ export const GetCustomerApiKeysSuccessResponseSchema = registry.register(
     data: CustomerApiKeysDataSchema,
   }),
 );
+
+export const CreateApiKeySuccessResponseSchema = registry.register(
+  "CustomerDashboardCreateApiKeySuccessResponse",
+  z.object({
+    success: z.literal(true).openapi({
+      description: "Indicates the request succeeded",
+    }),
+    data: ApiKeySchema,
+  }),
+);
+
+export const DeleteApiKeyRequestSchema = registry.register(
+  "CustomerDashboardDeleteApiKeyRequest",
+  z.object({
+    key_id: z.string().openapi({
+      description: "API key ID to delete",
+    }),
+  }),
+);
+
+export const DeleteApiKeySuccessResponseSchema = registry.register(
+  "CustomerDashboardDeleteApiKeySuccessResponse",
+  z.object({
+    success: z.literal(true).openapi({
+      description: "Indicates the request succeeded",
+    }),
+    data: z.object({
+      key_id: z.string().openapi({
+        description: "Deleted API key ID",
+      }),
+    }),
+  }),
+);

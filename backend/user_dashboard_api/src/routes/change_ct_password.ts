@@ -1,28 +1,51 @@
 import { comparePassword, hashPassword } from "@oko-wallet/crypto-js";
+import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
 import { registry } from "@oko-wallet/oko-api-openapi";
 import { ErrorResponseSchema } from "@oko-wallet/oko-api-openapi/common";
 import {
   ChangePasswordRequestSchema,
   ChangePasswordSuccessResponseSchema,
   CustomerAuthHeaderSchema,
+  LoginSuccessResponseSchema,
+  SendVerificationRequestSchema,
+  SendVerificationSuccessResponseSchema,
+  SignInRequestSchema,
+  VerifyAndLoginRequestSchema,
 } from "@oko-wallet/oko-api-openapi/ct_dashboard";
 import {
   getCTDUserWithCustomerAndPasswordHashByEmail,
+  getCTDUserWithCustomerByEmail,
   updateCustomerDashboardUserPassword,
+  verifyCustomerDashboardUserEmail,
 } from "@oko-wallet/oko-pg-interface/customer_dashboard_users";
+import { verifyEmailCode } from "@oko-wallet/oko-pg-interface/email_verifications";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type {
   ChangePasswordRequest,
   ChangePasswordResponse,
+  LoginResponse,
+  SendVerificationRequest,
+  SendVerificationResponse,
+  SignInRequest,
+  VerifyAndLoginRequest,
 } from "@oko-wallet/oko-types/ct_dashboard";
-import type { Response } from "express";
+import type { Response, Router } from "express";
 
+import { sendVerificationCodeRoute } from "./send_verification_code";
+import { signInCustomer } from "./sign_in_customer";
+import { verifyEmailAndLogin } from "./verify_email_and_login";
+import { generateCustomerToken } from "@oko-wallet-usrd-api/auth";
 import {
-  CHANGED_PASSWORD_MAX_LENGTH,
   CHANGED_PASSWORD_MIN_LENGTH,
-  PASSWORD_CONTAINS_NUMBER_REGEX,
-} from "@oko-wallet-ctd-api/constants";
-import type { CustomerAuthenticatedRequest } from "@oko-wallet-ctd-api/middleware/auth";
+  EMAIL_REGEX,
+  SIX_DIGITS_REGEX,
+} from "@oko-wallet-usrd-api/constants";
+import { sendEmailVerificationCode } from "@oko-wallet-usrd-api/email/send";
+import {
+  type CustomerAuthenticatedRequest,
+  customerJwtMiddleware,
+} from "@oko-wallet-usrd-api/middleware/auth";
+import { rateLimitMiddleware } from "@oko-wallet-usrd-api/middleware/rate_limit";
 
 registry.registerPath({
   method: "post",
@@ -86,7 +109,7 @@ registry.registerPath({
   },
 });
 
-export async function changePassword(
+export async function changeCustomerPassword(
   req: CustomerAuthenticatedRequest<ChangePasswordRequest>,
   res: Response<OkoApiResponse<ChangePasswordResponse>>,
 ) {
@@ -110,24 +133,6 @@ export async function changePassword(
         success: false,
         code: "INVALID_EMAIL_OR_PASSWORD",
         msg: "Password must be at least 8 characters long",
-      });
-      return;
-    }
-
-    if (request.new_password.length > CHANGED_PASSWORD_MAX_LENGTH) {
-      res.status(400).json({
-        success: false,
-        code: "INVALID_EMAIL_OR_PASSWORD",
-        msg: "Password must be at most 16 characters long",
-      });
-      return;
-    }
-
-    if (!PASSWORD_CONTAINS_NUMBER_REGEX.test(request.new_password)) {
-      res.status(400).json({
-        success: false,
-        code: "INVALID_EMAIL_OR_PASSWORD",
-        msg: "Password must include at least one number",
       });
       return;
     }

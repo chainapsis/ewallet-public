@@ -1,22 +1,34 @@
 import { uploadToS3 } from "@oko-wallet/aws";
 import { registry } from "@oko-wallet/oko-api-openapi";
 import { ErrorResponseSchema } from "@oko-wallet/oko-api-openapi/common";
-import { CustomerAuthHeaderSchema } from "@oko-wallet/oko-api-openapi/ct_dashboard";
+import {
+  CustomerAuthHeaderSchema,
+  GetCustomerApiKeysRequestSchema,
+  GetCustomerApiKeysSuccessResponseSchema,
+  GetCustomerInfoSuccessResponseSchema,
+} from "@oko-wallet/oko-api-openapi/ct_dashboard";
+import { getAPIKeysByCustomerId } from "@oko-wallet/oko-pg-interface/api_keys";
 import {
   getCustomerByUserId,
   updateCustomerInfo,
 } from "@oko-wallet/oko-pg-interface/customers";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { APIKey } from "@oko-wallet/oko-types/ct_dashboard";
 import type {
-  CustomerTheme,
+  Customer,
   UpdateCustomerInfoRequest,
   UpdateCustomerInfoResponse,
 } from "@oko-wallet/oko-types/customers";
 import { randomUUID } from "crypto";
-import type { Response } from "express";
+import type { Response, Router } from "express";
 import sharp from "sharp";
 
-import type { CustomerAuthenticatedRequest } from "@oko-wallet-ctd-api/middleware/auth";
+import {
+  type CustomerAuthenticatedRequest,
+  customerJwtMiddleware,
+} from "@oko-wallet-usrd-api/middleware/auth";
+import { multerMiddleware } from "@oko-wallet-usrd-api/middleware/multer";
+import { rateLimitMiddleware } from "@oko-wallet-usrd-api/middleware/rate_limit";
 
 registry.registerPath({
   method: "post",
@@ -121,7 +133,7 @@ export async function updateCustomerInfoRoute(
   try {
     const state = req.app.locals;
     const userId = res.locals.user_id;
-    const { label, url, delete_logo, theme } = req.body;
+    const { label, url, delete_logo } = req.body;
 
     const shouldDeleteLogo = delete_logo === "true";
 
@@ -171,7 +183,7 @@ export async function updateCustomerInfoRoute(
           .resize(128, 128, { fit: "cover" })
           .png({ quality: 90 })
           .toBuffer();
-      } catch (_error) {
+      } catch (error) {
         res.status(400).json({
           success: false,
           code: "IMAGE_UPLOAD_FAILED",
@@ -233,7 +245,6 @@ export async function updateCustomerInfoRoute(
       label?: string;
       url?: string | null;
       logo_url?: string | null;
-      theme?: CustomerTheme;
     } = {};
     if (label !== undefined && label.trim() !== "") {
       updates.label = label.trim();
@@ -243,16 +254,6 @@ export async function updateCustomerInfoRoute(
     }
     if (shouldUpdateLogo) {
       updates.logo_url = logo_url;
-    }
-    if (theme === "light" || theme === "dark" || theme === "system") {
-      updates.theme = theme;
-    } else if (theme !== undefined) {
-      res.status(400).json({
-        success: false,
-        code: "INVALID_REQUEST",
-        msg: "theme must be one of light, dark, system",
-      });
-      return;
     }
 
     if (Object.keys(updates).length === 0) {

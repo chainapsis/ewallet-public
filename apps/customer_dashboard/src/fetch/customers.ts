@@ -50,6 +50,41 @@ export async function requestGetCustomerAPIKeys({
   );
 }
 
+export async function requestCreateAPIKey({
+  token,
+}: {
+  token: string;
+}) {
+  return errorHandle<APIKey>(() =>
+    fetch(`${CUSTOMER_V1_ENDPOINT}/customer/api_keys/create`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }),
+  );
+}
+
+export async function requestDeleteAPIKey({
+  token,
+  key_id,
+}: {
+  token: string;
+  key_id: string;
+}) {
+  return errorHandle<{ key_id: string }>(() =>
+    fetch(`${CUSTOMER_V1_ENDPOINT}/customer/api_keys/delete`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ key_id }),
+    }),
+  );
+}
+
 export async function requestUpdateCustomerInfo({
   token,
   label,
