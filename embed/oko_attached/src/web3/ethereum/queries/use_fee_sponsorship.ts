@@ -7,6 +7,7 @@ import {
   isSponsorshipSupportedChain,
   BASE_CHAIN_ID,
   FEE_SPONSORSHIP_API_KEY,
+  FEE_SPONSORSHIP_ENDPOINT,
   type FeeSponsorshipStatusResponse,
   type FeeTopUpResponse,
   type FeeSponsorshipError,

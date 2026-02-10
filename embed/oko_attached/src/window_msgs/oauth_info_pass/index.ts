@@ -462,13 +462,16 @@ export async function handleUserSignInV2(
 
   if (checkResult.needs_reshare) {
     // V2 reshare flow (unified)
+    // Both wallets exist in Case 3, so reshare both when needs_reshare is true
+    const secp256k1NeedsReshare = true;
+    const ed25519NeedsReshare = true;
     const signInRes = await handleReshareV2(
       idToken,
       keyshareNodeMeta,
       authType,
       secp256k1NeedsReshare,
       ed25519NeedsReshare,
-      apiKey
+      apiKey,
     );
     if (!signInRes.success) {
       return {
