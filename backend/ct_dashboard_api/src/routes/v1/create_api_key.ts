@@ -1,15 +1,14 @@
-import { randomBytes } from "crypto";
-
 import { registry } from "@oko-wallet/oko-api-openapi";
 import { ErrorResponseSchema } from "@oko-wallet/oko-api-openapi/common";
 import {
-  CustomerAuthHeaderSchema,
   CreateApiKeySuccessResponseSchema,
+  CustomerAuthHeaderSchema,
 } from "@oko-wallet/oko-api-openapi/ct_dashboard";
 import { insertAPIKey } from "@oko-wallet/oko-pg-interface/api_keys";
 import { getCustomerByUserId } from "@oko-wallet/oko-pg-interface/customers";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type { APIKey } from "@oko-wallet/oko-types/ct_dashboard";
+import { randomBytes } from "crypto";
 import type { Response } from "express";
 
 import type { CustomerAuthenticatedRequest } from "@oko-wallet-ctd-api/middleware/auth";
@@ -65,7 +64,7 @@ export async function createApiKey(
   res: Response<OkoApiResponse<APIKey>>,
 ) {
   try {
-    const state = req.app.locals as any;
+    const state = req.app.locals;
 
     const customerRes = await getCustomerByUserId(state.db, res.locals.user_id);
 

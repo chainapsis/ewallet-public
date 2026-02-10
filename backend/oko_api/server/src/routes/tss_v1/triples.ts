@@ -1,15 +1,11 @@
-import type { Response, Router } from "express";
 import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
+import { registry } from "@oko-wallet/oko-api-openapi";
 import {
   ErrorResponseSchema,
   UserAuthHeaderSchema,
 } from "@oko-wallet/oko-api-openapi/common";
 import {
   ApiKeyAndUserAuthHeaderSchema,
-  TriplesStep10RequestSchema,
-  TriplesStep10SuccessResponseSchema,
-  TriplesStep11RequestSchema,
-  TriplesStep11SuccessResponseSchema,
   TriplesStep1RequestSchema,
   TriplesStep1SuccessResponseSchema,
   TriplesStep2RequestSchema,
@@ -28,12 +24,13 @@ import {
   TriplesStep8SuccessResponseSchema,
   TriplesStep9RequestSchema,
   TriplesStep9SuccessResponseSchema,
+  TriplesStep10RequestSchema,
+  TriplesStep10SuccessResponseSchema,
+  TriplesStep11RequestSchema,
+  TriplesStep11SuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/tss";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type {
-  TriplesStep10Body,
-  TriplesStep10Response,
-  TriplesStep11Body,
-  TriplesStep11Response,
   TriplesStep1Body,
   TriplesStep1Response,
   TriplesStep2Body,
@@ -52,8 +49,12 @@ import type {
   TriplesStep8Response,
   TriplesStep9Body,
   TriplesStep9Response,
+  TriplesStep10Body,
+  TriplesStep10Response,
+  TriplesStep11Body,
+  TriplesStep11Response,
 } from "@oko-wallet/oko-types/tss";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { Response, Router } from "express";
 
 import {
   runTriplesStep1,
@@ -68,14 +69,13 @@ import {
   runTriplesStep10,
   runTriplesStep11,
 } from "@oko-wallet-api/api/tss/v1/triples";
+import { apiKeyMiddleware } from "@oko-wallet-api/middleware/auth/api_key_auth";
 import {
+  sendResponseWithNewToken,
   type UserAuthenticatedRequest,
   userJwtMiddleware,
-  sendResponseWithNewToken,
 } from "@oko-wallet-api/middleware/auth/keplr_auth";
-import { apiKeyMiddleware } from "@oko-wallet-api/middleware/auth/api_key_auth";
 import { tssActivateMiddleware } from "@oko-wallet-api/middleware/auth/tss_activate";
-import { registry } from "@oko-wallet/oko-api-openapi";
 
 export function setTriplesV1Routes(router: Router) {
   registry.registerPath({
@@ -131,7 +131,7 @@ export function setTriplesV1Routes(router: Router) {
       req: UserAuthenticatedRequest<TriplesStep1Body>,
       res: Response<OkoApiResponse<TriplesStep1Response>>,
     ) => {
-      const state = req.app.locals as any;
+      const state = req.app.locals;
       const user = res.locals.user;
       const apiKey = res.locals.api_key;
       const body = req.body;
@@ -222,7 +222,7 @@ export function setTriplesV1Routes(router: Router) {
       req: UserAuthenticatedRequest<TriplesStep2Body>,
       res: Response<OkoApiResponse<TriplesStep2Response>>,
     ) => {
-      const state = req.app.locals as any;
+      const state = req.app.locals;
       const user = res.locals.user;
       const body = req.body;
 
@@ -312,7 +312,7 @@ export function setTriplesV1Routes(router: Router) {
       req: UserAuthenticatedRequest<TriplesStep3Body>,
       res: Response<OkoApiResponse<TriplesStep3Response>>,
     ) => {
-      const state = req.app.locals as any;
+      const state = req.app.locals;
       const user = res.locals.user;
       const body = req.body;
 
@@ -402,7 +402,7 @@ export function setTriplesV1Routes(router: Router) {
       req: UserAuthenticatedRequest<TriplesStep4Body>,
       res: Response<OkoApiResponse<TriplesStep4Response>>,
     ) => {
-      const state = req.app.locals as any;
+      const state = req.app.locals;
       const user = res.locals.user;
       const body = req.body;
 
@@ -483,7 +483,7 @@ export function setTriplesV1Routes(router: Router) {
       req: UserAuthenticatedRequest<TriplesStep5Body>,
       res: Response<OkoApiResponse<TriplesStep5Response>>,
     ) => {
-      const state = req.app.locals as any;
+      const state = req.app.locals;
       const user = res.locals.user;
       const body = req.body;
 
@@ -564,7 +564,7 @@ export function setTriplesV1Routes(router: Router) {
       req: UserAuthenticatedRequest<TriplesStep6Body>,
       res: Response<OkoApiResponse<TriplesStep6Response>>,
     ) => {
-      const state = req.app.locals as any;
+      const state = req.app.locals;
       const user = res.locals.user;
       const body = req.body;
 
@@ -645,7 +645,7 @@ export function setTriplesV1Routes(router: Router) {
       req: UserAuthenticatedRequest<TriplesStep7Body>,
       res: Response<OkoApiResponse<TriplesStep7Response>>,
     ) => {
-      const state = req.app.locals as any;
+      const state = req.app.locals;
       const user = res.locals.user;
       const body = req.body;
 
@@ -726,7 +726,7 @@ export function setTriplesV1Routes(router: Router) {
       req: UserAuthenticatedRequest<TriplesStep8Body>,
       res: Response<OkoApiResponse<TriplesStep8Response>>,
     ) => {
-      const state = req.app.locals as any;
+      const state = req.app.locals;
       const user = res.locals.user;
       const body = req.body;
 
@@ -807,7 +807,7 @@ export function setTriplesV1Routes(router: Router) {
       req: UserAuthenticatedRequest<TriplesStep9Body>,
       res: Response<OkoApiResponse<TriplesStep9Response>>,
     ) => {
-      const state = req.app.locals as any;
+      const state = req.app.locals;
       const user = res.locals.user;
       const body = req.body;
 
@@ -888,7 +888,7 @@ export function setTriplesV1Routes(router: Router) {
       req: UserAuthenticatedRequest<TriplesStep10Body>,
       res: Response<OkoApiResponse<TriplesStep10Response>>,
     ) => {
-      const state = req.app.locals as any;
+      const state = req.app.locals;
       const user = res.locals.user;
       const body = req.body;
 
@@ -971,7 +971,7 @@ export function setTriplesV1Routes(router: Router) {
       req: UserAuthenticatedRequest<TriplesStep11Body>,
       res: Response<OkoApiResponse<TriplesStep11Response>>,
     ) => {
-      const state = req.app.locals as any;
+      const state = req.app.locals;
       const user = res.locals.user;
       const body = req.body;
 

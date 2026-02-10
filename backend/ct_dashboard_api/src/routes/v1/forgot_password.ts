@@ -79,7 +79,7 @@ export async function forgotPassword(
   res: Response<OkoApiResponse<{ message: string }>>,
 ) {
   try {
-    const state = req.app.locals as any;
+    const state = req.app.locals;
     const { email } = req.body;
 
     if (!email) {

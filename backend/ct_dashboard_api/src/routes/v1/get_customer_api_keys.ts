@@ -71,7 +71,7 @@ export async function getCustomerApiKeys(
   res: Response<OkoApiResponse<APIKey[]>>,
 ) {
   try {
-    const state = req.app.locals as any;
+    const state = req.app.locals;
 
     const apiKeys = await getAPIKeysByCustomerId(
       state.db,

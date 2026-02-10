@@ -104,7 +104,7 @@ export async function verifyEmailAndLogin(
   res: Response<OkoApiResponse<LoginResponse>>,
 ) {
   try {
-    const state = req.app.locals as any;
+    const state = req.app.locals;
     const request: VerifyAndLoginRequest = req.body;
 
     if (!request.email || !request.verification_code) {

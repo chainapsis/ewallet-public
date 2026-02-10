@@ -114,7 +114,7 @@ export async function changeCustomerPassword(
   res: Response<OkoApiResponse<ChangePasswordResponse>>,
 ) {
   try {
-    const state = req.app.locals as any;
+    const state = req.app.locals;
     const request: ChangePasswordRequest = req.body;
     const userId = res.locals.user_id;
 

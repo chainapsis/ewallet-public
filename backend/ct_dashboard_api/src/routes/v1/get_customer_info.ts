@@ -62,7 +62,7 @@ export async function getCustomerInfo(
   res: Response<OkoApiResponse<Customer>>,
 ) {
   try {
-    const state = req.app.locals as any;
+    const state = req.app.locals;
 
     const customerRes = await getCustomerByUserId(state.db, res.locals.user_id);
 

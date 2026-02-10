@@ -1,12 +1,5 @@
-import type { Response, Router } from "express";
-import type {
-  SignStep1Body,
-  SignStep1Response,
-  SignStep2Body,
-  SignStep2Response,
-} from "@oko-wallet/oko-types/tss";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
+import { registry } from "@oko-wallet/oko-api-openapi";
 import {
   ErrorResponseSchema,
   UserAuthHeaderSchema,
@@ -17,13 +10,20 @@ import {
   SignStep2RequestSchema,
   SignStep2SuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/tss";
-import { registry } from "@oko-wallet/oko-api-openapi";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type {
+  SignStep1Body,
+  SignStep1Response,
+  SignStep2Body,
+  SignStep2Response,
+} from "@oko-wallet/oko-types/tss";
+import type { Response, Router } from "express";
 
 import { runSignStep1, runSignStep2 } from "@oko-wallet-api/api/tss/v1/sign";
 import {
+  sendResponseWithNewToken,
   type UserAuthenticatedRequest,
   userJwtMiddleware,
-  sendResponseWithNewToken,
 } from "@oko-wallet-api/middleware/auth/keplr_auth";
 import { tssActivateMiddleware } from "@oko-wallet-api/middleware/auth/tss_activate";
 
@@ -88,7 +88,7 @@ export function setSignV1Routes(router: Router) {
       req: UserAuthenticatedRequest<SignStep1Body>,
       res: Response<OkoApiResponse<SignStep1Response>>,
     ) => {
-      const state = req.app.locals as any;
+      const state = req.app.locals;
       const user = res.locals.user;
       const body = req.body;
 
@@ -172,7 +172,7 @@ export function setSignV1Routes(router: Router) {
       req: UserAuthenticatedRequest<SignStep2Body>,
       res: Response<OkoApiResponse<SignStep2Response>>,
     ) => {
-      const state = req.app.locals as any;
+      const state = req.app.locals;
       const user = res.locals.user;
       const body = req.body;
 

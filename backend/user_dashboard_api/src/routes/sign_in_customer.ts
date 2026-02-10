@@ -112,7 +112,7 @@ export async function signInCustomer(
   res: Response<OkoApiResponse<LoginResponse>>,
 ) {
   try {
-    const state = req.app.locals as any;
+    const state = req.app.locals;
     const request: SignInRequest = req.body;
 
     if (!request.email || !request.password) {
