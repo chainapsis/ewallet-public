@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Geist, Geist_Mono, Inter, Roboto_Mono } from "next/font/google";
 import type { ReactNode } from "react";
 
 import "@oko-wallet/oko-common-ui/styles/colors.scss";
@@ -22,6 +22,11 @@ const geistMono = Geist_Mono({
 
 const inter = Inter({
   variable: "--font-inter",
+  subsets: ["latin"],
+});
+
+const robotoMono = Roboto_Mono({
+  variable: "--font-roboto-mono",
   subsets: ["latin"],
 });
 
@@ -53,7 +58,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable}`}
+        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${robotoMono.variable}`}
         suppressHydrationWarning
       >
         <Providers>{children}</Providers>

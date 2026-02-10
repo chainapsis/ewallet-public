@@ -2,6 +2,7 @@
 
 .wrapper {
   width: 100%;
+  margin-top: 12px;
 
   @media (min-width: $desktop_min_width) {
     width: 360px;
