@@ -1,25 +1,25 @@
 import type { FC } from "react";
-import cn from "classnames";
 
 import styles from "./base_sponsorship_background.module.scss";
 
-// S3 asset URLs for Base chain sponsorship
-const BASE_ASSETS = {
-  // Pattern images
+// S3 asset URLs for Base chain sponsorship pattern images
+const BASE_PATTERN_ASSETS = {
   patternBlue:
     "https://oko-wallet.s3.ap-northeast-2.amazonaws.com/assets/base_chain/pattern-blue.png",
   patternGray:
     "https://oko-wallet.s3.ap-northeast-2.amazonaws.com/assets/base_chain/pattern-gray.png",
+};
 
-  // Gradient images
-  gradientLightNormal:
-    "https://oko-wallet.s3.ap-northeast-2.amazonaws.com/assets/base_chain/Rectangle+7879.png",
-  gradientDarkNormal:
-    "https://oko-wallet.s3.ap-northeast-2.amazonaws.com/assets/base_chain/Rectangle+7881.png",
-  gradientLightError:
-    "https://oko-wallet.s3.ap-northeast-2.amazonaws.com/assets/base_chain/Rectangle+7882.png",
-  gradientDarkError:
-    "https://oko-wallet.s3.ap-northeast-2.amazonaws.com/assets/base_chain/Rectangle+7883.png",
+// CSS linear-gradient values matching Figma design
+const GRADIENTS = {
+  lightNormal:
+    "linear-gradient(157.64deg, rgba(255, 255, 255, 0) 53.234%, rgb(178, 221, 255) 93.146%), linear-gradient(90deg, rgb(255, 255, 255) 0%, rgb(255, 255, 255) 100%)",
+  darkNormal:
+    "linear-gradient(143.9deg, rgba(13, 15, 19, 0.31) 64.704%, rgb(13, 52, 73) 92.501%), linear-gradient(90deg, rgb(12, 14, 18) 0%, rgb(12, 14, 18) 100%)",
+  lightError:
+    "linear-gradient(156.16deg, rgba(255, 255, 255, 0) 53.234%, rgb(221, 225, 227) 93.146%), linear-gradient(90deg, rgb(255, 255, 255) 0%, rgb(255, 255, 255) 100%)",
+  darkError:
+    "linear-gradient(142.53deg, rgba(13, 15, 19, 0.31) 64.704%, rgb(39, 43, 50) 92.501%), linear-gradient(90deg, rgb(12, 14, 18) 0%, rgb(12, 14, 18) 100%)",
 };
 
 export interface BaseSponsorshipBackgroundProps {
@@ -34,24 +34,21 @@ export const BaseSponsorshipBackground: FC<BaseSponsorshipBackgroundProps> = ({
   const isDark = theme === "dark";
 
   const patternUrl = isError
-    ? BASE_ASSETS.patternGray
-    : BASE_ASSETS.patternBlue;
+    ? BASE_PATTERN_ASSETS.patternGray
+    : BASE_PATTERN_ASSETS.patternBlue;
 
-  const gradientUrl = isError
+  const gradient = isError
     ? isDark
-      ? BASE_ASSETS.gradientDarkError
-      : BASE_ASSETS.gradientLightError
+      ? GRADIENTS.darkError
+      : GRADIENTS.lightError
     : isDark
-      ? BASE_ASSETS.gradientDarkNormal
-      : BASE_ASSETS.gradientLightNormal;
+      ? GRADIENTS.darkNormal
+      : GRADIENTS.lightNormal;
 
   return (
     <>
       {/* Gradient overlay */}
-      <div
-        className={styles.gradient}
-        style={{ backgroundImage: `url(${gradientUrl})` }}
-      />
+      <div className={styles.gradient} style={{ backgroundImage: gradient }} />
       {/* Pattern overlay */}
       <div
         className={styles.pattern}
