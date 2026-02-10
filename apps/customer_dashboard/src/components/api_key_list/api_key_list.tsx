@@ -139,7 +139,6 @@ export const APIKeyList: FC = () => {
       {deleteTargetKey && (
         <DeleteAPIKeyModal
           apiKey={deleteTargetKey.hashed_key}
-          isActive={deleteTargetKey.is_active}
           onDelete={handleDelete}
           onClose={() => setDeleteTargetKeyId(null)}
           isDeleting={deleteAPIKey.isPending}

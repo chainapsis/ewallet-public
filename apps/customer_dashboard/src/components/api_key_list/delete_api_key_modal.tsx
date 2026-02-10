@@ -14,7 +14,6 @@ import styles from "./delete_api_key_modal.module.scss";
 
 export type DeleteAPIKeyModalProps = {
   apiKey: string;
-  isActive: boolean;
   onDelete: () => void;
   onClose: () => void;
   isDeleting: boolean;
@@ -22,7 +21,6 @@ export type DeleteAPIKeyModalProps = {
 
 export const DeleteAPIKeyModal: FC<DeleteAPIKeyModalProps> = ({
   apiKey,
-  isActive,
   onDelete,
   onClose,
   isDeleting,
@@ -89,24 +87,18 @@ export const DeleteAPIKeyModal: FC<DeleteAPIKeyModalProps> = ({
 
           <Spacing height={8} />
 
-          <div
-            className={cn(styles.apiKeyBox, {
-              [styles.apiKeyBoxActive]: isActive,
-            })}
-          >
+          <div className={cn(styles.apiKeyBox, styles.apiKeyBoxActive)}>
             <Typography
-              size={isActive ? "md" : "sm"}
+              size="md"
               weight="medium"
-              color={isActive ? "error-primary" : "tertiary"}
+              color="error-primary"
               tagType="p"
             >
               {apiKey}
             </Typography>
-            {isActive && (
-              <Typography size="sm" weight="regular" color="error-primary">
-                Any requests using this key will stop working immediately.
-              </Typography>
-            )}
+            <Typography size="sm" weight="regular" color="error-primary">
+              Any requests using this key will stop working immediately.
+            </Typography>
           </div>
 
           <Spacing height={28} />
