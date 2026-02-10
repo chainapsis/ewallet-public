@@ -39,7 +39,9 @@ export const APIKeyList: FC = () => {
   );
 
   const handleDelete = () => {
-    if (!deleteTargetKeyId) return;
+    if (!deleteTargetKeyId) {
+      return;
+    }
     deleteAPIKey.mutate(deleteTargetKeyId, {
       onSuccess: () => {
         setDeleteTargetKeyId(null);
@@ -91,18 +93,20 @@ export const APIKeyList: FC = () => {
         <Typography size="md" weight="medium" color="tertiary">
           View and manage your API keys
         </Typography>
-      </div>
 
-      <Button
-        variant="primary"
-        size="md"
-        onClick={handleCreate}
-        disabled={createAPIKey.isPending}
-        isLoading={createAPIKey.isPending}
-      >
-        <PlusIcon size={20} color="currentColor" />
-        Create API Key
-      </Button>
+        <Spacing height={20} />
+
+        <Button
+          variant="primary"
+          size="md"
+          onClick={handleCreate}
+          disabled={createAPIKey.isPending}
+          isLoading={createAPIKey.isPending}
+        >
+          <PlusIcon size={20} color="currentColor" />
+          Create API Key
+        </Button>
+      </div>
 
       <Table variant="bordered">
         <TableHead>

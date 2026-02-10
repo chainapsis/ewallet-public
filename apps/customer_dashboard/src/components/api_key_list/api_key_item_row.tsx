@@ -71,9 +71,9 @@ export const APIKeyItemRow: FC<APIKeyItemRowProps> = ({
           className={styles.buttonIcon}
         >
           {isVisible ? (
-            <EyeOffIcon color="var(--fg-tertiary)" size={16} />
+            <EyeOffIcon color="var(--fg-tertiary)" size={24} />
           ) : (
-            <EyeIcon color="var(--fg-tertiary)" size={16} />
+            <EyeIcon color="var(--fg-tertiary)" size={24} />
           )}
         </button>
 
@@ -94,7 +94,7 @@ export const APIKeyItemRow: FC<APIKeyItemRowProps> = ({
             onClick={handleCopy}
             className={styles.buttonIcon}
           >
-            <CopyOutlinedIcon color="var(--fg-tertiary)" />
+            <CopyOutlinedIcon color="var(--fg-tertiary)" size={24} />
           </button>
         )}
       </TableCell>

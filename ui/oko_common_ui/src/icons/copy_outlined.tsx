@@ -5,12 +5,13 @@ import type { BasicIconProps } from "./types";
 export const CopyOutlinedIcon: FC<BasicIconProps> = ({
   className,
   color = "currentColor",
+  size = 16,
 }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="16"
-      height="16"
+      width={size}
+      height={size}
       viewBox="0 0 16 16"
       fill="none"
       className={className}
