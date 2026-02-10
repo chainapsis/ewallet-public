@@ -116,8 +116,8 @@ export const SponsoredFee: FC<SponsoredFeeProps> = ({
             tabIndex={0}
           >
             <InfoCircleIcon size={16} color="var(--fg-quaternary)" />
+            {tooltipVisible && showTooltip && <SponsoredFeeTooltip />}
           </div>
-          {tooltipVisible && showTooltip && <SponsoredFeeTooltip />}
         </div>
         <div className={styles.right}>
           {isSimulating || isLoading ? (
