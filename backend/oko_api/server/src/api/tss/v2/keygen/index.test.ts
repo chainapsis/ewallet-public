@@ -14,6 +14,7 @@ import {
 } from "@oko-wallet/teddsa-addon/src/server";
 import {
   insertKSNode,
+  createWalletKSNodes,
   getWalletKSNodesByWalletId,
 } from "@oko-wallet/oko-pg-interface/ks_nodes";
 import {
@@ -28,10 +29,12 @@ import {
   getWalletById,
 } from "@oko-wallet/oko-pg-interface/oko_wallets";
 import { insertKeyShareNodeMeta } from "@oko-wallet/oko-pg-interface/key_share_node_meta";
+import { insertCustomer } from "@oko-wallet/oko-pg-interface/customers";
 
 import { resetPgDatabase } from "@oko-wallet-api/testing/database";
 import { testPgConfig } from "@oko-wallet-api/database/test_config";
 import { TEMP_ENC_SECRET } from "@oko-wallet-api/api/tss/utils";
+import { TEST_CUSTOMER } from "@oko-wallet-api/api/tss/tests";
 
 const mockCheckKeyShareFromKSNodesV2 = jest.fn() as jest.Mock;
 
@@ -67,6 +70,15 @@ async function setUpKSNodes(pool: Pool): Promise<string[]> {
   }
 
   return ksNodeIds;
+}
+
+async function createTestCustomer(pool: Pool): Promise<string> {
+  const insertCustomerRes = await insertCustomer(pool, TEST_CUSTOMER);
+  if (insertCustomerRes.success === false) {
+    console.error(insertCustomerRes.err);
+    throw new Error("Failed to insert customer");
+  }
+  return insertCustomerRes.data.customer_id;
 }
 
 describe("keygen_v2_test", () => {
@@ -141,12 +153,15 @@ describe("keygen_v2_test", () => {
         },
       });
 
+      const customerId = await createTestCustomer(pool);
+
       const keygenResponse = await runKeygenV2(
         pool,
         jwtConfig,
         keygenRequest,
         TEMP_ENC_SECRET,
         mockLogger,
+        customerId,
       );
       if (keygenResponse.success === false) {
         console.error(keygenResponse);
@@ -285,12 +300,15 @@ describe("keygen_v2_test", () => {
         },
       };
 
+      const customerId = await createTestCustomer(pool);
+
       const keygenResponse = await runKeygenV2(
         pool,
         jwtConfig,
         keygenRequest,
         TEMP_ENC_SECRET,
         mockLogger,
+        customerId,
       );
       if (keygenResponse.success === true) {
         throw new Error("keygenV2 should fail");
@@ -345,12 +363,15 @@ describe("keygen_v2_test", () => {
         },
       };
 
+      const customerId = await createTestCustomer(pool);
+
       const keygenResponse = await runKeygenV2(
         pool,
         jwtConfig,
         keygenRequest,
         TEMP_ENC_SECRET,
         mockLogger,
+        customerId,
       );
       if (keygenResponse.success === true) {
         throw new Error("keygenV2 should fail");
@@ -402,12 +423,15 @@ describe("keygen_v2_test", () => {
         },
       };
 
+      const customerId = await createTestCustomer(pool);
+
       const keygenResponse = await runKeygenV2(
         pool,
         jwtConfig,
         keygenRequest,
         TEMP_ENC_SECRET,
         mockLogger,
+        customerId,
       );
       if (keygenResponse.success === true) {
         throw new Error("keygenV2 should fail");
@@ -456,12 +480,15 @@ describe("keygen_v2_test", () => {
         },
       };
 
+      const customerId = await createTestCustomer(pool);
+
       const keygenResponse = await runKeygenV2(
         pool,
         jwtConfig,
         keygenRequest,
         TEMP_ENC_SECRET,
         mockLogger,
+        customerId,
       );
       if (keygenResponse.success === true) {
         throw new Error("keygenV2 should fail");
@@ -508,12 +535,15 @@ describe("keygen_v2_test", () => {
         },
       };
 
+      const customerId = await createTestCustomer(pool);
+
       const keygenResponse = await runKeygenV2(
         pool,
         jwtConfig,
         keygenRequest,
         TEMP_ENC_SECRET,
         mockLogger,
+        customerId,
       );
       if (keygenResponse.success === true) {
         throw new Error("keygenV2 should fail");
@@ -561,12 +591,15 @@ describe("keygen_v2_test", () => {
         },
       };
 
+      const customerId = await createTestCustomer(pool);
+
       const keygenResponse = await runKeygenV2(
         pool,
         jwtConfig,
         keygenRequest,
         TEMP_ENC_SECRET,
         mockLogger,
+        customerId,
       );
       if (keygenResponse.success === true) {
         throw new Error("keygenV2 should fail");
@@ -612,12 +645,15 @@ describe("keygen_v2_test", () => {
         },
       };
 
+      const customerId = await createTestCustomer(pool);
+
       const keygenResponse = await runKeygenV2(
         pool,
         jwtConfig,
         keygenRequest,
         TEMP_ENC_SECRET,
         mockLogger,
+        customerId,
       );
       if (keygenResponse.success === true) {
         throw new Error("keygenV2 should fail");
@@ -639,7 +675,8 @@ describe("keygen_v2_test", () => {
       pool: Pool,
       userIdentifier: string = TEST_EMAIL_ED25519,
       authType: "google" | "auth0" = "google",
-    ): Promise<string> {
+      existingKsNodeIds?: string[],
+    ): Promise<{ userId: string; walletId: string; ksNodeIds: string[] }> {
       const createUserRes = await createUser(pool, userIdentifier, authType);
       if (createUserRes.success === false) {
         throw new Error("Failed to create user");
@@ -667,7 +704,22 @@ describe("keygen_v2_test", () => {
         throw new Error("Failed to create secp256k1 wallet");
       }
 
-      return createUserRes.data.user_id;
+      const ksNodeIds = existingKsNodeIds ?? (await setUpKSNodes(pool));
+
+      const createWalletKSNodesRes = await createWalletKSNodes(
+        pool,
+        createWalletRes.data.wallet_id,
+        ksNodeIds,
+      );
+      if (createWalletKSNodesRes.success === false) {
+        throw new Error("Failed to map wallet ks nodes");
+      }
+
+      return {
+        userId: createUserRes.data.user_id,
+        walletId: createWalletRes.data.wallet_id,
+        ksNodeIds,
+      };
     }
 
     function generateKeygenRequest(
@@ -736,9 +788,7 @@ describe("keygen_v2_test", () => {
     });
 
     it("should create ed25519 wallet for existing user with secp256k1 wallet", async () => {
-      await setUpUserWithSecp256k1Wallet(pool);
-
-      const ksNodeIds = await setUpKSNodes(pool);
+      const { ksNodeIds } = await setUpUserWithSecp256k1Wallet(pool);
       (mockCheckKeyShareFromKSNodesV2 as any).mockResolvedValue({
         success: true,
         data: {
@@ -768,9 +818,7 @@ describe("keygen_v2_test", () => {
     });
 
     it("should fail if ed25519 wallet already exists for user", async () => {
-      await setUpUserWithSecp256k1Wallet(pool);
-
-      const ksNodeIds = await setUpKSNodes(pool);
+      const { ksNodeIds } = await setUpUserWithSecp256k1Wallet(pool);
       (mockCheckKeyShareFromKSNodesV2 as any).mockResolvedValue({
         success: true,
         data: {
@@ -809,10 +857,11 @@ describe("keygen_v2_test", () => {
     });
 
     it("should fail if public key is duplicated", async () => {
-      await setUpUserWithSecp256k1Wallet(pool, "user1@test.com");
-      await setUpUserWithSecp256k1Wallet(pool, "user2@test.com");
-
-      const ksNodeIds = await setUpKSNodes(pool);
+      const { ksNodeIds } = await setUpUserWithSecp256k1Wallet(
+        pool,
+        "user1@test.com",
+      );
+      await setUpUserWithSecp256k1Wallet(pool, "user2@test.com", "google", ksNodeIds);
       (mockCheckKeyShareFromKSNodesV2 as any).mockResolvedValue({
         success: true,
         data: {
@@ -850,9 +899,7 @@ describe("keygen_v2_test", () => {
     });
 
     it("should include optional name in response when provided", async () => {
-      await setUpUserWithSecp256k1Wallet(pool);
-
-      const ksNodeIds = await setUpKSNodes(pool);
+      const { ksNodeIds } = await setUpUserWithSecp256k1Wallet(pool);
       (mockCheckKeyShareFromKSNodesV2 as any).mockResolvedValue({
         success: true,
         data: {
@@ -905,6 +952,7 @@ describe("keygen_v2_test", () => {
           pool,
           `authtype-test-${i}@test.com`,
           authTypes[i],
+          ksNodeIds,
         );
 
         const keygenResult = runKeygenCentralizedEd25519();
@@ -942,9 +990,7 @@ describe("keygen_v2_test", () => {
     });
 
     it("should generate valid JWT token", async () => {
-      await setUpUserWithSecp256k1Wallet(pool);
-
-      const ksNodeIds = await setUpKSNodes(pool);
+      const { ksNodeIds } = await setUpUserWithSecp256k1Wallet(pool);
       (mockCheckKeyShareFromKSNodesV2 as any).mockResolvedValue({
         success: true,
         data: {
@@ -1000,9 +1046,7 @@ describe("keygen_v2_test", () => {
     });
 
     it("should store only signing_share and verifying_share in enc_tss_share", async () => {
-      await setUpUserWithSecp256k1Wallet(pool);
-
-      const ksNodeIds = await setUpKSNodes(pool);
+      const { ksNodeIds } = await setUpUserWithSecp256k1Wallet(pool);
       (mockCheckKeyShareFromKSNodesV2 as any).mockResolvedValue({
         success: true,
         data: {

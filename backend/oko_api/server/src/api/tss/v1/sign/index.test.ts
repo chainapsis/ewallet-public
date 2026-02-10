@@ -127,6 +127,15 @@ async function setUpKSNodes(pool: Pool): Promise<string[]> {
   return ksNodeIds;
 }
 
+async function createTestCustomer(pool: Pool): Promise<string> {
+  const insertCustomerRes = await insertCustomer(pool, TEST_CUSTOMER);
+  if (insertCustomerRes.success === false) {
+    console.error(insertCustomerRes.err);
+    throw new Error("Failed to insert customer");
+  }
+  return insertCustomerRes.data.customer_id;
+}
+
 async function setUpTssStage(pool: Pool) {
   // keygen
   const email = "test@test.com";
@@ -146,6 +155,8 @@ async function setUpTssStage(pool: Pool) {
     sss_threshold: SSS_THRESHOLD,
   });
 
+  const customerId = await createTestCustomer(pool);
+
   const keygenRequest: KeygenRequest = {
     auth_type: "google",
     user_identifier: email,
@@ -161,6 +172,7 @@ async function setUpTssStage(pool: Pool) {
     keygenRequest,
     TEMP_ENC_SECRET,
     mockLogger,
+    customerId,
   );
   if (keygenResponse.success === false) {
     console.error(keygenResponse);
@@ -168,13 +180,6 @@ async function setUpTssStage(pool: Pool) {
   }
   const walletId = keygenResponse.data?.user.wallet_id;
   const keygen0 = keygen_outputs[Participant.P0];
-
-  const insertCustomerRes = await insertCustomer(pool, TEST_CUSTOMER);
-  if (insertCustomerRes.success === false) {
-    console.error(insertCustomerRes.err);
-    throw new Error("Failed to insert customer");
-  }
-  const customerId = insertCustomerRes.data.customer_id;
 
   // triples
   const clientTriplesState: TECDSATriplesState = {
