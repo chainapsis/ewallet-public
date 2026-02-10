@@ -54,7 +54,7 @@ export async function get_tss_all_activation_setting(
   req: AuthenticatedAdminRequest,
   res: Response<OkoApiResponse<GetTssAllActivationSettingResponse>>,
 ) {
-  const state = req.app.locals as any;
+  const state = req.app.locals;
 
   const result = await getTssAllActivationSetting(state.db);
   if (!result.success) {

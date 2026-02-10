@@ -58,7 +58,7 @@ export async function verifyResetCode(
   res: Response<OkoApiResponse<{ isValid: boolean }>>,
 ) {
   try {
-    const state = req.app.locals as any;
+    const state = req.app.locals;
     const { email, code } = req.body;
 
     if (!email || !code) {

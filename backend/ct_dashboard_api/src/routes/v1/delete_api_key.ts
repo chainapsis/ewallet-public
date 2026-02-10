@@ -82,7 +82,7 @@ export async function deleteApiKey(
   res: Response<OkoApiResponse<{ key_id: string }>>,
 ) {
   try {
-    const state = req.app.locals as any;
+    const state = req.app.locals;
     const { key_id } = req.body;
 
     if (!key_id) {

@@ -77,7 +77,7 @@ export async function resetPasswordConfirm(
   res: Response<OkoApiResponse<{ message: string }>>,
 ) {
   try {
-    const state = req.app.locals as any;
+    const state = req.app.locals;
     const { email, code, newPassword } = req.body;
 
     if (!email || !code || !newPassword) {

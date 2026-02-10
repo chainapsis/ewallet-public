@@ -1,138 +1,98 @@
+import { comparePassword, hashPassword } from "@oko-wallet/crypto-js";
+import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
 import { registry } from "@oko-wallet/oko-api-openapi";
 import {
   ErrorResponseSchema,
   SuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/common";
-import { CustomerAuthHeaderSchema } from "@oko-wallet/oko-api-openapi/ct_dashboard";
+import {
+  ChangePasswordRequestSchema,
+  ChangePasswordSuccessResponseSchema,
+  CustomerAuthHeaderSchema,
+  LoginSuccessResponseSchema,
+  SendVerificationRequestSchema,
+  SendVerificationSuccessResponseSchema,
+  SignInRequestSchema,
+  VerifyAndLoginRequestSchema,
+} from "@oko-wallet/oko-api-openapi/ct_dashboard";
+import {
+  getCTDUserWithCustomerAndPasswordHashByEmail,
+  getCTDUserWithCustomerByEmail,
+  updateCustomerDashboardUserPassword,
+  verifyCustomerDashboardUserEmail,
+} from "@oko-wallet/oko-pg-interface/customer_dashboard_users";
+import { verifyEmailCode } from "@oko-wallet/oko-pg-interface/email_verifications";
 import { getWalletById } from "@oko-wallet/oko-pg-interface/oko_wallets";
 import { getConnectionsByUserId } from "@oko-wallet/oko-pg-interface/user_customer_connections";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type {
+  ChangePasswordRequest,
+  ChangePasswordResponse,
+  LoginResponse,
+  SendVerificationRequest,
+  SendVerificationResponse,
+  SignInRequest,
+  VerifyAndLoginRequest,
+} from "@oko-wallet/oko-types/ct_dashboard";
 import type { ConnectedApp } from "@oko-wallet/oko-types/user_dashboard";
-import express, { type IRouter, type Response } from "express";
+import express, { type IRouter } from "express";
 import type { Pool } from "pg";
 
-import type { OkoApiResponse } from "@oko-wallet-types/api_response";
+import { changeCustomerPassword } from "./change_ct_password";
+import { getConnectedApps } from "./get_connected_apps";
+import { getCustomerApiKeys } from "./get_customer_api_keys";
+import { getCustomerInfo } from "./get_customer_info";
+import { sendVerificationCodeRoute } from "./send_verification_code";
+import { signInCustomer } from "./sign_in_customer";
+import { updateCustomerInfoRoute } from "./update_customer_info";
+import { verifyEmailAndLogin } from "./verify_email_and_login";
+import { generateCustomerToken } from "@oko-wallet-usrd-api/auth";
 import {
+  CHANGED_PASSWORD_MIN_LENGTH,
+  EMAIL_REGEX,
+  SIX_DIGITS_REGEX,
+} from "@oko-wallet-usrd-api/constants";
+import { sendEmailVerificationCode } from "@oko-wallet-usrd-api/email/send";
+import {
+  type CustomerAuthenticatedRequest,
+  customerJwtMiddleware,
   type UserAuthenticatedRequest,
   userJwtMiddleware,
 } from "@oko-wallet-usrd-api/middleware/auth";
-import { setUserRoutes } from "@oko-wallet-usrd-api/routes/user";
-import { setUserAuthRoutes } from "@oko-wallet-usrd-api/routes/user_auth";
+import { multerMiddleware } from "@oko-wallet-usrd-api/middleware/multer";
+import { rateLimitMiddleware } from "@oko-wallet-usrd-api/middleware/rate_limit";
+// import { setUserRoutes } from "@oko-wallet-usrd-api/routes/user";
+// import { setUserAuthRoutes } from "@oko-wallet-usrd-api/routes/user_auth";
 
 export function makeUserRouter() {
   const router = express.Router() as IRouter;
 
-  setUserAuthRoutes(router);
-  setUserRoutes(router);
+  router.use(rateLimitMiddleware({ windowSeconds: 60, maxRequests: 30 }));
 
-  registry.registerPath({
-    method: "post",
-    path: "/user_dashboard/v1/get_connected_apps",
-    tags: ["User Dashboard"],
-    summary: "Get connected apps",
-    description:
-      "Retrieves connected applications for the authenticated user (uses TSS API JWT)",
-    security: [{ userAuth: [] }],
-    request: {
-      headers: CustomerAuthHeaderSchema,
-    },
-    responses: {
-      200: {
-        description: "Connected apps retrieved successfully",
-        content: {
-          "application/json": {
-            schema: SuccessResponseSchema,
-          },
-        },
-      },
-      401: {
-        description: "User not authenticated",
-        content: {
-          "application/json": {
-            schema: ErrorResponseSchema,
-          },
-        },
-      },
-      500: {
-        description: "Server error",
-        content: {
-          "application/json": {
-            schema: ErrorResponseSchema,
-          },
-        },
-      },
-    },
-  });
+  router.post("/customer/auth/send-code", sendVerificationCodeRoute);
+
+  router.post("/customer/auth/verify-login", verifyEmailAndLogin);
+
+  router.post("/customer/auth/signin", signInCustomer);
+
   router.post(
-    "/get_connected_apps",
-    userJwtMiddleware,
-    async (
-      req: UserAuthenticatedRequest,
-      res: Response<OkoApiResponse<ConnectedApp[]>>,
-    ) => {
-      try {
-        const state = req.app.locals as { db: Pool };
-        const { wallet_id_secp256k1 } = res.locals.user as {
-          email: string;
-          wallet_id_secp256k1: string;
-          wallet_id_ed25519: string;
-        };
-
-        const walletRes = await getWalletById(state.db, wallet_id_secp256k1);
-        if (!walletRes.success) {
-          res.status(500).json({
-            success: false,
-            code: "UNKNOWN_ERROR",
-            msg: walletRes.err,
-          });
-          return;
-        }
-
-        if (!walletRes.data) {
-          res.status(404).json({
-            success: false,
-            code: "WALLET_NOT_FOUND",
-            msg: "Wallet not found",
-          });
-          return;
-        }
-
-        const userId = walletRes.data.user_id;
-
-        const connectionsRes = await getConnectionsByUserId(state.db, userId);
-        if (!connectionsRes.success) {
-          res.status(500).json({
-            success: false,
-            code: "UNKNOWN_ERROR",
-            msg: connectionsRes.err,
-          });
-          return;
-        }
-
-        const apps: ConnectedApp[] = connectionsRes.data.map((connection) => ({
-          customer_id: connection.customer_id,
-          label: connection.label,
-          logo_url: connection.logo_url,
-          url: connection.url,
-          connected_at: connection.created_at.toISOString(),
-          state: connection.state,
-        }));
-
-        res.status(200).json({
-          success: true,
-          data: apps,
-        });
-        return;
-      } catch (error) {
-        console.error("Get connected apps error:", error);
-        res.status(500).json({
-          success: false,
-          code: "UNKNOWN_ERROR",
-          msg: "Internal server error",
-        });
-        return;
-      }
-    },
+    "/customer/auth/change-password",
+    customerJwtMiddleware,
+    changeCustomerPassword,
   );
+
+  router.post("/customer/info", customerJwtMiddleware, getCustomerInfo);
+
+  router.post("/customer/api_keys", customerJwtMiddleware, getCustomerApiKeys);
+
+  router.post(
+    "/customer/update_info",
+    customerJwtMiddleware,
+    multerMiddleware,
+    updateCustomerInfoRoute,
+  );
+
+  router.post("/get_connected_apps", userJwtMiddleware, getConnectedApps);
 
   return router;
 }

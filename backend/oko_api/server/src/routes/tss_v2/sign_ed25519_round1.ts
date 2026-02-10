@@ -1,20 +1,20 @@
-import type { Response } from "express";
-import type {
-  SignEd25519Round1Body,
-  SignEd25519Round1Response,
-} from "@oko-wallet/oko-types/tss";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
+import { registry } from "@oko-wallet/oko-api-openapi";
 import {
   ErrorResponseSchema,
   UserAuthHeaderSchema,
 } from "@oko-wallet/oko-api-openapi/common";
-import { registry } from "@oko-wallet/oko-api-openapi";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type {
+  SignEd25519Round1Body,
+  SignEd25519Round1Response,
+} from "@oko-wallet/oko-types/tss";
+import type { Response } from "express";
 
 import { runSignEd25519Round1 } from "@oko-wallet-api/api/tss/sign_ed25519";
 import {
-  type UserAuthenticatedRequest,
   sendResponseWithNewToken,
+  type UserAuthenticatedRequest,
 } from "@oko-wallet-api/middleware/auth/keplr_auth";
 
 registry.registerPath({
@@ -89,7 +89,7 @@ export async function signEd25519Round1(
   req: UserAuthenticatedRequest<SignEd25519Round1Body>,
   res: Response<OkoApiResponse<SignEd25519Round1Response>>,
 ) {
-  const state = req.app.locals as any;
+  const state = req.app.locals;
   const user = res.locals.user;
   const apiKey = res.locals.api_key;
   const body = req.body;

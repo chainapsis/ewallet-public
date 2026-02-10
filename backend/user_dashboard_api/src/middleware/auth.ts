@@ -86,7 +86,8 @@ export async function customerJwtMiddleware(
   const token = authHeader.substring(7); // skip "Bearer "
 
   try {
-    const state = req.app.locals as any;
+    const state = req.app.locals;
+
     const result = verifyCustomerToken({
       token,
       jwt_config: {
