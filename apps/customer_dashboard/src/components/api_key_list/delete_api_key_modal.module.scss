@@ -59,7 +59,7 @@
   padding: 16px;
   border-radius: 12px;
   background: var(--bg-secondary);
-  word-break: break-all;
+  overflow-wrap: break-word;
   display: flex;
   flex-direction: column;
   gap: 12px;
