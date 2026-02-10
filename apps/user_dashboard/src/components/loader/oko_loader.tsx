@@ -1,6 +1,6 @@
-import type { FC } from "react";
-import Image from "next/image";
 import cn from "classnames";
+import Image from "next/image";
+import type { FC } from "react";
 
 import styles from "./oko_loader.module.scss";
 
@@ -10,10 +10,7 @@ interface OkoLoaderProps {
   className?: string;
 }
 
-export const OkoLoader: FC<OkoLoaderProps> = ({
-  size = 80,
-  className,
-}) => {
+export const OkoLoader: FC<OkoLoaderProps> = ({ size = 80, className }) => {
   const iconSize = (size / 80) * 28;
   return (
     <div className={cn(styles.container, className)}>

@@ -15,7 +15,7 @@ import { registry } from "@oko-wallet/oko-api-openapi";
 
 import { signInV2 } from "@oko-wallet-api/api/tss/v2/user";
 import { type OAuthAuthenticatedRequest } from "@oko-wallet-api/middleware/auth/oauth";
-import type { OAuthLocals } from "@oko-wallet-api/middleware/auth/types";
+import type { OAuthLocalsWithAPIKey } from "@oko-wallet-api/middleware/auth/types";
 
 registry.registerPath({
   method: "post",
@@ -74,12 +74,13 @@ registry.registerPath({
 
 export async function userSignInV2(
   req: OAuthAuthenticatedRequest,
-  res: Response<OkoApiResponse<SignInResponseV2>, OAuthLocals>,
+  res: Response<OkoApiResponse<SignInResponseV2>, OAuthLocalsWithAPIKey>,
 ) {
   const state = req.app.locals;
   const oauthUser = res.locals.oauth_user;
   const auth_type = oauthUser.type as AuthType;
   const user_identifier = oauthUser.user_identifier;
+  const apiKey = res.locals.api_key;
 
   if (!user_identifier) {
     res.status(401).json({
@@ -103,6 +104,7 @@ export async function userSignInV2(
     oauthUser.email,
     oauthUser.name,
     oauthUser.metadata,
+    apiKey.customer_id,
   );
   if (signInRes.success === false) {
     res

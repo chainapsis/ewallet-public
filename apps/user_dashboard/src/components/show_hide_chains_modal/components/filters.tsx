@@ -6,12 +6,7 @@ import { type FC, type ReactNode, useState } from "react";
 import styles from "./filters.module.scss";
 
 const visibilityOptions = ["Show All", "Show Hidden"] as const;
-const ecosystemFilterOptions = [
-  "All Chains",
-  "Cosmos",
-  "EVM",
-  "SVM",
-] as const;
+const ecosystemFilterOptions = ["All Chains", "Cosmos", "EVM", "SVM"] as const;
 
 type SelectedFilters = {
   visibility: (typeof visibilityOptions)[number];

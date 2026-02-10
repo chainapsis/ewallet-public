@@ -37,6 +37,7 @@ export async function handleNewUserV2(
   idToken: string,
   keyshareNodeMeta: KeyShareNodeMetaWithNodeStatusInfo,
   authType: AuthType,
+  apiKey?: string,
   referralInfo?: ReferralInfo | null,
 ): Promise<Result<UserSignInResultV2, OAuthSignInError>> {
   // 1. secp256k1 keygen
@@ -173,6 +174,7 @@ export async function handleNewUserV2(
     },
     idToken,
     keygenCommitRevealRes.data,
+    apiKey,
   );
   if (reqKeygenV2Res.success === false) {
     return {

@@ -1,20 +1,20 @@
-import request from "supertest";
-import { Pool } from "pg";
-import { v4 as uuidv4 } from "uuid";
 import { KNOWN_HASH_FROM_0000 } from "@oko-wallet/crypto-js";
-import { insertCustomer } from "@oko-wallet/oko-pg-interface/customers";
 import { insertCustomerDashboardUser } from "@oko-wallet/oko-pg-interface/customer_dashboard_users";
-import {
-  type CustomerDashboardUser,
-  type PasswordHash,
+import { insertCustomer } from "@oko-wallet/oko-pg-interface/customers";
+import type {
+  CustomerDashboardUser,
+  PasswordHash,
 } from "@oko-wallet/oko-types/ct_dashboard";
-import { type Customer } from "@oko-wallet/oko-types/customers";
+import type { Customer } from "@oko-wallet/oko-types/customers";
+import { createPgConn } from "@oko-wallet/postgres-lib";
 import * as dotenv from "dotenv";
 import path from "path";
-import { createPgConn } from "@oko-wallet/postgres-lib";
+import type { Pool } from "pg";
+import request from "supertest";
+import { v4 as uuidv4 } from "uuid";
 
-import { makeApp } from "@oko-wallet-usrd-api/testing/app";
 import { testPgConfig } from "@oko-wallet-usrd-api/database/test_config";
+import { makeApp } from "@oko-wallet-usrd-api/testing/app";
 
 dotenv.config({
   path: path.resolve(__dirname, "../../../.env.local"),

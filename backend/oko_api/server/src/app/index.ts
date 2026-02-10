@@ -23,11 +23,15 @@ export function makeApp(state: ServerState) {
       },
     }),
   );
+
   app.use(
     cors({
       exposedHeaders: ["X-New-Token"],
     }),
   );
+
+  // Make req.ip the nearest reverse-proxy ip address
+  app.set("trust proxy", 1);
 
   // Exclude typeform webhook from JSON parsing (needs raw body for signature verification)
   app.use((req, res, next) => {

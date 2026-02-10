@@ -223,7 +223,7 @@ export default function RemindInactivePage() {
                                 </td>
                                 <td>
                                   <a
-                                    href="https://oko-wallet.canny.io/integration-support-inquiries"
+                                    href="https://okowallet.userjot.com/board/integration-support-inquiries"
                                     style={linkStyle}
                                   >
                                     Integration Inquiries

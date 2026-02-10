@@ -39,6 +39,7 @@ import type { Result } from "@oko-wallet/stdlib-js";
 
 import { generateUserTokenV2 } from "@oko-wallet-api/api/tss/keplr_auth";
 import { checkKeyShareFromKSNodesV2 } from "@oko-wallet-api/api/tss/ks_node";
+import { saveUserCustomerConnection } from "@oko-wallet-api/api/tss/connection";
 import { requestCheckKeyShareV2 } from "@oko-wallet-api/requests";
 
 // Higher = worse (needs more attention)
@@ -62,6 +63,7 @@ export async function signInV2(
   email?: string,
   name?: string,
   metadata?: Record<string, unknown>,
+  customerId?: string,
 ): Promise<OkoApiResponse<SignInResponseV2>> {
   try {
     const getUserRes = await getUserByEmailAndAuthType(
@@ -161,6 +163,18 @@ export async function signInV2(
         code: "UNKNOWN_ERROR",
         msg: `generateUserToken error: ${tokenResult.err}`,
       };
+    }
+
+    if (customerId) {
+      saveUserCustomerConnection(
+        db,
+        logger,
+        getUserRes.data.user_id,
+        customerId,
+      )
+        .catch((err) => {
+          logger.error(`signInV2 error inserting user-customer connection: ${err}`);
+        });
     }
 
     return {

@@ -47,6 +47,9 @@ export async function handleExistingUser(
     {
       auth_type: authType,
     },
+    TSS_V1_ENDPOINT,
+    undefined,
+    apiKey,
   );
   if (!signInRes.success) {
     console.error("[attached] sign in failed, err: %s", signInRes.err);
@@ -107,9 +110,9 @@ export async function handleExistingUser(
         nodes: keyshareNodeMeta.nodes.map((n) =>
           n.name === error.affectedNode.name
             ? {
-                ...n,
-                wallet_status: "UNRECOVERABLE_DATA_LOSS" as WalletKSNodeStatus,
-              }
+              ...n,
+              wallet_status: "UNRECOVERABLE_DATA_LOSS" as WalletKSNodeStatus,
+            }
             : n,
         ),
       };
@@ -253,7 +256,12 @@ export async function handleNewUser(
     },
   };
 
-  const reqKeygenRes = await reqKeygen(TSS_V1_ENDPOINT, keygenRequest, idToken);
+  const reqKeygenRes = await reqKeygen(
+    TSS_V1_ENDPOINT,
+    keygenRequest,
+    idToken,
+    apiKey,
+  );
   if (reqKeygenRes.success === false) {
     return {
       success: false,
@@ -322,6 +330,7 @@ export async function handleReshare(
   idToken: string,
   keyshareNodeMeta: KeyShareNodeMetaWithNodeStatusInfo,
   authType: AuthType,
+  apiKey?: string,
 ): Promise<Result<UserSignInResult, OAuthSignInError>> {
   const signInRes = await makeAuthorizedOkoApiRequest<any, SignInResponse>(
     "user/signin",
@@ -329,6 +338,9 @@ export async function handleReshare(
     {
       auth_type: authType,
     },
+    TSS_V1_ENDPOINT,
+    undefined,
+    apiKey,
   );
   if (!signInRes.success) {
     console.error("[attached] sign in failed, err: %s", signInRes.err);

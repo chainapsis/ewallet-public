@@ -305,18 +305,18 @@ export function useAllBalances() {
       const aValue =
         a.priceUsd && a.token.currency.coinDecimals
           ? calculateUsdValue(
-              a.token.amount,
-              a.token.currency.coinDecimals,
-              a.priceUsd,
-            )
+            a.token.amount,
+            a.token.currency.coinDecimals,
+            a.priceUsd,
+          )
           : 0;
       const bValue =
         b.priceUsd && b.token.currency.coinDecimals
           ? calculateUsdValue(
-              b.token.amount,
-              b.token.currency.coinDecimals,
-              b.priceUsd,
-            )
+            b.token.amount,
+            b.token.currency.coinDecimals,
+            b.priceUsd,
+          )
           : 0;
       return bValue - aValue;
     });

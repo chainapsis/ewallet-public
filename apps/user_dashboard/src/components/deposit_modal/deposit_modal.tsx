@@ -27,15 +27,10 @@ import {
 } from "@oko-wallet-user-dashboard/hooks/queries/use_addresses";
 import { useSearch } from "@oko-wallet-user-dashboard/hooks/use_search";
 import { DEFAULT_ENABLED_CHAINS } from "@oko-wallet-user-dashboard/state/chains";
-import { getChainIdentifier } from "@oko-wallet-user-dashboard/utils/chain";
 import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
+import { getChainIdentifier } from "@oko-wallet-user-dashboard/utils/chain";
 
-const ecosystemFilterOptions = [
-  "All Chains",
-  "Cosmos",
-  "EVM",
-  "SVM",
-] as const;
+const ecosystemFilterOptions = ["All Chains", "Cosmos", "EVM", "SVM"] as const;
 type EcosystemFilter = (typeof ecosystemFilterOptions)[number];
 
 interface DepositModalProps {
@@ -123,9 +118,7 @@ export const DepositModal: FC<DepositModalProps> = ({ renderTrigger }) => {
       });
   }, [searchedChainInfos, ecosystem]);
 
-  const getAddressForChain = (
-    chain: ModularChainInfo,
-  ): string | undefined => {
+  const getAddressForChain = (chain: ModularChainInfo): string | undefined => {
     if (chain.evm) {
       return ethAddress === null ? undefined : ethAddress;
     }
