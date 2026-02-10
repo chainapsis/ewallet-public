@@ -8,7 +8,7 @@ import { Input } from "@oko-wallet/oko-common-ui/input";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import cn from "classnames";
-import { type FC, useState } from "react";
+import { type FC, useRef, useState } from "react";
 
 import styles from "./delete_api_key_modal.module.scss";
 
@@ -29,6 +29,7 @@ export const DeleteAPIKeyModal: FC<DeleteAPIKeyModalProps> = ({
 }) => {
   const [confirmText, setConfirmText] = useState("");
   const [touched, setTouched] = useState(false);
+  const mouseDownOnOverlay = useRef(false);
 
   const isConfirmed = confirmText === "Delete";
   const showError = touched && confirmText.length > 0 && !isConfirmed;
@@ -42,8 +43,19 @@ export const DeleteAPIKeyModal: FC<DeleteAPIKeyModalProps> = ({
   };
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+    <div
+      className={styles.overlay}
+      onMouseDown={(e) => {
+        mouseDownOnOverlay.current = e.target === e.currentTarget;
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget && mouseDownOnOverlay.current) {
+          onClose();
+        }
+        mouseDownOnOverlay.current = false;
+      }}
+    >
+      <div className={styles.modal}>
         <div className={styles.closeRow}>
           <button
             type="button"
