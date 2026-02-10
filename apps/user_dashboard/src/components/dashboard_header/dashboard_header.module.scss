@@ -1,18 +1,22 @@
 @use "../../styles/viewport.module.scss" as *;
 
 .wrapper {
-  height: 54px;
+  height: 64px;
   display: flex;
   flex-shrink: 0;
   flex-grow: 0;
   align-items: center;
-  padding: 20px 16px;
+  padding: 16px 20px;
   z-index: 999;
   justify-content: space-between;
 
   @media (min-width: $desktop_min_width) {
     padding: 16px 44px;
   }
+}
+
+.logo {
+  flex-shrink: 0;
 }
 
 .rightSection {

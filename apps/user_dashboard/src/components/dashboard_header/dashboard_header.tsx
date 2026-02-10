@@ -13,9 +13,7 @@ import { TelegramIcon } from "@oko-wallet/oko-common-ui/icons/telegram_icon";
 import { ThreeDotsVerticalIcon } from "@oko-wallet/oko-common-ui/icons/three_dots_vertical";
 import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
 import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
-import { Logo } from "@oko-wallet/oko-common-ui/logo";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import type { Theme } from "@oko-wallet/oko-common-ui/theme";
 import type { Property } from "csstype";
 import { useRouter } from "next/navigation";
 import type { FC, ReactNode } from "react";
@@ -50,10 +48,12 @@ function getAuthProviderIcon(authType: AuthType | null, size = 16): ReactNode {
   }
 }
 
+const OKO_LOGO_URL =
+  "https://oko-wallet.s3.ap-northeast-2.amazonaws.com/icons/oko_logo.png";
+
 export const DashboardHeader: FC<{
-  theme?: Theme;
   position?: Property.Position;
-}> = ({ theme = "light", position = "static" }) => {
+}> = ({ position = "static" }) => {
   const isLeftBarOpen = useViewState((state) => state.isLeftBarOpen);
   const toggleLeftBarOpen = useViewState((state) => state.toggleLeftBarOpen);
 
@@ -66,7 +66,13 @@ export const DashboardHeader: FC<{
 
   return (
     <div className={styles.wrapper} style={{ position }}>
-      <Logo theme={theme} />
+      <img
+        src={OKO_LOGO_URL}
+        alt="Oko"
+        width={72}
+        height={28}
+        className={styles.logo}
+      />
 
       <div className={styles.rightSection}>
         {isSignedIn && (
