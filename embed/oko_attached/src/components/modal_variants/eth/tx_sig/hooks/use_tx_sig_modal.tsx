@@ -318,19 +318,24 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
 
   // calculate the estimated fee
   useEffect(() => {
-    let adjustedGasEstimation = gasEstimation;
-    if (
-      originalTransaction.data === undefined ||
+    const adjustedGasEstimation =
+      gasEstimation ??
+      (originalTransaction.data === undefined ||
       originalTransaction.data === "0x"
-    ) {
-      adjustedGasEstimation = DEFAULT_GAS_ESTIMATION;
-    }
+        ? DEFAULT_GAS_ESTIMATION
+        : undefined);
 
     if (adjustedGasEstimation === undefined) {
       return;
     }
 
     if (feeData === undefined) {
+      return;
+    }
+
+    // On OP Stack chains, wait for L1 gas estimation before setting the fee
+    // to prevent a race condition where the fee is set without L1 data fee
+    if (isOpStack && !l1GasEstimation) {
       return;
     }
 
@@ -354,7 +359,7 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
     };
 
     setEstimatedFee(estimatedFee);
-  }, [originalTransaction, feeData, l1GasEstimation, gasEstimation]);
+  }, [originalTransaction, feeData, l1GasEstimation, gasEstimation, isOpStack]);
 
   // check if the balance is sufficient for the transaction
   useEffect(() => {
