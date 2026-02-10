@@ -136,7 +136,7 @@ export const MakeTxSigModal: FC<MakeTxSigModalProps> = ({
               fullWidth
               onClick={handleApproveClick}
               isLoading={isLoading}
-              disabled={!isApproveEnabled || isRateLimited}
+              disabled={!isApproveEnabled || (showSponsorship && isRateLimited)}
             >
               {isLoading ? "Signing..." : "Approve"}
             </Button>
