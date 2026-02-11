@@ -39,7 +39,6 @@ export default function Home() {
             {/* TODO: @Ryz0nd, @lidarbtc */}
             {/* <SDKInstallationGuide /> */}
             <APIKeyList />
-            {/* TODO: @blacktoast */}
             <Spacing height={66} />
             <DesignSection />
             <ToastContainer />
