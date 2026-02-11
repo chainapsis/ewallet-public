@@ -8,6 +8,7 @@ import { Authorized } from "@oko-wallet-user-dashboard/components/authorized/aut
 import { DashboardBody } from "@oko-wallet-user-dashboard/components/dashboard_body/dashboard_body";
 import { DashboardHeader } from "@oko-wallet-user-dashboard/components/dashboard_header/dashboard_header";
 import { LeftBar } from "@oko-wallet-user-dashboard/components/left_bar/left_bar";
+import { ToastContainer } from "@oko-wallet-user-dashboard/components/toast";
 import styles from "@oko-wallet-user-dashboard/styles/layout_with_left_bar.module.scss";
 
 export default function ExportPrivateKeyLayout({
@@ -26,6 +27,7 @@ export default function ExportPrivateKeyLayout({
           </DashboardBody>
         </div>
       </div>
+      <ToastContainer />
     </Authorized>
   );
 }

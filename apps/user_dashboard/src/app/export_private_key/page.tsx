@@ -4,14 +4,19 @@ import type { AuthType } from "@oko-wallet/oko-types/auth";
 import { DiscordIcon } from "@oko-wallet/oko-common-ui/icons/discord_icon";
 import { GoogleIcon } from "@oko-wallet/oko-common-ui/icons/google_icon";
 import { MailboxIcon } from "@oko-wallet/oko-common-ui/icons/mailbox";
-import { PasswordIcon } from "@oko-wallet/oko-common-ui/icons/password";
 import { TelegramIcon } from "@oko-wallet/oko-common-ui/icons/telegram_icon";
 import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
 import { Button } from "@oko-wallet/oko-common-ui/button";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import type { ReactNode } from "react";
+import { type ReactNode, useCallback, useState } from "react";
 
 import styles from "./page.module.scss";
+import { displayToast } from "@oko-wallet-user-dashboard/components/toast";
+import { useCopyToClipboard } from "@oko-wallet-user-dashboard/hooks/use_copy_to_clipboard";
+import {
+  selectCosmosSDK,
+  useSDKState,
+} from "@oko-wallet-user-dashboard/state/sdk";
 import { useUserInfoState } from "@oko-wallet-user-dashboard/state/user_info";
 
 function getAuthProviderInfo(authType: AuthType | null): {
@@ -91,13 +96,251 @@ function KeyIcon() {
   );
 }
 
+function CopyIcon() {
+  return (
+    <svg
+      width={24}
+      height={24}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M5 15C4.06812 15 3.60218 15 3.23463 14.8478C2.74458 14.6448 2.35523 14.2554 2.15224 13.7654C2 13.3978 2 12.9319 2 12V5.2C2 4.0799 2 3.51984 2.21799 3.09202C2.40973 2.71569 2.71569 2.40973 3.09202 2.21799C3.51984 2 4.0799 2 5.2 2H12C12.9319 2 13.3978 2 13.7654 2.15224C14.2554 2.35523 14.6448 2.74458 14.8478 3.23463C15 3.60218 15 4.06812 15 5M12.2 22H18.8C19.9201 22 20.4802 22 20.908 21.782C21.2843 21.5903 21.5903 21.2843 21.782 20.908C22 20.4802 22 19.9201 22 18.8V12.2C22 11.0799 22 10.5198 21.782 10.092C21.5903 9.71569 21.2843 9.40973 20.908 9.21799C20.4802 9 19.9201 9 18.8 9H12.2C11.0799 9 10.5198 9 10.092 9.21799C9.71569 9.40973 9.40973 9.71569 9.21799 10.092C9 10.5198 9 11.0799 9 12.2V18.8C9 19.9201 9 20.4802 9.21799 20.908C9.40973 21.2843 9.71569 21.5903 10.092 21.782C10.5198 22 11.0799 22 12.2 22Z" />
+    </svg>
+  );
+}
+
+function EyeOffIcon() {
+  return (
+    <svg
+      width={24}
+      height={24}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M10.7429 5.09232C11.1494 5.03223 11.5686 5 12.0004 5C17.1054 5 20.4553 9.50484 21.5807 11.2868C21.7169 11.5025 21.785 11.6103 21.8231 11.7767C21.8518 11.9016 21.8518 12.0987 21.8231 12.2236C21.785 12.3899 21.7164 12.4985 21.5792 12.7156C21.2793 13.1901 20.8222 13.8571 20.2165 14.5805M6.72432 6.71504C4.56225 8.1817 3.09445 10.2194 2.42111 11.2853C2.28428 11.5019 2.21587 11.6102 2.17774 11.7765C2.1491 11.9014 2.14909 12.0984 2.17771 12.2234C2.21583 12.3897 2.28393 12.4975 2.42013 12.7132C3.54554 14.4952 6.89541 19 12.0004 19C14.0588 19 15.8319 18.2676 17.2888 17.2766M3.00042 3L21.0004 21M9.8791 9.87868C9.3362 10.4216 9.00042 11.1716 9.00042 12C9.00042 13.6569 10.3436 15 12.0004 15C12.8288 15 13.5788 14.6642 14.1218 14.1213" />
+    </svg>
+  );
+}
+
+function Step1Content({
+  authInfo,
+  displayIdentifier,
+  isLoading,
+  onContinue,
+}: {
+  authInfo: { icon: ReactNode; label: string };
+  displayIdentifier: string | null;
+  isLoading: boolean;
+  onContinue: () => void;
+}) {
+  return (
+    <>
+      <Typography size="lg" weight="semibold" color="primary">
+        Log in again to reveal your private key
+      </Typography>
+
+      <div style={{ height: 24 }} />
+
+      <div className={styles.loginSection}>
+        <Typography
+          size="xs"
+          weight="semibold"
+          color="secondary"
+          className={styles.loginLabel}
+        >
+          You're logged in with:
+        </Typography>
+        <div className={styles.authCard}>
+          <div className={styles.authCardRow}>
+            {authInfo.icon}
+            <Typography size="md" weight="semibold" color="primary">
+              {authInfo.label}
+            </Typography>
+          </div>
+          <Typography size="md" weight="medium" color="tertiary">
+            {displayIdentifier}
+          </Typography>
+        </div>
+      </div>
+
+      <div className={styles.warningSection}>
+        <div className={styles.warningItem}>
+          <span className={styles.warningIconWrap}>
+            <LockIcon />
+          </span>
+          <div className={styles.warningText}>
+            <Typography size="md" weight="semibold" color="secondary">
+              Keep your private key secret.
+            </Typography>
+            <Typography size="md" color="secondary">
+              Anyone with it can take full control of your wallet and steal your
+              funds.
+            </Typography>
+          </div>
+        </div>
+        <div className={styles.warningItem}>
+          <span className={styles.warningIconWrap}>
+            <AlertTriangleIcon />
+          </span>
+          <div className={styles.warningText}>
+            <Typography size="md" weight="semibold" color="secondary">
+              Using or importing this key outside Oko changes how the wallet is
+              protected.
+            </Typography>
+            <Typography size="md" color="secondary">
+              You'll be fully responsible for managing your wallet.
+            </Typography>
+          </div>
+        </div>
+      </div>
+
+      <Button size="lg" fullWidth isLoading={isLoading} onClick={onContinue}>
+        Continue
+      </Button>
+    </>
+  );
+}
+
+function Step2Content({
+  privateKey,
+  isRevealed,
+  onToggleReveal,
+  onCopy,
+}: {
+  privateKey: string;
+  isRevealed: boolean;
+  onToggleReveal: () => void;
+  onCopy: () => void;
+}) {
+  return (
+    <>
+      <Typography size="lg" weight="semibold" color="primary">
+        View and copy your private key
+      </Typography>
+
+      <div style={{ height: 24 }} />
+
+      <div className={styles.privateKeySection}>
+        <Typography
+          size="xs"
+          weight="semibold"
+          color="secondary"
+          className={styles.privateKeyLabel}
+        >
+          Private Key
+        </Typography>
+        <div
+          className={styles.privateKeyField}
+          onClick={onToggleReveal}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              onToggleReveal();
+            }
+          }}
+        >
+          <div className={styles.privateKeyBg}>
+            <Typography
+              size="md"
+              weight="medium"
+              color="secondary"
+              className={isRevealed ? undefined : styles.privateKeyTextBlurred}
+            >
+              {privateKey}
+            </Typography>
+          </div>
+          {!isRevealed && (
+            <div className={styles.privateKeyHint}>
+              <span className={styles.eyeOffIcon}>
+                <EyeOffIcon />
+              </span>
+              <Typography size="md" weight="medium" color="primary">
+                Click or tap to reveal your private key.
+                <br />
+                Ensure no one else can see your screen.
+              </Typography>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div style={{ height: 32 }} />
+
+      <Button size="lg" fullWidth onClick={onCopy}>
+        <span className={styles.copyButtonIcon}>
+          <CopyIcon />
+        </span>
+        Copy to Clipboard
+      </Button>
+    </>
+  );
+}
+
 export default function Page() {
   const email = useUserInfoState((state) => state.email);
   const name = useUserInfoState((state) => state.name);
   const authType = useUserInfoState((state) => state.authType);
   const authInfo = getAuthProviderInfo(authType);
-  const usesName = authType === "discord" || authType === "telegram" || authType === "x";
+  const usesName =
+    authType === "discord" || authType === "telegram" || authType === "x";
   const displayIdentifier = usesName ? name : email;
+
+  const okoWallet = useSDKState(selectCosmosSDK)?.okoWallet;
+
+  const [step, setStep] = useState<1 | 2>(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isRevealed, setIsRevealed] = useState(false);
+  const [privateKey, setPrivateKey] = useState<string | null>(null);
+  const { copy } = useCopyToClipboard();
+
+  const handleContinue = useCallback(async () => {
+    if (!okoWallet || !authType) {
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      await okoWallet.signIn(authType === "auth0" ? "email" : authType);
+
+      // TODO: Verify re-authenticated account matches the current account (prevent account switch)
+      // TODO: Replace with actual private key export when SDK API is available
+      const mockPrivateKey = "0x" + "0".repeat(64);
+      setPrivateKey(mockPrivateKey);
+      setStep(2);
+    } catch (error) {
+      console.error("Re-authentication failed:", error);
+      displayToast({
+        variant: "error",
+        title: "Login Failed",
+        description: "Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [okoWallet, authType]);
+
+  const handleCopy = useCallback(async () => {
+    if (!privateKey) {
+      return;
+    }
+    const success = await copy(privateKey);
+    if (success) {
+      displayToast({ variant: "success", title: "Copied!" });
+    }
+  }, [privateKey, copy]);
+
+  const handleToggleReveal = useCallback(() => {
+    setIsRevealed((prev) => !prev);
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -110,74 +353,27 @@ export default function Page() {
         </Typography>
         <span className={styles.stepBadge}>
           <Typography size="xs" weight="medium" color="secondary">
-            1/2
+            {step}/2
           </Typography>
         </span>
       </div>
 
       <div className={styles.content}>
-        <Typography size="lg" weight="semibold" color="primary">
-          Log in again to reveal your private key
-        </Typography>
-
-        <div style={{ height: 24 }} />
-
-        <div className={styles.loginSection}>
-          <Typography
-            size="xs"
-            weight="semibold"
-            color="secondary"
-            className={styles.loginLabel}
-          >
-            You're logged in with:
-          </Typography>
-          <div className={styles.authCard}>
-            <div className={styles.authCardRow}>
-              {authInfo.icon}
-              <Typography size="md" weight="semibold" color="primary">
-                {authInfo.label}
-              </Typography>
-            </div>
-            <Typography size="md" weight="medium" color="tertiary">
-              {displayIdentifier}
-            </Typography>
-          </div>
-        </div>
-
-        <div className={styles.warningSection}>
-          <div className={styles.warningItem}>
-            <span className={styles.warningIconWrap}>
-              <LockIcon />
-            </span>
-            <div className={styles.warningText}>
-              <Typography size="md" weight="semibold" color="secondary">
-                Keep your private key secret.
-              </Typography>
-              <Typography size="md" color="secondary">
-                Anyone with it can take full control of your wallet and steal
-                your funds.
-              </Typography>
-            </div>
-          </div>
-          <div className={styles.warningItem}>
-            <span className={styles.warningIconWrap}>
-              <AlertTriangleIcon />
-            </span>
-            <div className={styles.warningText}>
-              <Typography size="md" weight="semibold" color="secondary">
-                Using or importing this key outside Oko changes how the wallet
-                is protected.
-              </Typography>
-              <Typography size="md" color="secondary">
-                You'll be fully responsible for managing your wallet.
-              </Typography>
-            </div>
-          </div>
-        </div>
-
-        <Button size="lg" fullWidth>
-          Continue
-        </Button>
+        {step === 1 ? (
+          <Step1Content
+            authInfo={authInfo}
+            displayIdentifier={displayIdentifier}
+            isLoading={isLoading}
+            onContinue={handleContinue}
+          />
+        ) : (
+          <Step2Content
+            privateKey={privateKey!}
+            isRevealed={isRevealed}
+            onToggleReveal={handleToggleReveal}
+            onCopy={handleCopy}
+          />
+        )}
       </div>
     </div>
   );
