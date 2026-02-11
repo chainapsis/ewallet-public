@@ -15,16 +15,26 @@ import { handleGetCosmosChain } from "./get_cosmos_chain_info";
 import { handleOAuthInfoPassV2 } from "./oauth_info_pass";
 import { handleGetEthChain } from "./get_eth_chain_info";
 import { handleGetConnectedApps } from "./get_connected_apps";
+import { handleExportPrivateKey } from "./export_private_key";
 
-// NOTE: Since this method can only be used within user_dashboard,
-// Define ExtendedOkoWalletMsg to extend the type
+// NOTE: These methods can only be used within user_dashboard,
+// so they are not exposed via the SDK. Define extended types here.
 type OkoWalletMsgGetConnectedApps = {
   target: "oko_attached";
   msg_type: "__get_connected_apps__";
   payload: null;
 };
 
-type ExtendedOkoWalletMsg = OkoWalletMsg | OkoWalletMsgGetConnectedApps;
+type OkoWalletMsgExportPrivateKey = {
+  target: "oko_attached";
+  msg_type: "__export_private_key__";
+  payload: null;
+};
+
+type ExtendedOkoWalletMsg =
+  | OkoWalletMsg
+  | OkoWalletMsgGetConnectedApps
+  | OkoWalletMsgExportPrivateKey;
 
 export function makeMsgHandler() {
   return async function msgHandler(event: MessageEvent) {
@@ -123,6 +133,11 @@ export function makeMsgHandler() {
 
       case "__get_connected_apps__": {
         await handleGetConnectedApps(ctx);
+        break;
+      }
+
+      case "__export_private_key__": {
+        await handleExportPrivateKey(ctx);
         break;
       }
 
