@@ -40,8 +40,8 @@ export default function Home() {
             {/* <SDKInstallationGuide /> */}
             <APIKeyList />
             {/* TODO: @blacktoast */}
-            {/* <Spacing height={66} /> */}
-            {/* <DesignSection /> */}
+            <Spacing height={66} />
+            <DesignSection />
             <ToastContainer />
           </DashboardBody>
         </div>
