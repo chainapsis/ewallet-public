@@ -80,7 +80,7 @@ export const DesignSection: FC = () => {
         setSavedTheme(draftTheme);
         displayToast({
           variant: "success",
-          title: "Saved",
+          title: "Saved!",
         });
         await queryClient.invalidateQueries({ queryKey: ["customer"] });
       } else {
