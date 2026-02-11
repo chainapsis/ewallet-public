@@ -39,8 +39,9 @@ export default function Home() {
             {/* TODO: @Ryz0nd, @lidarbtc */}
             {/* <SDKInstallationGuide /> */}
             <APIKeyList />
-            <Spacing height={66} />
-            <DesignSection />
+            {/* TODO: @blacktoast */}
+            {/* <Spacing height={66} /> */}
+            {/* <DesignSection /> */}
             <ToastContainer />
           </DashboardBody>
         </div>
