@@ -1,6 +1,7 @@
 import { jest } from "@jest/globals";
 import { napiRunKeygenClientCentralized } from "@oko-wallet/cait-sith-keplr-addon/addon";
 import { decryptData } from "@oko-wallet/crypto-js/node";
+import { insertCustomer } from "@oko-wallet/oko-pg-interface/customers";
 import { insertKeyShareNodeMeta } from "@oko-wallet/oko-pg-interface/key_share_node_meta";
 import {
   getWalletKSNodesByWalletId,
@@ -21,6 +22,7 @@ import { Participant } from "@oko-wallet/tecdsa-interface";
 import type { Pool } from "pg";
 import type { Logger } from "winston";
 
+import { TEST_CUSTOMER } from "@oko-wallet-api/api/tss/tests";
 import { TEMP_ENC_SECRET } from "@oko-wallet-api/api/tss/utils";
 import { testPgConfig } from "@oko-wallet-api/database/test_config";
 import { resetPgDatabase } from "@oko-wallet-api/testing/database";
@@ -57,6 +59,15 @@ async function setUpKSNodes(pool: Pool): Promise<string[]> {
   }
 
   return ksNodeIds;
+}
+
+async function createTestCustomer(pool: Pool): Promise<string> {
+  const insertCustomerRes = await insertCustomer(pool, TEST_CUSTOMER);
+  if (insertCustomerRes.success === false) {
+    console.error(insertCustomerRes);
+    throw new Error("Failed to insert customer");
+  }
+  return insertCustomerRes.data.customer_id;
 }
 
 describe("keygen_v1_test", () => {
@@ -118,13 +129,15 @@ describe("keygen_v1_test", () => {
         },
       });
 
+      const customerId = await createTestCustomer(pool);
+
       const keygenResponse = await runKeygen(
         pool,
         jwtConfig,
         keygenRequest,
         TEMP_ENC_SECRET,
         mockLogger,
-        "0",
+        customerId,
       );
       if (keygenResponse.success === false) {
         console.error(keygenResponse);
@@ -220,13 +233,15 @@ describe("keygen_v1_test", () => {
         },
       };
 
+      const customerId = await createTestCustomer(pool);
+
       const keygenResponse = await runKeygen(
         pool,
         jwtConfig,
         keygenRequest,
         TEMP_ENC_SECRET,
         mockLogger,
-        "0",
+        customerId,
       );
       if (keygenResponse.success === true) {
         throw new Error("keygen should fail");
@@ -266,13 +281,15 @@ describe("keygen_v1_test", () => {
         },
       };
 
+      const customerId = await createTestCustomer(pool);
+
       const keygenResponse = await runKeygen(
         pool,
         jwtConfig,
         keygenRequest,
         TEMP_ENC_SECRET,
         mockLogger,
-        "0",
+        customerId,
       );
       if (keygenResponse.success === true) {
         throw new Error("keygen should fail");
@@ -306,13 +323,15 @@ describe("keygen_v1_test", () => {
         },
       };
 
+      const customerId = await createTestCustomer(pool);
+
       const keygenResponse = await runKeygen(
         pool,
         jwtConfig,
         keygenRequest,
         TEMP_ENC_SECRET,
         mockLogger,
-        "0",
+        customerId,
       );
       if (keygenResponse.success === true) {
         throw new Error("keygen should fail");
@@ -348,13 +367,15 @@ describe("keygen_v1_test", () => {
         },
       };
 
+      const customerId = await createTestCustomer(pool);
+
       const keygenResponse = await runKeygen(
         pool,
         jwtConfig,
         keygenRequest,
         TEMP_ENC_SECRET,
         mockLogger,
-        "0",
+        customerId,
       );
       if (keygenResponse.success === true) {
         throw new Error("keygen should fail");

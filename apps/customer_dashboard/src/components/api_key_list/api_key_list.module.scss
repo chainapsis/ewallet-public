@@ -41,3 +41,19 @@
   vertical-align: middle;
   height: 100%;
 }
+
+.actionCell {
+  width: 48px;
+}
+
+.horizontalDots {
+  transform: rotate(90deg);
+}
+
+.deleteMenu {
+  min-width: 264px;
+}
+
+.deleteMenuItem:hover p {
+  color: var(--text-error-primary_hover, #b42318);
+}

@@ -7,7 +7,7 @@ export const DashboardHeader: FC = () => {
   return (
     <div className={styles.wrapper}>
       {/* NOTE: theme is hardcoded to light for now */}
-      <Logo theme={"light"} />
+      <Logo />
     </div>
   );
 };

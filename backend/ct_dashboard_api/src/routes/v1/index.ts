@@ -1,6 +1,8 @@
 import express from "express";
 
 import { changePassword } from "./change_password";
+import { createApiKey } from "./create_api_key";
+import { deleteApiKey } from "./delete_api_key";
 import { forgotPassword } from "./forgot_password";
 import { getCustomerApiKeys } from "./get_customer_api_keys";
 import { getCustomerInfo } from "./get_customer_info";
@@ -14,29 +16,50 @@ import { customerJwtMiddleware } from "@oko-wallet-ctd-api/middleware/auth";
 import { customerLogoUploadMiddleware } from "@oko-wallet-ctd-api/middleware/multer";
 import { rateLimitMiddleware } from "@oko-wallet-ctd-api/middleware/rate_limit";
 
-const ONE_MINUTE_SEC = 1 * 60;
-
 export function makeCustomerRouter() {
   const router = express.Router();
 
-  router.use(
-    rateLimitMiddleware({ windowSeconds: ONE_MINUTE_SEC, maxRequests: 20 }),
+  router.use(rateLimitMiddleware({ windowSeconds: 60, maxRequests: 30 }));
+
+  router.post(
+    "/customer/auth/forgot-password",
+    // rateLimitMiddleware({ windowSeconds: 60, maxRequests: 30 }),
+    forgotPassword,
   );
 
-  router.post("/customer/auth/forgot-password", forgotPassword);
+  router.post(
+    "/customer/auth/verify-reset-code",
+    // rateLimitMiddleware({ windowSeconds: 60, maxRequests: 30 }),
+    verifyResetCode,
+  );
 
-  router.post("/customer/auth/verify-reset-code", verifyResetCode);
+  router.post(
+    "/customer/auth/reset-password-confirm",
+    // rateLimitMiddleware({ windowSeconds: 60, maxRequests: 30 }),
+    resetPasswordConfirm,
+  );
 
-  router.post("/customer/auth/reset-password-confirm", resetPasswordConfirm);
+  router.post(
+    "/customer/auth/send-code",
+    // rateLimitMiddleware({ windowSeconds: 60, maxRequests: 30 }),
+    sendCode,
+  );
 
-  router.post("/customer/auth/send-code", sendCode);
+  router.post(
+    "/customer/auth/verify-login",
+    // rateLimitMiddleware({ windowSeconds: 60, maxRequests: 30 }),
+    verifyLogin,
+  );
 
-  router.post("/customer/auth/verify-login", verifyLogin);
-
-  router.post("/customer/auth/signin", signIn);
+  router.post(
+    "/customer/auth/signin",
+    // rateLimitMiddleware({ windowSeconds: 60, maxRequests: 30 }),
+    signIn,
+  );
 
   router.post(
     "/customer/auth/change-password",
+    // rateLimitMiddleware({ windowSeconds: 60, maxRequests: 30 }),
     customerJwtMiddleware,
     changePassword,
   );
@@ -46,7 +69,22 @@ export function makeCustomerRouter() {
   router.post("/customer/api_keys", customerJwtMiddleware, getCustomerApiKeys);
 
   router.post(
+    "/customer/api_keys/create",
+    // rateLimitMiddleware({ windowSeconds: 60, maxRequests: 30 }),
+    customerJwtMiddleware,
+    createApiKey,
+  );
+
+  router.post(
+    "/customer/api_keys/delete",
+    // rateLimitMiddleware({ windowSeconds: 60, maxRequests: 30 }),
+    customerJwtMiddleware,
+    deleteApiKey,
+  );
+
+  router.post(
     "/customer/update_info",
+    // rateLimitMiddleware({ windowSeconds: 60, maxRequests: 30 }),
     customerJwtMiddleware,
     customerLogoUploadMiddleware,
     updateCustomerInfoRoute,

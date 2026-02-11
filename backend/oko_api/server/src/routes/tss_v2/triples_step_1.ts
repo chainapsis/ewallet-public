@@ -1,22 +1,22 @@
-import type { Response } from "express";
 import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
+import { registry } from "@oko-wallet/oko-api-openapi";
 import { ErrorResponseSchema } from "@oko-wallet/oko-api-openapi/common";
 import {
   ApiKeyAndUserAuthHeaderSchema,
   TriplesStep1RequestSchema,
   TriplesStep1SuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/tss";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type {
   TriplesStep1Body,
   TriplesStep1Response,
 } from "@oko-wallet/oko-types/tss";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
-import { registry } from "@oko-wallet/oko-api-openapi";
+import type { Response } from "express";
 
 import { runTriplesStep1 } from "@oko-wallet-api/api/tss/v1/triples";
 import {
-  type UserAuthenticatedRequest,
   sendResponseWithNewToken,
+  type UserAuthenticatedRequest,
 } from "@oko-wallet-api/middleware/auth/keplr_auth";
 
 registry.registerPath({
@@ -70,7 +70,7 @@ export async function triplesStep1(
   req: UserAuthenticatedRequest<TriplesStep1Body>,
   res: Response<OkoApiResponse<TriplesStep1Response>>,
 ) {
-  const state = req.app.locals as any;
+  const state = req.app.locals;
   const user = res.locals.user;
   const apiKey = res.locals.api_key;
   const body = req.body;

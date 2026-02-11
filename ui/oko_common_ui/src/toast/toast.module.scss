@@ -37,6 +37,35 @@
   }
 }
 
+.confirmIcon {
+  color: var(--fg-primary, #181d27);
+  position: relative;
+  width: 20px;
+  height: 20px;
+
+  .confirmIconOuterRing1 {
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    width: calc(100% + 8px);
+    height: calc(100% + 8px);
+    border-radius: 9999px;
+    border: 2px solid;
+    border-color: rgba(#d92d20, 0.3);
+  }
+
+  .confirmIconOuterRing2 {
+    position: absolute;
+    top: -9px;
+    left: -9px;
+    width: calc(100% + 18px);
+    height: calc(100% + 18px);
+    border-radius: 9999px;
+    border: 2px solid;
+    border-color: rgba(#d92d20, 0.1);
+  }
+}
+
 .toastInner {
   display: flex;
   align-items: center;

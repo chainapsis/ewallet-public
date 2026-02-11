@@ -1,19 +1,9 @@
-import type { Response, Router } from "express";
-import type {
-  PresignStep1Body,
-  PresignStep1Response,
-  PresignStep2Body,
-  PresignStep2Response,
-  PresignStep3Body,
-  PresignStep3Response,
-} from "@oko-wallet/oko-types/tss";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
+import { registry } from "@oko-wallet/oko-api-openapi";
 import {
   ErrorResponseSchema,
   UserAuthHeaderSchema,
 } from "@oko-wallet/oko-api-openapi/common";
-import { registry } from "@oko-wallet/oko-api-openapi";
 import {
   PresignStep1RequestSchema,
   PresignStep1SuccessResponseSchema,
@@ -22,6 +12,16 @@ import {
   PresignStep3RequestSchema,
   PresignStep3SuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/tss";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type {
+  PresignStep1Body,
+  PresignStep1Response,
+  PresignStep2Body,
+  PresignStep2Response,
+  PresignStep3Body,
+  PresignStep3Response,
+} from "@oko-wallet/oko-types/tss";
+import type { Response, Router } from "express";
 
 import {
   runPresignStep1,
@@ -29,9 +29,9 @@ import {
   runPresignStep3,
 } from "@oko-wallet-api/api/tss/v1/presign";
 import {
+  sendResponseWithNewToken,
   type UserAuthenticatedRequest,
   userJwtMiddleware,
-  sendResponseWithNewToken,
 } from "@oko-wallet-api/middleware/auth/keplr_auth";
 import { tssActivateMiddleware } from "@oko-wallet-api/middleware/auth/tss_activate";
 
@@ -96,7 +96,7 @@ export function setPresignV1Routes(router: Router) {
       req: UserAuthenticatedRequest<PresignStep1Body>,
       res: Response<OkoApiResponse<PresignStep1Response>>,
     ) => {
-      const state = req.app.locals as any;
+      const state = req.app.locals;
       const user = res.locals.user;
       const body = req.body;
 
@@ -182,7 +182,7 @@ export function setPresignV1Routes(router: Router) {
       req: UserAuthenticatedRequest<PresignStep2Body>,
       res: Response<OkoApiResponse<PresignStep2Response>>,
     ) => {
-      const state = req.app.locals as any;
+      const state = req.app.locals;
       const user = res.locals.user;
       const body = req.body;
 
@@ -264,7 +264,7 @@ export function setPresignV1Routes(router: Router) {
       req: UserAuthenticatedRequest<PresignStep3Body>,
       res: Response<OkoApiResponse<PresignStep3Response>>,
     ) => {
-      const state = req.app.locals as any;
+      const state = req.app.locals;
       const user = res.locals.user;
       const body = req.body;
 

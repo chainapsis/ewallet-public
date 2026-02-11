@@ -59,6 +59,7 @@ import { Participant } from "@oko-wallet/tecdsa-interface";
 import type { Pool } from "pg";
 import type { Logger } from "winston";
 
+import { TEST_CUSTOMER } from "@oko-wallet-api/api/tss/tests";
 import { TEMP_ENC_SECRET } from "@oko-wallet-api/api/tss/utils";
 import {
   runPresignStep1,
@@ -119,6 +120,15 @@ async function setUpKSNodes(pool: Pool): Promise<string[]> {
   return ksNodeIds;
 }
 
+async function createTestCustomer(pool: Pool): Promise<string> {
+  const insertCustomerRes = await insertCustomer(pool, TEST_CUSTOMER);
+  if (insertCustomerRes.success === false) {
+    console.error(insertCustomerRes);
+    throw new Error("Failed to insert customer");
+  }
+  return insertCustomerRes.data.customer_id;
+}
+
 async function setUpTssStage(pool: Pool) {
   // keygen
   const email = "test@test.com";
@@ -143,6 +153,8 @@ async function setUpTssStage(pool: Pool) {
     },
   });
 
+  const customerId = await createTestCustomer(pool);
+
   const keygenRequest: KeygenRequest = {
     auth_type: "google",
     user_identifier: email,
@@ -155,7 +167,7 @@ async function setUpTssStage(pool: Pool) {
     keygenRequest,
     TEMP_ENC_SECRET,
     mockLogger,
-    "0",
+    customerId,
   );
   if (keygenResponse.success === false) {
     console.error(keygenResponse);
@@ -164,20 +176,6 @@ async function setUpTssStage(pool: Pool) {
 
   const walletId = keygenResponse.data?.user.wallet_id;
   const keygen0 = keygen_outputs[Participant.P0];
-
-  const insertCustomerRes = await insertCustomer(pool, {
-    customer_id: "110e8400-e29b-41d4-a716-446655440001",
-    label: "test customer",
-    status: "ACTIVE",
-    url: "https://test.com",
-    logo_url: "https://test.com/logo.png",
-    theme: "system",
-  });
-  if (insertCustomerRes.success === false) {
-    console.error(insertCustomerRes);
-    throw new Error("Failed to insert customer");
-  }
-  const customerId = insertCustomerRes.data.customer_id;
 
   // triples
   const clientTriplesState: TECDSATriplesState = {

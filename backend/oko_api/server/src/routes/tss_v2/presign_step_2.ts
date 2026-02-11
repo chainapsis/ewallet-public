@@ -1,24 +1,24 @@
-import type { Response } from "express";
-import type {
-  PresignStep2Body,
-  PresignStep2Response,
-} from "@oko-wallet/oko-types/tss";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
+import { registry } from "@oko-wallet/oko-api-openapi";
 import {
   ErrorResponseSchema,
   UserAuthHeaderSchema,
 } from "@oko-wallet/oko-api-openapi/common";
-import { registry } from "@oko-wallet/oko-api-openapi";
 import {
   PresignStep2RequestSchema,
   PresignStep2SuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/tss";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type {
+  PresignStep2Body,
+  PresignStep2Response,
+} from "@oko-wallet/oko-types/tss";
+import type { Response } from "express";
 
 import { runPresignStep2 } from "@oko-wallet-api/api/tss/v1/presign";
 import {
-  type UserAuthenticatedRequest,
   sendResponseWithNewToken,
+  type UserAuthenticatedRequest,
 } from "@oko-wallet-api/middleware/auth/keplr_auth";
 
 registry.registerPath({
@@ -79,7 +79,7 @@ export async function presignStep2(
   req: UserAuthenticatedRequest<PresignStep2Body>,
   res: Response<OkoApiResponse<PresignStep2Response>>,
 ) {
-  const state = req.app.locals as any;
+  const state = req.app.locals;
   const user = res.locals.user;
   const body = req.body;
 

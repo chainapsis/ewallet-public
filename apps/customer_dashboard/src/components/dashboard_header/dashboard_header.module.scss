@@ -1,10 +1,10 @@
 .wrapper {
-  height: 54px;
+  height: 64px;
   display: flex;
   flex-shrink: 0;
   flex-grow: 0;
   align-items: center;
-  padding: 16px 44px;
+  padding: 0 32px;
   background-color: var(--white);
   z-index: 999;
 }

@@ -119,7 +119,7 @@ export async function updateCustomerInfoRoute(
   res: Response<OkoApiResponse<UpdateCustomerInfoResponse>>,
 ) {
   try {
-    const state = req.app.locals as any;
+    const state = req.app.locals;
     const userId = res.locals.user_id;
     const { label, url, delete_logo, theme } = req.body;
 

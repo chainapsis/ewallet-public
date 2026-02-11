@@ -73,7 +73,7 @@ export async function get_tss_session_list(
   req: AuthenticatedAdminRequest<GetTssSessionListRequest>,
   res: Response<OkoApiResponse<GetTssSessionListResponse>>,
 ) {
-  const state = req.app.locals as any;
+  const state = req.app.locals;
 
   const result = await getTssSessionList(state.db, req.body);
   if (!result.success) {
