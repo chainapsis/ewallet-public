@@ -2,6 +2,7 @@ import type { FC } from "react";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import { Skeleton } from "@oko-wallet/oko-common-ui/skeleton";
 import { Tooltip } from "@oko-wallet/oko-common-ui/tooltip";
+import { InfoCircleIcon } from "@oko-wallet/oko-common-ui/icons/info_circle";
 
 import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
 import { TxRow } from "@oko-wallet-attached/components/modal_variants/common/tx_row";
@@ -78,7 +79,7 @@ export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
               {`${formattedAmount} ${symbol}`}
             </Typography>
           ) : mint ? (
-            <Tooltip content={mint} placement="bottom">
+            <div className={styles.unknownTokenContainer}>
               <Typography
                 color="secondary"
                 size="lg"
@@ -87,7 +88,10 @@ export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
               >
                 {`${formattedAmount} Unknown Token`}
               </Typography>
-            </Tooltip>
+              <Tooltip content={mint} placement="bottom">
+                <InfoCircleIcon color="var(--fg-quaternary)" />
+              </Tooltip>
+            </div>
           ) : (
             <Typography
               color="secondary"

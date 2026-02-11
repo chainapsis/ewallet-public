@@ -28,6 +28,12 @@
   word-break: break-all;
 }
 
+.unknownTokenContainer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .address {
   word-break: break-all;
 }
