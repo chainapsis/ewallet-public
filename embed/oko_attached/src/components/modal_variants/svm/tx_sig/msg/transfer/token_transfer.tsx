@@ -1,16 +1,12 @@
 import type { FC } from "react";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import { Skeleton } from "@oko-wallet/oko-common-ui/skeleton";
+import { Tooltip } from "@oko-wallet/oko-common-ui/tooltip";
 
 import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
 import { TxRow } from "@oko-wallet-attached/components/modal_variants/common/tx_row";
 import { useGetSvmTokenMetadata } from "@oko-wallet-attached/web3/svm/queries";
 import styles from "../instructions.module.scss";
-
-function shortenAddress(address: string): string {
-  if (address.length <= 12) return address;
-  return `${address.slice(0, 6)}...${address.slice(-4)}`;
-}
 
 function formatTokenAmount(amount: bigint | number, decimals: number): string {
   if (decimals === 0) {
@@ -70,22 +66,38 @@ export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
               fallback={symbol.slice(0, 2)}
             />
           ) : null}
-          <Typography
-            color="secondary"
-            size="lg"
-            weight="semibold"
-            className={styles.tokenAmount}
-          >
-            {isLoading ? (
-              <Skeleton width={80} height={20} />
-            ) : hasMetadata ? (
-              `${formattedAmount} ${symbol}`
-            ) : mint ? (
-              `${formattedAmount} (${shortenAddress(mint)})`
-            ) : (
-              formattedAmount
-            )}
-          </Typography>
+          {isLoading ? (
+            <Skeleton width={80} height={20} />
+          ) : hasMetadata ? (
+            <Typography
+              color="secondary"
+              size="lg"
+              weight="semibold"
+              className={styles.tokenAmount}
+            >
+              {`${formattedAmount} ${symbol}`}
+            </Typography>
+          ) : mint ? (
+            <Tooltip content={mint} placement="bottom">
+              <Typography
+                color="secondary"
+                size="lg"
+                weight="semibold"
+                className={styles.tokenAmount}
+              >
+                {`${formattedAmount} Unknown Token`}
+              </Typography>
+            </Tooltip>
+          ) : (
+            <Typography
+              color="secondary"
+              size="lg"
+              weight="semibold"
+              className={styles.tokenAmount}
+            >
+              {formattedAmount}
+            </Typography>
+          )}
         </div>
       </TxRow>
       {hasMetadata && name && (
