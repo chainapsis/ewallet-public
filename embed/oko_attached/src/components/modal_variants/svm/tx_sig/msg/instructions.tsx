@@ -48,6 +48,7 @@ function getInstructionTitle(instruction: ParsedInstruction): string {
 function renderInstruction(
   instruction: ParsedInstruction,
   index: number,
+  chainIdentifier: string,
 ): ReactNode {
   const { programId, instructionName, data, accounts } = instruction;
 
@@ -88,6 +89,7 @@ function renderInstruction(
             decimals={decimals}
             mint={mint}
             to={to}
+            chainIdentifier={chainIdentifier}
           />
         );
       }
@@ -99,7 +101,14 @@ function renderInstruction(
       const to = accounts[1]?.pubkey;
 
       if (amount !== undefined) {
-        return <TokenTransferPretty key={index} amount={amount} to={to} />;
+        return (
+          <TokenTransferPretty
+            key={index}
+            amount={amount}
+            to={to}
+            chainIdentifier={chainIdentifier}
+          />
+        );
       }
     }
 
@@ -112,11 +121,13 @@ function renderInstruction(
 
 export interface InstructionsProps {
   instructions: ParsedInstruction[];
+  chainIdentifier: string;
   isLoading?: boolean;
 }
 
 export const Instructions: FC<InstructionsProps> = ({
   instructions,
+  chainIdentifier,
   isLoading,
 }) => {
   if (isLoading) {
@@ -125,14 +136,14 @@ export const Instructions: FC<InstructionsProps> = ({
 
   // Filter out null results from renderInstruction (e.g., staking programs without amount)
   const validInstructions = instructions.filter(
-    (ix, index) => renderInstruction(ix, index) !== null,
+    (ix, index) => renderInstruction(ix, index, chainIdentifier) !== null,
   );
 
   // Single instruction: render directly without collapsible
   if (validInstructions.length === 1) {
     return (
       <div className={styles.instructionsContainer}>
-        {renderInstruction(validInstructions[0], 0)}
+        {renderInstruction(validInstructions[0], 0, chainIdentifier)}
       </div>
     );
   }
@@ -146,7 +157,7 @@ export const Instructions: FC<InstructionsProps> = ({
           title={getInstructionTitle(instruction)}
           defaultExpanded={index === 0}
         >
-          {renderInstruction(instruction, index)}
+          {renderInstruction(instruction, index, chainIdentifier)}
         </Collapsible>
       ))}
     </div>

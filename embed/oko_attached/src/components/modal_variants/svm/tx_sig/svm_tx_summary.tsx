@@ -28,6 +28,7 @@ export const SvmTxSummary: FC<SvmTxSummaryProps> = ({
   const [isRawView, setIsRawView] = useState(false);
 
   const txData = payload.data;
+  const chainIdentifier = payload.chain_id.split(":")[0];
 
   const { rawData, smartViewContent } = useMemo(() => {
     let content: ReactNode;
@@ -49,7 +50,12 @@ export const SvmTxSummary: FC<SvmTxSummaryProps> = ({
         </TxContainer>
       );
     } else {
-      content = <Instructions instructions={parsedTx.instructions} />;
+      content = (
+        <Instructions
+          instructions={parsedTx.instructions}
+          chainIdentifier={chainIdentifier}
+        />
+      );
     }
 
     return {
@@ -64,7 +70,7 @@ export const SvmTxSummary: FC<SvmTxSummaryProps> = ({
       ),
       smartViewContent: content,
     };
-  }, [txData, parsedTx, parseError, isLoading]);
+  }, [txData, parsedTx, parseError, isLoading, chainIdentifier]);
 
   function handleToggleView() {
     setIsRawView((prev) => !prev);

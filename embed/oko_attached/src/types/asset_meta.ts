@@ -4,6 +4,10 @@ export interface ERC20Metadata {
   name: string;
 }
 
+export interface SPLMetadata {
+  name: string;
+}
+
 export interface IBCMetadata {
   origin_chain_identifier: string;
   base_denom: string;
@@ -45,6 +49,11 @@ export type CW20AssetMeta = AssetMetaBase & {
   metadata: ERC20Metadata;
 };
 
+export type SPLAssetMeta = AssetMetaBase & {
+  token_spec: "spl";
+  metadata: SPLMetadata;
+};
+
 // mongodb table name
 export type AssetMetaDataSource =
   | "new-coingecko-token-info" // erc20
@@ -59,7 +68,8 @@ export type AssetMeta =
   | FactoryAssetMeta
   | ERC20AssetMeta
   | IBCAssetMeta
-  | CW20AssetMeta;
+  | CW20AssetMeta
+  | SPLAssetMeta;
 
 export interface AssetMetaInput {
   chain_identifier: string;
