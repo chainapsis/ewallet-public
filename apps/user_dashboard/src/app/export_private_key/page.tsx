@@ -319,7 +319,7 @@ export default function Page() {
     } catch (error) {
       console.error("Re-authentication failed:", error);
       displayToast({
-        variant: "error",
+        variant: "confirm",
         title: "Login Failed",
         description: "Please try again.",
       });
