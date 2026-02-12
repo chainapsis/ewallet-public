@@ -9,27 +9,19 @@ import { useAppState } from "@oko-wallet-attached/store/app";
 
 export async function handleExportPrivateKey(ctx: MsgEventContext) {
   const { port, hostOrigin } = ctx;
+
   const wallet = useAppState.getState().getWallet(hostOrigin);
-
-  console.log(123123);
-
-  // let payload = ["payload"];
-  // if (wallet?.authType) {
-  //   payload = {
-  //     success: true,
-  //     data: wallet.authType,
-  //   };
-  // } else {
-  //   payload = {
-  //     success: false,
-  //     err: "No auth type found",
-  //   };
-  // }
 
   const ack: OkoWalletMsgExportPrivateKeyAck = {
     target: OKO_SDK_TARGET,
     msg_type: "export_private_key_ack",
-    payload,
+    payload: {
+      success: true,
+      data: {
+        secp256k1: null,
+        ed25519: null,
+      },
+    },
   };
 
   port.postMessage(ack);
