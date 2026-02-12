@@ -28,7 +28,7 @@ export const SvmTxSummary: FC<SvmTxSummaryProps> = ({
   const [isRawView, setIsRawView] = useState(false);
 
   const txData = payload.data;
-  const chainIdentifier = payload.chain_id.split(":")[0];
+  const chainIdentifier = payload.chain_id;
 
   const { rawData, smartViewContent } = useMemo(() => {
     let content: ReactNode;

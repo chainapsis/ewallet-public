@@ -60,10 +60,13 @@ async function fetchTokenMetadata(
   mintAddress: string,
   chainIdentifier: string,
 ): Promise<SvmTokenMetadataResult> {
+  // Extract namespace from CAIP-2 for Asset Meta API (e.g., "solana:5eykt..." → "solana")
+  const assetMetaChainId = chainIdentifier.split(":")[0];
+
   // 1. Try Asset Meta store
   const store = useAssetMetaStore.getState();
   const cachedMeta = store.findAssetMeta({
-    chainIdentifier,
+    chainIdentifier: assetMetaChainId,
     denom: mintAddress,
   });
 
@@ -80,7 +83,7 @@ async function fetchTokenMetadata(
   try {
     const assets: AssetMetaInput[] = [
       {
-        chain_identifier: chainIdentifier,
+        chain_identifier: assetMetaChainId,
         minimal_denom: mintAddress,
       },
     ];
