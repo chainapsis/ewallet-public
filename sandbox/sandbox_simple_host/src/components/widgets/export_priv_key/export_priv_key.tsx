@@ -11,6 +11,9 @@ export const ExportPrivKeyWidget: FC = () => {
 
   const handleClickExport = async () => {
     try {
+      if (okoCosmos) {
+        okoCosmos.okoWallet.getName();
+      }
       console.log(123);
     } catch (error) {
       console.error(error);

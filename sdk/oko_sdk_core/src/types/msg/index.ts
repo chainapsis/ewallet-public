@@ -1,18 +1,18 @@
 import type { ChainInfo } from "@keplr-wallet/types";
-import type { Result } from "@oko-wallet/stdlib-js";
 import type { Bytes32 } from "@oko-wallet/bytes";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
+import type { Result } from "@oko-wallet/stdlib-js";
 
+import type { InitPayload } from "@oko-wallet-sdk-core/types/init";
 import type {
   OpenModalAckPayload,
   OpenModalPayload,
 } from "@oko-wallet-sdk-core/types/modal";
-import type { InitPayload } from "@oko-wallet-sdk-core/types/init";
-import type { OAuthSignInError } from "@oko-wallet-sdk-core/types/sign_in";
 import type {
   OAuthPayload,
   OAuthTokenRequestPayload,
 } from "@oko-wallet-sdk-core/types/oauth";
+import type { OAuthSignInError } from "@oko-wallet-sdk-core/types/sign_in";
 
 export type OkoWalletMsgGetPublicKey = {
   target: "oko_attached";
@@ -217,15 +217,15 @@ export type OkoWalletMsgGetEthChainInfoAck = {
   payload: Result<ChainInfo[], string>;
 };
 
-export type OkoWalletMsgImportPrivateKey = {
+export type OkoWalletMsgExportPrivateKey = {
   target: "oko_attached";
-  msg_type: "import_private_key";
-  payload: OAuthPayload;
+  msg_type: "export_private_key";
+  payload: null;
 };
 
-export type OkoWalletMsgImportPrivateKeyAck = {
+export type OkoWalletMsgExportPrivateKeyAck = {
   target: "oko_sdk";
-  msg_type: "import_private_key_ack";
+  msg_type: "export_private_key_ack";
   payload: Result<Bytes32, string>;
 };
 
@@ -262,8 +262,8 @@ export type OkoWalletMsg =
   | OkoWalletMsgGetCosmosChainInfoAck
   | OkoWalletMsgGetEthChainInfo
   | OkoWalletMsgGetEthChainInfoAck
-  | OkoWalletMsgImportPrivateKey
-  | OkoWalletMsgImportPrivateKeyAck
+  | OkoWalletMsgExportPrivateKey
+  | OkoWalletMsgExportPrivateKeyAck
   | {
       target: "oko_sdk";
       msg_type: "unknown_msg_type";

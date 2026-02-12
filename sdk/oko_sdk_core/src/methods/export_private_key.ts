@@ -1,20 +1,18 @@
-import type { AuthType } from "@oko-wallet/oko-types/auth";
-
 import type { OkoWalletInterface } from "@oko-wallet-sdk-core/types";
 import { OKO_ATTACHED_TARGET } from "@oko-wallet-sdk-core/window_msg/target";
 
-export async function getAuthType(
+export async function exportPrivateKey(
   this: OkoWalletInterface,
-): Promise<AuthType | null> {
+): Promise<any | null> {
   await this.waitUntilInitialized;
 
   const res = await this.sendMsgToIframe({
     target: OKO_ATTACHED_TARGET,
-    msg_type: "get_auth_type",
+    msg_type: "export_private_key",
     payload: null,
   });
 
-  if (res.msg_type === "get_auth_type_ack" && res.payload.success) {
+  if (res.msg_type === "export_private_key_ack" && res.payload.success) {
     return res.payload.data;
   }
 

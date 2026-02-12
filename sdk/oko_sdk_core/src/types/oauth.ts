@@ -21,6 +21,7 @@ export interface OAuthPayload {
   target_origin: string;
   auth_type: AuthType;
 }
+
 export type OAuthTokenRequestPayload =
   | OAuthTokenRequestPayloadOfX
   | OAuthTokenRequestPayloadOfTelegram

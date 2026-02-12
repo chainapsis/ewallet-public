@@ -1,3 +1,4 @@
+import { EventEmitter3 } from "./event";
 import { lazyInit } from "./private/lazy_init";
 import type {
   OkoWalletCoreEvent2,
@@ -5,7 +6,6 @@ import type {
   OkoWalletInterface,
   OkoWalletStaticInterface,
 } from "./types";
-import { EventEmitter3 } from "./event";
 
 export const OkoWallet = function (
   this: OkoWalletInterface,
