@@ -2,12 +2,12 @@ import type { Currency } from "@keplr-wallet/types";
 import { create } from "zustand";
 import { combine } from "zustand/middleware";
 
+import { postAssetMeta } from "@oko-wallet-attached/requests/asset_meta";
 import type {
   AssetMeta,
-  AssetMetaParams,
   AssetMetaInput,
+  AssetMetaParams,
 } from "@oko-wallet-attached/types/asset_meta";
-import { postAssetMeta } from "@oko-wallet-attached/requests/asset_meta";
 import { normalizeIBCDenom } from "@oko-wallet-attached/web3/cosmos/normalize_denom";
 
 type AssetMetaMap = Record<string, AssetMeta>;
@@ -46,14 +46,16 @@ export const useAssetMetaStore = create(
       findAssetMeta: ({ chainIdentifier, denom }) => {
         const meta = get().assetMetaMap[keyOf(chainIdentifier, denom)];
 
-        if (!meta) return undefined;
+        if (!meta) {
+          return undefined;
+        }
 
         const currency: Currency = {
-          coinDenom: meta.symbol,
-          coinMinimalDenom: meta.denom,
-          coinDecimals: meta.decimals,
-          coinGeckoId: meta.coin_gecko_id ?? undefined,
-          coinImageUrl: meta.img_url ?? undefined,
+          coinDenom: meta.base.symbol,
+          coinMinimalDenom: meta.base.denom,
+          coinDecimals: meta.base.decimals,
+          coinGeckoId: meta.base.coin_gecko_id ?? undefined,
+          coinImageUrl: meta.base.img_url ?? undefined,
         };
         return currency;
       },
@@ -68,11 +70,11 @@ export const useAssetMetaStore = create(
             },
           );
 
-          let next: AssetMetaMap = { ...current };
+          const next: AssetMetaMap = { ...current };
           if (missing.length > 0) {
             const fetched = await postAssetMeta({ assets: missing });
             for (const meta of fetched) {
-              next[keyOf(meta.chain_identifier, meta.denom)] = meta;
+              next[keyOf(meta.base.chain_identifier, meta.base.denom)] = meta;
             }
           }
           set({ assetMetaMap: next });
@@ -93,11 +95,11 @@ export const useAssetMetaStore = create(
           const meta = map[k];
           if (meta) {
             results.push({
-              coinDenom: meta.symbol,
-              coinMinimalDenom: meta.denom,
-              coinDecimals: meta.decimals,
-              coinGeckoId: meta.coin_gecko_id ?? undefined,
-              coinImageUrl: meta.img_url ?? undefined,
+              coinDenom: meta.base.symbol,
+              coinMinimalDenom: meta.base.denom,
+              coinDecimals: meta.base.decimals,
+              coinGeckoId: meta.base.coin_gecko_id ?? undefined,
+              coinImageUrl: meta.base.img_url ?? undefined,
             });
           } else {
             missing.push({
@@ -113,13 +115,13 @@ export const useAssetMetaStore = create(
             const next: AssetMetaMap = { ...get().assetMetaMap };
 
             for (const meta of fetched) {
-              next[keyOf(meta.chain_identifier, meta.denom)] = meta;
+              next[keyOf(meta.base.chain_identifier, meta.base.denom)] = meta;
               results.push({
-                coinDenom: meta.symbol,
-                coinMinimalDenom: meta.denom,
-                coinDecimals: meta.decimals,
-                coinGeckoId: meta.coin_gecko_id ?? undefined,
-                coinImageUrl: meta.img_url ?? undefined,
+                coinDenom: meta.base.symbol,
+                coinMinimalDenom: meta.base.denom,
+                coinDecimals: meta.base.decimals,
+                coinGeckoId: meta.base.coin_gecko_id ?? undefined,
+                coinImageUrl: meta.base.img_url ?? undefined,
               });
             }
             set({ assetMetaMap: next });
@@ -134,7 +136,7 @@ export const useAssetMetaStore = create(
       setAssetMetaBatch: (items) => {
         const next: AssetMetaMap = { ...get().assetMetaMap };
         for (const meta of items) {
-          next[keyOf(meta.chain_identifier, meta.denom)] = meta;
+          next[keyOf(meta.base.chain_identifier, meta.base.denom)] = meta;
         }
         set({ assetMetaMap: next });
       },
