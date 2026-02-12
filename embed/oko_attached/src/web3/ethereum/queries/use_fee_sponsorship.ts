@@ -67,9 +67,11 @@ export function useFeeSponsorshipStatus({
       return result.data;
     },
     enabled: enabled && isSupported && hasApiKey && !!recipientAddress,
-    staleTime: 30 * 1000, // 30 seconds
+    staleTime: 0,
     gcTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
+    refetchInterval: 10_000,
+    refetchIntervalInBackground: false,
   });
 
   return {
