@@ -39,6 +39,7 @@ import express, { type IRouter } from "express";
 import type { Pool } from "pg";
 
 import { changeCustomerPassword } from "./change_ct_password";
+import { exportPrivateKey } from "./export_private_key";
 import { getConnectedApps } from "./get_connected_apps";
 import { getCustomerApiKeys } from "./get_customer_api_keys";
 import { getCustomerInfo } from "./get_customer_info";
@@ -93,6 +94,9 @@ export function makeUserRouter() {
   );
 
   router.post("/get_connected_apps", userJwtMiddleware, getConnectedApps);
+
+  // Temporary API for testing the export_private_key flow.
+  router.post("/export_private_key", userJwtMiddleware, exportPrivateKey);
 
   return router;
 }
