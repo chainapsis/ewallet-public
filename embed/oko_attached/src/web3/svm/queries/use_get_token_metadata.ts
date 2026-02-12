@@ -24,7 +24,7 @@ export type SvmTokenMetadataResult = {
 
 export interface UseGetSvmTokenMetadataProps {
   mintAddress?: string;
-  chainIdentifier: string;
+  chainId: string;
   options?: Partial<UseQueryOptions<SvmTokenMetadataResult>>;
 }
 
@@ -58,10 +58,10 @@ async function fetchTokenMetadataFromJupiter(
 
 async function fetchTokenMetadata(
   mintAddress: string,
-  chainIdentifier: string,
+  chainId: string,
 ): Promise<SvmTokenMetadataResult> {
   // Extract namespace from CAIP-2 for Asset Meta API (e.g., "solana:5eykt..." → "solana")
-  const assetMetaChainId = chainIdentifier.split(":")[0];
+  const assetMetaChainId = chainId.split(":")[0];
 
   // 1. Try Asset Meta store
   const store = useAssetMetaStore.getState();
@@ -132,11 +132,11 @@ async function fetchTokenMetadata(
 
 export function useGetSvmTokenMetadata({
   mintAddress,
-  chainIdentifier,
+  chainId,
   options,
 }: UseGetSvmTokenMetadataProps) {
   return useQuery({
-    queryKey: ["svm-token-metadata", chainIdentifier, mintAddress],
+    queryKey: ["svm-token-metadata", chainId, mintAddress],
     queryFn: async (): Promise<SvmTokenMetadataResult> => {
       if (!mintAddress) {
         return {
@@ -147,7 +147,7 @@ export function useGetSvmTokenMetadata({
         };
       }
 
-      return await fetchTokenMetadata(mintAddress, chainIdentifier);
+      return await fetchTokenMetadata(mintAddress, chainId);
     },
     ...options,
     enabled: !!mintAddress && options?.enabled !== false,

@@ -28,7 +28,7 @@ export interface TokenTransferPrettyProps {
   decimals?: number;
   mint?: string;
   to?: string;
-  chainIdentifier: string;
+  chainId: string;
 }
 
 export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
@@ -36,11 +36,11 @@ export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
   decimals: providedDecimals,
   mint,
   to,
-  chainIdentifier,
+  chainId,
 }) => {
   const { data: tokenMetadata, isLoading } = useGetSvmTokenMetadata({
     mintAddress: mint,
-    chainIdentifier,
+    chainId,
   });
 
   const decimals = tokenMetadata?.decimals ?? providedDecimals ?? 0;
