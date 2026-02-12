@@ -9,6 +9,7 @@ import { CosmosOnchainSignWidget } from "@/components/widgets/cosmos_onchain_sig
 import { ErrorWidget } from "@/components/widgets/error_widget/error_widget";
 import { EthereumOffchainSignWidget } from "@/components/widgets/ethereum_offchain_sign_widget/ethereum_offchain_sign_widget";
 import { EthereumOnchainSignWidget } from "@/components/widgets/ethereum_onchain_sign_widget/ethereum_onchain_sign_widget";
+import { ExportPrivKeyWidget } from "@/components/widgets/export_priv_key/export_priv_key";
 import { LoginWidget } from "@/components/widgets/login_widget/login_widget";
 import styles from "./preview_panel.module.scss";
 
@@ -37,7 +38,9 @@ export const PreviewPanel: FC = () => {
           <h2>Error</h2>
           <ErrorWidget />
         </div>
-        <div className={styles.col}></div>
+        <div className={styles.col}>
+          <ExportPrivKeyWidget />
+        </div>
       </div>
     </div>
   );
