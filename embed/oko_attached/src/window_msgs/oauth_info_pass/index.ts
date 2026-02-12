@@ -94,7 +94,7 @@ export async function handleOAuthInfoPass(
     if (!userExistsRes.success) {
       await bail(message, {
         type: "check_user_request_fail",
-        error: userExistsRes.err.toString(),
+        error: `${userExistsRes.err.type}, err: ${userExistsRes.err}`,
       });
       return;
     }
@@ -288,7 +288,7 @@ export async function handleOAuthInfoPassV2(
     if (!userExistsRes.success) {
       await bail(message, {
         type: "check_user_request_fail",
-        error: userExistsRes.err.toString(),
+        error: JSON.stringify(userExistsRes.err),
       });
       return;
     }

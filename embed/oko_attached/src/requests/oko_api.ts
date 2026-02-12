@@ -1,26 +1,26 @@
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
-import type {
-  OperationType,
-  CommitRevealParams,
-} from "@oko-wallet/oko-types/commit_reveal";
 import type {
   CommitRequestBody,
   CommitResponseData,
 } from "@oko-wallet/oko-api-openapi/tss";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type {
-  SignInRequest,
-  SignInResponseV2,
-  SaveReferralRequest,
-  SaveReferralResponse,
+  CommitRevealParams,
+  OperationType,
+} from "@oko-wallet/oko-types/commit_reveal";
+import type { NodeStatusInfo } from "@oko-wallet/oko-types/tss";
+import type {
   ReportKeyShareNotFoundBody,
   ReportKeyShareNotFoundResponse,
+  SaveReferralRequest,
+  SaveReferralResponse,
+  SignInRequest,
+  SignInResponseV2,
 } from "@oko-wallet/oko-types/user";
-import type { NodeStatusInfo } from "@oko-wallet/oko-types/tss";
-import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { Result } from "@oko-wallet/stdlib-js";
 
-import type { FetchError } from "./types";
 import { OKO_API_ENDPOINT } from "./endpoints";
+import type { FetchError } from "./types";
 
 export const TSS_V1_ENDPOINT = `${OKO_API_ENDPOINT}/tss/v1`;
 export const TSS_V2_ENDPOINT = `${OKO_API_ENDPOINT}/tss/v2`;
@@ -46,9 +46,10 @@ export async function makeOkoApiRequest<T, R>(
   }
 
   if (!resp.ok) {
+    const errorBody = await resp.text();
     return {
       success: false,
-      err: { type: "status_fail", status: resp.status },
+      err: { type: "status_fail", status: resp.status, error: errorBody },
     };
   }
 
@@ -90,9 +91,10 @@ export async function makeAuthorizedOkoApiRequest<T, R>(
   }
 
   if (!resp.ok) {
+    const errorBody = await resp.text();
     return {
       success: false,
-      err: { type: "status_fail", status: resp.status },
+      err: { type: "status_fail", status: resp.status, error: errorBody },
     };
   }
 
@@ -133,7 +135,14 @@ export async function signInV2(
   const signInRes = await makeAuthorizedOkoApiRequest<
     SignInRequest,
     SignInResponseV2
-  >("user/signin", idToken, { auth_type: authType }, TSS_V2_ENDPOINT, commitReveal, apiKey);
+  >(
+    "user/signin",
+    idToken,
+    { auth_type: authType },
+    TSS_V2_ENDPOINT,
+    commitReveal,
+    apiKey,
+  );
 
   if (!signInRes.success) {
     console.error("[attached] sign in failed, err: %s", signInRes.err);
