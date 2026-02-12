@@ -1,11 +1,11 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter, Route, Routes } from "react-router";
 
 import { Home } from "@/components/home/home";
 
 import "@/styles/globals.scss";
+import { StrictMode } from "react";
 
 const queryClient = new QueryClient();
 
@@ -17,8 +17,8 @@ async function main() {
     return;
   }
 
-  ReactDOM.createRoot(root).render(
-    <React.StrictMode>
+  createRoot(root).render(
+    <StrictMode>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <Routes>
@@ -26,7 +26,7 @@ async function main() {
           </Routes>
         </BrowserRouter>
       </QueryClientProvider>
-    </React.StrictMode>,
+    </StrictMode>,
   );
 }
 

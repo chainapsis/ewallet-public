@@ -1,15 +1,15 @@
-import { useState, type FC } from "react";
+import { type FC, useState } from "react";
 
-import { Widget } from "../widget_components";
-import styles from "./login_widget.module.scss";
+import { CosmosAccountsModal } from "@/components/cosmos_accounts_modal/cosmos_accounts_modal";
+import { useAddresses } from "@/hooks/use_addresses";
 import { useOko } from "@/hooks/use_oko";
 import { useUserInfoState } from "@/state/user_info";
-import { useAddresses } from "@/hooks/use_addresses";
-import { CosmosAccountsModal } from "@/components/cosmos_accounts_modal/cosmos_accounts_modal";
+import { Widget } from "../widget_components";
+import styles from "./login_widget.module.scss";
 
 type SignInStrategy = "google" | "email" | "telegram" | "x";
 
-export const LoginWidget: FC<LoginWidgetProps> = () => {
+export const LoginWidget: FC = () => {
   const { okoCosmos } = useOko();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [signInStrategy, setSignInStrategy] = useState<SignInStrategy | null>(
@@ -76,7 +76,11 @@ export const LoginWidget: FC<LoginWidgetProps> = () => {
         <div className={styles.loginInfoContainer}>
           <div className={styles.loginInfoRow}>
             <p className={styles.value}>{email}</p>
-            <button className={styles.signOutButton} onClick={handleSignOut}>
+            <button
+              type="button"
+              className={styles.signOutButton}
+              onClick={handleSignOut}
+            >
               <p>Sign out</p>
             </button>
           </div>
@@ -96,6 +100,7 @@ export const LoginWidget: FC<LoginWidgetProps> = () => {
           <div className={styles.addressRow}>
             <p className={styles.label}>Cosmos Accounts</p>
             <button
+              type="button"
               className={styles.signOutButton}
               onClick={() => setIsModalOpen(true)}
             >
@@ -116,6 +121,7 @@ export const LoginWidget: FC<LoginWidgetProps> = () => {
       <div className={styles.container}>
         <div className={styles.logoWrapper}>logo</div>
         <button
+          type="button"
           onClick={() => handleSignIn("google")}
           disabled={isSigningIn}
           data-testid="google-login-btn"
@@ -123,6 +129,7 @@ export const LoginWidget: FC<LoginWidgetProps> = () => {
           Google Login
         </button>
         <button
+          type="button"
           onClick={() => handleSignIn("email")}
           disabled={isSigningIn}
           data-testid="email-login-btn"
@@ -130,6 +137,7 @@ export const LoginWidget: FC<LoginWidgetProps> = () => {
           Email Login
         </button>
         <button
+          type="button"
           onClick={() => handleSignIn("telegram")}
           disabled={isSigningIn}
           data-testid="telegram-login-btn"
@@ -137,6 +145,7 @@ export const LoginWidget: FC<LoginWidgetProps> = () => {
           Telegram Login
         </button>
         <button
+          type="button"
           onClick={() => handleSignIn("x")}
           disabled={isSigningIn}
           data-testid="x-login-btn"
@@ -144,6 +153,7 @@ export const LoginWidget: FC<LoginWidgetProps> = () => {
           Twitter(x) Login
         </button>
         <button
+          type="button"
           onClick={() => {
             const width = 440;
             const height = 285;
@@ -159,6 +169,7 @@ export const LoginWidget: FC<LoginWidgetProps> = () => {
           Open Error Popup
         </button>
         <button
+          type="button"
           onClick={() => {
             const width = 440;
             const height = 285;
@@ -182,5 +193,3 @@ export const LoginWidget: FC<LoginWidgetProps> = () => {
     </Widget>
   );
 };
-
-export interface LoginWidgetProps {}
