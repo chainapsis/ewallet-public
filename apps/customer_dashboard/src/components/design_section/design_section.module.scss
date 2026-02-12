@@ -8,8 +8,6 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-
-  gap: 16px;
 }
 
 .themeOptions {
@@ -19,9 +17,41 @@
   flex-wrap: wrap;
 }
 
+.themeActionsWrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transform: translateY(8px);
+  filter: blur(4px);
+  margin-top: 0;
+
+  transition:
+    grid-template-rows 0s 0.2s,
+    opacity 0.2s cubic-bezier(.25, .46, .45, .94),
+    transform 0.2s cubic-bezier(.25, .46, .45, .94),
+    filter 0.2s cubic-bezier(.25, .46, .45, .94),
+    margin-top 0s 0.2s;
+
+  &.visible {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+    margin-top: 16px;
+
+    transition:
+      grid-template-rows 0s,
+      opacity 0.25s cubic-bezier(.25, .46, .45, .94),
+      transform 0.25s cubic-bezier(.25, .46, .45, .94),
+      filter 0.25s cubic-bezier(.25, .46, .45, .94),
+      margin-top 0s;
+  }
+}
+
 .themeActions {
   display: flex;
   gap: 12px;
+  overflow: hidden;
 }
 
 .themeOptionButton {
@@ -49,6 +79,7 @@
 }
 
 .error {
+  margin-top: 16px;
   color: var(--text-error, #d92d20);
   font-size: 14px;
   font-weight: 500;
