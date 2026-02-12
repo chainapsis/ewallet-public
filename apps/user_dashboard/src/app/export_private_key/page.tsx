@@ -309,9 +309,20 @@ export default function Page() {
 
     try {
       setIsLoading(true);
-      await okoWallet.signIn(authType === "auth0" ? "email" : authType);
 
-      // TODO: Verify re-authenticated account matches the current account (prevent account switch)
+      const publicKeyBefore = await okoWallet.getPublicKey();
+      await okoWallet.signIn(authType === "auth0" ? "email" : authType);
+      const publicKeyAfter = await okoWallet.getPublicKey();
+
+      if (publicKeyBefore !== publicKeyAfter) {
+        displayToast({
+          variant: "confirm",
+          title: "Login Failed",
+          description: "Please try again.",
+        });
+        return;
+      }
+
       // TODO: Replace with actual private key export when SDK API is available
       const mockPrivateKey = "0x" + "0".repeat(64);
       setPrivateKey(mockPrivateKey);
