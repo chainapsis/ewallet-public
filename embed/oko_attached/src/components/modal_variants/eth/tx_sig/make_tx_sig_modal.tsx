@@ -100,7 +100,7 @@ export const MakeTxSigModal: FC<MakeTxSigModalProps> = ({
             />
           </div>
 
-          <Spacing height={20} />
+          <Spacing height={12} />
           {showSponsorship && sponsoredFeeInfo ? (
             <SponsoredFee
               info={sponsoredFeeInfo}

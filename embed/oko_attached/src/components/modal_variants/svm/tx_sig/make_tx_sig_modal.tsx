@@ -76,7 +76,7 @@ export const MakeTxSigModal: FC<MakeTxSigModalProps> = ({
           />
         </div>
 
-        <Spacing height={20} />
+        <Spacing height={12} />
 
         <SvmTxFee
           serializedTransaction={data.payload.data.serialized_transaction}

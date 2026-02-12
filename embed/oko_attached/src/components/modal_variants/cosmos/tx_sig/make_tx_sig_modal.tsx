@@ -90,7 +90,7 @@ export const MakeTxSigModal: FC<MakeTxSigModalProps> = ({
           />
         </div>
 
-        <Spacing height={20} />
+        <Spacing height={12} />
         <CosmosTxFee
           signDocJson={signDocJson}
           chainInfo={sigData.payload.chain_info}
