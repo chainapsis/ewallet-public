@@ -232,6 +232,7 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
     hostOrigin,
     estimatedFeeWei: estimatedFee?.raw,
     hasSufficientBalance: hasSufficientBalanceForFee,
+    publicClient: publicClient ?? undefined,
     enabled: isSponsorshipSupported && !isDemo,
   });
 
@@ -518,21 +519,7 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
         !isSponsored
       ) {
         setIsLoading(true);
-        const topUpResult = await requestSponsorship();
-
-        // Wait for the top-up transaction to be confirmed
-        if (topUpResult?.txHash && publicClient) {
-          try {
-            await publicClient.waitForTransactionReceipt({
-              hash: topUpResult.txHash as `0x${string}`,
-              confirmations: 1,
-            });
-          } catch (e) {
-            console.warn("[fee-sponsorship] Failed to wait for tx receipt:", e);
-            // Continue anyway - the tx might still succeed
-          }
-        }
-        // Continue with signing after sponsorship is confirmed
+        await requestSponsorship();
       }
 
       setIsLoading(true);

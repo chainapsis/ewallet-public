@@ -1,5 +1,6 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState, useEffect, useCallback } from "react";
+import type { PublicClient } from "viem";
 
 import {
   checkFeeSponsorshipStatus,
@@ -194,6 +195,7 @@ export interface UseBaseSponsorshipFlowProps {
   hostOrigin: string;
   estimatedFeeWei: bigint | undefined;
   hasSufficientBalance: boolean | null;
+  publicClient?: PublicClient;
   enabled?: boolean;
 }
 
@@ -235,6 +237,7 @@ export function useBaseSponsorshipFlow({
   hostOrigin,
   estimatedFeeWei,
   hasSufficientBalance,
+  publicClient,
   enabled = true,
 }: UseBaseSponsorshipFlowProps): UseBaseSponsorshipFlowResult {
   const [sponsorshipState, setSponsorshipState] =
@@ -341,6 +344,19 @@ export function useBaseSponsorshipFlow({
 
       const result = await requestTopUp(recipientAddress, amountWei);
 
+      if (publicClient) {
+        setSponsorshipState("waiting_confirmation");
+        try {
+          await publicClient.waitForTransactionReceipt({
+            hash: result.txHash as `0x${string}`,
+            confirmations: 1,
+          });
+        } catch (e) {
+          console.warn("[fee-sponsorship] Failed to wait for tx receipt:", e);
+          // Continue anyway - the tx might still succeed
+        }
+      }
+
       setSponsorshipState("success");
       setIsSponsored(true);
 
@@ -351,7 +367,7 @@ export function useBaseSponsorshipFlow({
       refetchStatus();
       return null;
     }
-  }, [estimatedFeeWei, recipientAddress, requestTopUp]);
+  }, [estimatedFeeWei, recipientAddress, requestTopUp, publicClient]);
 
   const resetSponsorship = useCallback(() => {
     setSponsorshipState("idle");
