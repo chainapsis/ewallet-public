@@ -2,21 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { PublicKey, Transaction } from "@solana/web3.js";
 import {
-  PublicKey,
-  Transaction,
-  TransactionInstruction,
-} from "@solana/web3.js";
+  createTransferCheckedInstruction,
+  getAssociatedTokenAddress,
+} from "@solana/spl-token";
 import bs58 from "bs58";
 
 import { useSdkStore } from "@/store/sdk";
 import Button from "./Button";
 import { DEVNET_CONNECTION } from "@/lib/connection";
-
-// Token Program ID
-const TOKEN_PROGRAM_ID = new PublicKey(
-  "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-);
 
 // Well-known devnet tokens for testing
 const DEVNET_TOKENS = [
@@ -26,54 +21,6 @@ const DEVNET_TOKENS = [
     decimals: 6,
   },
 ];
-
-/**
- * Creates a transferChecked instruction manually (without @solana/spl-token dependency)
- */
-function createTransferCheckedInstruction(
-  source: PublicKey,
-  mint: PublicKey,
-  destination: PublicKey,
-  owner: PublicKey,
-  amount: bigint,
-  decimals: number,
-): TransactionInstruction {
-  // TransferChecked instruction discriminator = 12
-  const data = Buffer.alloc(10);
-  data.writeUInt8(12, 0); // instruction discriminator
-  data.writeBigUInt64LE(amount, 1); // amount
-  data.writeUInt8(decimals, 9); // decimals
-
-  return new TransactionInstruction({
-    keys: [
-      { pubkey: source, isSigner: false, isWritable: true },
-      { pubkey: mint, isSigner: false, isWritable: false },
-      { pubkey: destination, isSigner: false, isWritable: true },
-      { pubkey: owner, isSigner: true, isWritable: false },
-    ],
-    programId: TOKEN_PROGRAM_ID,
-    data,
-  });
-}
-
-/**
- * Derives Associated Token Account address
- */
-function getAssociatedTokenAddress(
-  mint: PublicKey,
-  owner: PublicKey,
-): PublicKey {
-  const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey(
-    "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
-  );
-
-  const [address] = PublicKey.findProgramAddressSync(
-    [owner.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), mint.toBuffer()],
-    ASSOCIATED_TOKEN_PROGRAM_ID,
-  );
-
-  return address;
-}
 
 export function SplTokenTransferWidget() {
   const { okoSvmWallet, publicKey } = useSdkStore();
@@ -110,8 +57,8 @@ export function SplTokenTransferWidget() {
       const mintPubkey = new PublicKey(selectedToken.mint);
 
       // Derive token accounts
-      const sourceAta = getAssociatedTokenAddress(mintPubkey, ownerPubkey);
-      const destinationAta = getAssociatedTokenAddress(
+      const sourceAta = await getAssociatedTokenAddress(mintPubkey, ownerPubkey);
+      const destinationAta = await getAssociatedTokenAddress(
         mintPubkey,
         recipientPubkey,
       );
@@ -173,8 +120,8 @@ export function SplTokenTransferWidget() {
       const ownerPubkey = new PublicKey(publicKey);
       const mintPubkey = new PublicKey(selectedToken.mint);
 
-      const sourceAta = getAssociatedTokenAddress(mintPubkey, ownerPubkey);
-      const destinationAta = getAssociatedTokenAddress(
+      const sourceAta = await getAssociatedTokenAddress(mintPubkey, ownerPubkey);
+      const destinationAta = await getAssociatedTokenAddress(
         mintPubkey,
         recipientPubkey,
       );
