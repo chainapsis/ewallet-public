@@ -12,9 +12,9 @@ export const ExportPrivKeyWidget: FC = () => {
   const handleClickExport = async () => {
     try {
       if (okoCosmos) {
-        okoCosmos.okoWallet.getName();
+        const ret = await okoCosmos.okoWallet.exportPrivateKey();
+        console.log("ret", ret);
       }
-      console.log(123);
     } catch (error) {
       console.error(error);
     } finally {

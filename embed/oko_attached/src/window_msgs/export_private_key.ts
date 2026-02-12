@@ -10,7 +10,12 @@ import { useAppState } from "@oko-wallet-attached/store/app";
 export async function handleExportPrivateKey(ctx: MsgEventContext) {
   const { port, hostOrigin } = ctx;
 
-  const wallet = useAppState.getState().getWallet(hostOrigin);
+  // const wallet = useAppState.getState().getWallet(hostOrigin);
+
+  const appState = useAppState.getState();
+  const keyshare_1 = appState.getKeyshare_1(hostOrigin);
+
+  console.log(1, keyshare_1);
 
   const ack: OkoWalletMsgExportPrivateKeyAck = {
     target: OKO_SDK_TARGET,
