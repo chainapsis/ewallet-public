@@ -24,35 +24,35 @@ interface AssetMetaBase {
   data_source: AssetMetaDataSource;
 }
 
-export type NativeAssetMeta = AssetMetaBase & {
+export interface NativeAssetMeta extends AssetMetaBase {
   token_spec: "native";
   metadata: DefaultMetadata;
-};
+}
 
-export type FactoryAssetMeta = AssetMetaBase & {
+export interface FactoryAssetMeta extends AssetMetaBase {
   token_spec: "factory";
   metadata: DefaultMetadata;
-};
+}
 
-export type ERC20AssetMeta = AssetMetaBase & {
+export interface ERC20AssetMeta extends AssetMetaBase {
   token_spec: "erc20";
   metadata: ERC20Metadata;
-};
+}
 
-export type IBCAssetMeta = AssetMetaBase & {
+export interface IBCAssetMeta extends AssetMetaBase {
   token_spec: "ibc";
   metadata: IBCMetadata;
-};
+}
 
-export type CW20AssetMeta = AssetMetaBase & {
+export interface CW20AssetMeta extends AssetMetaBase {
   token_spec: "cw20";
   metadata: ERC20Metadata;
-};
+}
 
-export type SPLAssetMeta = AssetMetaBase & {
+export interface SPLAssetMeta extends AssetMetaBase {
   token_spec: "spl";
   metadata: SPLMetadata;
-};
+}
 
 // mongodb table name
 export type AssetMetaDataSource =
