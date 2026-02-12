@@ -1,15 +1,13 @@
-import { useState, type FC } from "react";
-
-import { Widget } from "../widget_components";
-import styles from "./error_widget.module.scss";
-import { useOko } from "@/hooks/use_oko";
-import { useUserInfoState } from "@/state/user_info";
-import { useAddresses } from "@/hooks/use_addresses";
 import type { OkoWalletMsgOpenModal } from "@oko-wallet/oko-sdk-core";
+import { type FC, useState } from "react";
 
-export const ErrorWidget: FC<LoginWidgetProps> = () => {
+import { Widget } from "@/components/widgets/widget_components";
+import { useOko } from "@/hooks/use_oko";
+import styles from "./error_widget.module.scss";
+
+export const ErrorWidget: FC = () => {
   const { okoCosmos } = useOko();
-  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [_, setIsSigningIn] = useState(false);
 
   const handleClickError = async () => {
     try {
@@ -41,11 +39,11 @@ export const ErrorWidget: FC<LoginWidgetProps> = () => {
     <Widget>
       <div className={styles.container}>
         <div className={styles.title}>Trigger an error</div>
-        <button onClick={handleClickError}>Error</button>
+        <button type="button" onClick={handleClickError}>
+          Error
+        </button>
         {/* <div className={styles.walletBoxRow}>123</div> */}
       </div>
     </Widget>
   );
 };
-
-export interface LoginWidgetProps {}
