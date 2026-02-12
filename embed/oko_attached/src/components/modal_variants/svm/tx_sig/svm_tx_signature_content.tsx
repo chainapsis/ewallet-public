@@ -5,6 +5,7 @@ import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
+import { EmptyStateIcon } from "@oko-wallet/oko-common-ui/icons/empty_state_icon";
 
 import styles from "../common/signature_content.module.scss";
 import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
@@ -75,16 +76,18 @@ export const SvmTxSignatureContent: FC<SvmTxSignatureContentProps> = ({
               requested your
             </Typography>
             <div className={styles.chainNameGroup}>
-              {chainLogoUrl && (
+              {chainLogoUrl !== undefined ? (
                 <Avatar
                   src={chainLogoUrl}
                   alt={chainName ?? "chain"}
                   size="sm"
                   variant="rounded"
                 />
+              ) : (
+                <EmptyStateIcon size={16} />
               )}
               <Typography size="lg" color="secondary" weight="semibold">
-                {chainName ? `${chainName} signature` : "signature"}
+                {chainName ? `${chainName} signature` : "Network signature"}
               </Typography>
             </div>
           </div>

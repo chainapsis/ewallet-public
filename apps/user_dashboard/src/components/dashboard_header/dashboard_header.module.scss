@@ -1,18 +1,28 @@
 @use "../../styles/viewport.module.scss" as *;
 
 .wrapper {
-  height: 54px;
+  height: 64px;
   display: flex;
   flex-shrink: 0;
   flex-grow: 0;
   align-items: center;
-  padding: 20px 16px;
+  padding: 16px 20px;
   z-index: 999;
   justify-content: space-between;
 
   @media (min-width: $desktop_min_width) {
     padding: 16px 44px;
   }
+}
+
+.logo {
+  flex-shrink: 0;
+}
+
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .menuIconWrapper {
@@ -23,4 +33,71 @@
   @media (min-width: $desktop_min_width) {
     display: none;
   }
+}
+
+// Account menu trigger
+.accountTrigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+
+  &:hover {
+    background-color: var(--bg-primary-hover);
+  }
+}
+
+.authProviderIcon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.accountEmail {
+  display: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+
+  @media (min-width: $desktop_min_width) {
+    display: block;
+  }
+}
+
+.dotsButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+// Dropdown menu
+.accountMenu {
+  width: 252px;
+}
+
+.menuHeader {
+  display: flex;
+  padding: 6px;
+}
+
+.menuUserInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.menuEmail {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

@@ -4,6 +4,7 @@ import { combine, createJSONStorage, persist } from "zustand/middleware";
 
 interface UserInfoState {
   email: string | null;
+  name: string | null;
   publicKey: string | null;
   isSignedIn: boolean;
   authType: AuthType | null;
@@ -12,6 +13,7 @@ interface UserInfoState {
 interface UserInfoActions {
   setUserInfo: (info: {
     email: string | null;
+    name: string | null;
     publicKey: string | null;
   }) => void;
   setAuthType: (authType: AuthType | null) => void;
@@ -23,6 +25,7 @@ export const useUserInfoState = create(
     combine<UserInfoState, UserInfoActions>(
       {
         email: null,
+        name: null,
         publicKey: null,
         isSignedIn: false,
         authType: null,
@@ -31,6 +34,7 @@ export const useUserInfoState = create(
         setUserInfo: (info) => {
           set({
             email: info.email,
+            name: info.name,
             publicKey: info.publicKey,
             isSignedIn: !!(info.email && info.publicKey),
           });
@@ -41,6 +45,7 @@ export const useUserInfoState = create(
         clearUserInfo: () => {
           set({
             email: null,
+            name: null,
             publicKey: null,
             isSignedIn: false,
             authType: null,

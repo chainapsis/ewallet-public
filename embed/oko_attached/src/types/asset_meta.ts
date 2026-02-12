@@ -4,6 +4,10 @@ export interface ERC20Metadata {
   name: string;
 }
 
+export interface SPLMetadata {
+  name: string;
+}
+
 export interface IBCMetadata {
   origin_chain_identifier: string;
   base_denom: string;
@@ -20,30 +24,41 @@ interface AssetMetaBase {
   data_source: AssetMetaDataSource;
 }
 
-export type NativeAssetMeta = AssetMetaBase & {
+export interface NativeAssetMeta {
   token_spec: "native";
   metadata: DefaultMetadata;
-};
+  base: AssetMetaBase;
+}
 
-export type FactoryAssetMeta = AssetMetaBase & {
+export interface FactoryAssetMeta {
   token_spec: "factory";
   metadata: DefaultMetadata;
-};
+  base: AssetMetaBase;
+}
 
-export type ERC20AssetMeta = AssetMetaBase & {
+export interface ERC20AssetMeta {
   token_spec: "erc20";
   metadata: ERC20Metadata;
-};
+  base: AssetMetaBase;
+}
 
-export type IBCAssetMeta = AssetMetaBase & {
+export interface IBCAssetMeta {
   token_spec: "ibc";
   metadata: IBCMetadata;
-};
+  base: AssetMetaBase;
+}
 
-export type CW20AssetMeta = AssetMetaBase & {
+export interface CW20AssetMeta {
   token_spec: "cw20";
   metadata: ERC20Metadata;
-};
+  base: AssetMetaBase;
+}
+
+export interface SPLAssetMeta {
+  token_spec: "spl";
+  metadata: SPLMetadata;
+  base: AssetMetaBase;
+}
 
 // mongodb table name
 export type AssetMetaDataSource =
@@ -59,7 +74,8 @@ export type AssetMeta =
   | FactoryAssetMeta
   | ERC20AssetMeta
   | IBCAssetMeta
-  | CW20AssetMeta;
+  | CW20AssetMeta
+  | SPLAssetMeta;
 
 export interface AssetMetaInput {
   chain_identifier: string;

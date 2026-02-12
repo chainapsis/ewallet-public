@@ -68,7 +68,7 @@ export function useOkoSvm() {
         const svmWalletResult = OkoSvmWallet.init({
           api_key: process.env.NEXT_PUBLIC_OKO_API_KEY!,
           sdk_endpoint: process.env.NEXT_PUBLIC_OKO_SDK_ENDPOINT,
-          chain_id: SOLANA_MAINNET_CHAIN,
+          chain_id: SOLANA_DEVNET_CHAIN,
         });
 
         if (!svmWalletResult.success) {

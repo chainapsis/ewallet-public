@@ -190,9 +190,10 @@ export const useSDKState = create(
         // Setup auth state listener - updates user_info store directly
         okoCosmos.on({
           type: "accountsChanged",
-          handler: ({ email, publicKey }) => {
+          handler: ({ email, name, publicKey }) => {
             useUserInfoState.getState().setUserInfo({
               email: email || null,
+              name: name || null,
               publicKey: publicKey
                 ? Buffer.from(publicKey).toString("hex")
                 : null,

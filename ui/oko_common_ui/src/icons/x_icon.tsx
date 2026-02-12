@@ -10,12 +10,12 @@ export const XIcon: FC<TelegramIconProps> = ({ size = 24 }) => {
       xmlns="http://www.w3.org/2000/svg"
       xmlnsXlink="http://www.w3.org/1999/xlink"
     >
-      <rect x="1.5" y="1.5" width="21" height="21" rx="10.5" fill="#283544" />
+      <rect x="2" y="2" width="20" height="20" rx="10" fill="#283544" />
       <rect
-        x="6.75"
-        y="6.75"
-        width="10.5"
-        height="10.5"
+        x="7"
+        y="7"
+        width="10"
+        height="10"
         fill="url(#pattern0_1385_14849)"
       />
       <defs>
