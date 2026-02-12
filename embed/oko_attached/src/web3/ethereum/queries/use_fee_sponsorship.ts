@@ -156,7 +156,7 @@ export function useSponsorshipTimer({
 
   useEffect(() => {
     if (remainingTimeMs !== undefined) {
-      setRemainingMs(remainingTimeMs);
+      setRemainingMs((prev) => Math.min(prev, remainingTimeMs));
     }
   }, [remainingTimeMs]);
 
