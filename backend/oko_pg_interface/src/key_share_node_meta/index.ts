@@ -39,7 +39,8 @@ export async function getKeyShareNodeMeta(
 ): Promise<Result<KeyShareNodeMeta, string>> {
   try {
     const getKeyShareNodeMetaQuery = `
-SELECT * FROM key_share_node_meta 
+SELECT * 
+FROM key_share_node_meta 
 ORDER BY created_at DESC 
 LIMIT 1
 `;
@@ -47,6 +48,8 @@ LIMIT 1
     const getKeyShareNodeMetaResult = await db.query(getKeyShareNodeMetaQuery);
 
     if (getKeyShareNodeMetaResult.rows.length === 0) {
+      console.log("If this is local environment, have you seeded the DB?");
+
       return {
         success: false,
         err: "Failed to get key share node meta",
