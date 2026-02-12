@@ -120,7 +120,7 @@
 
 .privateKeyField {
   position: relative;
-  height: 68px;
+  min-height: 68px;
   width: 100%;
   cursor: pointer;
 
@@ -130,8 +130,6 @@
 }
 
 .privateKeyBg {
-  position: absolute;
-  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;

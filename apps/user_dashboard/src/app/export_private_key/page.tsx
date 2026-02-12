@@ -210,20 +210,20 @@ function Step1Content({
 }
 
 function Step2Content({
-  privateKey,
-  isRevealed,
+  privateKeys,
+  revealedKeys,
   onToggleReveal,
   onCopy,
 }: {
-  privateKey: string;
-  isRevealed: boolean;
-  onToggleReveal: () => void;
-  onCopy: () => void;
+  privateKeys: { secp256k1: string; ed25519: string };
+  revealedKeys: { secp256k1: boolean; ed25519: boolean };
+  onToggleReveal: (key: "secp256k1" | "ed25519") => void;
+  onCopy: (key: string) => void;
 }) {
   return (
     <>
       <Typography size="lg" weight="semibold" color="primary">
-        View and copy your private key
+        View and copy your private keys
       </Typography>
 
       <div style={{ height: 24 }} />
@@ -235,16 +235,16 @@ function Step2Content({
           color="secondary"
           className={styles.privateKeyLabel}
         >
-          Private Key
+          EVM/Cosmos Private Key
         </Typography>
         <div
           className={styles.privateKeyField}
-          onClick={onToggleReveal}
+          onClick={() => onToggleReveal("secp256k1")}
           role="button"
           tabIndex={0}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
-              onToggleReveal();
+              onToggleReveal("secp256k1");
             }
           }}
         >
@@ -253,12 +253,16 @@ function Step2Content({
               size="md"
               weight="medium"
               color="secondary"
-              className={isRevealed ? undefined : styles.privateKeyTextBlurred}
+              className={
+                revealedKeys.secp256k1
+                  ? undefined
+                  : styles.privateKeyTextBlurred
+              }
             >
-              {privateKey}
+              {privateKeys.secp256k1}
             </Typography>
           </div>
-          {!isRevealed && (
+          {!revealedKeys.secp256k1 && (
             <div className={styles.privateKeyHint}>
               <span className={styles.eyeOffIcon}>
                 <EyeOffIcon />
@@ -275,7 +279,65 @@ function Step2Content({
 
       <div style={{ height: 32 }} />
 
-      <Button size="lg" fullWidth onClick={onCopy}>
+      <Button size="lg" fullWidth onClick={() => onCopy(privateKeys.secp256k1)}>
+        <span className={styles.copyButtonIcon}>
+          <CopyIcon />
+        </span>
+        Copy to Clipboard
+      </Button>
+
+      <div style={{ height: 40 }} />
+
+      <div className={styles.privateKeySection}>
+        <Typography
+          size="xs"
+          weight="semibold"
+          color="secondary"
+          className={styles.privateKeyLabel}
+        >
+          SVM Private Key
+        </Typography>
+        <div
+          className={styles.privateKeyField}
+          onClick={() => onToggleReveal("ed25519")}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              onToggleReveal("ed25519");
+            }
+          }}
+        >
+          <div className={styles.privateKeyBg}>
+            <Typography
+              size="md"
+              weight="medium"
+              color="secondary"
+              className={
+                revealedKeys.ed25519 ? undefined : styles.privateKeyTextBlurred
+              }
+            >
+              {privateKeys.ed25519}
+            </Typography>
+          </div>
+          {!revealedKeys.ed25519 && (
+            <div className={styles.privateKeyHint}>
+              <span className={styles.eyeOffIcon}>
+                <EyeOffIcon />
+              </span>
+              <Typography size="md" weight="medium" color="primary">
+                Click or tap to reveal your private key.
+                <br />
+                Ensure no one else can see your screen.
+              </Typography>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div style={{ height: 32 }} />
+
+      <Button size="lg" fullWidth onClick={() => onCopy(privateKeys.ed25519)}>
         <span className={styles.copyButtonIcon}>
           <CopyIcon />
         </span>
@@ -298,8 +360,14 @@ export default function Page() {
 
   const [step, setStep] = useState<1 | 2>(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [isRevealed, setIsRevealed] = useState(false);
-  const [privateKey, setPrivateKey] = useState<string | null>(null);
+  const [revealedKeys, setRevealedKeys] = useState({
+    secp256k1: false,
+    ed25519: false,
+  });
+  const [privateKeys, setPrivateKeys] = useState<{
+    secp256k1: string;
+    ed25519: string;
+  } | null>(null);
   const { copy } = useCopyToClipboard();
 
   const handleContinue = useCallback(async () => {
@@ -323,10 +391,38 @@ export default function Page() {
         return;
       }
 
-      // TODO: Replace with actual private key export when SDK API is available
-      const mockPrivateKey = "0x" + "0".repeat(64);
-      setPrivateKey(mockPrivateKey);
-      setStep(2);
+      const res = await okoWallet.sendMsgToIframe({
+        target: "oko_attached",
+        msg_type: "__export_private_key__",
+        payload: null,
+      } as any);
+
+      const resAny = res as unknown as {
+        msg_type: "__export_private_key_ack__";
+        payload:
+          | {
+              success: true;
+              data: { secp256k1: string; ed25519: string };
+            }
+          | {
+              success: false;
+              error: { type: string; error?: string };
+            };
+      };
+
+      if (
+        resAny.msg_type === "__export_private_key_ack__" &&
+        resAny.payload.success
+      ) {
+        setPrivateKeys(resAny.payload.data);
+        setStep(2);
+      } else {
+        displayToast({
+          variant: "confirm",
+          title: "Export Failed",
+          description: "Please try again.",
+        });
+      }
     } catch (error) {
       console.error("Re-authentication failed:", error);
       displayToast({
@@ -339,18 +435,18 @@ export default function Page() {
     }
   }, [okoWallet, authType]);
 
-  const handleCopy = useCallback(async () => {
-    if (!privateKey) {
-      return;
-    }
-    const success = await copy(privateKey);
-    if (success) {
-      displayToast({ variant: "success", title: "Copied!" });
-    }
-  }, [privateKey, copy]);
+  const handleCopy = useCallback(
+    async (key: string) => {
+      const success = await copy(key);
+      if (success) {
+        displayToast({ variant: "success", title: "Copied!" });
+      }
+    },
+    [copy],
+  );
 
-  const handleToggleReveal = useCallback(() => {
-    setIsRevealed((prev) => !prev);
+  const handleToggleReveal = useCallback((key: "secp256k1" | "ed25519") => {
+    setRevealedKeys((prev) => ({ ...prev, [key]: !prev[key] }));
   }, []);
 
   return (
@@ -379,8 +475,8 @@ export default function Page() {
           />
         ) : (
           <Step2Content
-            privateKey={privateKey!}
-            isRevealed={isRevealed}
+            privateKeys={privateKeys!}
+            revealedKeys={revealedKeys}
             onToggleReveal={handleToggleReveal}
             onCopy={handleCopy}
           />

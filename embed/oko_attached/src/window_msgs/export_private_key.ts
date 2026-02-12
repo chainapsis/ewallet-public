@@ -1,3 +1,5 @@
+import bs58 from "bs58";
+
 import type { MsgEventContext } from "./types";
 import { OKO_SDK_TARGET } from "./target";
 import { useAppState } from "@oko-wallet-attached/store/app";
@@ -59,8 +61,9 @@ export async function handleExportPrivateKey(
 
   // 3. Extract user shares from local state
   const keyshare1 = useAppState.getState().getKeyshare_1(hostOrigin);
-  const keyPackageEd25519Hex =
-    useAppState.getState().getKeyPackageEd25519(hostOrigin);
+  const keyPackageEd25519Hex = useAppState
+    .getState()
+    .getKeyPackageEd25519(hostOrigin);
 
   if (!keyshare1 || !keyPackageEd25519Hex) {
     const ack: OkoWalletMsgExportPrivateKeyAck = {
@@ -73,8 +76,7 @@ export async function handleExportPrivateKey(
   }
 
   // 4. Get ed25519 public key for the response
-  const ed25519Wallet =
-    useAppState.getState().getWalletEd25519(hostOrigin);
+  const ed25519Wallet = useAppState.getState().getWalletEd25519(hostOrigin);
   const ed25519PublicKey = ed25519Wallet?.publicKey ?? null;
 
   // -------------------------------------------------------------------
@@ -122,16 +124,24 @@ export async function handleExportPrivateKey(
   // to recover the full ed25519 signing secret.
   //
   // const fullEd25519Secret = ... // 32 bytes
-  // const fullEd25519Key = hex(fullEd25519Secret) + hex(ed25519PublicKey) // 64 bytes
+  // const fullEd25519Keypair = Uint8Array.from([...fullEd25519Secret, ...ed25519PublicKeyBytes]) // 64 bytes
+  // const fullEd25519Key = bs58.encode(fullEd25519Keypair) // base58 (Phantom/Solflare import format)
   //
   // -------------------------------------------------------------------
 
   // [Mock] Return deterministic test keys for development
   const mockSecp256k1 =
     "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
-  const mockEd25519SigningSecret = "a".repeat(64); // 32 bytes
-  const mockEd25519PublicKey = ed25519PublicKey ?? "b".repeat(64); // 32 bytes
-  const mockEd25519 = mockEd25519SigningSecret + mockEd25519PublicKey;
+  const mockEd25519SigningSecret = "a".repeat(64); // 32 bytes hex
+  const mockEd25519PublicKey = ed25519PublicKey ?? "b".repeat(64); // 32 bytes hex
+  const mockEd25519Hex = mockEd25519SigningSecret + mockEd25519PublicKey;
+
+  // Convert 64-byte ed25519 keypair (secret + pubkey) from hex to base58
+  // This is the standard format used by Phantom, Solflare, etc.
+  const ed25519Bytes = new Uint8Array(
+    (mockEd25519Hex.match(/.{2}/g) ?? []).map((b) => Number.parseInt(b, 16)),
+  );
+  const mockEd25519Base58 = bs58.encode(ed25519Bytes);
 
   const ack: OkoWalletMsgExportPrivateKeyAck = {
     target: OKO_SDK_TARGET,
@@ -140,7 +150,7 @@ export async function handleExportPrivateKey(
       success: true,
       data: {
         secp256k1: mockSecp256k1,
-        ed25519: mockEd25519,
+        ed25519: mockEd25519Base58,
       },
     },
   };
