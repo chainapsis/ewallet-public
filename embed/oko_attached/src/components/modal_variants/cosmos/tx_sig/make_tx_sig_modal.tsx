@@ -99,7 +99,7 @@ export const MakeTxSigModal: FC<MakeTxSigModalProps> = ({
           insufficientBalanceFee={insufficientBalanceFee}
         />
 
-        <Spacing height={20} />
+        <Spacing height={12} />
 
         <div className={styles.buttonContainer}>
           <Button
