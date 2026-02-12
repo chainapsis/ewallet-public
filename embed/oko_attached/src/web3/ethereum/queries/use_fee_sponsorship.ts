@@ -348,6 +348,7 @@ export function useBaseSponsorshipFlow({
     } catch (err) {
       setSponsorshipState("error");
       setError(err as FeeSponsorshipError);
+      refetchStatus();
       return null;
     }
   }, [estimatedFeeWei, recipientAddress, requestTopUp]);
