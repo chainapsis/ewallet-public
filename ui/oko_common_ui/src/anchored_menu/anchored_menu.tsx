@@ -18,10 +18,38 @@ import { Typography } from "@oko-wallet/oko-common-ui/typography";
 
 import styles from "./anchored_menu.module.scss";
 
+const MenuItemRow: FC<{
+  item: AnchoredMenuItem;
+  onClick: (item: AnchoredMenuItem) => void;
+}> = ({ item, onClick }) => (
+  <li
+    className={cn(styles.menuItem, item.className)}
+    role="menuitem"
+    onClick={() => onClick(item)}
+  >
+    <div className={styles.menuItemContent}>
+      {item.icon && <span className={styles.menuItemIcon}>{item.icon}</span>}
+      <Typography
+        size="sm"
+        weight="semibold"
+        color={item.labelColor ?? "secondary"}
+        className={styles.menuItemLabel}
+      >
+        {item.label}
+      </Typography>
+      {item.trailingIcon && (
+        <span className={styles.menuItemTrailingIcon}>{item.trailingIcon}</span>
+      )}
+    </div>
+  </li>
+);
+
 export const AnchoredMenu: FC<AnchoredMenuProps> = ({
   TriggerComponent,
   HeaderComponent = null,
   menuItems,
+  menuSections,
+  footerSection,
   placement = "right-start",
   className,
 }) => {
@@ -71,31 +99,61 @@ export const AnchoredMenu: FC<AnchoredMenuProps> = ({
             className={cn(styles.menu, className)}
             {...getFloatingProps()}
           >
-            {HeaderComponent}
-            <ul className={styles.menuList} role="menu">
-              {menuItems.map((item) => (
-                <li
-                  key={item.id}
-                  className={cn(styles.menuItem, item.className)}
-                  role="menuitem"
-                  onClick={() => handleMenuItemClick(item)}
-                >
-                  <div className={styles.menuItemContent}>
-                    {item.icon && (
-                      <span className={styles.menuItemIcon}>{item.icon}</span>
+            {menuSections ? (
+              <div className={styles.menuInner}>
+                {HeaderComponent}
+                {menuSections.map((section) => (
+                  <ul
+                    key={section.id}
+                    className={styles.menuSection}
+                    role="menu"
+                  >
+                    {section.label && (
+                      <li className={styles.menuSectionLabel}>
+                        <Typography
+                          size="xs"
+                          weight="semibold"
+                          color="tertiary"
+                        >
+                          {section.label}
+                        </Typography>
+                      </li>
                     )}
-                    <Typography
-                      size="sm"
-                      weight="semibold"
-                      color={item.labelColor ?? "secondary"}
-                      className={styles.menuItemLabel}
-                    >
-                      {item.label}
-                    </Typography>
-                  </div>
-                </li>
-              ))}
-            </ul>
+                    {section.items.map((item) => (
+                      <MenuItemRow
+                        key={item.id}
+                        item={item}
+                        onClick={handleMenuItemClick}
+                      />
+                    ))}
+                  </ul>
+                ))}
+              </div>
+            ) : (
+              <>
+                {HeaderComponent}
+                <ul className={styles.menuList} role="menu">
+                  {menuItems?.map((item) => (
+                    <MenuItemRow
+                      key={item.id}
+                      item={item}
+                      onClick={handleMenuItemClick}
+                    />
+                  ))}
+                </ul>
+              </>
+            )}
+            {footerSection && (
+              <ul className={styles.menuFooter} role="menu">
+                {footerSection.items.map((item) => (
+                  <MenuItemRow
+                    key={item.id}
+                    item={item}
+                    onClick={handleMenuItemClick}
+                  />
+                ))}
+              </ul>
+            )}
           </div>
         )}
       </FloatingPortal>
@@ -108,13 +166,22 @@ export type AnchoredMenuItem = {
   label: string;
   onClick: () => void;
   icon?: ReactNode;
+  trailingIcon?: ReactNode;
   className?: string;
   labelColor?: Parameters<typeof Typography>[0]["color"];
 };
 
+export type AnchoredMenuSection = {
+  id: string;
+  label?: string;
+  items: AnchoredMenuItem[];
+};
+
 export type AnchoredMenuProps = {
   TriggerComponent: ReactNode;
-  menuItems: AnchoredMenuItem[];
+  menuItems?: AnchoredMenuItem[];
+  menuSections?: AnchoredMenuSection[];
+  footerSection?: AnchoredMenuSection;
   placement?: Placement;
   disabled?: boolean;
   HeaderComponent?: ReactNode;

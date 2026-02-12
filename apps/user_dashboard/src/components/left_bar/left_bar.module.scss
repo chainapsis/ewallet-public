@@ -1,6 +1,6 @@
 @use "../../styles/viewport.module.scss" as *;
 
-$header_height: 54px;
+$header_height: 64px;
 
 .wrapper {
   display: none;
@@ -46,27 +46,8 @@ $header_height: 54px;
   }
 }
 
-.subMenu {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
 .icon {
   width: 20px;
   height: 20px;
   aspect-ratio: 1/1;
-}
-
-.featureRequestButton {
-  border: none;
-  background: none;
-  cursor: pointer;
-  width: 100%;
-  padding: 10px 12px;
-  text-align: left;
-
-  &:hover {
-    background-color: var(--bg-primary-hover);
-  }
 }
