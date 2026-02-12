@@ -43,9 +43,19 @@ export function filterEthChains(chains: ChainInfo[]): ChainInfo[] {
   return chains.filter((c) => c.chainId.startsWith("eip155:"));
 }
 
+// Solana wallet-standard uses short aliases (e.g., "solana:devnet")
+// while Keplr API uses CAIP-2 format with genesis hash
+const SOLANA_CHAIN_ALIASES: Record<string, string> = {
+  "solana:devnet": "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
+  "solana:mainnet": "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+  "solana:testnet": "solana:4uhcVJyU9pJkvQyS88uRDiswHXSCkY3z",
+};
+
 export async function getChainByChainId(
   chainId: string,
 ): Promise<ChainInfo | null> {
   const chains = await getAllChainsCached();
-  return chains.find((c) => c.chainId === chainId) ?? null;
+  // Normalize Solana chain aliases to CAIP-2 format
+  const normalizedChainId = SOLANA_CHAIN_ALIASES[chainId] ?? chainId;
+  return chains.find((c) => c.chainId === normalizedChainId) ?? null;
 }
