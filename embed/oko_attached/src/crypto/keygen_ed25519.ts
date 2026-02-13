@@ -1,5 +1,5 @@
 import {
-  runTeddsaKeygen,
+  runTeddsaKeygenSeed,
   type TeddsaKeygenOutputBytes,
 } from "@oko-wallet/teddsa-hooks";
 import type {
@@ -9,11 +9,13 @@ import type {
 import type { Result } from "@oko-wallet/stdlib-js";
 import { Bytes, type Bytes32 } from "@oko-wallet/bytes";
 import type { KeyShareNodeMetaWithNodeStatusInfo } from "@oko-wallet/oko-types/tss";
-import type { TeddsaKeyShareByNode } from "@oko-wallet/oko-types/user_key_share";
-import {
-  extractSigningShare,
-  splitTeddsaSigningShare,
-} from "./sss_ed25519";
+import type {
+  PointNumArr,
+  TeddsaKeyShareByNode,
+} from "@oko-wallet/oko-types/user_key_share";
+import * as secp256k1Wasm from "@oko-wallet/cait-sith-keplr-wasm/pkg/cait_sith_keplr_wasm";
+import { extractSigningShare, splitTeddsaSigningShare } from "./sss_ed25519";
+import { hashKeyshareNodeNames } from "./hash";
 
 export interface KeyPackageEd25519Hex {
   keyPackage: string;
@@ -105,6 +107,13 @@ export function teddsaKeygenFromHex(
   }
 }
 
+/**
+ * Serialize a SeedSharePoint to hex string (x[32] || y[32] = 128 hex chars).
+ */
+export function seedShareToHex(share: SeedSharePoint): string {
+  return share.x.toHex() + share.y.toHex();
+}
+
 export function getPublicKeyFromKeyPackage(
   keyPackageHex: KeyPackageEd25519Hex,
 ): Result<Bytes32, string> {
@@ -137,15 +146,98 @@ export function extractKeyPackageHex(
   };
 }
 
+export interface SeedSharePoint {
+  x: Bytes32;
+  y: Bytes32;
+}
+
+export interface SeedShareByNode {
+  node: { name: string; endpoint: string };
+  share: SeedSharePoint;
+}
+
 export interface Ed25519KeygenSplitResult {
   keygen1: TeddsaKeygenOutputBytes;
   keygen2: TeddsaKeygenOutputBytes;
   userKeyShares: TeddsaKeyShareByNode[];
+  serverSeedShare: SeedSharePoint;
+  ksnSeedShares: SeedShareByNode[];
+}
+
+// secp256k1 group order n
+const SECP256K1_ORDER = new Uint8Array([
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0xff, 0xfe, 0xba, 0xae, 0xdc, 0xe6, 0xaf, 0x48, 0xa0, 0x3b, 0xbf, 0xd2,
+  0x5e, 0x8c, 0xd0, 0x36, 0x41, 0x41,
+]);
+
+/**
+ * Compare two 32-byte big-endian unsigned integers.
+ * Returns true if a < b.
+ */
+function isLessThan(a: Uint8Array, b: Uint8Array): boolean {
+  for (let i = 0; i < 32; i++) {
+    if (a[i] < b[i]) {
+      return true;
+    }
+    if (a[i] > b[i]) {
+      return false;
+    }
+  }
+  return false; // equal
 }
 
 /**
- * Run ed25519 keygen and split the signing share for distribution to KS nodes.
- * Used by handlers that need to create new ed25519 wallets.
+ * Generate a 32-byte seed that is less than the secp256k1 group order.
+ * Resamples if seed >= n (probability ≈ 1.5e-39, practically never happens).
+ */
+function generateSeed(): Result<Bytes32, string> {
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const seedBytes = new Uint8Array(32);
+    crypto.getRandomValues(seedBytes);
+
+    if (isLessThan(seedBytes, SECP256K1_ORDER)) {
+      const res = Bytes.fromUint8Array(seedBytes, 32);
+      if (res.success) {
+        return res;
+      }
+    }
+  }
+  return {
+    success: false,
+    err: "Failed to generate valid seed after 10 attempts",
+  };
+}
+
+/**
+ * Convert a PointNumArr (from secp256k1 WASM) to a SeedSharePoint (Bytes32 pair).
+ */
+function pointNumArrToSeedShare(
+  point: PointNumArr,
+): Result<SeedSharePoint, string> {
+  const xRes = Bytes.fromUint8Array(Uint8Array.from([...point.x]), 32);
+  if (!xRes.success) {
+    return { success: false, err: xRes.err };
+  }
+  const yRes = Bytes.fromUint8Array(Uint8Array.from([...point.y]), 32);
+  if (!yRes.success) {
+    return { success: false, err: yRes.err };
+  }
+  return { success: true, data: { x: xRes.data, y: yRes.data } };
+}
+
+// Fixed identifiers for the 2-of-2 seed split (server + user)
+const SEED_SPLIT_SERVER_ID = "oko_seed_server";
+const SEED_SPLIT_USER_ID = "oko_seed_user";
+
+/**
+ * Run ed25519 keygen from seed and split both signing share and seed for distribution.
+ *
+ * 1. Generate seed (32B, < secp256k1 order)
+ * 2. Derive Ed25519 scalar from seed (SHA-512 + clamp + mod l) via WASM
+ * 3. FROST split scalar into signing shares (existing flow)
+ * 4. secp256k1 SSS split seed into 2-of-2 (server + user)
+ * 5. secp256k1 SSS split user's seed share Y into t-of-n for KSN distribution
  */
 export async function runEd25519KeygenAndSplit(
   keyshareNodeMeta: KeyShareNodeMetaWithNodeStatusInfo,
@@ -155,8 +247,18 @@ export async function runEd25519KeygenAndSplit(
     { type: "sign_in_request_fail"; error: string }
   >
 > {
-  // 1. ed25519 keygen
-  const ed25519KeygenRes = await runTeddsaKeygen();
+  // 1. Generate seed
+  const seedRes = generateSeed();
+  if (!seedRes.success) {
+    return {
+      success: false,
+      err: { type: "sign_in_request_fail", error: seedRes.err },
+    };
+  }
+  const seed = seedRes.data;
+
+  // 2. Seed-based ed25519 keygen (SHA-512 + clamp + mod l → scalar → FROST split)
+  const ed25519KeygenRes = await runTeddsaKeygenSeed(seed);
   if (ed25519KeygenRes.success === false) {
     return {
       success: false,
@@ -165,7 +267,7 @@ export async function runEd25519KeygenAndSplit(
   }
   const { keygen_1: keygen1, keygen_2: keygen2 } = ed25519KeygenRes.data;
 
-  // 2. Extract signing share from key package
+  // 3. Extract and split signing share for KSN distribution (existing Ed25519 SSS)
   const signingShareRes = extractSigningShare(keygen1.key_package);
   if (signingShareRes.success === false) {
     return {
@@ -173,8 +275,6 @@ export async function runEd25519KeygenAndSplit(
       err: { type: "sign_in_request_fail", error: signingShareRes.err },
     };
   }
-
-  // 3. Split signing share for distribution
   const splitRes = await splitTeddsaSigningShare(
     signingShareRes.data,
     keyshareNodeMeta,
@@ -186,12 +286,78 @@ export async function runEd25519KeygenAndSplit(
     };
   }
 
+  // 4. Seed 2-of-2 split via secp256k1 SSS (server + user)
+  const seedIdHashesRes = await hashKeyshareNodeNames([
+    SEED_SPLIT_SERVER_ID,
+    SEED_SPLIT_USER_ID,
+  ]);
+  if (!seedIdHashesRes.success) {
+    return {
+      success: false,
+      err: { type: "sign_in_request_fail", error: seedIdHashesRes.err },
+    };
+  }
+  const [serverHash, userHash] = seedIdHashesRes.data;
+
+  const seedSplitPoints: PointNumArr[] = secp256k1Wasm.sss_split(
+    [...seed.toUint8Array()],
+    [[...serverHash.toUint8Array()], [...userHash.toUint8Array()]],
+    2,
+  );
+
+  const serverSeedShareRes = pointNumArrToSeedShare(seedSplitPoints[0]);
+  if (!serverSeedShareRes.success) {
+    return {
+      success: false,
+      err: { type: "sign_in_request_fail", error: serverSeedShareRes.err },
+    };
+  }
+  const userSeedY = seedSplitPoints[1].y;
+
+  // 5. User seed share Y → t-of-n split for KSN distribution via secp256k1 SSS
+  const ksnHashesRes = await hashKeyshareNodeNames(
+    keyshareNodeMeta.nodes.map((n) => n.name),
+  );
+  if (!ksnHashesRes.success) {
+    return {
+      success: false,
+      err: { type: "sign_in_request_fail", error: ksnHashesRes.err },
+    };
+  }
+  const ksnHashes = ksnHashesRes.data.map((b) => [...b.toUint8Array()]);
+
+  const ksnSeedSplitPoints: PointNumArr[] = secp256k1Wasm.sss_split(
+    userSeedY,
+    ksnHashes,
+    keyshareNodeMeta.threshold,
+  );
+
+  const ksnSeedShares: SeedShareByNode[] = [];
+  for (let i = 0; i < ksnSeedSplitPoints.length; i++) {
+    const shareRes = pointNumArrToSeedShare(ksnSeedSplitPoints[i]);
+    if (!shareRes.success) {
+      return {
+        success: false,
+        err: { type: "sign_in_request_fail", error: shareRes.err },
+      };
+    }
+    ksnSeedShares.push({
+      node: {
+        name: keyshareNodeMeta.nodes[i].name,
+        endpoint: keyshareNodeMeta.nodes[i].endpoint,
+      },
+      share: shareRes.data,
+    });
+  }
+
   return {
     success: true,
     data: {
       keygen1,
       keygen2,
       userKeyShares: splitRes.data,
+      serverSeedShare: serverSeedShareRes.data,
+      ksnSeedShares,
     },
   };
 }

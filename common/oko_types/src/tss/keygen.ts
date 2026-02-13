@@ -32,6 +32,7 @@ export interface KeygenRequestV2 {
 export type KeygenBodyV2 = {
   keygen_2_secp256k1: KeygenOutput;
   keygen_2_ed25519: KeygenEd25519OutputWithPublicKey;
+  ed25519_seed_share?: string; // TODO: make required after server implements seed_share storage
 };
 
 export type KeygenRequestBodyV2 = OAuthRequest<KeygenBodyV2>;

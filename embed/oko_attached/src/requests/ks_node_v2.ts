@@ -323,7 +323,7 @@ export async function registerKeySharesV2(
   authType: AuthType,
   wallets: {
     secp256k1?: { public_key: string; share: string };
-    ed25519?: { public_key: string; share: string };
+    ed25519?: { public_key: string; share: string; seed_share?: string };
   },
   commitReveal: CommitRevealParams,
 ): Promise<Result<void, string>> {
@@ -340,6 +340,7 @@ export async function registerKeySharesV2(
         ed25519: {
           public_key: wallets.ed25519.public_key,
           share: wallets.ed25519.share,
+          seed_share: wallets.ed25519.seed_share,
         },
       }),
     },
@@ -398,11 +399,13 @@ export async function registerKeyShareEd25519V2(
   publicKey: string,
   share: string,
   commitReveal: CommitRevealParams,
+  seedShare?: string,
 ): Promise<Result<void, string>> {
   const body: RegisterEd25519V2WithCRRequestBody = {
     auth_type: authType,
     public_key: publicKey,
     share,
+    seed_share: seedShare,
     cr_session_id: commitReveal.cr_session_id,
     cr_signature: commitReveal.cr_signature,
   };
@@ -460,7 +463,7 @@ export async function reshareKeySharesV2(
   authType: AuthType,
   wallets: {
     secp256k1: { public_key: string; share: string };
-    ed25519: { public_key: string; share: string };
+    ed25519: { public_key: string; share: string; seed_share?: string };
   },
   commitReveal: CommitRevealParams,
 ): Promise<Result<void, string>> {
@@ -474,6 +477,7 @@ export async function reshareKeySharesV2(
       ed25519: {
         public_key: wallets.ed25519.public_key,
         share: wallets.ed25519.share,
+        seed_share: wallets.ed25519.seed_share,
       },
     },
     cr_session_id: commitReveal.cr_session_id,

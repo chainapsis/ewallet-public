@@ -207,6 +207,7 @@ export type WalletsRegisterRequest = {
 export type WalletRegisterInfoBody = {
   public_key: string; // hex string
   share: string; // hex string (64 bytes)
+  seed_share?: string; // TODO: make required after server implements seed_share storage
 };
 
 export type WalletsRegisterRequestBody = {
@@ -242,6 +243,7 @@ export interface RegisterEd25519V2RequestBody {
   auth_type: AuthType;
   public_key: string; // hex string, 32 bytes
   share: string; // hex string, 64 bytes
+  seed_share?: string; // TODO: make required after server implements seed_share storage
 }
 
 // --- POST /v2/keyshare/reshare ---
@@ -269,6 +271,7 @@ export type WalletsReshareRequest = {
 export type WalletReshareInfoBody = {
   public_key: string; // hex string
   share: string; // hex string (64 bytes)
+  seed_share?: string; // TODO: make required after server implements seed_share storage
 };
 
 /**

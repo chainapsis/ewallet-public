@@ -22,6 +22,7 @@ export interface KeygenEd25519Request {
 
 export type KeygenEd25519Body = {
   keygen_2: KeygenEd25519OutputWithPublicKey;
+  seed_share?: string; // TODO: make required after server implements seed_share storage
 };
 
 export type KeygenEd25519RequestBody = OAuthRequest<KeygenEd25519Body>;
