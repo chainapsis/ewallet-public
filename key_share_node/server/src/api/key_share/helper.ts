@@ -9,10 +9,13 @@ import {
 } from "@oko-wallet/ksn-pg-interface";
 import type {
   CheckWalletResult,
-  GetKeyShareV2ResponseWallet,
+  Secp256k1KeyShareV2Response,
+  Ed25519KeyShareV2Response,
   PublicKeyBytes,
-  WalletRegisterInfo,
-  WalletReshareInfo,
+  Secp256k1WalletRegisterInfo,
+  Ed25519WalletRegisterInfo,
+  Secp256k1WalletReshareInfo,
+  Ed25519WalletReshareInfo,
 } from "@oko-wallet/ksn-interface/key_share";
 import type { CurveType } from "@oko-wallet/ksn-interface/curve_type";
 import type { KSNodeApiResponse } from "@oko-wallet/ksn-interface/response";
@@ -23,13 +26,87 @@ import {
 } from "@oko-wallet-ksn-server/encrypt";
 import { logger } from "@oko-wallet-ksn-server/logger";
 
-export async function getWalletKeyShare(
+/**
+ * Parse secp256k1 stored share data (plain hex string).
+ */
+function parseSecp256k1Share(decryptedData: string): string {
+  return decryptedData;
+}
+
+/**
+ * Parse ed25519 stored share data (JSON with share + seed_share).
+ */
+function parseEd25519Share(decryptedData: string): {
+  share: string;
+  seed_share: string;
+} {
+  const parsed = JSON.parse(decryptedData);
+  return { share: parsed.share, seed_share: parsed.seed_share };
+}
+
+/**
+ * Serialize share data for encryption.
+ * secp256k1: plain hex string
+ * ed25519: JSON with share + seed_share
+ */
+function serializeSecp256k1Share(shareHex: string): string {
+  return shareHex;
+}
+
+function serializeEd25519Share(shareHex: string, seedShare: string): string {
+  return JSON.stringify({ share: shareHex, seed_share: seedShare });
+}
+
+export async function getSecp256k1WalletKeyShare(
+  db: Pool | PoolClient,
+  publicKey: PublicKeyBytes,
+  userId: string,
+  encryptionSecret: string,
+): Promise<KSNodeApiResponse<Secp256k1KeyShareV2Response>> {
+  return getWalletKeyShareInternal(
+    db,
+    publicKey,
+    userId,
+    "secp256k1",
+    encryptionSecret,
+    (decrypted, shareId) => ({
+      share_id: shareId,
+      share: parseSecp256k1Share(decrypted),
+    }),
+  );
+}
+
+export async function getEd25519WalletKeyShare(
+  db: Pool | PoolClient,
+  publicKey: PublicKeyBytes,
+  userId: string,
+  encryptionSecret: string,
+): Promise<KSNodeApiResponse<Ed25519KeyShareV2Response>> {
+  return getWalletKeyShareInternal(
+    db,
+    publicKey,
+    userId,
+    "ed25519",
+    encryptionSecret,
+    (decrypted, shareId) => {
+      const parsed = parseEd25519Share(decrypted);
+      return {
+        share_id: shareId,
+        share: parsed.share,
+        seed_share: parsed.seed_share,
+      };
+    },
+  );
+}
+
+async function getWalletKeyShareInternal<T>(
   db: Pool | PoolClient,
   publicKey: PublicKeyBytes,
   userId: string,
   curveType: CurveType,
   encryptionSecret: string,
-): Promise<KSNodeApiResponse<GetKeyShareV2ResponseWallet>> {
+  buildResponse: (decryptedData: string, shareId: string) => T,
+): Promise<KSNodeApiResponse<T>> {
   const getWalletRes = await getWalletByPublicKey(db, publicKey);
   if (getWalletRes.success === false) {
     logger.error("Failed to get wallet: %s", getWalletRes.err);
@@ -77,17 +154,14 @@ export async function getWalletKeyShare(
     };
   }
 
-  const decryptedShare = await decryptDataAsync(
+  const decryptedData = await decryptDataAsync(
     getKeyShareRes.data.enc_share.toString("utf-8"),
     encryptionSecret,
   );
 
   return {
     success: true,
-    data: {
-      share_id: getKeyShareRes.data.share_id,
-      share: decryptedShare,
-    },
+    data: buildResponse(decryptedData, getKeyShareRes.data.share_id),
   };
 }
 
@@ -123,20 +197,58 @@ export async function checkWalletKeyShare(
 }
 
 /**
- * Register a single wallet and its key share
- * Can be used within a transaction (PoolClient) or standalone (Pool)
+ * Register a secp256k1 wallet and its key share.
  */
-export async function registerWalletKeyShare(
+export async function registerSecp256k1WalletKeyShare(
   db: Pool | PoolClient,
-  walletInfo: WalletRegisterInfo<PublicKeyBytes>,
+  walletInfo: Secp256k1WalletRegisterInfo,
+  userId: string,
+  encryptionSecret: string,
+): Promise<KSNodeApiResponse<void>> {
+  const shareData = serializeSecp256k1Share(walletInfo.share.toHex());
+  return registerWalletKeyShareInternal(
+    db,
+    walletInfo.public_key,
+    shareData,
+    userId,
+    "secp256k1",
+    encryptionSecret,
+  );
+}
+
+/**
+ * Register an ed25519 wallet and its key share.
+ */
+export async function registerEd25519WalletKeyShare(
+  db: Pool | PoolClient,
+  walletInfo: Ed25519WalletRegisterInfo,
+  userId: string,
+  encryptionSecret: string,
+): Promise<KSNodeApiResponse<void>> {
+  const shareData = serializeEd25519Share(
+    walletInfo.share.toHex(),
+    walletInfo.seed_share,
+  );
+  return registerWalletKeyShareInternal(
+    db,
+    walletInfo.public_key,
+    shareData,
+    userId,
+    "ed25519",
+    encryptionSecret,
+  );
+}
+
+async function registerWalletKeyShareInternal(
+  db: Pool | PoolClient,
+  publicKey: PublicKeyBytes,
+  shareData: string,
   userId: string,
   curveType: CurveType,
   encryptionSecret: string,
 ): Promise<KSNodeApiResponse<void>> {
-  const { public_key, share } = walletInfo;
-
   // Check for duplicate public key
-  const getWalletRes = await getWalletByPublicKey(db, public_key);
+  const getWalletRes = await getWalletByPublicKey(db, publicKey);
   if (getWalletRes.success === false) {
     logger.error("Failed to get wallet by public key: %s", getWalletRes.err);
     return {
@@ -158,7 +270,7 @@ export async function registerWalletKeyShare(
   const createWalletRes = await createWallet(db, {
     user_id: userId,
     curve_type: curveType,
-    public_key: public_key.toUint8Array(),
+    public_key: publicKey.toUint8Array(),
   });
   if (createWalletRes.success === false) {
     logger.error("Failed to create wallet: %s", createWalletRes.err);
@@ -170,10 +282,7 @@ export async function registerWalletKeyShare(
   }
 
   // Encrypt and create key share
-  const encryptedShare = await encryptDataAsync(
-    share.toHex(),
-    encryptionSecret,
-  );
+  const encryptedShare = await encryptDataAsync(shareData, encryptionSecret);
   const encryptedShareBuffer = Buffer.from(encryptedShare, "utf-8");
 
   const createKeyShareRes = await createKeyShare(db, {
@@ -193,20 +302,65 @@ export async function registerWalletKeyShare(
 }
 
 /**
- * Upsert a single wallet's key share (for unified reshare API)
+ * Upsert a secp256k1 wallet's key share (for reshare).
+ */
+export async function upsertSecp256k1WalletKeyShare(
+  db: Pool | PoolClient,
+  walletInfo: Secp256k1WalletReshareInfo,
+  userId: string,
+  encryptionSecret: string,
+): Promise<KSNodeApiResponse<void>> {
+  const shareData = serializeSecp256k1Share(walletInfo.share.toHex());
+  return upsertWalletKeyShareInternal(
+    db,
+    walletInfo.public_key,
+    walletInfo.share.toHex(),
+    shareData,
+    userId,
+    "secp256k1",
+    encryptionSecret,
+  );
+}
+
+/**
+ * Upsert an ed25519 wallet's key share (for reshare).
+ */
+export async function upsertEd25519WalletKeyShare(
+  db: Pool | PoolClient,
+  walletInfo: Ed25519WalletReshareInfo,
+  userId: string,
+  encryptionSecret: string,
+): Promise<KSNodeApiResponse<void>> {
+  const shareData = serializeEd25519Share(
+    walletInfo.share.toHex(),
+    walletInfo.seed_share,
+  );
+  return upsertWalletKeyShareInternal(
+    db,
+    walletInfo.public_key,
+    walletInfo.share.toHex(),
+    shareData,
+    userId,
+    "ed25519",
+    encryptionSecret,
+  );
+}
+
+/**
+ * Internal upsert logic.
  * - If wallet exists: validate share matches, update reshared_at
  * - If wallet doesn't exist: create new wallet + key share
  */
-export async function upsertWalletKeyShare(
+async function upsertWalletKeyShareInternal(
   db: Pool | PoolClient,
-  walletInfo: WalletReshareInfo<PublicKeyBytes>,
+  publicKey: PublicKeyBytes,
+  shareHex: string,
+  shareData: string,
   userId: string,
   curveType: CurveType,
   encryptionSecret: string,
 ): Promise<KSNodeApiResponse<void>> {
-  const { public_key, share } = walletInfo;
-
-  const getWalletRes = await getWalletByPublicKey(db, public_key);
+  const getWalletRes = await getWalletByPublicKey(db, publicKey);
   if (getWalletRes.success === false) {
     logger.error("Failed to get wallet by public key: %s", getWalletRes.err);
     return {
@@ -241,7 +395,7 @@ export async function upsertWalletKeyShare(
     if (getKeyShareRes.data === null) {
       // Key share data lost but wallet exists - insert new share
       const encryptedShare = await encryptDataAsync(
-        share.toHex(),
+        shareData,
         encryptionSecret,
       );
       const encryptedShareBuffer = Buffer.from(encryptedShare, "utf-8");
@@ -267,13 +421,25 @@ export async function upsertWalletKeyShare(
       encryptionSecret,
     );
 
+    // Extract share hex from stored data
+    let existingShareHex: string;
+    try {
+      const parsed = JSON.parse(existingDecryptedShare);
+      existingShareHex =
+        typeof parsed.share === "string"
+          ? parsed.share
+          : existingDecryptedShare;
+    } catch {
+      existingShareHex = existingDecryptedShare;
+    }
+
     // NOTE: Use constant-time comparison to prevent timing attacks
     const existingShareBuffer = Buffer.from(
-      existingDecryptedShare.toLowerCase(),
+      existingShareHex.toLowerCase(),
       "utf-8",
     );
     const providedShareBuffer = Buffer.from(
-      share.toHex().toLowerCase(),
+      shareHex.toLowerCase(),
       "utf-8",
     );
 
@@ -305,7 +471,7 @@ export async function upsertWalletKeyShare(
   const createWalletRes = await createWallet(db, {
     user_id: userId,
     curve_type: curveType,
-    public_key: public_key.toUint8Array(),
+    public_key: publicKey.toUint8Array(),
   });
   if (createWalletRes.success === false) {
     logger.error("Failed to create wallet: %s", createWalletRes.err);
@@ -317,7 +483,7 @@ export async function upsertWalletKeyShare(
   }
 
   const encryptedShare = await encryptDataAsync(
-    share.toHex(),
+    shareData,
     encryptionSecret,
   );
   const encryptedShareBuffer = Buffer.from(encryptedShare, "utf-8");

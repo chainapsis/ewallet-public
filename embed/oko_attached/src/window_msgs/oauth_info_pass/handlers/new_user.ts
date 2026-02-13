@@ -115,6 +115,12 @@ export async function handleNewUserV2(
       const ksnSeedShare = ed25519KsnSeedShares.find(
         (s) => s.node.endpoint === keyShareByNode.node.endpoint,
       );
+      if (!ksnSeedShare) {
+        return {
+          success: false,
+          err: `ed25519 seed share not found for node ${keyShareByNode.node.name}`,
+        };
+      }
       return registerKeySharesV2(
         keyShareByNode.node.endpoint,
         idToken,
@@ -127,9 +133,7 @@ export async function handleNewUserV2(
           ed25519: {
             public_key: ed25519Keygen1.public_key.toHex(),
             share: teddsaKeyShareToHex(ed25519UserKeyShares[index].share),
-            seed_share: ksnSeedShare
-              ? seedShareToHex(ksnSeedShare.share)
-              : undefined,
+            seed_share: seedShareToHex(ksnSeedShare.share),
           },
         },
         commitRevealRes.data,

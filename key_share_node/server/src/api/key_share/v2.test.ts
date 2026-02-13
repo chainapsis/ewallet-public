@@ -23,6 +23,7 @@ import {
 import { encryptDataAsync } from "@oko-wallet-ksn-server/encrypt";
 
 const TEST_ENC_SECRET = "test_enc_secret";
+const TEST_SEED_SHARE = "a".repeat(64) + "b".repeat(64);
 
 // Test public keys
 const TEST_SECP256K1_PK =
@@ -103,7 +104,7 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           wallets: {
             secp256k1: { public_key: secp256k1Pk, share: secp256k1Share },
-            ed25519: { public_key: ed25519Pk, share: ed25519Share },
+            ed25519: { public_key: ed25519Pk, share: ed25519Share, seed_share: TEST_SEED_SHARE },
           },
         },
         TEST_ENC_SECRET,
@@ -154,7 +155,7 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           wallets: {
             secp256k1: { public_key: secp256k1Pk, share: secp256k1Share },
-            ed25519: { public_key: ed25519Pk, share: ed25519Share },
+            ed25519: { public_key: ed25519Pk, share: ed25519Share, seed_share: TEST_SEED_SHARE },
           },
         },
         TEST_ENC_SECRET,
@@ -186,7 +187,7 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           wallets: {
             secp256k1: { public_key: secp256k1Pk, share: secp256k1Share },
-            ed25519: { public_key: ed25519Pk, share: ed25519Share },
+            ed25519: { public_key: ed25519Pk, share: ed25519Share, seed_share: TEST_SEED_SHARE },
           },
         },
         TEST_ENC_SECRET,
@@ -395,7 +396,7 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           wallets: {
             secp256k1: { public_key: secp256k1Pk, share: secp256k1Share },
-            ed25519: { public_key: ed25519Pk, share: ed25519Share },
+            ed25519: { public_key: ed25519Pk, share: ed25519Share, seed_share: TEST_SEED_SHARE },
           },
         },
         TEST_ENC_SECRET,
@@ -434,7 +435,7 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           wallets: {
             secp256k1: { public_key: secp256k1Pk, share: secp256k1Share },
-            ed25519: { public_key: ed25519Pk, share: ed25519Share },
+            ed25519: { public_key: ed25519Pk, share: ed25519Share, seed_share: TEST_SEED_SHARE },
           },
         },
         TEST_ENC_SECRET,
@@ -496,7 +497,7 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           wallets: {
             secp256k1: { public_key: secp256k1Pk2, share: secp256k1Share },
-            ed25519: { public_key: ed25519Pk, share: ed25519Share },
+            ed25519: { public_key: ed25519Pk, share: ed25519Share, seed_share: TEST_SEED_SHARE },
           },
         },
         TEST_ENC_SECRET,
@@ -622,6 +623,7 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           public_key: ed25519Pk,
           share: ed25519Share,
+          seed_share: TEST_SEED_SHARE,
         },
         TEST_ENC_SECRET,
       );
@@ -656,6 +658,7 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           public_key: ed25519Pk,
           share: ed25519Share,
+          seed_share: TEST_SEED_SHARE,
         },
         TEST_ENC_SECRET,
       );
@@ -680,6 +683,7 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           public_key: ed25519Pk,
           share: ed25519Share,
+          seed_share: TEST_SEED_SHARE,
         },
         TEST_ENC_SECRET,
       );
@@ -704,7 +708,7 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           wallets: {
             secp256k1: { public_key: secp256k1Pk, share: secp256k1Share },
-            ed25519: { public_key: ed25519Pk, share: ed25519Share },
+            ed25519: { public_key: ed25519Pk, share: ed25519Share, seed_share: TEST_SEED_SHARE },
           },
         },
         TEST_ENC_SECRET,
@@ -718,6 +722,7 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           public_key: ed25519Pk,
           share: ed25519Share,
+          seed_share: TEST_SEED_SHARE,
         },
         TEST_ENC_SECRET,
       );
@@ -750,7 +755,7 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           wallets: {
             secp256k1: { public_key: secp256k1Pk, share: secp256k1Share },
-            ed25519: { public_key: ed25519Pk, share: ed25519Share },
+            ed25519: { public_key: ed25519Pk, share: ed25519Share, seed_share: TEST_SEED_SHARE },
           },
         },
         TEST_ENC_SECRET,
@@ -764,7 +769,7 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           wallets: {
             secp256k1: { public_key: secp256k1Pk, share: secp256k1Share },
-            ed25519: { public_key: ed25519Pk, share: ed25519Share },
+            ed25519: { public_key: ed25519Pk, share: ed25519Share, seed_share: TEST_SEED_SHARE },
           },
         },
         TEST_ENC_SECRET,
@@ -787,7 +792,7 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           wallets: {
             secp256k1: { public_key: secp256k1Pk, share: secp256k1Share },
-            ed25519: { public_key: ed25519Pk, share: ed25519Share },
+            ed25519: { public_key: ed25519Pk, share: ed25519Share, seed_share: TEST_SEED_SHARE },
           },
         },
         TEST_ENC_SECRET,
@@ -832,7 +837,7 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           wallets: {
             secp256k1: { public_key: secp256k1Pk, share: secp256k1Share },
-            ed25519: { public_key: ed25519Pk, share: ed25519Share },
+            ed25519: { public_key: ed25519Pk, share: ed25519Share, seed_share: TEST_SEED_SHARE },
           },
         },
         TEST_ENC_SECRET,
@@ -847,7 +852,7 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           wallets: {
             secp256k1: { public_key: secp256k1Pk, share: secp256k1Share },
-            ed25519: { public_key: ed25519Pk2, share: ed25519Share2 },
+            ed25519: { public_key: ed25519Pk2, share: ed25519Share2, seed_share: TEST_SEED_SHARE },
           },
         },
         TEST_ENC_SECRET,
@@ -872,7 +877,7 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           wallets: {
             secp256k1: { public_key: secp256k1Pk, share: secp256k1Share },
-            ed25519: { public_key: ed25519Pk, share: ed25519Share },
+            ed25519: { public_key: ed25519Pk, share: ed25519Share, seed_share: TEST_SEED_SHARE },
           },
         },
         TEST_ENC_SECRET,
@@ -889,7 +894,7 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           wallets: {
             secp256k1: { public_key: secp256k1Pk, share: newSecp256k1Share },
-            ed25519: { public_key: ed25519Pk, share: newEd25519Share },
+            ed25519: { public_key: ed25519Pk, share: newEd25519Share, seed_share: TEST_SEED_SHARE },
           },
         },
         TEST_ENC_SECRET,
@@ -933,7 +938,7 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           wallets: {
             secp256k1: { public_key: secp256k1Pk, share: secp256k1Share },
-            ed25519: { public_key: ed25519Pk, share: ed25519Share },
+            ed25519: { public_key: ed25519Pk, share: ed25519Share, seed_share: TEST_SEED_SHARE },
           },
         },
         TEST_ENC_SECRET,
@@ -959,7 +964,7 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           wallets: {
             secp256k1: { public_key: secp256k1Pk, share: secp256k1Share },
-            ed25519: { public_key: ed25519Pk, share: newEd25519Share },
+            ed25519: { public_key: ed25519Pk, share: newEd25519Share, seed_share: TEST_SEED_SHARE },
           },
         },
         TEST_ENC_SECRET,
@@ -1000,7 +1005,7 @@ describe("key_share_v2_test", () => {
           user_auth_id: TEST_USER_AUTH_ID,
           auth_type: "google",
           wallets: {
-            ed25519: { public_key: ed25519Pk, share: ed25519Share },
+            ed25519: { public_key: ed25519Pk, share: ed25519Share, seed_share: TEST_SEED_SHARE },
           },
         } as any, // Type assertion to bypass TS check for test
         TEST_ENC_SECRET,
@@ -1049,7 +1054,7 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           wallets: {
             secp256k1: { public_key: secp256k1Pk, share: secp256k1Share },
-            ed25519: { public_key: ed25519Pk, share: ed25519Share },
+            ed25519: { public_key: ed25519Pk, share: ed25519Share, seed_share: TEST_SEED_SHARE },
           },
         },
         TEST_ENC_SECRET,
@@ -1063,7 +1068,7 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           wallets: {
             secp256k1: { public_key: secp256k1Pk, share: wrongShare },
-            ed25519: { public_key: ed25519Pk, share: ed25519Share },
+            ed25519: { public_key: ed25519Pk, share: ed25519Share, seed_share: TEST_SEED_SHARE },
           },
         },
         TEST_ENC_SECRET,
@@ -1090,7 +1095,7 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           wallets: {
             secp256k1: { public_key: secp256k1Pk, share: secp256k1Share },
-            ed25519: { public_key: ed25519Pk, share: ed25519Share },
+            ed25519: { public_key: ed25519Pk, share: ed25519Share, seed_share: TEST_SEED_SHARE },
           },
         },
         TEST_ENC_SECRET,
@@ -1104,7 +1109,7 @@ describe("key_share_v2_test", () => {
           auth_type: "google",
           wallets: {
             secp256k1: { public_key: secp256k1Pk, share: secp256k1Share },
-            ed25519: { public_key: ed25519Pk, share: wrongShare },
+            ed25519: { public_key: ed25519Pk, share: wrongShare, seed_share: TEST_SEED_SHARE },
           },
         },
         TEST_ENC_SECRET,

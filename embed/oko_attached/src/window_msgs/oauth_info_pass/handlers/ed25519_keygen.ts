@@ -113,6 +113,12 @@ export async function handleExistingUserNeedsEd25519Keygen(
       const ksnSeedShare = ed25519KsnSeedShares.find(
         (s) => s.node.endpoint === node.endpoint,
       );
+      if (!ksnSeedShare) {
+        return {
+          success: false,
+          err: `ed25519 seed share not found for node ${node.name}`,
+        };
+      }
       return registerKeyShareEd25519V2(
         node.endpoint,
         idToken,
@@ -120,7 +126,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
         ed25519Keygen1.public_key.toHex(),
         teddsaKeyShareToHex(shareForNode.share),
         commitRevealRes.data,
-        ksnSeedShare ? seedShareToHex(ksnSeedShare.share) : undefined,
+        seedShareToHex(ksnSeedShare.share),
       );
     }),
   );
@@ -347,6 +353,12 @@ export async function handleReshareAndEd25519Keygen(
       const ksnSeedShare = ed25519KsnSeedShares.find(
         (s) => s.node.endpoint === node.endpoint,
       );
+      if (!ksnSeedShare) {
+        return {
+          success: false,
+          err: `ed25519 seed share not found for node ${node.name}`,
+        };
+      }
       return registerKeyShareEd25519V2(
         node.endpoint,
         idToken,
@@ -354,7 +366,7 @@ export async function handleReshareAndEd25519Keygen(
         ed25519Keygen1.public_key.toHex(),
         teddsaKeyShareToHex(nodeShare.share),
         commitRevealRes.data,
-        ksnSeedShare ? seedShareToHex(ksnSeedShare.share) : undefined,
+        seedShareToHex(ksnSeedShare.share),
       );
     }),
   );
@@ -509,6 +521,12 @@ export async function handleReshareAndEd25519Keygen(
         const ksnSeedShare = ed25519KsnSeedShares.find(
           (s) => s.node.endpoint === node.endpoint,
         );
+        if (!ksnSeedShare) {
+          return {
+            success: false,
+            err: `ed25519 seed share not found for node ${node.name}`,
+          };
+        }
         // First: reshare with both wallets (secp256k1 verified/registered, ed25519 registered)
         const reshareRes = await reshareKeySharesV2(
           node.endpoint,
@@ -522,9 +540,7 @@ export async function handleReshareAndEd25519Keygen(
             ed25519: {
               public_key: ed25519Keygen1.public_key.toHex(),
               share: teddsaKeyShareToHex(ed25519Share.share),
-              seed_share: ksnSeedShare
-                ? seedShareToHex(ksnSeedShare.share)
-                : undefined,
+              seed_share: seedShareToHex(ksnSeedShare.share),
             },
           },
           commitRevealRes.data,

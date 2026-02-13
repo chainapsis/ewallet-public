@@ -208,6 +208,7 @@ export async function reshareUserKeySharesV2(
         } as const;
       }
 
+      // TODO: Phase 5 — collect seed_share from KSN via sss_expand_shares
       const wallets = {
         secp256k1: {
           public_key: secp256k1.publicKey.toHex(),
@@ -216,6 +217,7 @@ export async function reshareUserKeySharesV2(
         ed25519: {
           public_key: ed25519.publicKey.toHex(),
           share: teddsaKeyShareToHex(ed25519Share.share),
+          seed_share: "", // @TODO
         },
       };
 

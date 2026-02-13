@@ -279,7 +279,7 @@ export async function runKeygenV2(
     const ed25519SharesData = {
       signing_share: ed25519KeyPackageShares.signing_share,
       verifying_share: ed25519KeyPackageShares.verifying_share,
-      ...(ed25519_seed_share && { seed_share: ed25519_seed_share }),
+      seed_share: ed25519_seed_share,
     };
     const ed25519EncryptedShare = await encryptDataAsync(
       JSON.stringify(ed25519SharesData),
@@ -632,7 +632,7 @@ export async function runKeygenEd25519(
     const sharesData = {
       signing_share: ed25519KeyPackageShares.signing_share,
       verifying_share: ed25519KeyPackageShares.verifying_share,
-      ...(seed_share && { seed_share }),
+      seed_share,
     };
 
     const encryptedShare = await encryptDataAsync(

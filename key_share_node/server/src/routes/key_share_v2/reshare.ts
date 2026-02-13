@@ -241,6 +241,7 @@ export async function keyshareV2Reshare(
     ed25519: {
       public_key: ed25519PublicKeyRes.data,
       share: ed25519ShareRes.data,
+      seed_share: body.wallets.ed25519.seed_share,
     },
   };
 

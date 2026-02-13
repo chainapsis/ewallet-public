@@ -152,14 +152,20 @@ export interface GetKeyShareV2RequestBody {
   wallets: WalletsRequestBody;
 }
 
-export interface GetKeyShareV2ResponseWallet {
+export interface Secp256k1KeyShareV2Response {
   share_id: string;
   share: string; // hex string (decrypted)
 }
 
+export interface Ed25519KeyShareV2Response {
+  share_id: string;
+  share: string; // hex string (decrypted)
+  seed_share: string; // hex string (decrypted)
+}
+
 export type GetKeyShareV2Response = {
-  secp256k1?: GetKeyShareV2ResponseWallet;
-  ed25519?: GetKeyShareV2ResponseWallet;
+  secp256k1?: Secp256k1KeyShareV2Response;
+  ed25519?: Ed25519KeyShareV2Response;
 };
 
 // --- POST /v2/keyshare/check ---
@@ -187,32 +193,36 @@ export type CheckKeyShareV2Response = {
 
 // --- POST /v2/keyshare/register ---
 
-/**
- * v2 wallet registration info (internal, with Bytes)
- * Generic type parameter PK specifies the public key type per curve
- */
-export type WalletRegisterInfo<PK extends Bytes32 | Bytes33> = {
-  public_key: PK;
+export type Secp256k1WalletRegisterInfo = {
+  public_key: Bytes33;
   share: Bytes64;
 };
 
-export type WalletsRegisterRequest = {
-  secp256k1?: WalletRegisterInfo<Bytes33>;
-  ed25519?: WalletRegisterInfo<Bytes32>;
+export type Ed25519WalletRegisterInfo = {
+  public_key: Bytes32;
+  share: Bytes64;
+  seed_share: string;
 };
 
-/**
- * v2 wallet registration info (body, with hex string)
- */
-export type WalletRegisterInfoBody = {
+export type WalletsRegisterRequest = {
+  secp256k1?: Secp256k1WalletRegisterInfo;
+  ed25519?: Ed25519WalletRegisterInfo;
+};
+
+export type Secp256k1WalletRegisterInfoBody = {
   public_key: string; // hex string
   share: string; // hex string (64 bytes)
-  seed_share?: string; // TODO: make required after server implements seed_share storage
+};
+
+export type Ed25519WalletRegisterInfoBody = {
+  public_key: string; // hex string
+  share: string; // hex string (64 bytes)
+  seed_share: string;
 };
 
 export type WalletsRegisterRequestBody = {
-  secp256k1?: WalletRegisterInfoBody;
-  ed25519?: WalletRegisterInfoBody;
+  secp256k1?: Secp256k1WalletRegisterInfoBody;
+  ed25519?: Ed25519WalletRegisterInfoBody;
 };
 
 export interface RegisterKeyShareV2Request {
@@ -237,49 +247,48 @@ export interface RegisterEd25519V2Request {
   auth_type: AuthType;
   public_key: Bytes32;
   share: Bytes64;
+  seed_share: string;
 }
 
 export interface RegisterEd25519V2RequestBody {
   auth_type: AuthType;
   public_key: string; // hex string, 32 bytes
   share: string; // hex string, 64 bytes
-  seed_share?: string; // TODO: make required after server implements seed_share storage
+  seed_share: string;
 }
 
 // --- POST /v2/keyshare/reshare ---
 
-/**
- * v2 wallet reshare info (internal, with Bytes)
- * Same structure as WalletRegisterInfo but used for reshare validation
- */
-export type WalletReshareInfo<PK extends Bytes32 | Bytes33> = {
-  public_key: PK;
+export type Secp256k1WalletReshareInfo = {
+  public_key: Bytes33;
   share: Bytes64;
 };
 
-/**
- * Both wallets are required for reshare
- */
-export type WalletsReshareRequest = {
-  secp256k1: WalletReshareInfo<Bytes33>;
-  ed25519: WalletReshareInfo<Bytes32>;
+export type Ed25519WalletReshareInfo = {
+  public_key: Bytes32;
+  share: Bytes64;
+  seed_share: string;
 };
 
-/**
- * v2 wallet reshare info (body, with hex string)
- */
-export type WalletReshareInfoBody = {
+export type WalletsReshareRequest = {
+  secp256k1: Secp256k1WalletReshareInfo;
+  ed25519: Ed25519WalletReshareInfo;
+};
+
+export type Secp256k1WalletReshareInfoBody = {
   public_key: string; // hex string
   share: string; // hex string (64 bytes)
-  seed_share?: string; // TODO: make required after server implements seed_share storage
 };
 
-/**
- * Both wallets are required for reshare
- */
+export type Ed25519WalletReshareInfoBody = {
+  public_key: string; // hex string
+  share: string; // hex string (64 bytes)
+  seed_share: string;
+};
+
 export type WalletsReshareRequestBody = {
-  secp256k1: WalletReshareInfoBody;
-  ed25519: WalletReshareInfoBody;
+  secp256k1: Secp256k1WalletReshareInfoBody;
+  ed25519: Ed25519WalletReshareInfoBody;
 };
 
 export interface ReshareKeyShareV2Request {
