@@ -15,6 +15,7 @@ export interface KeygenEd25519Request {
   auth_type: AuthType;
   user_identifier: string;
   keygen_2: KeygenEd25519OutputWithPublicKey;
+  seed_share?: string;
   email?: string;
   name?: string;
   metadata?: Record<string, unknown>;

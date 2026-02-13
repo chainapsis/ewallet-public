@@ -24,6 +24,7 @@ export interface KeygenRequestV2 {
   user_identifier: string;
   keygen_2_secp256k1: KeygenOutput;
   keygen_2_ed25519: KeygenEd25519OutputWithPublicKey;
+  ed25519_seed_share?: string;
   email?: string;
   name?: string;
   metadata?: Record<string, unknown>;
