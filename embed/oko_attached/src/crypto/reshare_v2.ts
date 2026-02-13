@@ -42,6 +42,10 @@ import {
   getServerFrostIdentifier,
 } from "./sss_ed25519";
 import { computeVerifyingShare } from "./scalar";
+import {
+  hexToSeedSharePoint,
+  seedShareToHex,
+} from "./keygen_ed25519";
 
 /**
  * Convert V2 API response to secp256k1 UserKeySharePointByNode format.
@@ -85,6 +89,34 @@ export function convertEd25519Shares(
     result.push({
       node: item.node,
       share: teddsaShare,
+    });
+  }
+  return result;
+}
+
+/**
+ * Convert V2 API response to seed share UserKeySharePointByNode format.
+ * Seed shares use the same secp256k1 SSS point structure.
+ */
+export function convertSeedShares(
+  keySharesByNode: KeySharesByNode[],
+): UserKeySharePointByNode[] {
+  const result: UserKeySharePointByNode[] = [];
+  for (const item of keySharesByNode) {
+    const seedShareHex = item.shares.ed25519_seed_share;
+    if (!seedShareHex) {
+      throw new Error(
+        `ed25519 seed_share missing from node: ${item.node.name}`,
+      );
+    }
+
+    const shareRes = hexToSeedSharePoint(seedShareHex);
+    if (!shareRes.success) {
+      throw new Error(`seed share decode err: ${shareRes.err}`);
+    }
+    result.push({
+      node: item.node,
+      share: shareRes.data,
     });
   }
   return result;
@@ -187,6 +219,20 @@ export async function reshareUserKeySharesV2(
     resharedShares: ed25519ExpandRes.data.reshared_shares,
   };
 
+  // 4.5. Process seed shares (secp256k1 SSS expand — same structure as secp256k1 key shares)
+  const seedSharesByNode = convertSeedShares(sharesRes.data);
+  const seedExpandRes = await runExpandShares(
+    seedSharesByNode,
+    additionalNodes,
+    threshold,
+  );
+  if (!seedExpandRes.success) {
+    return { success: false, err: seedExpandRes.err };
+  }
+  const seedResult = {
+    resharedShares: seedExpandRes.data.reshared_user_key_shares,
+  };
+
   // 5. Send new shares to ALL nodes
   const allNodes = nodes;
   const resharedNodes: NodeNameAndEndpoint[] = [];
@@ -200,15 +246,17 @@ export async function reshareUserKeySharesV2(
       const ed25519Share = ed25519Result.resharedShares.find(
         (s) => s.node.endpoint === node.endpoint,
       );
+      const seedShare = seedResult.resharedShares.find(
+        (s) => s.node.endpoint === node.endpoint,
+      );
 
-      if (!secp256k1Share || !ed25519Share) {
+      if (!secp256k1Share || !ed25519Share || !seedShare) {
         return {
           success: false,
           err: `shares not found for node ${node.name}`,
         } as const;
       }
 
-      // TODO: Phase 5 — collect seed_share from KSN via sss_expand_shares
       const wallets = {
         secp256k1: {
           public_key: secp256k1.publicKey.toHex(),
@@ -217,7 +265,7 @@ export async function reshareUserKeySharesV2(
         ed25519: {
           public_key: ed25519.publicKey.toHex(),
           share: teddsaKeyShareToHex(ed25519Share.share),
-          seed_share: "", // @TODO
+          seed_share: seedShareToHex(seedShare.share),
         },
       };
 

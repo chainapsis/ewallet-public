@@ -114,6 +114,29 @@ export function seedShareToHex(share: SeedSharePoint): string {
   return share.x.toHex() + share.y.toHex();
 }
 
+/**
+ * Deserialize a hex string (128 chars) back to SeedSharePoint.
+ */
+export function hexToSeedSharePoint(
+  hex: string,
+): Result<SeedSharePoint, string> {
+  if (hex.length !== 128) {
+    return {
+      success: false,
+      err: `expected 128 hex chars, got ${hex.length}`,
+    };
+  }
+  const xRes = Bytes.fromHexString(hex.slice(0, 64), 32);
+  if (!xRes.success) {
+    return { success: false, err: xRes.err };
+  }
+  const yRes = Bytes.fromHexString(hex.slice(64), 32);
+  if (!yRes.success) {
+    return { success: false, err: yRes.err };
+  }
+  return { success: true, data: { x: xRes.data, y: yRes.data } };
+}
+
 export function getPublicKeyFromKeyPackage(
   keyPackageHex: KeyPackageEd25519Hex,
 ): Result<Bytes32, string> {

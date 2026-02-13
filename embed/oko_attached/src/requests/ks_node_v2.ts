@@ -28,6 +28,7 @@ export interface KeySharesByNode {
   shares: {
     secp256k1: string;
     ed25519: string;
+    ed25519_seed_share: string;
   };
 }
 
@@ -249,6 +250,7 @@ async function requestKeyShareFromNode(params: {
           shares: {
             secp256k1: data.data.secp256k1.share,
             ed25519: data.data.ed25519.share,
+            ed25519_seed_share: data.data.ed25519.seed_share,
           },
         },
       };
