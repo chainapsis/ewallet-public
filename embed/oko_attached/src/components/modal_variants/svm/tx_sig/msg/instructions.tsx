@@ -2,21 +2,25 @@ import type { FC, ReactNode } from "react";
 import {
   type ParsedInstruction,
   SYSTEM_PROGRAM_ID,
-  TOKEN_PROGRAM_ID,
   TOKEN_2022_PROGRAM_ID,
+  TOKEN_PROGRAM_ID,
 } from "@oko-wallet-attached/tx-parsers/svm";
 import { Skeleton } from "@oko-wallet/oko-common-ui/skeleton";
 
+import { Collapsible } from "@oko-wallet-attached/components/collapsible/collapsible";
 import styles from "./instructions.module.scss";
 import { isStakingProgram } from "./staking/constants";
 import {
   extractStakingData,
   StakingInstruction,
 } from "./staking/staking_instruction";
+import {
+  StakingOperationInstruction,
+  getStakingOperationLabel,
+} from "./staking/staking_operation_instruction";
 import { TokenTransferPretty } from "./transfer/token_transfer";
 import { SvmTransferPretty } from "./transfer/transfer";
 import { UnknownInstruction } from "./unknown/unknown";
-import { Collapsible } from "@oko-wallet-attached/components/collapsible/collapsible";
 
 function isTokenProgram(programId: string): boolean {
   return programId === TOKEN_PROGRAM_ID || programId === TOKEN_2022_PROGRAM_ID;
@@ -27,6 +31,10 @@ function getInstructionTitle(instruction: ParsedInstruction): string {
 
   if (extractStakingData(instruction) !== null) {
     return "Staking";
+  }
+
+  if (isStakingProgram(programId)) {
+    return getStakingOperationLabel(instructionName);
   }
 
   if (programId === SYSTEM_PROGRAM_ID && instructionName === "transfer") {
@@ -57,9 +65,9 @@ function renderInstruction(
     return <StakingInstruction key={index} instruction={instruction} />;
   }
 
-  // Staking Programs without amount data -> skip (return null)
+  // Staking Programs without amount data -> show operation details
   if (isStakingProgram(programId)) {
-    return null;
+    return <StakingOperationInstruction key={index} instruction={instruction} />;
   }
 
   // System Program - SOL Transfer
