@@ -259,7 +259,7 @@ export function useBaseSponsorshipFlow({
   // Check sponsorship status eagerly for supported chains (before balance check completes)
   // This allows us to know if sponsorship is available while simulation is still running
   const shouldCheckStatus =
-    enabled && isSupported && !!FEE_SPONSORSHIP_API_KEY && sponsorshipState !== "success";
+    enabled && isSupported && sponsorshipState !== "success";
 
   const {
     data: statusData,
