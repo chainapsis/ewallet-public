@@ -46,6 +46,10 @@ export function createOkoApiApp(
     "/tss/v2/keygen",
     commitRevealMiddleware("keygen"),
     mockOAuthMiddleware,
+    ((_req, res, next) => {
+      res.locals.api_key = { customer_id: "test_customer_id" };
+      next();
+    }) as express.RequestHandler,
     keygenV2,
   );
 
@@ -53,6 +57,10 @@ export function createOkoApiApp(
     "/tss/v2/user/signin",
     commitRevealMiddleware("signin"),
     mockOAuthMiddleware,
+    ((_req, res, next) => {
+      res.locals.api_key = { customer_id: "test_customer_id" };
+      next();
+    }) as express.RequestHandler,
     userSignInV2,
   );
 
@@ -107,6 +115,7 @@ export function createOkoApiApp(
       },
       state.encryption_secret,
       state.logger,
+      "test_customer_id",
     );
     if (!result.success) {
       res.status(400).json(result);
