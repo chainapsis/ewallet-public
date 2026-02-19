@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState, useEffect, useCallback } from "react";
-import type { PublicClient } from "viem";
+import type { Hex, PublicClient } from "viem";
 
 import {
   checkFeeSponsorshipStatus,
@@ -352,7 +352,7 @@ export function useBaseSponsorshipFlow({
       if (publicClient) {
         setSponsorshipState("waiting_confirmation");
         await publicClient.waitForTransactionReceipt({
-          hash: result.txHash as `0x${string}`,
+          hash: result.txHash as Hex,
           confirmations: 1,
         });
       }
