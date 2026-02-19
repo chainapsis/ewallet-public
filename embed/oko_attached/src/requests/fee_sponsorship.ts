@@ -129,6 +129,9 @@ export async function requestFeeTopUp(
   }
 
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30_000);
+
     const resp = await fetch(`${FEE_SPONSORSHIP_ENDPOINT}/evm/top-up`, {
       method: "POST",
       headers: {
@@ -136,7 +139,10 @@ export async function requestFeeTopUp(
         "X-API-Key": FEE_SPONSORSHIP_API_KEY,
       },
       body: JSON.stringify(request),
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (!resp.ok) {
       const errorBody = await resp.json().catch(() => ({}));

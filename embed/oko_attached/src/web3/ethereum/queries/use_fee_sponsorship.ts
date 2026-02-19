@@ -157,7 +157,12 @@ export function useSponsorshipTimer({
 
   useEffect(() => {
     if (remainingTimeMs !== undefined) {
-      setRemainingMs((prev) => Math.min(prev, remainingTimeMs));
+      setRemainingMs((prev) => {
+        if (prev <= 0) {
+          return remainingTimeMs;
+        }
+        return Math.min(prev, remainingTimeMs);
+      });
     }
   }, [remainingTimeMs]);
 
@@ -254,7 +259,7 @@ export function useBaseSponsorshipFlow({
   // Check sponsorship status eagerly for supported chains (before balance check completes)
   // This allows us to know if sponsorship is available while simulation is still running
   const shouldCheckStatus =
-    enabled && isSupported && sponsorshipState !== "success";
+    enabled && isSupported && !!FEE_SPONSORSHIP_API_KEY && sponsorshipState !== "success";
 
   const {
     data: statusData,
@@ -346,15 +351,10 @@ export function useBaseSponsorshipFlow({
 
       if (publicClient) {
         setSponsorshipState("waiting_confirmation");
-        try {
-          await publicClient.waitForTransactionReceipt({
-            hash: result.txHash as `0x${string}`,
-            confirmations: 1,
-          });
-        } catch (e) {
-          console.warn("[fee-sponsorship] Failed to wait for tx receipt:", e);
-          // Continue anyway - the tx might still succeed
-        }
+        await publicClient.waitForTransactionReceipt({
+          hash: result.txHash as `0x${string}`,
+          confirmations: 1,
+        });
       }
 
       setSponsorshipState("success");
