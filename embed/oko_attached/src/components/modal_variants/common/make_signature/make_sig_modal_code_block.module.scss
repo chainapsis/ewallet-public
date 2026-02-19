@@ -4,4 +4,25 @@
 .codeBlock {
   min-height: 65px;
   max-height: 230px;
+  padding-right: 4px; // text-to-scrollbar gap
+  background: transparent;
+  border-radius: 0;
+
+  // Firefox
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-quaternary) transparent;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 8px 0;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--bg-quaternary);
+    border-radius: 9999px;
+  }
 }
