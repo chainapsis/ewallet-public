@@ -23,7 +23,8 @@ import type { FetchError } from "./types";
 import { OKO_API_ENDPOINT } from "./endpoints";
 
 export const TSS_V1_ENDPOINT = `${OKO_API_ENDPOINT}/tss/v1`;
-export const TSS_V2_ENDPOINT = `${OKO_API_ENDPOINT}/tss/v2`;
+// @TODO: using v1 temporarily
+export const TSS_V2_ENDPOINT = `${OKO_API_ENDPOINT}/tss/v1`;
 export const SOCIAL_LOGIN_V1_ENDPOINT = `${OKO_API_ENDPOINT}/social-login/v1`;
 export const SOCIAL_LOGIN_V2_ENDPOINT = `${OKO_API_ENDPOINT}/social-login/v2`;
 
@@ -133,7 +134,14 @@ export async function signInV2(
   const signInRes = await makeAuthorizedOkoApiRequest<
     SignInRequest,
     SignInResponseV2
-  >("user/signin", idToken, { auth_type: authType }, TSS_V2_ENDPOINT, commitReveal, apiKey);
+  >(
+    "user/signin",
+    idToken,
+    { auth_type: authType },
+    TSS_V2_ENDPOINT,
+    commitReveal,
+    apiKey,
+  );
 
   if (!signInRes.success) {
     console.error("[attached] sign in failed, err: %s", signInRes.err);

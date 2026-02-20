@@ -12,7 +12,7 @@ import { handleGetName } from "./get_name";
 import { handleGetWalletInfo } from "./get_wallet_info";
 import { handleGetAuthType } from "./get_auth_type";
 import { handleGetCosmosChain } from "./get_cosmos_chain_info";
-import { handleOAuthInfoPassV2 } from "./oauth_info_pass";
+import { handleOAuthInfoPass } from "./oauth_info_pass";
 import { handleGetEthChain } from "./get_eth_chain_info";
 import { handleGetConnectedApps } from "./get_connected_apps";
 
@@ -117,7 +117,7 @@ export function makeMsgHandler() {
 
       // @NOTE: Switch to handleOAuthInfoPassV2 for ed25519 support
       case "oauth_info_pass": {
-        await handleOAuthInfoPassV2(ctx, message);
+        await handleOAuthInfoPass(ctx, message);
         break;
       }
 
