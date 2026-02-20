@@ -214,9 +214,17 @@ function pointNumArrToSeedShare(
   return { success: true, data: { x: xRes.data, y: yRes.data } };
 }
 
-// Fixed identifiers for the 2-of-2 seed split (server + user)
-const SEED_SPLIT_SERVER_ID = "oko_seed_server";
-const SEED_SPLIT_USER_ID = "oko_seed_user";
+/**
+ * Seed SSS 2-of-2 split identifiers (big-endian 32-byte scalars).
+ * Matches Cait-Sith convention: client = 1, server = 2.
+ */
+function seedSplitId(scalar: number): number[] {
+  const id = new Array<number>(32).fill(0);
+  id[31] = scalar;
+  return id;
+}
+export const SEED_ID_CLIENT = seedSplitId(1);
+export const SEED_ID_SERVER = seedSplitId(2);
 
 /**
  * Run ed25519 keygen from seed and split both signing share and seed for distribution.
@@ -275,21 +283,9 @@ export async function runEd25519KeygenAndSplit(
   }
 
   // 4. Seed 2-of-2 split via 257-bit prime SSS (server + user)
-  const seedIdHashesRes = await hashKeyshareNodeNames([
-    SEED_SPLIT_SERVER_ID,
-    SEED_SPLIT_USER_ID,
-  ]);
-  if (!seedIdHashesRes.success) {
-    return {
-      success: false,
-      err: { type: "sign_in_request_fail", error: seedIdHashesRes.err },
-    };
-  }
-  const [serverHash, userHash] = seedIdHashesRes.data;
-
   const seedSplitPoints: PointNumArr[] = secp256k1Wasm.seed_sss_split(
     [...seed.toUint8Array()],
-    [[...serverHash.toUint8Array()], [...userHash.toUint8Array()]],
+    [SEED_ID_SERVER, SEED_ID_CLIENT],
     2,
   );
 
