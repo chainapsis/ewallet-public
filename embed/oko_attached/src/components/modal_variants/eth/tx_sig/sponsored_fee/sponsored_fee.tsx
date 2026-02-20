@@ -103,36 +103,38 @@ export const SponsoredFee: FC<SponsoredFeeProps> = ({
         </div>
       </div>
 
-      {/* Next free transaction line */}
-      <div className={styles.line}>
-        <div className={styles.left}>
-          <Typography color="tertiary" size="xs" weight="medium">
-            Next free transaction in
-          </Typography>
-          <div
-            className={styles.infoIcon}
-            onClick={onTooltipToggle}
-            role="button"
-            tabIndex={0}
-          >
-            <InfoCircleIcon size={16} color="var(--fg-quaternary)" />
+      {/* Next free transaction line - hide during/after signing */}
+      {info.state !== "success" && (
+        <div className={styles.line}>
+          <div className={styles.left}>
+            <Typography color="tertiary" size="xs" weight="medium">
+              Next free transaction in
+            </Typography>
+            <div
+              className={styles.infoIcon}
+              onClick={onTooltipToggle}
+              role="button"
+              tabIndex={0}
+            >
+              <InfoCircleIcon size={16} color="var(--fg-quaternary)" />
+              {tooltipVisible && showTooltip && <SponsoredFeeTooltip />}
+            </div>
           </div>
-          {tooltipVisible && showTooltip && <SponsoredFeeTooltip />}
+          <div className={styles.right}>
+            {isSimulating || isLoading ? (
+              <Skeleton width="40px" className="skeleton--text-xs" />
+            ) : isTimer ? (
+              <Typography color="tertiary" size="xs" weight="medium">
+                {info.formattedRemainingTime}
+              </Typography>
+            ) : (
+              <Typography color="tertiary" size="xs" weight="medium">
+                5 min
+              </Typography>
+            )}
+          </div>
         </div>
-        <div className={styles.right}>
-          {isSimulating || isLoading ? (
-            <Skeleton width="40px" className="skeleton--text-xs" />
-          ) : isTimer ? (
-            <Typography color="tertiary" size="xs" weight="medium">
-              {info.formattedRemainingTime}
-            </Typography>
-          ) : (
-            <Typography color="tertiary" size="xs" weight="medium">
-              {info.state === "success" ? "after 5 min" : "5 min"}
-            </Typography>
-          )}
-        </div>
-      </div>
+      )}
 
       {/* Error message */}
       {isError && info.errorMessage && (
@@ -145,7 +147,7 @@ export const SponsoredFee: FC<SponsoredFeeProps> = ({
       )}
 
       {/* Loading message */}
-      {isLoading && (
+      {(isLoading || info.state === "success") && (
         <div className={styles.loadingMessage}>
           <Typography color="tertiary" size="xs" weight="medium">
             Keep this window open during the transaction...

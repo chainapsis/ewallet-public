@@ -1,5 +1,6 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState, useEffect, useCallback } from "react";
+import type { Hex, PublicClient } from "viem";
 
 import {
   checkFeeSponsorshipStatus,
@@ -67,9 +68,11 @@ export function useFeeSponsorshipStatus({
       return result.data;
     },
     enabled: enabled && isSupported && hasApiKey && !!recipientAddress,
-    staleTime: 30 * 1000, // 30 seconds
+    staleTime: 0,
     gcTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
+    refetchInterval: 10_000,
+    refetchIntervalInBackground: false,
   });
 
   return {
@@ -154,7 +157,12 @@ export function useSponsorshipTimer({
 
   useEffect(() => {
     if (remainingTimeMs !== undefined) {
-      setRemainingMs(remainingTimeMs);
+      setRemainingMs((prev) => {
+        if (prev <= 0) {
+          return remainingTimeMs;
+        }
+        return Math.min(prev, remainingTimeMs);
+      });
     }
   }, [remainingTimeMs]);
 
@@ -192,6 +200,7 @@ export interface UseBaseSponsorshipFlowProps {
   hostOrigin: string;
   estimatedFeeWei: bigint | undefined;
   hasSufficientBalance: boolean | null;
+  publicClient?: PublicClient;
   enabled?: boolean;
 }
 
@@ -233,6 +242,7 @@ export function useBaseSponsorshipFlow({
   hostOrigin,
   estimatedFeeWei,
   hasSufficientBalance,
+  publicClient,
   enabled = true,
 }: UseBaseSponsorshipFlowProps): UseBaseSponsorshipFlowResult {
   const [sponsorshipState, setSponsorshipState] =
@@ -339,6 +349,14 @@ export function useBaseSponsorshipFlow({
 
       const result = await requestTopUp(recipientAddress, amountWei);
 
+      if (publicClient) {
+        setSponsorshipState("waiting_confirmation");
+        await publicClient.waitForTransactionReceipt({
+          hash: result.txHash as Hex,
+          confirmations: 1,
+        });
+      }
+
       setSponsorshipState("success");
       setIsSponsored(true);
 
@@ -346,9 +364,10 @@ export function useBaseSponsorshipFlow({
     } catch (err) {
       setSponsorshipState("error");
       setError(err as FeeSponsorshipError);
+      refetchStatus();
       return null;
     }
-  }, [estimatedFeeWei, recipientAddress, requestTopUp]);
+  }, [estimatedFeeWei, recipientAddress, requestTopUp, publicClient]);
 
   const resetSponsorship = useCallback(() => {
     setSponsorshipState("idle");
