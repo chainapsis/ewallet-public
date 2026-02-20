@@ -33,7 +33,7 @@ import {
   decodeKeyShareStringToPoint256,
   encodePoint256ToKeyShareString,
 } from "./key_share_utils";
-import { runExpandShares } from "./reshare";
+import { runExpandShares, runSeedExpandShares } from "./reshare";
 import {
   expandTeddsaSigningShare,
   reconstructKeyPackage,
@@ -219,9 +219,9 @@ export async function reshareUserKeySharesV2(
     resharedShares: ed25519ExpandRes.data.reshared_shares,
   };
 
-  // 4.5. Process seed shares (secp256k1 SSS expand — same structure as secp256k1 key shares)
+  // 4.5. Process seed shares (257-bit prime SSS expand)
   const seedSharesByNode = convertSeedShares(sharesRes.data);
-  const seedExpandRes = await runExpandShares(
+  const seedExpandRes = await runSeedExpandShares(
     seedSharesByNode,
     additionalNodes,
     threshold,

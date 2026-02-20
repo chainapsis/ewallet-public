@@ -187,49 +187,14 @@ export interface Ed25519KeygenSplitResult {
   ksnSeedShares: SeedShareByNode[];
 }
 
-// secp256k1 group order n
-const SECP256K1_ORDER = new Uint8Array([
-  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-  0xff, 0xff, 0xfe, 0xba, 0xae, 0xdc, 0xe6, 0xaf, 0x48, 0xa0, 0x3b, 0xbf, 0xd2,
-  0x5e, 0x8c, 0xd0, 0x36, 0x41, 0x41,
-]);
-
 /**
- * Compare two 32-byte big-endian unsigned integers.
- * Returns true if a < b.
- */
-function isLessThan(a: Uint8Array, b: Uint8Array): boolean {
-  for (let i = 0; i < 32; i++) {
-    if (a[i] < b[i]) {
-      return true;
-    }
-    if (a[i] > b[i]) {
-      return false;
-    }
-  }
-  return false; // equal
-}
-
-/**
- * Generate a 32-byte seed that is less than the secp256k1 group order.
- * Resamples if seed >= n (probability ≈ 1.5e-39, practically never happens).
+ * Generate a random 32-byte seed.
+ * All 32-byte values are valid because seed SSS uses a 257-bit prime (p = 2^256 + 297 > 2^256).
  */
 function generateSeed(): Result<Bytes32, string> {
-  for (let attempt = 0; attempt < 10; attempt++) {
-    const seedBytes = new Uint8Array(32);
-    crypto.getRandomValues(seedBytes);
-
-    if (isLessThan(seedBytes, SECP256K1_ORDER)) {
-      const res = Bytes.fromUint8Array(seedBytes, 32);
-      if (res.success) {
-        return res;
-      }
-    }
-  }
-  return {
-    success: false,
-    err: "Failed to generate valid seed after 10 attempts",
-  };
+  const seedBytes = new Uint8Array(32);
+  crypto.getRandomValues(seedBytes);
+  return Bytes.fromUint8Array(seedBytes, 32);
 }
 
 /**
@@ -256,11 +221,11 @@ const SEED_SPLIT_USER_ID = "oko_seed_user";
 /**
  * Run ed25519 keygen from seed and split both signing share and seed for distribution.
  *
- * 1. Generate seed (32B, < secp256k1 order)
+ * 1. Generate seed (32B)
  * 2. Derive Ed25519 scalar from seed (SHA-512 + clamp + mod l) via WASM
  * 3. FROST split scalar into signing shares (existing flow)
- * 4. secp256k1 SSS split seed into 2-of-2 (server + user)
- * 5. secp256k1 SSS split user's seed share Y into t-of-n for KSN distribution
+ * 4. 257-bit prime SSS split seed into 2-of-2 (server + user)
+ * 5. 257-bit prime SSS split user's seed share Y into t-of-n for KSN distribution
  */
 export async function runEd25519KeygenAndSplit(
   keyshareNodeMeta: KeyShareNodeMetaWithNodeStatusInfo,
@@ -309,7 +274,7 @@ export async function runEd25519KeygenAndSplit(
     };
   }
 
-  // 4. Seed 2-of-2 split via secp256k1 SSS (server + user)
+  // 4. Seed 2-of-2 split via 257-bit prime SSS (server + user)
   const seedIdHashesRes = await hashKeyshareNodeNames([
     SEED_SPLIT_SERVER_ID,
     SEED_SPLIT_USER_ID,
@@ -322,7 +287,7 @@ export async function runEd25519KeygenAndSplit(
   }
   const [serverHash, userHash] = seedIdHashesRes.data;
 
-  const seedSplitPoints: PointNumArr[] = secp256k1Wasm.sss_split(
+  const seedSplitPoints: PointNumArr[] = secp256k1Wasm.seed_sss_split(
     [...seed.toUint8Array()],
     [[...serverHash.toUint8Array()], [...userHash.toUint8Array()]],
     2,
@@ -337,7 +302,7 @@ export async function runEd25519KeygenAndSplit(
   }
   const userSeedY = seedSplitPoints[1].y;
 
-  // 5. User seed share Y → t-of-n split for KSN distribution via secp256k1 SSS
+  // 5. User seed share Y → t-of-n split for KSN distribution via 257-bit prime SSS
   const ksnHashesRes = await hashKeyshareNodeNames(
     keyshareNodeMeta.nodes.map((n) => n.name),
   );
@@ -349,7 +314,7 @@ export async function runEd25519KeygenAndSplit(
   }
   const ksnHashes = ksnHashesRes.data.map((b) => [...b.toUint8Array()]);
 
-  const ksnSeedSplitPoints: PointNumArr[] = secp256k1Wasm.sss_split(
+  const ksnSeedSplitPoints: PointNumArr[] = secp256k1Wasm.seed_sss_split(
     userSeedY,
     ksnHashes,
     keyshareNodeMeta.threshold,
