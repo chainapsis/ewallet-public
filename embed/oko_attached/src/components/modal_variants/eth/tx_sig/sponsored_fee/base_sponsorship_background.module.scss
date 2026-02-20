@@ -1,3 +1,5 @@
+$base-asset-url: "https://oko-wallet.s3.ap-northeast-2.amazonaws.com/assets/base_chain";
+
 .gradient {
   position: absolute;
   bottom: 0;
@@ -9,6 +11,22 @@
   background-repeat: no-repeat;
   pointer-events: none;
   z-index: 0;
+
+  &.light_normal {
+    background-image: url("#{$base-asset-url}/Rectangle+7879.png");
+  }
+
+  &.dark_normal {
+    background-image: url("#{$base-asset-url}/Rectangle+7881.png");
+  }
+
+  &.light_error {
+    background-image: url("#{$base-asset-url}/Rectangle+7882.png");
+  }
+
+  &.dark_error {
+    background-image: url("#{$base-asset-url}/Rectangle+7883.png");
+  }
 }
 
 .pattern {
@@ -22,4 +40,12 @@
   background-repeat: no-repeat;
   pointer-events: none;
   z-index: 1;
+
+  &.blue {
+    background-image: url("#{$base-asset-url}/pattern-blue.png");
+  }
+
+  &.gray {
+    background-image: url("#{$base-asset-url}/pattern-gray.png");
+  }
 }

@@ -15,6 +15,7 @@ describe("e2e_test_front_running_add_ed25519", () => {
 
   const TOKEN_A = "id_token_A";
   const TOKEN_B = "id_token_B";
+  const TEST_SEED_SHARE = "a".repeat(64) + "b".repeat(64);
 
   beforeAll(async () => {
     ctx = await createTestContext({ ksnCount: 6 });
@@ -60,6 +61,7 @@ describe("e2e_test_front_running_add_ed25519", () => {
         auth_type: AUTH_TYPE,
         public_key: "b".repeat(64),
         share: "aa".repeat(64),
+        seed_share: TEST_SEED_SHARE,
         cr_session_id: sessionId,
         cr_signature: sig,
       });
@@ -94,6 +96,7 @@ describe("e2e_test_front_running_add_ed25519", () => {
       auth_type: AUTH_TYPE,
       public_key: "b".repeat(64),
       share: "aa".repeat(64),
+      seed_share: TEST_SEED_SHARE,
       cr_session_id: sessionId,
       cr_signature: sig,
     };
@@ -153,7 +156,7 @@ describe("e2e_test_front_running_add_ed25519", () => {
             public_key: "03" + "a".repeat(64),
             share: "aa".repeat(64),
           },
-          ed25519: { public_key: "b".repeat(64), share: "bb".repeat(64) },
+          ed25519: { public_key: "b".repeat(64), share: "bb".repeat(64), seed_share: TEST_SEED_SHARE },
         },
         cr_session_id: sessionId,
         cr_signature: sig,
@@ -202,6 +205,7 @@ describe("e2e_test_front_running_add_ed25519", () => {
         auth_type: AUTH_TYPE,
         public_key: "b".repeat(64),
         share: "aa".repeat(64),
+        seed_share: TEST_SEED_SHARE,
         cr_session_id: sessionId,
         cr_signature: sigA,
       });

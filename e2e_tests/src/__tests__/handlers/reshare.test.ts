@@ -21,6 +21,7 @@ describe("e2e_test_reshare", () => {
   const SIGNUP_ID_TOKEN = "mock_id_token_signup";
   const SIGNIN_ID_TOKEN = "mock_id_token_signin";
   const AUTH_TYPE: AuthType = "google";
+  const TEST_SEED_SHARE = "a".repeat(64) + "b".repeat(64);
 
   type NodeShare = { secp256k1Share: string; ed25519Share: string };
   let secp256k1PublicKey: string;
@@ -133,6 +134,7 @@ describe("e2e_test_reshare", () => {
             ed25519: {
               public_key: ed25519PublicKeyHex,
               share: nodeShares[i].ed25519Share,
+              seed_share: TEST_SEED_SHARE,
             },
           },
           cr_session_id: sessionId,
@@ -169,6 +171,7 @@ describe("e2e_test_reshare", () => {
           identifier: serverOut.identifier,
           public_key: ed25519Pk,
         },
+        ed25519_seed_share: TEST_SEED_SHARE,
         cr_session_id: sessionId,
         cr_signature: kgSig,
       });
@@ -248,6 +251,7 @@ describe("e2e_test_reshare", () => {
             ed25519: {
               public_key: ed25519PublicKeyHex,
               share: nodeShares[i].ed25519Share,
+              seed_share: TEST_SEED_SHARE,
             },
           },
           cr_session_id: sessionId,
@@ -256,8 +260,45 @@ describe("e2e_test_reshare", () => {
       expect(res.status).toBe(200);
     }
 
-    // Optionally, oko_api user/reshare can be called here to update mappings.
-    // Skipped in this test to focus on KSN upsert/validation behavior.
+    // Verify seed_share preserved on KSN[0] via get_key_shares (new sign_in session)
+    const VERIFY_ID_TOKEN = "mock_id_token_verify";
+    const verifyKeypair = generateClientKeypair();
+    const verifySessionId = generateSessionId();
+    const verifyIdHash = computeIdTokenHash(AUTH_TYPE, VERIFY_ID_TOKEN);
+
+    const ksnVerifyCommit = await request(ctx.ksnApps[0])
+      .post("/keyshare/v2/commit")
+      .send({
+        session_id: verifySessionId,
+        operation_type: "sign_in",
+        client_ephemeral_pubkey: verifyKeypair.publicKey.toHex(),
+        id_token_hash: verifyIdHash,
+      });
+    expect(ksnVerifyCommit.status).toBe(200);
+
+    const getSharesSig = createRevealSignature(
+      verifyKeypair.privateKey,
+      ksnVerifyCommit.body.data.node_pubkey,
+      verifySessionId,
+      AUTH_TYPE,
+      VERIFY_ID_TOKEN,
+      "sign_in",
+      "get_key_shares",
+    );
+
+    const getSharesRes = await request(ctx.ksnApps[0])
+      .post("/keyshare/v2")
+      .set("x-mock-user-id", TEST_USER_ID)
+      .set("Authorization", `Bearer ${VERIFY_ID_TOKEN}`)
+      .send({
+        auth_type: AUTH_TYPE,
+        wallets: { ed25519: ed25519PublicKeyHex },
+        cr_session_id: verifySessionId,
+        cr_signature: getSharesSig,
+      });
+    expect(getSharesRes.status).toBe(200);
+    expect(getSharesRes.body.data.ed25519).toBeDefined();
+    expect(getSharesRes.body.data.ed25519.seed_share).toBe(TEST_SEED_SHARE);
   });
 
   it("should upsert on NEW node while validating ACTIVE nodes (KSN only)", async () => {
@@ -329,6 +370,7 @@ describe("e2e_test_reshare", () => {
             ed25519: {
               public_key: ed25519PublicKeyHex,
               share: nodeShares[i].ed25519Share,
+              seed_share: TEST_SEED_SHARE,
             },
           },
           cr_session_id: sessionId,
@@ -382,6 +424,7 @@ describe("e2e_test_reshare", () => {
           ed25519: {
             public_key: ed25519PublicKeyHex,
             share: shareForNode2.ed25519,
+            seed_share: TEST_SEED_SHARE,
           },
         },
         cr_session_id: reshareSession,
@@ -471,6 +514,7 @@ describe("e2e_test_reshare", () => {
           ed25519: {
             public_key: ed25519PublicKeyHex,
             share: nodeShares[0].ed25519Share,
+            seed_share: TEST_SEED_SHARE,
           },
         },
         cr_session_id: sessionId,
@@ -520,6 +564,7 @@ describe("e2e_test_reshare", () => {
           ed25519: {
             public_key: ed25519PublicKeyHex,
             share: nodeShares[0].ed25519Share,
+            seed_share: TEST_SEED_SHARE,
           },
         },
         cr_session_id: sessionId,

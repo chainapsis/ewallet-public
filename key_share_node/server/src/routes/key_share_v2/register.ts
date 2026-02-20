@@ -223,6 +223,7 @@ export async function keyshareV2Register(
     validatedWallets.ed25519 = {
       public_key: publicKeyBytesRes.data,
       share: shareBytesRes.data,
+      seed_share: body.wallets.ed25519.seed_share,
     };
   }
 

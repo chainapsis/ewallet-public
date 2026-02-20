@@ -76,14 +76,14 @@ export const MakeTxSigModal: FC<MakeTxSigModalProps> = ({
           />
         </div>
 
-        <Spacing height={20} />
+        <Spacing height={12} />
 
         <SvmTxFee
           serializedTransaction={data.payload.data.serialized_transaction}
           isVersioned={data.payload.data.is_versioned}
         />
 
-        <Spacing height={16} />
+        <Spacing height={12} />
 
         <div className={styles.buttonContainer}>
           <Button

@@ -111,6 +111,7 @@ export async function keygenEd25519(
       auth_type,
       user_identifier,
       keygen_2: body.keygen_2,
+      seed_share: body.seed_share,
       email: oauthUser.email,
       name: oauthUser.name,
       metadata: oauthUser.metadata,

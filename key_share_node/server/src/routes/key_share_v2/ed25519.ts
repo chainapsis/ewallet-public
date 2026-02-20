@@ -207,6 +207,7 @@ export async function registerKeyshareEd25519(
       auth_type,
       public_key: publicKeyBytesRes.data,
       share: shareBytesRes.data,
+      seed_share: body.seed_share,
     },
     state.encryptionSecret,
   );

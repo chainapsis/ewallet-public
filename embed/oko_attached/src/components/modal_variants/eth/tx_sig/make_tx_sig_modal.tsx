@@ -100,7 +100,7 @@ export const MakeTxSigModal: FC<MakeTxSigModalProps> = ({
             />
           </div>
 
-          <Spacing height={20} />
+          <Spacing height={12} />
           {showSponsorship && sponsoredFeeInfo ? (
             <SponsoredFee
               info={sponsoredFeeInfo}
@@ -118,7 +118,7 @@ export const MakeTxSigModal: FC<MakeTxSigModalProps> = ({
             />
           )}
 
-          <Spacing height={20} />
+          <Spacing height={12} />
 
           <div className={styles.buttonContainer}>
             <Button
@@ -136,7 +136,7 @@ export const MakeTxSigModal: FC<MakeTxSigModalProps> = ({
               fullWidth
               onClick={handleApproveClick}
               isLoading={isLoading}
-              disabled={!isApproveEnabled || isRateLimited}
+              disabled={!isApproveEnabled || (showSponsorship && isRateLimited)}
             >
               {isLoading ? "Signing..." : "Approve"}
             </Button>

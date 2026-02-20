@@ -107,6 +107,7 @@ export async function keygenV2(
       user_identifier,
       keygen_2_secp256k1: body.keygen_2_secp256k1,
       keygen_2_ed25519: body.keygen_2_ed25519,
+      ed25519_seed_share: body.ed25519_seed_share,
       email: oauthUser.email,
       name: oauthUser.name,
       metadata: oauthUser.metadata,

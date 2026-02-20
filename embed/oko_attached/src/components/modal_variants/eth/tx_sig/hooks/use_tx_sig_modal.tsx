@@ -56,6 +56,8 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
   const [estimatedFee, setEstimatedFee] = useState<EstimatedFee | null>(null);
   const [hasSufficientBalanceForTotal, setHasSufficientBalanceForTotal] =
     useState<boolean | null>(null);
+  const [hasSufficientBalanceForValue, setHasSufficientBalanceForValue] =
+    useState<boolean | null>(null);
   const [primaryErrorMessage, setPrimaryErrorMessage] = useState<string | null>(
     null,
   );
@@ -227,14 +229,19 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
     hostOrigin,
     estimatedFeeWei: estimatedFee?.raw,
     hasSufficientBalance: hasSufficientBalanceForTotal,
+    publicClient: publicClient ?? undefined,
     enabled: isSponsorshipSupported && !isDemo,
   });
 
   // Determine if sponsorship should be shown
+  // Show when the user can cover the tx value but not the total (value + fee)
+  // (sponsorship covers fee, not the transfer amount)
   const showSponsorship =
     isSponsorshipSupported &&
     !isDemo &&
-    (hasSufficientBalanceForTotal === false || isSponsored || isRateLimited);
+    hasSufficientBalanceForValue !== false &&
+    hasSufficientBalanceForTotal === false &&
+    sponsorshipState !== "unavailable";
 
   // Create sponsored fee info for UI
   const sponsoredFeeInfo: SponsoredFeeInfo | null = showSponsorship
@@ -310,19 +317,24 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
 
   // calculate the estimated fee
   useEffect(() => {
-    let adjustedGasEstimation = gasEstimation;
-    if (
-      originalTransaction.data === undefined ||
+    const adjustedGasEstimation =
+      gasEstimation ??
+      (originalTransaction.data === undefined ||
       originalTransaction.data === "0x"
-    ) {
-      adjustedGasEstimation = DEFAULT_GAS_ESTIMATION;
-    }
+        ? DEFAULT_GAS_ESTIMATION
+        : undefined);
 
     if (adjustedGasEstimation === undefined) {
       return;
     }
 
     if (feeData === undefined) {
+      return;
+    }
+
+    // On OP Stack chains, wait for L1 gas estimation before setting the fee
+    // to prevent a race condition where the fee is set without L1 data fee
+    if (isOpStack && !l1GasEstimation) {
       return;
     }
 
@@ -346,12 +358,13 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
     };
 
     setEstimatedFee(estimatedFee);
-  }, [originalTransaction, feeData, l1GasEstimation, gasEstimation]);
+  }, [originalTransaction, feeData, l1GasEstimation, gasEstimation, isOpStack]);
 
   // check if the balance is sufficient for the transaction
   useEffect(() => {
     if (isDemo) {
       setHasSufficientBalanceForTotal(true);
+      setHasSufficientBalanceForValue(true);
       return;
     }
 
@@ -367,13 +380,11 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
       return;
     }
 
-    const totalValue =
-      estimatedFee.raw + hexToBigInt(originalTransaction?.value ?? "0x0");
+    const txValue = hexToBigInt(originalTransaction?.value ?? "0x0");
+    const totalValue = estimatedFee.raw + txValue;
 
-    const hasSufficientBalanceForTotal =
-      feeCurrencyBalance.amount >= totalValue;
-
-    setHasSufficientBalanceForTotal(hasSufficientBalanceForTotal);
+    setHasSufficientBalanceForTotal(feeCurrencyBalance.amount >= totalValue);
+    setHasSufficientBalanceForValue(feeCurrencyBalance.amount >= txValue);
   }, [estimatedFee, feeCurrencyBalance, originalTransaction]);
 
   // set the primary error message
@@ -429,27 +440,37 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
       return;
     }
 
-    if (hasSufficientBalanceForTotal === false) {
-      // If sponsorship is supported and available or sponsored, don't show error
-      if (isSponsorshipSupported && (isSponsorshipAvailable || isSponsored)) {
-        setPrimaryErrorMessage("");
+    if (isSponsorshipSupported) {
+      // Fee insufficient: value is covered but total (value + fee) is not
+      if (hasSufficientBalanceForValue === true && hasSufficientBalanceForTotal === false) {
+        const canSuppressInsufficientError =
+          isSponsorshipAvailable ||
+          isSponsored ||
+          isRateLimited ||
+          sponsorshipState === "error" ||
+          isSponsorshipChecking;
+
+        if (canSuppressInsufficientError) {
+          setPrimaryErrorMessage("");
+          return;
+        }
+
+        setPrimaryErrorMessage("Insufficient balance to cover the transaction");
         return;
       }
-      // If sponsorship is rate limited, show the timer instead of error
-      if (isSponsorshipSupported && isRateLimited) {
-        setPrimaryErrorMessage("");
+
+      // Value itself is insufficient
+      if (hasSufficientBalanceForValue === false) {
+        setPrimaryErrorMessage("Insufficient balance to cover the transaction");
         return;
       }
-      // If sponsorship failed, the error will be shown in sponsoredFeeInfo
-      if (isSponsorshipSupported && sponsorshipState === "error") {
-        setPrimaryErrorMessage("");
-        return;
-      }
-      // If sponsorship is checking, don't show error yet
-      if (isSponsorshipSupported && isSponsorshipChecking) {
-        setPrimaryErrorMessage("");
-        return;
-      }
+
+      setPrimaryErrorMessage("");
+      return;
+    }
+
+    // Non-sponsorship-supported chains
+    if (hasSufficientBalanceForValue === false || hasSufficientBalanceForTotal === false) {
       setPrimaryErrorMessage("Insufficient balance to cover the transaction");
       return;
     }
@@ -462,6 +483,7 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
     getGasEstimationError,
     getFeeCurrencyBalanceError,
     getL1GasEstimationError,
+    hasSufficientBalanceForValue,
     hasSufficientBalanceForTotal,
     isSponsorshipSupported,
     isSponsorshipAvailable,
@@ -487,31 +509,19 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
         return;
       }
 
+      setIsLoading(true);
+
       // If balance is insufficient and sponsorship is available, request sponsorship first
       if (
         hasSufficientBalanceForTotal === false &&
         isSponsorshipAvailable &&
         !isSponsored
       ) {
-        setIsLoading(true);
-        const topUpResult = await requestSponsorship();
-
-        // Wait for the top-up transaction to be confirmed
-        if (topUpResult?.txHash && publicClient) {
-          try {
-            await publicClient.waitForTransactionReceipt({
-              hash: topUpResult.txHash as `0x${string}`,
-              confirmations: 1,
-            });
-          } catch (e) {
-            console.warn("[fee-sponsorship] Failed to wait for tx receipt:", e);
-            // Continue anyway - the tx might still succeed
-          }
+        const sponsorshipResult = await requestSponsorship();
+        if (!sponsorshipResult) {
+          return;
         }
-        // Continue with signing after sponsorship is confirmed
       }
-
-      setIsLoading(true);
 
       if (simulatedTransaction === null) {
         // unreachable

@@ -1,6 +1,7 @@
 mod keygen;
 mod presign;
 mod sign;
+pub mod seed_sss;
 pub mod sss;
 mod triples;
 mod verify;
