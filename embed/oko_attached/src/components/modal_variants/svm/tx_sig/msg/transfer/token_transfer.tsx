@@ -1,7 +1,8 @@
 import type { FC } from "react";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import { Skeleton } from "@oko-wallet/oko-common-ui/skeleton";
-import { Tooltip } from "@oko-wallet/oko-common-ui/tooltip";
+import { CopyOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/copy_outlined";
+import { EmptyStateIcon } from "@oko-wallet/oko-common-ui/icons/empty_state_icon";
 
 import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
 import { TxRow } from "@oko-wallet-attached/components/modal_variants/common/tx_row";
@@ -65,7 +66,9 @@ export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
               variant="rounded"
               fallback={symbol.slice(0, 2)}
             />
-          ) : null}
+          ) : (
+            <EmptyStateIcon size={16} />
+          )}
           {isLoading ? (
             <Skeleton width={80} height={20} />
           ) : hasMetadata ? (
@@ -78,16 +81,14 @@ export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
               {`${formattedAmount} ${symbol}`}
             </Typography>
           ) : mint ? (
-            <Tooltip content={mint} placement="bottom">
-              <Typography
-                color="secondary"
-                size="lg"
-                weight="semibold"
-                className={styles.tokenAmount}
-              >
-                {`${formattedAmount} Unknown Token`}
-              </Typography>
-            </Tooltip>
+            <Typography
+              color="secondary"
+              size="lg"
+              weight="semibold"
+              className={styles.tokenAmount}
+            >
+              {`${formattedAmount} Unknown Token`}
+            </Typography>
           ) : (
             <Typography
               color="secondary"
@@ -100,6 +101,32 @@ export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
           )}
         </div>
       </TxRow>
+      {!hasMetadata && mint && (
+        <div className={styles.tokenAddressSection}>
+          <Typography
+            color="tertiary"
+            size="xs"
+            weight="medium"
+            className={styles.tokenAddressLabel}
+          >
+            Token Address
+          </Typography>
+          <button
+            type="button"
+            className={styles.tokenAddressRow}
+            onClick={() => navigator.clipboard.writeText(mint)}
+          >
+            <Typography
+              size="sm"
+              weight="medium"
+              className={styles.address}
+            >
+              {mint}
+            </Typography>
+            <CopyOutlinedIcon size={16} color="currentColor" />
+          </button>
+        </div>
+      )}
       {hasMetadata && name && (
         <TxRow label="Token">
           <Typography

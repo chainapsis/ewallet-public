@@ -17,7 +17,7 @@ export const EmptyStateIcon: FC<BasicIconProps> = ({
     >
       <title>Empty state</title>
       <g clipPath="url(#clip0_239_3873)">
-        <rect width="28" height="28" rx="14" fill="#F5F5F5" />
+        <rect width="28" height="28" rx="14" fill="var(--bg-secondary-hover)" />
         <mask
           id="mask0_239_3873"
           style={{ maskType: "alpha" }}
@@ -27,7 +27,7 @@ export const EmptyStateIcon: FC<BasicIconProps> = ({
           width="28"
           height="28"
         >
-          <rect width="28" height="28" rx="14" fill="#F5F5F5" />
+          <rect width="28" height="28" rx="14" fill="var(--bg-secondary-hover)" />
         </mask>
         <g mask="url(#mask0_239_3873)">
           <line
@@ -35,17 +35,17 @@ export const EmptyStateIcon: FC<BasicIconProps> = ({
             y1="-0.352577"
             x2="28.8479"
             y2="28.6388"
-            stroke="#D5D7DA"
+            stroke="var(--border-primary)"
           />
           <line
             x1="28.1372"
             y1="0.357497"
             x2="-0.147066"
             y2="28.6418"
-            stroke="#D5D7DA"
+            stroke="var(--border-primary)"
             strokeLinecap="round"
           />
-          <circle cx="14" cy="14" r="9" stroke="#D5D7DA" />
+          <circle cx="14" cy="14" r="9" stroke="var(--border-primary)" />
         </g>
       </g>
       <defs>

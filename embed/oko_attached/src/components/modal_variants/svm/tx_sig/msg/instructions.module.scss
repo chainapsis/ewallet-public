@@ -1,6 +1,6 @@
 .container {
   display: flex;
-  padding: 16px;
+  padding: 16px 8px;
   flex-direction: column;
   align-items: flex-start;
   overflow-y: auto;
@@ -30,6 +30,39 @@
 
 .address {
   word-break: break-all;
+}
+
+.tokenAddressSection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.tokenAddressLabel {
+  padding: 0 8px;
+}
+
+.tokenAddressRow {
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 4px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text-secondary);
+
+  &:hover {
+    background: var(--bg-secondary-hover);
+    color: var(--text-secondary-hover);
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
 }
 
 .instructionsContainer {
