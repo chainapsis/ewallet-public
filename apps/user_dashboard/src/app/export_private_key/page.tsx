@@ -394,12 +394,16 @@ export default function Page() {
     try {
       setIsLoading(true);
 
-      // 1. Open re-auth popup at attached origin
+      // 1. Open re-auth popup at attached origin (match sign-in popup sizes)
       const attachedOrigin = new URL(okoWallet.sdkEndpoint).origin;
+      const popupWidth = 440;
+      const popupHeight = authType === "telegram" ? 402 : 285;
+      const popupLeft = Math.max((window.screen.width - popupWidth) / 2, 0);
+      const popupTop = Math.max((window.screen.height - popupHeight) / 2, 0);
       popup = window.open(
         `${attachedOrigin}/export/reauth?auth_type=${authType}`,
         "oko_re_auth",
-        "width=600,height=700",
+        `width=${popupWidth},height=${popupHeight},left=${popupLeft},top=${popupTop},resizable=yes`,
       );
 
       // 2. Send export request to attached iframe
