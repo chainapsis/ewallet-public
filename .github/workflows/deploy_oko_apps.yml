@@ -87,14 +87,20 @@ jobs:
       - name: Build SDK packages
         run: yarn ci build_sdk
 
+      - name: Determine deploy environment
+        id: deploy_env
+        run: node ./internals/github/dist/determine_deploy_env.js
+        env:
+          GIT_TAG: "${{ inputs.git_tag }}"
+
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
 
       - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=${{ steps.deploy_env.outputs.vercel_env }} --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build Project Artifacts
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build ${{ steps.deploy_env.outputs.vercel_build_flag }} --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel deploy --prebuilt ${{ steps.deploy_env.outputs.vercel_deploy_flag }} --token=${{ secrets.VERCEL_TOKEN }}
