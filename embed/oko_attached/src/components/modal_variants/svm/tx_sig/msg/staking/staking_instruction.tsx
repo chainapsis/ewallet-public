@@ -202,7 +202,7 @@ export const StakingInstruction: FC<StakingInstructionProps> = ({
                 Rent
               </Typography>
               <Tooltip
-                content="Rent is a refundable deposit required to create a stake account on Solana."
+                content="A small SOL deposit, returned when you unstake."
                 placement="top"
               >
                 <InfoCircleIcon
