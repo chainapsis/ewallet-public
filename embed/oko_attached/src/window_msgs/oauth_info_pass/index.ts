@@ -43,6 +43,11 @@ import {
 } from "./handlers/ed25519_keygen";
 import { bail } from "./errors";
 import { getCredentialsFromPayload } from "./validate_social_login";
+import {
+  hasActiveReAuthResolver,
+  consumeReAuthResolver,
+  rejectReAuthResolver,
+} from "../export_reauth_state";
 
 export async function handleOAuthInfoPass(
   ctx: MsgEventContext,
@@ -256,6 +261,28 @@ export async function handleOAuthInfoPassV2(
         msg_type: message.msg_type,
       });
       return;
+    }
+
+    // Re-auth interceptor: if an export request is waiting for re-auth credentials,
+    // extract OAuth credentials and resolve the pending promise.
+    // Skips api_key/hostOriginList checks (re-auth uses attached origin with no SDK API key).
+    if (hasActiveReAuthResolver()) {
+      const authType: AuthType = message.payload.auth_type;
+      const validateOauthRes = await getCredentialsFromPayload(
+        message.payload,
+        hostOrigin,
+      );
+
+      if (!validateOauthRes.success) {
+        rejectReAuthResolver(validateOauthRes.err.type);
+      } else {
+        consumeReAuthResolver({
+          idToken: validateOauthRes.data.idToken,
+          userIdentifier: validateOauthRes.data.userIdentifier,
+          authType,
+        });
+      }
+      return; // finally block handles ack + nonce cleanup
     }
 
     if (!appState.getHostOriginList().includes(hostOrigin)) {

@@ -1,6 +1,8 @@
 import type { OkoWalletMsg } from "@oko-wallet/oko-sdk-core";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
 
 import type { MsgEventContext } from "./types";
+import { useAppState } from "@oko-wallet-attached/store/app";
 import { handleGetPublicKey } from "./get_public_key";
 import { handleGetPublicKeyEd25519 } from "./get_public_key_ed25519";
 import { handleSetOAuthNonce } from "./set_oauth_nonce";
@@ -28,7 +30,7 @@ type OkoWalletMsgGetConnectedApps = {
 type OkoWalletMsgExportPrivateKey = {
   target: "oko_attached";
   msg_type: "__export_private_key__";
-  payload: null;
+  payload: { jwt: string; auth_type: AuthType };
 };
 
 type ExtendedOkoWalletMsg =
@@ -38,6 +40,26 @@ type ExtendedOkoWalletMsg =
 
 export function makeMsgHandler() {
   return async function msgHandler(event: MessageEvent) {
+    // Handle port-less messages (popup → iframe, fire-and-forget)
+    const data = event.data;
+    if (
+      data?.target === "oko_attached" &&
+      data?.msg_type === "set_reauth_params"
+    ) {
+      const appState = useAppState.getState();
+      const payload = data.payload as
+        | { nonce?: string; code_verifier?: string }
+        | undefined;
+      if (payload?.nonce) {
+        appState.setNonce(event.origin, payload.nonce);
+      }
+      if (payload?.code_verifier) {
+        appState.setCodeVerifier(event.origin, payload.code_verifier);
+      }
+      console.debug("[attached] set_reauth_params received", event.origin);
+      return;
+    }
+
     if (event.ports.length < 1) {
       // do nothing
 
@@ -137,7 +159,7 @@ export function makeMsgHandler() {
       }
 
       case "__export_private_key__": {
-        await handleExportPrivateKey(ctx);
+        await handleExportPrivateKey(ctx, message.payload);
         break;
       }
 
