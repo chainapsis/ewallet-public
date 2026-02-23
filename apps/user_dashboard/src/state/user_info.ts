@@ -36,7 +36,7 @@ export const useUserInfoState = create(
             email: info.email,
             name: info.name,
             publicKey: info.publicKey,
-            isSignedIn: !!(info.email && info.publicKey),
+            isSignedIn: !!info.publicKey,
           });
         },
         setAuthType: (authType) => {
