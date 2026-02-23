@@ -142,9 +142,20 @@ export const Instructions: FC<InstructionsProps> = ({
     return <Skeleton width="100%" height="32px" />;
   }
 
-  // Filter out null results from renderInstruction (e.g., staking programs without amount)
+  // When a staking instruction with amount data exists (e.g., createAccount),
+  // hide auxiliary staking instructions (initialize, delegateStake) since they
+  // are implementation details already represented in the "Amount to Lock" card.
+  const hasStakingData = instructions.some(
+    (ix) => extractStakingData(ix) !== null,
+  );
+
   const validInstructions = instructions.filter(
-    (ix, index) => renderInstruction(ix, index, chainId) !== null,
+    (ix) =>
+      !(
+        hasStakingData &&
+        isStakingProgram(ix.programId) &&
+        extractStakingData(ix) === null
+      ),
   );
 
   // Single instruction: render directly without collapsible
