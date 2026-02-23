@@ -17,6 +17,7 @@ import { Route as TelegramCallbackIndexRouteImport } from './routes/telegram/cal
 import { Route as GoogleCallbackIndexRouteImport } from './routes/google/callback/index'
 import { Route as EmailCallbackIndexRouteImport } from './routes/email/callback/index'
 import { Route as DiscordCallbackIndexRouteImport } from './routes/discord/callback/index'
+import { Route as ExportReauthIndexRouteImport } from './routes/export/reauth/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,10 +59,16 @@ const DiscordCallbackIndexRoute = DiscordCallbackIndexRouteImport.update({
   path: '/discord/callback/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ExportReauthIndexRoute = ExportReauthIndexRouteImport.update({
+  id: '/export/reauth/',
+  path: '/export/reauth/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/email/': typeof EmailIndexRoute
+  '/export/reauth/': typeof ExportReauthIndexRoute
   '/telegram/': typeof TelegramIndexRoute
   '/discord/callback/': typeof DiscordCallbackIndexRoute
   '/email/callback/': typeof EmailCallbackIndexRoute
@@ -72,6 +79,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/email': typeof EmailIndexRoute
+  '/export/reauth': typeof ExportReauthIndexRoute
   '/telegram': typeof TelegramIndexRoute
   '/discord/callback': typeof DiscordCallbackIndexRoute
   '/email/callback': typeof EmailCallbackIndexRoute
@@ -83,6 +91,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/email/': typeof EmailIndexRoute
+  '/export/reauth/': typeof ExportReauthIndexRoute
   '/telegram/': typeof TelegramIndexRoute
   '/discord/callback/': typeof DiscordCallbackIndexRoute
   '/email/callback/': typeof EmailCallbackIndexRoute
@@ -95,6 +104,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/email/'
+    | '/export/reauth/'
     | '/telegram/'
     | '/discord/callback/'
     | '/email/callback/'
@@ -105,6 +115,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/email'
+    | '/export/reauth'
     | '/telegram'
     | '/discord/callback'
     | '/email/callback'
@@ -115,6 +126,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/email/'
+    | '/export/reauth/'
     | '/telegram/'
     | '/discord/callback/'
     | '/email/callback/'
@@ -126,6 +138,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   EmailIndexRoute: typeof EmailIndexRoute
+  ExportReauthIndexRoute: typeof ExportReauthIndexRoute
   TelegramIndexRoute: typeof TelegramIndexRoute
   DiscordCallbackIndexRoute: typeof DiscordCallbackIndexRoute
   EmailCallbackIndexRoute: typeof EmailCallbackIndexRoute
@@ -148,6 +161,13 @@ declare module '@tanstack/react-router' {
       path: '/telegram'
       fullPath: '/telegram/'
       preLoaderRoute: typeof TelegramIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/export/reauth/': {
+      id: '/export/reauth/'
+      path: '/export/reauth'
+      fullPath: '/export/reauth/'
+      preLoaderRoute: typeof ExportReauthIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/email/': {
@@ -198,6 +218,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   EmailIndexRoute: EmailIndexRoute,
+  ExportReauthIndexRoute: ExportReauthIndexRoute,
   TelegramIndexRoute: TelegramIndexRoute,
   DiscordCallbackIndexRoute: DiscordCallbackIndexRoute,
   EmailCallbackIndexRoute: EmailCallbackIndexRoute,
