@@ -5,6 +5,14 @@
   border-radius: 12px;
   background: var(--bg-secondary);
   overflow: hidden;
+
+  &:hover {
+    background: var(--bg-secondary-hover);
+
+    .chevronIcon {
+      color: var(--fg-quaternary-hover);
+    }
+  }
 }
 
 .header {

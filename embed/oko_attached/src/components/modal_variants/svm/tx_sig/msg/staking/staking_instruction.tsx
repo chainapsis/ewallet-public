@@ -148,7 +148,7 @@ export const StakingInstruction: FC<StakingInstructionProps> = ({
       >
         <div className={styles.headerContent}>
           <Typography color="tertiary" size="xs" weight="medium">
-            Total locked Amount
+            Amount to Lock
           </Typography>
           <div className={styles.totalAmount}>
             <Avatar
@@ -181,7 +181,7 @@ export const StakingInstruction: FC<StakingInstructionProps> = ({
               weight="semibold"
               className={styles.rowLabel}
             >
-              Stake Amount
+              Stake
             </Typography>
             <div className={styles.rowValue}>
               <Avatar
