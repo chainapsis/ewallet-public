@@ -125,6 +125,12 @@ export async function handleExportPrivateKey(
 
   console.log(`${LOG_PREFIX} re-auth credentials received, starting sign-in`);
 
+  // 5a. Notify parent (UD) that re-auth completed — popup close is now expected
+  window.parent.postMessage(
+    { target: "oko_sdk", msg_type: "__export_reauth_received__" },
+    hostOrigin,
+  );
+
   try {
     // 6. Check user exists
     const checkRes = await checkUserExistsV2(

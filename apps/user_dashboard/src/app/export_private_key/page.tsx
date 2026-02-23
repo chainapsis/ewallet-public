@@ -409,19 +409,48 @@ export default function Page() {
         payload: { auth_type: authType },
       } as any);
 
-      // 3. Monitor popup close (user abandoned re-auth)
+      // 3. Listen for re-auth completion signal from iframe
+      let reauthReceived = false;
+      const reauthHandler = (event: MessageEvent) => {
+        if (event.origin !== attachedOrigin) {
+          return;
+        }
+        if (event.data?.msg_type === "__export_reauth_received__") {
+          reauthReceived = true;
+        }
+      };
+      window.addEventListener("message", reauthHandler);
+
+      // 4. Monitor popup close — only reject if re-auth hasn't completed
       const popupClosePromise = new Promise<never>((_, reject) => {
         const timer = window.setInterval(() => {
           if (!popup || popup.closed) {
             window.clearInterval(timer);
-            reject(new Error("POPUP_CLOSED"));
+            if (!reauthReceived) {
+              reject(new Error("POPUP_CLOSED"));
+            }
+            // re-auth completed → popup close is expected, don't reject
           }
         }, 1000);
         void resPromise.finally(() => window.clearInterval(timer));
       });
 
-      // 4. Wait for iframe result or popup close
-      const res = await Promise.race([resPromise, popupClosePromise]);
+      // 5. Backup timeout (in case export hangs after re-auth)
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        const timer = setTimeout(
+          () => reject(new Error("EXPORT_TIMEOUT")),
+          3 * 60 * 1000,
+        );
+        void resPromise.finally(() => clearTimeout(timer));
+      });
+
+      // 6. Wait for iframe result, popup close, or timeout
+      const res = await Promise.race([
+        resPromise,
+        popupClosePromise,
+        timeoutPromise,
+      ]);
+      window.removeEventListener("message", reauthHandler);
       popup?.close();
 
       // 5. Parse result
@@ -460,10 +489,14 @@ export default function Page() {
         return;
       }
       console.error("Export failed:", error);
+      const description =
+        error instanceof Error && error.message === "EXPORT_TIMEOUT"
+          ? "Export timed out. Please try again."
+          : "Please try again.";
       displayToast({
         variant: "confirm",
         title: "Export Failed",
-        description: "Please try again.",
+        description,
       });
     } finally {
       setIsLoading(false);
