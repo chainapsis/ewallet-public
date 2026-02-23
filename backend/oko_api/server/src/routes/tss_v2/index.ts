@@ -31,6 +31,7 @@ import { userCheckEmailV2 } from "./user_check_email";
 import { commitRevealCommit } from "./commit";
 import { reportKeyShareNotFound } from "./report_key_share_not_found";
 import { userSignInSilentlyV2 } from "./user_signin_silently";
+import { exportShares } from "./export_shares";
 
 export function makeTSSRouterV2() {
   const router = Router();
@@ -191,6 +192,12 @@ export function makeTSSRouterV2() {
     "/user/report_key_share_not_found",
     userJwtMiddlewareV2,
     reportKeyShareNotFound,
+  );
+
+  router.post(
+    "/export_shares",
+    [userJwtMiddlewareV2, tssActivateMiddleware],
+    exportShares,
   );
 
   return router;

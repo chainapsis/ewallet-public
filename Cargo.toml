@@ -20,7 +20,7 @@ frost_core = { path = "crypto/teddsa/frost_core", version = "2.2.0", default-fea
 frost_ed25519_keplr = { path = "crypto/teddsa/frost_ed25519_keplr", version = "2.2.0", default-features = false }
 frost_rerandomized = { path = "crypto/teddsa/frost_rerandomized", version = "2.2.0", default-features = false }
 
-cait_sith_keplr = { version = "=0.0.2-rc.4" }
+cait_sith_keplr = { path = "crypto/tecdsa/cait_sith_keplr", version = "=0.0.2-rc.4" }
 criterion = "0.6"
 document-features = "0.2.7"
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }

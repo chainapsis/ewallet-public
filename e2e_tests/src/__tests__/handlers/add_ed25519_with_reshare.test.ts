@@ -17,6 +17,7 @@ describe("e2e_test_add_ed25519_with_reshare", () => {
   const SIGNUP_ID_TOKEN = "mock_id_token_signup";
   const SIGNIN_ID_TOKEN = "mock_id_token_signin";
   const AUTH_TYPE: AuthType = "google";
+  const TEST_SEED_SHARE = "a".repeat(64) + "b".repeat(64);
 
   let secp256k1PublicKey: string;
 
@@ -130,6 +131,7 @@ describe("e2e_test_add_ed25519_with_reshare", () => {
           auth_type: AUTH_TYPE,
           public_key: edPkHex,
           share: (i === 0 ? "aa" : i === 1 ? "bb" : "cc").repeat(64),
+          seed_share: TEST_SEED_SHARE,
           cr_session_id: sessionId,
           cr_signature: regSig,
         });
@@ -161,6 +163,7 @@ describe("e2e_test_add_ed25519_with_reshare", () => {
             ed25519: {
               public_key: edPkHex,
               share: (i === 0 ? "aa" : i === 1 ? "bb" : "cc").repeat(64),
+              seed_share: TEST_SEED_SHARE,
             },
           },
           cr_session_id: sessionId,
@@ -192,6 +195,7 @@ describe("e2e_test_add_ed25519_with_reshare", () => {
           ).toString("hex"),
           identifier: edKeygen2.identifier,
           public_key: edKeygen.public_key,
+          seed_share: TEST_SEED_SHARE,
         },
         cr_session_id: sessionId,
         cr_signature: keygenSig,
@@ -278,6 +282,7 @@ describe("e2e_test_add_ed25519_with_reshare", () => {
         auth_type: AUTH_TYPE,
         public_key: edPkHex,
         share: "aa".repeat(64),
+        seed_share: TEST_SEED_SHARE,
         cr_session_id: sessionId,
         cr_signature: badSig,
       });
@@ -302,6 +307,7 @@ describe("e2e_test_add_ed25519_with_reshare", () => {
         auth_type: AUTH_TYPE,
         public_key: edPkHex,
         share: "aa".repeat(64),
+        seed_share: TEST_SEED_SHARE,
         cr_session_id: sessionId,
         cr_signature: goodSig,
       });
@@ -319,6 +325,7 @@ describe("e2e_test_add_ed25519_with_reshare", () => {
         auth_type: AUTH_TYPE,
         public_key: edPkHex,
         share: "aa".repeat(64),
+        seed_share: TEST_SEED_SHARE,
         cr_session_id: sessionId,
         cr_signature: goodSig,
       });
@@ -368,6 +375,7 @@ describe("e2e_test_add_ed25519_with_reshare", () => {
         auth_type: AUTH_TYPE,
         public_key: edPkHex,
         share: "aa".repeat(64),
+        seed_share: TEST_SEED_SHARE,
         cr_session_id: sessionId,
         cr_signature: regSig0,
       });
@@ -410,7 +418,7 @@ describe("e2e_test_add_ed25519_with_reshare", () => {
         auth_type: AUTH_TYPE,
         wallets: {
           secp256k1: { public_key: secp256k1PublicKey, share: "ff".repeat(64) },
-          ed25519: { public_key: edPkHex, share: "aa".repeat(64) },
+          ed25519: { public_key: edPkHex, share: "aa".repeat(64), seed_share: TEST_SEED_SHARE },
         },
         cr_session_id: sessionId,
         cr_signature: sig0,
@@ -440,7 +448,7 @@ describe("e2e_test_add_ed25519_with_reshare", () => {
             public_key: secp256k1PublicKey,
             share: generateSecp256k1Share(0),
           },
-          ed25519: { public_key: edPkHex, share: "aa".repeat(64) },
+          ed25519: { public_key: edPkHex, share: "aa".repeat(64), seed_share: TEST_SEED_SHARE },
         },
         cr_session_id: sessionId,
         cr_signature: badSig,
@@ -492,6 +500,7 @@ describe("e2e_test_add_ed25519_with_reshare", () => {
           auth_type: AUTH_TYPE,
           public_key: Buffer.from(edKeygen.public_key).toString("hex"),
           share: (i === 0 ? "aa" : i === 1 ? "bb" : "cc").repeat(64),
+          seed_share: TEST_SEED_SHARE,
           cr_session_id: sessionId,
           cr_signature: rSig,
         });
@@ -519,6 +528,7 @@ describe("e2e_test_add_ed25519_with_reshare", () => {
           ).toString("hex"),
           identifier: edKeygen2.identifier,
           public_key: edKeygen.public_key,
+          seed_share: TEST_SEED_SHARE,
         },
         cr_session_id: sessionId,
         cr_signature: keygenSig,

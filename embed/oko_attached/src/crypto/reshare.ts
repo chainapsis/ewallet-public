@@ -145,6 +145,120 @@ export async function reshareUserKeyShares(
   };
 }
 
+export async function runSeedExpandShares(
+  splitKeyShares: UserKeySharePointByNode[],
+  additionalKSNodes: NodeNameAndEndpoint[],
+  threshold: number,
+): Promise<Result<RunExpandSharesResult, string>> {
+  try {
+    if (threshold < 2) {
+      return {
+        success: false,
+        err: "Threshold must be at least 2",
+      };
+    }
+
+    if (splitKeyShares.length < threshold) {
+      return {
+        success: false,
+        err: "Number of user key shares is less than threshold",
+      };
+    }
+
+    const splitPoints: PointNumArr[] = splitKeyShares.map((splitKeyShare) => ({
+      x: [...splitKeyShare.share.x.toUint8Array()],
+      y: [...splitKeyShare.share.y.toUint8Array()],
+    }));
+
+    const additionalKSNodeHashesRes = await hashKeyshareNodeNames(
+      additionalKSNodes.map((node) => node.name),
+    );
+    if (additionalKSNodeHashesRes.success === false) {
+      return {
+        success: false,
+        err: additionalKSNodeHashesRes.err,
+      };
+    }
+    const additionalKSNodeHashes = additionalKSNodeHashesRes.data.map(
+      (bytes) => {
+        return [...bytes.toUint8Array()];
+      },
+    );
+
+    const reshareResult: {
+      t: number;
+      reshared_points: PointNumArr[];
+      secret: number[];
+    } = await wasmModule.seed_sss_expand_shares(
+      splitPoints,
+      additionalKSNodeHashes,
+      threshold,
+    );
+
+    const resharedPoints: UserKeySharePointByNode[] = [];
+    for (let i = 0; i < reshareResult.reshared_points.length; ++i) {
+      const xBytesRes = Bytes.fromUint8Array(
+        Uint8Array.from(reshareResult.reshared_points[i].x),
+        32,
+      );
+      if (xBytesRes.success === false) {
+        return {
+          success: false,
+          err: `Failed to convert reshared key share to bytes: ${xBytesRes.err}`,
+        };
+      }
+      const yBytesRes = Bytes.fromUint8Array(
+        Uint8Array.from(reshareResult.reshared_points[i].y),
+        32,
+      );
+      if (yBytesRes.success === false) {
+        return {
+          success: false,
+          err: `Failed to convert reshared key share to bytes: ${yBytesRes.err}`,
+        };
+      }
+      resharedPoints.push({
+        node:
+          i < splitKeyShares.length
+            ? splitKeyShares[i].node
+            : {
+                name: additionalKSNodes[i - splitKeyShares.length].name,
+                endpoint: additionalKSNodes[i - splitKeyShares.length].endpoint,
+              },
+        share: {
+          x: xBytesRes.data,
+          y: yBytesRes.data,
+        },
+      });
+    }
+
+    const originalSecretBytesRes = Bytes.fromUint8Array(
+      Uint8Array.from(reshareResult.secret),
+      32,
+    );
+    if (originalSecretBytesRes.success === false) {
+      return {
+        success: false,
+        err: `Failed to convert original secret to bytes: ${originalSecretBytesRes.err}`,
+      };
+    }
+
+    return {
+      success: true,
+      data: {
+        t: reshareResult.t,
+        reshared_user_key_shares: resharedPoints,
+        original_secret: originalSecretBytesRes.data,
+      },
+    };
+  } catch (e) {
+    return {
+      success: false,
+      err: String(e),
+    };
+  }
+}
+
 export async function runExpandShares(
   splitKeyShares: UserKeySharePointByNode[],
   additionalKSNodes: NodeNameAndEndpoint[],

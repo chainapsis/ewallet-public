@@ -37,6 +37,7 @@ import { TEMP_ENC_SECRET } from "@oko-wallet-api/api/tss/utils";
 
 const SSS_THRESHOLD = 2;
 const TEST_EMAIL = "test-ed25519@test.com";
+const TEST_SEED_SHARE = "a".repeat(64) + "b".repeat(64);
 
 interface TestSetupResult {
   pool: Pool;
@@ -105,10 +106,11 @@ async function setUpEd25519Wallet(pool: Pool): Promise<TestSetupResult> {
     new Uint8Array(serverKeygenOutput.key_package),
   );
 
-  // Store only signing_share and verifying_share (64 bytes total)
+  // Store signing_share, verifying_share, and seed_share
   const sharesData = {
     signing_share: serverKeyPackageShares.signing_share,
     verifying_share: serverKeyPackageShares.verifying_share,
+    seed_share: TEST_SEED_SHARE,
   };
 
   const encryptedShare = await encryptDataAsync(
