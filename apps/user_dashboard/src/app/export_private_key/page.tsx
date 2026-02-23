@@ -396,8 +396,14 @@ export default function Page() {
 
       // 1. Open re-auth popup at attached origin (match sign-in popup sizes)
       const attachedOrigin = new URL(okoWallet.sdkEndpoint).origin;
-      const popupWidth = 440;
-      const popupHeight = authType === "telegram" ? 402 : 285;
+      const isOAuthProvider =
+        authType === "google" || authType === "x" || authType === "discord";
+      const popupWidth = isOAuthProvider ? 1200 : 440;
+      const popupHeight = isOAuthProvider
+        ? 800
+        : authType === "telegram"
+          ? 402
+          : 285;
       const popupLeft = Math.max((window.screen.width - popupWidth) / 2, 0);
       const popupTop = Math.max((window.screen.height - popupHeight) / 2, 0);
       popup = window.open(
