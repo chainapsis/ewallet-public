@@ -59,7 +59,7 @@ const LOG_PREFIX = "[attached][export]";
 
 export async function handleExportPrivateKey(
   ctx: MsgEventContext,
-  payload?: { jwt: string; auth_type: AuthType } | null,
+  payload?: { auth_type: AuthType } | null,
 ): Promise<void> {
   const { port, hostOrigin } = ctx;
 
@@ -88,19 +88,19 @@ export async function handleExportPrivateKey(
     return;
   }
 
-  // 3. Payload validation (Phase 9 wires up the actual payload)
-  if (!payload?.jwt || !payload?.auth_type) {
+  // 3. Payload validation
+  if (!payload?.auth_type) {
     sendAck({
       success: false,
-      error: { type: "API_ERROR", error: "Missing payload (jwt, auth_type)" },
+      error: { type: "API_ERROR", error: "Missing payload (auth_type)" },
     });
     return;
   }
-  const { jwt } = payload;
 
-  // 4. Capture first login publicKey from appState
+  // 4. Capture first login context from appState
   const wallet = useAppState.getState().getWallet(hostOrigin);
   const firstLoginPublicKey = wallet?.publicKey ?? null;
+  const apiKey = useAppState.getState().getApiKey(hostOrigin) ?? undefined;
 
   // 5. Wait for re-auth credentials (popup → OAuth callback → interceptor)
   let creds;
@@ -203,6 +203,7 @@ export async function handleExportPrivateKey(
       creds.idToken,
       creds.authType,
       signInCommitRevealRes.data,
+      apiKey,
     );
     if (!signInResult.success) {
       sendAck({
@@ -261,7 +262,7 @@ export async function handleExportPrivateKey(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${jwt}`,
+        Authorization: `Bearer ${authToken}`,
       },
       body: JSON.stringify(exportBody),
     });

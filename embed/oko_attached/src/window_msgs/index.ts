@@ -30,7 +30,7 @@ type OkoWalletMsgGetConnectedApps = {
 type OkoWalletMsgExportPrivateKey = {
   target: "oko_attached";
   msg_type: "__export_private_key__";
-  payload: { jwt: string; auth_type: AuthType };
+  payload: { auth_type: AuthType };
 };
 
 type ExtendedOkoWalletMsg =

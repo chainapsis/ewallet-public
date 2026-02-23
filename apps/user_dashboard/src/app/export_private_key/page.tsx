@@ -347,6 +347,21 @@ function Step2Content({
   );
 }
 
+function getExportErrorDescription(errorType: string): string {
+  switch (errorType) {
+    case "REAUTH_TIMEOUT":
+      return "Re-authentication timed out. Please try again.";
+    case "USER_MISMATCH":
+      return "Account mismatch. Please log in with the same account.";
+    case "USER_NOT_FOUND":
+      return "User not found.";
+    case "ED25519_KEYGEN_REQUIRED":
+      return "Ed25519 key generation required. Please try signing in first.";
+    default:
+      return "Please try again.";
+  }
+}
+
 export default function Page() {
   const email = useUserInfoState((state) => state.email);
   const name = useUserInfoState((state) => state.name);
@@ -375,28 +390,41 @@ export default function Page() {
       return;
     }
 
+    let popup: Window | null = null;
     try {
       setIsLoading(true);
 
-      const publicKeyBefore = await okoWallet.getPublicKey();
-      await okoWallet.signIn(authType === "auth0" ? "email" : authType);
-      const publicKeyAfter = await okoWallet.getPublicKey();
+      // 1. Open re-auth popup at attached origin
+      const attachedOrigin = new URL(okoWallet.sdkEndpoint).origin;
+      popup = window.open(
+        `${attachedOrigin}/export/reauth?auth_type=${authType}`,
+        "oko_re_auth",
+        "width=600,height=700",
+      );
 
-      if (publicKeyBefore !== publicKeyAfter) {
-        displayToast({
-          variant: "confirm",
-          title: "Login Failed",
-          description: "Please try again.",
-        });
-        return;
-      }
-
-      const res = await okoWallet.sendMsgToIframe({
+      // 2. Send export request to attached iframe
+      const resPromise = okoWallet.sendMsgToIframe({
         target: "oko_attached",
         msg_type: "__export_private_key__",
-        payload: null,
+        payload: { auth_type: authType },
       } as any);
 
+      // 3. Monitor popup close (user abandoned re-auth)
+      const popupClosePromise = new Promise<never>((_, reject) => {
+        const timer = window.setInterval(() => {
+          if (!popup || popup.closed) {
+            window.clearInterval(timer);
+            reject(new Error("POPUP_CLOSED"));
+          }
+        }, 1000);
+        void resPromise.finally(() => window.clearInterval(timer));
+      });
+
+      // 4. Wait for iframe result or popup close
+      const res = await Promise.race([resPromise, popupClosePromise]);
+      popup?.close();
+
+      // 5. Parse result
       const resAny = res as unknown as {
         msg_type: "__export_private_key_ack__";
         payload:
@@ -417,17 +445,24 @@ export default function Page() {
         setPrivateKeys(resAny.payload.data);
         setStep(2);
       } else {
+        const errorType = !resAny.payload.success
+          ? resAny.payload.error.type
+          : "unknown";
         displayToast({
           variant: "confirm",
           title: "Export Failed",
-          description: "Please try again.",
+          description: getExportErrorDescription(errorType),
         });
       }
     } catch (error) {
-      console.error("Re-authentication failed:", error);
+      popup?.close();
+      if (error instanceof Error && error.message === "POPUP_CLOSED") {
+        return;
+      }
+      console.error("Export failed:", error);
       displayToast({
         variant: "confirm",
-        title: "Login Failed",
+        title: "Export Failed",
         description: "Please try again.",
       });
     } finally {

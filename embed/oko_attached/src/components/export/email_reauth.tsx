@@ -49,7 +49,7 @@ export function EmailReauth() {
   const nonce = useMemo(() => generateNonce(), []);
   const oauthState = useMemo<OAuthState>(
     () => ({
-      apiKey: "",
+      apiKey: "reauth",
       targetOrigin: window.location.origin,
       provider: "auth0",
     }),
