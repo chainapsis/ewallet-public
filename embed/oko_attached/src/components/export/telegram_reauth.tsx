@@ -1,7 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 
 import type { OAuthState } from "@oko-wallet/oko-sdk-core";
 import { RedirectUriSearchParamsKey } from "@oko-wallet/oko-sdk-core";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import { Button } from "@oko-wallet/oko-common-ui/button";
+import { WarningIcon } from "@oko-wallet/oko-common-ui/icons/warning_icon";
+import { Logo } from "@oko-wallet/oko-common-ui/logo";
+import { ThemeContext } from "@oko-wallet/oko-common-ui/theme";
 
 import { TELEGRAM_BOT_NAME } from "@oko-wallet-attached/config/telegram";
 
@@ -9,10 +14,12 @@ import {
   findEmbeddedIframe,
   sendReauthParamsToIframe,
 } from "./use_export_reauth";
+import styles from "./telegram_reauth.module.scss";
 
 const LOG_PREFIX = "[attached][telegram_reauth]";
 
 export function TelegramReauth() {
+  const theme = useContext(ThemeContext);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Build OAuthState for the callback to parse
@@ -77,25 +84,106 @@ export function TelegramReauth() {
 
   if (errorMessage) {
     return (
-      <div style={{ padding: "24px", maxWidth: "400px", margin: "0 auto" }}>
-        <div style={{ color: "red" }}>{errorMessage}</div>
+      <div className={styles.container}>
+        <div className={styles.body}>
+          <div className={styles.popupContainer}>
+            <div className={styles.errorContainer}>
+              <div className={styles.errorTopSection}>
+                <div className={styles.errorIconWrapper}>
+                  <WarningIcon size={42} />
+                </div>
+                <Typography
+                  tagType="h1"
+                  className={styles.errorTitle}
+                  color="primary"
+                  size="lg"
+                >
+                  Request failed
+                </Typography>
+                <div className={styles.errorMessageBox}>
+                  <div className={styles.errorTextRow}>
+                    <Typography
+                      size="sm"
+                      weight="semibold"
+                      className={styles.errorMessageText}
+                    >
+                      {errorMessage}
+                    </Typography>
+                  </div>
+                </div>
+                <Typography
+                  tagType="a"
+                  href="https://okowallet.userjot.com/board/report-bugs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.errorSupportLink}
+                  size="xs"
+                  weight="medium"
+                >
+                  Get Support
+                </Typography>
+              </div>
+              <div className={styles.errorBottomSection}>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  onClick={() => window.close()}
+                  fullWidth
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: "24px", maxWidth: "400px", margin: "0 auto" }}>
-      <h3>Telegram Re-Authentication</h3>
-      <p>Continue with Telegram to verify your identity.</p>
-      <div
-        id="telegram-reauth-container"
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          marginTop: "16px",
-        }}
-      />
+    <div className={styles.container}>
+      <div className={styles.body}>
+        <div className={styles.popupContainer}>
+          <div className={styles.card}>
+            <div className={styles.stepIndicator}>
+              <div className={styles.stepProgressBar}>
+                <div className={styles.stepNumberActive}>1</div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="30"
+                  height="2"
+                  viewBox="0 0 30 2"
+                  fill="none"
+                  className={styles.stepLine}
+                >
+                  <path
+                    d="M0.614014 0.614258H28.614"
+                    stroke="var(--colors-text-text-primary-900, #181D27)"
+                    strokeWidth="1.22807"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <div className={styles.stepNumberInactive}>2</div>
+              </div>
+              <div className={styles.stepText}>Step 1/2</div>
+            </div>
+            <div className={styles.cardTop}>
+              <Logo theme={theme} />
+              <div className={styles.continueText}>Continue with Telegram</div>
+            </div>
+            <div className={styles.telegramWidgetContainer}>
+              <div
+                id="telegram-reauth-container"
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
