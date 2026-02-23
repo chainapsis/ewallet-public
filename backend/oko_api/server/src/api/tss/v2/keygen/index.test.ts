@@ -81,6 +81,9 @@ async function createTestCustomer(pool: Pool): Promise<string> {
   return insertCustomerRes.data.customer_id;
 }
 
+// Dummy seed_share for testing (128 hex chars = 64 bytes, x || y)
+const TEST_SEED_SHARE = "a".repeat(64) + "b".repeat(64);
+
 describe("keygen_v2_test", () => {
   let pool: Pool;
 
@@ -137,6 +140,7 @@ describe("keygen_v2_test", () => {
           identifier: [...keygen_2_ed25519.identifier],
           public_key: [...ed25519KeygenResult.public_key],
         },
+        ed25519_seed_share: TEST_SEED_SHARE,
       };
 
       const jwtConfig = {
@@ -298,6 +302,7 @@ describe("keygen_v2_test", () => {
           identifier: [...keygen_2_ed25519.identifier],
           public_key: [...ed25519KeygenResult.public_key],
         },
+        ed25519_seed_share: TEST_SEED_SHARE,
       };
 
       const customerId = await createTestCustomer(pool);
@@ -361,6 +366,7 @@ describe("keygen_v2_test", () => {
           identifier: [...keygen_2_ed25519.identifier],
           public_key: [...ed25519KeygenResult.public_key],
         },
+        ed25519_seed_share: TEST_SEED_SHARE,
       };
 
       const customerId = await createTestCustomer(pool);
@@ -421,6 +427,7 @@ describe("keygen_v2_test", () => {
           identifier: [...keygen_2_ed25519.identifier],
           public_key: [...ed25519KeygenResult.public_key],
         },
+        ed25519_seed_share: TEST_SEED_SHARE,
       };
 
       const customerId = await createTestCustomer(pool);
@@ -478,6 +485,7 @@ describe("keygen_v2_test", () => {
           identifier: [...keygen_2_ed25519.identifier],
           public_key: [...ed25519KeygenResult.public_key],
         },
+        ed25519_seed_share: TEST_SEED_SHARE,
       };
 
       const customerId = await createTestCustomer(pool);
@@ -533,6 +541,7 @@ describe("keygen_v2_test", () => {
           identifier: [...keygen_2_ed25519.identifier],
           public_key: [...ed25519KeygenResult.public_key],
         },
+        ed25519_seed_share: TEST_SEED_SHARE,
       };
 
       const customerId = await createTestCustomer(pool);
@@ -589,6 +598,7 @@ describe("keygen_v2_test", () => {
           identifier: [...keygen_2_ed25519.identifier],
           public_key: [...ed25519KeygenResult.public_key],
         },
+        ed25519_seed_share: TEST_SEED_SHARE,
       };
 
       const customerId = await createTestCustomer(pool);
@@ -643,6 +653,7 @@ describe("keygen_v2_test", () => {
           identifier: [...keygen_2_ed25519.identifier],
           public_key: [...ed25519KeygenResult.public_key],
         },
+        ed25519_seed_share: TEST_SEED_SHARE,
       };
 
       const customerId = await createTestCustomer(pool);
@@ -734,6 +745,7 @@ describe("keygen_v2_test", () => {
           ...serverKeygenOutput,
           public_key: [...keygenResult.public_key],
         },
+        seed_share: TEST_SEED_SHARE,
         email: user_identifier,
       };
     }
@@ -917,6 +929,7 @@ describe("keygen_v2_test", () => {
           ...serverKeygenOutput,
           public_key: [...keygenResult.public_key],
         },
+        seed_share: TEST_SEED_SHARE,
         email: TEST_EMAIL_ED25519,
         name: "Test User",
       };
@@ -965,6 +978,7 @@ describe("keygen_v2_test", () => {
             ...serverKeygenOutput,
             public_key: [...keygenResult.public_key],
           },
+          seed_share: TEST_SEED_SHARE,
           email: `authtype-test-${i}@test.com`,
         };
 

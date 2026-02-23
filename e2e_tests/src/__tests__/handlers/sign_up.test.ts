@@ -20,6 +20,7 @@ describe("e2e_test_sign_up", () => {
   const TEST_USER_ID = "new_user_123";
   const SIGNUP_ID_TOKEN = "mock_id_token_signup";
   const AUTH_TYPE: AuthType = "google";
+  const TEST_SEED_SHARE = "a".repeat(64) + "b".repeat(64);
 
   function generateNodeIdentifier(nodeIndex: number): Uint8Array {
     const id = new Uint8Array(32);
@@ -128,6 +129,7 @@ describe("e2e_test_sign_up", () => {
             ed25519: {
               public_key: ed25519PublicKeyHex,
               share: ed25519Share,
+              seed_share: TEST_SEED_SHARE,
             },
           },
           cr_session_id: sessionId,
@@ -165,11 +167,55 @@ describe("e2e_test_sign_up", () => {
           identifier: serverFrostOutput.identifier,
           public_key: ed25519PublicKey,
         },
+        ed25519_seed_share: TEST_SEED_SHARE,
         cr_session_id: sessionId,
         cr_signature: keygenSignature,
       });
     expect(keygenRes.status).toBe(200);
     expect(keygenRes.body.success).toBe(true);
+
+    // Verify seed_share was stored on KSN via get_key_shares (needs sign_in session)
+    const VERIFY_ID_TOKEN = "mock_id_token_verify";
+    const verifyKeypair = generateClientKeypair();
+    const verifySessionId = generateSessionId();
+    const verifyIdHash = computeIdTokenHash(AUTH_TYPE, VERIFY_ID_TOKEN);
+
+    const ksnVerifyCommit = await request(ctx.ksnApps[0])
+      .post("/keyshare/v2/commit")
+      .send({
+        session_id: verifySessionId,
+        operation_type: "sign_in",
+        client_ephemeral_pubkey: verifyKeypair.publicKey.toHex(),
+        id_token_hash: verifyIdHash,
+      });
+    expect(ksnVerifyCommit.status).toBe(200);
+
+    const getSharesSig = createRevealSignature(
+      verifyKeypair.privateKey,
+      ksnVerifyCommit.body.data.node_pubkey,
+      verifySessionId,
+      AUTH_TYPE,
+      VERIFY_ID_TOKEN,
+      "sign_in",
+      "get_key_shares",
+    );
+
+    const getSharesRes = await request(ctx.ksnApps[0])
+      .post("/keyshare/v2")
+      .set("x-mock-user-id", TEST_USER_ID)
+      .set("Authorization", `Bearer ${VERIFY_ID_TOKEN}`)
+      .send({
+        auth_type: AUTH_TYPE,
+        wallets: {
+          secp256k1: secp256k1PublicKey,
+          ed25519: ed25519PublicKeyHex,
+        },
+        cr_session_id: verifySessionId,
+        cr_signature: getSharesSig,
+      });
+    expect(getSharesRes.status).toBe(200);
+    expect(getSharesRes.body.data.ed25519).toBeDefined();
+    expect(getSharesRes.body.data.ed25519.seed_share).toBe(TEST_SEED_SHARE);
   });
 
   it("should reject duplicate commit for same session_id", async () => {
@@ -248,7 +294,7 @@ describe("e2e_test_sign_up", () => {
             public_key: "03" + "a".repeat(64),
             share: "c1".repeat(64),
           },
-          ed25519: { public_key: "b".repeat(64), share: "d1".repeat(64) },
+          ed25519: { public_key: "b".repeat(64), share: "d1".repeat(64), seed_share: TEST_SEED_SHARE },
         },
         cr_session_id: sessionId,
         cr_signature: registerSignature,
@@ -304,7 +350,7 @@ describe("e2e_test_sign_up", () => {
             public_key: "03" + "a".repeat(64),
             share: "c1".repeat(64),
           },
-          ed25519: { public_key: "b".repeat(64), share: "d1".repeat(64) },
+          ed25519: { public_key: "b".repeat(64), share: "d1".repeat(64), seed_share: TEST_SEED_SHARE },
         },
         cr_session_id: sessionId,
         cr_signature: badSignature,
@@ -407,6 +453,7 @@ describe("e2e_test_sign_up", () => {
           identifier: new Uint8Array(32),
           public_key: new Uint8Array(32),
         },
+        ed25519_seed_share: TEST_SEED_SHARE,
         cr_session_id: sessionId,
         cr_signature: keygenSignature,
       });
@@ -461,6 +508,7 @@ describe("e2e_test_sign_up", () => {
           identifier: serverFrostOutput.identifier,
           public_key: ed25519PublicKey,
         },
+        ed25519_seed_share: TEST_SEED_SHARE,
         cr_session_id: sessionId,
         cr_signature: keygenSignature,
       });
@@ -513,6 +561,7 @@ describe("e2e_test_sign_up", () => {
           identifier: serverFrostOutput.identifier,
           public_key: frostKeygen.public_key,
         },
+        ed25519_seed_share: TEST_SEED_SHARE,
         cr_session_id: sessionId,
         cr_signature: wrongSignature,
       });
@@ -597,7 +646,7 @@ describe("e2e_test_sign_up", () => {
               public_key: secpPk1,
               share: generateSecp256k1Share(i),
             },
-            ed25519: { public_key: edPkHex1, share: edShare },
+            ed25519: { public_key: edPkHex1, share: edShare, seed_share: TEST_SEED_SHARE },
           },
           cr_session_id: sessionId1,
           cr_signature: regSig,
@@ -632,6 +681,7 @@ describe("e2e_test_sign_up", () => {
           identifier: serverOut1.identifier,
           public_key: edPk1,
         },
+        ed25519_seed_share: TEST_SEED_SHARE,
         cr_session_id: sessionId1,
         cr_signature: kgSig1,
       });
@@ -681,6 +731,7 @@ describe("e2e_test_sign_up", () => {
           identifier: serverOut1.identifier,
           public_key: edPk1,
         },
+        ed25519_seed_share: TEST_SEED_SHARE,
         cr_session_id: sessionId2,
         cr_signature: kgSig2,
       });

@@ -18,9 +18,12 @@ import type { KSNodeApiResponse } from "@oko-wallet/ksn-interface/response";
 import { logger } from "@oko-wallet-ksn-server/logger";
 import {
   checkWalletKeyShare,
-  getWalletKeyShare,
-  registerWalletKeyShare,
-  upsertWalletKeyShare,
+  getSecp256k1WalletKeyShare,
+  getEd25519WalletKeyShare,
+  registerSecp256k1WalletKeyShare,
+  registerEd25519WalletKeyShare,
+  upsertSecp256k1WalletKeyShare,
+  upsertEd25519WalletKeyShare,
 } from "./helper";
 
 /**
@@ -64,20 +67,18 @@ export async function getKeyShareV2(
 
     const [secp256k1Res, ed25519Res] = await Promise.all([
       wallets.secp256k1
-        ? getWalletKeyShare(
+        ? getSecp256k1WalletKeyShare(
             db,
             wallets.secp256k1,
             userId,
-            "secp256k1",
             encryptionSecret,
           )
         : null,
       wallets.ed25519
-        ? getWalletKeyShare(
+        ? getEd25519WalletKeyShare(
             db,
             wallets.ed25519,
             userId,
-            "ed25519",
             encryptionSecret,
           )
         : null,
@@ -255,11 +256,10 @@ export async function registerKeyShareV2(
 
       // Register each wallet
       if (wallets.secp256k1) {
-        const res = await registerWalletKeyShare(
+        const res = await registerSecp256k1WalletKeyShare(
           client,
           wallets.secp256k1,
           userId,
-          "secp256k1",
           encryptionSecret,
         );
         if (res.success === false) {
@@ -269,11 +269,10 @@ export async function registerKeyShareV2(
       }
 
       if (wallets.ed25519) {
-        const res = await registerWalletKeyShare(
+        const res = await registerEd25519WalletKeyShare(
           client,
           wallets.ed25519,
           userId,
-          "ed25519",
           encryptionSecret,
         );
         if (res.success === false) {
@@ -311,7 +310,7 @@ export async function registerEd25519V2(
   request: RegisterEd25519V2Request,
   encryptionSecret: string,
 ): Promise<KSNodeApiResponse<void>> {
-  const { user_auth_id, auth_type, public_key, share } = request;
+  const { user_auth_id, auth_type, public_key, share, seed_share } = request;
 
   try {
     // 1. Check if user exists
@@ -357,11 +356,10 @@ export async function registerEd25519V2(
     }
 
     // 3. Register ed25519 wallet
-    return await registerWalletKeyShare(
+    return await registerEd25519WalletKeyShare(
       db,
-      { public_key, share },
+      { public_key, share, seed_share },
       userId,
-      "ed25519",
       encryptionSecret,
     );
   } catch (error) {
@@ -439,11 +437,10 @@ export async function reshareKeyShareV2(
       }
 
       // 3. Upsert both wallets (validate + update if exists, register if not)
-      const secp256k1Res = await upsertWalletKeyShare(
+      const secp256k1Res = await upsertSecp256k1WalletKeyShare(
         client,
         wallets.secp256k1,
         userId,
-        "secp256k1",
         encryptionSecret,
       );
       if (secp256k1Res.success === false) {
@@ -451,11 +448,10 @@ export async function reshareKeyShareV2(
         return secp256k1Res;
       }
 
-      const ed25519Res = await upsertWalletKeyShare(
+      const ed25519Res = await upsertEd25519WalletKeyShare(
         client,
         wallets.ed25519,
         userId,
-        "ed25519",
         encryptionSecret,
       );
       if (ed25519Res.success === false) {

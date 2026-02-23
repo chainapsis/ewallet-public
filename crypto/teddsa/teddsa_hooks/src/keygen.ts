@@ -38,6 +38,22 @@ export async function runTeddsaKeygen(): Promise<
   }
 }
 
+export async function runTeddsaKeygenSeed(
+  seed: Bytes32,
+): Promise<Result<TeddsaKeygenResult, string>> {
+  try {
+    const keygenOutput: CentralizedKeygenOutput =
+      wasmModule.cli_keygen_seed_ed25519([...seed.toUint8Array()]);
+
+    return processKeygenOutput(keygenOutput);
+  } catch (error: any) {
+    return {
+      success: false,
+      err: String(error),
+    };
+  }
+}
+
 function processKeygenOutput(
   keygenOutput: CentralizedKeygenOutput,
 ): Result<TeddsaKeygenResult, string> {

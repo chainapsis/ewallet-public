@@ -129,6 +129,7 @@ pub mod triples;
 pub mod keyshare;
 pub mod presign;
 pub mod sign;
+pub mod seed_sss;
 pub mod sss;
 pub mod tecdsa;
 pub mod tecdsa_cli_srv;

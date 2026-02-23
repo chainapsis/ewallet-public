@@ -38,6 +38,7 @@ import {
 import {
   teddsaKeygenToHex,
   runEd25519KeygenAndSplit,
+  seedShareToHex,
 } from "@oko-wallet-attached/crypto/keygen_ed25519";
 
 /**
@@ -63,6 +64,8 @@ export async function handleExistingUserNeedsEd25519Keygen(
     keygen1: ed25519Keygen1,
     keygen2: ed25519Keygen2,
     userKeyShares: ed25519UserKeyShares,
+    serverSeedShare: ed25519ServerSeedShare,
+    ksnSeedShares: ed25519KsnSeedShares,
   } = ed25519KeygenSplitRes.data;
 
   // 2. Commit to oko_api and ks nodes
@@ -107,6 +110,15 @@ export async function handleExistingUserNeedsEd25519Keygen(
           err: `ed25519 share not found for node ${node.name}`,
         };
       }
+      const ksnSeedShare = ed25519KsnSeedShares.find(
+        (s) => s.node.endpoint === node.endpoint,
+      );
+      if (!ksnSeedShare) {
+        return {
+          success: false,
+          err: `ed25519 seed share not found for node ${node.name}`,
+        };
+      }
       return registerKeyShareEd25519V2(
         node.endpoint,
         idToken,
@@ -114,6 +126,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
         ed25519Keygen1.public_key.toHex(),
         teddsaKeyShareToHex(shareForNode.share),
         commitRevealRes.data,
+        seedShareToHex(ksnSeedShare.share),
       );
     }),
   );
@@ -156,6 +169,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
         identifier: [...ed25519Keygen2.identifier],
         public_key: [...ed25519Keygen2.public_key.toUint8Array()],
       },
+      seed_share: seedShareToHex(ed25519ServerSeedShare),
     },
     idToken,
     keygenEd25519CommitRevealRes.data,
@@ -290,6 +304,8 @@ export async function handleReshareAndEd25519Keygen(
     keygen1: ed25519Keygen1,
     keygen2: ed25519Keygen2,
     userKeyShares: ed25519UserKeyShares,
+    serverSeedShare: ed25519ServerSeedShare,
+    ksnSeedShares: ed25519KsnSeedShares,
   } = ed25519KeygenSplitRes.data;
 
   // 3. Commit to oko_api and ks nodes with "add_ed25519_with_reshare" operation type
@@ -334,6 +350,15 @@ export async function handleReshareAndEd25519Keygen(
       if (!commitRevealRes.success) {
         return { success: false, err: commitRevealRes.err };
       }
+      const ksnSeedShare = ed25519KsnSeedShares.find(
+        (s) => s.node.endpoint === node.endpoint,
+      );
+      if (!ksnSeedShare) {
+        return {
+          success: false,
+          err: `ed25519 seed share not found for node ${node.name}`,
+        };
+      }
       return registerKeyShareEd25519V2(
         node.endpoint,
         idToken,
@@ -341,6 +366,7 @@ export async function handleReshareAndEd25519Keygen(
         ed25519Keygen1.public_key.toHex(),
         teddsaKeyShareToHex(nodeShare.share),
         commitRevealRes.data,
+        seedShareToHex(ksnSeedShare.share),
       );
     }),
   );
@@ -381,6 +407,7 @@ export async function handleReshareAndEd25519Keygen(
         identifier: [...ed25519Keygen2.identifier],
         public_key: [...ed25519Keygen2.public_key.toUint8Array()],
       },
+      seed_share: seedShareToHex(ed25519ServerSeedShare),
     },
     idToken,
     keygenEd25519CommitRevealRes.data,
@@ -491,6 +518,15 @@ export async function handleReshareAndEd25519Keygen(
           return { success: false, err: commitRevealRes.err };
         }
 
+        const ksnSeedShare = ed25519KsnSeedShares.find(
+          (s) => s.node.endpoint === node.endpoint,
+        );
+        if (!ksnSeedShare) {
+          return {
+            success: false,
+            err: `ed25519 seed share not found for node ${node.name}`,
+          };
+        }
         // First: reshare with both wallets (secp256k1 verified/registered, ed25519 registered)
         const reshareRes = await reshareKeySharesV2(
           node.endpoint,
@@ -504,6 +540,7 @@ export async function handleReshareAndEd25519Keygen(
             ed25519: {
               public_key: ed25519Keygen1.public_key.toHex(),
               share: teddsaKeyShareToHex(ed25519Share.share),
+              seed_share: seedShareToHex(ksnSeedShare.share),
             },
           },
           commitRevealRes.data,

@@ -50,6 +50,7 @@ export async function runKeygenV2(
       user_identifier,
       keygen_2_secp256k1,
       keygen_2_ed25519,
+      ed25519_seed_share,
       email,
       name,
       metadata,
@@ -278,6 +279,7 @@ export async function runKeygenV2(
     const ed25519SharesData = {
       signing_share: ed25519KeyPackageShares.signing_share,
       verifying_share: ed25519KeyPackageShares.verifying_share,
+      seed_share: ed25519_seed_share,
     };
     const ed25519EncryptedShare = await encryptDataAsync(
       JSON.stringify(ed25519SharesData),
@@ -439,8 +441,15 @@ export async function runKeygenEd25519(
   logger: Logger,
 ): Promise<OkoApiResponse<SignInResponseV2>> {
   try {
-    const { auth_type, user_identifier, keygen_2, email, name, metadata } =
-      keygenRequest;
+    const {
+      auth_type,
+      user_identifier,
+      keygen_2,
+      seed_share,
+      email,
+      name,
+      metadata,
+    } = keygenRequest;
 
     const getUserRes = await getUserByEmailAndAuthType(
       db,
@@ -620,10 +629,10 @@ export async function runKeygenEd25519(
       new Uint8Array(keygen_2.key_package),
     );
 
-    // Store only signing_share and verifying_share (64 bytes total)
     const sharesData = {
       signing_share: ed25519KeyPackageShares.signing_share,
       verifying_share: ed25519KeyPackageShares.verifying_share,
+      seed_share,
     };
 
     const encryptedShare = await encryptDataAsync(

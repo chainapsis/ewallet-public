@@ -289,6 +289,30 @@ export const CheckEmailSuccessResponseV2Schema = registry.register(
   }),
 );
 
+const ExportSharesDataSchema = registry.register(
+  "TssExportSharesData",
+  z.object({
+    secp256k1_share: z.string().openapi({
+      description:
+        "Server's secp256k1 TSS share (encrypted private share, raw string)",
+    }),
+    ed25519_seed_share: z.string().openapi({
+      description:
+        "Server's ed25519 seed share in hex format (128 chars = 64 bytes, x[32] || y[32])",
+    }),
+  }),
+);
+
+export const ExportSharesSuccessResponseSchema = registry.register(
+  "TssExportSharesSuccessResponse",
+  z.object({
+    success: z.literal(true).openapi({
+      description: "Indicates the request succeeded",
+    }),
+    data: ExportSharesDataSchema,
+  }),
+);
+
 const SignInSilentlyDataSchema = registry.register(
   "TssUserSignInSilentlyResponse",
   z.object({
