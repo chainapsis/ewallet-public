@@ -3,15 +3,11 @@ import { useEffect, useState } from "react";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 
 import { useExportReauth } from "./use_export_reauth";
+import { EmailReauth } from "./email_reauth";
+import { TelegramReauth } from "./telegram_reauth";
 
 type ReauthStatus = "loading" | "redirecting" | "error";
 
-/**
- * Re-auth popup dispatcher.
- * Reads `auth_type` from URL search params and dispatches to the appropriate flow:
- * - google / x / discord → immediate OAuth redirect via useExportReauth hook
- * - auth0 / telegram → dedicated UI component (Phase 7)
- */
 export function ExportReauth() {
   const params = new URLSearchParams(window.location.search);
   const authType = params.get("auth_type") as AuthType | null;
@@ -27,12 +23,10 @@ export function ExportReauth() {
       return <OAuthRedirect authType={authType} />;
 
     case "auth0":
-      // Phase 7: EmailReauth component
-      return <div>Email re-authentication (coming soon)</div>;
+      return <EmailReauth />;
 
     case "telegram":
-      // Phase 7: TelegramReauth component
-      return <div>Telegram re-authentication (coming soon)</div>;
+      return <TelegramReauth />;
 
     default:
       return <div>Error: unsupported auth_type: {authType}</div>;

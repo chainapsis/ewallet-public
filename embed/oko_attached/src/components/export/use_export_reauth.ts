@@ -10,7 +10,7 @@ const GOOGLE_CLIENT_ID =
 const X_CLIENT_ID = "eWJPdVNYNlV6dEpNSTM3T01GRGI6MTpjaQ";
 const DISCORD_CLIENT_ID = "1445280712121913384";
 
-function generateNonce(length = 8) {
+export function generateNonce(length = 8) {
   return Array.from(crypto.getRandomValues(new Uint8Array(length)))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
@@ -71,7 +71,7 @@ async function createPkcePair(): Promise<{
   return { codeVerifier, codeChallenge };
 }
 
-function findEmbeddedIframe(): Window | null {
+export function findEmbeddedIframe(): Window | null {
   if (!window.opener) {
     return null;
   }
@@ -92,7 +92,7 @@ function findEmbeddedIframe(): Window | null {
   return null;
 }
 
-function sendReauthParamsToIframe(
+export function sendReauthParamsToIframe(
   iframe: Window,
   params: { nonce?: string; code_verifier?: string },
 ): void {
@@ -172,8 +172,6 @@ function buildDiscordOAuthUrl(codeChallenge: string): string {
 
   return authUrl.toString();
 }
-
-// --- Hook ---
 
 export function useExportReauth() {
   const startReauth = useCallback(
