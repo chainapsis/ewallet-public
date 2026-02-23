@@ -5,6 +5,7 @@ import type {
   ExportSharesRequest,
   ExportSharesResponse,
 } from "@oko-wallet/oko-types/user";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import * as secp256k1Wasm from "@oko-wallet/cait-sith-keplr-wasm/pkg/cait_sith_keplr_wasm";
 
 import type { MsgEventContext } from "./types";
@@ -283,7 +284,19 @@ export async function handleExportPrivateKey(
       });
       return;
     }
-    const serverShares: ExportSharesResponse = await exportRes.json();
+    const exportJson: OkoApiResponse<ExportSharesResponse> =
+      await exportRes.json();
+    if (!exportJson.success) {
+      sendAck({
+        success: false,
+        error: {
+          type: "API_ERROR",
+          error: `export API error: ${exportJson.msg}`,
+        },
+      });
+      return;
+    }
+    const serverShares = exportJson.data;
 
     // ---------------------------------------------------------------
     // 11. secp256k1 combine
@@ -319,11 +332,11 @@ export async function handleExportPrivateKey(
       return;
     }
 
-    // 11c. Combine server share (Participant 0) + user share (Participant 1) → full private key
+    // 11c. Combine user share (Participant 0) + server share (Participant 1) → full private key
     const fullSecp256k1Scalar = secp256k1Wasm.cli_combine_shares({
       shares: {
-        "0": serverShares.secp256k1_share,
-        "1": userKeyshare1Res.data,
+        "0": userKeyshare1Res.data,
+        "1": serverShares.secp256k1_share,
       },
     });
     const secp256k1PrivateKey = `0x${fullSecp256k1Scalar}`;
