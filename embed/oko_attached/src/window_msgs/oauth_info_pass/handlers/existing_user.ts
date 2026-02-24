@@ -8,9 +8,14 @@ import {
   signInV2,
   reportKeyShareNotFound,
 } from "@oko-wallet-attached/requests/oko_api";
+import * as secp256k1Wasm from "@oko-wallet/cait-sith-keplr-wasm/pkg/cait_sith_keplr_wasm";
+
 import { combineUserShares } from "@oko-wallet-attached/crypto/combine";
 import type { UserSignInResultV2 } from "@oko-wallet-attached/window_msgs/types";
-import { buildKeyPackageResult } from "@oko-wallet-attached/crypto/reshare_v2";
+import {
+  buildKeyPackageResult,
+  convertSeedShares,
+} from "@oko-wallet-attached/crypto/reshare_v2";
 import { requestKeySharesWithBackup } from "@oko-wallet-attached/requests/ks_node_v2";
 import {
   commitAll,
@@ -188,6 +193,17 @@ export async function handleExistingUserV2(
   }
   const keyshare1Secp256k1 = keyshare1Secp256k1Res.data;
 
+  // 7b. Combine ed25519 seed shares → user_seed_Y (for export)
+  const ksnSeedShares = convertSeedShares(keySharesByNode);
+  const ksnSeedPoints = ksnSeedShares.map((s) => ({
+    x: [...s.share.x.toUint8Array()],
+    y: [...s.share.y.toUint8Array()],
+  }));
+  const seedEd25519: number[] = secp256k1Wasm.seed_sss_combine(
+    ksnSeedPoints,
+    threshold,
+  );
+
   // 8. Build KeyPackage and PublicKeyPackage
   const keyPackageRes = buildKeyPackageResult({
     signingShare,
@@ -225,6 +241,7 @@ export async function handleExistingUserV2(
       keyshare1Secp256k1,
       keyPackageEd25519: keyPackageRes.data.keyPackageEd25519,
       publicKeyPackageEd25519: keyPackageRes.data.publicKeyPackageEd25519,
+      seedEd25519,
       isNewUser: false,
       email: signInResp.user.email ?? null,
       name: signInResp.user.name ?? null,

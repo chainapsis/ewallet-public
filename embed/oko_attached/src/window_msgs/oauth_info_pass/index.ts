@@ -366,6 +366,12 @@ export async function handleOAuthInfoPassV2(
     // Store ed25519 key package (signing share) separately
     appState.setKeyPackageEd25519(hostOrigin, signInResult.keyPackageEd25519);
 
+    // Store combined ed25519 user seed share for export
+    appState.setSeedEd25519(
+      hostOrigin,
+      JSON.stringify(signInResult.seedEd25519),
+    );
+
     // Store ed25519 wallet info (without signing share)
     appState.setWalletEd25519(hostOrigin, {
       authType,

@@ -77,6 +77,7 @@ export async function handleNewUserV2(
     userKeyShares: ed25519UserKeyShares,
     serverSeedShare: ed25519ServerSeedShare,
     ksnSeedShares: ed25519KsnSeedShares,
+    userSeedEd25519,
   } = ed25519KeygenSplitRes.data;
 
   // 4. Commit to oko_api and ks nodes
@@ -225,6 +226,7 @@ export async function handleNewUserV2(
       keyshare1Secp256k1: secp256k1Keygen1.tss_private_share.toHex(),
       keyPackageEd25519: keyPackageEd25519Hex.keyPackage,
       publicKeyPackageEd25519: keyPackageEd25519Hex.publicKeyPackage,
+      seedEd25519: userSeedEd25519,
       isNewUser: true,
       email: reqKeygenV2Res.data.user.email ?? null,
       name: reqKeygenV2Res.data.user.name ?? null,

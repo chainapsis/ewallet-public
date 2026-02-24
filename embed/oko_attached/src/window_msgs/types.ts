@@ -83,6 +83,8 @@ export interface UserSignInResultV2 {
   keyPackageEd25519: string;
   /** hex-encoded PublicKeyPackageRaw JSON for ed25519 */
   publicKeyPackageEd25519: string;
+  /** combined ed25519 user seed share as number[] */
+  seedEd25519: number[];
   isNewUser: boolean;
   name: string | null;
   email: string | null;

@@ -185,6 +185,7 @@ export interface Ed25519KeygenSplitResult {
   userKeyShares: TeddsaKeyShareByNode[];
   serverSeedShare: SeedSharePoint;
   ksnSeedShares: SeedShareByNode[];
+  userSeedEd25519: number[];
 }
 
 /**
@@ -342,6 +343,7 @@ export async function runEd25519KeygenAndSplit(
       userKeyShares: splitRes.data,
       serverSeedShare: serverSeedShareRes.data,
       ksnSeedShares,
+      userSeedEd25519: [...userSeedY],
     },
   };
 }

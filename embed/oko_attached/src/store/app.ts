@@ -29,6 +29,8 @@ interface PerOriginState {
   keyshare_1: string | null;
   /** hex-encoded KeyPackageRaw JSON (contains signing_share for ed25519) */
   keyPackageEd25519: string | null;
+  /** JSON-encoded number[] — combined ed25519 user seed share */
+  seedEd25519: string | null;
   nonce: string | null;
   codeVerifier: string | null;
   authToken: string | null;
@@ -64,6 +66,9 @@ interface AppActions {
 
   getKeyPackageEd25519: (hostOrigin: string) => string | null;
   setKeyPackageEd25519: (hostOrigin: string, keyPackage: string | null) => void;
+
+  getSeedEd25519: (hostOrigin: string) => string | null;
+  setSeedEd25519: (hostOrigin: string, seedEd25519: string | null) => void;
 
   getApiKey: (hostOrigin: string) => string | null;
   setApiKey: (hostOrigin: string, apiKey: string | null) => void;
@@ -160,6 +165,7 @@ export const useAppState = create(
               apiKey: null,
               keyshare_1: null,
               keyPackageEd25519: null,
+              seedEd25519: null,
               nonce: null,
               codeVerifier: null,
               authToken: null,
@@ -224,6 +230,20 @@ export const useAppState = create(
       },
       getKeyPackageEd25519: (hostOrigin: string) => {
         return get().perOrigin[hostOrigin]?.keyPackageEd25519;
+      },
+      setSeedEd25519: (hostOrigin: string, seedEd25519: string | null) => {
+        set({
+          perOrigin: {
+            ...get().perOrigin,
+            [hostOrigin]: {
+              ...get().perOrigin[hostOrigin],
+              seedEd25519,
+            },
+          },
+        });
+      },
+      getSeedEd25519: (hostOrigin: string) => {
+        return get().perOrigin[hostOrigin]?.seedEd25519;
       },
       getApiKey: (hostOrigin: string) => {
         return get().perOrigin[hostOrigin]?.apiKey;
