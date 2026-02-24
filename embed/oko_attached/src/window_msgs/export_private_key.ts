@@ -7,6 +7,8 @@ import type {
 } from "@oko-wallet/oko-types/user";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import * as secp256k1Wasm from "@oko-wallet/cait-sith-keplr-wasm/pkg/cait_sith_keplr_wasm";
+import { Bytes } from "@oko-wallet/bytes";
+import type { PublicKeyPackageRaw } from "@oko-wallet/oko-types/teddsa";
 
 import type { MsgEventContext } from "./types";
 import { OKO_SDK_TARGET } from "./target";
@@ -21,7 +23,10 @@ import {
 } from "@oko-wallet-attached/crypto/commit_reveal";
 import { decodeSecp256k1SharesByNode } from "@oko-wallet-attached/crypto/key_share_utils";
 import { combineUserShares } from "@oko-wallet-attached/crypto/combine";
-import { convertSeedShares } from "@oko-wallet-attached/crypto/reshare_v2";
+import {
+  convertSeedShares,
+  reshareUserKeySharesV2,
+} from "@oko-wallet-attached/crypto/reshare_v2";
 import {
   SEED_ID_CLIENT,
   hexToSeedSharePoint,
@@ -54,6 +59,32 @@ interface OkoWalletMsgExportPrivateKeyAck {
 
 const REAUTH_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 const LOG_PREFIX = "[attached][export]";
+
+/**
+ * Extract server verifying share from hex-encoded PublicKeyPackageRaw.
+ * verifying_shares layout: [0]=client, [1]=server.
+ */
+function extractServerVerifyingShare(publicKeyPackageHex: string) {
+  try {
+    const jsonStr = new TextDecoder().decode(
+      hexToUint8Array(publicKeyPackageHex),
+    );
+    const pkg: PublicKeyPackageRaw = JSON.parse(jsonStr);
+    const serverEntry = pkg.verifying_shares[1];
+    if (!serverEntry) {
+      return {
+        success: false as const,
+        err: "server verifying share not found in publicKeyPackage",
+      };
+    }
+    return Bytes.fromUint8Array(Uint8Array.from(serverEntry.share), 32);
+  } catch (err) {
+    return {
+      success: false as const,
+      err: `publicKeyPackage parse: ${err instanceof Error ? err.message : String(err)}`,
+    };
+  }
+}
 
 export async function handleExportPrivateKey(
   ctx: MsgEventContext,
@@ -175,14 +206,104 @@ export async function handleExportPrivateKey(
       return;
     }
 
-    // Guard: needs reshare
-    if ("needs_reshare" in checkData && checkData.needs_reshare) {
-      sendAck({ success: false, error: { type: "RESHARE_REQUIRED" } });
-      return;
-    }
-
     const { keyshare_node_meta } = checkData;
     const { threshold, nodes } = keyshare_node_meta;
+
+    // Handle reshare if needed (KSN node changes since last sign-in)
+    if ("needs_reshare" in checkData && checkData.needs_reshare) {
+      console.log(
+        `${LOG_PREFIX} needs_reshare detected, performing reshare before export`,
+      );
+
+      // Extract server verifying share from appState publicKeyPackage
+      const serverVerifyingShareRes = extractServerVerifyingShare(
+        ed25519Wallet.publicKeyPackage,
+      );
+      if (!serverVerifyingShareRes.success) {
+        sendAck({
+          success: false,
+          error: {
+            type: "COMBINE_ERROR",
+            error: `server verifying share: ${serverVerifyingShareRes.err}`,
+          },
+        });
+        return;
+      }
+
+      // Parse public keys as Bytes for reshare
+      const secp256k1PubKeyBytes = Bytes.fromHexString(secp256k1PubKey, 33);
+      if (!secp256k1PubKeyBytes.success) {
+        sendAck({
+          success: false,
+          error: {
+            type: "COMBINE_ERROR",
+            error: `secp256k1 pubkey parse: ${secp256k1PubKeyBytes.err}`,
+          },
+        });
+        return;
+      }
+      const ed25519PubKeyBytes = Bytes.fromHexString(ed25519PubKey, 32);
+      if (!ed25519PubKeyBytes.success) {
+        sendAck({
+          success: false,
+          error: {
+            type: "COMBINE_ERROR",
+            error: `ed25519 pubkey parse: ${ed25519PubKeyBytes.err}`,
+          },
+        });
+        return;
+      }
+
+      // Reshare session: commit ALL nodes with "export_with_reshare"
+      // (separate session from the subsequent export — KSN final API = "reshare")
+      const reshareKsnTargets: KsnCommitTarget[] = nodes.map((node) => ({
+        nodeUrl: node.endpoint,
+        operationType: "export_with_reshare" as const,
+      }));
+      const reshareCommitRes = await commitAll(
+        "export_with_reshare",
+        creds.authType,
+        creds.idToken,
+        reshareKsnTargets,
+        nodes.length, // ALL nodes must commit for reshare
+      );
+      if (!reshareCommitRes.success) {
+        sendAck({
+          success: false,
+          error: {
+            type: "API_ERROR",
+            error: `reshare commit failed: ${reshareCommitRes.err}`,
+          },
+        });
+        return;
+      }
+
+      // Perform reshare (get existing shares → expand → send to all nodes)
+      const reshareRes = await reshareUserKeySharesV2(
+        creds.idToken,
+        creds.authType,
+        keyshare_node_meta,
+        { publicKey: secp256k1PubKeyBytes.data },
+        {
+          publicKey: ed25519PubKeyBytes.data,
+          serverVerifyingShare: serverVerifyingShareRes.data,
+        },
+        reshareCommitRes.data.session,
+      );
+      if (!reshareRes.success) {
+        sendAck({
+          success: false,
+          error: {
+            type: "API_ERROR",
+            error: `reshare failed: ${reshareRes.err}`,
+          },
+        });
+        return;
+      }
+
+      console.log(`${LOG_PREFIX} reshare complete, proceeding to export`);
+      // Fall through to normal export flow below
+    }
 
     // 7. Commit to KSN nodes + oko_api with "export" operation type
     const ksnCommitTargets: KsnCommitTarget[] = nodes.map((node) => ({
