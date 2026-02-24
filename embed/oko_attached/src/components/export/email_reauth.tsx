@@ -58,6 +58,7 @@ export function EmailReauth() {
       apiKey: "reauth",
       targetOrigin: window.location.origin,
       provider: "auth0",
+      modalId: "reauth",
     }),
     [],
   );
@@ -132,7 +133,7 @@ export function EmailReauth() {
     setIsSubmitting(true);
     setErrorMessage(null);
 
-    const callbackUrl = `${window.location.origin}/email/callback`;
+    const callbackUrl = `${window.location.origin}/email/callback?modal_id=reauth`;
 
     console.log(`${LOG_PREFIX} verifying OTP for`, email.trim());
 
