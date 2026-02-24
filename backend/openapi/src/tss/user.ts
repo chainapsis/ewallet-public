@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 import { registry } from "../registry";
-import { CommitRevealRequestFieldsSchema } from "./commit_reveal";
 
 const KsNodeStatusEnum = z.enum(["ACTIVE", "INACTIVE"]);
 const WalletStatusEnum = z.enum([
@@ -292,16 +291,14 @@ export const CheckEmailSuccessResponseV2Schema = registry.register(
 
 export const ExportSharesRequestSchema = registry.register(
   "TssExportSharesRequest",
-  z
-    .object({
-      first_login_jwt: z.string().openapi({
-        description: "JWT from the first login session",
-      }),
-      auth_type: AuthTypeEnum.openapi({
-        description: "Authentication provider type for re-authentication",
-      }),
-    })
-    .merge(CommitRevealRequestFieldsSchema),
+  z.object({
+    first_login_jwt: z.string().openapi({
+      description: "JWT from the first login session",
+    }),
+    auth_type: AuthTypeEnum.openapi({
+      description: "Authentication provider type for re-authentication",
+    }),
+  }),
 );
 
 const ExportSharesDataSchema = registry.register(

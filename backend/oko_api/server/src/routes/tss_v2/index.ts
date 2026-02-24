@@ -198,7 +198,6 @@ export function makeTSSRouterV2() {
     "/export_shares",
     userJwtFromBodyMiddleware,
     oauthMiddleware,
-    commitRevealMiddleware("export_shares"),
     tssActivateMiddleware,
     exportShares,
   );

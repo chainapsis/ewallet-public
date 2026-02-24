@@ -26,7 +26,7 @@ registry.registerPath({
   tags: ["TSS"],
   summary: "Export server shares for wallet export",
   description:
-    "Exports the server's secp256k1 TSS share and ed25519 seed_share. Requires dual authentication: JWT (body.first_login_jwt) + OAuth re-authentication (Authorization Bearer id_token). Protected by commit-reveal middleware.",
+    "Exports the server's secp256k1 TSS share and ed25519 seed_share. Requires dual authentication: JWT (body.first_login_jwt) + OAuth re-authentication (Authorization Bearer id_token).",
   security: [{ userAuth: [] }],
   request: {
     headers: OAuthHeaderSchema,

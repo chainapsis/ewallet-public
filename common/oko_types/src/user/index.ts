@@ -97,8 +97,6 @@ export interface SignInResponseV2 {
 export interface ExportSharesRequest {
   first_login_jwt: string;
   auth_type: AuthType;
-  cr_session_id: string;
-  cr_signature: string;
 }
 
 export interface ExportSharesResponse {
