@@ -3,9 +3,7 @@ export type OperationType =
   | "sign_in"
   | "reshare"
   | "add_ed25519"
-  | "add_ed25519_with_reshare"
-  | "export"
-  | "export_with_reshare";
+  | "add_ed25519_with_reshare";
 
 export type ApiName =
   | "get_key_shares"

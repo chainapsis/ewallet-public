@@ -9,8 +9,6 @@ export const ALLOWED_APIS = {
   reshare: ["signin", "reshare"],
   add_ed25519: ["signin", "keygen_ed25519"],
   add_ed25519_with_reshare: ["signin", "keygen_ed25519", "reshare"],
-  export: ["export_shares"],
-  export_with_reshare: ["reshare", "export_shares"],
 };
 
 export const FINAL_APIS = {
@@ -19,8 +17,6 @@ export const FINAL_APIS = {
   reshare: "reshare",
   add_ed25519: "keygen_ed25519",
   add_ed25519_with_reshare: "reshare",
-  export: "export_shares",
-  export_with_reshare: "export_shares",
 };
 
 export function isApiAllowed(

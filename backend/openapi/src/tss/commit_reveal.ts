@@ -8,8 +8,6 @@ export const OperationTypeSchema = z
     "reshare",
     "add_ed25519",
     "add_ed25519_with_reshare",
-    "export",
-    "export_with_reshare",
   ])
   .describe("Operation type for commit-reveal session");
 
