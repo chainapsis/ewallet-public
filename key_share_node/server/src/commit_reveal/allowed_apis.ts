@@ -9,6 +9,8 @@ export const ALLOWED_APIS: Record<OperationType, ApiName[]> = {
   reshare: ["get_key_shares", "reshare"],
   add_ed25519: ["register_ed25519", "get_key_shares"],
   add_ed25519_with_reshare: ["register_ed25519", "get_key_shares", "reshare"],
+  export: ["get_key_shares"],
+  export_with_reshare: ["get_key_shares", "reshare"],
 };
 
 export const FINAL_APIS: Record<OperationType, ApiName> = {
@@ -17,6 +19,8 @@ export const FINAL_APIS: Record<OperationType, ApiName> = {
   reshare: "reshare",
   add_ed25519: "get_key_shares",
   add_ed25519_with_reshare: "reshare",
+  export: "get_key_shares",
+  export_with_reshare: "reshare",
 };
 
 export function isApiAllowed(
