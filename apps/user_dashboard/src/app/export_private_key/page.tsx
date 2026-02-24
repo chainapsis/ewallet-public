@@ -357,6 +357,8 @@ function getExportErrorDescription(errorType: string): string {
       return "User not found.";
     case "ED25519_KEYGEN_REQUIRED":
       return "Ed25519 key generation required. Please try signing in first.";
+    case "NODES_BELOW_THRESHOLD":
+      return "Service temporarily unavailable. Please try again later.";
     default:
       return "Please try again.";
   }
@@ -391,6 +393,7 @@ export default function Page() {
     }
 
     let popup: Window | null = null;
+    let reauthHandler: ((event: MessageEvent) => void) | null = null;
     try {
       setIsLoading(true);
 
@@ -421,7 +424,7 @@ export default function Page() {
 
       // 3. Listen for re-auth completion signal from iframe
       let reauthReceived = false;
-      const reauthHandler = (event: MessageEvent) => {
+      reauthHandler = (event: MessageEvent) => {
         if (event.origin !== attachedOrigin) {
           return;
         }
@@ -460,7 +463,6 @@ export default function Page() {
         popupClosePromise,
         timeoutPromise,
       ]);
-      window.removeEventListener("message", reauthHandler);
       popup?.close();
 
       // 5. Parse result
@@ -509,6 +511,9 @@ export default function Page() {
         description,
       });
     } finally {
+      if (reauthHandler) {
+        window.removeEventListener("message", reauthHandler);
+      }
       setIsLoading(false);
     }
   }, [okoWallet, authType]);

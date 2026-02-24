@@ -265,7 +265,9 @@ export async function handleOAuthInfoPassV2(
 
     // Re-auth interceptor: if an export request is waiting for re-auth credentials,
     // extract OAuth credentials and resolve the pending promise.
-    // Skips api_key/hostOriginList checks (re-auth uses attached origin with no SDK API key).
+    // Fires before api_key/hostOriginList checks (re-auth uses attached origin with no SDK API key).
+    // Mutual exclusion: only one resolver can be active at a time (module-level singleton in
+    // export_reauth_state.ts), so a normal sign-in callback cannot be intercepted during export.
     if (hasActiveReAuthResolver()) {
       const authType: AuthType = message.payload.auth_type;
       const validateOauthRes = await getCredentialsFromPayload(

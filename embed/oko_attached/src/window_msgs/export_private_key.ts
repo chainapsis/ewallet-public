@@ -32,6 +32,7 @@ import {
   hexToSeedSharePoint,
   hexToUint8Array,
 } from "@oko-wallet-attached/crypto/keygen_ed25519";
+import { getServerFrostIdentifier } from "@oko-wallet-attached/crypto/sss_ed25519";
 
 import { setReAuthResolver } from "./export_reauth_state";
 import { checkUserExistsV2 } from "./oauth_info_pass/handlers/check_user";
@@ -41,6 +42,7 @@ type ExportPrivateKeyError =
   | { type: "NOT_AUTHENTICATED" }
   | { type: "USER_NOT_FOUND" }
   | { type: "ED25519_KEYGEN_REQUIRED" }
+  | { type: "NODES_BELOW_THRESHOLD" }
   | { type: "RESHARE_REQUIRED" }
   | { type: "COMBINE_ERROR"; error: string }
   | { type: "API_ERROR"; error: string }
@@ -66,11 +68,22 @@ const LOG_PREFIX = "[attached][export]";
  */
 function extractServerVerifyingShare(publicKeyPackageHex: string) {
   try {
+    const serverIdRes = getServerFrostIdentifier();
+    if (!serverIdRes.success) {
+      return {
+        success: false as const,
+        err: `server identifier: ${serverIdRes.err}`,
+      };
+    }
+    const serverIdentifierHex = serverIdRes.data.toHex();
+
     const jsonStr = new TextDecoder().decode(
       hexToUint8Array(publicKeyPackageHex),
     );
     const pkg: PublicKeyPackageRaw = JSON.parse(jsonStr);
-    const serverEntry = pkg.verifying_shares[1];
+    const serverEntry = pkg.verifying_shares.find(
+      (entry) => entry.identifier === serverIdentifierHex,
+    );
     if (!serverEntry) {
       return {
         success: false as const,
@@ -167,7 +180,7 @@ export async function handleExportPrivateKey(
 
   // 5a. Notify parent (UD) that re-auth completed — popup close is now expected
   window.parent.postMessage(
-    { target: "oko_sdk", msg_type: "__export_reauth_received__" },
+    { target: "oko_user_dashboard", msg_type: "__export_reauth_received__" },
     hostOrigin,
   );
 
@@ -193,6 +206,15 @@ export async function handleExportPrivateKey(
     }
 
     const checkData = checkRes.data.data;
+
+    // Guard: active nodes below threshold
+    if (checkData.active_nodes_below_threshold) {
+      sendAck({
+        success: false,
+        error: { type: "NODES_BELOW_THRESHOLD" },
+      });
+      return;
+    }
 
     // Guard: user not found
     if (!checkData.exists) {
