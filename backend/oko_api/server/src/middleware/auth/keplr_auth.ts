@@ -64,22 +64,16 @@ export async function userJwtMiddleware(
   }
 }
 
-export async function userJwtMiddlewareV2(
+/**
+ * Verify a V2 JWT token and set `res.locals.user` with the decoded payload.
+ * Shared by `userJwtMiddlewareV2` (header) and `userJwtFromBodyMiddleware` (body).
+ */
+function verifyJwtV2AndSetLocals(
+  token: string,
   req: UserAuthenticatedRequest,
   res: Response,
   next: NextFunction,
-) {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    res
-      .status(401)
-      .json({ error: "Authorization header with Bearer token required" });
-    return;
-  }
-
-  const token = authHeader.substring(7); // skip "Bearer "
-
+): void {
   try {
     const state = req.app.locals;
 
@@ -95,9 +89,13 @@ export async function userJwtMiddlewareV2(
       return;
     }
 
-    const payload = verifyTokenRes.data
+    const payload = verifyTokenRes.data;
 
-    if (!payload.email || !payload.wallet_id_secp256k1 || !payload.wallet_id_ed25519) {
+    if (
+      !payload.email ||
+      !payload.wallet_id_secp256k1 ||
+      !payload.wallet_id_ed25519
+    ) {
       res.status(401).json({
         error: "Unauthorized: Invalid token",
       });
@@ -111,13 +109,50 @@ export async function userJwtMiddlewareV2(
     };
 
     next();
-    return;
   } catch (error) {
     res.status(500).json({
       error: `Token validation failed: ${error instanceof Error ? error.message : String(error)}`,
     });
+  }
+}
+
+export async function userJwtMiddlewareV2(
+  req: UserAuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    res
+      .status(401)
+      .json({ error: "Authorization header with Bearer token required" });
     return;
   }
+
+  const token = authHeader.substring(7); // skip "Bearer "
+  verifyJwtV2AndSetLocals(token, req, res, next);
+}
+
+/**
+ * JWT middleware that reads the token from `body.first_login_jwt` instead of
+ * the Authorization header. Used by export_shares endpoint.
+ */
+export async function userJwtFromBodyMiddleware(
+  req: UserAuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+) {
+  const firstLoginJwt = req.body?.first_login_jwt;
+
+  if (!firstLoginJwt || typeof firstLoginJwt !== "string") {
+    res
+      .status(401)
+      .json({ error: "first_login_jwt is required in request body" });
+    return;
+  }
+
+  verifyJwtV2AndSetLocals(firstLoginJwt, req, res, next);
 }
 
 export function sendResponseWithNewToken(

@@ -12,10 +12,7 @@ import type { MsgEventContext } from "./types";
 import { OKO_SDK_TARGET } from "./target";
 import { useAppState } from "@oko-wallet-attached/store/app";
 import { USER_DASHBOARD_ORIGINS } from "@oko-wallet-attached/requests/endpoints";
-import {
-  signInV2,
-  TSS_V2_ENDPOINT,
-} from "@oko-wallet-attached/requests/oko_api";
+import { TSS_V2_ENDPOINT } from "@oko-wallet-attached/requests/oko_api";
 import { requestKeySharesWithBackup } from "@oko-wallet-attached/requests/ks_node_v2";
 import {
   commitAll,
@@ -39,7 +36,7 @@ type ExportPrivateKeyError =
   | { type: "NOT_AUTHENTICATED" }
   | { type: "USER_NOT_FOUND" }
   | { type: "ED25519_KEYGEN_REQUIRED" }
-  | { type: "USER_MISMATCH" }
+  | { type: "RESHARE_REQUIRED" }
   | { type: "COMBINE_ERROR"; error: string }
   | { type: "API_ERROR"; error: string }
   | { type: "REAUTH_TIMEOUT" }
@@ -82,9 +79,9 @@ export async function handleExportPrivateKey(
     return;
   }
 
-  // 2. Auth token validation
-  const authToken = useAppState.getState().getAuthToken(hostOrigin);
-  if (!authToken) {
+  // 2. Auth token validation (first login JWT — will be sent to export_shares as body param)
+  const firstLoginJwt = useAppState.getState().getAuthToken(hostOrigin);
+  if (!firstLoginJwt) {
     sendAck({ success: false, error: { type: "NOT_AUTHENTICATED" } });
     return;
   }
@@ -98,10 +95,21 @@ export async function handleExportPrivateKey(
     return;
   }
 
-  // 4. Capture first login context from appState
+  // 4. Get public keys from appState (no signInV2 needed)
   const wallet = useAppState.getState().getWallet(hostOrigin);
-  const firstLoginPublicKey = wallet?.publicKey ?? null;
-  const apiKey = useAppState.getState().getApiKey(hostOrigin) ?? undefined;
+  const ed25519Wallet = useAppState.getState().getWalletEd25519(hostOrigin);
+  if (!wallet?.publicKey || !ed25519Wallet?.publicKey) {
+    sendAck({
+      success: false,
+      error: {
+        type: "API_ERROR",
+        error: "Wallet public keys not found in appState",
+      },
+    });
+    return;
+  }
+  const secp256k1PubKey = wallet.publicKey;
+  const ed25519PubKey = ed25519Wallet.publicKey;
 
   // 5. Wait for re-auth credentials (popup → OAuth callback → interceptor)
   let creds;
@@ -124,7 +132,7 @@ export async function handleExportPrivateKey(
     return;
   }
 
-  console.log(`${LOG_PREFIX} re-auth credentials received, starting sign-in`);
+  console.log(`${LOG_PREFIX} re-auth credentials received, starting export`);
 
   // 5a. Notify parent (UD) that re-auth completed — popup close is now expected
   window.parent.postMessage(
@@ -167,16 +175,22 @@ export async function handleExportPrivateKey(
       return;
     }
 
+    // Guard: needs reshare
+    if ("needs_reshare" in checkData && checkData.needs_reshare) {
+      sendAck({ success: false, error: { type: "RESHARE_REQUIRED" } });
+      return;
+    }
+
     const { keyshare_node_meta } = checkData;
     const { threshold, nodes } = keyshare_node_meta;
 
-    // 7. Sign-in building blocks: commitAll → signInV2
+    // 7. Commit to KSN nodes + oko_api with "export" operation type
     const ksnCommitTargets: KsnCommitTarget[] = nodes.map((node) => ({
       nodeUrl: node.endpoint,
-      operationType: "sign_in" as const,
+      operationType: "export" as const,
     }));
     const commitRes = await commitAll(
-      "sign_in",
+      "export",
       creds.authType,
       creds.idToken,
       ksnCommitTargets,
@@ -191,55 +205,13 @@ export async function handleExportPrivateKey(
     }
     const { session, readyNodes, pendingCommits } = commitRes.data;
 
-    const signInCommitRevealRes = createOkoApiCommitRevealParams(
-      session,
-      "signin",
-    );
-    if (!signInCommitRevealRes.success) {
-      sendAck({
-        success: false,
-        error: {
-          type: "API_ERROR",
-          error: `commit-reveal params failed: ${signInCommitRevealRes.err}`,
-        },
-      });
-      return;
-    }
-
-    const signInResult = await signInV2(
-      creds.idToken,
-      creds.authType,
-      signInCommitRevealRes.data,
-      apiKey,
-    );
-    if (!signInResult.success) {
-      sendAck({
-        success: false,
-        error: {
-          type: "API_ERROR",
-          error: `signIn failed: ${signInResult.err.error}`,
-        },
-      });
-      return;
-    }
-    const signInResp = signInResult.data;
-
-    // 8. User mismatch check (re-auth must match first login)
-    if (
-      firstLoginPublicKey &&
-      signInResp.user.public_key_secp256k1 !== firstLoginPublicKey
-    ) {
-      sendAck({ success: false, error: { type: "USER_MISMATCH" } });
-      return;
-    }
-
-    // 9. Request key shares from KSN
+    // 8. Request key shares from KSN (using appState public keys)
     const requestSharesRes = await requestKeySharesWithBackup({
       idToken: creds.idToken,
       authType: creds.authType,
       wallets: {
-        secp256k1: signInResp.user.public_key_secp256k1,
-        ed25519: signInResp.user.public_key_ed25519,
+        secp256k1: secp256k1PubKey,
+        ed25519: ed25519PubKey,
       },
       threshold,
       session,
@@ -259,27 +231,45 @@ export async function handleExportPrivateKey(
     }
     const { shares: keySharesByNode } = requestSharesRes.data;
 
-    // 10. Export API: get server shares (dual-auth: JWT + re-auth id_token)
+    // 9. Export API: get server shares
+    //    Authorization header = re-auth id_token (for commit-reveal middleware)
+    //    Body = first_login_jwt + auth_type + commit-reveal params
+    const exportCrParamsRes = createOkoApiCommitRevealParams(
+      session,
+      "export_shares",
+    );
+    if (!exportCrParamsRes.success) {
+      sendAck({
+        success: false,
+        error: {
+          type: "API_ERROR",
+          error: `commit-reveal params failed: ${exportCrParamsRes.err}`,
+        },
+      });
+      return;
+    }
+
     const exportApiUrl = `${TSS_V2_ENDPOINT}/export_shares`;
     const exportBody: ExportSharesRequest = {
+      first_login_jwt: firstLoginJwt,
       auth_type: creds.authType,
-      id_token: creds.idToken,
+      cr_session_id: exportCrParamsRes.data.cr_session_id,
+      cr_signature: exportCrParamsRes.data.cr_signature,
     };
     const exportRes = await fetch(exportApiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${authToken}`,
+        Authorization: `Bearer ${creds.idToken}`,
       },
       body: JSON.stringify(exportBody),
     });
     if (!exportRes.ok) {
-      const errText = await exportRes.text().catch(() => "");
       sendAck({
         success: false,
         error: {
           type: "API_ERROR",
-          error: `export API ${exportRes.status}: ${errText}`,
+          error: `export API failed with status ${exportRes.status}`,
         },
       });
       return;
@@ -299,10 +289,10 @@ export async function handleExportPrivateKey(
     const serverShares = exportJson.data;
 
     // ---------------------------------------------------------------
-    // 11. secp256k1 combine
+    // 10. secp256k1 combine
     // ---------------------------------------------------------------
 
-    // 11a. Decode KSN secp256k1 shares → Point256 format
+    // 10a. Decode KSN secp256k1 shares → Point256 format
     const secp256k1DecodeRes =
       await decodeSecp256k1SharesByNode(keySharesByNode);
     if (!secp256k1DecodeRes.success) {
@@ -316,7 +306,7 @@ export async function handleExportPrivateKey(
       return;
     }
 
-    // 11b. Combine KSN shares → user's keyshare_1 (Lagrange interpolation)
+    // 10b. Combine KSN shares → user's keyshare_1 (Lagrange interpolation)
     const userKeyshare1Res = await combineUserShares(
       secp256k1DecodeRes.data,
       threshold,
@@ -332,7 +322,7 @@ export async function handleExportPrivateKey(
       return;
     }
 
-    // 11c. Combine user share (Participant 0) + server share (Participant 1) → full private key
+    // 10c. Combine user share (Participant 0) + server share (Participant 1) → full private key
     const fullSecp256k1Scalar = secp256k1Wasm.cli_combine_shares({
       shares: {
         "0": userKeyshare1Res.data,
@@ -342,25 +332,25 @@ export async function handleExportPrivateKey(
     const secp256k1PrivateKey = `0x${fullSecp256k1Scalar}`;
 
     // ---------------------------------------------------------------
-    // 12. ed25519 seed 2-stage combine
+    // 11. ed25519 seed 2-stage combine
     // ---------------------------------------------------------------
 
-    // 12a. Convert KSN seed shares to UserKeySharePointByNode format
+    // 11a. Convert KSN seed shares to UserKeySharePointByNode format
     const ksnSeedShares = convertSeedShares(keySharesByNode);
 
-    // 12b. Convert to PointNumArr for WASM
+    // 11b. Convert to PointNumArr for WASM
     const ksnSeedPoints = ksnSeedShares.map((s) => ({
       x: [...s.share.x.toUint8Array()],
       y: [...s.share.y.toUint8Array()],
     }));
 
-    // 12c. Stage 1: Combine KSN seed shares → user_seed_Y
+    // 11c. Stage 1: Combine KSN seed shares → user_seed_Y
     const userSeedY: number[] = secp256k1Wasm.seed_sss_combine(
       ksnSeedPoints,
       threshold,
     );
 
-    // 12d. Parse server's seed share
+    // 11d. Parse server's seed share
     const serverSeedShareRes = hexToSeedSharePoint(
       serverShares.ed25519_seed_share,
     );
@@ -375,7 +365,7 @@ export async function handleExportPrivateKey(
       return;
     }
 
-    // 12e. Stage 2: Combine server share + reconstructed user share → original seed
+    // 11e. Stage 2: Combine server share + reconstructed user share → original seed
     const serverSeedPoint = {
       x: [...serverSeedShareRes.data.x.toUint8Array()],
       y: [...serverSeedShareRes.data.y.toUint8Array()],
@@ -389,15 +379,15 @@ export async function handleExportPrivateKey(
       2,
     );
 
-    // 12f. Build ed25519 keypair: seed[32] || pubkey[32] → bs58
+    // 11f. Build ed25519 keypair: seed[32] || pubkey[32] → bs58
     const seedBytes = Uint8Array.from(recoveredSeed);
-    const pubkeyBytes = hexToUint8Array(signInResp.user.public_key_ed25519);
+    const pubkeyBytes = hexToUint8Array(ed25519PubKey);
     const keypairBytes = new Uint8Array(seedBytes.length + pubkeyBytes.length);
     keypairBytes.set(seedBytes, 0);
     keypairBytes.set(pubkeyBytes, seedBytes.length);
     const ed25519Keypair = bs58.encode(keypairBytes);
 
-    // 13. Return result
+    // 12. Return result
     console.log(`${LOG_PREFIX} export complete`);
     sendAck({
       success: true,
