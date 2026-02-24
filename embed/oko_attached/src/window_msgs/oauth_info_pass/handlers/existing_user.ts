@@ -3,13 +3,12 @@ import type { KeyShareNodeMetaWithNodeStatusInfo } from "@oko-wallet/oko-types/t
 import type { Result } from "@oko-wallet/stdlib-js";
 import { type OAuthSignInError } from "@oko-wallet/oko-sdk-core";
 import { Bytes } from "@oko-wallet/bytes";
+import * as secp256k1Wasm from "@oko-wallet/cait-sith-keplr-wasm/pkg/cait_sith_keplr_wasm";
 
 import {
   signInV2,
   reportKeyShareNotFound,
 } from "@oko-wallet-attached/requests/oko_api";
-import * as secp256k1Wasm from "@oko-wallet/cait-sith-keplr-wasm/pkg/cait_sith_keplr_wasm";
-
 import { combineUserShares } from "@oko-wallet-attached/crypto/combine";
 import type { UserSignInResultV2 } from "@oko-wallet-attached/window_msgs/types";
 import {
