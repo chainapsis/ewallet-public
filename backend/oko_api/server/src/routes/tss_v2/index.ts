@@ -196,7 +196,7 @@ export function makeTSSRouterV2() {
 
   router.post(
     "/export_shares",
-    [userJwtMiddlewareV2, tssActivateMiddleware],
+    [userJwtMiddlewareV2, commitRevealMiddleware("export_shares"), tssActivateMiddleware],
     exportShares,
   );
 
