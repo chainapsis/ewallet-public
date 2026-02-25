@@ -68,5 +68,5 @@ function OAuthRedirect({ authType }: { authType: "google" | "x" | "discord" }) {
     return <div>Error: {error}</div>;
   }
 
-  return <div>Redirecting to {authType} authentication...</div>;
+  return null;
 }
