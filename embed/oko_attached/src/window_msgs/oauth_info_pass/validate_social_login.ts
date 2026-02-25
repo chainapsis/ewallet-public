@@ -197,6 +197,12 @@ export async function getCredentialsFromPayload(
         return validateOAuthPayloadOfTelegram(payload);
       case "discord":
         return validateOAuthPayloadOfDiscord(payload, hostOrigin);
+      case "github":
+        // TODO(OKO-636): implement in Phase 6
+        return {
+          success: false,
+          err: { type: "unknown", error: "GitHub login not yet implemented" },
+        };
     }
   } else {
     // payload is OAuthPayload
@@ -222,6 +228,7 @@ function isOAuthTokenRequestPayload(
   return (
     payload.auth_type === "x" ||
     payload.auth_type === "telegram" ||
-    payload.auth_type === "discord"
+    payload.auth_type === "discord" ||
+    payload.auth_type === "github"
   );
 }

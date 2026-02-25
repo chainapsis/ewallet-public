@@ -4,4 +4,5 @@ export type LoginMethod =
   | "x"
   | "discord"
   | "apple"
-  | "email";
+  | "email"
+  | "github";

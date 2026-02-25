@@ -7,6 +7,7 @@ import {
   XIcon,
   TelegramIcon,
   DiscordIcon,
+  GithubIcon,
   SpinnerLoadingIcon,
   SpinnerFailedIcon,
 } from "./icons";
@@ -23,6 +24,7 @@ const PROVIDER_ICONS: Record<SignInType, FC> = {
   x: XIcon,
   telegram: TelegramIcon,
   discord: DiscordIcon,
+  github: GithubIcon,
 };
 
 export const ProgressView: FC<ProgressViewProps> = ({
