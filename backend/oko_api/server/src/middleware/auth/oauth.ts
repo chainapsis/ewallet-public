@@ -21,6 +21,10 @@ import {
   discordAuthMiddleware,
   type DiscordAuthenticatedRequest,
 } from "@oko-wallet-api/middleware/auth/discord_auth";
+import {
+  githubAuthMiddleware,
+  type GithubAuthenticatedRequest,
+} from "@oko-wallet-api/middleware/auth/github_auth";
 import type {
   OAuthBody,
   OAuthLocals,
@@ -59,9 +63,15 @@ export async function oauthMiddleware(
         res,
         next,
       );
+    case "github":
+      return githubAuthMiddleware(
+        req as GithubAuthenticatedRequest,
+        res,
+        next,
+      );
     default:
       res.status(400).json({
-        error: `Invalid auth_type: ${authType}. Must be 'google', 'auth0', 'x', or 'telegram'`,
+        error: `Invalid auth_type: ${authType}. Must be 'google', 'auth0', 'x', 'telegram', 'discord', or 'github'`,
       });
       return;
   }

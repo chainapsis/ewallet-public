@@ -3,7 +3,7 @@ import { z } from "zod";
 import { registry } from "../registry";
 import { CommitRevealRequestFieldsSchema } from "./commit_reveal";
 
-const OAuthTypeSchema = z.enum(["google", "auth0", "x", "telegram", "discord"]).openapi({
+const OAuthTypeSchema = z.enum(["google", "auth0", "x", "telegram", "discord", "github"]).openapi({
   description: "OAuth provider type",
   example: "google",
 });
