@@ -11,6 +11,7 @@ import type { OAuthValidationFail } from "@oko-wallet-ksn-server/auth/types";
 import {
   validateAuth0Token,
   validateDiscordOAuthToken,
+  validateGithubOAuthToken,
   validateGoogleOAuthToken,
   validateTelegramHash,
 } from "@oko-wallet-ksn-server/auth";
@@ -19,6 +20,7 @@ import type { ResponseLocal } from "@oko-wallet-ksn-server/routes/io";
 import { validateAccessTokenOfX } from "@oko-wallet-ksn-server/auth/x";
 import type { Auth0TokenInfo } from "@oko-wallet-ksn-server/auth/auth0";
 import type { XUserInfo } from "@oko-wallet-ksn-server/auth/x";
+import type { GithubUserInfo } from "@oko-wallet-ksn-server/auth/github";
 import type {
   TelegramUserData,
   TelegramUserInfo,
@@ -48,6 +50,10 @@ type VerifyResult =
   | {
       auth_type: "discord";
       data: Result<DiscordTokenInfo, OAuthValidationFail>;
+    }
+  | {
+      auth_type: "github";
+      data: Result<GithubUserInfo, OAuthValidationFail>;
     };
 
 export interface AuthenticatedRequest<T = any>
@@ -120,6 +126,12 @@ export async function bearerTokenMiddleware(
         result = {
           auth_type: "discord",
           data: await validateDiscordOAuthToken(bearerToken),
+        };
+        break;
+      case "github":
+        result = {
+          auth_type: "github",
+          data: await validateGithubOAuthToken(bearerToken),
         };
         break;
 
@@ -222,6 +234,22 @@ export async function bearerTokenMiddleware(
         res.locals.oauth_user = {
           type: result.auth_type,
           user_identifier: result.data.data.email,
+        };
+        break;
+      }
+      case "github": {
+        if (result.data.data.id == null) {
+          const errorRes: KSNodeApiErrorResponse = {
+            success: false,
+            code: "UNAUTHORIZED",
+            msg: "Invalid token: missing required field (id)",
+          };
+          res.status(ErrorCodeMap[errorRes.code]).json(errorRes);
+          return;
+        }
+        res.locals.oauth_user = {
+          type: result.auth_type,
+          user_identifier: `github_${result.data.data.id}`,
         };
         break;
       }
