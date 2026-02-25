@@ -5,12 +5,14 @@ import type {
   OAuthTokenRequestPayloadOfTelegram,
   OAuthTokenRequestPayloadOfX,
   OAuthTokenRequestPayloadOfDiscord,
+  OAuthTokenRequestPayloadOfGithub,
 } from "@oko-wallet/oko-sdk-core";
 import type { Result } from "@oko-wallet/stdlib-js";
 
 import { verifyIdToken } from "./token";
 import { getAccessTokenOfX } from "./x";
 import { getAccessTokenOfDiscordWithPKCE } from "./discord";
+import { getAccessTokenOfGithub } from "./github";
 import { useAppState } from "@oko-wallet-attached/store/app";
 
 type OAuthCredentialResult = Result<
@@ -148,6 +150,55 @@ async function validateOAuthPayloadOfDiscord(
   };
 }
 
+async function validateOAuthPayloadOfGithub(
+  payload: OAuthTokenRequestPayloadOfGithub,
+  hostOrigin: string,
+): Promise<OAuthCredentialResult> {
+  const appState = useAppState.getState();
+  const codeVerifierRegistered = appState.getCodeVerifier(hostOrigin);
+  if (!codeVerifierRegistered) {
+    return {
+      success: false,
+      err: { type: "PKCE_missing" },
+    };
+  }
+
+  const redirectUri = `${window.location.origin}/github/callback`;
+
+  const tokenRes = await getAccessTokenOfGithub(
+    payload.code,
+    codeVerifierRegistered,
+    redirectUri,
+  );
+
+  if (!tokenRes.success) {
+    return {
+      success: false,
+      err: { type: "unknown", error: tokenRes.err },
+    };
+  }
+
+  const verifyIdTokenRes = await verifyIdToken("github", tokenRes.data);
+  if (!verifyIdTokenRes.success) {
+    return {
+      success: false,
+      err: { type: "unknown", error: verifyIdTokenRes.err },
+    };
+  }
+
+  const userInfo = verifyIdTokenRes.data;
+
+  appState.setCodeVerifier(hostOrigin, null);
+
+  return {
+    success: true,
+    data: {
+      idToken: tokenRes.data,
+      userIdentifier: userInfo.user_identifier,
+    },
+  };
+}
+
 async function validateOAuthPayload(
   payload: OAuthPayload,
   hostOrigin: string,
@@ -198,11 +249,7 @@ export async function getCredentialsFromPayload(
       case "discord":
         return validateOAuthPayloadOfDiscord(payload, hostOrigin);
       case "github":
-        // TODO(OKO-636): implement in Phase 6
-        return {
-          success: false,
-          err: { type: "unknown", error: "GitHub login not yet implemented" },
-        };
+        return validateOAuthPayloadOfGithub(payload, hostOrigin);
     }
   } else {
     // payload is OAuthPayload
