@@ -5,6 +5,7 @@ import { handleEmailSignIn } from "./email";
 import { handleXSignIn } from "./x";
 import { handleTelegramSignIn } from "./telegram";
 import { handleDiscordSignIn } from "./discord";
+import { handleGithubSignIn } from "./github";
 
 export async function signIn(this: OkoWalletInterface, type: SignInType) {
   await this.waitUntilInitialized;
@@ -25,6 +26,9 @@ export async function signIn(this: OkoWalletInterface, type: SignInType) {
         break;
       case "discord":
         await handleDiscordSignIn(this);
+        break;
+      case "github":
+        await handleGithubSignIn(this);
         break;
       default:
         throw new Error(`not supported sign in type, type: ${type}`);
