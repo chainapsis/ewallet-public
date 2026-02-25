@@ -106,7 +106,10 @@ export async function getGithubToken(
     });
 
     if (response.status === 200) {
-      const data = await response.json();
+      const data: SocialLoginGithubResponse & {
+        error?: string;
+        error_description?: string;
+      } = await response.json();
 
       if (data.error) {
         res.status(400).json({
@@ -119,7 +122,13 @@ export async function getGithubToken(
 
       res.status(200).json({
         success: true,
-        data,
+        data: {
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+          expires_in: data.expires_in,
+          token_type: data.token_type,
+          scope: data.scope,
+        },
       });
       return;
     }
@@ -129,11 +138,13 @@ export async function getGithubToken(
       code: "UNKNOWN_ERROR",
       msg: await response.text(),
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : "Failed to exchange GitHub token";
     res.status(500).json({
       success: false,
       code: "UNKNOWN_ERROR",
-      msg: err.message || "Failed to exchange GitHub token",
+      msg: message,
     });
   }
 }
