@@ -23,6 +23,9 @@ import {
   type ReAuthCredentials,
 } from "./export_reauth_state";
 
+// NOTE: Since this method can only be used within user_dashboard,
+// it is not exposed to the SDK, and its type is also defined within this file.
+
 type ExportPrivateKeyError =
   | { type: "UNAUTHORIZED_ORIGIN" }
   | { type: "NOT_AUTHENTICATED" }
