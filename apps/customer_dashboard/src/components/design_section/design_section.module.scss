@@ -27,9 +27,9 @@
 
   transition:
     grid-template-rows 0s 0.2s,
-    opacity 0.2s cubic-bezier(.25, .46, .45, .94),
-    transform 0.2s cubic-bezier(.25, .46, .45, .94),
-    filter 0.2s cubic-bezier(.25, .46, .45, .94),
+    opacity 0.2s var(--ease-out-quad),
+    transform 0.2s var(--ease-out-quad),
+    filter 0.2s var(--ease-out-quad),
     margin-top 0s 0.2s;
 
   &.visible {
@@ -41,9 +41,9 @@
 
     transition:
       grid-template-rows 0s,
-      opacity 0.25s cubic-bezier(.25, .46, .45, .94),
-      transform 0.25s cubic-bezier(.25, .46, .45, .94),
-      filter 0.25s cubic-bezier(.25, .46, .45, .94),
+      opacity 0.25s var(--ease-out-quad),
+      transform 0.25s var(--ease-out-quad),
+      filter 0.25s var(--ease-out-quad),
       margin-top 0s;
   }
 }
