@@ -19,10 +19,10 @@ import {
 } from "@oko-wallet-user-dashboard/state/sdk";
 import { useUserInfoState } from "@oko-wallet-user-dashboard/state/user_info";
 
-function getAuthProviderInfo(authType: AuthType | null): {
+const getAuthProviderInfo = (authType: AuthType | null): {
   icon: ReactNode;
   label: string;
-} {
+} => {
   switch (authType) {
     case "google":
       return {
@@ -42,7 +42,7 @@ function getAuthProviderInfo(authType: AuthType | null): {
   }
 }
 
-function LockIcon() {
+const LockIcon = () => {
   return (
     <svg
       width={16}
@@ -60,7 +60,7 @@ function LockIcon() {
   );
 }
 
-function AlertTriangleIcon() {
+const AlertTriangleIcon = () => {
   return (
     <svg
       width={16}
@@ -79,7 +79,7 @@ function AlertTriangleIcon() {
   );
 }
 
-function KeyIcon() {
+const KeyIcon = () => {
   return (
     <svg
       width={28}
@@ -96,7 +96,7 @@ function KeyIcon() {
   );
 }
 
-function CopyIcon() {
+const CopyIcon = () => {
   return (
     <svg
       width={24}
@@ -113,7 +113,7 @@ function CopyIcon() {
   );
 }
 
-function EyeOffIcon() {
+const EyeOffIcon = () => {
   return (
     <svg
       width={24}
@@ -130,7 +130,7 @@ function EyeOffIcon() {
   );
 }
 
-function Step1Content({
+const Step1Content = ({
   authInfo,
   displayIdentifier,
   isLoading,
@@ -140,7 +140,7 @@ function Step1Content({
   displayIdentifier: string | null;
   isLoading: boolean;
   onContinue: () => void;
-}) {
+}) => {
   return (
     <>
       <Typography size="lg" weight="semibold" color="primary">
@@ -209,7 +209,7 @@ function Step1Content({
   );
 }
 
-function Step2Content({
+const Step2Content = ({
   privateKeys,
   revealedKeys,
   onToggleReveal,
@@ -219,7 +219,7 @@ function Step2Content({
   revealedKeys: { secp256k1: boolean; ed25519: boolean };
   onToggleReveal: (key: "secp256k1" | "ed25519") => void;
   onCopy: (key: string) => void;
-}) {
+}) => {
   return (
     <>
       <Typography size="lg" weight="semibold" color="primary">
@@ -347,7 +347,7 @@ function Step2Content({
   );
 }
 
-function getExportErrorDescription(errorType: string): string {
+const getExportErrorDescription = (errorType: string): string => {
   switch (errorType) {
     case "REAUTH_TIMEOUT":
       return "Re-authentication timed out. Please try again.";
@@ -364,7 +364,7 @@ function getExportErrorDescription(errorType: string): string {
   }
 }
 
-export default function Page() {
+const Page = () => {
   const email = useUserInfoState((state) => state.email);
   const name = useUserInfoState((state) => state.name);
   const authType = useUserInfoState((state) => state.authType);
@@ -567,4 +567,6 @@ export default function Page() {
       </div>
     </div>
   );
-}
+};
+
+export default Page;

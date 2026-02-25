@@ -1,6 +1,5 @@
 import { useCallback } from "react";
 
-import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { OAuthState } from "@oko-wallet/oko-sdk-core";
 import type { Result } from "@oko-wallet/stdlib-js";
 

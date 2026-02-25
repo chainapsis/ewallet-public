@@ -26,7 +26,7 @@ const LOG_PREFIX = "[attached][email_reauth]";
 
 type Step = "enter_email" | "verify_code";
 
-export function EmailReauth() {
+export const EmailReauth = () => {
   const theme = useContext(ThemeContext);
   const webAuth = useMemo(() => getAuth0WebAuth(), []);
 

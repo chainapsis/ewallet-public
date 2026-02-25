@@ -8,7 +8,7 @@ import { TelegramReauth } from "./telegram_reauth";
 
 type ReauthStatus = "loading" | "redirecting" | "error";
 
-export function ExportReauth() {
+export const ExportReauth = () => {
   const params = new URLSearchParams(window.location.search);
   const authType = params.get("auth_type") as AuthType | null;
 
@@ -33,7 +33,7 @@ export function ExportReauth() {
   }
 }
 
-function OAuthRedirect({ authType }: { authType: "google" | "x" | "discord" }) {
+const OAuthRedirect = ({ authType }: { authType: "google" | "x" | "discord" }) => {
   const [status, setStatus] = useState<ReauthStatus>("loading");
   const [error, setError] = useState<string | null>(null);
 

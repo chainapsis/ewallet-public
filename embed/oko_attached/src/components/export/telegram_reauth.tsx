@@ -18,7 +18,7 @@ import styles from "./telegram_reauth.module.scss";
 
 const LOG_PREFIX = "[attached][telegram_reauth]";
 
-export function TelegramReauth() {
+export const TelegramReauth = () => {
   const theme = useContext(ThemeContext);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
