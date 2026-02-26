@@ -1,49 +1,30 @@
-import bs58 from "bs58";
-
+import * as secp256k1Wasm from "@oko-wallet/cait-sith-keplr-wasm/pkg/cait_sith_keplr_wasm";
+import type {
+  ExportPrivateKeyAckPayload,
+  OkoWalletMsgExportPrivateKeyAck,
+} from "@oko-wallet/oko-sdk-core";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type {
   ExportSharesRequest,
   ExportSharesResponse,
 } from "@oko-wallet/oko-types/user";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
-import * as secp256k1Wasm from "@oko-wallet/cait-sith-keplr-wasm/pkg/cait_sith_keplr_wasm";
+import bs58 from "bs58";
 
-import type { MsgEventContext } from "./types";
-import { OKO_SDK_TARGET } from "./target";
-import { useAppState } from "@oko-wallet-attached/store/app";
-import { USER_DASHBOARD_ORIGINS } from "@oko-wallet-attached/requests/endpoints";
-import { TSS_V2_ENDPOINT } from "@oko-wallet-attached/requests/oko_api";
 import {
-  SEED_ID_CLIENT,
+  type ReAuthCredentials,
+  setReAuthResolver,
+} from "./export_reauth_state";
+import { OKO_SDK_TARGET } from "./target";
+import type { MsgEventContext } from "./types";
+import {
   hexToSeedSharePoint,
   hexToUint8Array,
+  SEED_ID_CLIENT,
 } from "@oko-wallet-attached/crypto/keygen_ed25519";
-import {
-  setReAuthResolver,
-  type ReAuthCredentials,
-} from "./export_reauth_state";
-
-// NOTE: Since this method can only be used within user_dashboard,
-// it is not exposed to the SDK, and its type is also defined within this file.
-
-type ExportPrivateKeyError =
-  | { type: "UNAUTHORIZED_ORIGIN" }
-  | { type: "NOT_AUTHENTICATED" }
-  | { type: "MISSING_KEY_SHARES" }
-  | { type: "COMBINE_ERROR"; error: string }
-  | { type: "API_ERROR"; error: string }
-  | { type: "REAUTH_TIMEOUT" }
-  | { type: "REAUTH_ERROR"; error: string };
-
-type ExportPrivateKeyAckPayload =
-  | { success: true; data: { secp256k1: string; ed25519: string } }
-  | { success: false; error: ExportPrivateKeyError };
-
-interface OkoWalletMsgExportPrivateKeyAck {
-  target: "oko_sdk";
-  msg_type: "__export_private_key_ack__";
-  payload: ExportPrivateKeyAckPayload;
-}
+import { USER_DASHBOARD_ORIGINS } from "@oko-wallet-attached/requests/endpoints";
+import { TSS_V2_ENDPOINT } from "@oko-wallet-attached/requests/oko_api";
+import { useAppState } from "@oko-wallet-attached/store/app";
 
 const REAUTH_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 const LOG_PREFIX = "[attached][export]";

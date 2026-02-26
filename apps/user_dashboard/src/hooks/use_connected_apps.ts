@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import { useQuery } from "@tanstack/react-query";
 
 import {
   selectCosmosSDK,
@@ -27,14 +27,15 @@ interface GetConnectedAppsAckPayload {
   error?: GetConnectedAppsError;
 }
 
-
 type UseConnectedAppsResult = UseConnectedAppsSuccess | UseConnectedAppsError;
+
 interface UseConnectedAppsSuccess {
   isSuccess: true;
   data: ConnectedApp[];
   isLoading: boolean;
   error: null;
 }
+
 interface UseConnectedAppsError {
   isSuccess: false;
   error: GetConnectedAppsError;
