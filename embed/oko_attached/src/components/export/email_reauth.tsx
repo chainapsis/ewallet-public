@@ -1,24 +1,22 @@
-import { type FormEvent, useContext, useEffect, useMemo, useState } from "react";
-
-import type { OAuthState } from "@oko-wallet/oko-sdk-core";
-import { OtpInput } from "@oko-wallet/oko-common-ui/otp_input";
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import { MailboxIcon } from "@oko-wallet/oko-common-ui/icons/mailbox";
 import { Logo } from "@oko-wallet/oko-common-ui/logo";
+import { OtpInput } from "@oko-wallet/oko-common-ui/otp_input";
 import { ThemeContext } from "@oko-wallet/oko-common-ui/theme";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import type { OAuthState } from "@oko-wallet/oko-sdk-core";
+import { useContext, useEffect, useMemo, useState } from "react";
 
-import { getAuth0WebAuth } from "@oko-wallet-attached/config/auth0";
-import {
-  sendEmailOTPCode,
-  verifyEmailOTPCode,
-} from "@oko-wallet-attached/lib/auth0";
-
+import styles from "./email_reauth.module.scss";
 import {
   findEmbeddedIframe,
   generateNonce,
   sendReauthParamsToIframe,
 } from "./use_export_reauth";
-import styles from "./email_reauth.module.scss";
+import { getAuth0WebAuth } from "@oko-wallet-attached/config/auth0";
+import {
+  sendEmailOTPCode,
+  verifyEmailOTPCode,
+} from "@oko-wallet-attached/lib/auth0";
 
 const CODE_LENGTH = 6;
 const RESEND_COOLDOWN_SECONDS = 180;
@@ -95,6 +93,7 @@ export const EmailReauth = () => {
   }, [resendTimer]);
 
   // Auto-verify when OTP is complete
+  // biome-ignore lint/correctness/useExhaustiveDependencies: rendering infinite loop
   useEffect(() => {
     if (isOtpComplete && !isSubmitting && !errorMessage) {
       void handleVerifyCode();
@@ -125,7 +124,7 @@ export const EmailReauth = () => {
     }
   };
 
-  const handleVerifyCode = async () => {
+  async function handleVerifyCode() {
     if (!isOtpComplete || isSubmitting) {
       return;
     }
@@ -159,7 +158,7 @@ export const EmailReauth = () => {
         setIsSubmitting(false);
       },
     });
-  };
+  }
 
   const handleResendCode = async () => {
     if (resendTimer > 0 || isSubmitting) {
@@ -180,12 +179,12 @@ export const EmailReauth = () => {
     }
   };
 
-  const onSubmitEmail = (e: FormEvent) => {
+  const onSubmitEmail = (e: React.SubmitEvent) => {
     e.preventDefault();
     void handleSubmitEmail();
   };
 
-  const onSubmitCode = (e: FormEvent) => {
+  const onSubmitCode = (e: React.SubmitEvent) => {
     e.preventDefault();
     void handleVerifyCode();
   };
@@ -216,7 +215,6 @@ export const EmailReauth = () => {
                         setEmail(e.target.value);
                       }}
                       className={styles.emailInput}
-                      autoFocus
                     />
                     <button
                       className={`${styles.nextButton} ${
@@ -313,4 +311,4 @@ export const EmailReauth = () => {
       </div>
     </div>
   );
-}
+};
