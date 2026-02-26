@@ -295,7 +295,7 @@ const Step2Content = ({
         View and copy your private key
       </Typography>
 
-      <div style={{ height: 24 }} />
+      <div style={{ height: 32 }} />
 
       {/* EVM & Cosmos Section */}
       <div className={styles.keySection}>
@@ -316,7 +316,7 @@ const Step2Content = ({
           allow="clipboard-write"
         />
 
-        <div style={{ height: 16 }} />
+        <div style={{ height: 24 }} />
 
         <ChainsList chains={EVM_COSMOS_CHAINS} />
       </div>
@@ -342,7 +342,7 @@ const Step2Content = ({
           allow="clipboard-write"
         />
 
-        <div style={{ height: 16 }} />
+        <div style={{ height: 24 }} />
 
         <ChainsList chains={SVM_CHAINS} />
       </div>

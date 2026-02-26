@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import {
   type ExportedKeys,
@@ -62,7 +62,7 @@ export const ExportDisplay = () => {
   const [revealed, setRevealed] = useState(false);
   const [keys, setKeys] = useState<ExportedKeys | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerEl, setContainerEl] = useState<HTMLDivElement | null>(null);
 
   // Read keys: try local first, then request from hidden iframe via BroadcastChannel
   useEffect(() => {
@@ -96,25 +96,23 @@ export const ExportDisplay = () => {
 
   // ResizeObserver → notify parent of height changes
   useEffect(() => {
-    const el = containerRef.current;
-    if (!el) {
+    if (!containerEl) {
       return;
     }
 
-    const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        postToParent("__export_display_resize__", {
-          height: entry.contentRect.height,
-          key_type: keyType,
-        });
-      }
-    });
-    observer.observe(el);
+    const report = () => {
+      postToParent("__export_display_resize__", {
+        height: document.documentElement.scrollHeight,
+        key_type: keyType,
+      });
+    };
+    const observer = new ResizeObserver(report);
+    observer.observe(containerEl);
 
     return () => {
       observer.disconnect();
     };
-  }, [keyType]);
+  }, [keyType, containerEl]);
 
   const handleToggleReveal = useCallback(() => {
     setRevealed((prev) => !prev);
@@ -144,7 +142,7 @@ export const ExportDisplay = () => {
   const keyValue = keys[keyType];
 
   return (
-    <div ref={containerRef} className={styles.container}>
+    <div ref={setContainerEl} className={styles.container}>
       <div
         className={styles.privateKeyField}
         onClick={handleToggleReveal}
