@@ -289,6 +289,18 @@ export const CheckEmailSuccessResponseV2Schema = registry.register(
   }),
 );
 
+export const ExportSharesRequestSchema = registry.register(
+  "TssExportSharesRequest",
+  z.object({
+    first_login_jwt: z.string().openapi({
+      description: "JWT from the first login session",
+    }),
+    auth_type: AuthTypeEnum.openapi({
+      description: "Authentication provider type for re-authentication",
+    }),
+  }),
+);
+
 const ExportSharesDataSchema = registry.register(
   "TssExportSharesData",
   z.object({

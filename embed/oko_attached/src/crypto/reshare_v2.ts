@@ -42,10 +42,7 @@ import {
   getServerFrostIdentifier,
 } from "./sss_ed25519";
 import { computeVerifyingShare } from "./scalar";
-import {
-  hexToSeedSharePoint,
-  seedShareToHex,
-} from "./keygen_ed25519";
+import { hexToSeedSharePoint, seedShareToHex } from "./keygen_ed25519";
 
 /**
  * Convert V2 API response to secp256k1 UserKeySharePointByNode format.
@@ -141,6 +138,7 @@ export interface ReshareV2Result {
   keyshare1Secp256k1: string; // hex string
   keyPackageEd25519: string; // hex-encoded KeyPackageRaw JSON
   publicKeyPackageEd25519: string; // hex-encoded PublicKeyPackageRaw JSON
+  seedEd25519: number[]; // combined ed25519 user seed share
 }
 
 export async function reshareUserKeySharesV2(
@@ -231,6 +229,7 @@ export async function reshareUserKeySharesV2(
   }
   const seedResult = {
     resharedShares: seedExpandRes.data.reshared_user_key_shares,
+    originalSecret: [...seedExpandRes.data.original_secret.toUint8Array()],
   };
 
   // 5. Send new shares to ALL nodes
@@ -347,6 +346,7 @@ export async function reshareUserKeySharesV2(
       keyshare1Secp256k1: secp256k1Result.originalSecret,
       keyPackageEd25519: keyPackageRes.data.keyPackageEd25519,
       publicKeyPackageEd25519: keyPackageRes.data.publicKeyPackageEd25519,
+      seedEd25519: seedResult.originalSecret,
     },
   };
 }

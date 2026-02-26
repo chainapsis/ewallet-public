@@ -1,18 +1,21 @@
 import type { ChainInfo } from "@keplr-wallet/types";
-import type { Result } from "@oko-wallet/stdlib-js";
 import type { Bytes32 } from "@oko-wallet/bytes";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
+import type { Result } from "@oko-wallet/stdlib-js";
 
+import type { InitPayload } from "@oko-wallet-sdk-core/types/init";
 import type {
   OpenModalAckPayload,
   OpenModalPayload,
 } from "@oko-wallet-sdk-core/types/modal";
-import type { InitPayload } from "@oko-wallet-sdk-core/types/init";
-import type { OAuthSignInError } from "@oko-wallet-sdk-core/types/sign_in";
 import type {
   OAuthPayload,
   OAuthTokenRequestPayload,
 } from "@oko-wallet-sdk-core/types/oauth";
+import type { OAuthSignInError } from "@oko-wallet-sdk-core/types/sign_in";
+
+export * from "./export_priv_key";
+export * from "./get_conn_apps";
 
 export type OkoWalletMsgGetPublicKey = {
   target: "oko_attached";

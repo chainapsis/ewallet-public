@@ -1,15 +1,24 @@
 import type { Response } from "express";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type {
+  ExportSharesRequest,
+  ExportSharesResponse,
+} from "@oko-wallet/oko-types/user";
 import { decryptDataAsync } from "@oko-wallet/crypto-js/node";
 import {
   ErrorResponseSchema,
-  UserAuthHeaderSchema,
+  OAuthHeaderSchema,
 } from "@oko-wallet/oko-api-openapi/common";
-import { ExportSharesSuccessResponseSchema } from "@oko-wallet/oko-api-openapi/tss";
+import {
+  ExportSharesRequestSchema,
+  ExportSharesSuccessResponseSchema,
+} from "@oko-wallet/oko-api-openapi/tss";
 import { registry } from "@oko-wallet/oko-api-openapi";
+import { getUserByEmailAndAuthType } from "@oko-wallet/oko-pg-interface/oko_users";
 
 import { validateWalletEmailAndCurveType } from "@oko-wallet-api/api/tss/utils";
 import { type UserAuthenticatedRequest } from "@oko-wallet-api/middleware/auth/keplr_auth";
+import type { OAuthLocals } from "@oko-wallet-api/middleware/auth/types";
 
 registry.registerPath({
   method: "post",
@@ -17,10 +26,17 @@ registry.registerPath({
   tags: ["TSS"],
   summary: "Export server shares for wallet export",
   description:
-    "Exports the server's secp256k1 TSS share and ed25519 seed_share from the authenticated user's wallets. Used for private key export.",
+    "Exports the server's secp256k1 TSS share and ed25519 seed_share. Requires dual authentication: JWT (body.first_login_jwt) + OAuth re-authentication (Authorization Bearer id_token).",
   security: [{ userAuth: [] }],
   request: {
-    headers: UserAuthHeaderSchema,
+    headers: OAuthHeaderSchema,
+    body: {
+      content: {
+        "application/json": {
+          schema: ExportSharesRequestSchema,
+        },
+      },
+    },
   },
   responses: {
     200: {
@@ -32,7 +48,7 @@ registry.registerPath({
       },
     },
     401: {
-      description: "Unauthorized - Invalid token or wallet mismatch",
+      description: "Unauthorized - Invalid token or user mismatch",
       content: {
         "application/json": {
           schema: ErrorResponseSchema,
@@ -50,14 +66,9 @@ registry.registerPath({
   },
 });
 
-interface ExportSharesResponse {
-  secp256k1_share: string;
-  ed25519_seed_share: string;
-}
-
 export async function exportShares(
-  req: UserAuthenticatedRequest,
-  res: Response<OkoApiResponse<ExportSharesResponse>>,
+  req: UserAuthenticatedRequest<ExportSharesRequest>,
+  res: Response<OkoApiResponse<ExportSharesResponse>, OAuthLocals & Record<string, any>>,
 ) {
   const state = req.app.locals;
   const user = res.locals.user;
@@ -98,7 +109,36 @@ export async function exportShares(
     const secp256k1Wallet = secp256k1ValidateRes.data;
     const ed25519Wallet = ed25519ValidateRes.data;
 
-    // 3. Decrypt secp256k1 enc_tss_share (raw string, not JSON)
+    // 3. Same-user verification: OAuth identity (from oauthMiddleware) must match JWT wallets
+    const { auth_type } = req.body;
+    const oauthUser = res.locals.oauth_user;
+    const oauthUserRes = await getUserByEmailAndAuthType(
+      state.db,
+      oauthUser.user_identifier,
+      auth_type,
+    );
+    if (!oauthUserRes.success || !oauthUserRes.data) {
+      res.status(401).json({
+        success: false,
+        code: "UNAUTHORIZED",
+        msg: "OAuth user not found",
+      });
+      return;
+    }
+
+    if (
+      oauthUserRes.data.user_id !== secp256k1Wallet.user_id ||
+      oauthUserRes.data.user_id !== ed25519Wallet.user_id
+    ) {
+      res.status(401).json({
+        success: false,
+        code: "UNAUTHORIZED",
+        msg: "User mismatch: OAuth identity does not match JWT wallets",
+      });
+      return;
+    }
+
+    // 4. Decrypt secp256k1 enc_tss_share (raw string, not JSON)
     const secp256k1EncryptedShare =
       secp256k1Wallet.enc_tss_share.toString("utf-8");
     const secp256k1Share = await decryptDataAsync(
@@ -106,9 +146,8 @@ export async function exportShares(
       state.encryption_secret,
     );
 
-    // 4. Decrypt ed25519 enc_tss_share (JSON with signing_share, verifying_share, seed_share)
-    const ed25519EncryptedShare =
-      ed25519Wallet.enc_tss_share.toString("utf-8");
+    // 5. Decrypt ed25519 enc_tss_share (JSON with signing_share, verifying_share, seed_share)
+    const ed25519EncryptedShare = ed25519Wallet.enc_tss_share.toString("utf-8");
     const ed25519Decrypted = await decryptDataAsync(
       ed25519EncryptedShare,
       state.encryption_secret,
