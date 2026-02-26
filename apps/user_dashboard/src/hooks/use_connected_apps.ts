@@ -1,35 +1,15 @@
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
-import { useQuery } from "@tanstack/react-query";
-
 import type {
+  ConnectedApp,
+  GetConnectedAppsError,
   OkoWalletMsgGetConnectedApps,
   OkoWalletMsgGetConnectedAppsAck,
-} from "../../../../sdk/oko_sdk_core/dist/types";
+} from "@oko-wallet/oko-sdk-core";
+import { useQuery } from "@tanstack/react-query";
+
 import {
   selectCosmosSDK,
   useSDKState,
 } from "@oko-wallet-user-dashboard/state/sdk";
-
-// Types for connected apps (internal to user_dashboard)
-export interface ConnectedApp {
-  customer_id: string;
-  label: string | null;
-  logo_url: string | null;
-  url: string | null;
-  connected_at: string;
-  state: string;
-}
-
-export type GetConnectedAppsError =
-  | { type: "UNAUTHORIZED_ORIGIN" }
-  | { type: "NOT_AUTHENTICATED" }
-  | { type: "FETCH_ERROR"; msg: string };
-
-interface GetConnectedAppsAckPayload {
-  success: boolean;
-  data?: ConnectedApp[];
-  error?: GetConnectedAppsError;
-}
 
 type UseConnectedAppsResult = UseConnectedAppsSuccess | UseConnectedAppsError;
 
@@ -47,7 +27,7 @@ interface UseConnectedAppsError {
   data: never[];
 }
 
-// NOTE The __get_connected_apps__ message should only be called from the user_dashboard,
+// NOTE: The __get_connected_apps__ message should only be called from the user_dashboard,
 // so it is not added to the SDK and is instead called separately in useConnectedApp.
 export function useConnectedApps(): UseConnectedAppsResult {
   const cosmosSDK = useSDKState(selectCosmosSDK);
