@@ -1,3 +1,11 @@
+import type { AuthType } from "@oko-wallet/oko-types/auth";
+
+export type OkoWalletMsgExportPrivateKey = {
+  target: "oko_attached";
+  msg_type: "__export_private_key__";
+  payload: { auth_type: AuthType };
+};
+
 export type ExportPrivateKeyError =
   | { type: "UNAUTHORIZED_ORIGIN" }
   | { type: "NOT_AUTHENTICATED" }

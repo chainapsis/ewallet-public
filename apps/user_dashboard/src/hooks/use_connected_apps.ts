@@ -1,6 +1,10 @@
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import { useQuery } from "@tanstack/react-query";
 
+import type {
+  OkoWalletMsgGetConnectedApps,
+  OkoWalletMsgGetConnectedAppsAck,
+} from "../../../../sdk/oko_sdk_core/dist/types";
 import {
   selectCosmosSDK,
   useSDKState,
@@ -42,7 +46,8 @@ interface UseConnectedAppsError {
   isLoading: boolean;
   data: never[];
 }
-//NOTE The __get_connected_apps__ message should only be called from the user_dashboard,
+
+// NOTE The __get_connected_apps__ message should only be called from the user_dashboard,
 // so it is not added to the SDK and is instead called separately in useConnectedApp.
 export function useConnectedApps(): UseConnectedAppsResult {
   const cosmosSDK = useSDKState(selectCosmosSDK);
@@ -58,19 +63,15 @@ export function useConnectedApps(): UseConnectedAppsResult {
         target: "oko_attached",
         msg_type: "__get_connected_apps__",
         payload: null,
-      } as any);
+      } as OkoWalletMsgGetConnectedApps as any);
 
-      //NOTE: get_connected_apps is a msg specific to user_dashboard, so it need to be casted to as unknown here.
-      const resAny = res as unknown as {
-        msg_type: "__get_connected_apps_ack__";
-        payload: GetConnectedAppsAckPayload;
-      };
+      const resAny = res as unknown as OkoWalletMsgGetConnectedAppsAck;
       if (resAny.msg_type === "__get_connected_apps_ack__") {
         const payload = resAny.payload;
-        if (payload.success && payload.data) {
+
+        if (payload.success) {
           return payload.data;
-        }
-        if (payload.error) {
+        } else {
           throw payload.error;
         }
       }

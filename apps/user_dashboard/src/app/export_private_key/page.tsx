@@ -10,6 +10,7 @@ import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import { type ReactNode, useCallback, useState } from "react";
 
+import type { OkoWalletMsgExportPrivateKeyAck } from "../../../../../sdk/oko_sdk_core/dist/types";
 import styles from "./page.module.scss";
 import { displayToast } from "@oko-wallet-user-dashboard/components/toast";
 import { useCopyToClipboard } from "@oko-wallet-user-dashboard/hooks/use_copy_to_clipboard";
@@ -473,19 +474,7 @@ const Page = () => {
       popup?.close();
 
       // 5. Parse result
-      // TODO: Use imported type
-      const resAny = res as unknown as {
-        msg_type: "__export_private_key_ack__";
-        payload:
-          | {
-              success: true;
-              data: { secp256k1: string; ed25519: string };
-            }
-          | {
-              success: false;
-              error: { type: string; error?: string };
-            };
-      };
+      const resAny = res as unknown as OkoWalletMsgExportPrivateKeyAck;
 
       if (
         resAny.msg_type === "__export_private_key_ack__" &&
