@@ -1,10 +1,10 @@
-import type { MsgEventContext } from "./types";
 import { OKO_SDK_TARGET } from "./target";
-import { useAppState } from "@oko-wallet-attached/store/app";
+import type { MsgEventContext } from "./types";
 import {
   OKO_API_ENDPOINT,
   USER_DASHBOARD_ORIGINS,
 } from "@oko-wallet-attached/requests/endpoints";
+import { useAppState } from "@oko-wallet-attached/store/app";
 
 // NOTE: Since this method can only be used within user_dashboard,
 // it is not exposed to the SDK, and its type is also defined within that file.
@@ -21,15 +21,20 @@ type GetConnectedAppsError =
   | { type: "UNAUTHORIZED_ORIGIN" }
   | { type: "NOT_AUTHENTICATED" }
   | { type: "FETCH_ERROR"; error: string };
+
 interface GetConnectedAppsAckSuccessPayload {
   success: true;
   data: ConnectedApp[];
 }
+
 interface GetConnectedAppsAckErrorPayload {
   success: false;
   error: GetConnectedAppsError;
 }
-type GetConnectedAppsAckPayload = GetConnectedAppsAckSuccessPayload | GetConnectedAppsAckErrorPayload;
+
+type GetConnectedAppsAckPayload =
+  | GetConnectedAppsAckSuccessPayload
+  | GetConnectedAppsAckErrorPayload;
 
 interface OkoWalletMsgGetConnectedAppsAck {
   target: "oko_sdk";

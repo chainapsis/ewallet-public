@@ -1,13 +1,13 @@
 "use client";
 
-import type { AuthType } from "@oko-wallet/oko-types/auth";
+import { Button } from "@oko-wallet/oko-common-ui/button";
 import { DiscordIcon } from "@oko-wallet/oko-common-ui/icons/discord_icon";
 import { GoogleIcon } from "@oko-wallet/oko-common-ui/icons/google_icon";
 import { MailboxIcon } from "@oko-wallet/oko-common-ui/icons/mailbox";
 import { TelegramIcon } from "@oko-wallet/oko-common-ui/icons/telegram_icon";
 import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
-import { Button } from "@oko-wallet/oko-common-ui/button";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
 import { type ReactNode, useCallback, useState } from "react";
 
 import styles from "./page.module.scss";
@@ -19,7 +19,9 @@ import {
 } from "@oko-wallet-user-dashboard/state/sdk";
 import { useUserInfoState } from "@oko-wallet-user-dashboard/state/user_info";
 
-const getAuthProviderInfo = (authType: AuthType | null): {
+const getAuthProviderInfo = (
+  authType: AuthType | null,
+): {
   icon: ReactNode;
   label: string;
 } => {
@@ -40,7 +42,7 @@ const getAuthProviderInfo = (authType: AuthType | null): {
     default:
       return { icon: null, label: "" };
   }
-}
+};
 
 const LockIcon = () => {
   return (
@@ -58,7 +60,7 @@ const LockIcon = () => {
       <path d="M7 11V7a5 5 0 0 1 10 0v4" />
     </svg>
   );
-}
+};
 
 const AlertTriangleIcon = () => {
   return (
@@ -77,7 +79,7 @@ const AlertTriangleIcon = () => {
       <line x1="12" y1="17" x2="12.01" y2="17" />
     </svg>
   );
-}
+};
 
 const KeyIcon = () => {
   return (
@@ -94,7 +96,7 @@ const KeyIcon = () => {
       <path d="M15 9H15.01M15 15C18.3137 15 21 12.3137 21 9C21 5.68629 18.3137 3 15 3C11.6863 3 9 5.68629 9 9C9 9.27368 9.01832 9.54308 9.05381 9.80704C9.11218 10.2412 9.14136 10.4583 9.12172 10.5956C9.10125 10.7387 9.0752 10.8157 9.00469 10.9419C8.937 11.063 8.81771 11.1823 8.57913 11.4209L3.46863 16.5314C3.29568 16.7043 3.2092 16.7908 3.14736 16.8917C3.09253 16.9812 3.05213 17.0787 3.02763 17.1808C3 17.2959 3 17.4182 3 17.6627V19.4C3 19.9601 3 20.2401 3.10899 20.454C3.20487 20.6422 3.35785 20.7951 3.54601 20.891C3.75992 21 4.03995 21 4.6 21H6.33726C6.58185 21 6.70414 21 6.81923 20.9724C6.92127 20.9479 7.01881 20.9075 7.10828 20.8526C7.2092 20.7908 7.29568 20.7043 7.46863 20.5314L12.5791 15.4209C12.8177 15.1823 12.937 15.063 13.0581 14.9953C13.1843 14.9248 13.2613 14.8987 13.4044 14.8783C13.5417 14.8586 13.7588 14.8878 14.193 14.9462C14.4569 14.9817 14.7263 15 15 15Z" />
     </svg>
   );
-}
+};
 
 const CopyIcon = () => {
   return (
@@ -111,7 +113,7 @@ const CopyIcon = () => {
       <path d="M5 15C4.06812 15 3.60218 15 3.23463 14.8478C2.74458 14.6448 2.35523 14.2554 2.15224 13.7654C2 13.3978 2 12.9319 2 12V5.2C2 4.0799 2 3.51984 2.21799 3.09202C2.40973 2.71569 2.71569 2.40973 3.09202 2.21799C3.51984 2 4.0799 2 5.2 2H12C12.9319 2 13.3978 2 13.7654 2.15224C14.2554 2.35523 14.6448 2.74458 14.8478 3.23463C15 3.60218 15 4.06812 15 5M12.2 22H18.8C19.9201 22 20.4802 22 20.908 21.782C21.2843 21.5903 21.5903 21.2843 21.782 20.908C22 20.4802 22 19.9201 22 18.8V12.2C22 11.0799 22 10.5198 21.782 10.092C21.5903 9.71569 21.2843 9.40973 20.908 9.21799C20.4802 9 19.9201 9 18.8 9H12.2C11.0799 9 10.5198 9 10.092 9.21799C9.71569 9.40973 9.40973 9.71569 9.21799 10.092C9 10.5198 9 11.0799 9 12.2V18.8C9 19.9201 9 20.4802 9.21799 20.908C9.40973 21.2843 9.71569 21.5903 10.092 21.782C10.5198 22 11.0799 22 12.2 22Z" />
     </svg>
   );
-}
+};
 
 const EyeOffIcon = () => {
   return (
@@ -128,7 +130,7 @@ const EyeOffIcon = () => {
       <path d="M10.7429 5.09232C11.1494 5.03223 11.5686 5 12.0004 5C17.1054 5 20.4553 9.50484 21.5807 11.2868C21.7169 11.5025 21.785 11.6103 21.8231 11.7767C21.8518 11.9016 21.8518 12.0987 21.8231 12.2236C21.785 12.3899 21.7164 12.4985 21.5792 12.7156C21.2793 13.1901 20.8222 13.8571 20.2165 14.5805M6.72432 6.71504C4.56225 8.1817 3.09445 10.2194 2.42111 11.2853C2.28428 11.5019 2.21587 11.6102 2.17774 11.7765C2.1491 11.9014 2.14909 12.0984 2.17771 12.2234C2.21583 12.3897 2.28393 12.4975 2.42013 12.7132C3.54554 14.4952 6.89541 19 12.0004 19C14.0588 19 15.8319 18.2676 17.2888 17.2766M3.00042 3L21.0004 21M9.8791 9.87868C9.3362 10.4216 9.00042 11.1716 9.00042 12C9.00042 13.6569 10.3436 15 12.0004 15C12.8288 15 13.5788 14.6642 14.1218 14.1213" />
     </svg>
   );
-}
+};
 
 const Step1Content = ({
   authInfo,
@@ -207,7 +209,7 @@ const Step1Content = ({
       </Button>
     </>
   );
-}
+};
 
 const Step2Content = ({
   privateKeys,
@@ -345,7 +347,7 @@ const Step2Content = ({
       </Button>
     </>
   );
-}
+};
 
 const getExportErrorDescription = (errorType: string): string => {
   switch (errorType) {
@@ -362,7 +364,7 @@ const getExportErrorDescription = (errorType: string): string => {
     default:
       return "Please try again.";
   }
-}
+};
 
 const Page = () => {
   const email = useUserInfoState((state) => state.email);
@@ -466,6 +468,7 @@ const Page = () => {
       popup?.close();
 
       // 5. Parse result
+      // TODO: Use imported type
       const resAny = res as unknown as {
         msg_type: "__export_private_key_ack__";
         payload:
