@@ -107,6 +107,7 @@ body {
   font-weight: 600;
   font-size: var(--font-size-text-md, 15px);
   line-height: var(--line-height-text-md, 22px);
+  box-shadow: 0 1px 2px 0 rgba(10, 13, 18, 0.05);
 }
 
 .copyButton:hover {

@@ -303,7 +303,7 @@ const Step2Content = ({
           <span className={styles.sectionKeyIcon}>
             <SectionKeyIcon />
           </span>
-          <Typography size="lg" weight="semibold" color="primary">
+          <Typography size="lg" weight="semibold" color="secondary">
             EVM & Cosmos
           </Typography>
         </div>
@@ -329,7 +329,7 @@ const Step2Content = ({
           <span className={styles.sectionKeyIcon}>
             <SectionKeyIcon />
           </span>
-          <Typography size="lg" weight="semibold" color="primary">
+          <Typography size="lg" weight="semibold" color="secondary">
             Solana & SVM
           </Typography>
         </div>
