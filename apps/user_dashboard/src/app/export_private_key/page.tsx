@@ -19,10 +19,10 @@ import {
 } from "@oko-wallet-user-dashboard/state/sdk";
 import { useUserInfoState } from "@oko-wallet-user-dashboard/state/user_info";
 
-function getAuthProviderInfo(authType: AuthType | null): {
+const getAuthProviderInfo = (authType: AuthType | null): {
   icon: ReactNode;
   label: string;
-} {
+} => {
   switch (authType) {
     case "google":
       return {
@@ -42,7 +42,7 @@ function getAuthProviderInfo(authType: AuthType | null): {
   }
 }
 
-function LockIcon() {
+const LockIcon = () => {
   return (
     <svg
       width={16}
@@ -60,7 +60,7 @@ function LockIcon() {
   );
 }
 
-function AlertTriangleIcon() {
+const AlertTriangleIcon = () => {
   return (
     <svg
       width={16}
@@ -79,7 +79,7 @@ function AlertTriangleIcon() {
   );
 }
 
-function KeyIcon() {
+const KeyIcon = () => {
   return (
     <svg
       width={28}
@@ -96,7 +96,7 @@ function KeyIcon() {
   );
 }
 
-function CopyIcon() {
+const CopyIcon = () => {
   return (
     <svg
       width={24}
@@ -113,7 +113,7 @@ function CopyIcon() {
   );
 }
 
-function EyeOffIcon() {
+const EyeOffIcon = () => {
   return (
     <svg
       width={24}
@@ -130,7 +130,7 @@ function EyeOffIcon() {
   );
 }
 
-function Step1Content({
+const Step1Content = ({
   authInfo,
   displayIdentifier,
   isLoading,
@@ -140,7 +140,7 @@ function Step1Content({
   displayIdentifier: string | null;
   isLoading: boolean;
   onContinue: () => void;
-}) {
+}) => {
   return (
     <>
       <Typography size="lg" weight="semibold" color="primary">
@@ -209,21 +209,21 @@ function Step1Content({
   );
 }
 
-function Step2Content({
-  privateKey,
-  isRevealed,
+const Step2Content = ({
+  privateKeys,
+  revealedKeys,
   onToggleReveal,
   onCopy,
 }: {
-  privateKey: string;
-  isRevealed: boolean;
-  onToggleReveal: () => void;
-  onCopy: () => void;
-}) {
+  privateKeys: { secp256k1: string; ed25519: string };
+  revealedKeys: { secp256k1: boolean; ed25519: boolean };
+  onToggleReveal: (key: "secp256k1" | "ed25519") => void;
+  onCopy: (key: string) => void;
+}) => {
   return (
     <>
       <Typography size="lg" weight="semibold" color="primary">
-        View and copy your private key
+        View and copy your private keys
       </Typography>
 
       <div style={{ height: 24 }} />
@@ -235,16 +235,16 @@ function Step2Content({
           color="secondary"
           className={styles.privateKeyLabel}
         >
-          Private Key
+          EVM/Cosmos Private Key
         </Typography>
         <div
           className={styles.privateKeyField}
-          onClick={onToggleReveal}
+          onClick={() => onToggleReveal("secp256k1")}
           role="button"
           tabIndex={0}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
-              onToggleReveal();
+              onToggleReveal("secp256k1");
             }
           }}
         >
@@ -253,12 +253,16 @@ function Step2Content({
               size="md"
               weight="medium"
               color="secondary"
-              className={isRevealed ? undefined : styles.privateKeyTextBlurred}
+              className={
+                revealedKeys.secp256k1
+                  ? undefined
+                  : styles.privateKeyTextBlurred
+              }
             >
-              {privateKey}
+              {privateKeys.secp256k1}
             </Typography>
           </div>
-          {!isRevealed && (
+          {!revealedKeys.secp256k1 && (
             <div className={styles.privateKeyHint}>
               <span className={styles.eyeOffIcon}>
                 <EyeOffIcon />
@@ -275,7 +279,65 @@ function Step2Content({
 
       <div style={{ height: 32 }} />
 
-      <Button size="lg" fullWidth onClick={onCopy}>
+      <Button size="lg" fullWidth onClick={() => onCopy(privateKeys.secp256k1)}>
+        <span className={styles.copyButtonIcon}>
+          <CopyIcon />
+        </span>
+        Copy to Clipboard
+      </Button>
+
+      <div style={{ height: 40 }} />
+
+      <div className={styles.privateKeySection}>
+        <Typography
+          size="xs"
+          weight="semibold"
+          color="secondary"
+          className={styles.privateKeyLabel}
+        >
+          SVM Private Key
+        </Typography>
+        <div
+          className={styles.privateKeyField}
+          onClick={() => onToggleReveal("ed25519")}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              onToggleReveal("ed25519");
+            }
+          }}
+        >
+          <div className={styles.privateKeyBg}>
+            <Typography
+              size="md"
+              weight="medium"
+              color="secondary"
+              className={
+                revealedKeys.ed25519 ? undefined : styles.privateKeyTextBlurred
+              }
+            >
+              {privateKeys.ed25519}
+            </Typography>
+          </div>
+          {!revealedKeys.ed25519 && (
+            <div className={styles.privateKeyHint}>
+              <span className={styles.eyeOffIcon}>
+                <EyeOffIcon />
+              </span>
+              <Typography size="md" weight="medium" color="primary">
+                Click or tap to reveal your private key.
+                <br />
+                Ensure no one else can see your screen.
+              </Typography>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div style={{ height: 32 }} />
+
+      <Button size="lg" fullWidth onClick={() => onCopy(privateKeys.ed25519)}>
         <span className={styles.copyButtonIcon}>
           <CopyIcon />
         </span>
@@ -285,7 +347,24 @@ function Step2Content({
   );
 }
 
-export default function Page() {
+const getExportErrorDescription = (errorType: string): string => {
+  switch (errorType) {
+    case "REAUTH_TIMEOUT":
+      return "Re-authentication timed out. Please try again.";
+    case "USER_MISMATCH":
+      return "Account mismatch. Please log in with the same account.";
+    case "USER_NOT_FOUND":
+      return "User not found.";
+    case "ED25519_KEYGEN_REQUIRED":
+      return "Ed25519 key generation required. Please try signing in first.";
+    case "NODES_BELOW_THRESHOLD":
+      return "Service temporarily unavailable. Please try again later.";
+    default:
+      return "Please try again.";
+  }
+}
+
+const Page = () => {
   const email = useUserInfoState((state) => state.email);
   const name = useUserInfoState((state) => state.name);
   const authType = useUserInfoState((state) => state.authType);
@@ -298,8 +377,14 @@ export default function Page() {
 
   const [step, setStep] = useState<1 | 2>(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [isRevealed, setIsRevealed] = useState(false);
-  const [privateKey, setPrivateKey] = useState<string | null>(null);
+  const [revealedKeys, setRevealedKeys] = useState({
+    secp256k1: false,
+    ed25519: false,
+  });
+  const [privateKeys, setPrivateKeys] = useState<{
+    secp256k1: string;
+    ed25519: string;
+  } | null>(null);
   const { copy } = useCopyToClipboard();
 
   const handleContinue = useCallback(async () => {
@@ -307,39 +392,144 @@ export default function Page() {
       return;
     }
 
+    let popup: Window | null = null;
+    let reauthHandler: ((event: MessageEvent) => void) | null = null;
     try {
       setIsLoading(true);
-      await okoWallet.signIn(authType === "auth0" ? "email" : authType);
 
-      // TODO: Verify re-authenticated account matches the current account (prevent account switch)
-      // TODO: Replace with actual private key export when SDK API is available
-      const mockPrivateKey = "0x" + "0".repeat(64);
-      setPrivateKey(mockPrivateKey);
-      setStep(2);
+      // 1. Open re-auth popup at attached origin (match sign-in popup sizes)
+      const attachedOrigin = new URL(okoWallet.sdkEndpoint).origin;
+      const isOAuthProvider =
+        authType === "google" || authType === "x" || authType === "discord";
+      const popupWidth = isOAuthProvider ? 1200 : 440;
+      const popupHeight = isOAuthProvider
+        ? 800
+        : authType === "telegram"
+          ? 402
+          : 285;
+      const popupLeft = Math.max((window.screen.width - popupWidth) / 2, 0);
+      const popupTop = Math.max((window.screen.height - popupHeight) / 2, 0);
+      popup = window.open(
+        `${attachedOrigin}/export/reauth?auth_type=${authType}`,
+        "oko_re_auth",
+        `width=${popupWidth},height=${popupHeight},left=${popupLeft},top=${popupTop},resizable=yes`,
+      );
+
+      // 2. Send export request to attached iframe
+      const resPromise = okoWallet.sendMsgToIframe({
+        target: "oko_attached",
+        msg_type: "__export_private_key__",
+        payload: { auth_type: authType },
+      } as any);
+
+      // 3. Listen for re-auth completion signal from iframe
+      let reauthReceived = false;
+      reauthHandler = (event: MessageEvent) => {
+        if (event.origin !== attachedOrigin) {
+          return;
+        }
+        if (event.data?.msg_type === "__export_reauth_received__") {
+          reauthReceived = true;
+        }
+      };
+      window.addEventListener("message", reauthHandler);
+
+      // 4. Monitor popup close — only reject if re-auth hasn't completed
+      const popupClosePromise = new Promise<never>((_, reject) => {
+        const timer = window.setInterval(() => {
+          if (!popup || popup.closed) {
+            window.clearInterval(timer);
+            if (!reauthReceived) {
+              reject(new Error("POPUP_CLOSED"));
+            }
+            // re-auth completed → popup close is expected, don't reject
+          }
+        }, 1000);
+        void resPromise.finally(() => window.clearInterval(timer));
+      });
+
+      // 5. Backup timeout (in case export hangs after re-auth)
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        const timer = setTimeout(
+          () => reject(new Error("EXPORT_TIMEOUT")),
+          3 * 60 * 1000,
+        );
+        void resPromise.finally(() => clearTimeout(timer));
+      });
+
+      // 6. Wait for iframe result, popup close, or timeout
+      const res = await Promise.race([
+        resPromise,
+        popupClosePromise,
+        timeoutPromise,
+      ]);
+      popup?.close();
+
+      // 5. Parse result
+      const resAny = res as unknown as {
+        msg_type: "__export_private_key_ack__";
+        payload:
+          | {
+              success: true;
+              data: { secp256k1: string; ed25519: string };
+            }
+          | {
+              success: false;
+              error: { type: string; error?: string };
+            };
+      };
+
+      if (
+        resAny.msg_type === "__export_private_key_ack__" &&
+        resAny.payload.success
+      ) {
+        setPrivateKeys(resAny.payload.data);
+        setStep(2);
+      } else {
+        const errorType = !resAny.payload.success
+          ? resAny.payload.error.type
+          : "unknown";
+        displayToast({
+          variant: "confirm",
+          title: "Export Failed",
+          description: getExportErrorDescription(errorType),
+        });
+      }
     } catch (error) {
-      console.error("Re-authentication failed:", error);
+      popup?.close();
+      if (error instanceof Error && error.message === "POPUP_CLOSED") {
+        return;
+      }
+      console.error("Export failed:", error);
+      const description =
+        error instanceof Error && error.message === "EXPORT_TIMEOUT"
+          ? "Export timed out. Please try again."
+          : "Please try again.";
       displayToast({
         variant: "confirm",
-        title: "Login Failed",
-        description: "Please try again.",
+        title: "Export Failed",
+        description,
       });
     } finally {
+      if (reauthHandler) {
+        window.removeEventListener("message", reauthHandler);
+      }
       setIsLoading(false);
     }
   }, [okoWallet, authType]);
 
-  const handleCopy = useCallback(async () => {
-    if (!privateKey) {
-      return;
-    }
-    const success = await copy(privateKey);
-    if (success) {
-      displayToast({ variant: "success", title: "Copied!" });
-    }
-  }, [privateKey, copy]);
+  const handleCopy = useCallback(
+    async (key: string) => {
+      const success = await copy(key);
+      if (success) {
+        displayToast({ variant: "success", title: "Copied!" });
+      }
+    },
+    [copy],
+  );
 
-  const handleToggleReveal = useCallback(() => {
-    setIsRevealed((prev) => !prev);
+  const handleToggleReveal = useCallback((key: "secp256k1" | "ed25519") => {
+    setRevealedKeys((prev) => ({ ...prev, [key]: !prev[key] }));
   }, []);
 
   return (
@@ -368,8 +558,8 @@ export default function Page() {
           />
         ) : (
           <Step2Content
-            privateKey={privateKey!}
-            isRevealed={isRevealed}
+            privateKeys={privateKeys!}
+            revealedKeys={revealedKeys}
             onToggleReveal={handleToggleReveal}
             onCopy={handleCopy}
           />
@@ -377,4 +567,6 @@ export default function Page() {
       </div>
     </div>
   );
-}
+};
+
+export default Page;

@@ -43,6 +43,11 @@ import {
 } from "./handlers/ed25519_keygen";
 import { bail } from "./errors";
 import { getCredentialsFromPayload } from "./validate_social_login";
+import {
+  hasActiveReAuthResolver,
+  consumeReAuthResolver,
+  rejectReAuthResolver,
+} from "../export_reauth_state";
 
 export async function handleOAuthInfoPass(
   ctx: MsgEventContext,
@@ -258,6 +263,30 @@ export async function handleOAuthInfoPassV2(
       return;
     }
 
+    // Re-auth interceptor: if an export request is waiting for re-auth credentials,
+    // extract OAuth credentials and resolve the pending promise.
+    // Fires before api_key/hostOriginList checks (re-auth uses attached origin with no SDK API key).
+    // Mutual exclusion: only one resolver can be active at a time (module-level singleton in
+    // export_reauth_state.ts), so a normal sign-in callback cannot be intercepted during export.
+    if (hasActiveReAuthResolver()) {
+      const authType: AuthType = message.payload.auth_type;
+      const validateOauthRes = await getCredentialsFromPayload(
+        message.payload,
+        hostOrigin,
+      );
+
+      if (!validateOauthRes.success) {
+        rejectReAuthResolver(validateOauthRes.err.type);
+      } else {
+        consumeReAuthResolver({
+          idToken: validateOauthRes.data.idToken,
+          userIdentifier: validateOauthRes.data.userIdentifier,
+          authType,
+        });
+      }
+      return; // finally block handles ack + nonce cleanup
+    }
+
     if (!appState.getHostOriginList().includes(hostOrigin)) {
       await bail(message, { type: "origin_not_registered" });
       return;
@@ -336,6 +365,12 @@ export async function handleOAuthInfoPassV2(
 
     // Store ed25519 key package (signing share) separately
     appState.setKeyPackageEd25519(hostOrigin, signInResult.keyPackageEd25519);
+
+    // Store combined ed25519 user seed share for export
+    appState.setSeedEd25519(
+      hostOrigin,
+      JSON.stringify(signInResult.seedEd25519),
+    );
 
     // Store ed25519 wallet info (without signing share)
     appState.setWalletEd25519(hostOrigin, {

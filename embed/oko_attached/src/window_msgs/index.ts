@@ -1,6 +1,8 @@
 import type { OkoWalletMsg } from "@oko-wallet/oko-sdk-core";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
 
 import type { MsgEventContext } from "./types";
+import { useAppState } from "@oko-wallet-attached/store/app";
 import { handleGetPublicKey } from "./get_public_key";
 import { handleGetPublicKeyEd25519 } from "./get_public_key_ed25519";
 import { handleSetOAuthNonce } from "./set_oauth_nonce";
@@ -15,19 +17,49 @@ import { handleGetCosmosChain } from "./get_cosmos_chain_info";
 import { handleOAuthInfoPassV2 } from "./oauth_info_pass";
 import { handleGetEthChain } from "./get_eth_chain_info";
 import { handleGetConnectedApps } from "./get_connected_apps";
+import { handleExportPrivateKey } from "./export_private_key";
 
-// NOTE: Since this method can only be used within user_dashboard,
-// Define ExtendedOkoWalletMsg to extend the type
+// NOTE: These methods can only be used within user_dashboard,
+// so they are not exposed via the SDK. Define extended types here.
 type OkoWalletMsgGetConnectedApps = {
   target: "oko_attached";
   msg_type: "__get_connected_apps__";
   payload: null;
 };
 
-type ExtendedOkoWalletMsg = OkoWalletMsg | OkoWalletMsgGetConnectedApps;
+type OkoWalletMsgExportPrivateKey = {
+  target: "oko_attached";
+  msg_type: "__export_private_key__";
+  payload: { auth_type: AuthType };
+};
+
+type ExtendedOkoWalletMsg =
+  | OkoWalletMsg
+  | OkoWalletMsgGetConnectedApps
+  | OkoWalletMsgExportPrivateKey;
 
 export function makeMsgHandler() {
   return async function msgHandler(event: MessageEvent) {
+    // Handle port-less messages (popup → iframe, fire-and-forget)
+    const data = event.data;
+    if (
+      data?.target === "oko_attached" &&
+      data?.msg_type === "set_reauth_params"
+    ) {
+      const appState = useAppState.getState();
+      const payload = data.payload as
+        | { nonce?: string; code_verifier?: string }
+        | undefined;
+      if (payload?.nonce) {
+        appState.setNonce(event.origin, payload.nonce);
+      }
+      if (payload?.code_verifier) {
+        appState.setCodeVerifier(event.origin, payload.code_verifier);
+      }
+      console.debug("[attached] set_reauth_params received", event.origin);
+      return;
+    }
+
     if (event.ports.length < 1) {
       // do nothing
 
@@ -123,6 +155,11 @@ export function makeMsgHandler() {
 
       case "__get_connected_apps__": {
         await handleGetConnectedApps(ctx);
+        break;
+      }
+
+      case "__export_private_key__": {
+        await handleExportPrivateKey(ctx, message.payload);
         break;
       }
 

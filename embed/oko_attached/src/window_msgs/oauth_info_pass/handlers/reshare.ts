@@ -144,6 +144,7 @@ export async function handleReshareV2(
       keyshare1Secp256k1: reshareRes.data.keyshare1Secp256k1,
       keyPackageEd25519: reshareRes.data.keyPackageEd25519,
       publicKeyPackageEd25519: reshareRes.data.publicKeyPackageEd25519,
+      seedEd25519: reshareRes.data.seedEd25519,
       isNewUser: false,
       email: signInResp.user.email ?? null,
       name: signInResp.user.name ?? null,
