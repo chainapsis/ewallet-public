@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   type ExportedKeys,
   getExportedKeys,
+  requestExportedKeys,
 } from "@oko-wallet-attached/window_msgs/export_key_store";
 
 import styles from "./export_display.module.scss";
@@ -63,18 +64,34 @@ export const ExportDisplay = () => {
   const [error, setError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Read keys from same-origin module store
+  // Read keys: try local first, then request from hidden iframe via BroadcastChannel
   useEffect(() => {
-    const stored = getExportedKeys();
-    if (!stored) {
-      setError("No exported keys found.");
-      return;
-    }
-    if (!keyType || !(keyType in stored)) {
-      setError(`Invalid key_type: ${keyType}`);
-      return;
-    }
-    setKeys(stored);
+    let cancelled = false;
+
+    const loadKeys = async () => {
+      let stored = getExportedKeys();
+      if (!stored) {
+        stored = await requestExportedKeys();
+      }
+      if (cancelled) {
+        return;
+      }
+      if (!stored) {
+        setError("No exported keys found.");
+        return;
+      }
+      if (!keyType || !(keyType in stored)) {
+        setError(`Invalid key_type: ${keyType}`);
+        return;
+      }
+      setKeys(stored);
+    };
+
+    loadKeys();
+
+    return () => {
+      cancelled = true;
+    };
   }, [keyType]);
 
   // ResizeObserver → notify parent of height changes

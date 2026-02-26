@@ -131,59 +131,10 @@
   color: var(--fg-quaternary);
 }
 
-.privateKeyField {
-  position: relative;
-  min-height: 68px;
+.keyIframe {
   width: 100%;
-  cursor: pointer;
-
-  &:hover .privateKeyBg {
-    background-color: var(--bg-secondary-hover, #f5f5f5);
-  }
-}
-
-.privateKeyBg {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 16px;
-  background-color: var(--bg-secondary);
-  border-radius: 12px;
-  overflow: hidden;
-  word-break: break-all;
-}
-
-.privateKeyTextBlurred {
-  filter: blur(4px);
-  opacity: 0.5;
-}
-
-.privateKeyHint {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-}
-
-.eyeOffIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
-  color: var(--fg-primary);
-}
-
-.copyButtonIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
+  border: none;
+  display: block;
 }
 
 .chainsList {

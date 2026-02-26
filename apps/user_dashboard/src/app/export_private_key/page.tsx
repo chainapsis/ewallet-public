@@ -17,12 +17,11 @@ import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
 import { ZigchainIcon } from "@oko-wallet/oko-common-ui/icons/zigchain_icon";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
-import { type ReactNode, useCallback, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useState } from "react";
 
 import type { OkoWalletMsgExportPrivateKeyAck } from "../../../../../sdk/oko_sdk_core/dist/types";
 import styles from "./page.module.scss";
 import { displayToast } from "@oko-wallet-user-dashboard/components/toast";
-import { useCopyToClipboard } from "@oko-wallet-user-dashboard/hooks/use_copy_to_clipboard";
 import {
   selectCosmosSDK,
   useSDKState,
@@ -111,24 +110,6 @@ const KeyIcon = () => {
   );
 };
 
-const CopyIcon = () => {
-  return (
-    <svg
-      width={24}
-      height={24}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <title>copy</title>
-      <path d="M5 15C4.06812 15 3.60218 15 3.23463 14.8478C2.74458 14.6448 2.35523 14.2554 2.15224 13.7654C2 13.3978 2 12.9319 2 12V5.2C2 4.0799 2 3.51984 2.21799 3.09202C2.40973 2.71569 2.71569 2.40973 3.09202 2.21799C3.51984 2 4.0799 2 5.2 2H12C12.9319 2 13.3978 2 13.7654 2.15224C14.2554 2.35523 14.6448 2.74458 14.8478 3.23463C15 3.60218 15 4.06812 15 5M12.2 22H18.8C19.9201 22 20.4802 22 20.908 21.782C21.2843 21.5903 21.5903 21.2843 21.782 20.908C22 20.4802 22 19.9201 22 18.8V12.2C22 11.0799 22 10.5198 21.782 10.092C21.5903 9.71569 21.2843 9.40973 20.908 9.21799C20.4802 9 19.9201 9 18.8 9H12.2C11.0799 9 10.5198 9 10.092 9.21799C9.71569 9.40973 9.40973 9.71569 9.21799 10.092C9 10.5198 9 11.0799 9 12.2V18.8C9 19.9201 9 20.4802 9.21799 20.908C9.40973 21.2843 9.71569 21.5903 10.092 21.782C10.5198 22 11.0799 22 12.2 22Z" />
-    </svg>
-  );
-};
-
 const SectionKeyIcon = () => {
   return (
     <svg
@@ -185,24 +166,6 @@ const ChainsList = ({
         ))}
       </div>
     </div>
-  );
-};
-
-const EyeOffIcon = () => {
-  return (
-    <svg
-      width={24}
-      height={24}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <title>eye off</title>
-      <path d="M10.7429 5.09232C11.1494 5.03223 11.5686 5 12.0004 5C17.1054 5 20.4553 9.50484 21.5807 11.2868C21.7169 11.5025 21.785 11.6103 21.8231 11.7767C21.8518 11.9016 21.8518 12.0987 21.8231 12.2236C21.785 12.3899 21.7164 12.4985 21.5792 12.7156C21.2793 13.1901 20.8222 13.8571 20.2165 14.5805M6.72432 6.71504C4.56225 8.1817 3.09445 10.2194 2.42111 11.2853C2.28428 11.5019 2.21587 11.6102 2.17774 11.7765C2.1491 11.9014 2.14909 12.0984 2.17771 12.2234C2.21583 12.3897 2.28393 12.4975 2.42013 12.7132C3.54554 14.4952 6.89541 19 12.0004 19C14.0588 19 15.8319 18.2676 17.2888 17.2766M3.00042 3L21.0004 21M9.8791 9.87868C9.3362 10.4216 9.00042 11.1716 9.00042 12C9.00042 13.6569 10.3436 15 12.0004 15C12.8288 15 13.5788 14.6642 14.1218 14.1213" />
-    </svg>
   );
 };
 
@@ -286,16 +249,46 @@ const Step1Content = ({
 };
 
 const Step2Content = ({
-  privateKeys,
-  revealedKeys,
-  onToggleReveal,
-  onCopy,
+  attachedOrigin,
 }: {
-  privateKeys: { secp256k1: string; ed25519: string };
-  revealedKeys: { secp256k1: boolean; ed25519: boolean };
-  onToggleReveal: (key: "secp256k1" | "ed25519") => void;
-  onCopy: (key: string) => void;
+  attachedOrigin: string;
 }) => {
+  const [secpIframeHeight, setSecpIframeHeight] = useState(0);
+  const [edIframeHeight, setEdIframeHeight] = useState(0);
+
+  useEffect(() => {
+    const handler = (event: MessageEvent) => {
+      if (event.origin !== attachedOrigin) {
+        return;
+      }
+      const { data } = event;
+      if (data?.target !== "oko_user_dashboard") {
+        return;
+      }
+
+      if (data.msg_type === "__export_display_resize__") {
+        if (data.key_type === "secp256k1") {
+          setSecpIframeHeight(data.height);
+        } else if (data.key_type === "ed25519") {
+          setEdIframeHeight(data.height);
+        }
+      } else if (data.msg_type === "__export_display_copied__") {
+        displayToast({ variant: "success", title: "Copied!" });
+      } else if (data.msg_type === "__export_display_copy_failed__") {
+        displayToast({
+          variant: "confirm",
+          title: "Copy Failed",
+          description: "Could not copy to clipboard.",
+        });
+      }
+    };
+
+    window.addEventListener("message", handler);
+    return () => {
+      window.removeEventListener("message", handler);
+    };
+  }, [attachedOrigin]);
+
   return (
     <>
       <Typography size="lg" weight="semibold" color="primary">
@@ -315,57 +308,13 @@ const Step2Content = ({
           </Typography>
         </div>
 
-        <div
-          className={styles.privateKeyField}
-          onClick={() => onToggleReveal("secp256k1")}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              onToggleReveal("secp256k1");
-            }
-          }}
-        >
-          <div className={styles.privateKeyBg}>
-            <Typography
-              size="md"
-              weight="medium"
-              color="secondary"
-              className={
-                revealedKeys.secp256k1
-                  ? undefined
-                  : styles.privateKeyTextBlurred
-              }
-            >
-              {privateKeys.secp256k1}
-            </Typography>
-          </div>
-          {!revealedKeys.secp256k1 && (
-            <div className={styles.privateKeyHint}>
-              <span className={styles.eyeOffIcon}>
-                <EyeOffIcon />
-              </span>
-              <Typography size="md" weight="medium" color="primary">
-                Click or tap to reveal your private key.
-                <br />
-                Ensure no one else can see your screen.
-              </Typography>
-            </div>
-          )}
-        </div>
-
-        <div style={{ height: 12 }} />
-
-        <Button
-          size="lg"
-          fullWidth
-          onClick={() => onCopy(privateKeys.secp256k1)}
-        >
-          <span className={styles.copyButtonIcon}>
-            <CopyIcon />
-          </span>
-          Copy to Clipboard
-        </Button>
+        <iframe
+          src={`${attachedOrigin}/export/display?key_type=secp256k1`}
+          className={styles.keyIframe}
+          style={secpIframeHeight ? { height: secpIframeHeight } : undefined}
+          title="EVM & Cosmos private key"
+          allow="clipboard-write"
+        />
 
         <div style={{ height: 16 }} />
 
@@ -385,57 +334,13 @@ const Step2Content = ({
           </Typography>
         </div>
 
-        <div
-          className={styles.privateKeyField}
-          onClick={() => onToggleReveal("ed25519")}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              onToggleReveal("ed25519");
-            }
-          }}
-        >
-          <div className={styles.privateKeyBg}>
-            <Typography
-              size="md"
-              weight="medium"
-              color="secondary"
-              className={
-                revealedKeys.ed25519
-                  ? undefined
-                  : styles.privateKeyTextBlurred
-              }
-            >
-              {privateKeys.ed25519}
-            </Typography>
-          </div>
-          {!revealedKeys.ed25519 && (
-            <div className={styles.privateKeyHint}>
-              <span className={styles.eyeOffIcon}>
-                <EyeOffIcon />
-              </span>
-              <Typography size="md" weight="medium" color="primary">
-                Click or tap to reveal your private key.
-                <br />
-                Ensure no one else can see your screen.
-              </Typography>
-            </div>
-          )}
-        </div>
-
-        <div style={{ height: 12 }} />
-
-        <Button
-          size="lg"
-          fullWidth
-          onClick={() => onCopy(privateKeys.ed25519)}
-        >
-          <span className={styles.copyButtonIcon}>
-            <CopyIcon />
-          </span>
-          Copy to Clipboard
-        </Button>
+        <iframe
+          src={`${attachedOrigin}/export/display?key_type=ed25519`}
+          className={styles.keyIframe}
+          style={edIframeHeight ? { height: edIframeHeight } : undefined}
+          title="Solana & SVM private key"
+          allow="clipboard-write"
+        />
 
         <div style={{ height: 16 }} />
 
@@ -488,18 +393,12 @@ const Page = () => {
   const displayIdentifier = usesName ? name : email;
 
   const okoWallet = useSDKState(selectCosmosSDK)?.okoWallet;
+  const attachedOrigin = okoWallet
+    ? new URL(okoWallet.sdkEndpoint).origin
+    : null;
 
   const [step, setStep] = useState<1 | 2>(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [revealedKeys, setRevealedKeys] = useState({
-    secp256k1: false,
-    ed25519: false,
-  });
-  const [privateKeys] = useState<{
-    secp256k1: string;
-    ed25519: string;
-  } | null>(null);
-  const { copy } = useCopyToClipboard();
 
   const handleContinue = useCallback(async () => {
     if (!okoWallet || !authType) {
@@ -620,20 +519,6 @@ const Page = () => {
     }
   }, [okoWallet, authType]);
 
-  const handleCopy = useCallback(
-    async (key: string) => {
-      const success = await copy(key);
-      if (success) {
-        displayToast({ variant: "success", title: "Copied!" });
-      }
-    },
-    [copy],
-  );
-
-  const handleToggleReveal = useCallback((key: "secp256k1" | "ed25519") => {
-    setRevealedKeys((prev) => ({ ...prev, [key]: !prev[key] }));
-  }, []);
-
   return (
     <div className={styles.container}>
       <div className={styles.heading}>
@@ -659,12 +544,7 @@ const Page = () => {
             onContinue={handleContinue}
           />
         ) : (
-          <Step2Content
-            privateKeys={privateKeys!}
-            revealedKeys={revealedKeys}
-            onToggleReveal={handleToggleReveal}
-            onCopy={handleCopy}
-          />
+          <Step2Content attachedOrigin={attachedOrigin!} />
         )}
       </div>
     </div>

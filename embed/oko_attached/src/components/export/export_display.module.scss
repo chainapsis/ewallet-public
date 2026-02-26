@@ -6,6 +6,13 @@
   --fg-primary: #181d27;
 }
 
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
 .container {
   width: 100%;
   display: flex;
