@@ -1,0 +1,347 @@
+.container {
+  position: relative;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  align-items: center;
+  padding-top: 0;
+  justify-content: center;
+  min-height: 284px;
+}
+
+.card {
+  width: 376px;
+  min-width: 360px;
+  min-height: 220px;
+  border-radius: 12px;
+  background: var(--bg-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding: 0;
+}
+
+.cardTop {
+  width: 376px;
+  height: 126px;
+  padding: var(--spacing-3xl) var(--spacing-2xl) var(--spacing-2xl)
+    var(--spacing-2xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.cardBottom {
+  width: 376px;
+  height: 94px;
+  min-width: 200px;
+  padding: var(--spacing-2xl);
+  display: flex;
+  justify-content: center;
+}
+
+.fieldHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-family-body);
+  font-weight: 600;
+  font-size: var(--font-size-text-md);
+  line-height: var(--line-height-text-md);
+  letter-spacing: 0;
+  color: var(--text-primary);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 420px;
+  align-items: center;
+}
+
+.emailRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  width: 336px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid var(--border-secondary);
+  background: var(--bg-primary);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.08),
+    0 1px 1px rgba(15, 23, 42, 0.04);
+}
+
+.emailInner {
+  width: 308px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.emailIcon {
+  color: var(--fg-quaternary);
+  flex-shrink: 0;
+}
+
+.emailInput {
+  flex: 1 0 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-family-body);
+  font-weight: 400;
+  font-style: normal;
+  font-size: var(--font-size-text-md);
+  line-height: var(--line-height-text-md);
+  letter-spacing: 0;
+
+  &::placeholder {
+    color: var(--gray-500);
+  }
+}
+
+.nextButton {
+  height: 22px !important;
+  padding: 0 4px !important;
+  color: var(--gray-500) !important;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  flex-shrink: 0;
+
+  &:disabled {
+    cursor: not-allowed !important;
+    color: var(--text-disabled, #717680) !important;
+  }
+
+  &.nextButtonActive:not(:disabled) {
+    color: var(--text-primary) !important;
+  }
+}
+
+.actions {
+  min-height: 32px;
+}
+
+.otpForm {
+  align-items: center;
+}
+
+.otpPanel {
+  width: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.otpTitle {
+  font-family: var(--font-family-body);
+  font-weight: 600;
+  font-size: var(--font-size-text-lg);
+  line-height: var(--line-height-text-lg);
+  letter-spacing: 0;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.otpSubtitle {
+  margin-top: 0;
+  text-align: center;
+  font-family: Inter, var(--font-family-body);
+  font-weight: 400;
+  font-style: normal;
+  font-size: 15px;
+  line-height: 150%;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.otpCodeSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 340px;
+  align-items: center;
+}
+
+.otpInputRow {
+  margin-top: 0;
+}
+
+.otpInputRow > div {
+  gap: 6px !important;
+}
+
+.otpInputRow input {
+  width: 48px !important;
+  height: 48px !important;
+  background: var(--bg-primary) !important;
+  border: 1px solid var(--border-primary) !important;
+  border-radius: 7.5px !important;
+  box-shadow: 0 0.75px 1.5px 0 var(--ColorsEffectsShadowsshadow-xs) !important;
+  color: var(--text-primary) !important;
+  caret-color: var(--text-primary) !important;
+  font-family: var(--font-family-body) !important;
+  font-weight: 500 !important;
+  font-style: normal !important;
+  font-size: 36px !important;
+  line-height: 45px !important;
+  letter-spacing: -0.02em !important;
+  text-align: center !important;
+
+  &::placeholder {
+    color: var(--text-placeholder-subtle) !important;
+    opacity: 1 !important;
+    font-family: var(--font-family-body) !important;
+    font-weight: 500 !important;
+    font-style: normal !important;
+    font-size: 36px !important;
+    line-height: 45px !important;
+    letter-spacing: -0.02em !important;
+    text-align: center !important;
+  }
+
+  &:not(:placeholder-shown) {
+    border: 1.5px solid var(--border-brand) !important;
+  }
+
+  &:focus {
+    border: 1.5px solid var(--border-brand) !important;
+    background: var(--bg-primary) !important;
+    box-shadow:
+      0 0.75px 1.5px 0 var(--ColorsEffectsShadowsshadow-xs),
+      0 0 0 1.5px var(--bg-primary),
+      0 0 0 3px var(--ColorsEffectsFocusringsfocus-ring) !important;
+  }
+}
+
+.otpInputRowError input,
+.otpInputRowError input:not(:placeholder-shown),
+.otpInputRowError input:focus {
+  border: 1.5px solid var(--border-error) !important;
+  color: var(--text-error-primary) !important;
+  caret-color: var(--text-error-primary) !important;
+}
+
+.otpInputRowError input::placeholder {
+  color: var(--text-error-primary) !important;
+}
+
+.otpErrorMessage {
+  width: 318px;
+  padding: 0;
+  text-align: left;
+}
+
+.resendRow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  width: 340px;
+  height: 20px;
+}
+
+.resendText {
+  font-family: var(--font-family-body);
+  font-weight: 500;
+  font-size: var(--font-size-text-sm);
+  line-height: var(--line-height-text-sm);
+  letter-spacing: 0;
+  color: var(--text-primary);
+}
+
+.resendLink {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-family: var(--font-family-body);
+  font-weight: 600;
+  font-size: var(--font-size-text-sm);
+  line-height: var(--line-height-text-sm);
+  letter-spacing: 0;
+  text-decoration: underline;
+  color: var(--text-primary);
+  cursor: pointer;
+
+  &:disabled {
+    color: var(--text-disabled);
+    cursor: not-allowed;
+  }
+}
+
+.resendTimer {
+  font-family: var(--font-family-body);
+  font-weight: 500;
+  font-size: var(--font-size-text-sm);
+  line-height: var(--line-height-text-sm);
+  letter-spacing: 0;
+  color: #535862;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .body {
+    min-height: 100vh;
+    justify-content: flex-start;
+  }
+
+  .card {
+    width: 100%;
+    min-width: 0;
+    min-height: 100vh;
+    border-radius: 0;
+  }
+
+  .cardTop {
+    width: 100%;
+    padding: 36px 20px 20px;
+  }
+
+  .fieldHeader {
+    font-weight: 500;
+    font-size: var(--font-size-sm);
+    line-height: var(--font-line-height-sm);
+  }
+
+  .cardBottom {
+    width: 100%;
+    padding: 20px;
+  }
+
+  .form {
+    max-width: none;
+  }
+
+  .emailRow {
+    width: 100%;
+    height: 42px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border-color: var(--border-primary);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .emailInner {
+    width: 100%;
+  }
+
+  .nextButton {
+    height: auto !important;
+    padding: 0 !important;
+  }
+}

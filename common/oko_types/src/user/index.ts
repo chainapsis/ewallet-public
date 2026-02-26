@@ -94,6 +94,16 @@ export interface SignInResponseV2 {
   };
 }
 
+export interface ExportSharesRequest {
+  first_login_jwt: string;
+  auth_type: AuthType;
+}
+
+export interface ExportSharesResponse {
+  secp256k1_share: string;
+  ed25519_seed_share: string;
+}
+
 export interface SignInSilentlyResponse {
   token: string | null;
   // user: {

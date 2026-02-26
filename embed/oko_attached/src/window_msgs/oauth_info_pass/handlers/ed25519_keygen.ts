@@ -66,6 +66,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
     userKeyShares: ed25519UserKeyShares,
     serverSeedShare: ed25519ServerSeedShare,
     ksnSeedShares: ed25519KsnSeedShares,
+    userSeedEd25519,
   } = ed25519KeygenSplitRes.data;
 
   // 2. Commit to oko_api and ks nodes
@@ -259,6 +260,7 @@ export async function handleExistingUserNeedsEd25519Keygen(
       keyshare1Secp256k1,
       keyPackageEd25519: keyPackageEd25519Hex.keyPackage,
       publicKeyPackageEd25519: keyPackageEd25519Hex.publicKeyPackage,
+      seedEd25519: userSeedEd25519,
       isNewUser: false,
       email: reqKeygenEd25519Res.data.user.email ?? null,
       name: reqKeygenEd25519Res.data.user.name ?? null,
@@ -306,6 +308,7 @@ export async function handleReshareAndEd25519Keygen(
     userKeyShares: ed25519UserKeyShares,
     serverSeedShare: ed25519ServerSeedShare,
     ksnSeedShares: ed25519KsnSeedShares,
+    userSeedEd25519,
   } = ed25519KeygenSplitRes.data;
 
   // 3. Commit to oko_api and ks nodes with "add_ed25519_with_reshare" operation type
@@ -605,6 +608,7 @@ export async function handleReshareAndEd25519Keygen(
       keyshare1Secp256k1: secp256k1ExpandRes.data.original_secret.toHex(),
       keyPackageEd25519: keyPackageEd25519Hex.keyPackage,
       publicKeyPackageEd25519: keyPackageEd25519Hex.publicKeyPackage,
+      seedEd25519: userSeedEd25519,
       isNewUser: false,
       email: reqKeygenEd25519Res.data.user.email ?? null,
       name: reqKeygenEd25519Res.data.user.name ?? null,
