@@ -11,6 +11,7 @@ import type {
 } from "@oko-wallet/oko-types/user";
 import bs58 from "bs58";
 
+import { setExportedKeys } from "./export_key_store";
 import {
   type ReAuthCredentials,
   setReAuthResolver,
@@ -194,15 +195,13 @@ export async function handleExportPrivateKey(
     keypairBytes.set(pubkeyBytes, seedBytes.length);
     const ed25519Keypair = bs58.encode(keypairBytes);
 
-    // 9. Return result
-    console.log(`${LOG_PREFIX} export complete`);
-    sendAck({
-      success: true,
-      data: {
-        secp256k1: secp256k1PrivateKey,
-        ed25519: ed25519Keypair,
-      },
+    // 9. Store keys in module-level memory and signal success (no key data sent)
+    setExportedKeys({
+      secp256k1: secp256k1PrivateKey,
+      ed25519: ed25519Keypair,
     });
+    console.log(`${LOG_PREFIX} export complete, keys stored`);
+    sendAck({ success: true });
   } catch (err) {
     console.error(`${LOG_PREFIX} unexpected error`, err);
     sendAck({

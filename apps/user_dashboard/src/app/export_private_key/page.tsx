@@ -495,7 +495,7 @@ const Page = () => {
     secp256k1: false,
     ed25519: false,
   });
-  const [privateKeys, setPrivateKeys] = useState<{
+  const [privateKeys] = useState<{
     secp256k1: string;
     ed25519: string;
   } | null>(null);
@@ -586,7 +586,6 @@ const Page = () => {
         resAny.msg_type === "__export_private_key_ack__" &&
         resAny.payload.success
       ) {
-        setPrivateKeys(resAny.payload.data);
         setStep(2);
       } else {
         const errorType = !resAny.payload.success
