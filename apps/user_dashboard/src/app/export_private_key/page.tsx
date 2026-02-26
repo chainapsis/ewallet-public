@@ -1,11 +1,20 @@
 "use client";
 
 import { Button } from "@oko-wallet/oko-common-ui/button";
+import { ArbitrumIcon } from "@oko-wallet/oko-common-ui/icons/arbitrum_icon";
+import { BaseIcon } from "@oko-wallet/oko-common-ui/icons/base_icon";
+import { CosmosIcon } from "@oko-wallet/oko-common-ui/icons/cosmos_icon";
 import { DiscordIcon } from "@oko-wallet/oko-common-ui/icons/discord_icon";
+import { EthereumIcon } from "@oko-wallet/oko-common-ui/icons/ethereum_icon";
 import { GoogleIcon } from "@oko-wallet/oko-common-ui/icons/google_icon";
+import { InfoCircleIcon } from "@oko-wallet/oko-common-ui/icons/info_circle";
+import { InitiaIcon } from "@oko-wallet/oko-common-ui/icons/initia_icon";
 import { MailboxIcon } from "@oko-wallet/oko-common-ui/icons/mailbox";
+import { RialoIcon } from "@oko-wallet/oko-common-ui/icons/rialo_icon";
+import { SolanaCircleIcon } from "@oko-wallet/oko-common-ui/icons/solana_circle_icon";
 import { TelegramIcon } from "@oko-wallet/oko-common-ui/icons/telegram_icon";
 import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
+import { ZigchainIcon } from "@oko-wallet/oko-common-ui/icons/zigchain_icon";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import { type ReactNode, useCallback, useState } from "react";
@@ -120,6 +129,65 @@ const CopyIcon = () => {
   );
 };
 
+const SectionKeyIcon = () => {
+  return (
+    <svg
+      width={20}
+      height={20}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <title>key</title>
+      <path d="M15 9H15.01M15 15C18.3137 15 21 12.3137 21 9C21 5.68629 18.3137 3 15 3C11.6863 3 9 5.68629 9 9C9 9.27368 9.01832 9.54308 9.05381 9.80704C9.11218 10.2412 9.14136 10.4583 9.12172 10.5956C9.10125 10.7387 9.0752 10.8157 9.00469 10.9419C8.937 11.063 8.81771 11.1823 8.57913 11.4209L3.46863 16.5314C3.29568 16.7043 3.2092 16.7908 3.14736 16.8917C3.09253 16.9812 3.05213 17.0787 3.02763 17.1808C3 17.2959 3 17.4182 3 17.6627V19.4C3 19.9601 3 20.2401 3.10899 20.454C3.20487 20.6422 3.35785 20.7951 3.54601 20.891C3.75992 21 4.03995 21 4.6 21H6.33726C6.58185 21 6.70414 21 6.81923 20.9724C6.92127 20.9479 7.01881 20.9075 7.10828 20.8526C7.2092 20.7908 7.29568 20.7043 7.46863 20.5314L12.5791 15.4209C12.8177 15.1823 12.937 15.063 13.0581 14.9953C13.1843 14.9248 13.2613 14.8987 13.4044 14.8783C13.5417 14.8586 13.7588 14.8878 14.193 14.9462C14.4569 14.9817 14.7263 15 15 15Z" />
+    </svg>
+  );
+};
+
+const EVM_COSMOS_CHAINS = [
+  { name: "Ethereum", icon: <EthereumIcon width={16} height={16} /> },
+  { name: "Base", icon: <BaseIcon width={16} height={16} /> },
+  { name: "Arbitrum", icon: <ArbitrumIcon width={16} height={16} /> },
+  { name: "Cosmos Hub", icon: <CosmosIcon width={16} height={16} /> },
+  { name: "Initia", icon: <InitiaIcon width={16} height={16} /> },
+  { name: "Zigchain", icon: <ZigchainIcon width={16} height={16} /> },
+];
+
+const SVM_CHAINS = [
+  { name: "Solana", icon: <SolanaCircleIcon width={16} height={16} /> },
+  { name: "Rialo", icon: <RialoIcon width={16} height={16} /> },
+];
+
+const ChainsList = ({
+  chains,
+}: {
+  chains: { name: string; icon: ReactNode }[];
+}) => {
+  return (
+    <div className={styles.chainsList}>
+      <div className={styles.chainsTitle}>
+        <Typography size="xs" weight="semibold" color="secondary">
+          Examples
+        </Typography>
+        <span className={styles.chainsSeparator} />
+      </div>
+      <div className={styles.chainsItems}>
+        {chains.map((chain) => (
+          <span key={chain.name} className={styles.chainItem}>
+            {chain.icon}
+            <Typography size="xs" weight="semibold" color="primary">
+              {chain.name}
+            </Typography>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const EyeOffIcon = () => {
   return (
     <svg
@@ -231,20 +299,22 @@ const Step2Content = ({
   return (
     <>
       <Typography size="lg" weight="semibold" color="primary">
-        View and copy your private keys
+        View and copy your private key
       </Typography>
 
       <div style={{ height: 24 }} />
 
-      <div className={styles.privateKeySection}>
-        <Typography
-          size="xs"
-          weight="semibold"
-          color="secondary"
-          className={styles.privateKeyLabel}
-        >
-          EVM/Cosmos Private Key
-        </Typography>
+      {/* EVM & Cosmos Section */}
+      <div className={styles.keySection}>
+        <div className={styles.sectionHeader}>
+          <span className={styles.sectionKeyIcon}>
+            <SectionKeyIcon />
+          </span>
+          <Typography size="lg" weight="semibold" color="primary">
+            EVM & Cosmos
+          </Typography>
+        </div>
+
         <div
           className={styles.privateKeyField}
           onClick={() => onToggleReveal("secp256k1")}
@@ -283,28 +353,38 @@ const Step2Content = ({
             </div>
           )}
         </div>
+
+        <div style={{ height: 12 }} />
+
+        <Button
+          size="lg"
+          fullWidth
+          onClick={() => onCopy(privateKeys.secp256k1)}
+        >
+          <span className={styles.copyButtonIcon}>
+            <CopyIcon />
+          </span>
+          Copy to Clipboard
+        </Button>
+
+        <div style={{ height: 16 }} />
+
+        <ChainsList chains={EVM_COSMOS_CHAINS} />
       </div>
 
-      <div style={{ height: 32 }} />
+      <div style={{ height: 52 }} />
 
-      <Button size="lg" fullWidth onClick={() => onCopy(privateKeys.secp256k1)}>
-        <span className={styles.copyButtonIcon}>
-          <CopyIcon />
-        </span>
-        Copy to Clipboard
-      </Button>
+      {/* Solana & SVM Section */}
+      <div className={styles.keySection}>
+        <div className={styles.sectionHeader}>
+          <span className={styles.sectionKeyIcon}>
+            <SectionKeyIcon />
+          </span>
+          <Typography size="lg" weight="semibold" color="primary">
+            Solana & SVM
+          </Typography>
+        </div>
 
-      <div style={{ height: 40 }} />
-
-      <div className={styles.privateKeySection}>
-        <Typography
-          size="xs"
-          weight="semibold"
-          color="secondary"
-          className={styles.privateKeyLabel}
-        >
-          SVM Private Key
-        </Typography>
         <div
           className={styles.privateKeyField}
           onClick={() => onToggleReveal("ed25519")}
@@ -322,7 +402,9 @@ const Step2Content = ({
               weight="medium"
               color="secondary"
               className={
-                revealedKeys.ed25519 ? undefined : styles.privateKeyTextBlurred
+                revealedKeys.ed25519
+                  ? undefined
+                  : styles.privateKeyTextBlurred
               }
             >
               {privateKeys.ed25519}
@@ -341,16 +423,40 @@ const Step2Content = ({
             </div>
           )}
         </div>
+
+        <div style={{ height: 12 }} />
+
+        <Button
+          size="lg"
+          fullWidth
+          onClick={() => onCopy(privateKeys.ed25519)}
+        >
+          <span className={styles.copyButtonIcon}>
+            <CopyIcon />
+          </span>
+          Copy to Clipboard
+        </Button>
+
+        <div style={{ height: 16 }} />
+
+        <ChainsList chains={SVM_CHAINS} />
       </div>
 
-      <div style={{ height: 32 }} />
+      <hr className={styles.divider} />
 
-      <Button size="lg" fullWidth onClick={() => onCopy(privateKeys.ed25519)}>
-        <span className={styles.copyButtonIcon}>
-          <CopyIcon />
-        </span>
-        Copy to Clipboard
-      </Button>
+      {/* Info Box */}
+      <div className={styles.infoBox}>
+        <div className={styles.infoBoxTitle}>
+          <InfoCircleIcon className={styles.infoBoxIcon} />
+          <Typography size="sm" weight="semibold" color="tertiary">
+            Why are there two keys?
+          </Typography>
+        </div>
+        <Typography size="sm" weight="medium" color="quaternary">
+          Different ecosystems use different cryptographic curves, so their
+          private keys are generated differently.
+        </Typography>
+      </div>
     </>
   );
 };
