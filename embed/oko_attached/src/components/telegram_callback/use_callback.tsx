@@ -21,6 +21,15 @@ export function useTelegramCallback() {
         const cbRes = await handleTelegramCallback();
 
         if (cbRes.success) {
+          const stateParam = new URLSearchParams(window.location.search).get(RedirectUriSearchParamsKey.STATE);
+          if (stateParam) {
+            try {
+              const oauthState = JSON.parse(stateParam);
+              if (oauthState.apiKey === "reauth") {
+                return; // Parent will close popup when iframes are ready
+              }
+            } catch { /* ignore parse errors */ }
+          }
           window.close();
         } else {
           setError(cbRes.err.type);

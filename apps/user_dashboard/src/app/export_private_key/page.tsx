@@ -17,7 +17,7 @@ import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
 import { ZigchainIcon } from "@oko-wallet/oko-common-ui/icons/zigchain_icon";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
-import { type ReactNode, useCallback, useEffect, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
 import type { OkoWalletMsgExportPrivateKeyAck } from "@oko-wallet/oko-sdk-core";
 import styles from "./page.module.scss";
@@ -250,8 +250,10 @@ const Step1Content = ({
 
 const Step2Content = ({
   attachedOrigin,
+  onReady,
 }: {
   attachedOrigin: string;
+  onReady?: () => void;
 }) => {
   const [secpIframeHeight, setSecpIframeHeight] = useState(0);
   const [edIframeHeight, setEdIframeHeight] = useState(0);
@@ -289,8 +291,27 @@ const Step2Content = ({
     };
   }, [attachedOrigin]);
 
+  const iframesReady = secpIframeHeight > 0 && edIframeHeight > 0;
+
+  const onReadyFired = useRef(false);
+  useEffect(() => {
+    if (!onReady || onReadyFired.current) return;
+    if (iframesReady) {
+      onReadyFired.current = true;
+      onReady();
+      return;
+    }
+    const timer = setTimeout(() => {
+      if (!onReadyFired.current) {
+        onReadyFired.current = true;
+        onReady();
+      }
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [iframesReady, onReady]);
+
   return (
-    <>
+    <div style={{ visibility: iframesReady ? "visible" : "hidden" }}>
       <Typography size="lg" weight="semibold" color="primary">
         View and copy your private key
       </Typography>
@@ -362,7 +383,7 @@ const Step2Content = ({
           private keys are generated differently.
         </Typography>
       </div>
-    </>
+    </div>
   );
 };
 
@@ -399,6 +420,13 @@ const Page = () => {
 
   const [step, setStep] = useState<1 | 2>(1);
   const [isLoading, setIsLoading] = useState(false);
+  const popupRef = useRef<Window | null>(null);
+
+  const handlePopupClose = useCallback(() => {
+    popupRef.current?.close();
+    popupRef.current = null;
+    setIsLoading(false);
+  }, []);
 
   const handleContinue = useCallback(async () => {
     if (!okoWallet || !authType) {
@@ -407,6 +435,7 @@ const Page = () => {
 
     let popup: Window | null = null;
     let reauthHandler: ((event: MessageEvent) => void) | null = null;
+    let exportSucceeded = false;
     try {
       setIsLoading(true);
 
@@ -476,7 +505,6 @@ const Page = () => {
         popupClosePromise,
         timeoutPromise,
       ]);
-      popup?.close();
 
       // 7. Parse result
       const resAny = res as unknown as OkoWalletMsgExportPrivateKeyAck;
@@ -485,8 +513,12 @@ const Page = () => {
         resAny.msg_type === "__export_private_key_ack__" &&
         resAny.payload.success
       ) {
+        // Keep popup open — Step2Content.onReady will close it
+        exportSucceeded = true;
+        popupRef.current = popup;
         setStep(2);
       } else {
+        popup?.close();
         const errorType = !resAny.payload.success
           ? resAny.payload.error.type
           : "unknown";
@@ -515,7 +547,9 @@ const Page = () => {
       if (reauthHandler) {
         window.removeEventListener("message", reauthHandler);
       }
-      setIsLoading(false);
+      if (!exportSucceeded) {
+        setIsLoading(false);
+      }
     }
   }, [okoWallet, authType]);
 
@@ -544,7 +578,10 @@ const Page = () => {
             onContinue={handleContinue}
           />
         ) : (
-          <Step2Content attachedOrigin={attachedOrigin!} />
+          <Step2Content
+            attachedOrigin={attachedOrigin!}
+            onReady={handlePopupClose}
+          />
         )}
       </div>
     </div>
