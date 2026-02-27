@@ -38,7 +38,6 @@ export function requestExportedKeys(): Promise<ExportedKeys | null> {
     reqBc.onmessage = (event: MessageEvent) => {
       if (event.data?.type === "keys") {
         clearTimeout(timeout);
-        storedKeys = event.data.keys;
         reqBc.close();
         resolve(event.data.keys);
       }

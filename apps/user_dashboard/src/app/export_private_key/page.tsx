@@ -19,7 +19,7 @@ import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import { type ReactNode, useCallback, useEffect, useState } from "react";
 
-import type { OkoWalletMsgExportPrivateKeyAck } from "../../../../../sdk/oko_sdk_core/dist/types";
+import type { OkoWalletMsgExportPrivateKeyAck } from "@oko-wallet/oko-sdk-core";
 import styles from "./page.module.scss";
 import { displayToast } from "@oko-wallet-user-dashboard/components/toast";
 import {
@@ -478,7 +478,7 @@ const Page = () => {
       ]);
       popup?.close();
 
-      // 5. Parse result
+      // 7. Parse result
       const resAny = res as unknown as OkoWalletMsgExportPrivateKeyAck;
 
       if (

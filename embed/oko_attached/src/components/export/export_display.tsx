@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
   type ExportedKeys,
@@ -55,9 +55,13 @@ const CopyIcon = () => {
   );
 };
 
+const VALID_KEY_TYPES: ReadonlySet<string> = new Set(["secp256k1", "ed25519"]);
+
 export const ExportDisplay = () => {
-  const params = new URLSearchParams(window.location.search);
-  const keyType = params.get("key_type") as KeyType | null;
+  const keyType = useMemo(() => {
+    const raw = new URLSearchParams(window.location.search).get("key_type");
+    return raw && VALID_KEY_TYPES.has(raw) ? (raw as KeyType) : null;
+  }, []);
 
   const [revealed, setRevealed] = useState(false);
   const [keys, setKeys] = useState<ExportedKeys | null>(null);
