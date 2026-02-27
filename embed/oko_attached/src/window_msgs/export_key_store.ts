@@ -7,11 +7,13 @@ const CHANNEL_NAME = "__oko_export_keys__";
 
 let storedKeys: ExportedKeys | null = null;
 
-// Respond to key requests from other same-origin contexts (visible iframe)
+// Respond to key requests and clear signals from other same-origin contexts (visible iframe)
 const bc = new BroadcastChannel(CHANNEL_NAME);
 bc.onmessage = (event: MessageEvent) => {
   if (event.data?.type === "request_keys" && storedKeys) {
     bc.postMessage({ type: "keys", keys: storedKeys });
+  } else if (event.data?.type === "clear_keys") {
+    storedKeys = null;
   }
 };
 
@@ -38,6 +40,8 @@ export function requestExportedKeys(): Promise<ExportedKeys | null> {
     reqBc.onmessage = (event: MessageEvent) => {
       if (event.data?.type === "keys") {
         clearTimeout(timeout);
+        // Signal the hidden iframe to clear keys from memory
+        reqBc.postMessage({ type: "clear_keys" });
         reqBc.close();
         resolve(event.data.keys);
       }

@@ -3,7 +3,6 @@ import type {
   OkoWalletMsgExportPrivateKey,
   OkoWalletMsgGetConnectedApps,
 } from "@oko-wallet/oko-sdk-core";
-import type { AuthType } from "@oko-wallet/oko-types/auth";
 
 import { handleExportPrivateKey } from "./export_private_key";
 import { handleGetAuthType } from "./get_auth_type";
@@ -21,6 +20,7 @@ import { handleSetCodeVerifier } from "./set_code_verifier";
 import { handleSetOAuthNonce } from "./set_oauth_nonce";
 import { handleSignOut } from "./sign_out";
 import type { MsgEventContext } from "./types";
+import { USER_DASHBOARD_ORIGINS } from "@oko-wallet-attached/requests/endpoints";
 import { useAppState } from "@oko-wallet-attached/store/app";
 
 // NOTE: Some types are used only within certain apps, such as "user_dashboard"
@@ -37,6 +37,16 @@ export function makeMsgHandler() {
       data?.target === "oko_attached" &&
       data?.msg_type === "set_reauth_params"
     ) {
+      const allowedOrigins = USER_DASHBOARD_ORIGINS.split(",").map(
+        (o: string) => o.trim(),
+      );
+      if (!allowedOrigins.includes(event.origin)) {
+        console.warn(
+          "[attached] set_reauth_params rejected from origin:",
+          event.origin,
+        );
+        return;
+      }
       const appState = useAppState.getState();
       const payload = data.payload as
         | { nonce?: string; code_verifier?: string }

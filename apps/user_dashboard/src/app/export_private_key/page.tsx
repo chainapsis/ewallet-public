@@ -309,7 +309,7 @@ const Step2Content = ({
         </div>
 
         <iframe
-          src={`${attachedOrigin}/export/display?key_type=secp256k1`}
+          src={`${attachedOrigin}/export/display?key_type=secp256k1&parent_origin=${encodeURIComponent(window.location.origin)}`}
           className={styles.keyIframe}
           style={secpIframeHeight ? { height: secpIframeHeight } : undefined}
           title="EVM & Cosmos private key"
@@ -335,7 +335,7 @@ const Step2Content = ({
         </div>
 
         <iframe
-          src={`${attachedOrigin}/export/display?key_type=ed25519`}
+          src={`${attachedOrigin}/export/display?key_type=ed25519&parent_origin=${encodeURIComponent(window.location.origin)}`}
           className={styles.keyIframe}
           style={edIframeHeight ? { height: edIframeHeight } : undefined}
           title="Solana & SVM private key"

@@ -12,10 +12,24 @@ type KeyType = "secp256k1" | "ed25519";
 
 const PARENT_MSG_TARGET = "oko_user_dashboard";
 
+function getParentOrigin(): string {
+  const raw = new URLSearchParams(window.location.search).get("parent_origin");
+  if (!raw) {
+    return "*";
+  }
+  try {
+    return new URL(raw).origin;
+  } catch {
+    return "*";
+  }
+}
+
+const parentOrigin = getParentOrigin();
+
 function postToParent(msgType: string, data?: Record<string, unknown>) {
   window.parent.postMessage(
     { target: PARENT_MSG_TARGET, msg_type: msgType, ...data },
-    "*",
+    parentOrigin,
   );
 }
 
