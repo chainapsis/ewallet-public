@@ -25,7 +25,7 @@ export const TelegramReauth = () => {
   // Build OAuthState for the callback to parse
   const oauthState = useMemo<OAuthState>(
     () => ({
-      apiKey: "reauth",
+      apiKey: "export_key_reauth",
       targetOrigin: window.location.origin,
       provider: "telegram",
     }),
