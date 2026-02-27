@@ -25,7 +25,7 @@ export function useTelegramCallback() {
           if (stateParam) {
             try {
               const oauthState = JSON.parse(stateParam);
-              if (oauthState.apiKey === "reauth") {
+              if (oauthState.apiKey === "export_key_reauth") {
                 return; // Parent will close popup when iframes are ready
               }
             } catch { /* ignore parse errors */ }

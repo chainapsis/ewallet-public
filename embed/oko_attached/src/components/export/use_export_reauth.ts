@@ -111,7 +111,7 @@ function buildGoogleOAuthUrl(nonce: string): string {
   const redirectUri = `${window.location.origin}/google/callback`;
 
   const oauthState: OAuthState = {
-    apiKey: "reauth",
+    apiKey: "export_key_reauth",
     targetOrigin: window.location.origin,
     provider: "google",
   };
@@ -132,7 +132,7 @@ function buildXOAuthUrl(codeChallenge: string): string {
   const redirectUri = `${window.location.origin}/x/callback`;
 
   const oauthState: OAuthState = {
-    apiKey: "reauth",
+    apiKey: "export_key_reauth",
     targetOrigin: window.location.origin,
     provider: "x",
   };
@@ -154,7 +154,7 @@ function buildDiscordOAuthUrl(codeChallenge: string): string {
   const redirectUri = `${window.location.origin}/discord/callback`;
 
   const oauthState: OAuthState = {
-    apiKey: "reauth",
+    apiKey: "export_key_reauth",
     targetOrigin: window.location.origin,
     provider: "discord",
   };
