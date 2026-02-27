@@ -15,6 +15,18 @@ export function generateNonce(length = 8) {
     .join("");
 }
 
+function toBase64Url(base64: string): string {
+  return base64.replace(/[+/]|(=+)$/g, (match) => {
+    if (match === "+") {
+      return "-";
+    }
+    if (match === "/") {
+      return "_";
+    }
+    return "";
+  });
+}
+
 function generateRandomString(length = 64): string {
   const array = new Uint8Array(length);
   crypto.getRandomValues(array);
@@ -24,16 +36,7 @@ function generateRandomString(length = 64): string {
     binary += String.fromCharCode(array[i]);
   }
 
-  const base64 = btoa(binary);
-  return base64.replace(/[+\/]|(=+)$/g, (match) => {
-    if (match === "+") {
-      return "-";
-    }
-    if (match === "/") {
-      return "_";
-    }
-    return "";
-  });
+  return toBase64Url(btoa(binary));
 }
 
 async function sha256(input: string): Promise<ArrayBuffer> {
@@ -48,16 +51,7 @@ function base64UrlEncode(buffer: ArrayBuffer): string {
   for (let i = 0; i < bytes.byteLength; i++) {
     binary += String.fromCharCode(bytes[i]);
   }
-  const base64 = btoa(binary);
-  return base64.replace(/[+\/]|(=+)$/g, (match) => {
-    if (match === "+") {
-      return "-";
-    }
-    if (match === "/") {
-      return "_";
-    }
-    return "";
-  });
+  return toBase64Url(btoa(binary));
 }
 
 async function createPkcePair(): Promise<{
