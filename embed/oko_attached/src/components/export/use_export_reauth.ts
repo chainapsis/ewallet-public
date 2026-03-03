@@ -125,8 +125,6 @@ function buildGoogleOAuthUrl(nonce: string): string {
   authUrl.searchParams.set("prompt", "login");
   authUrl.searchParams.set("nonce", nonce);
   authUrl.searchParams.set("state", JSON.stringify(oauthState));
-  authUrl.searchParams.set("allow_signup", "false");
-  authUrl.searchParams.set("prompt", "select_account");
 
   return authUrl.toString();
 }
@@ -192,6 +190,7 @@ function buildGithubOAuthUrl(codeChallenge: string): string {
   authUrl.searchParams.set("code_challenge", codeChallenge);
   authUrl.searchParams.set("code_challenge_method", "S256");
   authUrl.searchParams.set("state", oauthStateString);
+  authUrl.searchParams.set("allow_signup", "false");
 
   return authUrl.toString();
 }
