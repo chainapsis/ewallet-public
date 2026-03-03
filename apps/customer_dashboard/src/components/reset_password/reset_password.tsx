@@ -11,9 +11,13 @@ import styles from "./reset_password.module.scss";
 import { useResetPasswordForm } from "./use_reset_password_form";
 import { AccountForm } from "@oko-wallet-ct-dashboard/ui";
 
-export const ResetPassword: FC = () => {
+interface ResetPasswordProps {
+  isAfterLogin: boolean;
+}
+
+export const ResetPassword: FC<ResetPasswordProps> = ({ isAfterLogin }) => {
   const { onSubmit, register, errors, isLoading, isValid } =
-    useResetPasswordForm();
+    useResetPasswordForm(isAfterLogin);
 
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -39,17 +43,21 @@ export const ResetPassword: FC = () => {
         disabled={!isValid || isLoading}
         submitText={isLoading ? "Updating..." : "Update"}
       >
-        <Input
-          {...register("originalPassword")}
-          label="Enter current password"
-          placeholder="Enter current password"
-          requiredSymbol
-          type="password"
-          error={errors.originalPassword?.message}
-          fullWidth
-        />
+        {isAfterLogin && (
+          <>
+            <Input
+              {...register("originalPassword")}
+              label="Enter current password"
+              placeholder="Enter current password"
+              requiredSymbol
+              type="password"
+              error={errors.originalPassword?.message}
+              fullWidth
+            />
 
-        <Spacing height={28} />
+            <Spacing height={28} />
+          </>
+        )}
 
         <Input
           {...register("newPassword")}
