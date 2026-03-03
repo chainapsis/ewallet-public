@@ -8,6 +8,7 @@ const GOOGLE_CLIENT_ID =
   "421793224165-cpmbt6enqrj6ad6n4ujokham8qdmnnln.apps.googleusercontent.com";
 const X_CLIENT_ID = "eWJPdVNYNlV6dEpNSTM3T01GRGI6MTpjaQ";
 const DISCORD_CLIENT_ID = "1445280712121913384";
+const GITHUB_CLIENT_ID = "PLACEHOLDER_GITHUB_CLIENT_ID";
 
 export function generateNonce(length = 8) {
   return Array.from(crypto.getRandomValues(new Uint8Array(length)))
@@ -124,6 +125,8 @@ function buildGoogleOAuthUrl(nonce: string): string {
   authUrl.searchParams.set("prompt", "login");
   authUrl.searchParams.set("nonce", nonce);
   authUrl.searchParams.set("state", JSON.stringify(oauthState));
+  authUrl.searchParams.set("allow_signup", "false");
+  authUrl.searchParams.set("prompt", "select_account");
 
   return authUrl.toString();
 }
@@ -172,10 +175,31 @@ function buildDiscordOAuthUrl(codeChallenge: string): string {
   return authUrl.toString();
 }
 
+function buildGithubOAuthUrl(codeChallenge: string): string {
+  const redirectUri = `${window.location.origin}/github/callback`;
+
+  const oauthState: OAuthState = {
+    apiKey: "reauth",
+    targetOrigin: window.location.origin,
+    provider: "github",
+  };
+  const oauthStateString = btoa(JSON.stringify(oauthState));
+
+  const authUrl = new URL("https://github.com/login/oauth/authorize");
+  authUrl.searchParams.set("client_id", GITHUB_CLIENT_ID);
+  authUrl.searchParams.set("redirect_uri", redirectUri);
+  authUrl.searchParams.set("scope", "user:email");
+  authUrl.searchParams.set("code_challenge", codeChallenge);
+  authUrl.searchParams.set("code_challenge_method", "S256");
+  authUrl.searchParams.set("state", oauthStateString);
+
+  return authUrl.toString();
+}
+
 export function useExportReauth() {
   const startReauth = useCallback(
     async (
-      authType: "google" | "x" | "discord",
+      authType: "google" | "x" | "discord" | "github",
     ): Promise<Result<void, string>> => {
       const iframe = findEmbeddedIframe();
       if (!iframe) {
@@ -198,8 +222,10 @@ export function useExportReauth() {
 
         if (authType === "x") {
           oauthUrl = buildXOAuthUrl(codeChallenge);
-        } else {
+        } else if (authType === "discord") {
           oauthUrl = buildDiscordOAuthUrl(codeChallenge);
+        } else {
+          oauthUrl = buildGithubOAuthUrl(codeChallenge);
         }
       }
 
