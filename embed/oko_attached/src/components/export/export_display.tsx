@@ -1,6 +1,6 @@
-import type { CurveType } from "@oko-wallet/ksn-interface/curve_type";
 import type { OkoWalletProtectedMsgs } from "@oko-wallet/oko-sdk-core";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import type { CurveType } from "@oko-wallet/oko-types/crypto";
+import { type FC, useCallback, useEffect, useMemo, useState } from "react";
 
 import styles from "./export_display.module.scss";
 import { postLog } from "@oko-wallet-attached/requests/logging";
@@ -31,7 +31,7 @@ function postToParent(msg: OkoWalletProtectedMsgs) {
   );
 }
 
-const EyeOffIcon = () => {
+const EyeOffIcon: FC = () => {
   return (
     <svg
       width={24}
@@ -70,7 +70,7 @@ const CopyIcon = () => {
 const VALID_KEY_TYPES: ReadonlySet<string> = new Set(["secp256k1", "ed25519"]);
 const MAX_KEY_REQUEST_ATTEMPTS = 3;
 
-export const ExportDisplay = () => {
+export const ExportDisplay: FC = () => {
   const keyType = useMemo(() => {
     const raw = new URLSearchParams(window.location.search).get("key_type");
     return raw && VALID_KEY_TYPES.has(raw) ? (raw as CurveType) : null;
