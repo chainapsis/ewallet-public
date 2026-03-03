@@ -3,6 +3,7 @@ export interface ExportedKeys {
   ed25519: string;
 }
 
+const LOG = "[export_key_store]";
 const CLEANUP_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 const REQUEST_KEYS_MSG = "oko_export_request_keys";
 const RESPONSE_KEYS_MSG = "oko_export_keys";
@@ -35,18 +36,25 @@ function handleWindowMessage(event: MessageEvent): void {
   if (!data || typeof data !== "object") {
     return;
   }
-  if (data.type === REQUEST_KEYS_MSG && storedKeys) {
-    const responder = event.source as Window | null;
-    responder?.postMessage({ type: RESPONSE_KEYS_MSG, keys: storedKeys }, event.origin);
+  if (data.type === REQUEST_KEYS_MSG) {
+    console.log(LOG, "recv REQUEST_KEYS_MSG, storedKeys:", storedKeys ? "SET" : "NULL", "from:", event.origin);
+    if (storedKeys) {
+      const responder = event.source as Window | null;
+      console.log(LOG, "responding with keys, responder:", responder ? "OK" : "NULL");
+      responder?.postMessage({ type: RESPONSE_KEYS_MSG, keys: storedKeys }, event.origin);
+    }
   } else if (data.type === CLEAR_KEYS_MSG) {
+    console.log(LOG, "recv CLEAR_KEYS_MSG");
     storedKeys = null;
     clearCleanupTimer();
   }
 }
 
+console.log(LOG, "registering handleWindowMessage, path:", window.location.pathname);
 window.addEventListener("message", handleWindowMessage);
 
 export function setExportedKeys(keys: ExportedKeys): void {
+  console.log(LOG, "setExportedKeys called, path:", window.location.pathname);
   storedKeys = keys;
   startCleanupTimer();
 }
@@ -62,8 +70,11 @@ export function getExportedKeys(): ExportedKeys | null {
 export function requestExportedKeys(): Promise<ExportedKeys | null> {
   const local = getExportedKeys();
   if (local) {
+    console.log(LOG, "requestExportedKeys: found local keys");
     return Promise.resolve(local);
   }
+
+  console.log(LOG, "requestExportedKeys: no local keys, requesting from siblings");
 
   return new Promise((resolve) => {
     const selfOrigin = window.location.origin;
@@ -74,12 +85,14 @@ export function requestExportedKeys(): Promise<ExportedKeys | null> {
       }
       const data = event.data;
       if (data?.type === RESPONSE_KEYS_MSG) {
+        console.log(LOG, "requestExportedKeys: received RESPONSE_KEYS_MSG, keys:", data.keys ? "SET" : "NULL");
         cleanup();
         resolve(data.keys ?? null);
       }
     };
 
     const timeout = setTimeout(() => {
+      console.log(LOG, "requestExportedKeys: TIMEOUT (2s), no response received");
       cleanup();
       resolve(null);
     }, 2000);
@@ -100,16 +113,19 @@ export function requestExportedKeys(): Promise<ExportedKeys | null> {
       const parentWin = window.parent;
       if (parentWin && parentWin !== window) {
         const frames = parentWin.frames;
+        console.log(LOG, "requestExportedKeys: sending to", frames.length, "sibling frames, selfOrigin:", selfOrigin);
         for (let i = 0; i < frames.length; i += 1) {
           try {
             frames[i].postMessage({ type: REQUEST_KEYS_MSG }, selfOrigin);
-          } catch {
-            // ignore individual frame errors
+          } catch (err) {
+            console.warn(LOG, "requestExportedKeys: frame", i, "postMessage failed:", err);
           }
         }
+      } else {
+        console.warn(LOG, "requestExportedKeys: no parent or parent === self");
       }
-    } catch {
-      // ignore
+    } catch (err) {
+      console.warn(LOG, "requestExportedKeys: frame iteration failed:", err);
     }
   });
 }
