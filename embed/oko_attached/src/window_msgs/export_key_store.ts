@@ -1,3 +1,5 @@
+import { postLog } from "@oko-wallet-attached/requests/logging";
+
 export interface ExportedKeys {
   secp256k1: string;
   ed25519: string;
@@ -36,13 +38,23 @@ function handleWindowMessage(event: MessageEvent): void {
     return;
   }
   if (data.type === REQUEST_KEYS_MSG) {
-    console.log("[EKS]", "REQ recv, keys:", storedKeys ? "Y" : "N", "path:", window.location.pathname);
     if (storedKeys) {
       const responder = event.source as Window | null;
       responder?.postMessage(
         { type: RESPONSE_KEYS_MSG, keys: storedKeys },
         event.origin,
       );
+    } else if (window.location.pathname === "/") {
+      // Only log in the hidden iframe context — display iframes receiving
+      // sibling requests without keys is expected behavior
+      postLog({
+        level: "error",
+        message: "export_key_store: REQUEST received but no keys stored",
+        error: {
+          name: "ExportKeyStoreError",
+          message: "storedKeys is null when REQUEST_KEYS_MSG received",
+        },
+      });
     }
   } else if (data.type === CLEAR_KEYS_MSG) {
     storedKeys = null;
@@ -50,11 +62,9 @@ function handleWindowMessage(event: MessageEvent): void {
   }
 }
 
-console.log("[EKS]", "init, path:", window.location.pathname);
 window.addEventListener("message", handleWindowMessage);
 
 export function setExportedKeys(keys: ExportedKeys): void {
-  console.log("[EKS]", "setKeys, path:", window.location.pathname);
   storedKeys = keys;
   startCleanupTimer();
 }
@@ -82,14 +92,12 @@ export function requestExportedKeys(): Promise<ExportedKeys | null> {
       }
       const data = event.data;
       if (data?.type === RESPONSE_KEYS_MSG) {
-        console.log("[EKS]", "RESP recv, keys:", data.keys ? "Y" : "N");
         cleanup();
         resolve(data.keys ?? null);
       }
     };
 
     const timeout = setTimeout(() => {
-      console.log("[EKS]", "TIMEOUT 2s, no response");
       cleanup();
       resolve(null);
     }, 2000);
@@ -105,7 +113,6 @@ export function requestExportedKeys(): Promise<ExportedKeys | null> {
       const parentWin = window.parent;
       if (parentWin && parentWin !== window) {
         const frames = parentWin.frames;
-        console.log("[EKS]", "requesting from", frames.length, "frames");
         for (let i = 0; i < frames.length; i += 1) {
           try {
             frames[i].postMessage({ type: REQUEST_KEYS_MSG }, selfOrigin);

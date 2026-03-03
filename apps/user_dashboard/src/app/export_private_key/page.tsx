@@ -257,9 +257,11 @@ const Step1Content = ({
 const Step2Content = ({
   attachedOrigin,
   onReady,
+  onError,
 }: {
   attachedOrigin: string;
   onReady?: () => void;
+  onError?: () => void;
 }) => {
   const [secpIframeHeight, setSecpIframeHeight] = useState(0);
   const [edIframeHeight, setEdIframeHeight] = useState(0);
@@ -288,6 +290,8 @@ const Step2Content = ({
           title: "Copy Failed",
           description: "Could not copy to clipboard.",
         });
+      } else if (data.msg_type === "__export_display_error__") {
+        onError?.();
       }
     };
 
@@ -295,7 +299,7 @@ const Step2Content = ({
     return () => {
       window.removeEventListener("message", handler);
     };
-  }, [attachedOrigin]);
+  }, [attachedOrigin, onError]);
 
   const iframesReady = secpIframeHeight > 0 && edIframeHeight > 0;
 
@@ -434,6 +438,15 @@ const Page = () => {
     popupRef.current?.close();
     popupRef.current = null;
     setIsLoading(false);
+  }, []);
+
+  const handleExportDisplayError = useCallback(() => {
+    setStep(1);
+    displayToast({
+      variant: "confirm",
+      title: "Export Failed",
+      description: "Please try again.",
+    });
   }, []);
 
   const handleContinue = useCallback(async () => {
@@ -589,6 +602,7 @@ const Page = () => {
           <Step2Content
             attachedOrigin={attachedOrigin!}
             onReady={handlePopupClose}
+            onError={handleExportDisplayError}
           />
         )}
       </div>

@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import styles from "./export_display.module.scss";
 import {
   type ExportedKeys,
   getExportedKeys,
   requestExportedKeys,
 } from "@oko-wallet-attached/window_msgs/export_key_store";
+import { postLog } from "@oko-wallet-attached/requests/logging";
+
+import styles from "./export_display.module.scss";
 
 type KeyType = "secp256k1" | "ed25519";
 
@@ -69,6 +71,7 @@ const CopyIcon = () => {
 };
 
 const VALID_KEY_TYPES: ReadonlySet<string> = new Set(["secp256k1", "ed25519"]);
+const MAX_KEY_REQUEST_ATTEMPTS = 3;
 
 export const ExportDisplay = () => {
   const keyType = useMemo(() => {
@@ -87,33 +90,61 @@ export const ExportDisplay = () => {
 
     const loadKeys = async () => {
       let stored = getExportedKeys();
-      console.log("[ED]", keyType, "local:", stored ? "Y" : "N");
       if (!stored) {
-        // Retry up to 3 times (2s each)
+        // Retry up to 3 times (2s each) to handle timing variance across devices
         for (
           let attempt = 0;
-          attempt < 3 && !stored && !cancelled;
+          attempt < MAX_KEY_REQUEST_ATTEMPTS && !stored && !cancelled;
           attempt += 1
         ) {
-          console.log("[ED]", keyType, "attempt", attempt + 1);
           stored = await requestExportedKeys();
         }
       }
       if (cancelled) {
-        console.log("[ED]", keyType, "cancelled");
         return;
       }
+
+      const framesCount = (() => {
+        try {
+          return window.parent?.frames?.length ?? -1;
+        } catch {
+          return -1;
+        }
+      })();
+
       if (!stored) {
-        console.log("[ED]", keyType, "NO KEYS after retries");
+        postLog({
+          level: "error",
+          message: "export_display: key load failed after retries",
+          error: {
+            name: "ExportDisplayError",
+            message: "No keys received from hidden iframe",
+          },
+          meta: {
+            keyType,
+            attempts: MAX_KEY_REQUEST_ATTEMPTS,
+            framesCount,
+            parentOrigin,
+          },
+        });
+        postToParent("__export_display_error__", { key_type: keyType });
         setError("No exported keys found.");
         return;
       }
       if (!keyType || !(keyType in stored)) {
-        console.log("[ED]", keyType, "invalid keyType");
+        postLog({
+          level: "error",
+          message: "export_display: invalid key type",
+          error: {
+            name: "ExportDisplayError",
+            message: `key_type=${keyType} not found in exported keys`,
+          },
+          meta: { keyType, availableKeys: Object.keys(stored) },
+        });
+        postToParent("__export_display_error__", { key_type: keyType });
         setError(`Invalid key_type: ${keyType}`);
         return;
       }
-      console.log("[ED]", keyType, "OK");
       setKeys(stored);
     };
 
@@ -126,14 +157,12 @@ export const ExportDisplay = () => {
 
   // ResizeObserver → notify parent of height changes
   useEffect(() => {
-    console.log("[ED]", keyType, "resize effect, el:", containerEl ? "Y" : "N");
     if (!containerEl) {
       return;
     }
 
     const report = () => {
       const h = document.documentElement.scrollHeight;
-      console.log("[ED]", keyType, "report h:", h, "origin:", parentOrigin);
       postToParent("__export_display_resize__", {
         height: h,
         key_type: keyType,
@@ -216,7 +245,11 @@ export const ExportDisplay = () => {
 
       <div className={styles.spacer16} />
 
-      <button type="button" className={styles.copyButton} onClick={handleCopy}>
+      <button
+        type="button"
+        className={styles.copyButton}
+        onClick={handleCopy}
+      >
         <span className={styles.copyButtonIcon}>
           <CopyIcon />
         </span>
