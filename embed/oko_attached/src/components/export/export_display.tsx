@@ -157,6 +157,8 @@ export const ExportDisplay = () => {
     }
   }, [keys, keyType]);
 
+  console.log("[ExportDisplay] render: error=", error, "keys=", keys ? "SET" : "NULL", "keyType=", keyType, "containerEl=", containerEl ? "SET" : "NULL");
+
   if (error) {
     return <div className={styles.error}>{error}</div>;
   }
