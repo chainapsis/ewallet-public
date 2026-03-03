@@ -1,7 +1,6 @@
-import { useCallback } from "react";
-
 import type { OAuthState } from "@oko-wallet/oko-sdk-core";
 import type { Result } from "@oko-wallet/stdlib-js";
+import { useCallback } from "react";
 
 // Client IDs (public constants, same as SDK)
 const GOOGLE_CLIENT_ID =
@@ -92,6 +91,9 @@ export function sendReauthParamsToIframe(
   const targetOrigin = new URL(window.location.toString()).origin;
 
   iframe.postMessage(
+    // TODO: @chihun
+    // Should be typed and "oko_attached" should be aware of this type
+    // in the compile time
     {
       target: "oko_attached",
       msg_type: "set_reauth_params",

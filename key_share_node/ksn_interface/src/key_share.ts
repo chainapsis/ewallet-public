@@ -1,7 +1,6 @@
 import type { Bytes32, Bytes33, Bytes64 } from "@oko-wallet/bytes";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
-
-import type { CurveType } from "./curve_type";
+import type { CurveType } from "@oko-wallet/oko-types/crypto";
 
 // ============================================================================
 // Common Types

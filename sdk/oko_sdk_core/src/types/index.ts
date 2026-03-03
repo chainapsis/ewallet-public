@@ -5,5 +5,6 @@ export * from "./modal";
 export * from "./msg";
 export * from "./oauth";
 export * from "./oko_wallet";
+export * from "./protected";
 export * from "./sign";
 export * from "./sign_in";

@@ -16,7 +16,10 @@ import { TelegramIcon } from "@oko-wallet/oko-common-ui/icons/telegram_icon";
 import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
 import { ZigchainIcon } from "@oko-wallet/oko-common-ui/icons/zigchain_icon";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import type { OkoWalletMsgExportPrivateKeyAck } from "@oko-wallet/oko-sdk-core";
+import type {
+  OkoWalletMsgExportPrivateKeyAck,
+  OkoWalletProtectedMsgs,
+} from "@oko-wallet/oko-sdk-core";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import {
   type ReactNode,
@@ -271,20 +274,26 @@ const Step2Content = ({
       if (event.origin !== attachedOrigin) {
         return;
       }
-      const { data } = event;
+
+      const data = event.data as OkoWalletProtectedMsgs;
+
       if (data?.target !== "oko_user_dashboard") {
         return;
       }
 
+      if (!data?.payload) {
+        return;
+      }
+
       if (data.msg_type === "__export_display_resize__") {
-        if (data.key_type === "secp256k1") {
-          setSecpIframeHeight(data.height);
-        } else if (data.key_type === "ed25519") {
-          setEdIframeHeight(data.height);
+        if (data.payload.key_type === "secp256k1") {
+          setSecpIframeHeight(data.payload.height);
+        } else if (data.payload.key_type === "ed25519") {
+          setEdIframeHeight(data.payload.height);
         }
-      } else if (data.msg_type === "__export_display_copied__") {
+      } else if (data.msg_type === "__export_display_copy__") {
         displayToast({ variant: "success", title: "Copied!" });
-      } else if (data.msg_type === "__export_display_copy_failed__") {
+      } else if (data.msg_type === "__export_display_copy_error__") {
         displayToast({
           variant: "confirm",
           title: "Copy Failed",

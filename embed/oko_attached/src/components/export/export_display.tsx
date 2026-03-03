@@ -1,17 +1,14 @@
+import type { CurveType } from "@oko-wallet/ksn-interface/curve_type";
+import type { OkoWalletProtectedMsgs } from "@oko-wallet/oko-sdk-core";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import styles from "./export_display.module.scss";
+import { postLog } from "@oko-wallet-attached/requests/logging";
 import {
   type ExportedKeys,
   getExportedKeys,
   requestExportedKeys,
 } from "@oko-wallet-attached/window_msgs/export_key_store";
-import { postLog } from "@oko-wallet-attached/requests/logging";
-
-import styles from "./export_display.module.scss";
-
-type KeyType = "secp256k1" | "ed25519";
-
-const PARENT_MSG_TARGET = "oko_user_dashboard";
 
 function getParentOrigin(): string {
   const raw = new URLSearchParams(window.location.search).get("parent_origin");
@@ -27,9 +24,9 @@ function getParentOrigin(): string {
 
 const parentOrigin = getParentOrigin();
 
-function postToParent(msgType: string, data?: Record<string, unknown>) {
+function postToParent(msg: OkoWalletProtectedMsgs) {
   window.parent.postMessage(
-    { target: PARENT_MSG_TARGET, msg_type: msgType, ...data },
+    { target: msg.target, msg_type: msg.msg_type, payload: msg.payload },
     parentOrigin,
   );
 }
@@ -76,7 +73,7 @@ const MAX_KEY_REQUEST_ATTEMPTS = 3;
 export const ExportDisplay = () => {
   const keyType = useMemo(() => {
     const raw = new URLSearchParams(window.location.search).get("key_type");
-    return raw && VALID_KEY_TYPES.has(raw) ? (raw as KeyType) : null;
+    return raw && VALID_KEY_TYPES.has(raw) ? (raw as CurveType) : null;
   }, []);
 
   const [revealed, setRevealed] = useState(false);
@@ -127,7 +124,11 @@ export const ExportDisplay = () => {
             parentOrigin,
           },
         });
-        postToParent("__export_display_error__", { key_type: keyType });
+        postToParent({
+          target: "oko_user_dashboard",
+          msg_type: "__export_display_error__",
+          payload: { key_type: keyType },
+        });
         setError("No exported keys found.");
         return;
       }
@@ -141,7 +142,13 @@ export const ExportDisplay = () => {
           },
           meta: { keyType, availableKeys: Object.keys(stored) },
         });
-        postToParent("__export_display_error__", { key_type: keyType });
+
+        postToParent({
+          target: "oko_user_dashboard",
+          msg_type: "__export_display_error__",
+          payload: { key_type: keyType },
+        });
+
         setError(`Invalid key_type: ${keyType}`);
         return;
       }
@@ -163,11 +170,17 @@ export const ExportDisplay = () => {
 
     const report = () => {
       const h = document.documentElement.scrollHeight;
-      postToParent("__export_display_resize__", {
-        height: h,
-        key_type: keyType,
+
+      postToParent({
+        target: "oko_user_dashboard",
+        msg_type: "__export_display_resize__",
+        payload: {
+          height: h,
+          key_type: keyType,
+        },
       });
     };
+
     const observer = new ResizeObserver(report);
     observer.observe(containerEl);
 
@@ -188,12 +201,22 @@ export const ExportDisplay = () => {
     if (!keys || !keyType) {
       return;
     }
+
     const keyValue = keys[keyType];
+
     try {
       await navigator.clipboard.writeText(keyValue);
-      postToParent("__export_display_copied__", { key_type: keyType });
+      postToParent({
+        target: "oko_user_dashboard",
+        msg_type: "__export_display_copy__",
+        payload: { key_type: keyType },
+      });
     } catch {
-      postToParent("__export_display_copy_failed__", { key_type: keyType });
+      postToParent({
+        target: "oko_user_dashboard",
+        msg_type: "__export_display_copy_error__",
+        payload: { key_type: keyType },
+      });
     }
   }, [keys, keyType]);
 
@@ -245,11 +268,7 @@ export const ExportDisplay = () => {
 
       <div className={styles.spacer16} />
 
-      <button
-        type="button"
-        className={styles.copyButton}
-        onClick={handleCopy}
-      >
+      <button type="button" className={styles.copyButton} onClick={handleCopy}>
         <span className={styles.copyButtonIcon}>
           <CopyIcon />
         </span>

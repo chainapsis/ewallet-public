@@ -1,20 +1,18 @@
-import { useContext, useEffect, useMemo, useState } from "react";
-
-import type { OAuthState } from "@oko-wallet/oko-sdk-core";
-import { RedirectUriSearchParamsKey } from "@oko-wallet/oko-sdk-core";
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import { Button } from "@oko-wallet/oko-common-ui/button";
 import { WarningIcon } from "@oko-wallet/oko-common-ui/icons/warning_icon";
 import { Logo } from "@oko-wallet/oko-common-ui/logo";
 import { ThemeContext } from "@oko-wallet/oko-common-ui/theme";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import type { OAuthState } from "@oko-wallet/oko-sdk-core";
+import { RedirectUriSearchParamsKey } from "@oko-wallet/oko-sdk-core";
+import { useContext, useEffect, useMemo, useState } from "react";
 
-import { TELEGRAM_BOT_NAME } from "@oko-wallet-attached/config/telegram";
-
+import styles from "./telegram_reauth.module.scss";
 import {
   findEmbeddedIframe,
   sendReauthParamsToIframe,
 } from "./use_export_reauth";
-import styles from "./telegram_reauth.module.scss";
+import { TELEGRAM_BOT_NAME } from "@oko-wallet-attached/config/telegram";
 
 const LOG_PREFIX = "[attached][telegram_reauth]";
 
@@ -157,6 +155,7 @@ export const TelegramReauth = () => {
                   fill="none"
                   className={styles.stepLine}
                 >
+                  <title>step line</title>
                   <path
                     d="M0.614014 0.614258H28.614"
                     stroke="var(--colors-text-text-primary-900, #181D27)"
@@ -183,4 +182,4 @@ export const TelegramReauth = () => {
       </div>
     </div>
   );
-}
+};
