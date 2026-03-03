@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import styles from "./export_display.module.scss";
 import {
   type ExportedKeys,
   getExportedKeys,
   requestExportedKeys,
 } from "@oko-wallet-attached/window_msgs/export_key_store";
-
-import styles from "./export_display.module.scss";
 
 type KeyType = "secp256k1" | "ed25519";
 
@@ -90,14 +89,22 @@ export const ExportDisplay = () => {
       let stored = getExportedKeys();
       console.log("[ED]", keyType, "local:", stored ? "Y" : "N");
       if (!stored) {
-        stored = await requestExportedKeys();
+        // Retry up to 3 times (2s each)
+        for (
+          let attempt = 0;
+          attempt < 3 && !stored && !cancelled;
+          attempt += 1
+        ) {
+          console.log("[ED]", keyType, "attempt", attempt + 1);
+          stored = await requestExportedKeys();
+        }
       }
       if (cancelled) {
         console.log("[ED]", keyType, "cancelled");
         return;
       }
       if (!stored) {
-        console.log("[ED]", keyType, "NO KEYS");
+        console.log("[ED]", keyType, "NO KEYS after retries");
         setError("No exported keys found.");
         return;
       }
@@ -209,11 +216,7 @@ export const ExportDisplay = () => {
 
       <div className={styles.spacer16} />
 
-      <button
-        type="button"
-        className={styles.copyButton}
-        onClick={handleCopy}
-      >
+      <button type="button" className={styles.copyButton} onClick={handleCopy}>
         <span className={styles.copyButtonIcon}>
           <CopyIcon />
         </span>
