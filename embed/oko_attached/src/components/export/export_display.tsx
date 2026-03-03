@@ -88,20 +88,25 @@ export const ExportDisplay = () => {
 
     const loadKeys = async () => {
       let stored = getExportedKeys();
+      console.log("[ED]", keyType, "local:", stored ? "Y" : "N");
       if (!stored) {
         stored = await requestExportedKeys();
       }
       if (cancelled) {
+        console.log("[ED]", keyType, "cancelled");
         return;
       }
       if (!stored) {
+        console.log("[ED]", keyType, "NO KEYS");
         setError("No exported keys found.");
         return;
       }
       if (!keyType || !(keyType in stored)) {
+        console.log("[ED]", keyType, "invalid keyType");
         setError(`Invalid key_type: ${keyType}`);
         return;
       }
+      console.log("[ED]", keyType, "OK");
       setKeys(stored);
     };
 
@@ -114,12 +119,14 @@ export const ExportDisplay = () => {
 
   // ResizeObserver → notify parent of height changes
   useEffect(() => {
+    console.log("[ED]", keyType, "resize effect, el:", containerEl ? "Y" : "N");
     if (!containerEl) {
       return;
     }
 
     const report = () => {
       const h = document.documentElement.scrollHeight;
+      console.log("[ED]", keyType, "report h:", h, "origin:", parentOrigin);
       postToParent("__export_display_resize__", {
         height: h,
         key_type: keyType,
