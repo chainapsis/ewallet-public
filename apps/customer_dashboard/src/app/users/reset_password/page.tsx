@@ -56,7 +56,7 @@ export default function ResetPasswordPage() {
             Time for a fresh, secure password
           </Typography>
 
-          <ResetPassword />
+          <ResetPassword isAfterLogin={isAfterLogin} />
         </div>
       </div>
     </Authorized>
