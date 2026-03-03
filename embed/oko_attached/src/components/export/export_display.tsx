@@ -119,6 +119,7 @@ export const ExportDisplay = () => {
 
   // ResizeObserver → notify parent of height changes
   useEffect(() => {
+    console.log("[ExportDisplay] resize effect entered, containerEl:", containerEl ? "SET" : "NULL", "keyType:", keyType);
     if (!containerEl) {
       console.log("[ExportDisplay] ResizeObserver skipped: no containerEl");
       return;
@@ -134,6 +135,11 @@ export const ExportDisplay = () => {
     };
     const observer = new ResizeObserver(report);
     observer.observe(containerEl);
+
+    // Send initial height immediately — ResizeObserver initial callback
+    // may not fire reliably in cross-origin iframes in some environments
+    console.log("[ExportDisplay] sending initial report after observe");
+    report();
 
     return () => {
       observer.disconnect();
