@@ -28,6 +28,7 @@ export const TelegramReauth = () => {
       apiKey: "export_key_reauth",
       targetOrigin: window.location.origin,
       provider: "telegram",
+      modalId: "export_key_reauth",
     }),
     [],
   );
