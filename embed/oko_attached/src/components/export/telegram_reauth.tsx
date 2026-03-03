@@ -174,11 +174,7 @@ export const TelegramReauth = () => {
             <div className={styles.telegramWidgetContainer}>
               <div
                 id="telegram-reauth-container"
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
+                className={styles.telegramWidgetInner}
               />
             </div>
           </div>

@@ -195,7 +195,7 @@ export const ExportDisplay = () => {
         )}
       </div>
 
-      <div style={{ height: 16 }} />
+      <div className={styles.spacer16} />
 
       <button
         type="button"

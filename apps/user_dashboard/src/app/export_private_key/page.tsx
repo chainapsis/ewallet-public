@@ -16,10 +16,16 @@ import { TelegramIcon } from "@oko-wallet/oko-common-ui/icons/telegram_icon";
 import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
 import { ZigchainIcon } from "@oko-wallet/oko-common-ui/icons/zigchain_icon";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import type { AuthType } from "@oko-wallet/oko-types/auth";
-import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
-
 import type { OkoWalletMsgExportPrivateKeyAck } from "@oko-wallet/oko-sdk-core";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
 import styles from "./page.module.scss";
 import { displayToast } from "@oko-wallet-user-dashboard/components/toast";
 import {
@@ -186,7 +192,7 @@ const Step1Content = ({
         Log in again to reveal your private key
       </Typography>
 
-      <div style={{ height: 24 }} />
+      <div className={styles.spacer24} />
 
       <div className={styles.loginSection}>
         <Typography
@@ -295,7 +301,9 @@ const Step2Content = ({
 
   const onReadyFired = useRef(false);
   useEffect(() => {
-    if (!onReady || onReadyFired.current) return;
+    if (!onReady || onReadyFired.current) {
+      return;
+    }
     if (iframesReady) {
       onReadyFired.current = true;
       onReady();
@@ -316,7 +324,7 @@ const Step2Content = ({
         View and copy your private key
       </Typography>
 
-      <div style={{ height: 32 }} />
+      <div className={styles.spacer32} />
 
       {/* EVM & Cosmos Section */}
       <div className={styles.keySection}>
@@ -337,12 +345,12 @@ const Step2Content = ({
           allow="clipboard-write"
         />
 
-        <div style={{ height: 24 }} />
+        <div className={styles.spacer24} />
 
         <ChainsList chains={EVM_COSMOS_CHAINS} />
       </div>
 
-      <div style={{ height: 52 }} />
+      <div className={styles.spacer52} />
 
       {/* Solana & SVM Section */}
       <div className={styles.keySection}>
@@ -363,7 +371,7 @@ const Step2Content = ({
           allow="clipboard-write"
         />
 
-        <div style={{ height: 24 }} />
+        <div className={styles.spacer24} />
 
         <ChainsList chains={SVM_CHAINS} />
       </div>
