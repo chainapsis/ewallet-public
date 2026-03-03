@@ -92,22 +92,6 @@ export function requestExportedKeys(): Promise<ExportedKeys | null> {
     function cleanup() {
       clearTimeout(timeout);
       window.removeEventListener("message", handleResponse);
-      // Clear keys from sibling frames (hidden iframe) after successful retrieval
-      try {
-        const parentWin = window.parent;
-        if (parentWin && parentWin !== window) {
-          const frames = parentWin.frames;
-          for (let i = 0; i < frames.length; i += 1) {
-            try {
-              frames[i].postMessage({ type: CLEAR_KEYS_MSG }, selfOrigin);
-            } catch {
-              // cross-origin frame, skip
-            }
-          }
-        }
-      } catch {
-        // ignore
-      }
     }
 
     window.addEventListener("message", handleResponse);
