@@ -24,6 +24,16 @@ a {
 }
 
 @mixin common-list-scroll {
+  // Firefox
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-quaternary) transparent;
+
+  // Chromium/Safari: disable standard properties so ::-webkit-scrollbar takes effect
+  @supports selector(::-webkit-scrollbar) {
+    scrollbar-width: unset;
+    scrollbar-color: unset;
+  }
+
   &::-webkit-scrollbar {
     width: 4px;
     height: 4px;
