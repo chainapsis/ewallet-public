@@ -36,6 +36,7 @@ export const DesignSection: FC = () => {
 
   const [isSavingTheme, setIsSavingTheme] = useState(false);
   const [themeError, setThemeError] = useState<string | null>(null);
+  const [hasTouched, setHasTouched] = useState(false);
 
   const hasThemeChange = draftTheme !== savedTheme;
 
@@ -46,15 +47,19 @@ export const DesignSection: FC = () => {
 
     setThemeError(null);
     setDraftTheme(option);
+    if (option !== savedTheme) {
+      setHasTouched(true);
+    }
   };
 
   const handleThemeCancel = () => {
-    if (!hasThemeChange || isSavingTheme) {
+    if (isSavingTheme) {
       return;
     }
 
     setThemeError(null);
     setDraftTheme(savedTheme);
+    setHasTouched(false);
   };
 
   const handleThemeSave = async () => {
@@ -78,9 +83,10 @@ export const DesignSection: FC = () => {
 
       if (result.success) {
         setSavedTheme(draftTheme);
+        setHasTouched(false);
         displayToast({
           variant: "success",
-          title: "Saved",
+          title: "Saved!",
         });
         await queryClient.invalidateQueries({ queryKey: ["customer"] });
       } else {
@@ -128,26 +134,30 @@ export const DesignSection: FC = () => {
           })}
         </div>
 
-        <div className={styles.themeActions}>
-          <Button
-            type="button"
-            variant="primary"
-            size="md"
-            onClick={handleThemeSave}
-            disabled={!hasThemeChange}
-            isLoading={isSavingTheme}
-          >
-            Save
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            size="md"
-            onClick={handleThemeCancel}
-            disabled={isSavingTheme}
-          >
-            Cancel
-          </Button>
+        <div
+          className={`${styles.themeActionsWrapper}${hasTouched ? ` ${styles.visible}` : ""}`}
+        >
+          <div className={styles.themeActions}>
+            <Button
+              type="button"
+              variant="primary"
+              size="md"
+              onClick={handleThemeSave}
+              disabled={!hasThemeChange}
+              isLoading={isSavingTheme}
+            >
+              Save
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              size="md"
+              onClick={handleThemeCancel}
+              disabled={isSavingTheme}
+            >
+              Cancel
+            </Button>
+          </div>
         </div>
 
         {themeError && <div className={styles.error}>{themeError}</div>}

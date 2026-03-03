@@ -1,11 +1,14 @@
 .activeIndicator {
   position: absolute;
-  bottom: 8;
-  right: 7;
+  bottom: 8px;
+  right: 7px;
   width: 16px;
   height: 16px;
   background-color: var(--border-brand-alt);
   border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .buttonContainer {
