@@ -82,7 +82,7 @@ export const ExportDisplay = () => {
   const [error, setError] = useState<string | null>(null);
   const [containerEl, setContainerEl] = useState<HTMLDivElement | null>(null);
 
-  // Read keys: try local first, then request from hidden iframe via BroadcastChannel
+  // Read keys: try local first, then request from hidden iframe via postMessage
   useEffect(() => {
     let cancelled = false;
 

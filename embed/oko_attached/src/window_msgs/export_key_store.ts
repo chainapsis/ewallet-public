@@ -3,7 +3,8 @@ export interface ExportedKeys {
   ed25519: string;
 }
 
-const CHANNEL_NAME = "__oko_export_keys__";
+const MSG_REQUEST = "__oko_request_export_keys__";
+const MSG_RESPONSE = "__oko_export_keys_response__";
 const CLEANUP_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 
 let storedKeys: ExportedKeys | null = null;
@@ -24,16 +25,22 @@ function startCleanupTimer(): void {
   }, CLEANUP_TIMEOUT_MS);
 }
 
-// Respond to key requests and clear signals from other same-origin contexts (visible iframe)
-const bc = new BroadcastChannel(CHANNEL_NAME);
-bc.onmessage = (event: MessageEvent) => {
-  if (event.data?.type === "request_keys" && storedKeys) {
-    bc.postMessage({ type: "keys", keys: storedKeys });
-  } else if (event.data?.type === "clear_keys") {
-    storedKeys = null;
-    clearCleanupTimer();
+// Respond to key requests from display iframes via postMessage.
+// BroadcastChannel is NOT used because third-party storage partitioning
+// blocks it when the attached iframe is embedded in a different-site parent.
+window.addEventListener("message", (event: MessageEvent) => {
+  if (
+    event.origin === window.location.origin &&
+    event.data?.type === MSG_REQUEST &&
+    storedKeys &&
+    event.source
+  ) {
+    (event.source as Window).postMessage(
+      { type: MSG_RESPONSE, keys: storedKeys },
+      event.origin,
+    );
   }
-};
+});
 
 export function setExportedKeys(keys: ExportedKeys): void {
   storedKeys = keys;
@@ -45,26 +52,46 @@ export function getExportedKeys(): ExportedKeys | null {
 }
 
 /**
- * Request keys from another same-origin context via BroadcastChannel.
- * Used by the visible iframe to fetch keys stored in the hidden iframe.
+ * Request keys from the hidden iframe via postMessage through parent frames.
+ * Used by the visible display iframe to fetch keys stored in the hidden iframe.
  */
 export function requestExportedKeys(): Promise<ExportedKeys | null> {
   return new Promise((resolve) => {
-    const reqBc = new BroadcastChannel(CHANNEL_NAME);
+    const selfOrigin = window.location.origin;
+
     const timeout = setTimeout(() => {
-      reqBc.close();
+      window.removeEventListener("message", handler);
       resolve(null);
     }, 2000);
 
-    reqBc.onmessage = (event: MessageEvent) => {
-      if (event.data?.type === "keys") {
+    const handler = (event: MessageEvent) => {
+      if (
+        event.origin === selfOrigin &&
+        event.data?.type === MSG_RESPONSE
+      ) {
         clearTimeout(timeout);
-        reqBc.close();
+        window.removeEventListener("message", handler);
         resolve(event.data.keys);
       }
     };
+    window.addEventListener("message", handler);
 
-    reqBc.postMessage({ type: "request_keys" });
+    // Send request to sibling iframes via window.parent.frames
+    try {
+      const len = window.parent.length;
+      for (let i = 0; i < len; i++) {
+        try {
+          window.parent[i].postMessage(
+            { type: MSG_REQUEST },
+            selfOrigin,
+          );
+        } catch {
+          // Skip inaccessible frames
+        }
+      }
+    } catch {
+      // window.parent might not be accessible (e.g., top-level window)
+    }
   });
 }
 
