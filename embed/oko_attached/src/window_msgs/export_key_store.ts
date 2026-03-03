@@ -3,8 +3,10 @@ export interface ExportedKeys {
   ed25519: string;
 }
 
-const CHANNEL_NAME = "__oko_export_keys__";
 const CLEANUP_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+const REQUEST_KEYS_MSG = "oko_export_request_keys";
+const RESPONSE_KEYS_MSG = "oko_export_keys";
+const CLEAR_KEYS_MSG = "oko_export_clear_keys";
 
 let storedKeys: ExportedKeys | null = null;
 let cleanupTimer: ReturnType<typeof setTimeout> | null = null;
@@ -25,15 +27,24 @@ function startCleanupTimer(): void {
 }
 
 // Respond to key requests and clear signals from other same-origin contexts (visible iframe)
-const bc = new BroadcastChannel(CHANNEL_NAME);
-bc.onmessage = (event: MessageEvent) => {
-  if (event.data?.type === "request_keys" && storedKeys) {
-    bc.postMessage({ type: "keys", keys: storedKeys });
-  } else if (event.data?.type === "clear_keys") {
+function handleWindowMessage(event: MessageEvent): void {
+  if (event.origin !== window.location.origin) {
+    return;
+  }
+  const data = event.data;
+  if (!data || typeof data !== "object") {
+    return;
+  }
+  if (data.type === REQUEST_KEYS_MSG && storedKeys) {
+    const responder = event.source as Window | null;
+    responder?.postMessage({ type: RESPONSE_KEYS_MSG, keys: storedKeys }, event.origin);
+  } else if (data.type === CLEAR_KEYS_MSG) {
     storedKeys = null;
     clearCleanupTimer();
   }
-};
+}
+
+window.addEventListener("message", handleWindowMessage);
 
 export function setExportedKeys(keys: ExportedKeys): void {
   storedKeys = keys;
@@ -45,26 +56,61 @@ export function getExportedKeys(): ExportedKeys | null {
 }
 
 /**
- * Request keys from another same-origin context via BroadcastChannel.
+ * Request keys from another same-origin context via postMessage.
  * Used by the visible iframe to fetch keys stored in the hidden iframe.
  */
 export function requestExportedKeys(): Promise<ExportedKeys | null> {
-  return new Promise((resolve) => {
-    const reqBc = new BroadcastChannel(CHANNEL_NAME);
-    const timeout = setTimeout(() => {
-      reqBc.close();
-      resolve(null);
-    }, 2000);
+  const local = getExportedKeys();
+  if (local) {
+    return Promise.resolve(local);
+  }
 
-    reqBc.onmessage = (event: MessageEvent) => {
-      if (event.data?.type === "keys") {
-        clearTimeout(timeout);
-        reqBc.close();
-        resolve(event.data.keys);
+  return new Promise((resolve) => {
+    const selfOrigin = window.location.origin;
+
+    const handleResponse = (event: MessageEvent) => {
+      if (event.origin !== selfOrigin) {
+        return;
+      }
+      const data = event.data;
+      if (data?.type === RESPONSE_KEYS_MSG) {
+        cleanup();
+        resolve(data.keys ?? null);
       }
     };
 
-    reqBc.postMessage({ type: "request_keys" });
+    const timeout = setTimeout(() => {
+      cleanup();
+      resolve(null);
+    }, 2000);
+
+    function cleanup() {
+      clearTimeout(timeout);
+      window.removeEventListener("message", handleResponse);
+      try {
+        window.parent?.postMessage({ type: CLEAR_KEYS_MSG }, selfOrigin);
+      } catch {
+        // ignore
+      }
+    }
+
+    window.addEventListener("message", handleResponse);
+
+    try {
+      const parentWin = window.parent;
+      if (parentWin && parentWin !== window) {
+        const frames = parentWin.frames;
+        for (let i = 0; i < frames.length; i += 1) {
+          try {
+            frames[i].postMessage({ type: REQUEST_KEYS_MSG }, selfOrigin);
+          } catch {
+            // ignore individual frame errors
+          }
+        }
+      }
+    } catch {
+      // ignore
+    }
   });
 }
 
