@@ -1,4 +1,3 @@
-import type { CurveType } from "@oko-wallet/ksn-interface/curve_type";
 import type {
   CheckWalletResult,
   Ed25519KeyShareV2Response,
@@ -17,6 +16,7 @@ import {
   getWalletByPublicKey,
   updateReshare,
 } from "@oko-wallet/ksn-pg-interface";
+import type { CurveType } from "@oko-wallet/oko-types/crypto";
 import { timingSafeEqual } from "crypto";
 import type { Pool, PoolClient } from "pg";
 
