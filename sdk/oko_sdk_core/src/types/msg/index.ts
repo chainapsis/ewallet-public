@@ -232,6 +232,24 @@ export type OkoWalletMsgImportPrivateKeyAck = {
   payload: Result<Bytes32, string>;
 };
 
+export type OAuthProvider = "google" | "x" | "discord";
+
+export type OkoWalletMsgGenerateOAuthUrl = {
+  target: "oko_attached";
+  msg_type: "generate_oauth_url";
+  payload: {
+    provider: OAuthProvider;
+    apiKey: string;
+    targetOrigin: string;
+  };
+};
+
+export type OkoWalletMsgGenerateOAuthUrlAck = {
+  target: "oko_sdk";
+  msg_type: "generate_oauth_url_ack";
+  payload: Result<{ url: string }, string>;
+};
+
 export type OkoWalletMsg =
   | OkoWalletMsgInit
   | OkoWalletMsgInitAck
@@ -267,6 +285,8 @@ export type OkoWalletMsg =
   | OkoWalletMsgGetEthChainInfoAck
   | OkoWalletMsgImportPrivateKey
   | OkoWalletMsgImportPrivateKeyAck
+  | OkoWalletMsgGenerateOAuthUrl
+  | OkoWalletMsgGenerateOAuthUrlAck
   | {
       target: "oko_sdk";
       msg_type: "unknown_msg_type";
