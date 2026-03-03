@@ -101,7 +101,7 @@ export const ThemeButton: FC<ThemeButtonProps> = ({
         {themeButton}
         {active && (
           <div className={styles.activeIndicator}>
-            <CheckIcon size={12} />
+            <CheckIcon size={12} color="var(--fg-white)" />
           </div>
         )}
       </button>

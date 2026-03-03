@@ -17,7 +17,7 @@ export type ResetPasswordInputs = {
   confirmPassword: string;
 };
 
-export function useResetPasswordForm() {
+export function useResetPasswordForm(isAfterLogin: boolean) {
   const {
     register,
     handleSubmit,
@@ -25,7 +25,9 @@ export function useResetPasswordForm() {
     reset,
     formState: { errors, isValid },
   } = useForm<ResetPasswordInputs>({
-    resolver: resetPasswordResolver,
+    resolver: isAfterLogin
+      ? resetPasswordResolver
+      : resetPasswordResolverWithoutOriginal,
     mode: "onTouched",
   });
 
@@ -41,7 +43,7 @@ export function useResetPasswordForm() {
     try {
       const result = await requestChangePassword(
         user?.email ?? "",
-        data.originalPassword,
+        isAfterLogin ? data.originalPassword : undefined,
         data.newPassword,
         token ?? "",
       );
@@ -78,15 +80,8 @@ export function useResetPasswordForm() {
   };
 }
 
-function resetPasswordResolver(values: ResetPasswordInputs) {
+function validateNewPassword(values: ResetPasswordInputs) {
   const errors: Record<string, any> = {};
-
-  if (!values.originalPassword) {
-    errors.originalPassword = {
-      type: "required",
-      message: "Password is required",
-    };
-  }
 
   if (!values.newPassword) {
     errors.newPassword = { type: "required", message: "Password is required" };
@@ -118,6 +113,28 @@ function resetPasswordResolver(values: ResetPasswordInputs) {
       message: "Passwords do not match",
     };
   }
+
+  return errors;
+}
+
+function resetPasswordResolver(values: ResetPasswordInputs) {
+  const errors = validateNewPassword(values);
+
+  if (!values.originalPassword) {
+    errors.originalPassword = {
+      type: "required",
+      message: "Password is required",
+    };
+  }
+
+  return {
+    values: values,
+    errors: errors,
+  } as any;
+}
+
+function resetPasswordResolverWithoutOriginal(values: ResetPasswordInputs) {
+  const errors = validateNewPassword(values);
 
   return {
     values: values,

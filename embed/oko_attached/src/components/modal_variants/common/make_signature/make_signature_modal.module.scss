@@ -16,7 +16,7 @@
 .modal {
   height: 100%;
   max-height: $make-signature-modal-max-height;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 .modalInnerContentContainer {
@@ -28,6 +28,7 @@
       )
   );
   overflow-y: auto;
+  padding-right: 8px;
   @include global.common-list-scroll;
 }
 

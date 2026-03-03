@@ -54,7 +54,7 @@ export async function requestVerifyCodeAndLogin(
 
 export async function requestChangePassword(
   email: string,
-  originalPassword: string,
+  originalPassword: string | undefined,
   newPassword: string,
   token: string,
 ): Promise<OkoApiResponse<ChangePasswordResponse>> {
@@ -63,7 +63,7 @@ export async function requestChangePassword(
       method: "POST",
       body: JSON.stringify({
         email,
-        original_password: originalPassword,
+        ...(originalPassword && { original_password: originalPassword }),
         new_password: newPassword,
       }),
       headers: {
