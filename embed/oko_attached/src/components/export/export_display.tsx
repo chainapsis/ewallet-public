@@ -74,6 +74,7 @@ const VALID_KEY_TYPES: ReadonlySet<string> = new Set(["secp256k1", "ed25519"]);
 export const ExportDisplay = () => {
   const keyType = useMemo(() => {
     const raw = new URLSearchParams(window.location.search).get("key_type");
+    console.log("[ExportDisplay] keyType parsed:", raw, "search:", window.location.search);
     return raw && VALID_KEY_TYPES.has(raw) ? (raw as KeyType) : null;
   }, []);
 
@@ -92,16 +93,20 @@ export const ExportDisplay = () => {
         stored = await requestExportedKeys();
       }
       if (cancelled) {
+        console.log("[ExportDisplay] cancelled=true, skipping state update");
         return;
       }
       if (!stored) {
+        console.log("[ExportDisplay] no keys found after request");
         setError("No exported keys found.");
         return;
       }
       if (!keyType || !(keyType in stored)) {
+        console.log("[ExportDisplay] invalid keyType:", keyType, "keys has:", Object.keys(stored));
         setError(`Invalid key_type: ${keyType}`);
         return;
       }
+      console.log("[ExportDisplay] keys loaded OK, keyType:", keyType);
       setKeys(stored);
     };
 
@@ -115,12 +120,15 @@ export const ExportDisplay = () => {
   // ResizeObserver → notify parent of height changes
   useEffect(() => {
     if (!containerEl) {
+      console.log("[ExportDisplay] ResizeObserver skipped: no containerEl");
       return;
     }
 
     const report = () => {
+      const h = document.documentElement.scrollHeight;
+      console.log("[ExportDisplay] resize report:", h, "key_type:", keyType, "parentOrigin:", parentOrigin);
       postToParent("__export_display_resize__", {
-        height: document.documentElement.scrollHeight,
+        height: h,
         key_type: keyType,
       });
     };
