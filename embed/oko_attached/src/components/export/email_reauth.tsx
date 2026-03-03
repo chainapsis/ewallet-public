@@ -9,9 +9,9 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import styles from "./email_reauth.module.scss";
 import {
   findEmbeddedIframe,
-  generateNonce,
   sendReauthParamsToIframe,
 } from "./use_export_reauth";
+import { generateNonce } from "@oko-wallet-attached/config/oauth";
 import { getAuth0WebAuth } from "@oko-wallet-attached/config/auth0";
 import {
   sendEmailOTPCode,
