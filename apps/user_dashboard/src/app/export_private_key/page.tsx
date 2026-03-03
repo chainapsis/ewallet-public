@@ -2,6 +2,7 @@
 
 import { Button } from "@oko-wallet/oko-common-ui/button";
 import { DiscordIcon } from "@oko-wallet/oko-common-ui/icons/discord_icon";
+import { GithubIcon } from "@oko-wallet/oko-common-ui/icons/github_icon";
 import { GoogleIcon } from "@oko-wallet/oko-common-ui/icons/google_icon";
 import { MailboxIcon } from "@oko-wallet/oko-common-ui/icons/mailbox";
 import { TelegramIcon } from "@oko-wallet/oko-common-ui/icons/telegram_icon";
@@ -38,6 +39,8 @@ const getAuthProviderInfo = (
       return { icon: <TelegramIcon size={24} />, label: "Telegram" };
     case "x":
       return { icon: <XIcon size={24} />, label: "X" };
+    case "github":
+      return { icon: <GithubIcon size={24} />, label: "GitHub" };
     case "auth0":
       return { icon: <MailboxIcon size={24} />, label: "Email" };
     default:
@@ -378,7 +381,7 @@ const Page = () => {
   const authType = useUserInfoState((state) => state.authType);
   const authInfo = getAuthProviderInfo(authType);
   const usesName =
-    authType === "discord" || authType === "telegram" || authType === "x";
+    authType === "discord" || authType === "telegram" || authType === "x" || authType === "github";
   const displayIdentifier = usesName ? name : email;
 
   const okoWallet = useSDKState(selectCosmosSDK)?.okoWallet;
@@ -408,7 +411,7 @@ const Page = () => {
       // 1. Open re-auth popup at attached origin (match sign-in popup sizes)
       const attachedOrigin = new URL(okoWallet.sdkEndpoint).origin;
       const isOAuthProvider =
-        authType === "google" || authType === "x" || authType === "discord";
+        authType === "google" || authType === "x" || authType === "discord" || authType === "github";
       const popupWidth = isOAuthProvider ? 1200 : 440;
       const popupHeight = isOAuthProvider
         ? 800
