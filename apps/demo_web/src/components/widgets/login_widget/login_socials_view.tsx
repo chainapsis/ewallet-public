@@ -5,6 +5,7 @@ import { TelegramIcon } from "@oko-wallet/oko-common-ui/icons/telegram_icon";
 import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
 import { AppleIcon } from "@oko-wallet/oko-common-ui/icons/apple_icon";
 import { DiscordIcon } from "@oko-wallet/oko-common-ui/icons/discord_icon";
+import { GithubIcon } from "@oko-wallet/oko-common-ui/icons/github_icon";
 import { ChevronLeftIcon } from "@oko-wallet/oko-common-ui/icons/chevron_left";
 import { Spacing } from "@oko-wallet-common-ui/spacing/spacing";
 
@@ -12,7 +13,7 @@ import styles from "./login_widget.module.scss";
 
 export interface LoginSocialsViewProps {
   onBack: () => void;
-  onSignIn: (method: "telegram" | "x" | "apple" | "discord") => void;
+  onSignIn: (method: "telegram" | "x" | "apple" | "discord" | "github") => void;
 }
 
 export const LoginSocialsView: FC<LoginSocialsViewProps> = ({
@@ -83,6 +84,23 @@ export const LoginSocialsView: FC<LoginSocialsViewProps> = ({
             style={{ padding: "0 2px" }}
           >
             Discord
+          </Typography>
+        </Button>
+
+        <Button
+          variant="secondary"
+          size="md"
+          fullWidth
+          onClick={() => onSignIn("github")}
+        >
+          <GithubIcon size={20} />
+          <Typography
+            size="sm"
+            weight="semibold"
+            color="secondary"
+            style={{ padding: "0 2px" }}
+          >
+            GitHub
           </Typography>
         </Button>
 

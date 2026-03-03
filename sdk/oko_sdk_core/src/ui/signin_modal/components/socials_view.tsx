@@ -6,6 +6,7 @@ import {
   XIcon,
   TelegramIcon,
   DiscordIcon,
+  GithubIcon,
   AppleIcon,
   ChevronLeftIcon,
 } from "./icons";
@@ -39,6 +40,11 @@ export const SocialsView: FC<SocialsViewProps> = ({ onSelect, onBack }) => {
           icon={<DiscordIcon />}
           label="Discord"
           onClick={() => onSelect("discord")}
+        />
+        <ProviderButton
+          icon={<GithubIcon />}
+          label="GitHub"
+          onClick={() => onSelect("github")}
         />
         <ProviderButton icon={<AppleIcon />} label="Apple" disabled />
       </div>

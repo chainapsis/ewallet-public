@@ -8,6 +8,7 @@ import { TelegramIcon } from "@oko-wallet-common-ui/icons/telegram_icon";
 import { XIcon } from "@oko-wallet-common-ui/icons/x_icon";
 import { AppleIcon } from "@oko-wallet-common-ui/icons/apple_icon";
 import { DiscordIcon } from "@oko-wallet-common-ui/icons/discord_icon";
+import { GithubIcon } from "@oko-wallet/oko-common-ui/icons/github_icon";
 
 import { Widget } from "../widget_components";
 import styles from "./account_info_widget.module.scss";
@@ -40,6 +41,7 @@ export const AccountInfoWidget: FC<AccountInfoWidgetProps> = ({
           {type === "x" && <XIcon size={20} />}
           {type === "apple" && <AppleIcon size={20} />}
           {type === "discord" && <DiscordIcon size={20} />}
+          {type === "github" && <GithubIcon size={20} />}
           <Typography
             size="lg"
             weight="medium"
