@@ -92,8 +92,7 @@ export function sendReauthParamsToIframe(
 
   iframe.postMessage(
     // TODO: @chihun
-    // Should be typed and "oko_attached" should be aware of this type
-    // in the compile time
+    // Should be type defined
     {
       target: "oko_attached",
       msg_type: "set_reauth_params",
