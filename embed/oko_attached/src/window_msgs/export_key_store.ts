@@ -59,8 +59,6 @@ export function requestExportedKeys(): Promise<ExportedKeys | null> {
     reqBc.onmessage = (event: MessageEvent) => {
       if (event.data?.type === "keys") {
         clearTimeout(timeout);
-        // Signal the hidden iframe to clear keys from memory
-        reqBc.postMessage({ type: "clear_keys" });
         reqBc.close();
         resolve(event.data.keys);
       }
