@@ -58,7 +58,7 @@ export const ErrorModal: FC<ErrorModalProps> = ({ error }) => {
         <div className={styles.closeButton} onClick={handleClickClose}>
           <XCloseIcon size={20} color="var(--fg-quaternary)" />
         </div>
-        <div className={styles.modalInnerContentContainer}>
+        <div data-scroll-container className={styles.modalInnerContentContainer}>
           <div className={styles.errorIconContainer}>
             <ErrorIcon size={23} color="var(--fg-warning-primary)" />
             <div className={styles.ring1} />

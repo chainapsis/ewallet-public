@@ -82,7 +82,7 @@ export const MakeTxSigModal: FC<MakeTxSigModalProps> = ({
           <XCloseIcon size={20} color="var(--fg-quaternary)" />
         </div>
 
-        <div className={styles.modalInnerContentContainer}>
+        <div data-scroll-container className={styles.modalInnerContentContainer}>
           <CosmosTxSignatureContent
             payload={sigData.payload}
             signDocJson={signDocJson}
