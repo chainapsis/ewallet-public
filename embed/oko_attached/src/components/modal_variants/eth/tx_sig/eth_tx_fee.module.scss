@@ -33,6 +33,10 @@
     width: 8px;
   }
 
+  &::-webkit-scrollbar-track {
+    margin: 6px 0;
+  }
+
   &::-webkit-scrollbar-thumb {
     border-right: 4px solid transparent;
     background-clip: padding-box;
