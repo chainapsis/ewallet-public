@@ -5,6 +5,7 @@ import type {
 } from "@oko-wallet/oko-sdk-core";
 
 import { handleExportPrivateKey } from "./export_private_key";
+import { handleGenerateOAuthUrl } from "./generate_oauth_url";
 import { handleGetAuthType } from "./get_auth_type";
 import { handleGetConnectedApps } from "./get_connected_apps";
 import { handleGetCosmosChain } from "./get_cosmos_chain_info";
@@ -142,6 +143,11 @@ export function makeMsgHandler() {
 
       case "get_eth_chain_info": {
         await handleGetEthChain(ctx, message);
+        break;
+      }
+
+      case "generate_oauth_url": {
+        await handleGenerateOAuthUrl(ctx, message);
         break;
       }
 
