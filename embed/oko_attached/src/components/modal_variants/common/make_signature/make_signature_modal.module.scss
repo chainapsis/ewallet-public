@@ -14,19 +14,14 @@
 }
 
 .modal {
-  height: 100%;
+  display: flex;
+  flex-direction: column;
   max-height: $make-signature-modal-max-height;
-  overflow: hidden;
 }
 
 .modalInnerContentContainer {
-  height: 100%;
-  max-height: calc(
-    #{$make-signature-modal-max-height} - calc(
-        $make-signature-modal-padding-y + $make-signature-modal-header-height +
-          $make-signature-modal-footer-height + 2px
-      )
-  );
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding-right: 8px;
   @include global.common-list-scroll;
