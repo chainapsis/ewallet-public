@@ -208,7 +208,6 @@ export async function handleExistingUserV2(
     signingShare,
     verifyingKey,
     serverVerifyingShare: serverVerifyingShareRes.data,
-    threshold,
   });
   if (!keyPackageRes.success) {
     return {

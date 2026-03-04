@@ -13,6 +13,14 @@ import type {
 import { hashKeyshareNodeNamesEd25519 } from "./hash";
 import { computeVerifyingShare } from "./scalar";
 
+/**
+ * FROST 2-of-2 signing threshold (client + server).
+ *
+ * This is the min_signers value for the FROST signing protocol,
+ * NOT the SSS threshold for KS node share splitting.
+ */
+export const FROST_MIN_SIGNERS = 2;
+
 interface SplitOutputRaw {
   key_packages: KeyPackageRaw[];
   public_key_package: PublicKeyPackageRaw;

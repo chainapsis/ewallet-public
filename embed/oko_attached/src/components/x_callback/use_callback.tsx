@@ -19,6 +19,15 @@ export function useXCallback() {
         const cbRes = await handleXCallback();
 
         if (cbRes.success) {
+          const stateParam = new URLSearchParams(window.location.search).get("state");
+          if (stateParam) {
+            try {
+              const oauthState = JSON.parse(atob(stateParam));
+              if (oauthState.apiKey === "export_key_reauth") {
+                return; // Parent will close popup when iframes are ready
+              }
+            } catch { /* ignore parse errors */ }
+          }
           window.close();
         } else {
           if (cbRes.err.type === "login_canceled_by_user") {

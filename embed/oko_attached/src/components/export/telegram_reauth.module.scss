@@ -191,6 +191,12 @@
   margin-bottom: var(--spacing-2xl, 20px);
 }
 
+.telegramWidgetInner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .telegramWidgetContainer :global(iframe) {
   border-radius: 107.341px !important;
 }

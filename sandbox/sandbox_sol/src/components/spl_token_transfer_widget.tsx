@@ -1,17 +1,18 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { PublicKey, Transaction } from "@solana/web3.js";
 import {
+  createAssociatedTokenAccountIdempotentInstruction,
   createTransferCheckedInstruction,
   getAssociatedTokenAddress,
 } from "@solana/spl-token";
+import { PublicKey, Transaction } from "@solana/web3.js";
 import bs58 from "bs58";
+import Link from "next/link";
+import { useState } from "react";
 
+import { DEVNET_CONNECTION } from "@/lib/connection";
 import { useSdkStore } from "@/store/sdk";
 import Button from "./Button";
-import { DEVNET_CONNECTION } from "@/lib/connection";
 
 // Well-known devnet tokens for testing
 const DEVNET_TOKENS = [
@@ -32,7 +33,9 @@ export function SplTokenTransferWidget() {
   const [error, setError] = useState<string | null>(null);
 
   const handleSignTransaction = async () => {
-    if (!okoSvmWallet || !publicKey) return;
+    if (!okoSvmWallet || !publicKey) {
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
@@ -57,7 +60,10 @@ export function SplTokenTransferWidget() {
       const mintPubkey = new PublicKey(selectedToken.mint);
 
       // Derive token accounts
-      const sourceAta = await getAssociatedTokenAddress(mintPubkey, ownerPubkey);
+      const sourceAta = await getAssociatedTokenAddress(
+        mintPubkey,
+        ownerPubkey,
+      );
       const destinationAta = await getAssociatedTokenAddress(
         mintPubkey,
         recipientPubkey,
@@ -68,16 +74,25 @@ export function SplTokenTransferWidget() {
       const transaction = new Transaction({
         recentBlockhash: blockhash,
         feePayer: ownerPubkey,
-      }).add(
-        createTransferCheckedInstruction(
-          sourceAta,
-          mintPubkey,
-          destinationAta,
-          ownerPubkey,
-          tokenAmount,
-          selectedToken.decimals,
-        ),
-      );
+      })
+        .add(
+          createAssociatedTokenAccountIdempotentInstruction(
+            ownerPubkey,
+            destinationAta,
+            recipientPubkey,
+            mintPubkey,
+          ),
+        )
+        .add(
+          createTransferCheckedInstruction(
+            sourceAta,
+            mintPubkey,
+            destinationAta,
+            ownerPubkey,
+            tokenAmount,
+            selectedToken.decimals,
+          ),
+        );
 
       const signedTx = await okoSvmWallet.signTransaction(transaction);
       const txSignature = signedTx.signature;
@@ -96,7 +111,9 @@ export function SplTokenTransferWidget() {
   };
 
   const handleSendTransaction = async () => {
-    if (!okoSvmWallet || !publicKey) return;
+    if (!okoSvmWallet || !publicKey) {
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
@@ -120,7 +137,10 @@ export function SplTokenTransferWidget() {
       const ownerPubkey = new PublicKey(publicKey);
       const mintPubkey = new PublicKey(selectedToken.mint);
 
-      const sourceAta = await getAssociatedTokenAddress(mintPubkey, ownerPubkey);
+      const sourceAta = await getAssociatedTokenAddress(
+        mintPubkey,
+        ownerPubkey,
+      );
       const destinationAta = await getAssociatedTokenAddress(
         mintPubkey,
         recipientPubkey,
@@ -131,16 +151,25 @@ export function SplTokenTransferWidget() {
       const transaction = new Transaction({
         recentBlockhash: blockhash,
         feePayer: ownerPubkey,
-      }).add(
-        createTransferCheckedInstruction(
-          sourceAta,
-          mintPubkey,
-          destinationAta,
-          ownerPubkey,
-          tokenAmount,
-          selectedToken.decimals,
-        ),
-      );
+      })
+        .add(
+          createAssociatedTokenAccountIdempotentInstruction(
+            ownerPubkey,
+            destinationAta,
+            recipientPubkey,
+            mintPubkey,
+          ),
+        )
+        .add(
+          createTransferCheckedInstruction(
+            sourceAta,
+            mintPubkey,
+            destinationAta,
+            ownerPubkey,
+            tokenAmount,
+            selectedToken.decimals,
+          ),
+        );
 
       const txSignature = await okoSvmWallet.sendTransaction(
         transaction,
@@ -177,7 +206,9 @@ export function SplTokenTransferWidget() {
               const token = DEVNET_TOKENS.find(
                 (t) => t.mint === e.target.value,
               );
-              if (token) setSelectedToken(token);
+              if (token) {
+                setSelectedToken(token);
+              }
             }}
           >
             {DEVNET_TOKENS.map((token) => (

@@ -14,7 +14,7 @@ import type {
 } from "@oko-wallet-sdk-core/types/oauth";
 import type { OAuthSignInError } from "@oko-wallet-sdk-core/types/sign_in";
 
-export * from "./export_priv_key";
+export * from "../protected/export_priv_key";
 export * from "./get_conn_apps";
 
 export type OkoWalletMsgGetPublicKey = {
@@ -232,6 +232,24 @@ export type OkoWalletMsgImportPrivateKeyAck = {
   payload: Result<Bytes32, string>;
 };
 
+export type OAuthProvider = "google" | "x" | "discord";
+
+export type OkoWalletMsgGenerateOAuthUrl = {
+  target: "oko_attached";
+  msg_type: "generate_oauth_url";
+  payload: {
+    provider: OAuthProvider;
+    apiKey: string;
+    targetOrigin: string;
+  };
+};
+
+export type OkoWalletMsgGenerateOAuthUrlAck = {
+  target: "oko_sdk";
+  msg_type: "generate_oauth_url_ack";
+  payload: Result<{ url: string }, string>;
+};
+
 export type OkoWalletMsg =
   | OkoWalletMsgInit
   | OkoWalletMsgInitAck
@@ -267,6 +285,8 @@ export type OkoWalletMsg =
   | OkoWalletMsgGetEthChainInfoAck
   | OkoWalletMsgImportPrivateKey
   | OkoWalletMsgImportPrivateKeyAck
+  | OkoWalletMsgGenerateOAuthUrl
+  | OkoWalletMsgGenerateOAuthUrlAck
   | {
       target: "oko_sdk";
       msg_type: "unknown_msg_type";

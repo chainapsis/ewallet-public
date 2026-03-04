@@ -1,4 +1,4 @@
-import type { CurveType } from "./curve_type";
+import type { CurveType } from "@oko-wallet/oko-types/crypto";
 
 export interface KSNodeWallet {
   wallet_id: string;
