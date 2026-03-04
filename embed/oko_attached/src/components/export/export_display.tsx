@@ -170,7 +170,7 @@ export const ExportDisplay: FC = () => {
     }
 
     const report = () => {
-      const h = document.documentElement.scrollHeight;
+      const h = containerEl.offsetHeight;
 
       postToParent({
         target: "oko_user_dashboard",
