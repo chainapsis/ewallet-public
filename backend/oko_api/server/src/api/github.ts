@@ -1,10 +1,11 @@
-import type { Result } from "@oko-wallet/stdlib-js";
 import type { SocialLoginGithubVerifyUserResponse } from "@oko-wallet/oko-types/social_login";
+import type { Result } from "@oko-wallet/stdlib-js";
 
 export const GITHUB_SOCIAL_LOGIN_TOKEN_URL =
   "https://github.com/login/oauth/access_token";
 export const GITHUB_USER_INFO_URL = "https://api.github.com/user";
-export const GITHUB_CLIENT_ID = "PLACEHOLDER_GITHUB_CLIENT_ID";
+// @TODO replace with production GitHub App Client ID
+export const GITHUB_CLIENT_ID = "Iv23lio9XBqEICR45fCJ";
 
 export async function getGithubUserInfo(accessToken: string): Promise<
   Result<

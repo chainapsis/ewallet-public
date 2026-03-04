@@ -76,22 +76,12 @@ export async function getGithubToken(
     return;
   }
 
-  const clientSecret = process.env.GITHUB_CLIENT_SECRET;
-  if (!clientSecret) {
-    res.status(500).json({
-      success: false,
-      code: "UNKNOWN_ERROR",
-      msg: "GitHub client secret is not configured",
-    });
-    return;
-  }
-
   try {
     const reqBody = new URLSearchParams({
       code: body.code,
       grant_type: "authorization_code",
       client_id: GITHUB_CLIENT_ID,
-      client_secret: clientSecret,
+      client_secret: req.app.locals.github_client_secret,
       redirect_uri: body.redirect_uri,
       code_verifier: body.code_verifier,
     });
