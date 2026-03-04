@@ -5,6 +5,7 @@
   flex-wrap: wrap;
   gap: 64px;
   align-items: flex-start;
+  max-width: 1280px;
 }
 
 .heading {
@@ -109,66 +110,104 @@
 
 /* Step 2 styles */
 
-.privateKeySection {
+.keySection {
   display: flex;
   flex-direction: column;
 }
 
-.privateKeyLabel {
-  margin-bottom: 12px;
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
-.privateKeyField {
-  position: relative;
-  min-height: 68px;
-  width: 100%;
-  cursor: pointer;
-
-  &:hover .privateKeyBg {
-    background-color: var(--bg-secondary-hover, #f5f5f5);
-  }
-}
-
-.privateKeyBg {
+.sectionKeyIcon {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 16px;
-  background-color: var(--bg-secondary);
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: var(--fg-quaternary);
+}
+
+.keyIframe {
+  width: 100%;
+  border: none;
+  display: block;
+}
+
+.chainsList {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px;
   border-radius: 12px;
-  overflow: hidden;
-  word-break: break-all;
 }
 
-.privateKeyTextBlurred {
-  filter: blur(4px);
-  opacity: 0.5;
-}
-
-.privateKeyHint {
-  position: absolute;
-  inset: 0;
+.chainsTitle {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
+  flex-shrink: 0;
 }
 
-.eyeOffIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
+.chainsSeparator {
+  width: 1px;
+  height: 12px;
+  background-color: var(--border-primary);
   flex-shrink: 0;
-  color: var(--fg-primary);
 }
 
-.copyButtonIcon {
+.chainsItems {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chainItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--border-primary);
+  margin: 32px 0;
+}
+
+.infoBox {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 12px;
+}
+
+.infoBoxTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.infoBoxIcon {
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
+}
+
+.spacer24 {
+  height: 24px;
+}
+
+.spacer32 {
+  height: 32px;
+}
+
+.spacer52 {
+  height: 52px;
 }

@@ -17,6 +17,10 @@ export function useGoogleCallback() {
         const cbRes = await handleGoogleCallback();
 
         if (cbRes.success) {
+          const oauthState = getOAuthStateFromUrl();
+          if (oauthState.apiKey === "export_key_reauth") {
+            return; // Parent will close popup when iframes are ready
+          }
           window.close();
         }
       } catch (err) {

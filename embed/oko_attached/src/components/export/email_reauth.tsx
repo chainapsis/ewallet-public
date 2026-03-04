@@ -53,10 +53,10 @@ export const EmailReauth = () => {
   const nonce = useMemo(() => generateNonce(), []);
   const oauthState = useMemo<OAuthState>(
     () => ({
-      apiKey: "reauth",
+      apiKey: "export_key_reauth",
       targetOrigin: window.location.origin,
       provider: "auth0",
-      modalId: "reauth",
+      modalId: "export_key_reauth",
     }),
     [],
   );
@@ -132,7 +132,7 @@ export const EmailReauth = () => {
     setIsSubmitting(true);
     setErrorMessage(null);
 
-    const callbackUrl = `${window.location.origin}/email/callback?modal_id=reauth`;
+    const callbackUrl = `${window.location.origin}/email/callback?modal_id=export_key_reauth`;
 
     console.log(`${LOG_PREFIX} verifying OTP for`, email.trim());
 
