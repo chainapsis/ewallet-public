@@ -1,4 +1,4 @@
-import { useState, type FC } from "react";
+import { useMemo, useState, type FC } from "react";
 import type { CosmosArbitrarySignPayload } from "@oko-wallet/oko-sdk-core";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
@@ -12,10 +12,21 @@ interface CosmosArbitrarySignatureContentProps {
   payload: CosmosArbitrarySignPayload;
 }
 
+function decodeArbitraryData(data: string | Uint8Array): string {
+  if (typeof data === "string") {
+    return data;
+  }
+  return new TextDecoder().decode(data);
+}
+
 export const CosmosArbitrarySignatureContent: FC<
   CosmosArbitrarySignatureContentProps
 > = ({ payload }) => {
   const [isViewRawData, setIsViewRawData] = useState(false);
+  const displayData = useMemo(
+    () => decodeArbitraryData(payload.data),
+    [payload.data],
+  );
 
   return (
     <div>
@@ -55,7 +66,7 @@ export const CosmosArbitrarySignatureContent: FC<
             weight="medium"
             className={styles.data}
           >
-            {payload.data}
+            {displayData}
           </Typography>
         )}
       </div>
