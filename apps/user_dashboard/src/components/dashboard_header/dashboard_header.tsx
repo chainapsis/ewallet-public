@@ -1,6 +1,5 @@
 "use client";
 
-import type { AuthType } from "@oko-wallet/oko-types/auth";
 import { AnchoredMenu } from "@oko-wallet/oko-common-ui/anchored_menu";
 import { DiscordIcon } from "@oko-wallet/oko-common-ui/icons/discord_icon";
 import { ExternalLinkOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/external_link_outlined";
@@ -12,6 +11,7 @@ import { ThreeDotsVerticalIcon } from "@oko-wallet/oko-common-ui/icons/three_dot
 import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
 import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { Property } from "csstype";
 import { useRouter } from "next/navigation";
 import type { FC, ReactNode } from "react";
@@ -97,10 +97,13 @@ function MenuChatIcon() {
 
 const OKO_LOGO_URL =
   "https://oko-wallet.s3.ap-northeast-2.amazonaws.com/icons/oko_logo.png";
+const OKO_LOGO_WHITE_URL =
+  "https://oko-wallet.s3.ap-northeast-2.amazonaws.com/icons/oko_logo_white.png";
 
 export const DashboardHeader: FC<{
   position?: Property.Position;
-}> = ({ position = "static" }) => {
+  logoVariant?: "default" | "white";
+}> = ({ position = "static", logoVariant = "default" }) => {
   const isLeftBarOpen = useViewState((state) => state.isLeftBarOpen);
   const toggleLeftBarOpen = useViewState((state) => state.toggleLeftBarOpen);
 
@@ -118,7 +121,7 @@ export const DashboardHeader: FC<{
   return (
     <div className={styles.wrapper} style={{ position }}>
       <img
-        src={OKO_LOGO_URL}
+        src={logoVariant === "white" ? OKO_LOGO_WHITE_URL : OKO_LOGO_URL}
         alt="Oko"
         width={72}
         height={28}
