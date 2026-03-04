@@ -23,6 +23,7 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  margin-right: -8px;
   padding-right: 8px;
   @include global.common-list-scroll;
 }
