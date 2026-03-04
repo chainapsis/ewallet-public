@@ -28,7 +28,7 @@ export const CosmosArbitrarySignatureContent: FC<
       <Spacing height={28} />
 
       <div className={styles.messageHeader}>
-        <Typography size="sm" color="tertiary" weight="semibold">
+        <Typography size="sm" color="secondary" weight="semibold">
           Message
         </Typography>
         <div

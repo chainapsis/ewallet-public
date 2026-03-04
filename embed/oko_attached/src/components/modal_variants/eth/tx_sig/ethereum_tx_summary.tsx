@@ -69,7 +69,7 @@ export const EthereumTxSummary: FC<EthereumTxSummaryProps> = ({
           <Typography color="tertiary" size="xs" weight="medium">
             {isRawView ? "Smart View" : "Raw View"}
           </Typography>
-          <ChevronRightIcon className={styles.txSummaryHeaderRightIcon} />
+          <ChevronRightIcon className={styles.txSummaryHeaderRightIcon} color="var(--fg-tertiary)" />
         </div>
       </div>
       {content}
