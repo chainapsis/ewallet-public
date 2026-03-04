@@ -2,66 +2,13 @@ import type { OAuthState } from "@oko-wallet/oko-sdk-core";
 import type { Result } from "@oko-wallet/stdlib-js";
 import { useCallback } from "react";
 
-// Client IDs (public constants, same as SDK)
-const GOOGLE_CLIENT_ID =
-  "421793224165-cpmbt6enqrj6ad6n4ujokham8qdmnnln.apps.googleusercontent.com";
-const X_CLIENT_ID = "eWJPdVNYNlV6dEpNSTM3T01GRGI6MTpjaQ";
-const DISCORD_CLIENT_ID = "1445280712121913384";
-
-export function generateNonce(length = 8) {
-  return Array.from(crypto.getRandomValues(new Uint8Array(length)))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
-
-function toBase64Url(base64: string): string {
-  return base64.replace(/[+/]|(=+)$/g, (match) => {
-    if (match === "+") {
-      return "-";
-    }
-    if (match === "/") {
-      return "_";
-    }
-    return "";
-  });
-}
-
-function generateRandomString(length = 64): string {
-  const array = new Uint8Array(length);
-  crypto.getRandomValues(array);
-
-  let binary = "";
-  for (let i = 0; i < array.length; i++) {
-    binary += String.fromCharCode(array[i]);
-  }
-
-  return toBase64Url(btoa(binary));
-}
-
-async function sha256(input: string): Promise<ArrayBuffer> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(input);
-  return crypto.subtle.digest("SHA-256", data);
-}
-
-function base64UrlEncode(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer);
-  let binary = "";
-  for (let i = 0; i < bytes.byteLength; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  return toBase64Url(btoa(binary));
-}
-
-async function createPkcePair(): Promise<{
-  codeVerifier: string;
-  codeChallenge: string;
-}> {
-  const codeVerifier = generateRandomString(64);
-  const hash = await sha256(codeVerifier);
-  const codeChallenge = base64UrlEncode(hash);
-  return { codeVerifier, codeChallenge };
-}
+import {
+  createPkcePair,
+  DISCORD_CLIENT_ID,
+  GOOGLE_CLIENT_ID,
+  generateNonce,
+  X_CLIENT_ID,
+} from "@oko-wallet-attached/config/oauth";
 
 export function findEmbeddedIframe(): Window | null {
   if (!window.opener) {

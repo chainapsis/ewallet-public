@@ -1,20 +1,14 @@
 import type {
-  OAuthState,
   OkoWalletInterface,
   OkoWalletMsg,
   OkoWalletMsgOAuthSignInUpdate,
   OkoWalletMsgOAuthSignInUpdateAck,
 } from "@oko-wallet-sdk-core/types";
-import { RedirectUriSearchParamsKey } from "@oko-wallet-sdk-core/types/oauth";
-import { GOOGLE_CLIENT_ID } from "@oko-wallet-sdk-core/auth/google";
-
-import { generateNonce } from "./utils";
 
 const FIVE_MINS_MS = 5 * 60 * 1000;
 
 export async function handleGoogleSignIn(okoWallet: OkoWalletInterface) {
   const signInRes = await tryGoogleSignIn(
-    okoWallet.sdkEndpoint,
     okoWallet.apiKey,
     okoWallet.sendMsgToIframe.bind(okoWallet),
   );
@@ -24,51 +18,14 @@ export async function handleGoogleSignIn(okoWallet: OkoWalletInterface) {
   }
 }
 
-// NOTE: Opening popup window should not reside in the async function
-// Or at least any async function should not come before window.open()
-function tryGoogleSignIn(
-  sdkEndpoint: string,
+// Open popup immediately to avoid Safari popup blocker,
+// then request the OAuth URL from attached iframe.
+async function tryGoogleSignIn(
   apiKey: string,
   sendMsgToIframe: (msg: OkoWalletMsg) => Promise<OkoWalletMsg>,
 ): Promise<OkoWalletMsgOAuthSignInUpdate> {
-  const clientId = GOOGLE_CLIENT_ID;
-  if (!clientId) {
-    throw new Error("GOOGLE_CLIENT_ID is not set");
-  }
-
-  const redirectUri = `${new URL(sdkEndpoint).origin}/google/callback`;
-
-  console.debug("[oko] window host: %s", window.location.host);
-  console.debug("[oko] redirectUri: %s", redirectUri);
-
-  const nonce = generateNonce();
-
-  const nonceAckPromise = sendMsgToIframe({
-    target: "oko_attached",
-    msg_type: "set_oauth_nonce",
-    payload: nonce,
-  });
-
-  const oauthState: OAuthState = {
-    apiKey,
-    targetOrigin: window.location.origin,
-    provider: "google",
-  };
-  const oauthStateString = JSON.stringify(oauthState);
-
-  console.debug("[oko] oauthStateString: %s", oauthStateString);
-
-  const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
-  authUrl.searchParams.set("client_id", clientId);
-  authUrl.searchParams.set("redirect_uri", redirectUri);
-  authUrl.searchParams.set("response_type", "token id_token");
-  authUrl.searchParams.set("scope", "openid email profile");
-  authUrl.searchParams.set("prompt", "login");
-  authUrl.searchParams.set("nonce", nonce);
-  authUrl.searchParams.set(RedirectUriSearchParamsKey.STATE, oauthStateString);
-
   const popup = window.open(
-    authUrl.toString(),
+    "about:blank",
     "google_oauth",
     "width=1200,height=800",
   );
@@ -77,12 +34,34 @@ function tryGoogleSignIn(
     throw new Error("Failed to open new window for google oauth sign in");
   }
 
-  return new Promise<OkoWalletMsgOAuthSignInUpdate>(async (resolve, reject) => {
-    const ack = await nonceAckPromise;
-    if (ack.msg_type !== "set_oauth_nonce_ack" || !ack.payload.success) {
-      throw new Error("Failed to set nonce for google oauth sign in");
-    }
+  const ack = await sendMsgToIframe({
+    target: "oko_attached",
+    msg_type: "generate_oauth_url",
+    payload: {
+      provider: "google",
+      apiKey,
+      targetOrigin: window.location.origin,
+    },
+  });
 
+  if (
+    ack.msg_type !== "generate_oauth_url_ack" ||
+    !ack.payload.success
+  ) {
+    popup.close();
+    throw new Error("Failed to generate Google OAuth URL");
+  }
+
+  try {
+    popup.location.href = ack.payload.data.url;
+  } catch (error) {
+    popup.close();
+    throw new Error(
+      `Failed to redirect popup to auth URL: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+
+  return new Promise<OkoWalletMsgOAuthSignInUpdate>((resolve, reject) => {
     let popupTimeoutTimer: number;
     let popupCloseCheckTimer: number;
 
@@ -117,7 +96,6 @@ function tryGoogleSignIn(
 
     window.addEventListener("message", onMessage);
 
-    // Check if popup was closed by the user
     popupCloseCheckTimer = window.setInterval(() => {
       if (popup.closed) {
         console.log("[oko] Popup was closed by user, rejecting sign-in");
