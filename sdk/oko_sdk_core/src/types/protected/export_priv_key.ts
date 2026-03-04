@@ -16,7 +16,7 @@ export type ExportPrivateKeyError =
   | { type: "REAUTH_ERROR"; error: string };
 
 export type ExportPrivateKeyAckPayload =
-  | { success: true; data: { secp256k1: string; ed25519: string } }
+  | { success: true }
   | { success: false; error: ExportPrivateKeyError };
 
 export interface OkoWalletMsgExportPrivateKeyAck {

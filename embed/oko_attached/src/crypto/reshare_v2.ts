@@ -40,6 +40,7 @@ import {
   keyPackageToRaw,
   getClientFrostIdentifier,
   getServerFrostIdentifier,
+  FROST_MIN_SIGNERS,
 } from "./sss_ed25519";
 import { computeVerifyingShare } from "./scalar";
 import { hexToSeedSharePoint, seedShareToHex } from "./keygen_ed25519";
@@ -334,7 +335,6 @@ export async function reshareUserKeySharesV2(
     signingShare: ed25519Result.originalSigningShare,
     verifyingKey: ed25519.publicKey,
     serverVerifyingShare: ed25519.serverVerifyingShare,
-    threshold,
   });
   if (!keyPackageRes.success) {
     return { success: false, err: keyPackageRes.err };
@@ -358,7 +358,6 @@ export interface BuildKeyPackageParams {
   signingShare: Bytes32;
   verifyingKey: Bytes32;
   serverVerifyingShare: Bytes32;
-  threshold: number;
 }
 
 /**
@@ -378,8 +377,7 @@ export interface BuildKeyPackageResult {
 export function buildKeyPackageResult(
   params: BuildKeyPackageParams,
 ): Result<BuildKeyPackageResult, string> {
-  const { signingShare, verifyingKey, serverVerifyingShare, threshold } =
-    params;
+  const { signingShare, verifyingKey, serverVerifyingShare } = params;
 
   const clientIdentifierRes = getClientFrostIdentifier();
   if (!clientIdentifierRes.success) {
@@ -395,7 +393,7 @@ export function buildKeyPackageResult(
     signingShare,
     clientIdentifierRes.data,
     verifyingKey,
-    threshold,
+    FROST_MIN_SIGNERS,
   );
 
   const clientVerifyingShare = computeVerifyingShare(signingShare);

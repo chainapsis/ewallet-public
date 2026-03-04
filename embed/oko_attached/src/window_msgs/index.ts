@@ -3,7 +3,6 @@ import type {
   OkoWalletMsgExportPrivateKey,
   OkoWalletMsgGetConnectedApps,
 } from "@oko-wallet/oko-sdk-core";
-import type { AuthType } from "@oko-wallet/oko-types/auth";
 
 import { handleExportPrivateKey } from "./export_private_key";
 import { handleGenerateOAuthUrl } from "./generate_oauth_url";
@@ -38,6 +37,14 @@ export function makeMsgHandler() {
       data?.target === "oko_attached" &&
       data?.msg_type === "set_reauth_params"
     ) {
+      // set_reauth_params is sent from the re-auth popup (same attached origin)
+      if (event.origin !== window.location.origin) {
+        console.warn(
+          "[attached] set_reauth_params rejected from origin:",
+          event.origin,
+        );
+        return;
+      }
       const appState = useAppState.getState();
       const payload = data.payload as
         | { nonce?: string; code_verifier?: string }

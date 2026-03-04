@@ -104,7 +104,7 @@ export async function handleNewUserV2(
 
   // 5. Send key shares by both curves to ks nodes using registerKeySharesV2
   const registerKeySharesResults: Result<void, string>[] = await Promise.all(
-    secp256k1UserKeyShares.map(async (keyShareByNode, index) => {
+    secp256k1UserKeyShares.map(async (keyShareByNode) => {
       const commitRevealRes = createKsnCommitRevealParams(
         session,
         keyShareByNode.node.endpoint,
@@ -112,6 +112,15 @@ export async function handleNewUserV2(
       );
       if (!commitRevealRes.success) {
         return { success: false, err: commitRevealRes.err };
+      }
+      const ed25519Share = ed25519UserKeyShares.find(
+        (s) => s.node.endpoint === keyShareByNode.node.endpoint,
+      );
+      if (!ed25519Share) {
+        return {
+          success: false,
+          err: `ed25519 share not found for node ${keyShareByNode.node.name}`,
+        };
       }
       const ksnSeedShare = ed25519KsnSeedShares.find(
         (s) => s.node.endpoint === keyShareByNode.node.endpoint,
@@ -133,7 +142,7 @@ export async function handleNewUserV2(
           },
           ed25519: {
             public_key: ed25519Keygen1.public_key.toHex(),
-            share: teddsaKeyShareToHex(ed25519UserKeyShares[index].share),
+            share: teddsaKeyShareToHex(ed25519Share.share),
             seed_share: seedShareToHex(ksnSeedShare.share),
           },
         },

@@ -22,9 +22,28 @@ export function useEmailCallback(): { error: string | null } {
   useEffect(() => {
     async function fn() {
       try {
+        // Read state before handleEmailCallback clears the hash via replaceState
+        let isReauth = false;
+        const hash = window.location.hash;
+        if (hash) {
+          try {
+            const params = new URLSearchParams(hash.substring(1));
+            const stateStr = params.get("state");
+            if (stateStr) {
+              const oauthState = JSON.parse(stateStr);
+              if (oauthState.apiKey === "export_key_reauth") {
+                isReauth = true;
+              }
+            }
+          } catch { /* ignore parse errors */ }
+        }
+
         const cbRes = await handleEmailCallback();
 
         if (cbRes.success) {
+          if (isReauth) {
+            return; // Parent will close popup when iframes are ready
+          }
           window.close();
         } else {
           throw new Error(cbRes.err.type);

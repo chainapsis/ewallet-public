@@ -14,7 +14,7 @@ import type {
 } from "@oko-wallet-sdk-core/types/oauth";
 import type { OAuthSignInError } from "@oko-wallet-sdk-core/types/sign_in";
 
-export * from "./export_priv_key";
+export * from "../protected/export_priv_key";
 export * from "./get_conn_apps";
 
 export type OkoWalletMsgGetPublicKey = {

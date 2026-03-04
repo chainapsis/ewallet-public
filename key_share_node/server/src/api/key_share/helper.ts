@@ -1,5 +1,14 @@
-import { timingSafeEqual } from "crypto";
-import type { Pool, PoolClient } from "pg";
+import type {
+  CheckWalletResult,
+  Ed25519KeyShareV2Response,
+  Ed25519WalletRegisterInfo,
+  Ed25519WalletReshareInfo,
+  PublicKeyBytes,
+  Secp256k1KeyShareV2Response,
+  Secp256k1WalletRegisterInfo,
+  Secp256k1WalletReshareInfo,
+} from "@oko-wallet/ksn-interface/key_share";
+import type { KSNodeApiResponse } from "@oko-wallet/ksn-interface/response";
 import {
   createKeyShare,
   createWallet,
@@ -7,18 +16,9 @@ import {
   getWalletByPublicKey,
   updateReshare,
 } from "@oko-wallet/ksn-pg-interface";
-import type {
-  CheckWalletResult,
-  Secp256k1KeyShareV2Response,
-  Ed25519KeyShareV2Response,
-  PublicKeyBytes,
-  Secp256k1WalletRegisterInfo,
-  Ed25519WalletRegisterInfo,
-  Secp256k1WalletReshareInfo,
-  Ed25519WalletReshareInfo,
-} from "@oko-wallet/ksn-interface/key_share";
-import type { CurveType } from "@oko-wallet/ksn-interface/curve_type";
-import type { KSNodeApiResponse } from "@oko-wallet/ksn-interface/response";
+import type { CurveType } from "@oko-wallet/oko-types/crypto";
+import { timingSafeEqual } from "crypto";
+import type { Pool, PoolClient } from "pg";
 
 import {
   decryptDataAsync,
@@ -343,6 +343,7 @@ export async function upsertEd25519WalletKeyShare(
     userId,
     "ed25519",
     encryptionSecret,
+    walletInfo.seed_share,
   );
 }
 
@@ -359,6 +360,7 @@ async function upsertWalletKeyShareInternal(
   userId: string,
   curveType: CurveType,
   encryptionSecret: string,
+  seedShareHex?: string,
 ): Promise<KSNodeApiResponse<void>> {
   const getWalletRes = await getWalletByPublicKey(db, publicKey);
   if (getWalletRes.success === false) {
@@ -421,14 +423,14 @@ async function upsertWalletKeyShareInternal(
       encryptionSecret,
     );
 
-    // Extract share hex from stored data
+    // Extract share hex (and seed_share if ed25519) from stored data
+    // secp256k1: plain hex string, ed25519: JSON { share, seed_share }
     let existingShareHex: string;
+    let existingSeedShareHex: string | undefined;
     try {
       const parsed = JSON.parse(existingDecryptedShare);
-      existingShareHex =
-        typeof parsed.share === "string"
-          ? parsed.share
-          : existingDecryptedShare;
+      existingShareHex = parsed.share;
+      existingSeedShareHex = parsed.seed_share;
     } catch {
       existingShareHex = existingDecryptedShare;
     }
@@ -438,10 +440,7 @@ async function upsertWalletKeyShareInternal(
       existingShareHex.toLowerCase(),
       "utf-8",
     );
-    const providedShareBuffer = Buffer.from(
-      shareHex.toLowerCase(),
-      "utf-8",
-    );
+    const providedShareBuffer = Buffer.from(shareHex.toLowerCase(), "utf-8");
 
     if (
       existingShareBuffer.length !== providedShareBuffer.length ||
@@ -452,6 +451,30 @@ async function upsertWalletKeyShareInternal(
         code: "RESHARE_FAILED",
         msg: "Share mismatch",
       };
+    }
+
+    // Validate seed_share if provided (ed25519)
+    // When seedShareHex is set, stored data is always ed25519 JSON with seed_share
+    if (seedShareHex !== undefined && existingSeedShareHex !== undefined) {
+      const existingSeedBuffer = Buffer.from(
+        existingSeedShareHex.toLowerCase(),
+        "utf-8",
+      );
+      const providedSeedBuffer = Buffer.from(
+        seedShareHex.toLowerCase(),
+        "utf-8",
+      );
+
+      if (
+        existingSeedBuffer.length !== providedSeedBuffer.length ||
+        !timingSafeEqual(existingSeedBuffer, providedSeedBuffer)
+      ) {
+        return {
+          success: false,
+          code: "RESHARE_FAILED",
+          msg: "Seed share mismatch",
+        };
+      }
     }
 
     const updateRes = await updateReshare(db, walletId);
@@ -482,10 +505,7 @@ async function upsertWalletKeyShareInternal(
     };
   }
 
-  const encryptedShare = await encryptDataAsync(
-    shareData,
-    encryptionSecret,
-  );
+  const encryptedShare = await encryptDataAsync(shareData, encryptionSecret);
   const encryptedShareBuffer = Buffer.from(encryptedShare, "utf-8");
 
   const createKeyShareRes = await createKeyShare(db, {
