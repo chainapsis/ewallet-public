@@ -1,4 +1,4 @@
-import { type FC, type PropsWithChildren, useRef, useCallback } from "react";
+import { type FC, type PropsWithChildren, useRef, useEffect } from "react";
 import cn from "classnames";
 
 import styles from "./common_modal.module.scss";
@@ -15,18 +15,24 @@ export const CommonModal: FC<PropsWithChildren<CommonModalProps>> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
+  useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    const scrollTarget = container.querySelector<HTMLElement>(
-      "[data-scroll-container]",
-    );
-    if (!scrollTarget) return;
-    if (scrollTarget.contains(e.target as Node)) return;
-    if (scrollTarget.scrollHeight <= scrollTarget.clientHeight) return;
+    const handleWheel = (e: WheelEvent) => {
+      const scrollTarget = container.querySelector<HTMLElement>(
+        "[data-scroll-container]",
+      );
+      if (!scrollTarget) return;
+      if (scrollTarget.contains(e.target as Node)) return;
+      if (scrollTarget.scrollHeight <= scrollTarget.clientHeight) return;
 
-    scrollTarget.scrollTop += e.deltaY;
+      e.preventDefault();
+      scrollTarget.scrollTop += e.deltaY;
+    };
+
+    container.addEventListener("wheel", handleWheel, { passive: false });
+    return () => container.removeEventListener("wheel", handleWheel);
   }, []);
 
   return (
@@ -34,7 +40,6 @@ export const CommonModal: FC<PropsWithChildren<CommonModalProps>> = ({
       ref={containerRef}
       className={cn(styles.modalContainer, className)}
       style={{ padding }}
-      onWheel={handleWheel}
     >
       {children}
     </div>
