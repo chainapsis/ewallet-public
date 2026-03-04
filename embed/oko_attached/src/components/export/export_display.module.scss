@@ -91,36 +91,14 @@ body {
   color: var(--text-primary);
 }
 
-.copyButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: 100%;
-  padding: 10px 16px;
-  border: 2px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  background-color: #181d27;
-  color: white;
-  cursor: pointer;
-  font-family: var(--font-family-body, Inter, sans-serif);
-  font-weight: 600;
-  font-size: var(--font-size-text-md, 15px);
-  line-height: var(--line-height-text-md, 22px);
-  box-shadow: 0 1px 2px 0 rgba(10, 13, 18, 0.05);
-}
-
-.copyButton:hover {
-  opacity: 0.9;
-}
-
 .copyButtonIcon {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
+  color: var(--brand-300, #a4a7ae);
+}
+
+.copyButton:hover .copyButtonIcon {
+  color: #d5d7da;
 }
 
 .spacer16 {

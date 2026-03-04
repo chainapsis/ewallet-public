@@ -97,7 +97,7 @@
   padding: 6px;
   background-color: var(--bg-warning-secondary);
   border-radius: 8px;
-  color: var(--text-warning-primary);
+  color: var(--fg-warning-secondary);
 }
 
 .warningText {
@@ -195,8 +195,8 @@
 }
 
 .infoBoxIcon {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   flex-shrink: 0;
 }
 

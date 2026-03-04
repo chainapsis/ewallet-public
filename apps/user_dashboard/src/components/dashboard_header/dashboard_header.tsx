@@ -1,17 +1,18 @@
 "use client";
 
-import type { AuthType } from "@oko-wallet/oko-types/auth";
 import { AnchoredMenu } from "@oko-wallet/oko-common-ui/anchored_menu";
+import { IconButton } from "@oko-wallet/oko-common-ui/icon_button";
 import { DiscordIcon } from "@oko-wallet/oko-common-ui/icons/discord_icon";
+import { DotsHorizontalIcon } from "@oko-wallet/oko-common-ui/icons/dots_horizontal";
 import { ExternalLinkOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/external_link_outlined";
 import { GoogleIcon } from "@oko-wallet/oko-common-ui/icons/google_icon";
 import { LogoutIcon } from "@oko-wallet/oko-common-ui/icons/logout";
 import { MenuIcon } from "@oko-wallet/oko-common-ui/icons/menu";
 import { TelegramIcon } from "@oko-wallet/oko-common-ui/icons/telegram_icon";
-import { ThreeDotsVerticalIcon } from "@oko-wallet/oko-common-ui/icons/three_dots_vertical";
 import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
 import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { Property } from "csstype";
 import { useRouter } from "next/navigation";
 import type { FC, ReactNode } from "react";
@@ -97,10 +98,13 @@ function MenuChatIcon() {
 
 const OKO_LOGO_URL =
   "https://oko-wallet.s3.ap-northeast-2.amazonaws.com/icons/oko_logo.png";
+const OKO_LOGO_WHITE_URL =
+  "https://oko-wallet.s3.ap-northeast-2.amazonaws.com/icons/oko_logo_white.png";
 
 export const DashboardHeader: FC<{
   position?: Property.Position;
-}> = ({ position = "static" }) => {
+  logoVariant?: "default" | "white";
+}> = ({ position = "static", logoVariant = "default" }) => {
   const isLeftBarOpen = useViewState((state) => state.isLeftBarOpen);
   const toggleLeftBarOpen = useViewState((state) => state.toggleLeftBarOpen);
 
@@ -118,37 +122,40 @@ export const DashboardHeader: FC<{
   return (
     <div className={styles.wrapper} style={{ position }}>
       <img
-        src={OKO_LOGO_URL}
+        src={logoVariant === "white" ? OKO_LOGO_WHITE_URL : OKO_LOGO_URL}
         alt="Oko"
         width={72}
         height={28}
         className={styles.logo}
+        onClick={() => router.push(paths.home)}
       />
 
       <div className={styles.rightSection}>
         {isSignedIn && (
-          <AnchoredMenu
-            placement="bottom-end"
-            TriggerComponent={
-              <div className={styles.accountTrigger}>
-                {authType !== "auth0" && (
-                  <span className={styles.authProviderIcon}>
-                    {getAuthProviderIcon(authType, 24)}
-                  </span>
-                )}
-                <Typography
+          <div className={styles.accountArea}>
+            {authType !== "auth0" && (
+              <span className={styles.authProviderIcon}>
+                {getAuthProviderIcon(authType, 24)}
+              </span>
+            )}
+            <Typography
+              size="md"
+              weight="medium"
+              color="secondary"
+              className={styles.accountEmail}
+            >
+              {displayIdentifier}
+            </Typography>
+            <AnchoredMenu
+              placement="bottom-end"
+              TriggerComponent={
+                <IconButton
+                  hierarchy="tertiary"
                   size="sm"
-                  color="secondary"
-                  className={styles.accountEmail}
-                >
-                  {displayIdentifier}
-                </Typography>
-                <span className={styles.dotsButton}>
-                  <ThreeDotsVerticalIcon color="var(--fg-quaternary)" />
-                </span>
-              </div>
-            }
-            HeaderComponent={
+                  icon={<DotsHorizontalIcon size={20} />}
+                />
+              }
+              HeaderComponent={
               <div className={styles.menuHeader}>
                 <div className={styles.menuUserInfo}>
                   {authType !== "auth0" && (
@@ -226,7 +233,8 @@ export const DashboardHeader: FC<{
               ],
             }}
             className={styles.accountMenu}
-          />
+            />
+          </div>
         )}
 
         <span className={styles.menuIconWrapper} onClick={toggleLeftBarOpen}>

@@ -75,9 +75,21 @@
   overflow: clip;
 }
 
-/* Figma hover: Menu items wrapper bg changes from bg-primary to bg-primary_hover */
-.menuList:has(.menuItem:hover) {
-  background: var(--bg-primary_hover, #fafafa);
+/* Figma hover state (1119:13932) */
+.menuItem:hover .menuItemContent {
+  background-color: var(--bg-primary-hover);
+}
+
+.menuItem:hover .menuItemIcon {
+  color: var(--fg-quaternary-hover);
+}
+
+.menuItem:hover .menuItemLabel {
+  color: var(--text-secondary-hover);
+}
+
+.menuItem:hover .menuItemTrailingIcon {
+  color: var(--fg-quaternary-hover);
 }
 
 .menuItemIcon {

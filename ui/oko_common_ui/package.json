@@ -6,6 +6,7 @@
     "./anchored_menu": "./src/anchored_menu/anchored_menu.tsx",
     "./badge": "./src/badge/badge.tsx",
     "./button": "./src/button/button.tsx",
+    "./icon_button": "./src/icon_button/icon_button.tsx",
     "./card": "./src/card/card.tsx",
     "./checkbox": "./src/checkbox/checkbox.tsx",
     "./command_block": "./src/command_block/command_block.tsx",
