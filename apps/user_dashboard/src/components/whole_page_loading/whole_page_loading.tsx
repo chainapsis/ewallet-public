@@ -15,7 +15,7 @@ export const WholePageLoading: FC = () => {
   return (
     <>
       <div className={cn(styles.wrapper, styles.desktop)}>
-        <DashboardHeader position="absolute" />
+        <DashboardHeader position="absolute" logoVariant="white" />
         <div className={styles.body}>
           <SignInImage>
             <div className={styles.inner}>

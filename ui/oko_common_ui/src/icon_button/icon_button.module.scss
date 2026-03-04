@@ -1,0 +1,80 @@
+/* Figma: Buttons/Button utility (8003:526508) */
+.iconButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  outline: none;
+  color: var(--fg-quaternary);
+
+  &.sm {
+    padding: 6px;
+    border-radius: 6px;
+
+    .icon {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  &.xs {
+    padding: 6px;
+    border-radius: 6px;
+
+    .icon {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  // — Tertiary —
+  &.tertiary {
+    background: transparent;
+
+    &:hover:not(.disabled) {
+      background-color: var(--bg-primary-hover);
+    }
+
+    &:focus:not(.disabled) {
+      background-color: var(--bg-primary);
+      box-shadow:
+        0 0 0 2px var(--bg-primary, white),
+        0 0 0 4px var(--gray-400, #a4a7ae);
+    }
+
+    &.disabled {
+      color: var(--fg-disabled);
+      cursor: not-allowed;
+    }
+  }
+
+  // — Secondary —
+  &.secondary {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-primary);
+    box-shadow: var(--shadow-xs);
+
+    &:hover:not(.disabled) {
+      background-color: var(--bg-primary-hover);
+    }
+
+    &:focus-visible:not(.disabled) {
+      box-shadow: var(--shadow-focus-ring-xs-skeuomorphic);
+    }
+
+    &.disabled {
+      color: var(--fg-disabled);
+      border-color: var(--border-disabled_subtle);
+      cursor: not-allowed;
+    }
+  }
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}

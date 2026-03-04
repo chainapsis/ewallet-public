@@ -1,3 +1,4 @@
+import { Button } from "@oko-wallet/oko-common-ui/button";
 import type { OkoWalletProtectedMsgs } from "@oko-wallet/oko-sdk-core";
 import type { CurveType } from "@oko-wallet/oko-types/crypto";
 import { type FC, useCallback, useEffect, useMemo, useState } from "react";
@@ -52,8 +53,8 @@ const EyeOffIcon: FC = () => {
 const CopyIcon = () => {
   return (
     <svg
-      width={24}
-      height={24}
+      width={20}
+      height={20}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -169,7 +170,7 @@ export const ExportDisplay: FC = () => {
     }
 
     const report = () => {
-      const h = document.documentElement.scrollHeight;
+      const h = containerEl.offsetHeight;
 
       postToParent({
         target: "oko_user_dashboard",
@@ -268,12 +269,17 @@ export const ExportDisplay: FC = () => {
 
       <div className={styles.spacer16} />
 
-      <button type="button" className={styles.copyButton} onClick={handleCopy}>
+      <Button
+        size="lg"
+        fullWidth
+        onClick={handleCopy}
+        className={styles.copyButton}
+      >
         <span className={styles.copyButtonIcon}>
           <CopyIcon />
         </span>
         Copy to Clipboard
-      </button>
+      </Button>
     </div>
   );
 };
