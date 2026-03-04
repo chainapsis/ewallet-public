@@ -24,6 +24,16 @@ a {
 }
 
 .common-list-scroll {
+  // Firefox
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-quaternary) transparent;
+
+  // Chromium/Safari: disable standard properties so ::-webkit-scrollbar takes effect
+  @supports selector(::-webkit-scrollbar) {
+    scrollbar-width: unset;
+    scrollbar-color: unset;
+  }
+
   &::-webkit-scrollbar {
     width: 4px;
     height: 4px;
@@ -31,12 +41,11 @@ a {
 
   &::-webkit-scrollbar-track {
     background: transparent;
-    margin: 12px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 4px;
+    border-radius: 9999px;
+    background: var(--bg-quaternary);
   }
 }
 
