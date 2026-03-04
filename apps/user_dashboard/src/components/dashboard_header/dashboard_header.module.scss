@@ -35,18 +35,11 @@
   }
 }
 
-// Account menu trigger
-.accountTrigger {
+// Account area (non-clickable wrapper; only the IconButton inside is clickable)
+.accountArea {
   display: flex;
   align-items: center;
   gap: 8px;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 8px;
-
-  &:hover {
-    background-color: var(--bg-primary-hover);
-  }
 }
 
 .authProviderIcon {
@@ -57,24 +50,11 @@
 
 .accountEmail {
   display: none;
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 200px;
 
   @media (min-width: $desktop_min_width) {
     display: block;
   }
-}
-
-.dotsButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
 }
 
 // Dropdown menu
