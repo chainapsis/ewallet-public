@@ -394,7 +394,7 @@ const Step2Content = ({
       {/* Info Box */}
       <div className={styles.infoBox}>
         <div className={styles.infoBoxTitle}>
-          <InfoCircleIcon className={styles.infoBoxIcon} />
+          <InfoCircleIcon className={styles.infoBoxIcon} color="#414651" />
           <Typography size="sm" weight="semibold" color="tertiary">
             Why are there two keys?
           </Typography>
