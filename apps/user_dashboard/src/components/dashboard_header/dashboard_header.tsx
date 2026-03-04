@@ -127,6 +127,7 @@ export const DashboardHeader: FC<{
         width={72}
         height={28}
         className={styles.logo}
+        onClick={() => router.push(paths.home)}
       />
 
       <div className={styles.rightSection}>
