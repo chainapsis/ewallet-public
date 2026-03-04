@@ -3,6 +3,7 @@ import type { MakeTxSignSigData } from "@oko-wallet/oko-sdk-core";
 import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import { Button } from "@oko-wallet/oko-common-ui/button";
+import cn from "classnames";
 
 import styles from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_signature_modal.module.scss";
 import { CommonModal } from "@oko-wallet-attached/components/modal_variants/common/common_modal";
@@ -88,7 +89,7 @@ export const MakeTxSigModal: FC<MakeTxSigModalProps> = ({
           <BaseSponsorshipBackground isError={isError} theme={theme} />
         )}
 
-        <div className={sponsoredStyles.content}>
+        <div className={cn(styles.modalContent, showSponsorship && sponsoredStyles.content)}>
           <div className={styles.closeButton} onClick={handleRejectClick}>
             <XCloseIcon size={20} color="var(--fg-quaternary)" />
           </div>

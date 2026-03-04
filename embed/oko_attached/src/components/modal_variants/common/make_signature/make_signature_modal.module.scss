@@ -19,6 +19,13 @@
   max-height: $make-signature-modal-max-height;
 }
 
+.modalContent {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
 .modalInnerContentContainer {
   flex: 1;
   min-height: 0;
