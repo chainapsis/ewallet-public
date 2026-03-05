@@ -9,6 +9,10 @@ import {
   OkoEthWallet,
   type OkoEthWalletInterface,
 } from "@oko-wallet/oko-sdk-eth";
+import {
+  OkoSvmWallet,
+  type OkoSvmWalletInterface,
+} from "@oko-wallet/oko-sdk-svm";
 import type { ChainInfo } from "@keplr-wallet/types";
 import type { OfflineDirectSigner } from "@cosmjs/proto-signing";
 import type { Address } from "viem";
@@ -25,6 +29,9 @@ interface OkoProviderValues {
   // evm
   address: Address | null;
   okoEth: OkoEthWalletInterface | null;
+  // svm
+  okoSvm: OkoSvmWalletInterface | null;
+  svmAddress: string | null;
   // auth
   signIn: () => Promise<void>;
   signOut: () => Promise<void>;
@@ -93,6 +100,8 @@ const OkoContext = createContext<OkoProviderValues>({
   chainInfo,
   address: null,
   okoEth: null,
+  okoSvm: null,
+  svmAddress: null,
   signIn: async () => {},
   signOut: async () => {},
 });
@@ -102,6 +111,7 @@ function OkoProvider({ children }: { children: React.ReactNode }) {
     null,
   );
   const [okoEth, setOkoEth] = useState<OkoEthWalletInterface | null>(null);
+  const [okoSvm, setOkoSvm] = useState<OkoSvmWalletInterface | null>(null);
 
   const [offlineSigner, setOfflineSigner] =
     useState<OfflineDirectSigner | null>(null);
@@ -111,6 +121,7 @@ function OkoProvider({ children }: { children: React.ReactNode }) {
 
   const [publicKey, setPublicKey] = useState<Uint8Array | null>(null);
   const [address, setAddress] = useState<Address | null>(null);
+  const [svmAddress, setSvmAddress] = useState<string | null>(null);
 
   const bech32Address = publicKey
     ? getBech32Address(
@@ -131,6 +142,11 @@ function OkoProvider({ children }: { children: React.ReactNode }) {
       api_key: apiKey,
       sdk_endpoint: sdkEndpoint,
     });
+    const svmInit = OkoSvmWallet.init({
+      api_key: apiKey,
+      sdk_endpoint: sdkEndpoint,
+      chain_id: "solana:devnet",
+    });
 
     if (!cosmosInit.success) {
       console.error(cosmosInit.err);
@@ -140,9 +156,14 @@ function OkoProvider({ children }: { children: React.ReactNode }) {
       console.error(ethInit.err);
       return;
     }
+    if (!svmInit.success) {
+      console.error(svmInit.err);
+      return;
+    }
 
     const c = cosmosInit.data;
     const e = ethInit.data;
+    const s = svmInit.data;
     const signer = c.getOfflineSigner("osmo-test-5");
 
     try {
@@ -151,21 +172,34 @@ function OkoProvider({ children }: { children: React.ReactNode }) {
         e.getAddress().catch(() => null),
       ]);
 
+      let solAddr: string | null = null;
+      try {
+        await s.connect();
+        solAddr = s.publicKey?.toBase58() ?? null;
+      } catch {
+        // not signed in yet
+      }
+
       if (pk) {
         setPublicKey(pk);
       }
       if (addr) {
         setAddress(addr);
       }
-      setIsSignedIn(!!pk || !!addr);
+      if (solAddr) {
+        setSvmAddress(solAddr);
+      }
+      setIsSignedIn(!!pk || !!addr || !!solAddr);
     } catch (err) {
       console.error(err);
       setIsSignedIn(false);
       setPublicKey(null);
       setAddress(null);
+      setSvmAddress(null);
     } finally {
       setOkoCosmos(c);
       setOkoEth(e);
+      setOkoSvm(s);
       setOfflineSigner(signer);
     }
   }
@@ -191,11 +225,22 @@ function OkoProvider({ children }: { children: React.ReactNode }) {
         okoEth?.getAddress().catch(() => null),
       ]);
 
+      let solAddr: string | null = null;
+      try {
+        await okoSvm?.connect();
+        solAddr = okoSvm?.publicKey?.toBase58() ?? null;
+      } catch {
+        // ignore
+      }
+
       if (pk) {
         setPublicKey(pk);
       }
       if (addr) {
         setAddress(addr);
+      }
+      if (solAddr) {
+        setSvmAddress(solAddr);
       }
       setIsSignedIn(true);
     } catch (error) {
@@ -212,6 +257,7 @@ function OkoProvider({ children }: { children: React.ReactNode }) {
       setIsSignedIn(false);
       setPublicKey(null);
       setAddress(null);
+      setSvmAddress(null);
     }
   }
 
@@ -222,7 +268,7 @@ function OkoProvider({ children }: { children: React.ReactNode }) {
   return (
     <OkoContext.Provider
       value={{
-        isReady: !!okoCosmos && !!okoEth,
+        isReady: !!okoCosmos && !!okoEth && !!okoSvm,
         isSignedIn,
         isSigningIn,
         publicKey,
@@ -231,6 +277,8 @@ function OkoProvider({ children }: { children: React.ReactNode }) {
         chainInfo,
         address,
         okoEth,
+        okoSvm,
+        svmAddress,
         signIn,
         signOut,
       }}
