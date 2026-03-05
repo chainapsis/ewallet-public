@@ -358,18 +358,18 @@ const Step2Content = ({
     const timer = setTimeout(() => {
       if (!onReadyFired.current) {
         console.warn(
-          `${LOG} 10s timeout — forcing ready. secp=${secpRef.current}, ed=${edRef.current}`,
+          `${LOG} 15s timeout — forcing ready. secp=${secpRef.current}, ed=${edRef.current}`,
         );
         postLog({
           level: "error",
-          message: `${LOG} 10s timeout — forcing ready`,
-          error: { name: "ExportIframeTimeout", message: "iframes not ready within 10s" },
+          message: `${LOG} 15s timeout — forcing ready`,
+          error: { name: "ExportIframeTimeout", message: "iframes not ready within 15s" },
           meta: { secp: secpRef.current, ed: edRef.current, attachedOrigin: originRef.current },
         });
         onReadyFired.current = true;
         onReady();
       }
-    }, 10000);
+    }, 15000);
     return () => clearTimeout(timer);
   }, [iframesReady, onReady]);
 
