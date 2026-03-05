@@ -101,7 +101,7 @@ export const SvmTxSummary: FC<SvmTxSummaryProps> = ({
           <Typography color="tertiary" size="xs" weight="medium">
             {isRawView ? "Smart View" : "Raw View"}
           </Typography>
-          <ChevronRightIcon className={styles.summaryHeaderRightIcon} />
+          <ChevronRightIcon className={styles.summaryHeaderRightIcon} color="var(--fg-tertiary)" />
         </div>
       </div>
       {content}

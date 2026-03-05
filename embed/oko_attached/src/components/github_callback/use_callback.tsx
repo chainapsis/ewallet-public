@@ -1,14 +1,14 @@
-import { useEffect, useState } from "react";
-import type { Result } from "@oko-wallet/stdlib-js";
 import {
-  RedirectUriSearchParamsKey,
   type OAuthTokenRequestPayload,
+  RedirectUriSearchParamsKey,
 } from "@oko-wallet/oko-sdk-core";
+import type { Result } from "@oko-wallet/stdlib-js";
+import { useEffect, useState } from "react";
 
 import type { HandleGithubCallbackError } from "./types";
-import { postLog } from "@oko-wallet-attached/requests/logging";
-import { errorToLog } from "@oko-wallet-attached/logging/error";
 import { sendOAuthPayloadToEmbeddedWindow } from "@oko-wallet-attached/components/oauth_callback/send_oauth_payload";
+import { errorToLog } from "@oko-wallet-attached/logging/error";
+import { postLog } from "@oko-wallet-attached/requests/logging";
 
 export function useGithubCallback() {
   const [error, setError] = useState<string | null>(null);
@@ -19,14 +19,18 @@ export function useGithubCallback() {
         const cbRes = await handleGithubCallback();
 
         if (cbRes.success) {
-          const stateParam = new URLSearchParams(window.location.search).get("state");
+          const stateParam = new URLSearchParams(window.location.search).get(
+            "state",
+          );
           if (stateParam) {
             try {
               const oauthState = JSON.parse(atob(stateParam));
               if (oauthState.apiKey === "export_key_reauth") {
                 return; // Parent will close popup when iframes are ready
               }
-            } catch { /* ignore parse errors */ }
+            } catch {
+              /* ignore parse errors */
+            }
           }
           window.close();
         } else {

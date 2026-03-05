@@ -14,6 +14,7 @@
 
   pre {
     align-self: stretch;
+    font-family: var(--font-family-body, Inter, sans-serif);
     color: var(--text-tertiary);
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-regular);

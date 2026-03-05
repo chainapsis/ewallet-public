@@ -31,7 +31,7 @@ export const MakeEIP712SigModal: FC<MakeEIP712SigModalProps> = ({
           <XCloseIcon size={20} color="var(--fg-quaternary)" />
         </div>
 
-        <div className={styles.modalInnerContentContainer}>
+        <div data-scroll-container className={styles.modalInnerContentContainer}>
           <EthereumEip712SignatureContent payload={data.payload} />
         </div>
 
