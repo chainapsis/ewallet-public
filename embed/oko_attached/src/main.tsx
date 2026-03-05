@@ -11,6 +11,8 @@ import "@oko-wallet-attached/styles/global.scss";
 import { routeTree } from "./routeTree.gen";
 import { initAmplitude } from "@oko-wallet-attached/analytics/amplitude";
 
+console.log(`[attached][main] bootstrap, path=${window.location.pathname}, href=${window.location.href}`);
+
 // Initialize Amplitude
 initAmplitude();
 

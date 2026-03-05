@@ -11,19 +11,32 @@ import {
   requestExportedKeys,
 } from "@oko-wallet-attached/window_msgs/export_key_store";
 
+const LOG = "[attached][export_display]";
+
+// Module-level: fires as soon as the route chunk is evaluated
+console.log(`${LOG} module loaded, url=${window.location.href}`);
+postLog({
+  level: "info",
+  message: `${LOG} module loaded`,
+  meta: { url: window.location.href },
+});
+
 function getParentOrigin(): string {
   const raw = new URLSearchParams(window.location.search).get("parent_origin");
   if (!raw) {
+    console.warn(`${LOG} parent_origin param missing, defaulting to *`);
     return "*";
   }
   try {
     return new URL(raw).origin;
   } catch {
+    console.warn(`${LOG} parent_origin parse failed: ${raw}`);
     return "*";
   }
 }
 
 const parentOrigin = getParentOrigin();
+console.log(`${LOG} parentOrigin=${parentOrigin}`);
 
 function postToParent(msg: OkoWalletProtectedMsgs) {
   window.parent.postMessage(
@@ -72,9 +85,13 @@ const VALID_KEY_TYPES: ReadonlySet<string> = new Set(["secp256k1", "ed25519"]);
 const MAX_KEY_REQUEST_ATTEMPTS = 3;
 
 export const ExportDisplay: FC = () => {
+  console.log(`${LOG} component render`);
+
   const keyType = useMemo(() => {
     const raw = new URLSearchParams(window.location.search).get("key_type");
-    return raw && VALID_KEY_TYPES.has(raw) ? (raw as CurveType) : null;
+    const parsed = raw && VALID_KEY_TYPES.has(raw) ? (raw as CurveType) : null;
+    console.log(`${LOG} keyType parsed: raw=${raw}, result=${parsed}`);
+    return parsed;
   }, []);
 
   const [revealed, setRevealed] = useState(false);
@@ -87,7 +104,16 @@ export const ExportDisplay: FC = () => {
     let cancelled = false;
 
     const loadKeys = async () => {
+      console.log(`${LOG} loadKeys() start`);
+      postLog({
+        level: "info",
+        message: `${LOG} loadKeys() start`,
+        meta: { keyType },
+      });
+
       let stored = getExportedKeys();
+      console.log(`${LOG} getExportedKeys() local: ${stored ? "found" : "null"}`);
+
       if (!stored) {
         // Retry up to 3 times (2s each) to handle timing variance across devices
         for (
@@ -95,10 +121,13 @@ export const ExportDisplay: FC = () => {
           attempt < MAX_KEY_REQUEST_ATTEMPTS && !stored && !cancelled;
           attempt += 1
         ) {
+          console.log(`${LOG} requestExportedKeys() attempt ${attempt + 1}/${MAX_KEY_REQUEST_ATTEMPTS}`);
           stored = await requestExportedKeys();
+          console.log(`${LOG} requestExportedKeys() attempt ${attempt + 1} result: ${stored ? "found" : "null"}`);
         }
       }
       if (cancelled) {
+        console.log(`${LOG} loadKeys() cancelled`);
         return;
       }
 
@@ -133,6 +162,13 @@ export const ExportDisplay: FC = () => {
         setError("No exported keys found.");
         return;
       }
+      console.log(`${LOG} keys loaded successfully, available keys: ${Object.keys(stored).join(", ")}`);
+      postLog({
+        level: "info",
+        message: `${LOG} keys loaded`,
+        meta: { keyType, availableKeys: Object.keys(stored), framesCount },
+      });
+
       if (!keyType || !(keyType in stored)) {
         postLog({
           level: "error",
@@ -166,11 +202,15 @@ export const ExportDisplay: FC = () => {
   // ResizeObserver → notify parent of height changes
   useEffect(() => {
     if (!containerEl) {
+      console.log(`${LOG} ResizeObserver skipped — containerEl is null`);
       return;
     }
 
+    console.log(`${LOG} ResizeObserver setup for keyType=${keyType}`);
+
     const report = () => {
       const h = containerEl.offsetHeight;
+      console.log(`${LOG} reporting height: keyType=${keyType}, height=${h}`);
 
       postToParent({
         target: "oko_user_dashboard",
@@ -188,6 +228,11 @@ export const ExportDisplay: FC = () => {
     // Send initial height immediately — ResizeObserver initial callback
     // may not fire reliably in cross-origin iframes in some environments
     report();
+    postLog({
+      level: "info",
+      message: `${LOG} ResizeObserver started`,
+      meta: { keyType, initialHeight: containerEl.offsetHeight, parentOrigin },
+    });
 
     return () => {
       observer.disconnect();
@@ -222,12 +267,16 @@ export const ExportDisplay: FC = () => {
   }, [keys, keyType]);
 
   if (error) {
+    console.warn(`${LOG} rendering error state: ${error}`);
     return <div className={styles.error}>{error}</div>;
   }
 
   if (!keys || !keyType) {
+    console.log(`${LOG} rendering null — keys=${!!keys}, keyType=${keyType}`);
     return null;
   }
+
+  console.log(`${LOG} rendering key display for keyType=${keyType}`);
 
   const keyValue = keys[keyType];
 
