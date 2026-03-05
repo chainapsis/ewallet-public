@@ -44,7 +44,7 @@ export const SvmMessageSummary: FC<SvmMessageSummaryProps> = ({
           weight="medium"
           style={{
             paddingRight: "8px",
-            wordBreak: "break-word",
+            overflowWrap: "break-word",
             whiteSpace: "pre-wrap",
           }}
         >
