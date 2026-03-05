@@ -47,7 +47,6 @@ import {
   RIALO_CHAINS,
   RIALO_DEVNET_CHAIN,
   RIALO_TESTNET_CHAIN,
-  RIALO_LOCALNET_CHAIN,
   RialoSignMessage,
   RialoSignTransaction,
   RialoSignAndSendTransaction,
@@ -65,7 +64,6 @@ const RIALO_CONFIG: WalletStandardConfig = {
   rpcEndpoints: {
     [RIALO_DEVNET_CHAIN]: "https://api.devnet.rialo.io",
     [RIALO_TESTNET_CHAIN]: "https://api.testnet.rialo.io",
-    [RIALO_LOCALNET_CHAIN]: "http://localhost:8899",
   },
 };
 
@@ -114,7 +112,6 @@ import {
   RIALO_CHAINS,
   RIALO_DEVNET_CHAIN,
   RIALO_TESTNET_CHAIN,
-  RIALO_LOCALNET_CHAIN,
   RialoSignAndSendTransaction,
   RialoSignMessage,
   RialoSignTransaction,
