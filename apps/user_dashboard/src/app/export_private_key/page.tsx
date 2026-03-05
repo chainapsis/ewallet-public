@@ -446,6 +446,15 @@ const Page = () => {
   const [isLoading, setIsLoading] = useState(false);
   const popupRef = useRef<Window | null>(null);
 
+  useEffect(() => {
+    const handler = () => {
+      setStep(1);
+      setIsLoading(false);
+    };
+    window.addEventListener("oko:reset-export-step", handler);
+    return () => window.removeEventListener("oko:reset-export-step", handler);
+  }, []);
+
   const handlePopupClose = useCallback(() => {
     popupRef.current?.close();
     popupRef.current = null;
