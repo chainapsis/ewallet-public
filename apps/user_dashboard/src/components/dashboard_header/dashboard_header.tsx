@@ -14,6 +14,7 @@ import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
 import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
+import { useQueryClient } from "@tanstack/react-query";
 import type { Property } from "csstype";
 import { useRouter } from "next/navigation";
 import type { FC, ReactNode } from "react";
@@ -120,6 +121,7 @@ export const DashboardHeader: FC<{
     authType === "discord" || authType === "telegram" || authType === "x" || authType === "github";
   const displayIdentifier = usesName ? name : email;
   const okoWallet = useSDKState(selectCosmosSDK)?.okoWallet;
+  const queryClient = useQueryClient();
   const router = useRouter();
 
   return (
@@ -230,6 +232,7 @@ export const DashboardHeader: FC<{
                     }
 
                     await okoWallet.signOut();
+                    queryClient.clear();
                     clearUserInfo();
                   },
                 },
