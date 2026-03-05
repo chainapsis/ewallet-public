@@ -14,6 +14,7 @@ import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
 import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
+import { useQueryClient } from "@tanstack/react-query";
 import type { Property } from "csstype";
 import { useRouter } from "next/navigation";
 import type { FC, ReactNode } from "react";
@@ -117,9 +118,13 @@ export const DashboardHeader: FC<{
   const authType = useUserInfoState((state) => state.authType);
   const clearUserInfo = useUserInfoState((state) => state.clearUserInfo);
   const usesName =
-    authType === "discord" || authType === "telegram" || authType === "x" || authType === "github";
+    authType === "discord" ||
+    authType === "telegram" ||
+    authType === "x" ||
+    authType === "github";
   const displayIdentifier = usesName ? name : email;
   const okoWallet = useSDKState(selectCosmosSDK)?.okoWallet;
+  const queryClient = useQueryClient();
   const router = useRouter();
 
   return (
@@ -159,83 +164,87 @@ export const DashboardHeader: FC<{
                 />
               }
               HeaderComponent={
-              <div className={styles.menuHeader}>
-                <div className={styles.menuUserInfo}>
-                  {authType !== "auth0" && (
-                    <span className={styles.authProviderIcon}>
-                      {getAuthProviderIcon(authType, 24)}
-                    </span>
-                  )}
-                  <Typography
-                    size="sm"
-                    weight="semibold"
-                    color="primary"
-                    className={styles.menuEmail}
-                  >
-                    {displayIdentifier}
-                  </Typography>
+                <div className={styles.menuHeader}>
+                  <div className={styles.menuUserInfo}>
+                    {authType !== "auth0" && (
+                      <span className={styles.authProviderIcon}>
+                        {getAuthProviderIcon(authType, 24)}
+                      </span>
+                    )}
+                    <Typography
+                      size="sm"
+                      weight="semibold"
+                      color="primary"
+                      className={styles.menuEmail}
+                    >
+                      {displayIdentifier}
+                    </Typography>
+                  </div>
                 </div>
-              </div>
-            }
-            menuSections={[
-              {
-                id: "security",
-                label: "Security",
-                items: [
-                  {
-                    id: "export-private-key",
-                    label: "Export Private Key",
-                    icon: <MenuKeyIcon />,
-                    onClick: () => {
-                      router.push(paths.export_private_key);
-                    },
-                  },
-                ],
-              },
-              {
-                id: "links",
-                items: [
-                  {
-                    id: "feature-request",
-                    label: "Feature Request",
-                    icon: <MenuLightbulbIcon />,
-                    trailingIcon: <ExternalLinkOutlinedIcon />,
-                    onClick: () => {
-                      window.open(OKO_FEATURE_REQUEST_ENDPOINT, "_blank");
-                    },
-                  },
-                  {
-                    id: "get-support",
-                    label: "Get Support",
-                    icon: <MenuChatIcon />,
-                    trailingIcon: <ExternalLinkOutlinedIcon />,
-                    onClick: () => {
-                      window.open(OKO_GET_SUPPORT_ENDPOINT, "_blank");
-                    },
-                  },
-                ],
-              },
-            ]}
-            footerSection={{
-              id: "account",
-              items: [
+              }
+              menuSections={[
                 {
-                  id: "sign-out",
-                  label: "Sign out",
-                  icon: <LogoutIcon size={20} />,
-                  onClick: async () => {
-                    if (!okoWallet) {
-                      console.error("okoWallet is not initialized");
-                      return;
-                    }
-
-                    await okoWallet.signOut();
-                    clearUserInfo();
-                  },
+                  id: "security",
+                  label: "Security",
+                  items: [
+                    {
+                      id: "export-private-key",
+                      label: "Export Private Key",
+                      icon: <MenuKeyIcon />,
+                      onClick: () => {
+                        window.dispatchEvent(
+                          new CustomEvent("oko:reset-export-step"),
+                        );
+                        router.push(paths.export_private_key);
+                      },
+                    },
+                  ],
                 },
-              ],
-            }}
-            className={styles.accountMenu}
+                {
+                  id: "links",
+                  items: [
+                    {
+                      id: "feature-request",
+                      label: "Feature Request",
+                      icon: <MenuLightbulbIcon />,
+                      trailingIcon: <ExternalLinkOutlinedIcon />,
+                      onClick: () => {
+                        window.open(OKO_FEATURE_REQUEST_ENDPOINT, "_blank");
+                      },
+                    },
+                    {
+                      id: "get-support",
+                      label: "Get Support",
+                      icon: <MenuChatIcon />,
+                      trailingIcon: <ExternalLinkOutlinedIcon />,
+                      onClick: () => {
+                        window.open(OKO_GET_SUPPORT_ENDPOINT, "_blank");
+                      },
+                    },
+                  ],
+                },
+              ]}
+              footerSection={{
+                id: "account",
+                items: [
+                  {
+                    id: "sign-out",
+                    label: "Sign out",
+                    icon: <LogoutIcon size={20} />,
+                    onClick: async () => {
+                      if (!okoWallet) {
+                        console.error("okoWallet is not initialized");
+                        return;
+                      }
+
+                      await okoWallet.signOut();
+                      queryClient.clear();
+                      clearUserInfo();
+                    },
+                  },
+                ],
+              }}
+              className={styles.accountMenu}
             />
           </div>
         )}

@@ -1,18 +1,18 @@
-import { useState, type FC } from "react";
 import { CosmosIcon } from "@oko-wallet/oko-common-ui/icons/cosmos_icon";
 import { EthereumBlueIcon } from "@oko-wallet/oko-common-ui/icons/ethereum_blue_icon";
 import { SolanaIcon } from "@oko-wallet/oko-common-ui/icons/solana_icon";
 import { WalletIcon } from "@oko-wallet/oko-common-ui/icons/wallet";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import { type FC, useState } from "react";
 
-import styles from "./address_widget.module.scss";
 import { Widget } from "../widget_components";
 import { AddressRow } from "./address_row";
+import styles from "./address_widget.module.scss";
 import { ViewChainsButton } from "./view_chains_button";
 import { ViewChainsModal } from "./view_chains_modal";
-import { useAddresses } from "@oko-wallet-demo-web/hooks/wallet";
 import { useGetChainInfos } from "@oko-wallet-demo-web/hooks/use_get_chain_infos";
+import { useAddresses } from "@oko-wallet-demo-web/hooks/wallet";
 
 export const AddressWidget: FC<AddressWidgetProps> = ({}) => {
   const [showModal, setShowModal] = useState(false);
@@ -21,7 +21,9 @@ export const AddressWidget: FC<AddressWidgetProps> = ({}) => {
   const { data: chains } = useGetChainInfos();
 
   const formatAddress = (address: string | null) => {
-    if (!address) return undefined;
+    if (!address) {
+      return undefined;
+    }
     return address;
   };
 
@@ -58,12 +60,12 @@ export const AddressWidget: FC<AddressWidgetProps> = ({}) => {
           />
           <Spacing height={12} />
 
-          <AddressRow
+          {/* <AddressRow
             icon={<SolanaIcon />}
             chain="solana"
             address={formatAddress(solanaAddress)}
           />
-          <Spacing height={12} />
+          <Spacing height={12} /> */}
 
           <ViewChainsButton onClick={handleViewChains} />
         </div>

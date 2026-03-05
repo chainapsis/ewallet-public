@@ -60,14 +60,14 @@ export const AccountInfoWidget: FC<AccountInfoWidgetProps> = ({
             color="tertiary"
             className={styles.label}
           >
-            Public Key (EVM & Cosmos)
+            Public Key
           </Typography>
           <Typography size="sm" weight="medium" className={styles.publicKey}>
             {publicKeySecp256k1}
           </Typography>
         </div>
 
-        {publicKeyEd25519 && (
+        {/* {publicKeyEd25519 && (
           <>
             <Spacing height={12} />
             <div className={styles.publicKeyCol}>
@@ -88,7 +88,7 @@ export const AccountInfoWidget: FC<AccountInfoWidgetProps> = ({
               </Typography>
             </div>
           </>
-        )}
+        )} */}
 
         <Spacing height={12} />
 
