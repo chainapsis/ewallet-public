@@ -119,7 +119,7 @@ function buildGithubOAuthUrl(codeChallenge: string): string {
   const redirectUri = `${window.location.origin}/github/callback`;
 
   const oauthState: OAuthState = {
-    apiKey: "reauth",
+    apiKey: "export_key_reauth",
     targetOrigin: window.location.origin,
     provider: "github",
   };
