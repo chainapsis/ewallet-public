@@ -1,15 +1,18 @@
 import useCosmos from "@/oko/useCosmos";
 import useEvm from "@/oko/useEvm";
+import useSvm from "@/oko/useSvm";
 import CopyableAddress from "./CopyableAddress";
 import CosmosBalance from "./CosmosBalance";
 import EvmBalance from "./EvmBalance";
+import SvmBalance from "./SvmBalance";
 
 function StatusBar() {
   const { bech32Address } = useCosmos();
   const { address } = useEvm();
+  const { svmAddress } = useSvm();
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
       <div className="bg-widget border border-widget-border rounded-3xl p-6 shadow-xl space-y-4">
         <h3 className="text-xl font-semibold tracking-tight">
           Cosmos{" "}
@@ -32,6 +35,17 @@ function StatusBar() {
           <div className="text-sm opacity-70">-</div>
         )}
         <EvmBalance />
+      </div>
+      <div className="bg-widget border border-widget-border rounded-3xl p-6 shadow-xl space-y-4">
+        <h3 className="text-xl font-semibold tracking-tight">
+          SVM <span className="text-sm text-gray-300">(Solana Devnet)</span>
+        </h3>
+        {svmAddress ? (
+          <CopyableAddress value={svmAddress} />
+        ) : (
+          <div className="text-sm opacity-70">-</div>
+        )}
+        <SvmBalance />
       </div>
     </div>
   );
