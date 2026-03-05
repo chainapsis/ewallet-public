@@ -5,7 +5,7 @@ sidebar_position: 2
 
 # Quick Start
 
-Unify your wallet experience across Ethereum and Cosmos with Oko.
+Unify your wallet experience across Ethereum, Cosmos, and Solana with Oko.
 
 ## Requirements
 
@@ -22,6 +22,9 @@ npm install @oko-wallet/oko-sdk-cosmos
 
 # For Ethereum/EVM chains
 npm install @oko-wallet/oko-sdk-eth
+
+# For Solana/SVM chains
+npm install @oko-wallet/oko-sdk-svm
 
 # Core SDK (if building custom integration)
 npm install @oko-wallet/oko-sdk-core
@@ -106,19 +109,63 @@ const hash = await walletClient.sendTransaction({
 });
 ```
 
+## Solana Integration
+
+Native Solana support using `@solana/web3.js`:
+
+```typescript
+import { OkoSvmWallet } from "@oko-wallet/oko-sdk-svm";
+import {
+  Connection,
+  PublicKey,
+  SystemProgram,
+  Transaction,
+} from "@solana/web3.js";
+
+// Initialize Solana wallet
+const initRes = OkoSvmWallet.init({
+  ...config,
+  chain_id: "solana:mainnet",
+});
+
+if (!initRes.success) {
+  throw new Error(`SVM wallet initialization failed: ${initRes.err}`);
+}
+
+const svmWallet = initRes.data;
+
+// Connect and get public key
+await svmWallet.connect();
+const publicKey = svmWallet.publicKey!;
+
+// Send a transaction
+const connection = new Connection("https://api.mainnet.solana.com");
+const transaction = new Transaction().add(
+  SystemProgram.transfer({
+    fromPubkey: publicKey,
+    toPubkey: new PublicKey("destination-address"),
+    lamports: 1_000_000,
+  }),
+);
+
+const signature = await svmWallet.sendTransaction(transaction, connection);
+```
+
 ## Multi-Chain Support
 
-**The power of Oko:** Use familiar APIs for both Ethereum and Cosmos,
-while giving users **one account** that works across **both ecosystems**. Same
+**The power of Oko:** Use familiar APIs for Ethereum, Cosmos, and Solana,
+while giving users **one account** that works across **all ecosystems**. Same
 Google login, consistent experience.
 
 ```typescript
 import { OkoCosmosWallet } from "@oko-wallet/oko-sdk-cosmos";
 import { OkoEthWallet } from "@oko-wallet/oko-sdk-eth";
+import { OkoSvmWallet } from "@oko-wallet/oko-sdk-svm";
 
-// Support both Ethereum and Cosmos in one integration
+// Support Ethereum, Cosmos, and Solana in one integration
 const cosmosInitRes = OkoCosmosWallet.init(config);
 const ethInitRes = OkoEthWallet.init(config);
+const svmInitRes = OkoSvmWallet.init({ ...config, chain_id: "solana:mainnet" });
 
 if (!cosmosInitRes.success) {
   throw new Error(`Cosmos wallet initialization failed: ${cosmosInitRes.err}`);
@@ -128,10 +175,15 @@ if (!ethInitRes.success) {
   throw new Error(`Eth wallet initialization failed: ${ethInitRes.err}`);
 }
 
+if (!svmInitRes.success) {
+  throw new Error(`SVM wallet initialization failed: ${svmInitRes.err}`);
+}
+
 const cosmosWallet = cosmosInitRes.data;
 const ethWallet = ethInitRes.data;
+const svmWallet = svmInitRes.data;
 
-// Users can interact with both ecosystems seamlessly
+// Users can interact with all three ecosystems seamlessly
 // Same Google account, same user experience!
 ```
 
@@ -150,8 +202,8 @@ Understanding how Oko works will help you integrate it effectively:
 
 **🚀 Ready to integrate?**
 
-- **[Complete SDK Examples](../sdk-usage/sdk-overview.md)** - Detailed Ethereum
-  and Cosmos code samples with multi-chain setups
+- **[Complete SDK Examples](../sdk-usage/sdk-overview.md)** - Detailed Ethereum,
+  Cosmos, and SVM code samples with multi-chain setups
 - **[Architecture Overview](../architecture)** - Understand how threshold
   signatures work
 - **[API Reference](../api-reference/api-overview.md)** - Complete method
