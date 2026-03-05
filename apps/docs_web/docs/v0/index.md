@@ -81,9 +81,9 @@ dashboards.
 
 - **Fully Open Source with Apache 2.0 License** - freedom to customize and self
   host every layer
-- **Standard ECDSA signatures** - compatible with all existing blockchain
+- **Standard ECDSA/EdDSA signatures** - compatible with all existing blockchain
   infrastructure
-- **Multi-chain support** - Ethereum and Cosmos ecosystems
+- **Multi-chain support** - Ethereum, Cosmos, and SVM ecosystems
 - **Simple integration** - drop-in replacement for existing wallet connections
 - **Programmable wallet experience** - combine Web2 convenience with Web3
   security
@@ -107,6 +107,12 @@ dashboards.
 - **Chain registry integration** - automatic chain discovery and configuration
 - **IBC support** - cross-chain operations
 
+#### SVM Chains
+
+- **Solana Web3.js compatibility** - works with existing Solana applications
+- **Transaction and message signing** - supports all standard signing methods
+- **Wallet Standard support** - compatible with Solana wallet adapter
+
 **Social login support**
 
 - Google OAuth
@@ -128,7 +134,7 @@ Ready to integrate Oko into your application?
 
 - **[Integration Guide](getting-started/integration-overview.md)** - Add to your
   dApp in minutes
-- **[SDK Documentation](sdk-usage/sdk-overview.md)** - Ethereum and Cosmos
+- **[SDK Documentation](sdk-usage/sdk-overview.md)** - Ethereum, Cosmos, and SVM
   examples
 - **[Starter Templates](getting-started/starter-templates.md)** - Next.js
   example repositories
