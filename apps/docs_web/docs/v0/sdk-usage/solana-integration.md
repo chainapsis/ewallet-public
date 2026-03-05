@@ -192,6 +192,15 @@ if (initRes.success) {
 | `solana:signTransaction`        | Sign transactions               |
 | `solana:signAndSendTransaction` | Sign and broadcast transactions |
 
+### Framework Integration
+
+For framework-specific wallet adapter integration, see:
+
+- **[Solana Wallet Adapter Integration](./solana-wallet-adapter-integration)** —
+  Use with `@solana/wallet-adapter-react` for Solana dApps
+- **[Frost Kit Integration](./frost-kit-integration)** — Use with `@rialo/frost`
+  for Rialo dApps
+
 ## Versioned Transactions
 
 Oko supports both legacy and versioned transactions:
@@ -221,6 +230,10 @@ console.log("Wallet disconnected");
 
 ## Next Steps
 
+- **[Solana Wallet Adapter Integration](./solana-wallet-adapter-integration)** -
+  Use Oko with `@solana/wallet-adapter-react`
+- **[Frost Kit Integration](./frost-kit-integration)** - Use Oko with Rialo
+  Frost
 - **[Ethereum Integration](./ethereum-integration)** - Add Ethereum support
 - **[Cosmos Integration](./cosmos-integration)** - Add Cosmos support
 - **[React Integration](./react-integration)** - React patterns
