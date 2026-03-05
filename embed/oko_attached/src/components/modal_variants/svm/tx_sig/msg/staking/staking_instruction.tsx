@@ -165,7 +165,7 @@ export const StakingInstruction: FC<StakingInstructionProps> = ({
         {hasRent && (
           <ChevronDownIcon
             className={`${styles.chevronIcon} ${isExpanded ? styles.chevronIconExpanded : ""}`}
-            color="var(--fg-quaternary)"
+            color="var(--fg-tertiary)"
           />
         )}
       </button>
@@ -207,7 +207,7 @@ export const StakingInstruction: FC<StakingInstructionProps> = ({
               >
                 <InfoCircleIcon
                   className={styles.infoIcon}
-                  color="var(--fg-quaternary)"
+                  color="var(--fg-tertiary)"
                 />
               </Tooltip>
             </div>

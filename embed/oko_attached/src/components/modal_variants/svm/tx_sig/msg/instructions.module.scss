@@ -72,6 +72,19 @@
   width: 100%;
 }
 
+// When collapsible contains tokenAddressRow (unknown token),
+// reduce horizontal padding so hover bg sits at 8px from card edge.
+// Add 8px padding to header so title stays at 16px.
+.instructionsContainer > :global(*):has(.tokenAddressRow) {
+  padding-left: 8px;
+  padding-right: 8px;
+
+  > :global(:first-child) {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+}
+
 .instructionDivider {
   width: 100%;
   height: 1px;
