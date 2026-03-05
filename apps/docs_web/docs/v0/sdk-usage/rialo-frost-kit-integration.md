@@ -205,16 +205,9 @@ function AccountInfo() {
 
   if (!isConnected) return <p>Not connected</p>;
 
-  const balanceDisplay = isLoading
-    ? "Loading..."
-    : balance !== null
-      ? `${(Number(balance) / 1_000_000_000).toFixed(4)} RIALO`
-      : "--";
-
   return (
     <div>
       <p>Address: {activeAccount?.address}</p>
-      <p>Balance: {balanceDisplay}</p>
       <button onClick={refetch}>Refresh</button>
     </div>
   );
