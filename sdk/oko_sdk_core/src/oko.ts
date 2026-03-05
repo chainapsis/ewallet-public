@@ -12,6 +12,7 @@ import { getWalletInfo } from "./methods/get_wallet_info";
 import { getAuthType } from "./methods/get_auth_type";
 import { closeModal } from "./methods/close_modal";
 import { on } from "./methods/on";
+import { off } from "./methods/off";
 import type { OkoWalletInterface } from "./types";
 import { init } from "./static/init";
 import { OkoWallet } from "./constructor";
@@ -34,5 +35,6 @@ ptype.getName = getName;
 ptype.getAuthType = getAuthType;
 ptype.getWalletInfo = getWalletInfo;
 ptype.on = on;
+ptype.off = off;
 
 export { OkoWallet };
