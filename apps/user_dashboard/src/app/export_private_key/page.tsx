@@ -380,7 +380,12 @@ const Step2Content = ({
           <Spinner size={32} />
         </div>
       )}
-      <div style={{ visibility: iframesReady ? "visible" : "hidden" }}>
+      <div
+        style={{
+          opacity: iframesReady ? 1 : 0,
+          pointerEvents: iframesReady ? "auto" : "none",
+        }}
+      >
         <Typography size="lg" weight="semibold" color="primary">
           View and copy your private key
         </Typography>
