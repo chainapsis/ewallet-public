@@ -31,6 +31,7 @@ import {
 } from "react";
 
 import styles from "./page.module.scss";
+import { Spinner } from "@oko-wallet-user-dashboard/components/spinner/spinner";
 import { displayToast } from "@oko-wallet-user-dashboard/components/toast";
 import {
   selectCosmosSDK,
@@ -269,10 +270,14 @@ const Step2Content = ({
   onReady?: () => void;
   onError?: () => void;
 }) => {
+  const LOG = "[export][step2]";
   const [secpIframeHeight, setSecpIframeHeight] = useState(0);
   const [edIframeHeight, setEdIframeHeight] = useState(0);
 
+  console.log(`${LOG} render, attachedOrigin=${attachedOrigin}`);
+
   useEffect(() => {
+    console.log(`${LOG} message listener attached`);
     const handler = (event: MessageEvent) => {
       if (event.origin !== attachedOrigin) {
         return;
@@ -289,6 +294,9 @@ const Step2Content = ({
       }
 
       if (data.msg_type === "__export_display_resize__") {
+        console.log(
+          `${LOG} resize: key_type=${data.payload.key_type}, height=${data.payload.height}`,
+        );
         if (data.payload.key_type === "secp256k1") {
           setSecpIframeHeight(data.payload.height);
         } else if (data.payload.key_type === "ed25519") {
@@ -303,6 +311,7 @@ const Step2Content = ({
           description: "Could not copy to clipboard.",
         });
       } else if (data.msg_type === "__export_display_error__") {
+        console.warn(`${LOG} display error: key_type=${data.payload.key_type}`);
         onError?.();
       }
     };
@@ -316,98 +325,115 @@ const Step2Content = ({
   const iframesReady = secpIframeHeight > 0 && edIframeHeight > 0;
 
   const onReadyFired = useRef(false);
+  const secpRef = useRef(secpIframeHeight);
+  const edRef = useRef(edIframeHeight);
+  secpRef.current = secpIframeHeight;
+  edRef.current = edIframeHeight;
+
   useEffect(() => {
     if (!onReady || onReadyFired.current) {
       return;
     }
     if (iframesReady) {
+      console.log(`${LOG} iframes ready (both reported height)`);
       onReadyFired.current = true;
       onReady();
       return;
     }
+    console.log(`${LOG} waiting: secp=${secpRef.current}, ed=${edRef.current}`);
     const timer = setTimeout(() => {
       if (!onReadyFired.current) {
+        console.warn(
+          `${LOG} 10s timeout — forcing ready. secp=${secpRef.current}, ed=${edRef.current}`,
+        );
         onReadyFired.current = true;
         onReady();
       }
-    }, 5000);
+    }, 10000);
     return () => clearTimeout(timer);
   }, [iframesReady, onReady]);
 
   return (
-    <div style={{ visibility: iframesReady ? "visible" : "hidden" }}>
-      <Typography size="lg" weight="semibold" color="primary">
-        View and copy your private key
-      </Typography>
-
-      <div className={styles.spacer32} />
-
-      {/* EVM & Cosmos Section */}
-      <div className={styles.keySection}>
-        <div className={styles.sectionHeader}>
-          <span className={styles.sectionKeyIcon}>
-            <SectionKeyIcon />
-          </span>
-          <Typography size="lg" weight="semibold" color="secondary">
-            EVM & Cosmos
-          </Typography>
+    <>
+      {!iframesReady && (
+        <div className={styles.step2Loading}>
+          <Spinner size={32} />
         </div>
-
-        <iframe
-          src={`${attachedOrigin}/export/display?key_type=secp256k1&parent_origin=${encodeURIComponent(window.location.origin)}`}
-          className={styles.keyIframe}
-          style={secpIframeHeight ? { height: secpIframeHeight } : undefined}
-          title="EVM & Cosmos private key"
-          allow="clipboard-write"
-        />
-
-        <div className={styles.spacer24} />
-
-        <ChainsList chains={EVM_COSMOS_CHAINS} />
-      </div>
-
-      <div className={styles.spacer52} />
-
-      {/* Solana & SVM Section */}
-      <div className={styles.keySection}>
-        <div className={styles.sectionHeader}>
-          <span className={styles.sectionKeyIcon}>
-            <SectionKeyIcon />
-          </span>
-          <Typography size="lg" weight="semibold" color="secondary">
-            Solana & SVM
-          </Typography>
-        </div>
-
-        <iframe
-          src={`${attachedOrigin}/export/display?key_type=ed25519&parent_origin=${encodeURIComponent(window.location.origin)}`}
-          className={styles.keyIframe}
-          style={edIframeHeight ? { height: edIframeHeight } : undefined}
-          title="Solana & SVM private key"
-          allow="clipboard-write"
-        />
-
-        <div className={styles.spacer24} />
-
-        <ChainsList chains={SVM_CHAINS} />
-      </div>
-
-      <hr className={styles.divider} />
-
-      {/* Info Box */}
-      <div className={styles.infoBox}>
-        <div className={styles.infoBoxTitle}>
-          <InfoCircleIcon className={styles.infoBoxIcon} color="#414651" />
-          <Typography size="sm" weight="semibold" color="tertiary">
-            Why are there two keys?
-          </Typography>
-        </div>
-        <Typography size="sm" weight="medium" color="quaternary">
-          Different ecosystems use different cryptographic curves, so their
-          private keys are generated differently.
+      )}
+      <div style={{ visibility: iframesReady ? "visible" : "hidden" }}>
+        <Typography size="lg" weight="semibold" color="primary">
+          View and copy your private key
         </Typography>
+
+        <div className={styles.spacer32} />
+
+        {/* EVM & Cosmos Section */}
+        <div className={styles.keySection}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionKeyIcon}>
+              <SectionKeyIcon />
+            </span>
+            <Typography size="lg" weight="semibold" color="secondary">
+              EVM & Cosmos
+            </Typography>
+          </div>
+
+          <iframe
+            src={`${attachedOrigin}/export/display?key_type=secp256k1&parent_origin=${encodeURIComponent(window.location.origin)}`}
+            className={styles.keyIframe}
+            style={secpIframeHeight ? { height: secpIframeHeight } : undefined}
+            title="EVM & Cosmos private key"
+            allow="clipboard-write"
+          />
+
+          <div className={styles.spacer24} />
+
+          <ChainsList chains={EVM_COSMOS_CHAINS} />
+        </div>
+
+        <div className={styles.spacer52} />
+
+        {/* Solana & SVM Section */}
+        <div className={styles.keySection}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionKeyIcon}>
+              <SectionKeyIcon />
+            </span>
+            <Typography size="lg" weight="semibold" color="secondary">
+              Solana & SVM
+            </Typography>
+          </div>
+
+          <iframe
+            src={`${attachedOrigin}/export/display?key_type=ed25519&parent_origin=${encodeURIComponent(window.location.origin)}`}
+            className={styles.keyIframe}
+            style={edIframeHeight ? { height: edIframeHeight } : undefined}
+            title="Solana & SVM private key"
+            allow="clipboard-write"
+          />
+
+          <div className={styles.spacer24} />
+
+          <ChainsList chains={SVM_CHAINS} />
+        </div>
+
+        <hr className={styles.divider} />
+
+        {/* Info Box */}
+        <div className={styles.infoBox}>
+          <div className={styles.infoBoxTitle}>
+            <InfoCircleIcon className={styles.infoBoxIcon} color="#414651" />
+            <Typography size="sm" weight="semibold" color="tertiary">
+              Why are there two keys?
+            </Typography>
+          </div>
+          <Typography size="sm" weight="medium" color="quaternary">
+            Different ecosystems use different cryptographic curves, so their
+            private keys are generated differently.
+          </Typography>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
@@ -434,7 +460,10 @@ const Page = () => {
   const authType = useUserInfoState((state) => state.authType);
   const authInfo = getAuthProviderInfo(authType);
   const usesName =
-    authType === "discord" || authType === "telegram" || authType === "x" || authType === "github";
+    authType === "discord" ||
+    authType === "telegram" ||
+    authType === "x" ||
+    authType === "github";
   const displayIdentifier = usesName ? name : email;
 
   const okoWallet = useSDKState(selectCosmosSDK)?.okoWallet;
@@ -484,7 +513,10 @@ const Page = () => {
       // 1. Open re-auth popup at attached origin (match sign-in popup sizes)
       const attachedOrigin = new URL(okoWallet.sdkEndpoint).origin;
       const isOAuthProvider =
-        authType === "google" || authType === "x" || authType === "discord" || authType === "github";
+        authType === "google" ||
+        authType === "x" ||
+        authType === "discord" ||
+        authType === "github";
       const popupWidth = isOAuthProvider ? 1200 : 440;
       const popupHeight = isOAuthProvider
         ? 800
