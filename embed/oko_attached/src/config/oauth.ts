@@ -2,8 +2,7 @@ export const GOOGLE_CLIENT_ID =
   "421793224165-cpmbt6enqrj6ad6n4ujokham8qdmnnln.apps.googleusercontent.com";
 export const X_CLIENT_ID = "eWJPdVNYNlV6dEpNSTM3T01GRGI6MTpjaQ";
 export const DISCORD_CLIENT_ID = "1445280712121913384";
-// @TODO replace with production GitHub App Client ID
-export const GITHUB_CLIENT_ID = "Iv23lio9XBqEICR45fCJ";
+export const GITHUB_CLIENT_ID = "Iv23limwRjerP82VKFmp";
 
 export function generateNonce(length = 8): string {
   return Array.from(crypto.getRandomValues(new Uint8Array(length)))
