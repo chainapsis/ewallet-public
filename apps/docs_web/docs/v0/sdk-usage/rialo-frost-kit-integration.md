@@ -1,9 +1,9 @@
 ---
-title: Frost Kit Integration
+title: Rialo Frost Kit Integration
 sidebar_position: 7
 ---
 
-# Frost Kit Integration
+# Rialo Frost Kit Integration
 
 Integrate Oko with [Rialo Frost](https://rialo.com), the wallet adapter
 framework for Rialo dApps.

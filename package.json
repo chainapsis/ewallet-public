@@ -20,6 +20,7 @@
       "examples/evm_nextjs",
       "examples/evm_wagmi_nextjs",
       "examples/multi_ecosystem_react",
+      "examples/svm_nextjs",
       "sandbox/sandbox_simple_host",
       "sandbox/sandbox_evm",
       "sandbox/sandbox_cosmos_kit",
