@@ -138,6 +138,11 @@ export const paths = (function () {
     "../../../examples/cosmos_nextjs",
   );
 
+  const example_svm_nextjs = path.join(
+    __dirname,
+    "../../../examples/svm_nextjs",
+  );
+
   return {
     root,
     github,
@@ -148,6 +153,7 @@ export const paths = (function () {
     example_evm_nextjs,
     example_evm_wagmi_nextjs,
     example_multi_ecosystem_react,
+    example_svm_nextjs,
     oko_types,
     sdk_core,
     sdk_eth,

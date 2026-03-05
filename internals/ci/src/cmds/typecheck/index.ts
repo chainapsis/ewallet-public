@@ -35,6 +35,7 @@ export async function typeCheck(..._args: any[]) {
     paths.example_evm_nextjs,
     paths.example_evm_wagmi_nextjs,
     paths.example_multi_ecosystem_react,
+    paths.example_svm_nextjs,
   ];
 
   const concurrency = DEFAULT_CONCURRENCY;
