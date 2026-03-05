@@ -49,6 +49,7 @@ export interface OkoWalletInterface {
   startEmailSignIn: (email: string) => Promise<void>;
   completeEmailSignIn: (email: string, code: string) => Promise<void>;
   on: (handlerDef: OkoWalletCoreEventHandler2) => void;
+  off: (handlerDef: OkoWalletCoreEventHandler2) => void;
 }
 
 export interface OkoWalletInitArgs {
