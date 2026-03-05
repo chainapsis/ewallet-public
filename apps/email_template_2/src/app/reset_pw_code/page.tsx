@@ -72,7 +72,7 @@ export default function ResetPwCodePage() {
                             password.
                             <br />
                             The code is valid for{" "}
-                            {"${email_verification_expiration_minutes}"} minute
+                            {"${email_verification_expiration_minutes}"} Minute
                             for your security.
                           </EmailText>
                         </td>

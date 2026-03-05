@@ -134,7 +134,7 @@ export default function OkoCodePage() {
                                                       {
                                                         "${email_verification_expiration_minutes}"
                                                       }{" "}
-                                                      minutes
+                                                      Minutes
                                                     </strong>
                                                     .
                                                   </EmailText>
