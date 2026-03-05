@@ -5,7 +5,7 @@ sidebar_position: 3
 
 # Supported Chains
 
-Oko supports Cosmos-SDK-based chains, EVM-based chains, and Solana/SVM chains.
+Oko supports Cosmos-SDK-based chains, EVM-based chains, and SVM-compatible chains (Solana, etc.).
 Chain metadata (IDs, names, currencies, RPCs, images, etc.) is sourced from the
 open-source Keplr Chain Registry. Contributions are
 welcome — you can add or update chains via pull requests.
@@ -17,7 +17,7 @@ welcome — you can add or update chains via pull requests.
 - **Cosmos**: Chains identified like `cosmoshub-4`, `osmosis-1`, etc.
 - **EVM**: Chains identified via CAIP-2 like `eip155:1` (Ethereum), `eip155:10`
   (Optimism), `eip155:8453` (Base), etc.
-- **Solana/SVM**: Chains identified like `solana:mainnet`, `solana:devnet`,
+- **SVM**: SVM-compatible chains identified like `solana:mainnet`, `solana:devnet`,
   `solana:testnet`.
 
 > Note: If a chain exists in the registry, Oko can discover and use
@@ -38,9 +38,9 @@ welcome — you can add or update chains via pull requests.
 Once merged, Oko SDK will pick it up automatically in the next fetch
 cycle (no app update needed).
 
-## Solana / SVM
+## SVM
 
-Solana chains are identified using `solana:<network>` format:
+SVM-compatible chains are identified using `<chain>:<network>` format:
 
 | Network | Chain ID | Description |
 |---------|----------|-------------|
@@ -58,7 +58,7 @@ const initRes = OkoSvmWallet.init({
 });
 ```
 
-Oko uses threshold EdDSA (FROST) for Solana signing, providing the same MPC
+Oko uses threshold EdDSA (FROST) for SVM chain signing, providing the same MPC
 security model as the Cosmos and EVM integrations.
 
 <!-- prettier-ignore -->
