@@ -166,6 +166,6 @@ function WalletContent() {
 
 - **[Solana Integration](./solana-integration)** - Direct SDK usage without
   Wallet Adapter
-- **[Frost Kit Integration](./frost-kit-integration)** - Rialo Frost integration
+- **[Rialo Frost Kit Integration](./rialo-frost-kit-integration)** - Rialo Frost integration
 - **[React Integration](./react-integration)** - General React patterns
 - **[Error Handling](./error-handling)** - Error handling best practices

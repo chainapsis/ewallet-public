@@ -17,8 +17,7 @@ welcome — you can add or update chains via pull requests.
 - **Cosmos**: Chains identified like `cosmoshub-4`, `osmosis-1`, etc.
 - **EVM**: Chains identified via CAIP-2 like `eip155:1` (Ethereum), `eip155:10`
   (Optimism), `eip155:8453` (Base), etc.
-- **SVM**: SVM-compatible chains identified like `solana:mainnet`, `solana:devnet`,
-  `solana:testnet`.
+- **SVM**: SVM-compatible chains identified like `solana:mainnet`, `solana:devnet`, etc.
 
 > Note: If a chain exists in the registry, Oko can discover and use
 > it automatically. If your chain isn’t there yet, add it via PR (see below).
@@ -28,6 +27,7 @@ welcome — you can add or update chains via pull requests.
 1. Check the registry for your chain
    - Cosmos directory: `cosmos/`
    - EVM directory: `evm/`
+   - SVM directory: `svm/`
 
 2. Prepare the chain JSON and assets per the registry’s requirements
    - Provide chain ID, RPC/REST endpoints, currencies, images, etc.
@@ -44,7 +44,7 @@ SVM-compatible chains are identified using `<chain>:<network>` format:
 
 | Network | Chain ID | Description |
 |---------|----------|-------------|
-| Mainnet | `solana:mainnet` | Solana mainnet-beta |
+| Mainnet | `solana:mainnet` | Solana mainnet|
 | Devnet | `solana:devnet` | Solana devnet |
 
 Pass the `chain_id` when initializing the SVM wallet:

@@ -7,14 +7,15 @@ sidebar_position: 4
 
 Kickstart your integration with ready-to-run examples. Each template includes
 minimal setup, local dev instructions, and basic signing/sending flows for
-Cosmos and EVM.
+Cosmos, EVM, and SVM (Solana).
 
 ## Quick picks
 
 - **[Cosmos (Next.js)](https://github.com/chainapsis/oko/tree/main/examples/cosmos_nextjs)**
 - **[EVM (Next.js)](https://github.com/chainapsis/oko/tree/main/examples/evm_nextjs)**
+- **[SVM / Solana (Next.js)](https://github.com/chainapsis/oko/tree/main/examples/svm_nextjs)**
 - **[EVM + wagmi (Next.js)](https://github.com/chainapsis/oko/tree/main/examples/evm_wagmi_nextjs)**
-- **[Cosmos + EVM (React + Vite)](https://github.com/chainapsis/oko/tree/main/examples/multi_ecosystem_react)**
+- **[EVM + SVM + Cosmos (React + Vite)](https://github.com/chainapsis/oko/tree/main/examples/multi_ecosystem_react)**
 
 ## All templates
 
