@@ -82,9 +82,9 @@ security, while eliminating the need to manage complex private keys themselves.
 ### ⚡ Simple Integration
 
 - **Drop-in replacement** - replace `window.ethereum` with Oko ethereum provider
-- **Standard ECDSA signatures** - compatible with all existing blockchain
+- **Standard ECDSA/EdDSA signatures** - compatible with all existing blockchain
   infrastructure
-- **Multi-chain support** - Ethereum and Cosmos ecosystems
+- **Multi-chain support** - Ethereum, Cosmos, and SVM ecosystems
 - **Familiar APIs** - uses EIP-1193 and CosmJS standards
 
 ## Technical Implementation
