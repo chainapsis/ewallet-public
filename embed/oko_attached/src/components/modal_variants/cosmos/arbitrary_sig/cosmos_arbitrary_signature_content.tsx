@@ -6,6 +6,7 @@ import { ChevronRightIcon } from "@oko-wallet/oko-common-ui/icons/chevron_right"
 
 import styles from "./cosmos_arbitrary_signature_content.module.scss";
 import { MakeSignatureRawCodeBlock } from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_sig_modal_code_block";
+import { MakeSignatureRawCodeBlockContainer } from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_sig_modal_code_block_container";
 import { MetadataContent } from "@oko-wallet-attached/components/modal_variants/common/metadata_content/metadata_content";
 
 interface CosmosArbitrarySignatureContentProps {
@@ -43,12 +44,14 @@ export const CosmosArbitrarySignatureContent: FC<
       </div>
       <Spacing height={8} />
 
-      <div className={styles.dataContainer}>
-        {isViewRawData ? (
+      {isViewRawData ? (
+        <MakeSignatureRawCodeBlockContainer>
           <MakeSignatureRawCodeBlock
             code={JSON.stringify(payload.signDoc, null, 2)}
           />
-        ) : (
+        </MakeSignatureRawCodeBlockContainer>
+      ) : (
+        <div className={styles.dataContainer}>
           <Typography
             size="md"
             color="tertiary"
@@ -57,8 +60,8 @@ export const CosmosArbitrarySignatureContent: FC<
           >
             {payload.data}
           </Typography>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
