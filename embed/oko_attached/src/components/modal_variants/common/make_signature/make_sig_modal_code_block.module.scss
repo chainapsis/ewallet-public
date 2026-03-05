@@ -4,6 +4,7 @@
 .codeBlock {
   min-height: 65px;
   max-height: 230px;
+  padding: 0;
   padding-right: 4px; // text-to-scrollbar gap
   background: transparent;
   border-radius: 0;
@@ -24,7 +25,7 @@
 
   &::-webkit-scrollbar-track {
     background: transparent;
-    margin: 8px 0;
+    margin: 0;
   }
 
   &::-webkit-scrollbar-thumb {

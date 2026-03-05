@@ -79,7 +79,7 @@ export const MakeMessageSigModal: FC<MakeMessageSigModalProps> = ({
           <XCloseIcon size={20} color="var(--fg-quaternary)" />
         </div>
 
-        <div className={styles.modalInnerContentContainer}>
+        <div data-scroll-container className={styles.modalInnerContentContainer}>
           {!!siwsMessage ? (
             <SvmSiwsSignatureContent payload={data.payload} theme={theme} />
           ) : (

@@ -106,7 +106,7 @@ export const SignInSuccessResponseV2Schema = registry.register(
   }),
 );
 
-const AuthTypeEnum = z.enum(["google", "auth0", "x", "telegram", "discord"]);
+const AuthTypeEnum = z.enum(["google", "auth0", "x", "telegram", "discord", "github"]);
 
 export const CheckEmailRequestSchema = registry.register(
   "TssUserCheckEmailRequest",

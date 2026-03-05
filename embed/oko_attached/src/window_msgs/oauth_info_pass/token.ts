@@ -11,6 +11,7 @@ import {
   AUTH0_DOMAIN,
 } from "@oko-wallet-attached/config/auth0";
 import { verifyIdTokenOfDiscord } from "./discord";
+import { verifyIdTokenOfGithub } from "./github";
 import { verifyIdTokenOfX } from "./x";
 
 export async function verifyIdToken(
@@ -99,6 +100,25 @@ export async function verifyIdToken(
           provider: "x",
           // in x, use x id as user identifier with prefix
           user_identifier: `x_${xTokenInfo.data.id}`,
+        },
+      };
+    }
+
+    if (authType === "github") {
+      const githubTokenInfo = await verifyIdTokenOfGithub(idToken);
+
+      if (!githubTokenInfo.success) {
+        return {
+          success: false,
+          err: githubTokenInfo.err,
+        };
+      }
+
+      return {
+        success: true,
+        data: {
+          provider: "github",
+          user_identifier: `github_${githubTokenInfo.data.id}`,
         },
       };
     }

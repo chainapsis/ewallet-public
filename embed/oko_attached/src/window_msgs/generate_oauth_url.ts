@@ -10,6 +10,7 @@ import type { MsgEventContext } from "./types";
 import {
   createPkcePair,
   DISCORD_CLIENT_ID,
+  GITHUB_CLIENT_ID,
   GOOGLE_CLIENT_ID,
   generateNonce,
   X_CLIENT_ID,
@@ -93,6 +94,31 @@ function buildDiscordOAuthUrl(
   return authUrl.toString();
 }
 
+function buildGithubOAuthUrl(
+  apiKey: string,
+  targetOrigin: string,
+  codeChallenge: string,
+): string {
+  const redirectUri = `${window.location.origin}/github/callback`;
+
+  const oauthState: OAuthState = {
+    apiKey,
+    targetOrigin,
+    provider: "github",
+  };
+  const oauthStateString = btoa(JSON.stringify(oauthState));
+
+  const authUrl = new URL("https://github.com/login/oauth/authorize");
+  authUrl.searchParams.set("client_id", GITHUB_CLIENT_ID);
+  authUrl.searchParams.set("redirect_uri", redirectUri);
+  authUrl.searchParams.set("scope", "user:email");
+  authUrl.searchParams.set("code_challenge", codeChallenge);
+  authUrl.searchParams.set("code_challenge_method", "S256");
+  authUrl.searchParams.set("state", oauthStateString);
+
+  return authUrl.toString();
+}
+
 async function buildOAuthUrl(
   provider: OAuthProvider,
   apiKey: string,
@@ -116,6 +142,8 @@ async function buildOAuthUrl(
       return buildXOAuthUrl(apiKey, targetOrigin, codeChallenge);
     case "discord":
       return buildDiscordOAuthUrl(apiKey, targetOrigin, codeChallenge);
+    case "github":
+      return buildGithubOAuthUrl(apiKey, targetOrigin, codeChallenge);
     default:
       throw new Error(`Unsupported OAuth provider: ${provider}`);
   }

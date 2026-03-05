@@ -45,7 +45,8 @@ export const AccountWidget: FC<AccountWidgetProps> = () => {
       method !== "auth0" &&
       method !== "telegram" &&
       method !== "x" &&
-      method !== "discord"
+      method !== "discord" &&
+      method !== "github"
     ) {
       console.error("Unsupported login method atm: %s", method);
       return;

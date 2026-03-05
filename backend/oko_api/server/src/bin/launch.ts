@@ -86,6 +86,7 @@ async function main() {
     telegram_bot_token: envs.TELEGRAM_BOT_TOKEN!,
     slack_webhook_url: envs.SLACK_WEBHOOK_URL ?? null,
     ks_node_report_password: envs.KS_NODE_REPORT_PASSWORD!,
+    github_client_secret: envs.GITHUB_CLIENT_SECRET!,
   });
 
   const app = makeApp(state);

@@ -31,7 +31,7 @@ export const MakeArbitrarySigModal: FC<MakeArbitrarySigModalProps> = ({
           <XCloseIcon size={20} color="var(--fg-quaternary)" />
         </div>
 
-        <div className={styles.modalInnerContentContainer}>
+        <div data-scroll-container className={styles.modalInnerContentContainer}>
           <CosmosArbitrarySignatureContent payload={data.payload} />
         </div>
 

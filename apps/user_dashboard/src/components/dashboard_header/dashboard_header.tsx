@@ -5,6 +5,7 @@ import { IconButton } from "@oko-wallet/oko-common-ui/icon_button";
 import { DiscordIcon } from "@oko-wallet/oko-common-ui/icons/discord_icon";
 import { DotsHorizontalIcon } from "@oko-wallet/oko-common-ui/icons/dots_horizontal";
 import { ExternalLinkOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/external_link_outlined";
+import { GithubIcon } from "@oko-wallet/oko-common-ui/icons/github_icon";
 import { GoogleIcon } from "@oko-wallet/oko-common-ui/icons/google_icon";
 import { LogoutIcon } from "@oko-wallet/oko-common-ui/icons/logout";
 import { MenuIcon } from "@oko-wallet/oko-common-ui/icons/menu";
@@ -40,6 +41,8 @@ function getAuthProviderIcon(authType: AuthType | null, size = 16): ReactNode {
       return <TelegramIcon size={size} />;
     case "x":
       return <XIcon size={size} />;
+    case "github":
+      return <GithubIcon size={size} />;
     default:
       return null;
   }
@@ -114,7 +117,7 @@ export const DashboardHeader: FC<{
   const authType = useUserInfoState((state) => state.authType);
   const clearUserInfo = useUserInfoState((state) => state.clearUserInfo);
   const usesName =
-    authType === "discord" || authType === "telegram" || authType === "x";
+    authType === "discord" || authType === "telegram" || authType === "x" || authType === "github";
   const displayIdentifier = usesName ? name : email;
   const okoWallet = useSDKState(selectCosmosSDK)?.okoWallet;
   const router = useRouter();

@@ -1,6 +1,7 @@
 import { Button } from "@oko-wallet/oko-common-ui/button";
 import { ChevronLeftIcon } from "@oko-wallet/oko-common-ui/icons/chevron_left";
 import { DiscordIcon } from "@oko-wallet/oko-common-ui/icons/discord_icon";
+import { GithubIcon } from "@oko-wallet/oko-common-ui/icons/github_icon";
 import { TelegramIcon } from "@oko-wallet/oko-common-ui/icons/telegram_icon";
 import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
@@ -90,22 +91,22 @@ export const LoginSocialsView: FC<LoginSocialsViewProps> = ({
           </Typography>
         </Button>
 
-        {/* <Button
+        <Button
           variant="secondary"
           size="md"
           fullWidth
-          onClick={() => onSignIn("apple")}
+          onClick={() => onSignIn("github")}
         >
-          <AppleIcon size={20} />
+          <GithubIcon size={20} />
           <Typography
             size="sm"
             weight="semibold"
             color="secondary"
             style={{ padding: "0 2px" }}
           >
-            Apple
+            GitHub
           </Typography>
-        </Button> */}
+        </Button>
       </div>
     </>
   );

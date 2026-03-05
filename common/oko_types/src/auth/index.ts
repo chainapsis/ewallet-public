@@ -1,4 +1,10 @@
-export type AuthType = "google" | "auth0" | "x" | "telegram" | "discord";
+export type AuthType =
+  | "google"
+  | "auth0"
+  | "x"
+  | "telegram"
+  | "discord"
+  | "github";
 
 export interface TokenResult {
   token: string;

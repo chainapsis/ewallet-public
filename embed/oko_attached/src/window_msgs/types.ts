@@ -35,6 +35,14 @@ export interface XUserInfo {
   email?: string;
 }
 
+export interface GithubUserInfo {
+  id: number;
+  login: string;
+  name: string | null;
+  email: string | null;
+  avatar_url: string;
+}
+
 export interface DiscordUserInfo {
   id: string;
   username: string;

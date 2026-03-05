@@ -49,7 +49,8 @@ export const AccountWidget: FC<AccountWidgetProps> = () => {
       method === "x" ||
       method === "discord" ||
       method === "telegram" ||
-      method === "email"
+      method === "email" ||
+      method === "github"
     );
   }
 

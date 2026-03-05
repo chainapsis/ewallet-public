@@ -28,4 +28,17 @@
   overflow-y: auto;
   word-wrap: break-word;
   word-break: break-word;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    margin: 6px 0;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-right: 4px solid transparent;
+    background-clip: padding-box;
+  }
 }
