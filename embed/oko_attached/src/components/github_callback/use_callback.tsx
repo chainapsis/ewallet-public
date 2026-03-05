@@ -55,6 +55,18 @@ export function useGithubCallback() {
 export async function handleGithubCallback(): Promise<
   Result<void, HandleGithubCallbackError>
 > {
+  const urlParams = new URLSearchParams(window.location.search);
+
+  // GitHub sends error param on denial (e.g. access_denied).
+  // Check before window.opener — error redirect may land on a different
+  // origin when multiple callback URLs are registered.
+  if (urlParams.get("error")) {
+    return {
+      success: false,
+      err: { type: "login_canceled_by_user" },
+    };
+  }
+
   if (!window.opener) {
     return {
       success: false,
@@ -64,7 +76,6 @@ export async function handleGithubCallback(): Promise<
     };
   }
 
-  const urlParams = new URLSearchParams(window.location.search);
   const code = urlParams.get("code");
   const stateParam = urlParams.get(RedirectUriSearchParamsKey.STATE) || "{}";
 
