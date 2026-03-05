@@ -10251,6 +10251,8 @@ __metadata:
     "@keplr-wallet/unit": "npm:0.12.297"
     "@oko-wallet/oko-sdk-cosmos": "npm:^0.1.2-alpha.1"
     "@oko-wallet/oko-sdk-eth": "npm:^0.1.2-alpha.1"
+    "@oko-wallet/oko-sdk-svm": "npm:^0.1.2-alpha.1"
+    "@solana/web3.js": "npm:^1.98.0"
     "@tailwindcss/postcss": "npm:^4"
     "@tanstack/react-query": "npm:^5.90.12"
     "@types/node": "npm:^24.10.1"
@@ -11286,7 +11288,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@oko-wallet/oko-sdk-svm@npm:^0.1.2-alpha.4, @oko-wallet/oko-sdk-svm@workspace:*, @oko-wallet/oko-sdk-svm@workspace:sdk/oko_sdk_svm":
+"@oko-wallet/oko-sdk-svm@npm:^0.1.2-alpha.1, @oko-wallet/oko-sdk-svm@npm:^0.1.2-alpha.4, @oko-wallet/oko-sdk-svm@workspace:*, @oko-wallet/oko-sdk-svm@workspace:sdk/oko_sdk_svm":
   version: 0.0.0-use.local
   resolution: "@oko-wallet/oko-sdk-svm@workspace:sdk/oko_sdk_svm"
   dependencies:
