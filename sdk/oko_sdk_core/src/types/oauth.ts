@@ -1,6 +1,12 @@
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 
-export type SignInType = "google" | "email" | "x" | "telegram" | "discord";
+export type SignInType =
+  | "google"
+  | "email"
+  | "x"
+  | "telegram"
+  | "discord"
+  | "github";
 
 export type OAuthState = {
   apiKey: string;
@@ -24,7 +30,8 @@ export interface OAuthPayload {
 export type OAuthTokenRequestPayload =
   | OAuthTokenRequestPayloadOfX
   | OAuthTokenRequestPayloadOfTelegram
-  | OAuthTokenRequestPayloadOfDiscord;
+  | OAuthTokenRequestPayloadOfDiscord
+  | OAuthTokenRequestPayloadOfGithub;
 
 export interface OAuthTokenRequestPayloadOfX {
   code: string;
@@ -45,4 +52,11 @@ export interface OAuthTokenRequestPayloadOfTelegram {
   api_key: string;
   target_origin: string;
   auth_type: "telegram";
+}
+
+export interface OAuthTokenRequestPayloadOfGithub {
+  code: string;
+  api_key: string;
+  target_origin: string;
+  auth_type: "github";
 }

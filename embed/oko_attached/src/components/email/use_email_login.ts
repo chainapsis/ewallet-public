@@ -256,6 +256,7 @@ export function useEmailLogin({
 
     const callbackUrl = new URL(`${window.location.origin}/email/callback`);
     callbackUrl.searchParams.set("modal_id", modalIdFromQuery);
+    callbackUrl.searchParams.set("host_origin", hostOrigin);
 
     verifyEmailOTPCode({
       webAuth,

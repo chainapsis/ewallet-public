@@ -44,4 +44,6 @@ export const envSchema = z.object({
 
   SLACK_WEBHOOK_URL: z.string().optional(),
   KS_NODE_REPORT_PASSWORD: z.string(),
+
+  GITHUB_CLIENT_SECRET: z.string(),
 });

@@ -30,6 +30,7 @@ export const ExportReauth = () => {
       case "google":
       case "x":
       case "discord":
+      case "github":
         return <OAuthRedirect authType={authType} />;
 
       case "auth0":
@@ -46,7 +47,7 @@ export const ExportReauth = () => {
   return <ThemeProvider theme={theme}>{content}</ThemeProvider>;
 }
 
-const OAuthRedirect = ({ authType }: { authType: "google" | "x" | "discord" }) => {
+const OAuthRedirect = ({ authType }: { authType: "google" | "x" | "discord" | "github" }) => {
   const [status, setStatus] = useState<ReauthStatus>("loading");
   const [error, setError] = useState<string | null>(null);
 

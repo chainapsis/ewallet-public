@@ -8,6 +8,7 @@ import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
 import { AppleIcon } from "@oko-wallet/oko-common-ui/icons/apple_icon";
 import { MailboxIcon } from "@oko-wallet/oko-common-ui/icons/mailbox";
 import { DiscordIcon } from "@oko-wallet-common-ui/icons/discord_icon";
+import { GithubIcon } from "@oko-wallet/oko-common-ui/icons/github_icon";
 
 import { Widget } from "../widget_components";
 import styles from "./auth_progress_widget.module.scss";
@@ -41,6 +42,7 @@ export const AuthProgressWidget: FC<AuthProgressWidgetProps> = ({
           {method === "x" && <XIcon size={48} />}
           {method === "apple" && <AppleIcon size={48} />}
           {method === "discord" && <DiscordIcon size={48} />}
+          {method === "github" && <GithubIcon size={48} />}
           <Spinner
             size={62}
             className={styles.spinnerOverlay}

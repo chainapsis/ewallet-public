@@ -32,7 +32,11 @@ export function useSetThemeInCallback(providerType: AuthType) {
         }
       }
 
-      if (providerType === "discord" || providerType === "x") {
+      if (
+        providerType === "discord" ||
+        providerType === "x" ||
+        providerType === "github"
+      ) {
         const urlParams = new URLSearchParams(window.location.search);
         const stateParam =
           urlParams.get(RedirectUriSearchParamsKey.STATE) || "{}";

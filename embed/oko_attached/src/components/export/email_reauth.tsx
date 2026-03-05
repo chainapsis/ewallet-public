@@ -132,7 +132,9 @@ export const EmailReauth = () => {
     setIsSubmitting(true);
     setErrorMessage(null);
 
-    const callbackUrl = `${window.location.origin}/email/callback?modal_id=export_key_reauth`;
+    const callbackUrl = new URL(`${window.location.origin}/email/callback`);
+    callbackUrl.searchParams.set("modal_id", "export_key_reauth");
+    callbackUrl.searchParams.set("host_origin", window.location.origin);
 
     console.log(`${LOG_PREFIX} verifying OTP for`, email.trim());
 
@@ -140,7 +142,7 @@ export const EmailReauth = () => {
       webAuth,
       email: email.trim(),
       verificationCode: otpDigits.join(""),
-      callbackUrl,
+      callbackUrl: callbackUrl.toString(),
       nonce,
       state: JSON.stringify(oauthState),
       onError: (err) => {

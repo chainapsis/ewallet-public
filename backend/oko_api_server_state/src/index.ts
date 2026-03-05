@@ -102,6 +102,7 @@ export interface ServerState {
   telegram_bot_token: string;
   slack_webhook_url: string | null;
   ks_node_report_password: string;
+  github_client_secret: string;
   server_keypair: EddsaKeypair;
 }
 
@@ -135,6 +136,7 @@ export interface InitStateArgs {
   telegram_bot_token: string;
   slack_webhook_url: string | null;
   ks_node_report_password: string;
+  github_client_secret: string;
 }
 
 async function initializeServerKeypair(

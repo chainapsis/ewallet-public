@@ -1,4 +1,5 @@
 import { DiscordIcon } from "@oko-wallet/oko-common-ui/icons/discord_icon";
+import { GithubIcon } from "@oko-wallet/oko-common-ui/icons/github_icon";
 import { GoogleIcon } from "@oko-wallet/oko-common-ui/icons/google_icon";
 import { MailboxIcon } from "@oko-wallet/oko-common-ui/icons/mailbox";
 import { TelegramIcon } from "@oko-wallet/oko-common-ui/icons/telegram_icon";
@@ -33,6 +34,7 @@ export const AuthProgressWidget: FC<AuthProgressWidgetProps> = ({
         {method === "telegram" && <TelegramIcon size={48} />}
         {method === "x" && <XIcon size={48} />}
         {method === "discord" && <DiscordIcon size={48} />}
+        {method === "github" && <GithubIcon size={48} />}
         <Spinner
           size={62}
           className={styles.spinnerOverlay}

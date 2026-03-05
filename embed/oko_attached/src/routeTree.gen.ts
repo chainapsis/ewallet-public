@@ -15,6 +15,7 @@ import { Route as EmailIndexRouteImport } from './routes/email/index'
 import { Route as XCallbackIndexRouteImport } from './routes/x/callback/index'
 import { Route as TelegramCallbackIndexRouteImport } from './routes/telegram/callback/index'
 import { Route as GoogleCallbackIndexRouteImport } from './routes/google/callback/index'
+import { Route as GithubCallbackIndexRouteImport } from './routes/github/callback/index'
 import { Route as ExportReauthIndexRouteImport } from './routes/export/reauth/index'
 import { Route as ExportDisplayIndexRouteImport } from './routes/export/display/index'
 import { Route as EmailCallbackIndexRouteImport } from './routes/email/callback/index'
@@ -50,6 +51,11 @@ const GoogleCallbackIndexRoute = GoogleCallbackIndexRouteImport.update({
   path: '/google/callback/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GithubCallbackIndexRoute = GithubCallbackIndexRouteImport.update({
+  id: '/github/callback/',
+  path: '/github/callback/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ExportReauthIndexRoute = ExportReauthIndexRouteImport.update({
   id: '/export/reauth/',
   path: '/export/reauth/',
@@ -79,6 +85,7 @@ export interface FileRoutesByFullPath {
   '/email/callback/': typeof EmailCallbackIndexRoute
   '/export/display/': typeof ExportDisplayIndexRoute
   '/export/reauth/': typeof ExportReauthIndexRoute
+  '/github/callback/': typeof GithubCallbackIndexRoute
   '/google/callback/': typeof GoogleCallbackIndexRoute
   '/telegram/callback/': typeof TelegramCallbackIndexRoute
   '/x/callback/': typeof XCallbackIndexRoute
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/email/callback': typeof EmailCallbackIndexRoute
   '/export/display': typeof ExportDisplayIndexRoute
   '/export/reauth': typeof ExportReauthIndexRoute
+  '/github/callback': typeof GithubCallbackIndexRoute
   '/google/callback': typeof GoogleCallbackIndexRoute
   '/telegram/callback': typeof TelegramCallbackIndexRoute
   '/x/callback': typeof XCallbackIndexRoute
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/email/callback/': typeof EmailCallbackIndexRoute
   '/export/display/': typeof ExportDisplayIndexRoute
   '/export/reauth/': typeof ExportReauthIndexRoute
+  '/github/callback/': typeof GithubCallbackIndexRoute
   '/google/callback/': typeof GoogleCallbackIndexRoute
   '/telegram/callback/': typeof TelegramCallbackIndexRoute
   '/x/callback/': typeof XCallbackIndexRoute
@@ -118,6 +127,7 @@ export interface FileRouteTypes {
     | '/email/callback/'
     | '/export/display/'
     | '/export/reauth/'
+    | '/github/callback/'
     | '/google/callback/'
     | '/telegram/callback/'
     | '/x/callback/'
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/email/callback'
     | '/export/display'
     | '/export/reauth'
+    | '/github/callback'
     | '/google/callback'
     | '/telegram/callback'
     | '/x/callback'
@@ -142,6 +153,7 @@ export interface FileRouteTypes {
     | '/email/callback/'
     | '/export/display/'
     | '/export/reauth/'
+    | '/github/callback/'
     | '/google/callback/'
     | '/telegram/callback/'
     | '/x/callback/'
@@ -155,6 +167,7 @@ export interface RootRouteChildren {
   EmailCallbackIndexRoute: typeof EmailCallbackIndexRoute
   ExportDisplayIndexRoute: typeof ExportDisplayIndexRoute
   ExportReauthIndexRoute: typeof ExportReauthIndexRoute
+  GithubCallbackIndexRoute: typeof GithubCallbackIndexRoute
   GoogleCallbackIndexRoute: typeof GoogleCallbackIndexRoute
   TelegramCallbackIndexRoute: typeof TelegramCallbackIndexRoute
   XCallbackIndexRoute: typeof XCallbackIndexRoute
@@ -204,6 +217,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GoogleCallbackIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/github/callback/': {
+      id: '/github/callback/'
+      path: '/github/callback'
+      fullPath: '/github/callback/'
+      preLoaderRoute: typeof GithubCallbackIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/export/reauth/': {
       id: '/export/reauth/'
       path: '/export/reauth'
@@ -243,6 +263,7 @@ const rootRouteChildren: RootRouteChildren = {
   EmailCallbackIndexRoute: EmailCallbackIndexRoute,
   ExportDisplayIndexRoute: ExportDisplayIndexRoute,
   ExportReauthIndexRoute: ExportReauthIndexRoute,
+  GithubCallbackIndexRoute: GithubCallbackIndexRoute,
   GoogleCallbackIndexRoute: GoogleCallbackIndexRoute,
   TelegramCallbackIndexRoute: TelegramCallbackIndexRoute,
   XCallbackIndexRoute: XCallbackIndexRoute,
