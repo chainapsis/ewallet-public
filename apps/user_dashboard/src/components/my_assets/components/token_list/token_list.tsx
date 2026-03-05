@@ -45,6 +45,10 @@ export const TokenList: FC = () => {
     }
 
     return searchedTokens.filter((bal) => {
+      if (BigInt(bal.token.amount) === BigInt(0)) {
+        return false;
+      }
+
       if (!bal.priceUsd) {
         return true;
       }
@@ -58,25 +62,6 @@ export const TokenList: FC = () => {
     });
   }, [searchedTokens, isHideLowBalance]);
 
-  // Check if there are low balance tokens to hide
-  const hasLowBalanceTokens = useMemo(() => {
-    if (!isHideLowBalance) {
-      return false;
-    }
-
-    return searchedTokens.some((bal) => {
-      if (!bal.priceUsd) {
-        return false;
-      }
-
-      const valueUsd = calculateUsdValue(
-        bal.token.amount,
-        bal.token.currency.coinDecimals,
-        bal.priceUsd,
-      );
-      return valueUsd < LOW_BALANCE_THRESHOLD_USD;
-    });
-  }, [searchedTokens, isHideLowBalance]);
 
   return (
     <>
