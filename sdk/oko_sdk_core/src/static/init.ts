@@ -70,6 +70,8 @@ export function init(
       if (utmCampaign) {
         sdkEndpointURL.searchParams.append(UTM_CAMPAIGN, utmCampaign);
       }
+
+      sdkEndpointURL.searchParams.append("sdk_version", OkoWallet.version);
     } catch (err) {
       return {
         success: false,
