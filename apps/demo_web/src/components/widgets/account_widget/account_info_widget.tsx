@@ -1,17 +1,17 @@
-import type { FC } from "react";
-import { GoogleIcon } from "@oko-wallet/oko-common-ui/icons/google_icon";
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import { DoorOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/door_outlined";
-import { MailboxIcon } from "@oko-wallet-common-ui/icons/mailbox";
-import { TelegramIcon } from "@oko-wallet-common-ui/icons/telegram_icon";
-import { XIcon } from "@oko-wallet-common-ui/icons/x_icon";
-import { AppleIcon } from "@oko-wallet-common-ui/icons/apple_icon";
-import { DiscordIcon } from "@oko-wallet-common-ui/icons/discord_icon";
 import { GithubIcon } from "@oko-wallet/oko-common-ui/icons/github_icon";
+import { GoogleIcon } from "@oko-wallet/oko-common-ui/icons/google_icon";
+import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import type { FC } from "react";
 
 import { Widget } from "../widget_components";
 import styles from "./account_info_widget.module.scss";
+import { AppleIcon } from "@oko-wallet-common-ui/icons/apple_icon";
+import { DiscordIcon } from "@oko-wallet-common-ui/icons/discord_icon";
+import { MailboxIcon } from "@oko-wallet-common-ui/icons/mailbox";
+import { TelegramIcon } from "@oko-wallet-common-ui/icons/telegram_icon";
+import { XIcon } from "@oko-wallet-common-ui/icons/x_icon";
 import type { LoginMethod } from "@oko-wallet-demo-web/types/login";
 
 export type AccountInfoWidgetProps = {
@@ -60,7 +60,7 @@ export const AccountInfoWidget: FC<AccountInfoWidgetProps> = ({
             color="tertiary"
             className={styles.label}
           >
-            Public Key (secp256k1)
+            Public Key (EVM & Cosmos)
           </Typography>
           <Typography size="sm" weight="medium" className={styles.publicKey}>
             {publicKeySecp256k1}
@@ -77,7 +77,7 @@ export const AccountInfoWidget: FC<AccountInfoWidgetProps> = ({
                 color="tertiary"
                 className={styles.label}
               >
-                Public Key (ed25519)
+                Public Key (Solana & SVM)
               </Typography>
               <Typography
                 size="sm"
