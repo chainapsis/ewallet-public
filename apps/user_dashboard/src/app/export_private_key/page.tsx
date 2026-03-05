@@ -33,6 +33,7 @@ import {
 import styles from "./page.module.scss";
 import { Spinner } from "@oko-wallet-user-dashboard/components/spinner/spinner";
 import { displayToast } from "@oko-wallet-user-dashboard/components/toast";
+import { postLog } from "@oko-wallet-user-dashboard/fetch/post_log";
 import {
   selectCosmosSDK,
   useSDKState,
@@ -312,6 +313,12 @@ const Step2Content = ({
         });
       } else if (data.msg_type === "__export_display_error__") {
         console.warn(`${LOG} display error: key_type=${data.payload.key_type}`);
+        postLog({
+          level: "error",
+          message: `${LOG} display error`,
+          error: { name: "ExportDisplayError", message: `key_type=${data.payload.key_type}` },
+          meta: { keyType: data.payload.key_type, attachedOrigin },
+        });
         onError?.();
       }
     };
@@ -327,8 +334,10 @@ const Step2Content = ({
   const onReadyFired = useRef(false);
   const secpRef = useRef(secpIframeHeight);
   const edRef = useRef(edIframeHeight);
+  const originRef = useRef(attachedOrigin);
   secpRef.current = secpIframeHeight;
   edRef.current = edIframeHeight;
+  originRef.current = attachedOrigin;
 
   useEffect(() => {
     if (!onReady || onReadyFired.current) {
@@ -336,6 +345,11 @@ const Step2Content = ({
     }
     if (iframesReady) {
       console.log(`${LOG} iframes ready (both reported height)`);
+      postLog({
+        level: "info",
+        message: `${LOG} iframes ready`,
+        meta: { secp: secpRef.current, ed: edRef.current },
+      });
       onReadyFired.current = true;
       onReady();
       return;
@@ -346,6 +360,12 @@ const Step2Content = ({
         console.warn(
           `${LOG} 10s timeout — forcing ready. secp=${secpRef.current}, ed=${edRef.current}`,
         );
+        postLog({
+          level: "error",
+          message: `${LOG} 10s timeout — forcing ready`,
+          error: { name: "ExportIframeTimeout", message: "iframes not ready within 10s" },
+          meta: { secp: secpRef.current, ed: edRef.current, attachedOrigin: originRef.current },
+        });
         onReadyFired.current = true;
         onReady();
       }
