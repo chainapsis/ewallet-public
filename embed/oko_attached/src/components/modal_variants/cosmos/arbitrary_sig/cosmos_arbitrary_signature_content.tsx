@@ -53,7 +53,7 @@ export const CosmosArbitrarySignatureContent: FC<
       ) : (
         <div className={styles.dataContainer}>
           <Typography
-            size="md"
+            size="sm"
             color="tertiary"
             weight="medium"
             className={styles.data}
