@@ -44,8 +44,6 @@ interface AppState {
 
 interface AppActions {
   resetAll: (hostOrigin: string) => void;
-  resetWallet: (hostOrigin: string) => void;
-
   getNonce: (hostOrigin: string) => string | null;
   setNonce: (hostOrigin: string, nonce: string | null) => void;
 
@@ -187,18 +185,6 @@ export const useAppState = create(
           },
         });
       },
-      resetWallet: (hostOrigin: string) => {
-        set({
-          perOrigin: {
-            ...get().perOrigin,
-            [hostOrigin]: {
-              ...get().perOrigin[hostOrigin],
-              wallet: null,
-            },
-          },
-        });
-      },
-
       getWallet: (hostOrigin: string) => {
         return get().perOrigin[hostOrigin]?.wallet;
       },
