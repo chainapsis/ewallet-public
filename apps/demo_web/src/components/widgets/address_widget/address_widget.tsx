@@ -21,7 +21,9 @@ export const AddressWidget: FC<AddressWidgetProps> = ({}) => {
   const { data: chains } = useGetChainInfos();
 
   const formatAddress = (address: string | null) => {
-    if (!address) return undefined;
+    if (!address) {
+      return undefined;
+    }
     return address;
   };
 
