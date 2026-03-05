@@ -43,6 +43,13 @@ export async function signIn(this: OkoWalletInterface, type: SignInType) {
     return;
   }
 
+  this.state = {
+    authType: walletInfo.authType,
+    publicKey: walletInfo.publicKey,
+    email: walletInfo.email,
+    name: walletInfo.name,
+  };
+
   if (walletInfo.authType && walletInfo.publicKey) {
     console.log("[oko] emit CORE__accountsChanged");
 
