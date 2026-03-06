@@ -3,10 +3,10 @@ import { buildRevealMessage, sha256 } from "@oko-wallet/crypto-js";
 import { verifySignature } from "@oko-wallet/crypto-js/node/ecdhe";
 import type { ApiName } from "@oko-wallet/ksn-interface/commit_reveal";
 import {
-  getCommitRevealSessionBySessionId,
   createCommitRevealApiCall,
-  updateCommitRevealSessionState,
+  getCommitRevealSessionBySessionId,
   hasCommitRevealApiBeenCalled,
+  updateCommitRevealSessionState,
 } from "@oko-wallet/ksn-pg-interface/commit_reveal";
 import type { NextFunction, Request, Response } from "express";
 
