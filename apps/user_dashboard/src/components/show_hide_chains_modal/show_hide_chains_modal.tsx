@@ -11,7 +11,6 @@ import {
   type ReactNode,
   useCallback,
   useMemo,
-  useRef,
   useState,
 } from "react";
 
@@ -43,29 +42,52 @@ export const ShowHideChainsModal: FC<ShowHideChainsModalProps> = ({
   const isChainEnabled = useChainStore((state) => state.isChainEnabled);
   const enableChains = useChainStore((state) => state.enableChains);
   const disableChains = useChainStore((state) => state.disableChains);
-  const enabledChainsByUser = useChainStore(
-    (state) => state.enabledChainsByUser,
-  );
-  const activeUserKey = useChainStore((state) => state.activeUserKey);
-
   const { balancesByChainIdentifier } = useAllBalances();
 
-  const chainIdsToEnable = useRef<Set<string>>(new Set());
-  const chainIdsToDisable = useRef<Set<string>>(new Set());
+  // Track pending toggle overrides as state (chainId → enabled)
+  const [pendingOverrides, setPendingOverrides] = useState<
+    Map<string, boolean>
+  >(new Map());
 
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   const onOpen = () => setIsOpen(true);
-  const onClose = () => setIsOpen(false);
+  const onClose = () => {
+    setPendingOverrides(new Map());
+    setIsOpen(false);
+  };
 
   const onSave = () => {
-    enableChains(...chainIdsToEnable.current);
-    disableChains(...chainIdsToDisable.current);
-    chainIdsToEnable.current.clear();
-    chainIdsToDisable.current.clear();
+    const toEnable: string[] = [];
+    const toDisable: string[] = [];
+    for (const [chainId, enabled] of pendingOverrides) {
+      if (enabled) {
+        toEnable.push(chainId);
+      } else {
+        toDisable.push(chainId);
+      }
+    }
+    if (toEnable.length > 0) {
+      enableChains(...toEnable);
+    }
+    if (toDisable.length > 0) {
+      disableChains(...toDisable);
+    }
+    setPendingOverrides(new Map());
     onClose();
   };
+
+  const getEffectiveEnabled = useCallback(
+    (chainId: string): boolean => {
+      const override = pendingOverrides.get(chainId);
+      if (override !== undefined) {
+        return override;
+      }
+      return isChainEnabled(chainId);
+    },
+    [pendingOverrides, isChainEnabled],
+  );
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -111,8 +133,8 @@ export const ShowHideChainsModal: FC<ShowHideChainsModalProps> = ({
     );
 
     return [...searchedChains].sort((a, b) => {
-      const aIsEnabled = isChainEnabled(a.chainId);
-      const bIsEnabled = isChainEnabled(b.chainId);
+      const aIsEnabled = getEffectiveEnabled(a.chainId);
+      const bIsEnabled = getEffectiveEnabled(b.chainId);
       if (aIsEnabled && !bIsEnabled) {
         return -1;
       }
@@ -151,7 +173,7 @@ export const ShowHideChainsModal: FC<ShowHideChainsModalProps> = ({
 
       return a.chainName.localeCompare(b.chainName);
     });
-  }, [searchedChains, isChainEnabled, enabledChainsByUser, activeUserKey]);
+  }, [searchedChains, getEffectiveEnabled]);
 
   const getTokenBalances = useCallback(
     (chainId: string): TokenBalance[] => {
@@ -160,15 +182,21 @@ export const ShowHideChainsModal: FC<ShowHideChainsModalProps> = ({
     [balancesByChainIdentifier],
   );
 
-  const handleEnable = useCallback((chainId: string, checked: boolean) => {
-    if (checked) {
-      chainIdsToEnable.current.add(chainId);
-      chainIdsToDisable.current.delete(chainId);
-    } else {
-      chainIdsToDisable.current.add(chainId);
-      chainIdsToEnable.current.delete(chainId);
-    }
-  }, []);
+  const handleEnable = useCallback(
+    (chainId: string, checked: boolean) => {
+      setPendingOverrides((prev) => {
+        const next = new Map(prev);
+        // If override matches store value, remove it (no-op)
+        if (checked === isChainEnabled(chainId)) {
+          next.delete(chainId);
+        } else {
+          next.set(chainId, checked);
+        }
+        return next;
+      });
+    },
+    [isChainEnabled],
+  );
 
   return (
     <>
@@ -224,7 +252,7 @@ export const ShowHideChainsModal: FC<ShowHideChainsModalProps> = ({
                           return true;
                         }
                         case "Show Hidden": {
-                          return !isChainEnabled(chain.chainId);
+                          return !getEffectiveEnabled(chain.chainId);
                         }
                         default: {
                           return false;
@@ -258,6 +286,7 @@ export const ShowHideChainsModal: FC<ShowHideChainsModalProps> = ({
                           <ChainItem
                             key={chain.chainId}
                             chainInfo={chain}
+                            isEnabled={getEffectiveEnabled(chain.chainId)}
                             getTokenBalances={getTokenBalances}
                             onEnable={handleEnable}
                           />
