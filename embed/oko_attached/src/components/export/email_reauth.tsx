@@ -4,7 +4,7 @@ import { OtpInput } from "@oko-wallet/oko-common-ui/otp_input";
 import { ThemeContext } from "@oko-wallet/oko-common-ui/theme";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import type { OAuthState } from "@oko-wallet/oko-sdk-core";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import styles from "./email_reauth.module.scss";
 import {
@@ -39,7 +39,10 @@ export const EmailReauth = () => {
   const webAuth = useMemo(() => getAuth0WebAuth(), []);
 
   const storedEmail = useMemo(() => getStoredEmail(), []);
-  const [step, setStep] = useState<Step>("enter_email");
+  const autoSentRef = useRef(false);
+  const [step, setStep] = useState<Step>(
+    storedEmail ? "verify_code" : "enter_email",
+  );
   const [email, setEmail] = useState(storedEmail ?? "");
   const [otpDigits, setOtpDigits] = useState<string[]>(
     Array.from({ length: CODE_LENGTH }, () => ""),
@@ -84,7 +87,23 @@ export const EmailReauth = () => {
       return;
     }
 
-  }, [nonce]);
+    // Auto-send OTP if email was pre-filled from stored state
+    if (storedEmail && !autoSentRef.current) {
+      autoSentRef.current = true;
+      console.log(`${LOG_PREFIX} auto-sending OTP for stored email`);
+      sendEmailOTPCode({ webAuth, email: storedEmail })
+        .then(() => {
+          setResendTimer(RESEND_COOLDOWN_SECONDS);
+        })
+        .catch((err) => {
+          console.error(`${LOG_PREFIX} auto-send OTP failed`, err);
+          setStep("enter_email");
+          setErrorMessage(
+            err instanceof Error ? err.message : "Failed to send the code.",
+          );
+        });
+    }
+  }, [nonce, storedEmail, webAuth]);
 
   // Resend timer countdown
   useEffect(() => {
