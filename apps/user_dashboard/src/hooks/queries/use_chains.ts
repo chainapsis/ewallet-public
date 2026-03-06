@@ -69,10 +69,8 @@ export function useEnabledChains() {
     const userChainIds = activeUserKey
       ? enabledChainsByUser[activeUserKey]
       : undefined;
-    // Use default if no user preferences or empty array
-    const enabledChainIds = userChainIds?.length
-      ? userChainIds
-      : [...DEFAULT_ENABLED_CHAINS];
+    // Use default only if no user preferences exist
+    const enabledChainIds = userChainIds ?? [...DEFAULT_ENABLED_CHAINS];
 
     const enabledSet = new Set(enabledChainIds);
     return chains.filter((chain) =>
