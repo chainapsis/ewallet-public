@@ -465,19 +465,9 @@ Backups are automatically created daily and stored in the directory specified by
 the `DUMP_DIR` environment variable in your `.env` file. The system maintains a
 7-day rolling backup retention policy.
 
-#### Manual Backup Operations
+#### Checking Backup History
 
-You can manually create and restore backups using the REST API:
-
-**Create a manual backup:**
-
-```bash
-curl -X POST http://localhost:${SERVER_PORT}/pg_dump/v1/backup \
-  -H "Content-Type: application/json" \
-  -d '{"password": "your_admin_password"}'
-```
-
-**List available backups:**
+You can check available backups using the REST API:
 
 ```bash
 # Get all backups
@@ -488,20 +478,6 @@ curl -X POST http://localhost:${SERVER_PORT}/pg_dump/v1/get_backup_history \
   -H "Content-Type: application/json" \
   -d '{"days": 7}'
 ```
-
-**Restore from a backup:**
-
-```bash
-curl -X POST http://localhost:${SERVER_PORT}/pg_dump/v1/restore \
-  -H "Content-Type: application/json" \
-  -d '{
-    "password": "your_admin_password",
-    "dump_path": "/home/node/key_share_node/dump/backup_file.dump"
-  }'
-```
-
-> **Note**: Use the container path (`/home/node/key_share_node/dump/`) when
-> specifying the dump file path, not the host path.
 
 ## Upgrade
 
