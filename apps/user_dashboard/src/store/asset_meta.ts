@@ -9,8 +9,15 @@ import type { Currency } from "@oko-wallet-user-dashboard/types/chain";
 
 type AssetMetaMap = Record<string, AssetMeta>;
 
-function cacheKey(chainIdentifier: string, contractAddress: string): string {
-  return `${chainIdentifier}_${contractAddress.toLowerCase()}`;
+function normalizeDenom(denom: string): string {
+  if (denom.startsWith("ibc/") || denom.startsWith("IBC/")) {
+    return "ibc/" + denom.slice(4).toUpperCase();
+  }
+  return denom.toLowerCase();
+}
+
+function cacheKey(chainIdentifier: string, denom: string): string {
+  return `${chainIdentifier}_${normalizeDenom(denom)}`;
 }
 
 function metaToCurrency(meta: AssetMeta): Currency {
@@ -27,12 +34,23 @@ function metaToCurrency(meta: AssetMeta): Currency {
   };
 }
 
-function createRawFallbackCurrency(contractAddress: string): Currency {
-  const addr = contractAddress.toLowerCase();
+function createFallbackCurrency(denom: string): Currency {
+  if (denom.startsWith("0x")) {
+    const addr = denom.toLowerCase();
+    return {
+      coinDenom: `${addr.slice(0, 6)}...${addr.slice(-4)}`,
+      coinMinimalDenom: `erc20:${addr}`,
+      coinDecimals: 18,
+    };
+  }
+  const display =
+    denom.length > 16
+      ? `${denom.slice(0, 10)}...${denom.slice(-4)}`
+      : denom;
   return {
-    coinDenom: `${addr.slice(0, 6)}...${addr.slice(-4)}`,
-    coinMinimalDenom: `erc20:${addr}`,
-    coinDecimals: 18,
+    coinDenom: display,
+    coinMinimalDenom: denom,
+    coinDecimals: 6,
   };
 }
 
@@ -52,19 +70,20 @@ export const useAssetMetaStore = create(
       const missing: {
         chain_identifier: string;
         minimal_denom: string;
-        contractAddress: string;
+        normalizedKey: string;
       }[] = [];
 
       for (const { chainIdentifier, contractAddress } of tokens) {
+        const normalized = normalizeDenom(contractAddress);
         const key = cacheKey(chainIdentifier, contractAddress);
         const cached = current[key];
         if (cached) {
-          result.set(contractAddress.toLowerCase(), metaToCurrency(cached));
+          result.set(normalized, metaToCurrency(cached));
         } else {
           missing.push({
             chain_identifier: chainIdentifier,
-            minimal_denom: contractAddress.toLowerCase(),
-            contractAddress,
+            minimal_denom: normalized,
+            normalizedKey: normalized,
           });
         }
       }
@@ -79,30 +98,35 @@ export const useAssetMetaStore = create(
           });
 
           const next: AssetMetaMap = { ...get().metaMap };
-          const fetchedDenoms = new Set<string>();
+          const fetchedKeys = new Set<string>();
 
           for (const meta of fetched) {
-            next[`${meta.chain_identifier}_${meta.denom}`] = meta;
-            result.set(meta.denom.toLowerCase(), metaToCurrency(meta));
-            fetchedDenoms.add(meta.denom.toLowerCase());
+            const normalized = normalizeDenom(meta.denom);
+            next[`${meta.chain_identifier}_${normalized}`] = meta;
+            result.set(normalized, metaToCurrency(meta));
+            fetchedKeys.add(normalized);
           }
 
           for (const m of missing) {
-            if (!fetchedDenoms.has(m.minimal_denom.toLowerCase())) {
-              const addr = m.contractAddress.toLowerCase();
-              if (!result.has(addr)) {
-                result.set(addr, createRawFallbackCurrency(addr));
+            if (!fetchedKeys.has(m.normalizedKey)) {
+              if (!result.has(m.normalizedKey)) {
+                result.set(
+                  m.normalizedKey,
+                  createFallbackCurrency(m.normalizedKey),
+                );
               }
             }
           }
 
           set({ metaMap: next });
         } catch (error) {
-          console.error("Failed to fetch ERC20 token metadata:", error);
+          console.error("Failed to fetch token metadata:", error);
           for (const m of missing) {
-            const addr = m.contractAddress.toLowerCase();
-            if (!result.has(addr)) {
-              result.set(addr, createRawFallbackCurrency(addr));
+            if (!result.has(m.normalizedKey)) {
+              result.set(
+                m.normalizedKey,
+                createFallbackCurrency(m.normalizedKey),
+              );
             }
           }
         }
