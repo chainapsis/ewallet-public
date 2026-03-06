@@ -13,6 +13,7 @@ import {
   isAlchemySupported,
 } from "@oko-wallet-user-dashboard/constants/alchemy";
 import { fetchErc20TokenBalances } from "@oko-wallet-user-dashboard/fetch/erc20_token_balances";
+import { DEFAULT_ENABLED_CHAINS } from "@oko-wallet-user-dashboard/state/chains";
 import { useAssetMetaStore } from "@oko-wallet-user-dashboard/store/asset_meta";
 import type {
   Currency,
@@ -24,6 +25,11 @@ import type {
 } from "@oko-wallet-user-dashboard/types/token";
 import { getChainIdentifier } from "@oko-wallet-user-dashboard/utils/chain";
 import { calculateUsdValue } from "@oko-wallet-user-dashboard/utils/format_token_amount";
+import { normalizeIBCDenom } from "@oko-wallet-user-dashboard/utils/normalize_denom";
+
+const CHAIN_ORDER = new Map<string, number>(
+  DEFAULT_ENABLED_CHAINS.map((id, index) => [id, index]),
+);
 
 type PriceMap = Record<string, number | undefined>;
 
@@ -100,6 +106,9 @@ async function getCosmosBalances(
   chain: ModularChainInfo,
   cosmosAddress: string,
   priceMap: PriceMap,
+  resolveTokenMetadata: (
+    tokens: { chainIdentifier: string; contractAddress: string }[],
+  ) => Promise<Map<string, Currency>>,
 ): Promise<TokenBalance[]> {
   const cosmos = chain.cosmos;
   if (!cosmos?.rest) {
@@ -112,11 +121,20 @@ async function getCosmosBalances(
   const mainCurrency = cosmos.stakeCurrency ?? cosmos.currencies[0];
   let mainCurrencyAdded = false;
 
+  const knownCurrencyMap = new Map<string, Currency>();
+  for (const c of cosmos.currencies) {
+    knownCurrencyMap.set(c.coinMinimalDenom, c);
+  }
+
+  const unknownBalances: RawBalance[] = [];
+
   for (const bal of rawBalances) {
-    const currency = cosmos.currencies.find(
-      (c) => c.coinMinimalDenom === bal.denom,
-    );
-    if (currency && BigInt(bal.amount) > BigInt(0)) {
+    if (BigInt(bal.amount) <= BigInt(0)) {
+      continue;
+    }
+
+    const currency = knownCurrencyMap.get(bal.denom);
+    if (currency) {
       results.push(
         buildTokenBalance(chain, currency, bal.amount, cosmosAddress, priceMap),
       );
@@ -125,6 +143,58 @@ async function getCosmosBalances(
         currency.coinMinimalDenom === mainCurrency.coinMinimalDenom
       ) {
         mainCurrencyAdded = true;
+      }
+    } else {
+      unknownBalances.push(bal);
+    }
+  }
+
+  if (unknownBalances.length > 0) {
+    const chainIdentifier = getChainIdentifier(chain.chainId);
+    const tokensToResolve = unknownBalances.map((bal) => ({
+      chainIdentifier,
+      contractAddress: normalizeIBCDenom(bal.denom),
+    }));
+
+    const resolvedMap = await resolveTokenMetadata(tokensToResolve);
+
+    const missingPriceIds: string[] = [];
+    for (const bal of unknownBalances) {
+      const currency = resolvedMap.get(normalizeIBCDenom(bal.denom));
+      if (currency?.coinGeckoId && priceMap[currency.coinGeckoId] === undefined) {
+        missingPriceIds.push(currency.coinGeckoId);
+      }
+    }
+
+    const extraPriceMap: Record<string, number> = {};
+    if (missingPriceIds.length > 0) {
+      try {
+        const priceResponse = await fetchPrices(missingPriceIds);
+        for (const [coinId, data] of Object.entries(priceResponse)) {
+          extraPriceMap[coinId] = data.usd;
+        }
+      } catch (error) {
+        console.error(
+          `Failed to fetch prices for unknown tokens on ${chain.chainId}:`,
+          error,
+        );
+      }
+    }
+
+    const mergedPriceMap: PriceMap = { ...priceMap, ...extraPriceMap };
+
+    for (const bal of unknownBalances) {
+      const currency = resolvedMap.get(normalizeIBCDenom(bal.denom));
+      if (currency) {
+        results.push(
+          buildTokenBalance(
+            chain,
+            currency,
+            bal.amount,
+            cosmosAddress,
+            mergedPriceMap,
+          ),
+        );
       }
     }
   }
@@ -292,7 +362,7 @@ async function fetchChainBalances(
 
   if (chain.cosmos && addresses.cosmos) {
     tasks.push(
-      getCosmosBalances(chain, addresses.cosmos, priceMap).catch((error) => {
+      getCosmosBalances(chain, addresses.cosmos, priceMap, resolveTokenMetadata).catch((error) => {
         console.error(
           `Failed to fetch Cosmos balances for ${chain.chainId}:`,
           error,
@@ -397,7 +467,14 @@ export function useAllBalances() {
 
   const allBalances = balanceQueries
     .flatMap((query) => query.data ?? [])
+    .map((balance) => ({
+      ...balance,
+      priceUsd: balance.token.currency.coinGeckoId
+        ? priceMap[balance.token.currency.coinGeckoId]
+        : undefined,
+    }))
     .sort((a, b) => {
+      // Primary: USD value descending
       const aValue =
         a.priceUsd && a.token.currency.coinDecimals
           ? calculateUsdValue(
@@ -414,7 +491,25 @@ export function useAllBalances() {
               b.priceUsd,
             )
           : 0;
-      return bValue - aValue;
+      if (bValue !== aValue) {
+        return bValue - aValue;
+      }
+
+      // Secondary: tokens with balance above zero rank higher
+      const aHasBalance = Number(a.token.amount) > 0 ? 1 : 0;
+      const bHasBalance = Number(b.token.amount) > 0 ? 1 : 0;
+      if (bHasBalance !== aHasBalance) {
+        return bHasBalance - aHasBalance;
+      }
+
+      // Tertiary: chain order (ETH → SOL → ATOM → OSMO → rest)
+      const aChainOrder =
+        CHAIN_ORDER.get(getChainIdentifier(a.chainInfo.chainId)) ??
+        CHAIN_ORDER.size;
+      const bChainOrder =
+        CHAIN_ORDER.get(getChainIdentifier(b.chainInfo.chainId)) ??
+        CHAIN_ORDER.size;
+      return aChainOrder - bChainOrder;
     });
 
   const balancesByChainIdentifier = new Map();

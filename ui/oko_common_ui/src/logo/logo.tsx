@@ -15,6 +15,7 @@ export const Logo: FC<LogoProps> = ({
   width = 72,
   height = 28,
   className,
+  theme,
 }) => {
   return (
     <div className={styles.logoContainer}>
@@ -22,6 +23,7 @@ export const Logo: FC<LogoProps> = ({
         width={width}
         height={height}
         className={className}
+        theme={theme}
       />
     </div>
   );

@@ -1,21 +1,21 @@
-import { type Response } from "express";
+import { Bytes } from "@oko-wallet/bytes";
 import type {
   ReshareKeyShareV2Request,
   ReshareKeyShareV2RequestBody,
 } from "@oko-wallet/ksn-interface/key_share";
-import { Bytes } from "@oko-wallet/bytes";
 import type { KSNodeApiResponse } from "@oko-wallet/ksn-interface/response";
+import { type Response } from "express";
 
 import { reshareKeyShareV2 } from "@oko-wallet-ksn-server/api/key_share";
-import { type AuthenticatedRequest } from "@oko-wallet-ksn-server/middlewares";
 import { ErrorCodeMap } from "@oko-wallet-ksn-server/error";
-import type { ResponseLocal } from "@oko-wallet-ksn-server/routes/io";
+import { type AuthenticatedRequest } from "@oko-wallet-ksn-server/middlewares";
 import { registry } from "@oko-wallet-ksn-server/openapi/doc";
 import {
+  ErrorResponseSchema,
   ReshareKeyShareV2RequestBodySchema,
   ReshareKeyShareV2SuccessResponseSchema,
-  ErrorResponseSchema,
 } from "@oko-wallet-ksn-server/openapi/schema";
+import type { ResponseLocal } from "@oko-wallet-ksn-server/routes/io";
 
 // --- POST /reshare ---
 registry.registerPath({
@@ -230,6 +230,17 @@ export async function keyshareV2Reshare(
       success: false,
       code: "SHARE_INVALID",
       msg: `Share is not valid for ed25519: ${ed25519ShareRes.err}`,
+    });
+  }
+  const ed25519SeedShareRes = Bytes.fromHexString(
+    body.wallets.ed25519.seed_share,
+    64,
+  );
+  if (!ed25519SeedShareRes.success) {
+    return res.status(400).json({
+      success: false,
+      code: "SHARE_INVALID",
+      msg: `Seed share is not valid for ed25519: ${ed25519SeedShareRes.err}`,
     });
   }
 

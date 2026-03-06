@@ -51,11 +51,11 @@ export const useAssetMetaStore = create(
         }
 
         const currency: Currency = {
-          coinDenom: meta.base.symbol,
-          coinMinimalDenom: meta.base.denom,
-          coinDecimals: meta.base.decimals,
-          coinGeckoId: meta.base.coin_gecko_id ?? undefined,
-          coinImageUrl: meta.base.img_url ?? undefined,
+          coinDenom: meta.symbol,
+          coinMinimalDenom: meta.denom,
+          coinDecimals: meta.decimals,
+          coinGeckoId: meta.coin_gecko_id ?? undefined,
+          coinImageUrl: meta.img_url ?? undefined,
         };
         return currency;
       },
@@ -74,7 +74,7 @@ export const useAssetMetaStore = create(
           if (missing.length > 0) {
             const fetched = await postAssetMeta({ assets: missing });
             for (const meta of fetched) {
-              next[keyOf(meta.base.chain_identifier, meta.base.denom)] = meta;
+              next[keyOf(meta.chain_identifier, meta.denom)] = meta;
             }
           }
           set({ assetMetaMap: next });
@@ -95,11 +95,11 @@ export const useAssetMetaStore = create(
           const meta = map[k];
           if (meta) {
             results.push({
-              coinDenom: meta.base.symbol,
-              coinMinimalDenom: meta.base.denom,
-              coinDecimals: meta.base.decimals,
-              coinGeckoId: meta.base.coin_gecko_id ?? undefined,
-              coinImageUrl: meta.base.img_url ?? undefined,
+              coinDenom: meta.symbol,
+              coinMinimalDenom: meta.denom,
+              coinDecimals: meta.decimals,
+              coinGeckoId: meta.coin_gecko_id ?? undefined,
+              coinImageUrl: meta.img_url ?? undefined,
             });
           } else {
             missing.push({
@@ -115,13 +115,13 @@ export const useAssetMetaStore = create(
             const next: AssetMetaMap = { ...get().assetMetaMap };
 
             for (const meta of fetched) {
-              next[keyOf(meta.base.chain_identifier, meta.base.denom)] = meta;
+              next[keyOf(meta.chain_identifier, meta.denom)] = meta;
               results.push({
-                coinDenom: meta.base.symbol,
-                coinMinimalDenom: meta.base.denom,
-                coinDecimals: meta.base.decimals,
-                coinGeckoId: meta.base.coin_gecko_id ?? undefined,
-                coinImageUrl: meta.base.img_url ?? undefined,
+                coinDenom: meta.symbol,
+                coinMinimalDenom: meta.denom,
+                coinDecimals: meta.decimals,
+                coinGeckoId: meta.coin_gecko_id ?? undefined,
+                coinImageUrl: meta.img_url ?? undefined,
               });
             }
             set({ assetMetaMap: next });
@@ -136,7 +136,7 @@ export const useAssetMetaStore = create(
       setAssetMetaBatch: (items) => {
         const next: AssetMetaMap = { ...get().assetMetaMap };
         for (const meta of items) {
-          next[keyOf(meta.base.chain_identifier, meta.base.denom)] = meta;
+          next[keyOf(meta.chain_identifier, meta.denom)] = meta;
         }
         set({ assetMetaMap: next });
       },

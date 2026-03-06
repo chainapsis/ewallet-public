@@ -1,30 +1,30 @@
-import type { Pool, PoolClient } from "pg";
-import {
-  createUser,
-  getUserByAuthTypeAndUserAuthId,
-  getWalletsByUserId,
-} from "@oko-wallet/ksn-pg-interface";
 import type {
   CheckKeyShareV2Request,
   CheckKeyShareV2Response,
   GetKeyShareV2Request,
   GetKeyShareV2Response,
-  RegisterKeyShareV2Request,
   RegisterEd25519V2Request,
+  RegisterKeyShareV2Request,
   ReshareKeyShareV2Request,
 } from "@oko-wallet/ksn-interface/key_share";
 import type { KSNodeApiResponse } from "@oko-wallet/ksn-interface/response";
+import {
+  createUser,
+  getUserByAuthTypeAndUserAuthId,
+  getWalletsByUserId,
+} from "@oko-wallet/ksn-pg-interface";
+import type { Pool, PoolClient } from "pg";
 
-import { logger } from "@oko-wallet-ksn-server/logger";
 import {
   checkWalletKeyShare,
-  getSecp256k1WalletKeyShare,
   getEd25519WalletKeyShare,
-  registerSecp256k1WalletKeyShare,
+  getSecp256k1WalletKeyShare,
   registerEd25519WalletKeyShare,
-  upsertSecp256k1WalletKeyShare,
+  registerSecp256k1WalletKeyShare,
   upsertEd25519WalletKeyShare,
+  upsertSecp256k1WalletKeyShare,
 } from "./helper";
+import { logger } from "@oko-wallet-ksn-server/logger";
 
 /**
  * Get multiple key shares at once (v2)
@@ -355,13 +355,30 @@ export async function registerEd25519V2(
       };
     }
 
-    // 3. Register ed25519 wallet
-    return await registerEd25519WalletKeyShare(
-      db,
-      { public_key, share, seed_share },
-      userId,
-      encryptionSecret,
-    );
+    // 3. Register ed25519 wallet in a transaction
+    const client = await db.connect();
+    try {
+      await client.query("BEGIN");
+
+      const res = await registerEd25519WalletKeyShare(
+        client,
+        { public_key, share, seed_share },
+        userId,
+        encryptionSecret,
+      );
+      if (res.success === false) {
+        await client.query("ROLLBACK");
+        return res;
+      }
+
+      await client.query("COMMIT");
+      return res;
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
   } catch (error) {
     logger.error("Failed to register ed25519 wallet: %s", error);
     return {

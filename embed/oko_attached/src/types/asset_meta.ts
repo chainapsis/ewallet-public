@@ -13,7 +13,16 @@ export interface IBCMetadata {
   base_denom: string;
 }
 
-interface AssetMetaBase {
+// mongodb table name
+export type AssetMetaDataSource =
+  | "new-coingecko-token-info" // erc20
+  | "chain-registry/token-factory" // factory
+  | "chain-registry/denom-trace" // ibc
+  | "chain-registry" // native
+  | "contract-registry" // cw20
+  | "skip"; // unknown erc20
+
+interface AssetMetaFields {
   meta_id: string;
   chain_identifier: string;
   denom: string;
@@ -24,50 +33,35 @@ interface AssetMetaBase {
   data_source: AssetMetaDataSource;
 }
 
-export interface NativeAssetMeta {
+export interface NativeAssetMeta extends AssetMetaFields {
   token_spec: "native";
   metadata: DefaultMetadata;
-  base: AssetMetaBase;
 }
 
-export interface FactoryAssetMeta {
+export interface FactoryAssetMeta extends AssetMetaFields {
   token_spec: "factory";
   metadata: DefaultMetadata;
-  base: AssetMetaBase;
 }
 
-export interface ERC20AssetMeta {
+export interface ERC20AssetMeta extends AssetMetaFields {
   token_spec: "erc20";
   metadata: ERC20Metadata;
-  base: AssetMetaBase;
 }
 
-export interface IBCAssetMeta {
+export interface IBCAssetMeta extends AssetMetaFields {
   token_spec: "ibc";
   metadata: IBCMetadata;
-  base: AssetMetaBase;
 }
 
-export interface CW20AssetMeta {
+export interface CW20AssetMeta extends AssetMetaFields {
   token_spec: "cw20";
   metadata: ERC20Metadata;
-  base: AssetMetaBase;
 }
 
-export interface SPLAssetMeta {
+export interface SPLAssetMeta extends AssetMetaFields {
   token_spec: "spl";
   metadata: SPLMetadata;
-  base: AssetMetaBase;
 }
-
-// mongodb table name
-export type AssetMetaDataSource =
-  | "new-coingecko-token-info" // erc20
-  | "chain-registry/token-factory" // factory
-  | "chain-registry/denom-trace" // ibc
-  | "chain-registry" // native
-  | "contract-registry" // cw20
-  | "skip"; // unknown erc20
 
 export type AssetMeta =
   | NativeAssetMeta

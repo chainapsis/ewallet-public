@@ -71,13 +71,41 @@ export function useSVMAddress() {
 }
 
 /**
- * Hook to get address for a chain (auto-detects chain type)
+ * Hook to get a single Cosmos chain address (works for non-enabled chains)
+ */
+export function useCosmosAddress(chainId: string | undefined) {
+  const okoCosmos = useSDKState(selectCosmosSDK);
+  const isInitialized = useSDKState(selectCosmosInitialized);
+
+  const query = useQuery({
+    queryKey: ["address", "cosmos", chainId],
+    queryFn: async () => {
+      if (!okoCosmos || !chainId) {
+        return null;
+      }
+      const key = await okoCosmos.getKey(chainId);
+      return key?.bech32Address ?? null;
+    },
+    enabled: !!okoCosmos && isInitialized && !!chainId,
+    staleTime: Infinity,
+    gcTime: Infinity,
+  });
+
+  return {
+    address: query.data ?? undefined,
+    isLoading: query.isLoading,
+  };
+}
+
+/**
+ * Hook to get address for a chain (auto-detects chain type).
+ * Works for both enabled and non-enabled chains.
  */
 export function useChainAddress(chainInfo: ModularChainInfo | undefined) {
   const { address: ethAddress, isLoading: ethLoading } = useEthAddress();
   const { address: svmAddress, isLoading: svmLoading } = useSVMAddress();
-  const { addresses: cosmosAddresses, isLoading: cosmosLoading } =
-    useCosmosAddresses();
+  const { address: cosmosAddress, isLoading: cosmosLoading } =
+    useCosmosAddress(chainInfo?.cosmos ? chainInfo.chainId : undefined);
 
   if (!chainInfo) {
     return { address: undefined, isLoading: false };
@@ -92,10 +120,7 @@ export function useChainAddress(chainInfo: ModularChainInfo | undefined) {
   }
 
   if (chainInfo.cosmos) {
-    return {
-      address: cosmosAddresses[chainInfo.chainId],
-      isLoading: cosmosLoading,
-    };
+    return { address: cosmosAddress, isLoading: cosmosLoading };
   }
 
   return { address: undefined, isLoading: false };

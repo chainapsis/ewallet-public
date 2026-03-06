@@ -4,6 +4,7 @@ import { LogoutIcon } from "@oko-wallet/oko-common-ui/icons/logout";
 import { PasswordIcon } from "@oko-wallet/oko-common-ui/icons/password";
 import { ThreeDotsVerticalIcon } from "@oko-wallet/oko-common-ui/icons/three_dots_vertical";
 import { SidebarAccountInfo } from "@oko-wallet/oko-common-ui/sidebar_account_info";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import type { FC } from "react";
 
@@ -20,6 +21,7 @@ export const AccountInfoWithSubMenu: FC = () => {
 
   const resetUser = useAppState((state) => state.resetUser);
   const resetToken = useAppState((state) => state.resetToken);
+  const queryClient = useQueryClient();
 
   return (
     <AnchoredMenu
@@ -67,6 +69,7 @@ export const AccountInfoWithSubMenu: FC = () => {
           label: "Sign Out",
           icon: <LogoutIcon size={16} />,
           onClick: () => {
+            queryClient.clear();
             resetUser();
             resetToken();
           },

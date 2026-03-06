@@ -12,8 +12,7 @@
   z-index: 10;
 
   &.hidden {
-    visibility: hidden;
-    pointer-events: none;
+    display: none;
   }
 }
 

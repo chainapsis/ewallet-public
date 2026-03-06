@@ -7,7 +7,7 @@ import { useAppState } from "@oko-wallet-ct-dashboard/state";
 
 type ResendCodeProps = {
   disabled: boolean;
-  onResendCode: () => void;
+  onResendCode: (expiresAt: string) => void;
   setError: (message: string) => void;
 };
 
@@ -27,7 +27,7 @@ export const ResendCode = memo<ResendCodeProps>(
       const response = await requestSendVerificationCode(user?.email ?? "");
 
       if (response.success) {
-        onResendCode();
+        onResendCode(response.data.expires_at);
       } else {
         setError(response.msg);
       }

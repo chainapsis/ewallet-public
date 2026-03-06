@@ -12,23 +12,19 @@ import {
 } from "react";
 
 import styles from "./chain_item.module.scss";
-import { useChainStore } from "@oko-wallet-user-dashboard/state/chains";
 import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
 import type { TokenBalance } from "@oko-wallet-user-dashboard/types/token";
 
 interface ChainItemProps {
   chainInfo: ModularChainInfo;
+  isEnabled: boolean;
   getTokenBalances: (chainId: string) => TokenBalance[];
   onEnable: (chainId: string, checked: boolean) => void;
 }
 
 export const ChainItem: FC<ChainItemProps> = memo(
-  ({ chainInfo, getTokenBalances, onEnable }) => {
-    const isChainEnabled = useChainStore((state) => state.isChainEnabled);
+  ({ chainInfo, isEnabled, getTokenBalances, onEnable }) => {
     const [isExpanded, setIsExpanded] = useState(false);
-    const [isEnabled, setIsEnabled] = useState(() =>
-      isChainEnabled(chainInfo.chainId),
-    );
 
     const tokenBalances = useMemo(
       () =>
@@ -43,7 +39,6 @@ export const ChainItem: FC<ChainItemProps> = memo(
 
     const handleToggle = useCallback(
       (checked: boolean) => {
-        setIsEnabled(checked);
         onEnable(chainInfo.chainId, checked);
       },
       [chainInfo.chainId, onEnable],

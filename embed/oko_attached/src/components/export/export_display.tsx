@@ -11,14 +11,18 @@ import {
   requestExportedKeys,
 } from "@oko-wallet-attached/window_msgs/export_key_store";
 
+const LOG = "[attached][export_display]";
+
 function getParentOrigin(): string {
   const raw = new URLSearchParams(window.location.search).get("parent_origin");
   if (!raw) {
+    console.warn(`${LOG} parent_origin param missing, defaulting to *`);
     return "*";
   }
   try {
     return new URL(raw).origin;
   } catch {
+    console.warn(`${LOG} parent_origin parse failed: ${raw}`);
     return "*";
   }
 }
@@ -74,7 +78,8 @@ const MAX_KEY_REQUEST_ATTEMPTS = 3;
 export const ExportDisplay: FC = () => {
   const keyType = useMemo(() => {
     const raw = new URLSearchParams(window.location.search).get("key_type");
-    return raw && VALID_KEY_TYPES.has(raw) ? (raw as CurveType) : null;
+    const parsed = raw && VALID_KEY_TYPES.has(raw) ? (raw as CurveType) : null;
+    return parsed;
   }, []);
 
   const [revealed, setRevealed] = useState(false);
@@ -88,6 +93,7 @@ export const ExportDisplay: FC = () => {
 
     const loadKeys = async () => {
       let stored = getExportedKeys();
+
       if (!stored) {
         // Retry up to 3 times (2s each) to handle timing variance across devices
         for (

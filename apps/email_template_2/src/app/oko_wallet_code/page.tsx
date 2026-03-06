@@ -128,7 +128,7 @@ export default function OkoWalletCodePage() {
                                                     in with Oko.
                                                     <br />
                                                     The code is valid for{" "}
-                                                    <strong>3 Minutes</strong>.
+                                                    <strong>3 minutes</strong>.
                                                   </EmailText>
                                                 </td>
                                               </tr>

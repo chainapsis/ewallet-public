@@ -424,15 +424,14 @@ async function upsertWalletKeyShareInternal(
     );
 
     // Extract share hex (and seed_share if ed25519) from stored data
-    // secp256k1: plain hex string, ed25519: JSON { share, seed_share }
     let existingShareHex: string;
     let existingSeedShareHex: string | undefined;
-    try {
-      const parsed = JSON.parse(existingDecryptedShare);
+    if (curveType === "ed25519") {
+      const parsed = parseEd25519Share(existingDecryptedShare);
       existingShareHex = parsed.share;
       existingSeedShareHex = parsed.seed_share;
-    } catch {
-      existingShareHex = existingDecryptedShare;
+    } else {
+      existingShareHex = parseSecp256k1Share(existingDecryptedShare);
     }
 
     // NOTE: Use constant-time comparison to prevent timing attacks

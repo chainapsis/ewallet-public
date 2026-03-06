@@ -47,6 +47,7 @@ export interface DropdownContentProps {
   children: React.ReactNode;
   className?: string;
   defaultOffsetFromTrigger?: number;
+  align?: "start" | "end";
   style?: React.CSSProperties;
 }
 
@@ -197,6 +198,7 @@ const DropdownContent: FC<DropdownContentProps> = ({
   children,
   className,
   defaultOffsetFromTrigger = 4,
+  align = "start",
   style,
 }) => {
   const { isOpen, contentRef, triggerRef } = useDropdownContext();
@@ -214,7 +216,10 @@ const DropdownContent: FC<DropdownContentProps> = ({
       const contentHeight = contentRef.current?.offsetHeight || 500;
 
       let top = triggerRect.bottom + window.scrollY + defaultOffsetFromTrigger;
-      let left = triggerRect.left + window.scrollX;
+      let left =
+        align === "end"
+          ? triggerRect.right + window.scrollX - contentWidth
+          : triggerRect.left + window.scrollX;
 
       const isBottomOverflow =
         top + contentHeight > window.scrollY + viewportHeight;
@@ -240,7 +245,7 @@ const DropdownContent: FC<DropdownContentProps> = ({
 
       setPosition({ top, left });
     }
-  }, [isOpen]);
+  }, [isOpen, align]);
 
   if (!isOpen) {
     return null;

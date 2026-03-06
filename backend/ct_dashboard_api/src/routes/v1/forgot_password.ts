@@ -76,7 +76,7 @@ registry.registerPath({
 
 export async function forgotPassword(
   req: Request,
-  res: Response<OkoApiResponse<{ message: string }>>,
+  res: Response<OkoApiResponse<{ message: string; expires_at: string }>>,
 ) {
   try {
     const state = req.app.locals;
@@ -172,6 +172,7 @@ export async function forgotPassword(
       success: true,
       data: {
         message: "Reset code sent successfully",
+        expires_at: createRes.data.expires_at.toISOString(),
       },
     });
   } catch (error) {

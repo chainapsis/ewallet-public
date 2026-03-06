@@ -7,9 +7,30 @@
   gap: 6px;
   background: var(--bg-secondary);
   border-radius: 8px;
+  border: 1px solid transparent;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover {
+    background-color: var(--bg-secondary-hover);
+  }
+
+  &:active,
+  &[aria-expanded="true"] {
+    border-color: var(--border-primary);
+    box-shadow:
+      var(--shadow-xs),
+      0 0 0 2px var(--bg-primary),
+      0 0 0 4px #a4a7ae;
+  }
 }
 
 .filterWrapper {
   display: flex;
   gap: 8px;
+}
+
+.dropdownContent {
+  width: 248px;
 }

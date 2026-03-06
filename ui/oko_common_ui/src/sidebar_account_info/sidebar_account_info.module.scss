@@ -28,13 +28,24 @@
 .detailInfo {
   overflow: hidden;
   position: relative;
-  width: 100%;
+  min-width: 0;
+  flex: 1;
 }
 
 .userEmail {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.labelWithIcon {
+  padding-right: 28px;
 }
 
 .topRightIcon {

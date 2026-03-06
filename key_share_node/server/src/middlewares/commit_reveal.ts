@@ -1,19 +1,19 @@
-import type { Request, Response, NextFunction } from "express";
 import { Bytes } from "@oko-wallet/bytes";
+import { buildRevealMessage, sha256 } from "@oko-wallet/crypto-js";
 import { verifySignature } from "@oko-wallet/crypto-js/node/ecdhe";
-import { sha256, buildRevealMessage } from "@oko-wallet/crypto-js";
-import {
-  getCommitRevealSessionBySessionId,
-  createCommitRevealApiCall,
-  updateCommitRevealSessionState,
-  hasCommitRevealApiBeenCalled,
-} from "@oko-wallet/ksn-pg-interface/commit_reveal";
 import type { ApiName } from "@oko-wallet/ksn-interface/commit_reveal";
+import {
+  createCommitRevealApiCall,
+  getCommitRevealSessionBySessionId,
+  hasCommitRevealApiBeenCalled,
+  updateCommitRevealSessionState,
+} from "@oko-wallet/ksn-pg-interface/commit_reveal";
+import type { NextFunction, Request, Response } from "express";
 
-import { ErrorCodeMap } from "@oko-wallet-ksn-server/error";
 import { isApiAllowed, isFinalApi } from "@oko-wallet-ksn-server/commit_reveal";
-import type { ServerState } from "@oko-wallet-ksn-server/state";
+import { ErrorCodeMap } from "@oko-wallet-ksn-server/error";
 import { logger } from "@oko-wallet-ksn-server/logger";
+import type { ServerState } from "@oko-wallet-ksn-server/state";
 
 const DEFAULT_AUTH_TYPE = "google";
 
@@ -218,7 +218,8 @@ export function commitRevealMiddleware(apiName: ApiName) {
 
     res.locals.cr_session_id = cr_session_id;
 
-    // Record API call and update session state on successful response
+    // Record API call async after response so that the client (attached) can
+    // retry within the same session if the handler fails mid-way.
     res.on("finish", async () => {
       if (res.statusCode >= 200 && res.statusCode < 300) {
         const client = await state.db.connect();
