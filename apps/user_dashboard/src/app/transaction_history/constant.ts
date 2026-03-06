@@ -5,12 +5,6 @@ import {
 
 export const TRANSACTION_HISTORY_SUPPORT_LIST = [
   {
-    chainId: "cosmoshub-4",
-    explorerName: "Mintscan",
-    explorerUrl: "https://www.mintscan.io/cosmos",
-    addressPath: "/address",
-  },
-  {
     chainId: ETHEREUM_MAINNET_CHAIN_ID,
     explorerName: "Etherscan",
     explorerUrl: "https://etherscan.io",
@@ -23,15 +17,21 @@ export const TRANSACTION_HISTORY_SUPPORT_LIST = [
     addressPath: "/account",
   },
   {
-    chainId: "interwoven-1",
-    explorerName: "Initia Scan",
-    explorerUrl: "https://scan.initia.xyz/interwoven-1",
+    chainId: "cosmoshub-4",
+    explorerName: "Mintscan",
+    explorerUrl: "https://www.mintscan.io/cosmos",
     addressPath: "/address",
   },
   {
     chainId: "osmosis-1",
     explorerName: "Mintscan",
     explorerUrl: "https://www.mintscan.io/osmosis",
+    addressPath: "/address",
+  },
+  {
+    chainId: "interwoven-1",
+    explorerName: "Initia Scan",
+    explorerUrl: "https://scan.initia.xyz/interwoven-1",
     addressPath: "/address",
   },
 ];

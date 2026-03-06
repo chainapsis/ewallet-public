@@ -22,10 +22,10 @@ export default function Page() {
       </div>
 
       <div className={styles.gridContainer}>
-        {TRANSACTION_HISTORY_SUPPORT_LIST.map((item, index) => {
+        {TRANSACTION_HISTORY_SUPPORT_LIST.map((item) => {
           return (
             <TxHistorySupportItem
-              key={index}
+              key={item.chainId}
               chainId={item.chainId}
               explorerName={item.explorerName}
               explorerUrl={item.explorerUrl}
