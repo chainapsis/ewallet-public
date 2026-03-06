@@ -17,6 +17,7 @@ import {
   sendEmailOTPCode,
   verifyEmailOTPCode,
 } from "@oko-wallet-attached/lib/auth0";
+import { useAppState } from "@oko-wallet-attached/store/app";
 
 const CODE_LENGTH = 6;
 const RESEND_COOLDOWN_SECONDS = 180;
@@ -24,12 +25,22 @@ const LOG_PREFIX = "[attached][email_reauth]";
 
 type Step = "enter_email" | "verify_code";
 
+function getStoredEmail(): string | null {
+  const params = new URLSearchParams(window.location.search);
+  const hostOrigin = params.get("host_origin");
+  if (!hostOrigin) {
+    return null;
+  }
+  return useAppState.getState().getWallet(hostOrigin)?.email ?? null;
+}
+
 export const EmailReauth = () => {
   const theme = useContext(ThemeContext);
   const webAuth = useMemo(() => getAuth0WebAuth(), []);
 
+  const storedEmail = useMemo(() => getStoredEmail(), []);
   const [step, setStep] = useState<Step>("enter_email");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(storedEmail ?? "");
   const [otpDigits, setOtpDigits] = useState<string[]>(
     Array.from({ length: CODE_LENGTH }, () => ""),
   );
@@ -70,7 +81,9 @@ export const EmailReauth = () => {
       setErrorMessage(
         "Cannot find embedded iframe. Make sure this page was opened from the dashboard.",
       );
+      return;
     }
+
   }, [nonce]);
 
   // Resend timer countdown
