@@ -8,6 +8,7 @@
 .customerInfo {
   display: flex;
   align-items: center;
+  min-width: 0;
 
   // Resize logo to 40x40
   img {
@@ -15,6 +16,7 @@
     height: 40px;
     border-radius: 8px;
     object-fit: cover;
+    flex-shrink: 0;
   }
 }
 
@@ -22,6 +24,7 @@
   width: 40px;
   height: 40px;
   padding: 8px 0;
+  flex-shrink: 0;
 
   display: flex;
   justify-content: center;
@@ -34,12 +37,31 @@
   text-align: center;
 }
 
+.spacer8 {
+  width: 8px;
+  flex-shrink: 0;
+}
+
+.spacer4 {
+  width: 4px;
+  flex-shrink: 0;
+}
+
+.customerLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
 .customerUrl {
   display: flex;
   align-items: center;
   gap: 4px;
   padding: 4px 8px;
   cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
 
   &:hover {
     border-radius: 8px;

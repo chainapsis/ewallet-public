@@ -1,7 +1,6 @@
 "use client";
 
 import { ExternalLinkOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/external_link_outlined";
-import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import Link from "next/link";
 import type { FC } from "react";
@@ -31,12 +30,18 @@ export const AccountInfo: FC = () => {
             {customer.data?.label.slice(0, 2).toUpperCase()}
           </Typography>
         )}
-        <Spacing width={8} />
+        <div className={styles.spacer8} />
 
-        <Typography tagType="span" size="xl" weight="semibold" color="primary">
+        <Typography
+          tagType="span"
+          size="xl"
+          weight="semibold"
+          color="primary"
+          className={styles.customerLabel}
+        >
           {customer.data?.label}
         </Typography>
-        <Spacing width={4} />
+        <div className={styles.spacer4} />
 
         <Link
           href={customer.data?.url ?? ""}
