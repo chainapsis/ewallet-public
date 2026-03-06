@@ -305,6 +305,7 @@ export const ShowHideChainsModal: FC<ShowHideChainsModalProps> = ({
                 fullWidth
                 className={styles.saveButton}
                 onClick={onSave}
+                disabled={pendingOverrides.size === 0}
               >
                 Save
               </Button>
