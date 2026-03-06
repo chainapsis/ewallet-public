@@ -37,8 +37,8 @@ export const SidebarAccountInfo: FC<SidebarAccountInfoProps> = ({
       )}
 
       <div className={styles.detailInfo}>
-        <span className={styles.topRightIcon}>{TopRightIcon}</span>
-        <Typography size="sm" weight="semibold" color="primary" className={styles.label}>
+        {TopRightIcon && <span className={styles.topRightIcon}>{TopRightIcon}</span>}
+        <Typography size="sm" weight="semibold" color="primary" className={cn(styles.label, TopRightIcon ? styles.labelWithIcon : undefined)}>
           {label}
         </Typography>
         <Typography size="sm" color="tertiary" className={styles.userEmail}>
