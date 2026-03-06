@@ -39,6 +39,7 @@
       "embed/oko_attached",
       "ui/oko_common_ui",
       "apps/demo_web",
+      "apps/attached_proxy_web",
       "apps/oko_admin_web",
       "apps/customer_dashboard",
       "apps/docs_web",
