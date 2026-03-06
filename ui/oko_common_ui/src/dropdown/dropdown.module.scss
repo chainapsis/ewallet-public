@@ -48,16 +48,17 @@ $z-index: 1000;
   font-family: Inter;
   display: flex;
   align-items: center;
-  width: calc(100% - 6px);
-  padding: 8px 13px;
-  margin: 0 3px;
+  width: calc(100% - 12px);
+  padding: 8px 10px;
+  margin: 1px 6px;
   border-radius: 6px;
 
   cursor: pointer;
   border: none;
   background: none;
   font-size: 14px;
-  color: var(--text-primary);
+  font-weight: 600;
+  color: var(--text-secondary);
   text-align: left;
   pointer-events: auto;
 

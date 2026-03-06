@@ -31,14 +31,18 @@ export const ShowHideChainsFilters: FC<ShowHideChainsFiltersProps> = ({
     <>
       <div className={styles.filterWrapper}>
         <FilterDropdown
+          align="start"
           options={visibilityOptions}
           value={visibility}
           onChange={setVisibility}
+          contentClassName={styles.dropdownContent}
         />
         <FilterDropdown
+          align="end"
           options={ecosystemFilterOptions}
           value={ecosystem}
           onChange={setEcosystem}
+          contentClassName={styles.dropdownContent}
         />
       </div>
 
@@ -56,6 +60,8 @@ type FilterDropdownProps<
   options: T;
   value: T[number];
   onChange: (value: T[number]) => void;
+  align?: "start" | "end";
+  contentClassName?: string;
 };
 
 const FilterDropdown = <
@@ -63,7 +69,9 @@ const FilterDropdown = <
 >({
   options,
   value,
+  align,
   onChange,
+  contentClassName,
 }: FilterDropdownProps<T>) => {
   return (
     <Dropdown>
@@ -79,7 +87,11 @@ const FilterDropdown = <
           />
         </div>
       </Dropdown.Trigger>
-      <Dropdown.Content className={styles.dropdownContent}>
+      <Dropdown.Content
+        className={contentClassName}
+        defaultOffsetFromTrigger={16}
+        align={align}
+      >
         {options.map((option) => (
           <Dropdown.Item key={option} onClick={() => onChange(option)}>
             {option}
