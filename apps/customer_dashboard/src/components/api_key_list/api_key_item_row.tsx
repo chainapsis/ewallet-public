@@ -13,6 +13,7 @@ import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import { type FC, useState } from "react";
 
 import styles from "./api_key_list.module.scss";
+import { displayToast } from "@oko-wallet-ct-dashboard/components/toast";
 
 export type APIKeyItemRowProps = {
   apiKey: string;
@@ -29,13 +30,14 @@ export const APIKeyItemRow: FC<APIKeyItemRowProps> = ({
   createdDate,
   onDelete,
 }) => {
-  const [isCopied, setIsCopied] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(apiKey);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2000);
+    displayToast({
+      variant: "success",
+      title: "Copied!",
+    });
   };
 
   const apiKeyHalfLength = Math.floor(apiKey.length / 2);
@@ -79,24 +81,13 @@ export const APIKeyItemRow: FC<APIKeyItemRowProps> = ({
 
         <Spacing width={4} />
 
-        {isCopied ? (
-          <Typography
-            tagType="span"
-            size="xs"
-            color="success-primary"
-            className={styles.copiedText}
-          >
-            Copied ✓
-          </Typography>
-        ) : (
-          <button
-            type="button"
-            onClick={handleCopy}
-            className={styles.buttonIcon}
-          >
-            <CopyOutlinedIcon color="var(--fg-tertiary)" size={20} />
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={handleCopy}
+          className={styles.buttonIcon}
+        >
+          <CopyOutlinedIcon color="var(--fg-tertiary)" size={20} />
+        </button>
       </TableCell>
 
       <TableCell className={styles.dateCell}>
@@ -123,7 +114,12 @@ export const APIKeyItemRow: FC<APIKeyItemRowProps> = ({
               onClick: () => onDelete(keyId),
               className: styles.deleteMenuItem,
               labelColor: "error-primary",
-              icon: <TrashIcon color="var(--fg-error-secondary, #f04438)" size={24} />,
+              icon: (
+                <TrashIcon
+                  color="var(--fg-error-secondary, #f04438)"
+                  size={24}
+                />
+              ),
             },
           ]}
         />
