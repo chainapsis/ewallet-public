@@ -3,6 +3,8 @@ import type {
   OkoWalletInterface,
 } from "@oko-wallet-sdk-core/types";
 
+const TIMEOUT_MS = 30_000;
+
 export async function sendMsgToIframe(
   this: OkoWalletInterface,
   msg: OkoWalletMsg,
@@ -14,10 +16,21 @@ export async function sendMsgToIframe(
     throw new Error("iframe contentWindow is null");
   }
 
-  return new Promise<OkoWalletMsg>((resolve) => {
+  return new Promise<OkoWalletMsg>((resolve, reject) => {
     const channel = new MessageChannel();
 
+    const timer = setTimeout(() => {
+      channel.port1.onmessage = null;
+      reject(
+        new Error(
+          `[oko] iframe response timeout (${TIMEOUT_MS}ms), msg_type: ${msg.msg_type}`,
+        ),
+      );
+    }, TIMEOUT_MS);
+
     channel.port1.onmessage = (event: MessageEvent) => {
+      clearTimeout(timer);
+
       const data = event.data as OkoWalletMsg;
 
       console.debug("[oko] reply recv", data);
