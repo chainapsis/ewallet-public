@@ -13,6 +13,7 @@ import {
   isAlchemySupported,
 } from "@oko-wallet-user-dashboard/constants/alchemy";
 import { fetchErc20TokenBalances } from "@oko-wallet-user-dashboard/fetch/erc20_token_balances";
+import { DEFAULT_ENABLED_CHAINS } from "@oko-wallet-user-dashboard/state/chains";
 import { useAssetMetaStore } from "@oko-wallet-user-dashboard/store/asset_meta";
 import type {
   Currency,
@@ -24,6 +25,10 @@ import type {
 } from "@oko-wallet-user-dashboard/types/token";
 import { getChainIdentifier } from "@oko-wallet-user-dashboard/utils/chain";
 import { calculateUsdValue } from "@oko-wallet-user-dashboard/utils/format_token_amount";
+
+const CHAIN_ORDER = new Map<string, number>(
+  DEFAULT_ENABLED_CHAINS.map((id, index) => [id, index]),
+);
 
 type PriceMap = Record<string, number | undefined>;
 
@@ -398,6 +403,7 @@ export function useAllBalances() {
   const allBalances = balanceQueries
     .flatMap((query) => query.data ?? [])
     .sort((a, b) => {
+      // Primary: USD value descending
       const aValue =
         a.priceUsd && a.token.currency.coinDecimals
           ? calculateUsdValue(
@@ -414,7 +420,18 @@ export function useAllBalances() {
               b.priceUsd,
             )
           : 0;
-      return bValue - aValue;
+      if (bValue !== aValue) {
+        return bValue - aValue;
+      }
+
+      // Secondary: chain order (ETH → SOL → ATOM → OSMO → rest)
+      const aChainOrder =
+        CHAIN_ORDER.get(getChainIdentifier(a.chainInfo.chainId)) ??
+        CHAIN_ORDER.size;
+      const bChainOrder =
+        CHAIN_ORDER.get(getChainIdentifier(b.chainInfo.chainId)) ??
+        CHAIN_ORDER.size;
+      return aChainOrder - bChainOrder;
     });
 
   const balancesByChainIdentifier = new Map();
