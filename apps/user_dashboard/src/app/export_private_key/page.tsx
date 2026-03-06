@@ -11,7 +11,7 @@ import { GoogleIcon } from "@oko-wallet/oko-common-ui/icons/google_icon";
 import { InfoCircleIcon } from "@oko-wallet/oko-common-ui/icons/info_circle";
 import { InitiaIcon } from "@oko-wallet/oko-common-ui/icons/initia_icon";
 import { MailboxIcon } from "@oko-wallet/oko-common-ui/icons/mailbox";
-import { RialoIcon } from "@oko-wallet/oko-common-ui/icons/rialo_icon";
+// import { RialoIcon } from "@oko-wallet/oko-common-ui/icons/rialo_icon";
 import { SolanaCircleIcon } from "@oko-wallet/oko-common-ui/icons/solana_circle_icon";
 import { TelegramIcon } from "@oko-wallet/oko-common-ui/icons/telegram_icon";
 import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
@@ -152,7 +152,7 @@ const EVM_COSMOS_CHAINS = [
 
 const SVM_CHAINS = [
   { name: "Solana", icon: <SolanaCircleIcon width={16} height={16} /> },
-  { name: "Rialo", icon: <RialoIcon width={16} height={16} /> },
+  // { name: "Rialo", icon: <RialoIcon width={16} height={16} /> },
 ];
 
 const ChainsList = ({
