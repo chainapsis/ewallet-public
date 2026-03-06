@@ -75,6 +75,7 @@ export const EmailReauth = () => {
       sendReauthParamsToIframe(iframe, { nonce });
       setIframeSent(true);
     } else {
+      setStep("enter_email");
       setErrorMessage(
         "Cannot find embedded iframe. Make sure this page was opened from the dashboard.",
       );
