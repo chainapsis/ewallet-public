@@ -200,6 +200,16 @@ export async function registerKeyshareEd25519(
     });
   }
 
+  // Validate seed_share (64 bytes)
+  const seedShareBytesRes = Bytes.fromHexString(body.seed_share, 64);
+  if (seedShareBytesRes.success === false) {
+    return res.status(400).json({
+      success: false,
+      code: "SHARE_INVALID",
+      msg: `Seed share is not valid: ${seedShareBytesRes.err}`,
+    });
+  }
+
   const result = await registerEd25519V2(
     state.db,
     {
