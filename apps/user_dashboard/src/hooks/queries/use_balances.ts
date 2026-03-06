@@ -402,6 +402,12 @@ export function useAllBalances() {
 
   const allBalances = balanceQueries
     .flatMap((query) => query.data ?? [])
+    .map((balance) => ({
+      ...balance,
+      priceUsd: balance.token.currency.coinGeckoId
+        ? priceMap[balance.token.currency.coinGeckoId]
+        : undefined,
+    }))
     .sort((a, b) => {
       // Primary: USD value descending
       const aValue =
