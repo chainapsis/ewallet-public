@@ -424,7 +424,14 @@ export function useAllBalances() {
         return bValue - aValue;
       }
 
-      // Secondary: chain order (ETH → SOL → ATOM → OSMO → rest)
+      // Secondary: tokens with balance above zero rank higher
+      const aHasBalance = Number(a.token.amount) > 0 ? 1 : 0;
+      const bHasBalance = Number(b.token.amount) > 0 ? 1 : 0;
+      if (bHasBalance !== aHasBalance) {
+        return bHasBalance - aHasBalance;
+      }
+
+      // Tertiary: chain order (ETH → SOL → ATOM → OSMO → rest)
       const aChainOrder =
         CHAIN_ORDER.get(getChainIdentifier(a.chainInfo.chainId)) ??
         CHAIN_ORDER.size;
