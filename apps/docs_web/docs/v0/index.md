@@ -117,7 +117,10 @@ dashboards.
 
 - Google OAuth
 - Email
-- Coming soon: Discord, Telegram, Twitter
+- GitHub
+- Discord
+- X (Twitter)
+- Telegram
 
 **Oko SDK**
 
