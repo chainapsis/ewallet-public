@@ -32,6 +32,10 @@ const SendVerificationResponseSchema = registry.register(
     message: z.string().openapi({
       description: "Success message indicating verification code was sent",
     }),
+    expires_at: z.string().openapi({
+      description:
+        "ISO 8601 expiration timestamp of the verification code",
+    }),
   }),
 );
 
@@ -171,6 +175,10 @@ const ForgotPasswordResponseSchema = registry.register(
   z.object({
     message: z.string().openapi({
       description: "Success message indicating reset code was sent",
+    }),
+    expires_at: z.string().openapi({
+      description:
+        "ISO 8601 expiration timestamp of the reset code",
     }),
   }),
 );

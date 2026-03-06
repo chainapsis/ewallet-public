@@ -54,6 +54,10 @@
   min-width: 264px;
 }
 
-.deleteMenuItem:hover p {
+.deleteMenu > ul:has(li:hover) {
+  background-color: var(--bg-primary-hover, #fafafa);
+}
+
+.deleteMenuItem.deleteMenuItem:hover p {
   color: var(--text-error-primary_hover, #b42318);
 }

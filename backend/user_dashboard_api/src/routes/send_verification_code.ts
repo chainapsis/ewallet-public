@@ -133,6 +133,7 @@ export async function sendVerificationCodeRoute(
       success: true,
       data: {
         message: sendEmailVerificationCodeRes.data.message,
+        expires_at: sendEmailVerificationCodeRes.data.expires_at,
       },
     });
     return;

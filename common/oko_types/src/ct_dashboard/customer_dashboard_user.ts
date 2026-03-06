@@ -75,6 +75,7 @@ export type VerifyCustomerAccountEmailResponse = {
 
 export interface SendVerificationResponse {
   message: string;
+  expires_at: string;
 }
 
 export interface LoginResponse {

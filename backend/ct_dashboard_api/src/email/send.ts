@@ -132,6 +132,7 @@ export async function sendEmailVerificationCode(
     success: true,
     data: {
       message: "Verification code sent successfully",
+      expires_at: createEmailVerificationRes.data.expires_at.toISOString(),
     },
   };
 }

@@ -76,8 +76,8 @@ export async function requestChangePassword(
 
 export async function requestForgotPassword(
   email: string,
-): Promise<OkoApiResponse<{ message: string }>> {
-  return errorHandle<{ message: string }>(() =>
+): Promise<OkoApiResponse<{ message: string; expires_at: string }>> {
+  return errorHandle<{ message: string; expires_at: string }>(() =>
     fetch(`${CUSTOMER_V1_ENDPOINT}/customer/auth/forgot-password`, {
       method: "POST",
       body: JSON.stringify({ email }),

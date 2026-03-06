@@ -24,7 +24,7 @@ export default function Home() {
               <HomeBanner
                 title="Read our docs"
                 description="Everything you need to get started with Oko."
-                buttonText="Open docs"
+                buttonText="Open Docs"
                 buttonLink={process.env.NEXT_PUBLIC_OKO_DOCS_ENDPOINT}
                 type="docs"
               />

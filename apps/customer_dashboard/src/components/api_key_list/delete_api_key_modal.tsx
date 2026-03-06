@@ -109,7 +109,16 @@ export const DeleteAPIKeyModal: FC<DeleteAPIKeyModalProps> = ({
             placeholder="Delete"
             value={confirmText}
             onChange={(e) => {
-              setConfirmText(e.target.value);
+              const value = e.target.value;
+              setConfirmText(value);
+              if (
+                value.length > 0 &&
+                value !== "Delete".slice(0, value.length)
+              ) {
+                setTouched(true);
+              } else {
+                setTouched(false);
+              }
             }}
             onBlur={() => setTouched(true)}
             onKeyDown={(e) => {
