@@ -17,7 +17,6 @@ import {
   sendEmailOTPCode,
   verifyEmailOTPCode,
 } from "@oko-wallet-attached/lib/auth0";
-import { useAppState } from "@oko-wallet-attached/store/app";
 
 const CODE_LENGTH = 6;
 const RESEND_COOLDOWN_SECONDS = 180;
@@ -25,25 +24,20 @@ const LOG_PREFIX = "[attached][email_reauth]";
 
 type Step = "enter_email" | "verify_code";
 
-function getStoredEmail(): string | null {
-  const params = new URLSearchParams(window.location.search);
-  const hostOrigin = params.get("host_origin");
-  if (!hostOrigin) {
-    return null;
-  }
-  return useAppState.getState().getWallet(hostOrigin)?.email ?? null;
+function getEmailParam(): string | null {
+  const raw = new URLSearchParams(window.location.search).get("email");
+  return raw?.trim() || null;
 }
 
 export const EmailReauth = () => {
   const theme = useContext(ThemeContext);
   const webAuth = useMemo(() => getAuth0WebAuth(), []);
 
-  const storedEmail = useMemo(() => getStoredEmail(), []);
-  const autoSentRef = useRef(false);
+  const initialEmail = useMemo(() => getEmailParam(), []);
   const [step, setStep] = useState<Step>(
-    storedEmail ? "verify_code" : "enter_email",
+    initialEmail ? "verify_code" : "enter_email",
   );
-  const [email, setEmail] = useState(storedEmail ?? "");
+  const [email, setEmail] = useState(initialEmail ?? "");
   const [otpDigits, setOtpDigits] = useState<string[]>(
     Array.from({ length: CODE_LENGTH }, () => ""),
   );
@@ -86,24 +80,41 @@ export const EmailReauth = () => {
       );
       return;
     }
+  }, [nonce]);
 
-    // Auto-send OTP if email was pre-filled from stored state
-    if (storedEmail && !autoSentRef.current) {
-      autoSentRef.current = true;
-      console.log(`${LOG_PREFIX} auto-sending OTP for stored email`);
-      sendEmailOTPCode({ webAuth, email: storedEmail })
-        .then(() => {
+  // Auto-send OTP if email was passed via query param
+  const autoSentRef = useRef(false);
+  useEffect(() => {
+    const paramEmail = getEmailParam();
+    if (!paramEmail || !iframeSent || autoSentRef.current) {
+      return;
+    }
+
+    autoSentRef.current = true;
+    setEmail(paramEmail);
+    console.log(`${LOG_PREFIX} auto-sending OTP for`, paramEmail);
+
+    let cancelled = false;
+    sendEmailOTPCode({ webAuth, email: paramEmail })
+      .then(() => {
+        if (!cancelled) {
+          setStep("verify_code");
           setResendTimer(RESEND_COOLDOWN_SECONDS);
-        })
-        .catch((err) => {
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
           console.error(`${LOG_PREFIX} auto-send OTP failed`, err);
-          setStep("enter_email");
           setErrorMessage(
             err instanceof Error ? err.message : "Failed to send the code.",
           );
-        });
-    }
-  }, [nonce, storedEmail, webAuth]);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [iframeSent, webAuth]);
 
   // Resend timer countdown
   useEffect(() => {
