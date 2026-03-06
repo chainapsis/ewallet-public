@@ -218,7 +218,8 @@ export function commitRevealMiddleware(apiName: ApiName) {
 
     res.locals.cr_session_id = cr_session_id;
 
-    // Record API call and update session state on successful response
+    // Record API call async after response so that the client (attached) can
+    // retry within the same session if the handler fails mid-way.
     res.on("finish", async () => {
       if (res.statusCode >= 200 && res.statusCode < 300) {
         const client = await state.db.connect();
