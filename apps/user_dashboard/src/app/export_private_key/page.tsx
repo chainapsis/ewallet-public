@@ -525,7 +525,7 @@ const Page = () => {
       const popupLeft = Math.max((window.screen.width - popupWidth) / 2, 0);
       const popupTop = Math.max((window.screen.height - popupHeight) / 2, 0);
       popup = window.open(
-        `${attachedOrigin}/export/reauth?auth_type=${authType}`,
+        `${attachedOrigin}/export/reauth?auth_type=${authType}&host_origin=${encodeURIComponent(window.location.origin)}`,
         "oko_re_auth",
         `width=${popupWidth},height=${popupHeight},left=${popupLeft},top=${popupTop},resizable=yes`,
       );
