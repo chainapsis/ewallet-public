@@ -6,7 +6,7 @@
   background: var(--bg-secondary);
   border-radius: 16px;
   padding: 16px;
-  gap: 8px;
+  gap: 10px;
   cursor: pointer;
   transition: background-color 0.15s ease;
 
@@ -26,6 +26,14 @@
   width: 100%;
 }
 
+.headerTextContainer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
 .headerIcon {
   width: 16px;
   height: 16px;
@@ -33,7 +41,6 @@
 }
 
 .headerText {
-  flex: 1;
   font-size: 14px;
   font-weight: 600;
   line-height: 20px;

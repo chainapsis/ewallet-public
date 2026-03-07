@@ -16,12 +16,14 @@ export const SignInfoBox: FC<SignInfoBoxProps> = ({ title, items }) => {
       onClick={() => setIsExpanded((prev) => !prev)}
     >
       <div className={styles.header}>
-        <InfoCircleIcon
-          className={styles.headerIcon}
-          color="var(--text-tertiary)"
-          size={16}
-        />
-        <span className={styles.headerText}>{title}</span>
+        <div className={styles.headerTextContainer}>
+          <InfoCircleIcon
+            className={styles.headerIcon}
+            color="var(--text-tertiary)"
+            size={16}
+          />
+          <span className={styles.headerText}>{title}</span>
+        </div>
         {isExpanded ? (
           <ChevronUpIcon
             className={styles.chevronIcon}
