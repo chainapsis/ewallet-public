@@ -8,7 +8,8 @@ import { ChevronRightIcon } from "@oko-wallet/oko-common-ui/icons/chevron_right"
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import { TelegramIcon } from "@oko-wallet/oko-common-ui/icons/telegram_icon";
 import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
-import { AppleIcon } from "@oko-wallet/oko-common-ui/icons/apple_icon";
+import { DiscordIcon } from "@oko-wallet/oko-common-ui/icons/discord_icon";
+import { GithubIcon } from "@oko-wallet/oko-common-ui/icons/github_icon";
 import { MailboxIcon } from "@oko-wallet/oko-common-ui/icons/mailbox";
 import { OkoLogoWithNameIcon } from "@oko-wallet/oko-common-ui/icons/oko_logo_with_name_icon";
 
@@ -38,28 +39,34 @@ export const LoginDefaultView: FC<LoginDefaultViewProps> = ({
           variant="secondary"
           size="md"
           fullWidth
-          onClick={() => onSignIn("email")}
-        >
-          <MailboxIcon size={20} color={"var(--fg-tertiary)"} />
-          <Spacing width={2} />
-          Email
-        </Button>
-
-        <Button
-          variant="secondary"
-          size="md"
-          fullWidth
           onClick={() => onSignIn("google")}
         >
           <GoogleIcon width={20} height={20} />
           Google
         </Button>
 
+        <div
+          className={styles.emailLoginMethod}
+          onClick={() => onSignIn("email")}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              onSignIn("email");
+            }
+          }}
+        >
+          <MailboxIcon size={20} color={"var(--text-placeholder)"} />
+          <span className={styles.emailInput}>your@email.com</span>
+          <span className={styles.loginButton}>Submit</span>
+        </div>
+
         <Button variant="secondary" size="md" fullWidth onClick={onShowSocials}>
           <div className={styles.socialIconWrapper}>
-            <XIcon size={16} />
             <TelegramIcon size={16} />
-            <AppleIcon size={16} />
+            <XIcon size={16} />
+            <DiscordIcon size={16} />
+            <GithubIcon size={16} />
           </div>
           <Typography
             size="sm"
@@ -76,17 +83,17 @@ export const LoginDefaultView: FC<LoginDefaultViewProps> = ({
       <Spacing height={28} />
 
       <div className={styles.getSupportRow}>
-        <OkoLogoWithNameIcon width={52} height={20} theme={theme} />
+        <OkoLogoWithNameIcon width={47} height={18} theme={theme} />
         <a
           href="https://okowallet.userjot.com/board/report-bugs"
           target="_blank"
           rel="noopener noreferrer"
           className={styles.supportLink}
         >
-          <Typography size="xs" weight="medium" color="secondary">
+          <Typography size="xs" weight="medium">
             Get support
           </Typography>
-          <ExternalLinkOutlinedIcon color={"var(--fg-quaternary-hover)"} />
+          <ExternalLinkOutlinedIcon />
         </a>
       </div>
     </Fragment>
