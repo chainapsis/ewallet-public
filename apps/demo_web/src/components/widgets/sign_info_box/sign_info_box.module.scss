@@ -10,10 +10,19 @@
   cursor: pointer;
   transition: background-color 0.15s ease;
 
+  &.expanded {
+    gap: 8px;
+  }
+
   &:hover {
     background: var(--bg-secondary_hover);
 
     .headerText {
+      color: var(--text-tertiary_hover);
+    }
+
+    .headerIcon,
+    .chevronIcon {
       color: var(--text-tertiary_hover);
     }
   }
@@ -38,6 +47,8 @@
   width: 16px;
   height: 16px;
   flex-shrink: 0;
+  color: var(--text-tertiary);
+  transition: color 0.15s ease;
 }
 
 .headerText {
@@ -53,6 +64,7 @@
   height: 20px;
   flex-shrink: 0;
   color: var(--text-tertiary);
+  transition: color 0.15s ease;
 }
 
 .list {

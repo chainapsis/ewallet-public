@@ -84,7 +84,7 @@ export const AccountInfoWidget: FC<AccountInfoWidgetProps> = ({
             >
               Logout
             </Typography>
-            <DoorOutlinedIcon color="var(--fg-quaternary)" />
+            <DoorOutlinedIcon color="currentColor" />
           </button>
         </div>
       </div>

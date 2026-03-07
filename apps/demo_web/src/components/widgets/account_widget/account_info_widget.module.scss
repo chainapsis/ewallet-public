@@ -57,9 +57,16 @@
       border: none;
       padding: 8px;
       border-radius: 8px;
+      color: var(--fg-quaternary);
+      transition: background-color 0.15s ease, color 0.15s ease;
 
       &:hover {
         background: var(--bg-primary_hover);
+        color: var(--text-tertiary_hover);
+
+        span {
+          color: var(--text-tertiary_hover);
+        }
       }
     }
   }
