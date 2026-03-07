@@ -15,15 +15,15 @@
   }
 
   &:hover {
-    background: var(--bg-secondary_hover);
+    background: var(--bg-secondary-hover);
 
     .headerText {
-      color: var(--text-tertiary_hover);
+      color: var(--text-tertiary-hover);
     }
 
     .headerIcon,
     .chevronIcon {
-      color: var(--text-tertiary_hover);
+      color: var(--text-tertiary-hover);
     }
   }
 }
