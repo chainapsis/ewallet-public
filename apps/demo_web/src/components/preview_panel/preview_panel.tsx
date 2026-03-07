@@ -36,6 +36,10 @@ export const PreviewPanel: FC = () => {
   return (
     <div className={styles.wrapper}>
       <div className={styles.inner}>
+        <div className={styles.bgDecoration} aria-hidden="true">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/bg_eye.png" alt="" />
+        </div>
         <div className={cn(styles.content, "common-list-scroll")}>
           {isLazyInitialized ? (
             <>
