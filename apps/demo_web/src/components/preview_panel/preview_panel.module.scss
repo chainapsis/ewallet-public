@@ -147,6 +147,10 @@
   width: 100%;
 }
 
+.docsStandalone {
+  width: 100%;
+}
+
 .onchainDisclaimer {
   margin: 0;
   font-size: var(--font-size-sm);
@@ -165,6 +169,10 @@
   }
 
   .signingCol {
+    width: 360px;
+  }
+
+  .docsStandalone {
     width: 360px;
   }
 }

@@ -47,9 +47,9 @@ export const PreviewPanel: FC = () => {
                 <AccountWidget />
                 <AddressWidget />
                 <ManageCard />
-                <DocsWidget />
+                {isSignedIn && <DocsWidget />}
               </div>
-              {isSignedIn && (
+              {isSignedIn ? (
                 <div className={styles.signingSection}>
                   <div className={styles.signingHeader}>
                     <ContractEditIcon
@@ -116,6 +116,10 @@ export const PreviewPanel: FC = () => {
                       </Widget>
                     </div>
                   </div>
+                </div>
+              ) : (
+                <div className={styles.docsStandalone}>
+                  <DocsWidget />
                 </div>
               )}
             </>
