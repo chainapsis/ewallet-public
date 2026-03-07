@@ -100,7 +100,22 @@
   flex-direction: column;
   gap: 16px;
   align-items: flex-start;
-  justify-content: center;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.signContainerCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 20px;
+  width: 100%;
+}
+
+.signList {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   width: 100%;
 }
 
@@ -114,7 +129,7 @@
   }
 
   .signingCol {
-    width: fit-content;
+    width: 360px;
   }
 }
 

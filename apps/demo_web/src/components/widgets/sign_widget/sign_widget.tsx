@@ -1,11 +1,9 @@
 import { type ReactElement, useState, useRef, useEffect, type FC } from "react";
 import { Button } from "@oko-wallet/oko-common-ui/button";
-import { InfoCircleIcon } from "@oko-wallet/oko-common-ui/icons/info_circle";
-import { LoadingIcon } from "@oko-wallet/oko-common-ui/icons/loading";
 import { CheckCircleOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/check_circle_outlined";
+import { LoadingIcon } from "@oko-wallet/oko-common-ui/icons/loading";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 
-import { Widget } from "@oko-wallet-demo-web/components/widgets/widget_components";
 import styles from "./sign_widget.module.scss";
 
 type SignStep = "initial" | "loading" | "success" | "error";
@@ -13,7 +11,6 @@ type SignStep = "initial" | "loading" | "success" | "error";
 export const SignWidget: FC<SignWidgetProps> = ({
   chain,
   chainIcon,
-  signType,
   signButtonOnClick,
   renderBottom,
 }) => {
@@ -27,11 +24,6 @@ export const SignWidget: FC<SignWidgetProps> = ({
       }
     };
   }, []);
-
-  const signTitle =
-    signType === "offchain"
-      ? "Sign an Offchain Message"
-      : "Sign an Onchain Message";
 
   const handleSignClick = async () => {
     if (timeoutRef.current) {
@@ -54,114 +46,45 @@ export const SignWidget: FC<SignWidgetProps> = ({
   };
 
   return (
-    <Widget>
-      <div className={styles.container}>
-        <div className={styles.titleRow}>
-          <div className={styles.chainBadge}>
-            {chainIcon}
-            <Typography
-              tagType="span"
-              size="xs"
-              weight="semibold"
-              color="secondary"
-            >
-              {chain}
-            </Typography>
-          </div>
+    <>
+      <div className={styles.row}>
+        <div className={styles.chainInfo}>
+          <div className={styles.chainIcon}>{chainIcon}</div>
           <Typography
             tagType="span"
-            size="sm"
+            size="md"
             weight="semibold"
             color="secondary"
-            className={styles.titleText}
           >
-            {signTitle}
+            {chain}
           </Typography>
         </div>
 
-        {signResult === "loading" ? (
-          <div className={styles.loadingWrapper}>
-            <div className={styles.loadingContent}>
+        {signResult === "success" ? (
+          <div className={styles.successInline}>
+            <CheckCircleOutlinedIcon color="var(--fg-success-primary)" />
+          </div>
+        ) : (
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleSignClick}
+            disabled={signResult === "loading"}
+          >
+            {signResult === "loading" ? (
               <LoadingIcon
                 className={styles.loadingIcon}
                 color="var(--fg-brand-primary)"
                 backgroundColor="var(--bg-tertiary)"
               />
-              <div className={styles.loadingText}>Processing...</div>
-            </div>
-          </div>
-        ) : signResult === "success" ? (
-          <div className={styles.resultWrapper}>
-            <div className={styles.resultIconWrapper}>
-              <CheckCircleOutlinedIcon color="var(--fg-success-primary)" />
-            </div>
-            <div className={styles.resultText}>Success!</div>
-          </div>
-        ) : (
-          <Description signType={signType} />
-        )}
-
-        {(signResult === "initial" || signResult === "loading") && (
-          <Button
-            variant="primary"
-            size="md"
-            fullWidth
-            onClick={handleSignClick}
-            disabled={signResult === "loading"}
-          >
-            Sign
+            ) : (
+              "Sign"
+            )}
           </Button>
         )}
       </div>
 
       {renderBottom?.()}
-    </Widget>
-  );
-};
-
-const Description = ({ signType }: { signType: SignType }) => {
-  return (
-    <>
-      {signType === "offchain" && (
-        <div className={styles.infoBox}>
-          <div className={styles.infoParagraph}>
-            <InfoCircleIcon />
-            <Typography size="sm" weight="semibold" color="tertiary">
-              Why use offchain signatures?
-            </Typography>
-          </div>
-
-          <ul className={styles.infoList}>
-            <li>
-              <Typography size="sm" weight="medium" color="tertiary">
-                Prove wallet ownership
-              </Typography>
-            </li>
-            <li>
-              <Typography size="sm" weight="medium" color="tertiary">
-                Authenticate without gas fees
-              </Typography>
-            </li>
-            <li>
-              <Typography size="sm" weight="medium" color="tertiary">
-                No transaction is sent on-chain
-              </Typography>
-            </li>
-          </ul>
-        </div>
-      )}
-      {signType === "onchain" && (
-        <Typography
-          tagType="div"
-          size="sm"
-          weight="medium"
-          color="tertiary"
-          className={styles.onchainTest}
-        >
-          <p>This is a demo ✨</p>
-          <p>No transaction will be sent on-chain.</p>
-        </Typography>
-      )}
     </>
   );
 };
@@ -174,4 +97,4 @@ export interface SignWidgetProps {
   renderBottom?: () => ReactElement;
 }
 
-type SignType = "offchain" | "onchain";
+export type SignType = "offchain" | "onchain";

@@ -2,10 +2,13 @@
 
 import { EditIcon } from "@oko-wallet/oko-common-ui/icons/edit";
 import { Skeleton } from "@oko-wallet/oko-common-ui/skeleton";
+import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import cn from "classnames";
 import type { FC } from "react";
 
 import styles from "./preview_panel.module.scss";
+import { Widget } from "@oko-wallet-demo-web/components/widgets/widget_components";
 import { AccountWidget } from "@oko-wallet-demo-web/components/widgets/account_widget/account_widget";
 import { AddressWidget } from "@oko-wallet-demo-web/components/widgets/address_widget/address_widget";
 import { CosmosOffChainSignWidget } from "@oko-wallet-demo-web/components/widgets/cosmos_offchain_sign_widget/cosmos_offchain_sign_widget";
@@ -55,14 +58,42 @@ export const PreviewPanel: FC = () => {
                   </div>
                   <div className={styles.signingSections}>
                     <div className={styles.signingCol}>
-                      <EthereumOffchainSignWidget />
-                      <CosmosOffChainSignWidget />
-                      <SolanaOffchainSignWidget />
+                      <Widget>
+                        <div className={styles.signContainerCard}>
+                          <Typography
+                            size="md"
+                            weight="semibold"
+                            color="primary"
+                          >
+                            Offchain Message Signing
+                          </Typography>
+                          <Spacing height={12} />
+                          <div className={styles.signList}>
+                            <EthereumOffchainSignWidget />
+                            <CosmosOffChainSignWidget />
+                            <SolanaOffchainSignWidget />
+                          </div>
+                        </div>
+                      </Widget>
                     </div>
                     <div className={styles.signingCol}>
-                      <EthereumOnchainSignWidget />
-                      <CosmosOnchainSignWidget />
-                      <SolanaOnchainSignWidget />
+                      <Widget>
+                        <div className={styles.signContainerCard}>
+                          <Typography
+                            size="md"
+                            weight="semibold"
+                            color="primary"
+                          >
+                            Onchain Transaction Signing
+                          </Typography>
+                          <Spacing height={12} />
+                          <div className={styles.signList}>
+                            <EthereumOnchainSignWidget />
+                            <CosmosOnchainSignWidget />
+                            <SolanaOnchainSignWidget />
+                          </div>
+                        </div>
+                      </Widget>
                     </div>
                   </div>
                 </div>
