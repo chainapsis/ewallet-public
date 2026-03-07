@@ -22,7 +22,7 @@ export const DocsWidget: FC = () => {
           <BookOpenIcon size={16} color="var(--fg-tertiary)" />
           <Typography
             tagType="h3"
-            size="sm"
+            size="md"
             weight="semibold"
             color="secondary"
           >

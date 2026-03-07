@@ -11,6 +11,7 @@ import { AddressWidget } from "@oko-wallet-demo-web/components/widgets/address_w
 import { CosmosOffChainSignWidget } from "@oko-wallet-demo-web/components/widgets/cosmos_offchain_sign_widget/cosmos_offchain_sign_widget";
 import { CosmosOnchainSignWidget } from "@oko-wallet-demo-web/components/widgets/cosmos_onchain_sign_widget/cosmos_onchain_sign_widget";
 import { DocsWidget } from "@oko-wallet-demo-web/components/widgets/docs_widget/docs_widget";
+import { ManageCard } from "@oko-wallet-demo-web/components/widgets/manage_card/manage_card";
 import { EthereumOffchainSignWidget } from "@oko-wallet-demo-web/components/widgets/ethereum_offchain_sign_widget/ethereum_offchain_sign_widget";
 import { EthereumOnchainSignWidget } from "@oko-wallet-demo-web/components/widgets/ethereum_onchain_sign_widget/ethereum_onchain_sign_widget";
 import { SolanaOffchainSignWidget } from "@oko-wallet-demo-web/components/widgets/solana_offchain_sign_widget/solana_offchain_sign_widget";
@@ -37,6 +38,7 @@ export const PreviewPanel: FC = () => {
               <div className={styles.col}>
                 <AccountWidget />
                 <AddressWidget />
+                <ManageCard />
                 <DocsWidget />
               </div>
               {isSignedIn && (
