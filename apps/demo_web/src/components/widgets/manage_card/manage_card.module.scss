@@ -69,13 +69,15 @@
   background: none;
   cursor: pointer;
   flex-shrink: 0;
-
-  &:hover {
-    background: var(--bg-primary_hover);
-  }
+  color: var(--fg-quaternary);
+  transition: color 0.15s ease;
 
   svg {
     width: 20px;
     height: 20px;
   }
+}
+
+.detailsRow:hover .linkButton {
+  color: var(--text-tertiary_hover);
 }

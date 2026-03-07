@@ -70,7 +70,7 @@ export const ManageCard: FC<ManageCardProps> = ({
             className={styles.linkButton}
             onClick={handleOpenDashboard}
           >
-            <ExternalLinkOutlinedIcon color="var(--fg-quaternary)" />
+            <ExternalLinkOutlinedIcon color="currentColor" />
           </button>
         </div>
 
@@ -108,7 +108,7 @@ export const ManageCard: FC<ManageCardProps> = ({
             className={styles.linkButton}
             onClick={handleOpenHome}
           >
-            <ExternalLinkOutlinedIcon color="var(--fg-quaternary)" />
+            <ExternalLinkOutlinedIcon color="currentColor" />
           </button>
         </div>
       </div>
