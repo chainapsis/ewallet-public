@@ -1,5 +1,5 @@
 import { CodeIcon } from "@oko-wallet/oko-common-ui/icons/code";
-import { EditIcon } from "@oko-wallet/oko-common-ui/icons/edit";
+import { CompassIcon } from "@oko-wallet/oko-common-ui/icons/compass";
 import { ExternalLinkOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/external_link_outlined";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
@@ -30,7 +30,7 @@ export const ManageCard: FC<ManageCardProps> = ({
     <Widget>
       <div className={styles.container}>
         <div className={styles.header}>
-          <EditIcon size={16} color="var(--fg-tertiary)" />
+          <CompassIcon size={16} color="var(--fg-tertiary)" />
           <Typography size="md" weight="semibold" color="primary">
             Manage with Oko
           </Typography>

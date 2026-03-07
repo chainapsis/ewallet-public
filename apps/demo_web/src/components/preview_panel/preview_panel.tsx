@@ -1,6 +1,6 @@
 "use client";
 
-import { EditIcon } from "@oko-wallet/oko-common-ui/icons/edit";
+import { ContractEditIcon } from "@oko-wallet/oko-common-ui/icons/contract_edit";
 import { Skeleton } from "@oko-wallet/oko-common-ui/skeleton";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
@@ -48,7 +48,7 @@ export const PreviewPanel: FC = () => {
               {isSignedIn && (
                 <div className={styles.signingSection}>
                   <div className={styles.signingHeader}>
-                    <EditIcon
+                    <ContractEditIcon
                       className={styles.signingHeaderIcon}
                       color="var(--text-secondary)"
                       size={20}
