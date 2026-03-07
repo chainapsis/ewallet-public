@@ -54,7 +54,7 @@ export const PreviewPanel: FC = () => {
                   <div className={styles.signingHeader}>
                     <ContractEditIcon
                       className={styles.signingHeaderIcon}
-                      color="var(--text-secondary)"
+                      color="#ED6B25"
                       size={20}
                     />
                     <span className={styles.signingHeaderTitle}>

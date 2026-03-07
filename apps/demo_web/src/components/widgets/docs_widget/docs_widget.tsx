@@ -19,7 +19,7 @@ export const DocsWidget: FC = () => {
     <Widget gradientBorder={!isSignedIn}>
       <div className={styles.container}>
         <div className={styles.title}>
-          <BookOpenIcon size={16} color="var(--fg-tertiary)" />
+          <BookOpenIcon size={16} color="#ED6B25" />
           <Typography
             tagType="h3"
             size="md"
