@@ -20,11 +20,13 @@
   align-items: center;
   padding: 8px;
   border-radius: 12px;
-  background: var(--bg-primary);
+  background: transparent;
   width: 100%;
 
+  transition: background-color 0.15s ease;
+
   &:hover {
-    background: var(--bg-primary_hover);
+    background: var(--bg-primary-hover);
   }
 }
 
@@ -70,7 +72,7 @@
   cursor: pointer;
   flex-shrink: 0;
   color: var(--fg-quaternary);
-  transition: color 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
 
   svg {
     width: 20px;
@@ -79,5 +81,6 @@
 }
 
 .detailsRow:hover .linkButton {
-  color: var(--text-tertiary_hover);
+  background: var(--bg-primary-hover);
+  color: var(--text-tertiary-hover);
 }

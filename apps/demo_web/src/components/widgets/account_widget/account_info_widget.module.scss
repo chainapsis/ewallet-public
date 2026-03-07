@@ -61,11 +61,11 @@
       transition: background-color 0.15s ease, color 0.15s ease;
 
       &:hover {
-        background: var(--bg-primary_hover);
-        color: var(--text-tertiary_hover);
+        background: var(--bg-primary-hover);
+        color: var(--text-tertiary-hover);
 
         span {
-          color: var(--text-tertiary_hover);
+          color: var(--text-tertiary-hover);
         }
       }
     }
