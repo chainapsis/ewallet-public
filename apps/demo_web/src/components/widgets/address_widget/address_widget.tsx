@@ -41,7 +41,7 @@ export const AddressWidget: FC<AddressWidgetProps> = ({}) => {
         <div className={styles.container}>
           <div className={styles.title}>
             <WalletIcon size={16} color="var(--fg-tertiary)" />
-            <Typography size="sm" weight="semibold" color="secondary">
+            <Typography size="md" weight="semibold" color="secondary">
               Wallet Address
             </Typography>
           </div>
@@ -60,12 +60,12 @@ export const AddressWidget: FC<AddressWidgetProps> = ({}) => {
           />
           <Spacing height={12} />
 
-          {/* <AddressRow
+          <AddressRow
             icon={<SolanaIcon />}
             chain="solana"
             address={formatAddress(solanaAddress)}
           />
-          <Spacing height={12} /> */}
+          <Spacing height={12} />
 
           <ViewChainsButton onClick={handleViewChains} />
         </div>
