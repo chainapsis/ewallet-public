@@ -1,6 +1,6 @@
-import { type FC, type ReactElement } from "react";
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import { Tooltip } from "@oko-wallet/oko-common-ui/tooltip";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import { type FC, type ReactElement } from "react";
 
 import styles from "./address_row.module.scss";
 
@@ -20,7 +20,7 @@ export const AddressRow: FC<AddressRowProps> = ({ icon, chain, address }) => {
   const renderChainLabel = () => (
     <div className={isLoggedIn ? styles.chainLabelChip : styles.chainLabel}>
       {icon}
-      <Typography tagType="span" size="xs" weight="semibold" color="secondary">
+      <Typography tagType="span" size="md" weight="semibold" color="secondary">
         {label}
       </Typography>
     </div>

@@ -44,56 +44,38 @@ export const AccountInfoWidget: FC<AccountInfoWidgetProps> = ({
           {type === "github" && <GithubIcon size={20} />}
           <Typography
             size="lg"
-            weight="medium"
+            weight="semibold"
             color="primary"
             className={styles.email}
           >
             {name || email}
           </Typography>
         </div>
-        <Spacing height={20} />
+        <Spacing height={12} />
 
         <div className={styles.publicKeyCol}>
           <Typography
-            size="xs"
+            size="sm"
             weight="semibold"
-            color="tertiary"
+            color="primary"
             className={styles.label}
           >
             Public Key
           </Typography>
-          <Typography size="sm" weight="medium" className={styles.publicKey}>
+          <Typography
+            size="sm"
+            weight="medium"
+            color="tertiary"
+            className={styles.publicKey}
+          >
             {publicKeySecp256k1}
           </Typography>
         </div>
 
-        {/* {publicKeyEd25519 && (
-          <>
-            <Spacing height={12} />
-            <div className={styles.publicKeyCol}>
-              <Typography
-                size="xs"
-                weight="semibold"
-                color="tertiary"
-                className={styles.label}
-              >
-                Public Key (Solana & SVM)
-              </Typography>
-              <Typography
-                size="sm"
-                weight="medium"
-                className={styles.publicKey}
-              >
-                {publicKeyEd25519}
-              </Typography>
-            </div>
-          </>
-        )} */}
-
-        <Spacing height={12} />
+        <Spacing height={8} />
 
         <div className={styles.signOutRow}>
-          <button className={styles.signOutButton} onClick={onSignOut}>
+          <button type="button" className={styles.signOutButton} onClick={onSignOut}>
             <Typography
               tagType="span"
               size="sm"
