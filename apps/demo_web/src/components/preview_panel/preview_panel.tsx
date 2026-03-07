@@ -1,5 +1,6 @@
 "use client";
 
+import { EditIcon } from "@oko-wallet/oko-common-ui/icons/edit";
 import { Skeleton } from "@oko-wallet/oko-common-ui/skeleton";
 import cn from "classnames";
 import type { FC } from "react";
@@ -38,22 +39,32 @@ export const PreviewPanel: FC = () => {
                 <AddressWidget />
                 <DocsWidget />
               </div>
-              <div className={styles.col}>
-                {isSignedIn && <EthereumOffchainSignWidget />}
-                {isSignedIn && <EthereumOnchainSignWidget />}
-              </div>
               {isSignedIn && (
-                <div className={styles.col}>
-                  <CosmosOffChainSignWidget />
-                  <CosmosOnchainSignWidget />
+                <div className={styles.signingSection}>
+                  <div className={styles.signingHeader}>
+                    <EditIcon
+                      className={styles.signingHeaderIcon}
+                      color="var(--text-secondary)"
+                      size={20}
+                    />
+                    <span className={styles.signingHeaderTitle}>
+                      Signing Experience
+                    </span>
+                  </div>
+                  <div className={styles.signingSections}>
+                    <div className={styles.signingCol}>
+                      <EthereumOffchainSignWidget />
+                      <CosmosOffChainSignWidget />
+                      <SolanaOffchainSignWidget />
+                    </div>
+                    <div className={styles.signingCol}>
+                      <EthereumOnchainSignWidget />
+                      <CosmosOnchainSignWidget />
+                      <SolanaOnchainSignWidget />
+                    </div>
+                  </div>
                 </div>
               )}
-              {/* {isSignedIn && (
-                <div className={styles.col}>
-                  <SolanaOffchainSignWidget />
-                  <SolanaOnchainSignWidget />
-                </div>
-              )} */}
             </>
           ) : (
             <div className={styles.col}>
