@@ -74,7 +74,7 @@ export const PreviewPanel: FC = () => {
                             <CosmosOffChainSignWidget />
                             <SolanaOffchainSignWidget />
                           </div>
-                          <Spacing height={16} />
+                          <Spacing height={24} />
                           <SignInfoBox
                             title="Why use offchain signatures?"
                             items={[
@@ -102,6 +102,12 @@ export const PreviewPanel: FC = () => {
                             <CosmosOnchainSignWidget />
                             <SolanaOnchainSignWidget />
                           </div>
+                          <Spacing height={24} />
+                          <p className={styles.onchainDisclaimer}>
+                            {"This is a demo ✨"}
+                            <br />
+                            {"No transaction will be sent on-chain."}
+                          </p>
                         </div>
                       </Widget>
                     </div>

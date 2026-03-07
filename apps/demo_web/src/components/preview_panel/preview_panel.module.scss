@@ -119,6 +119,14 @@
   width: 100%;
 }
 
+.onchainDisclaimer {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  line-height: var(--font-line-height-sm);
+  color: var(--text-quaternary);
+}
+
 @media (min-width: $tablet_min_width) {
   .wrapper {
     padding: 8px 0px 32px 0px;
