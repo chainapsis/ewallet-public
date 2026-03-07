@@ -18,6 +18,14 @@
     width: 100%;
   }
 
+  &.sm {
+    height: 36px;
+    padding: 8px 12px;
+
+    font-size: var(--font-size-sm);
+    line-height: var(--font-line-height-sm);
+  }
+
   &.md {
     height: 40px;
     padding: 10px 14px;
