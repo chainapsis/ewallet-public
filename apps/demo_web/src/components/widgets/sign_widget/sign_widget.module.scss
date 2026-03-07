@@ -39,6 +39,21 @@
   flex-shrink: 0;
 }
 
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 8px 2px 6px;
+  border-radius: 9999px;
+  border: 1px solid var(--border-secondary);
+  background: var(--bg-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
 .loadingIcon {
   width: 16px;
   height: 16px;

@@ -18,6 +18,7 @@ import { ManageCard } from "@oko-wallet-demo-web/components/widgets/manage_card/
 import { EthereumOffchainSignWidget } from "@oko-wallet-demo-web/components/widgets/ethereum_offchain_sign_widget/ethereum_offchain_sign_widget";
 import { EthereumOnchainSignWidget } from "@oko-wallet-demo-web/components/widgets/ethereum_onchain_sign_widget/ethereum_onchain_sign_widget";
 import { SolanaOffchainSignWidget } from "@oko-wallet-demo-web/components/widgets/solana_offchain_sign_widget/solana_offchain_sign_widget";
+import { SignInfoBox } from "@oko-wallet-demo-web/components/widgets/sign_info_box/sign_info_box";
 import { SolanaOnchainSignWidget } from "@oko-wallet-demo-web/components/widgets/solana_onchain_sign_widget/solana_onchain_sign_widget";
 import { useSDKState } from "@oko-wallet-demo-web/state/sdk";
 import { useUserInfoState } from "@oko-wallet-demo-web/state/user_info";
@@ -73,6 +74,15 @@ export const PreviewPanel: FC = () => {
                             <CosmosOffChainSignWidget />
                             <SolanaOffchainSignWidget />
                           </div>
+                          <Spacing height={16} />
+                          <SignInfoBox
+                            title="Why use offchain signatures?"
+                            items={[
+                              "Prove wallet ownership",
+                              "Authenticate without gas fees",
+                              "No transaction is sent on-chain",
+                            ]}
+                          />
                         </div>
                       </Widget>
                     </div>

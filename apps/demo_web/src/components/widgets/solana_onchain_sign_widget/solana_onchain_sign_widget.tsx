@@ -12,6 +12,7 @@ import { SolanaIcon } from "@oko-wallet/oko-common-ui/icons/solana_icon";
 import { Checkbox } from "@oko-wallet/oko-common-ui/checkbox";
 
 import styles from "./solana_onchain_sign_widget.module.scss";
+// import signStyles from "../sign_widget/sign_widget.module.scss";
 import { SignWidget } from "@oko-wallet-demo-web/components/widgets/sign_widget/sign_widget";
 import { useSDKState } from "@oko-wallet-demo-web/state/sdk";
 
@@ -109,6 +110,7 @@ export const SolanaOnchainSignWidget = () => {
       chain="Solana"
       chainIcon={<SolanaIcon />}
       signType="onchain"
+      // badge={<span className={signStyles.badge}>Rialo</span>}
       signButtonOnClick={
         isLegacy ? handleClickSolOnchainSignLegacy : handleClickSolOnchainSignV0
       }

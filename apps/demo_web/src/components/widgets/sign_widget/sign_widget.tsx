@@ -11,6 +11,7 @@ type SignStep = "initial" | "loading" | "success" | "error";
 export const SignWidget: FC<SignWidgetProps> = ({
   chain,
   chainIcon,
+  badge,
   signButtonOnClick,
   renderBottom,
 }) => {
@@ -58,6 +59,7 @@ export const SignWidget: FC<SignWidgetProps> = ({
           >
             {chain}
           </Typography>
+          {badge}
         </div>
 
         {signResult === "success" ? (
@@ -92,6 +94,7 @@ export const SignWidget: FC<SignWidgetProps> = ({
 export interface SignWidgetProps {
   chain: string;
   chainIcon: ReactElement;
+  badge?: ReactElement;
   signType: SignType;
   signButtonOnClick: () => Promise<void>;
   renderBottom?: () => ReactElement;
