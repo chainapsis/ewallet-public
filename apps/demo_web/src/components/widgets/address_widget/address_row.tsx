@@ -10,7 +10,7 @@ const chainConfig: Record<
 > = {
   ethereum: { label: "Ethereum", prefix: "0x" },
   cosmos: { label: "Cosmos Hub", prefix: "cosmos1" },
-  solana: { label: "Solana", prefix: "" },
+  solana: { label: "Solana", prefix: "7Zk9LQp" },
 };
 
 export const AddressRow: FC<AddressRowProps> = ({ icon, chain, address }) => {

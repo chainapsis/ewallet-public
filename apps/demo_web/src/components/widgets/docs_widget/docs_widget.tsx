@@ -16,7 +16,7 @@ export const DocsWidget: FC = () => {
   };
 
   return (
-    <Widget gradientBorder={!isSignedIn}>
+    <Widget>
       <div className={styles.container}>
         <div className={styles.title}>
           <BookOpenIcon size={16} color="#ED6B25" />
