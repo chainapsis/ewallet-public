@@ -12,6 +12,7 @@ export const CosmosIcon: FC<CosmosIconProps> = ({
       alt="cosmos_icon"
       width={width}
       height={height}
+      style={{ borderRadius: "999px" }}
     />
   );
 };

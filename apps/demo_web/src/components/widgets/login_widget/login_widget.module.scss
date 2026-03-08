@@ -60,15 +60,25 @@
     display: flex;
     gap: 4px;
     text-decoration: underline;
+    text-decoration-color: var(--text-secondary);
     color: var(--text-secondary);
 
     &:hover {
+      text-decoration-color: var(--text-secondary-hover);
       color: var(--text-secondary-hover);
 
       span {
         color: var(--text-secondary-hover);
       }
+
+      .supportIcon {
+        color: var(--fg-quaternary-hover);
+      }
     }
+  }
+
+  .supportIcon {
+    color: var(--fg-quaternary);
   }
 }
 

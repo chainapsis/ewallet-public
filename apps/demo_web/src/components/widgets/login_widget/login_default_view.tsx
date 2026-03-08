@@ -31,6 +31,9 @@ export const LoginDefaultView: FC<LoginDefaultViewProps> = ({
   return (
     <Fragment>
       <div className={styles.logoWrapper}>
+        <Typography size="sm" weight="medium" color="primary">
+          Login or sign up
+        </Typography>
         <Logo theme={theme} width={84} height={32} />
       </div>
 
@@ -90,10 +93,10 @@ export const LoginDefaultView: FC<LoginDefaultViewProps> = ({
           rel="noopener noreferrer"
           className={styles.supportLink}
         >
-          <Typography size="xs" weight="medium">
+          <Typography tagType="span" size="xs" weight="medium" color="secondary">
             Get support
           </Typography>
-          <ExternalLinkOutlinedIcon />
+          <ExternalLinkOutlinedIcon className={styles.supportIcon} />
         </a>
       </div>
     </Fragment>
