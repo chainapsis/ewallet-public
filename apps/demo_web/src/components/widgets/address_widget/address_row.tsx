@@ -51,7 +51,7 @@ export const AddressRow: FC<AddressRowProps> = ({ icon, chain, address }) => {
           >
             {prefix}
           </Typography>
-          {Array.from({ length: 8 }).map((_, i) => (
+          {Array.from({ length: 7 }).map((_, i) => (
             <div key={i} className={styles.dot} />
           ))}
         </div>
