@@ -10334,6 +10334,24 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@oko-wallet/attached-proxy-web@workspace:apps/attached_proxy_web":
+  version: 0.0.0-use.local
+  resolution: "@oko-wallet/attached-proxy-web@workspace:apps/attached_proxy_web"
+  dependencies:
+    "@oko-wallet/dotenv": "npm:^0.0.2-alpha.29"
+    "@types/node": "npm:^24.10.1"
+    "@types/react": "npm:^19.2.7"
+    "@types/react-dom": "npm:^19.2.3"
+    dotenv: "npm:^16.4.5"
+    next: "npm:^16.1.1"
+    react: "npm:^19.2.1"
+    react-dom: "npm:^19.2.1"
+    tsx: "npm:^4.20.3"
+    typescript: "npm:^5.8.3"
+    zod: "npm:^4.1.12"
+  languageName: unknown
+  linkType: soft
+
 "@oko-wallet/aws@workspace:*, @oko-wallet/aws@workspace:lib/aws":
   version: 0.0.0-use.local
   resolution: "@oko-wallet/aws@workspace:lib/aws"
