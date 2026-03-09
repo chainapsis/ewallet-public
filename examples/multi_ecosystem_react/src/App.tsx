@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import StatusBar from "@/components/StatusBar";
 import CosmosTransactionForm from "@/components/CosmosTransactionForm";
 import EvmTransactionForm from "./components/EvmTransactionForm";
+import SvmTransactionForm from "./components/SvmTransactionForm";
 
 function App() {
   return (
@@ -10,9 +11,10 @@ function App() {
       <div className="max-w-[920px] mx-auto my-10 p-5">
         <Header />
         <StatusBar />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <CosmosTransactionForm />
           <EvmTransactionForm />
+          <SvmTransactionForm />
         </div>
       </div>
     </OkoProvider>

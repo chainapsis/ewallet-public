@@ -17,7 +17,7 @@ export interface AssetMeta {
   decimals: number;
   coin_gecko_id: string | null;
   img_url: string | null;
-  token_spec: "native" | "factory" | "erc20" | "ibc" | "cw20";
+  token_spec: "native" | "factory" | "erc20" | "ibc" | "cw20" | "spl";
   data_source: string;
   metadata: Record<string, unknown>;
 }

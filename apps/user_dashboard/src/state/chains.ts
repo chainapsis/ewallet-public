@@ -116,6 +116,7 @@ export const useChainStore = create<
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         enabledChainsByUser: state.enabledChainsByUser,
+        activeUserKey: state.activeUserKey,
       }),
     },
   ),

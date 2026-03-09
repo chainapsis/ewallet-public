@@ -10,25 +10,42 @@
 }
 
 .inner {
+  position: relative;
   width: 100%;
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-secondary);
 
-  padding: 20px;
+  padding: 20px 16px;
   overflow: auto;
 
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+}
 
-  /* background dot pattern image*/
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Crect x='4' y='4' width='2' height='2' rx='1' fill='%23E9EAEB'/%3E%3C/svg%3E");
-  [data-theme="dark"] & {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Crect x='4' y='4' width='2' height='2' rx='1' fill='%2322262F'/%3E%3C/svg%3E");
+.bgDecoration {
+  position: absolute;
+  top: -197px;
+  left: -221px;
+  width: 1120px;
+  height: 900px;
+  opacity: 0.11;
+  pointer-events: none;
+  z-index: 0;
+
+  img {
+    position: absolute;
+    width: 1217px;
+    height: 1055px;
+    left: calc(50% + 50.37px);
+    top: calc(50% + 7.43px);
+    transform: translate(-50%, -50%) scaleX(-1);
+    object-fit: cover;
+    mask-image: url("/bg_eye_mask.svg");
+    mask-size: 962px 776px;
+    mask-position: 74px 161px;
+    mask-repeat: no-repeat;
   }
-
-  background-size: 16px 16px;
-  background-position: 7px -4px;
 }
 
 .spinnerWrapper {
@@ -45,6 +62,8 @@
 }
 
 .content {
+  position: relative;
+  z-index: 1;
   width: 100%;
   height: 100%;
   border: none;
@@ -66,13 +85,95 @@
   width: 100%;
 }
 
+.signingSection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  padding: 20px 0;
+}
+
+.signingHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.signingHeaderIcon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.signingHeaderTitle {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 28px;
+  color: var(--text-secondary);
+}
+
+.signingSections {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.signingCol {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.signContainerCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 20px;
+  width: 100%;
+}
+
+.signList {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.docsStandalone {
+  width: 100%;
+}
+
+.onchainDisclaimer {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  line-height: var(--font-line-height-sm);
+  color: var(--text-quaternary);
+}
+
 @media (min-width: $tablet_min_width) {
   .wrapper {
     padding: 8px 0px 32px 0px;
   }
 
   .col {
-    width: fit-content;
+    width: 360px;
+  }
+
+  .signingCol {
+    width: 360px;
+  }
+
+  .docsStandalone {
+    width: 360px;
   }
 }
 
@@ -85,5 +186,14 @@
   .content {
     flex-direction: row;
     align-items: flex-start;
+  }
+
+  .signingSection {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .signingSections {
+    flex-direction: row;
   }
 }

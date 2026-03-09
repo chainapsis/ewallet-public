@@ -269,6 +269,15 @@ Examples of signing transactions:
 - eth_signTypedData_v4
 - secp256k1_sign
 
+**SVM (Solana, etc.)**
+
+- signTransaction
+- signAllTransactions
+- signMessage
+- sendTransaction
+- signAndSendTransaction
+- signAndSendAllTransactions
+
 ## Authentication
 
 ### Google OAuth Flow
@@ -371,9 +380,9 @@ POST /tss/v1/sign
 Content-Type: application/json
 Headers: Authorization: Bearer <JWT Token>
 
-Purpose: Complete ECDSA signature using presignatures and message
+Purpose: Complete ECDSA/EdDSA signature using presignatures and message
 Implementation: Final signature creation step
-Output: Standard ECDSA signature (r, s) format
+Output: Standard ECDSA signature (r, s) or EdDSA signature format
 ```
 
 #### Session Management
@@ -748,6 +757,12 @@ const wallet = walletRes.data;
 - Viem integration for transaction handling
 - Standard Ethereum RPC method support
 
-This API architecture provides a comprehensive interface for threshold ECDSA
+**SVM Integration:**
+
+- OkoSvmWallet class wraps TSS API calls with EdDSA (FROST)
+- Methods: `connect()`, `signTransaction()`, `sendTransaction()`, `signMessage()`
+- Solana Wallet Standard support for dApp compatibility
+
+This API architecture provides a comprehensive interface for threshold signature
 wallet operations, with clear separation between TSS protocols, administrative
 functions, and secure key storage.

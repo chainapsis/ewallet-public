@@ -7,7 +7,7 @@ import { LoadingIcon } from "@oko-wallet-common-ui/icons/loading";
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "ghost";
-  size?: "md" | "lg";
+  size?: "sm" | "md" | "lg";
   fullWidth?: boolean;
   isLoading?: boolean;
   className?: string;
@@ -44,7 +44,7 @@ export const Button: React.FC<React.PropsWithChildren<ButtonProps>> = ({
     >
       {isLoading && (
         <LoadingIcon
-          size={size === "lg" ? 20 : 16}
+          size={size === "lg" ? 20 : size === "sm" ? 14 : 16}
           className={styles.loadingIcon}
         />
       )}

@@ -1,7 +1,7 @@
 @use "../../styles/viewport.module.scss" as *;
 
 .wrapper {
-  height: 54px;
+  height: 64px;
   display: flex;
   flex-shrink: 0;
   flex-grow: 0;
@@ -12,7 +12,7 @@
 
 @media (min-width: $desktop_min_width) {
   .wrapper {
-    padding: 16px 44px;
+    padding: 16px 32px;
   }
 }
 
@@ -29,16 +29,14 @@
   }
 }
 
+.logoLink {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
 .logoResponsive {
   width: auto;
-  height: 22px;
+  height: 28px;
   flex-shrink: 0;
-  // aspect-ratio: 37/16;
-
-  // TODO: new logo responsive size is required
-  // @media (min-width: $desktop_min_width) {
-  //   width: 180.06px;
-  //   height: 26px;
-  //   aspect-ratio: 180.06/26;
-  // }
 }

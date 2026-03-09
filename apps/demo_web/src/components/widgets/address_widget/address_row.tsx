@@ -1,6 +1,6 @@
-import { type FC, type ReactElement } from "react";
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import { Tooltip } from "@oko-wallet/oko-common-ui/tooltip";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import { type FC, type ReactElement } from "react";
 
 import styles from "./address_row.module.scss";
 
@@ -10,7 +10,7 @@ const chainConfig: Record<
 > = {
   ethereum: { label: "Ethereum", prefix: "0x" },
   cosmos: { label: "Cosmos Hub", prefix: "cosmos1" },
-  solana: { label: "Solana", prefix: "" },
+  solana: { label: "Solana", prefix: "7Zk9LQp" },
 };
 
 export const AddressRow: FC<AddressRowProps> = ({ icon, chain, address }) => {
@@ -20,7 +20,7 @@ export const AddressRow: FC<AddressRowProps> = ({ icon, chain, address }) => {
   const renderChainLabel = () => (
     <div className={isLoggedIn ? styles.chainLabelChip : styles.chainLabel}>
       {icon}
-      <Typography tagType="span" size="xs" weight="semibold" color="secondary">
+      <Typography tagType="span" size="md" weight="semibold" color="secondary">
         {label}
       </Typography>
     </div>
@@ -51,7 +51,7 @@ export const AddressRow: FC<AddressRowProps> = ({ icon, chain, address }) => {
           >
             {prefix}
           </Typography>
-          {Array.from({ length: 8 }).map((_, i) => (
+          {Array.from({ length: 7 }).map((_, i) => (
             <div key={i} className={styles.dot} />
           ))}
         </div>

@@ -21,10 +21,12 @@ function cacheKey(chainIdentifier: string, denom: string): string {
 }
 
 function metaToCurrency(meta: AssetMeta): Currency {
-  const denom =
-    meta.token_spec === "erc20" && !meta.denom.startsWith("erc20:")
-      ? `erc20:${meta.denom}`
-      : meta.denom;
+  let denom = meta.denom;
+  if (meta.token_spec === "erc20" && !denom.startsWith("erc20:")) {
+    denom = `erc20:${denom}`;
+  } else if (meta.token_spec === "spl" && !denom.startsWith("spl:")) {
+    denom = `spl:${denom}`;
+  }
   return {
     coinDenom: meta.symbol,
     coinMinimalDenom: denom,
@@ -34,7 +36,7 @@ function metaToCurrency(meta: AssetMeta): Currency {
   };
 }
 
-function createFallbackCurrency(denom: string): Currency {
+function createFallbackCurrency(denom: string, fallbackDecimals?: number): Currency {
   if (denom.startsWith("0x")) {
     const addr = denom.toLowerCase();
     return {
@@ -50,7 +52,7 @@ function createFallbackCurrency(denom: string): Currency {
   return {
     coinDenom: display,
     coinMinimalDenom: denom,
-    coinDecimals: 6,
+    coinDecimals: fallbackDecimals ?? 6,
   };
 }
 

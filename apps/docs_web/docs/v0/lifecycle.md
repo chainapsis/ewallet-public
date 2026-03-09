@@ -417,6 +417,53 @@ const signResult = await cosmosWallet.signAmino({
 // (Usually done with a client like @cosmjs/stargate)
 ```
 
+## SVM Transaction Lifecycle
+
+The process for SVM-compatible chains (Solana, etc.):
+
+```typescript
+import { OkoSvmWallet } from "@oko-wallet/oko-sdk-svm";
+import {
+  Connection,
+  PublicKey,
+  SystemProgram,
+  Transaction,
+} from "@solana/web3.js";
+
+// Step 1: Initialize SVM wallet
+const initRes = OkoSvmWallet.init({
+  api_key: "your-api-key",
+  chain_id: "solana:mainnet",
+});
+
+if (!initRes.success) {
+  throw new Error(`SVM wallet initialization failed: ${initRes.err}`);
+}
+
+const svmWallet = initRes.data;
+
+// Step 2: Connect and get public key
+await svmWallet.connect();
+const publicKey = svmWallet.publicKey!;
+
+// Step 3: Prepare transaction
+const connection = new Connection("https://api.mainnet.solana.com");
+const transaction = new Transaction().add(
+  SystemProgram.transfer({
+    fromPubkey: publicKey,
+    toPubkey: new PublicKey("destination-address"),
+    lamports: 1_000_000,
+  }),
+);
+
+// Step 4: Sign and send transaction
+const signature = await svmWallet.sendTransaction(transaction, connection);
+
+// Step 5: Confirm transaction
+const confirmation = await connection.confirmTransaction(signature);
+console.log("Transaction confirmed:", confirmation);
+```
+
 ## Error Handling & Recovery
 
 ### Common Error Scenarios

@@ -12,6 +12,7 @@ export const SolanaIcon: React.FC<SolanaIconProps> = ({
       alt="solana_icon"
       width={width}
       height={height}
+      style={{ borderRadius: "999px" }}
     />
   );
 };

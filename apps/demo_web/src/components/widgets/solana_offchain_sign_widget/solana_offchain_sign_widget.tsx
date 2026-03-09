@@ -1,5 +1,6 @@
 import { SolanaIcon } from "@oko-wallet/oko-common-ui/icons/solana_icon";
 
+// import styles from "../sign_widget/sign_widget.module.scss";
 import { SignWidget } from "@oko-wallet-demo-web/components/widgets/sign_widget/sign_widget";
 import { useSDKState } from "@oko-wallet-demo-web/state/sdk";
 
@@ -31,6 +32,7 @@ export const SolanaOffchainSignWidget = () => {
       chainIcon={<SolanaIcon />}
       signType="offchain"
       signButtonOnClick={handleClickSolOffchainSign}
+      // badge={<span className={styles.badge}>Rialo</span>}
     />
   );
 };

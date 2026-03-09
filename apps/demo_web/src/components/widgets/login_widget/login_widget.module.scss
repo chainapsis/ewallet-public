@@ -60,6 +60,25 @@
     display: flex;
     gap: 4px;
     text-decoration: underline;
+    text-decoration-color: var(--text-secondary);
+    color: var(--text-secondary);
+
+    &:hover {
+      text-decoration-color: var(--text-secondary-hover);
+      color: var(--text-secondary-hover);
+
+      span {
+        color: var(--text-secondary-hover);
+      }
+
+      .supportIcon {
+        color: var(--fg-quaternary-hover);
+      }
+    }
+  }
+
+  .supportIcon {
+    color: var(--fg-quaternary);
   }
 }
 
@@ -102,6 +121,7 @@
   align-items: center;
   gap: 8px;
   align-self: stretch;
+  cursor: pointer;
 
   border-radius: 8px;
   border: 1px solid var(--border-primary);
@@ -111,9 +131,12 @@
 }
 
 .loginButton {
-  height: 22px !important;
-  padding: 0 !important;
-  color: var(--text-placeholder) !important;
+  font-family: var(--font-family-body);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 22px;
+  color: var(--text-placeholder);
+  white-space: nowrap;
 }
 
 .emailInput {
@@ -128,6 +151,7 @@
   font-size: 15px;
   font-weight: 400;
   line-height: 22px;
+  color: var(--text-placeholder);
 
   border: none;
 }

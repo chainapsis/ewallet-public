@@ -9,7 +9,7 @@ Complete guide for integrating Oko into React applications.
 
 <!-- prettier-ignore -->
 :::tip Get started faster
-Prefer a ready-to-run example? Try the **[Cosmos + EVM (React) starter template](https://github.com/chainapsis/oko/tree/main/examples/multi-ecosystem-react)**.
+Prefer a ready-to-run example? Try the **[Cosmos + EVM + SVM (React) starter template](https://github.com/chainapsis/oko/tree/main/examples/multi_ecosystem_react)**.
 :::
 
 ## Context Provider
@@ -19,12 +19,14 @@ Prefer a ready-to-run example? Try the **[Cosmos + EVM (React) starter template]
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { OkoCosmosWallet } from '@oko-wallet/oko-sdk-cosmos';
 import { OkoEthWallet } from '@oko-wallet/oko-sdk-eth';
+import { OkoSvmWallet } from '@oko-wallet/oko-sdk-svm';
 
 const OkoContext = createContext(null);
 
 export const OkoProvider = ({ children }) => {
   const [cosmosWallet, setCosmosWallet] = useState(null);
   const [ethWallet, setEthWallet] = useState(null);
+  const [svmWallet, setSvmWallet] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
   function signIn() {
@@ -62,8 +64,17 @@ export const OkoProvider = ({ children }) => {
           return;
         }
 
+        const svmInitRes = OkoSvmWallet.init({
+          api_key: process.env.REACT_APP_OKO_API_KEY,
+          chain_id: 'solana:mainnet',
+        });
+        if (!svmInitRes.success) {
+          return;
+        }
+
         setCosmosWallet(cosmosInitRes.data);
         setEthWallet(ethInitRes.data);
+        setSvmWallet(svmInitRes.data);
         setIsInitialized(true);
       } catch (error) {
         console.error('Failed to initialize wallet:', error);
@@ -75,7 +86,7 @@ export const OkoProvider = ({ children }) => {
 
   return (
     <OkoContext.Provider
-      value={{ cosmosWallet, ethWallet, isInitialized, signIn, signOut }}
+      value={{ cosmosWallet, ethWallet, svmWallet, isInitialized, signIn, signOut }}
     >
       {children}
     </OkoContext.Provider>
@@ -227,6 +238,7 @@ export default App;
 
 - **[Cosmos Integration](./cosmos-integration)** - Cosmos setup
 - **[Ethereum Integration](./ethereum-integration)** - Ethereum setup
+- **[SVM Integration](./solana-integration)** - SVM setup (Solana, etc.)
 - **[RainbowKit Integration](./rainbow-kit-integration)** - RainbowKit
   integration
 - **[Error Handling](./error-handling)** - Error handling patterns

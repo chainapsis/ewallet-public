@@ -16,13 +16,13 @@ export const DocsWidget: FC = () => {
   };
 
   return (
-    <Widget gradientBorder={!isSignedIn}>
+    <Widget>
       <div className={styles.container}>
         <div className={styles.title}>
-          <BookOpenIcon size={16} color="var(--fg-tertiary)" />
+          <BookOpenIcon size={16} color="#ED6B25" />
           <Typography
             tagType="h3"
-            size="sm"
+            size="md"
             weight="semibold"
             color="secondary"
           >

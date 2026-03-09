@@ -132,6 +132,8 @@ of it. The SDK handles all the complexity:
 
 **For Technical Teams:**
 
+- **[Threshold EdDSA (FROST)](./threshold-eddsa)** - EdDSA threshold signatures
+  for SVM chains
 - **[Architecture Overview](../architecture)** - System design and security
   model
 - **[API Reference](../api-reference/api-overview.md)** - Complete technical

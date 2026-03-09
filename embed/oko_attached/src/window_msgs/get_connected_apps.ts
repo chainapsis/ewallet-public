@@ -49,6 +49,22 @@ export async function handleGetConnectedApps(
       },
     );
 
+    if (!response.ok) {
+      const ack: OkoWalletMsgGetConnectedAppsAck = {
+        target: OKO_SDK_TARGET,
+        msg_type: "__get_connected_apps_ack__",
+        payload: {
+          success: false,
+          error: {
+            type: "FETCH_ERROR",
+            error: `HTTP ${response.status}`,
+          },
+        },
+      };
+      port.postMessage(ack);
+      return;
+    }
+
     const data = await response.json();
 
     const ack: OkoWalletMsgGetConnectedAppsAck = {

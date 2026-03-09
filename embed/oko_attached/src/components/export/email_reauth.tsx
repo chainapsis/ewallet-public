@@ -4,7 +4,7 @@ import { OtpInput } from "@oko-wallet/oko-common-ui/otp_input";
 import { ThemeContext } from "@oko-wallet/oko-common-ui/theme";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import type { OAuthState } from "@oko-wallet/oko-sdk-core";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import styles from "./email_reauth.module.scss";
 import {
@@ -24,12 +24,20 @@ const LOG_PREFIX = "[attached][email_reauth]";
 
 type Step = "enter_email" | "verify_code";
 
+function getEmailParam(): string | null {
+  const raw = new URLSearchParams(window.location.search).get("email");
+  return raw?.trim() || null;
+}
+
 export const EmailReauth = () => {
   const theme = useContext(ThemeContext);
   const webAuth = useMemo(() => getAuth0WebAuth(), []);
 
-  const [step, setStep] = useState<Step>("enter_email");
-  const [email, setEmail] = useState("");
+  const initialEmail = useMemo(() => getEmailParam(), []);
+  const [step, setStep] = useState<Step>(
+    initialEmail ? "verify_code" : "enter_email",
+  );
+  const [email, setEmail] = useState(initialEmail ?? "");
   const [otpDigits, setOtpDigits] = useState<string[]>(
     Array.from({ length: CODE_LENGTH }, () => ""),
   );
@@ -67,11 +75,47 @@ export const EmailReauth = () => {
       sendReauthParamsToIframe(iframe, { nonce });
       setIframeSent(true);
     } else {
+      setStep("enter_email");
       setErrorMessage(
         "Cannot find embedded iframe. Make sure this page was opened from the dashboard.",
       );
+      return;
     }
   }, [nonce]);
+
+  // Auto-send OTP if email was passed via query param
+  const autoSentRef = useRef(false);
+  useEffect(() => {
+    const paramEmail = getEmailParam();
+    if (!paramEmail || !iframeSent || autoSentRef.current) {
+      return;
+    }
+
+    autoSentRef.current = true;
+    setEmail(paramEmail);
+    console.log(`${LOG_PREFIX} auto-sending OTP for`, paramEmail);
+
+    let cancelled = false;
+    sendEmailOTPCode({ webAuth, email: paramEmail })
+      .then(() => {
+        if (!cancelled) {
+          setStep("verify_code");
+          setResendTimer(RESEND_COOLDOWN_SECONDS);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          console.error(`${LOG_PREFIX} auto-send OTP failed`, err);
+          setErrorMessage(
+            err instanceof Error ? err.message : "Failed to send the code.",
+          );
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [iframeSent, webAuth]);
 
   // Resend timer countdown
   useEffect(() => {
