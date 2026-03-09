@@ -198,8 +198,6 @@ For framework-specific wallet adapter integration, see:
 
 - **[Solana Wallet Adapter Integration](./solana-wallet-adapter-integration)** —
   Use with `@solana/wallet-adapter-react` for Solana dApps
-- **[Rialo Frost Kit Integration](./rialo-frost-kit-integration)** — Use with `@rialo/frost`
-  for Rialo dApps
 
 ## Versioned Transactions
 
@@ -232,8 +230,6 @@ console.log("Wallet disconnected");
 
 - **[Solana Wallet Adapter Integration](./solana-wallet-adapter-integration)** -
   Use Oko with `@solana/wallet-adapter-react`
-- **[Rialo Frost Kit Integration](./rialo-frost-kit-integration)** - Use Oko with Rialo
-  Frost
 - **[Ethereum Integration](./ethereum-integration)** - Add Ethereum support
 - **[Cosmos Integration](./cosmos-integration)** - Add Cosmos support
 - **[React Integration](./react-integration)** - React patterns
