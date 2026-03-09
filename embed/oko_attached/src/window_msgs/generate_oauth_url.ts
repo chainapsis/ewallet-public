@@ -21,6 +21,7 @@ function buildGoogleOAuthUrl(
   apiKey: string,
   targetOrigin: string,
   nonce: string,
+  redirectScheme?: string,
 ): string {
   const redirectUri = `${window.location.origin}/google/callback`;
 
@@ -28,6 +29,7 @@ function buildGoogleOAuthUrl(
     apiKey,
     targetOrigin,
     provider: "google",
+    ...(redirectScheme && { redirectScheme }),
   };
 
   const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
@@ -46,6 +48,7 @@ function buildXOAuthUrl(
   apiKey: string,
   targetOrigin: string,
   codeChallenge: string,
+  redirectScheme?: string,
 ): string {
   const redirectUri = `${window.location.origin}/x/callback`;
 
@@ -53,6 +56,7 @@ function buildXOAuthUrl(
     apiKey,
     targetOrigin,
     provider: "x",
+    ...(redirectScheme && { redirectScheme }),
   };
   const oauthStateString = btoa(JSON.stringify(oauthState));
 
@@ -72,6 +76,7 @@ function buildDiscordOAuthUrl(
   apiKey: string,
   targetOrigin: string,
   codeChallenge: string,
+  redirectScheme?: string,
 ): string {
   const redirectUri = `${window.location.origin}/discord/callback`;
 
@@ -79,6 +84,7 @@ function buildDiscordOAuthUrl(
     apiKey,
     targetOrigin,
     provider: "discord",
+    ...(redirectScheme && { redirectScheme }),
   };
   const oauthStateString = btoa(JSON.stringify(oauthState));
 
@@ -98,6 +104,7 @@ function buildGithubOAuthUrl(
   apiKey: string,
   targetOrigin: string,
   codeChallenge: string,
+  redirectScheme?: string,
 ): string {
   const redirectUri = `${window.location.origin}/github/callback`;
 
@@ -105,6 +112,7 @@ function buildGithubOAuthUrl(
     apiKey,
     targetOrigin,
     provider: "github",
+    ...(redirectScheme && { redirectScheme }),
   };
   const oauthStateString = btoa(JSON.stringify(oauthState));
 
@@ -119,31 +127,63 @@ function buildGithubOAuthUrl(
   return authUrl.toString();
 }
 
+function buildEmailLoginUrl(
+  apiKey: string,
+  targetOrigin: string,
+  nonce: string,
+  redirectScheme?: string,
+): string {
+  const modalId = `rn-email-${Date.now()}`;
+
+  const oauthState: OAuthState = {
+    apiKey,
+    targetOrigin,
+    provider: "auth0",
+    modalId,
+    ...(redirectScheme && { redirectScheme }),
+  };
+
+  const emailUrl = new URL(`${window.location.origin}/email/`);
+  emailUrl.searchParams.set("modal_id", modalId);
+  emailUrl.searchParams.set("host_origin", targetOrigin);
+  emailUrl.searchParams.set("popup_layout", "inline");
+  emailUrl.searchParams.set("rn_nonce", nonce);
+  emailUrl.searchParams.set("rn_state", JSON.stringify(oauthState));
+
+  return emailUrl.toString();
+}
+
 async function buildOAuthUrl(
   provider: OAuthProvider,
   apiKey: string,
   targetOrigin: string,
   hostOrigin: string,
+  redirectScheme?: string,
 ): Promise<string> {
   const appState = useAppState.getState();
 
-  if (provider === "google") {
+  if (provider === "google" || provider === "email") {
     const nonce = generateNonce();
     appState.setNonce(hostOrigin, nonce);
-    return buildGoogleOAuthUrl(apiKey, targetOrigin, nonce);
+
+    if (provider === "email") {
+      return buildEmailLoginUrl(apiKey, targetOrigin, nonce, redirectScheme);
+    }
+
+    return buildGoogleOAuthUrl(apiKey, targetOrigin, nonce, redirectScheme);
   }
 
-  // X and Discord use PKCE
+  // X, Discord, GitHub use PKCE
   const { codeVerifier, codeChallenge } = await createPkcePair();
   appState.setCodeVerifier(hostOrigin, codeVerifier);
 
   switch (provider) {
     case "x":
-      return buildXOAuthUrl(apiKey, targetOrigin, codeChallenge);
+      return buildXOAuthUrl(apiKey, targetOrigin, codeChallenge, redirectScheme);
     case "discord":
-      return buildDiscordOAuthUrl(apiKey, targetOrigin, codeChallenge);
+      return buildDiscordOAuthUrl(apiKey, targetOrigin, codeChallenge, redirectScheme);
     case "github":
-      return buildGithubOAuthUrl(apiKey, targetOrigin, codeChallenge);
+      return buildGithubOAuthUrl(apiKey, targetOrigin, codeChallenge, redirectScheme);
     default:
       throw new Error(`Unsupported OAuth provider: ${provider}`);
   }
@@ -156,9 +196,9 @@ export async function handleGenerateOAuthUrl(
   const { port, hostOrigin } = ctx;
 
   try {
-    const { provider, apiKey, targetOrigin } = message.payload;
+    const { provider, apiKey, targetOrigin, redirectScheme } = message.payload;
 
-    const url = await buildOAuthUrl(provider, apiKey, targetOrigin, hostOrigin);
+    const url = await buildOAuthUrl(provider, apiKey, targetOrigin, hostOrigin, redirectScheme);
 
     const ack: OkoWalletMsgGenerateOAuthUrlAck = {
       target: OKO_SDK_TARGET,

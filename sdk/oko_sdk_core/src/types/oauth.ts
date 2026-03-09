@@ -14,6 +14,8 @@ export type OAuthState = {
   provider: AuthType;
   modalId?: string;
   codeVerifier?: string;
+  /** Deep link scheme for React Native OAuth callback (e.g. "okowallet") */
+  redirectScheme?: string;
 };
 
 export enum RedirectUriSearchParamsKey {

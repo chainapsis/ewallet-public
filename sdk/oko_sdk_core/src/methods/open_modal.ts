@@ -339,7 +339,7 @@ function sendMsgToPopupWindow(
 }
 
 function createTimeout(duration: number) {
-  let timeoutId: NodeJS.Timeout | null = null;
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
   return {
     timeoutPromise: new Promise<never>((_, reject) => {

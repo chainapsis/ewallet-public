@@ -43,6 +43,22 @@ export function useGoogleCallback() {
 export async function handleGoogleCallback(): Promise<
   Result<void, HandleCallbackError>
 > {
+  const params = new URLSearchParams(window.location.hash.substring(1));
+  const accessToken = params.get("access_token");
+  const idToken = params.get("id_token");
+
+  const oauthState = getOAuthStateFromUrl();
+
+  // React Native: no opener, redirect OAuth result to deep link
+  if (!window.opener && oauthState.redirectScheme) {
+    const deepLinkParams = new URLSearchParams();
+    deepLinkParams.set("provider", "google");
+    if (accessToken) deepLinkParams.set("access_token", accessToken);
+    if (idToken) deepLinkParams.set("id_token", idToken);
+    window.location.href = `${oauthState.redirectScheme}://oauth-callback?${deepLinkParams.toString()}`;
+    return { success: true, data: void 0 };
+  }
+
   if (!window.opener) {
     return {
       success: false,
@@ -51,12 +67,6 @@ export async function handleGoogleCallback(): Promise<
       },
     };
   }
-
-  const params = new URLSearchParams(window.location.hash.substring(1));
-  const accessToken = params.get("access_token");
-  const idToken = params.get("id_token");
-
-  const oauthState = getOAuthStateFromUrl();
 
   const apiKey: string = oauthState.apiKey;
   const targetOrigin: string = oauthState.targetOrigin;

@@ -62,7 +62,27 @@ export function useEmailCallback(): { error: string | null } {
 export async function handleEmailCallback(): Promise<
   Result<void, HandleCallbackError>
 > {
+  const parsedHash = await parseAuth0Hash();
+
+  // React Native: no opener, redirect OAuth result to deep link
   if (!window.opener) {
+    const accessToken = parsedHash.accessToken;
+    const idToken = parsedHash.idToken;
+    const stateString = parsedHash.state;
+    if (stateString && (accessToken || idToken)) {
+      try {
+        const oauthState = JSON.parse(stateString) as OAuthState;
+        if (oauthState.redirectScheme) {
+          const deepLinkParams = new URLSearchParams();
+          deepLinkParams.set("provider", "auth0");
+          if (accessToken) deepLinkParams.set("access_token", accessToken);
+          if (idToken) deepLinkParams.set("id_token", idToken);
+          window.location.href = `${oauthState.redirectScheme}://oauth-callback?${deepLinkParams.toString()}`;
+          return { success: true, data: void 0 };
+        }
+      } catch { /* fall through to normal error */ }
+    }
+
     return {
       success: false,
       err: {
@@ -70,8 +90,6 @@ export async function handleEmailCallback(): Promise<
       },
     };
   }
-
-  const parsedHash = await parseAuth0Hash();
   window.history.replaceState(
     {},
     document.title,

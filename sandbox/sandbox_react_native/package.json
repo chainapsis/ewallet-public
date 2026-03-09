@@ -12,6 +12,11 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
+    "@oko-wallet/oko-sdk-core": "workspace:*",
+    "@oko-wallet/oko-sdk-core-react-native": "workspace:*",
+    "@oko-wallet/oko-sdk-cosmos": "workspace:*",
+    "@oko-wallet/oko-sdk-eth": "workspace:*",
+    "@oko-wallet/oko-sdk-svm": "workspace:*",
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",

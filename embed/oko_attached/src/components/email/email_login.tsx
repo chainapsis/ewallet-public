@@ -1,11 +1,38 @@
 import { useEffect, useMemo, type FC } from "react";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import type { EmailLoginModalPayload } from "@oko-wallet/oko-sdk-core";
 
 import { AttachedInitialized } from "@oko-wallet-attached/components/attached_initialized/attached_initialized";
 import { useMemoryState } from "@oko-wallet-attached/store/memory";
 import { EmailLoginPopup } from "./email_login_popup";
 import { LoginPopupErrorView } from "../login_popup/login_popup_error_view";
 import styles from "./email_login.module.scss";
+
+/**
+ * Build email modal data from URL query params (RN mode).
+ * When the email login page is opened in a system browser by the RN SDK,
+ * there is no MemoryState — nonce and state come from URL params instead.
+ */
+function useRnEmailModalPayload(): {
+  modalId: string;
+  data: EmailLoginModalPayload["data"];
+} | null {
+  return useMemo(() => {
+    if (typeof window === "undefined") return null;
+    const params = new URLSearchParams(window.location.search);
+    const rnNonce = params.get("rn_nonce");
+    const rnState = params.get("rn_state");
+    const modalId = params.get("modal_id");
+    if (!rnNonce || !rnState || !modalId) return null;
+    return {
+      modalId,
+      data: {
+        email_hint: null,
+        oauth: { nonce: rnNonce, state: rnState },
+      },
+    };
+  }, []);
+}
 
 export const EmailLogin: FC = () => {
   useNotifyPopupReady();
@@ -18,6 +45,12 @@ export const EmailLogin: FC = () => {
       ? modalRequest.msg.payload
       : null;
 
+  // Fallback: RN mode — read from URL query params
+  const rnPayload = useRnEmailModalPayload();
+
+  const effectiveModalId = emailModalPayload?.modal_id ?? rnPayload?.modalId;
+  const effectiveData = emailModalPayload?.data ?? rnPayload?.data;
+
   return (
     <AttachedInitialized>
       <div className={styles.wrapper}>
@@ -25,10 +58,10 @@ export const EmailLogin: FC = () => {
           {isInlineLayout ? (
             error ? (
               <LoginPopupErrorView error={error} />
-            ) : emailModalPayload ? (
+            ) : effectiveModalId && effectiveData ? (
               <EmailLoginPopup
-                modalId={emailModalPayload.modal_id}
-                data={emailModalPayload.data}
+                modalId={effectiveModalId}
+                data={effectiveData}
               />
             ) : (
               <LoadingCard />

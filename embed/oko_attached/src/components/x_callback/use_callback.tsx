@@ -55,6 +55,24 @@ export function useXCallback() {
 export async function handleXCallback(): Promise<
   Result<void, HandleXCallbackError>
 > {
+  const urlParams = new URLSearchParams(window.location.search);
+  const code = urlParams.get("code");
+  const stateParam = urlParams.get(RedirectUriSearchParamsKey.STATE) || "{}";
+
+  // React Native: no opener, redirect OAuth result to deep link
+  if (!window.opener && stateParam !== "{}") {
+    try {
+      const oauthState = JSON.parse(atob(stateParam));
+      if (oauthState.redirectScheme && code) {
+        const deepLinkParams = new URLSearchParams();
+        deepLinkParams.set("provider", "x");
+        deepLinkParams.set("code", code);
+        window.location.href = `${oauthState.redirectScheme}://oauth-callback?${deepLinkParams.toString()}`;
+        return { success: true, data: void 0 };
+      }
+    } catch { /* fall through to normal error */ }
+  }
+
   if (!window.opener) {
     return {
       success: false,
@@ -63,10 +81,6 @@ export async function handleXCallback(): Promise<
       },
     };
   }
-
-  const urlParams = new URLSearchParams(window.location.search);
-  const code = urlParams.get("code");
-  const stateParam = urlParams.get(RedirectUriSearchParamsKey.STATE) || "{}";
 
   if (!code) {
     return {
