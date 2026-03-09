@@ -46,7 +46,10 @@ export const PreviewPanel: FC = () => {
               <div className={styles.col}>
                 <AccountWidget />
                 <AddressWidget />
-                <ManageCard />
+                <ManageCard
+                  dashboardUrl="https://dapp.oko.app"
+                  homeUrl="https://home.oko.app"
+                />
                 {isSignedIn && <DocsWidget />}
               </div>
               {isSignedIn ? (
