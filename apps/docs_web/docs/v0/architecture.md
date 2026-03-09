@@ -53,8 +53,10 @@ verify the user and release their encrypted fragments. The fragments are
 recombined **exactly once** during sign-in, remain on-device, and still
 represent only half of the full private key. For transaction signing, both key
 shares participate in a threshold signature protocol to produce a standard
-secp256k1 signature. See [Threshold ECDSA Concepts](concepts/threshold-ecdsa.md)
-for details on the signing process.
+secp256k1 (EVM/Cosmos) or Ed25519 (SVM) signature. See
+[Threshold ECDSA Concepts](concepts/threshold-ecdsa.md) and
+[Threshold EdDSA Concepts](concepts/threshold-eddsa.md) for details on the
+signing process.
 
 **The master key (or private key) is never reconstructed or revealed at any
 point.** This ensures users retain full control without compromising on
@@ -91,10 +93,17 @@ security, while eliminating the need to manage complex private keys themselves.
 
 ### Cryptographic Foundation
 
-**Protocol**: Cait-Sith threshold ECDSA with committed Beaver triples  
-**Implementation**: Rust core with WebAssembly and Node.js bindings  
-**Curve**: secp256k1 (standard Bitcoin/Ethereum curve)  
+**EVM / Cosmos:**
+**Protocol**: Cait-Sith threshold ECDSA with committed Beaver triples
+**Curve**: secp256k1 (standard Bitcoin/Ethereum curve)
 **Standards**: Full EIP-1193 and CosmJS compatibility
+
+**SVM (Solana):**
+**Protocol**: FROST threshold EdDSA
+**Curve**: Ed25519 (standard Solana curve)
+**Standards**: Solana Wallet Standard compatibility
+
+**Implementation**: Rust core with WebAssembly and Node.js bindings
 
 ### Integration Architecture
 
@@ -152,6 +161,29 @@ const okoCosmos = okoCosmosRes.data;
 const accounts = await okoCosmos.getAccounts();
 ```
 
+**For SVM (Solana):**
+
+```typescript
+import { OkoSvmWallet } from "@oko-wallet/oko-sdk-svm";
+import { SOLANA_MAINNET_CHAIN } from "@solana/wallet-standard-chains";
+
+// Initialize Oko SVM Wallet
+const okoSvmRes = OkoSvmWallet.init({
+  api_key: "your-api-key",
+  chain_id: SOLANA_MAINNET_CHAIN,
+});
+
+if (!okoSvmRes.success) {
+  throw new Error("Failed to initialize Oko SVM Wallet");
+}
+
+const okoSvm = okoSvmRes.data;
+
+// Connect and get public key
+await okoSvm.connect();
+console.log("Connected:", okoSvm.publicKey?.toBase58());
+```
+
 ### Security Model
 
 **Isolation Boundaries:**
@@ -188,7 +220,7 @@ const accounts = await okoCosmos.getAccounts();
 
 ### vs. MPC Wallets
 
-- **Proven Cryptography**: Standard ECDSA signatures (not experimental)
+- **Proven Cryptography**: Standard ECDSA/EdDSA signatures (not experimental)
 - **Better Integration**: Drop-in replacement for existing wallet connections
 - **Better Scalability**: Optimized threshold signature protocol
 
@@ -202,5 +234,6 @@ code samples
 **🧩 Starter Templates**:
 [Starter Templates](getting-started/starter-templates.md) - Ready-to-run
 examples  
-**🔍 Deep Dive**: [Threshold ECDSA Explained](concepts/threshold-ecdsa.md) -
+**🔍 Deep Dive**: [Threshold ECDSA Explained](concepts/threshold-ecdsa.md) |
+[Threshold EdDSA Explained](concepts/threshold-eddsa.md) -
 Understanding the cryptography
