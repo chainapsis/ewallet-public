@@ -1,9 +1,9 @@
 import type {
-  OAuthProvider,
   OAuthState,
   OkoWalletMsgGenerateOAuthUrl,
   OkoWalletMsgGenerateOAuthUrlAck,
 } from "@oko-wallet/oko-sdk-core";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
 
 import { OKO_SDK_TARGET } from "./target";
 import type { MsgEventContext } from "./types";
@@ -17,22 +17,8 @@ import {
 } from "@oko-wallet-attached/config/oauth";
 import { useAppState } from "@oko-wallet-attached/store/app";
 
-function buildGoogleOAuthUrl(
-  apiKey: string,
-  targetOrigin: string,
-  nonce: string,
-  redirectScheme?: string,
-  mobileOsBrowser?: boolean,
-): string {
+function buildGoogleOAuthUrl(nonce: string, state: OAuthState): string {
   const redirectUri = `${window.location.origin}/google/callback`;
-
-  const oauthState: OAuthState = {
-    apiKey,
-    targetOrigin,
-    provider: "google",
-    ...(redirectScheme && { redirectScheme }),
-    ...(mobileOsBrowser && { mobileOsBrowser }),
-  };
 
   const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
   authUrl.searchParams.set("client_id", GOOGLE_CLIENT_ID);
@@ -41,28 +27,13 @@ function buildGoogleOAuthUrl(
   authUrl.searchParams.set("scope", "openid email profile");
   authUrl.searchParams.set("prompt", "login");
   authUrl.searchParams.set("nonce", nonce);
-  authUrl.searchParams.set("state", JSON.stringify(oauthState));
+  authUrl.searchParams.set("state", JSON.stringify(state));
 
   return authUrl.toString();
 }
 
-function buildXOAuthUrl(
-  apiKey: string,
-  targetOrigin: string,
-  codeChallenge: string,
-  redirectScheme?: string,
-  mobileOsBrowser?: boolean,
-): string {
+function buildXOAuthUrl(codeChallenge: string, state: OAuthState): string {
   const redirectUri = `${window.location.origin}/x/callback`;
-
-  const oauthState: OAuthState = {
-    apiKey,
-    targetOrigin,
-    provider: "x",
-    ...(redirectScheme && { redirectScheme }),
-    ...(mobileOsBrowser && { mobileOsBrowser }),
-  };
-  const oauthStateString = btoa(JSON.stringify(oauthState));
 
   const authUrl = new URL("https://twitter.com/i/oauth2/authorize");
   authUrl.searchParams.set("response_type", "code");
@@ -71,28 +42,13 @@ function buildXOAuthUrl(
   authUrl.searchParams.set("scope", "tweet.read users.read offline.access");
   authUrl.searchParams.set("code_challenge", codeChallenge);
   authUrl.searchParams.set("code_challenge_method", "S256");
-  authUrl.searchParams.set("state", oauthStateString);
+  authUrl.searchParams.set("state", btoa(JSON.stringify(state)));
 
   return authUrl.toString();
 }
 
-function buildDiscordOAuthUrl(
-  apiKey: string,
-  targetOrigin: string,
-  codeChallenge: string,
-  redirectScheme?: string,
-  mobileOsBrowser?: boolean,
-): string {
+function buildDiscordOAuthUrl(codeChallenge: string, state: OAuthState): string {
   const redirectUri = `${window.location.origin}/discord/callback`;
-
-  const oauthState: OAuthState = {
-    apiKey,
-    targetOrigin,
-    provider: "discord",
-    ...(redirectScheme && { redirectScheme }),
-    ...(mobileOsBrowser && { mobileOsBrowser }),
-  };
-  const oauthStateString = btoa(JSON.stringify(oauthState));
 
   const authUrl = new URL("https://discord.com/api/oauth2/authorize");
   authUrl.searchParams.set("response_type", "code");
@@ -101,28 +57,13 @@ function buildDiscordOAuthUrl(
   authUrl.searchParams.set("scope", "identify email");
   authUrl.searchParams.set("code_challenge", codeChallenge);
   authUrl.searchParams.set("code_challenge_method", "S256");
-  authUrl.searchParams.set("state", oauthStateString);
+  authUrl.searchParams.set("state", btoa(JSON.stringify(state)));
 
   return authUrl.toString();
 }
 
-function buildGithubOAuthUrl(
-  apiKey: string,
-  targetOrigin: string,
-  codeChallenge: string,
-  redirectScheme?: string,
-  mobileOsBrowser?: boolean,
-): string {
+function buildGithubOAuthUrl(codeChallenge: string, state: OAuthState): string {
   const redirectUri = `${window.location.origin}/github/callback`;
-
-  const oauthState: OAuthState = {
-    apiKey,
-    targetOrigin,
-    provider: "github",
-    ...(redirectScheme && { redirectScheme }),
-    ...(mobileOsBrowser && { mobileOsBrowser }),
-  };
-  const oauthStateString = btoa(JSON.stringify(oauthState));
 
   const authUrl = new URL("https://github.com/login/oauth/authorize");
   authUrl.searchParams.set("client_id", GITHUB_CLIENT_ID);
@@ -130,13 +71,13 @@ function buildGithubOAuthUrl(
   authUrl.searchParams.set("scope", "user:email");
   authUrl.searchParams.set("code_challenge", codeChallenge);
   authUrl.searchParams.set("code_challenge_method", "S256");
-  authUrl.searchParams.set("state", oauthStateString);
+  authUrl.searchParams.set("state", btoa(JSON.stringify(state)));
 
   return authUrl.toString();
 }
 
 async function buildOAuthUrl(
-  provider: OAuthProvider,
+  provider: string,
   apiKey: string,
   targetOrigin: string,
   hostOrigin: string,
@@ -145,10 +86,18 @@ async function buildOAuthUrl(
 ): Promise<string> {
   const appState = useAppState.getState();
 
+  const state: OAuthState = {
+    apiKey,
+    targetOrigin,
+    provider: provider as AuthType,
+    ...(redirectScheme && { redirectScheme }),
+    ...(mobileOsBrowser && { mobileOsBrowser }),
+  };
+
   if (provider === "google") {
     const nonce = generateNonce();
     appState.setNonce(hostOrigin, nonce);
-    return buildGoogleOAuthUrl(apiKey, targetOrigin, nonce, redirectScheme, mobileOsBrowser);
+    return buildGoogleOAuthUrl(nonce, state);
   }
 
   // X, Discord, GitHub use PKCE
@@ -157,11 +106,11 @@ async function buildOAuthUrl(
 
   switch (provider) {
     case "x":
-      return buildXOAuthUrl(apiKey, targetOrigin, codeChallenge, redirectScheme, mobileOsBrowser);
+      return buildXOAuthUrl(codeChallenge, state);
     case "discord":
-      return buildDiscordOAuthUrl(apiKey, targetOrigin, codeChallenge, redirectScheme, mobileOsBrowser);
+      return buildDiscordOAuthUrl(codeChallenge, state);
     case "github":
-      return buildGithubOAuthUrl(apiKey, targetOrigin, codeChallenge, redirectScheme, mobileOsBrowser);
+      return buildGithubOAuthUrl(codeChallenge, state);
     default:
       throw new Error(`Unsupported OAuth provider: ${provider}`);
   }
