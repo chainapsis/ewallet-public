@@ -150,6 +150,10 @@ export function createMockOkoWallet(
     on: (handlerDef) => {
       // No-op for tests
     },
+
+    off: (_handlerDef) => {
+      // No-op for tests
+    },
   };
 
   return mockWallet;
