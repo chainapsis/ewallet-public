@@ -8,6 +8,8 @@
 
   &:hover {
     background: var(--bg-secondary-hover);
+    --text-secondary: var(--text-secondary-hover);
+    --fg-tertiary: var(--fg-tertiary-hover);
   }
 
   width: auto;
