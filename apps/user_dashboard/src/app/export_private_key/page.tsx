@@ -254,7 +254,7 @@ const Step1Content = ({
         </div>
       </div>
 
-      <Button size="lg" fullWidth isLoading={isLoading} onClick={onContinue}>
+      <Button size="lg" fullWidth isLoading={isLoading} disabled={isLoading} onClick={onContinue}>
         Continue
       </Button>
     </>
@@ -491,6 +491,7 @@ const Page = () => {
 
   const handleExportDisplayError = useCallback(() => {
     setStep(1);
+    setIsLoading(false);
     displayToast({
       variant: "confirm",
       title: "Export Failed",
