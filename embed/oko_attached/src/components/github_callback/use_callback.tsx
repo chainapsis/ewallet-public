@@ -7,6 +7,9 @@ import { useEffect, useState } from "react";
 
 import type { HandleGithubCallbackError } from "./types";
 import { sendOAuthPayloadToEmbeddedWindow } from "@oko-wallet-attached/components/oauth_callback/send_oauth_payload";
+import { storeOAuthRelay } from "@oko-wallet-attached/components/oauth_callback/store_oauth_relay";
+import { redirectToRnLoginComplete } from "@oko-wallet-attached/components/oauth_callback/redirect_to_rn_login_complete";
+import { tryRnOsBrowserRedirect } from "@oko-wallet-attached/components/oauth_callback/try_rn_os_browser_redirect";
 import { errorToLog } from "@oko-wallet-attached/logging/error";
 import { postLog } from "@oko-wallet-attached/requests/logging";
 
@@ -74,21 +77,51 @@ export async function handleGithubCallback(): Promise<
   const code = urlParams.get("code");
   const stateParam = urlParams.get(RedirectUriSearchParamsKey.STATE) || "{}";
 
-  // React Native: no opener, redirect OAuth result to deep link
+  // RN OS-browser: redirect to login/complete page for keygen inside the browser
+  if (!window.opener && stateParam !== "{}") {
+    try {
+      const oauthState = JSON.parse(atob(stateParam));
+      if (oauthState.rnOsBrowser && code) {
+        redirectToRnLoginComplete({
+          provider: "github",
+          api_key: oauthState.apiKey,
+          target_origin: oauthState.targetOrigin,
+          auth_type: "github",
+          code,
+        });
+        return { success: true, data: void 0 };
+      }
+    } catch { /* fall through */ }
+  }
+
+  // React Native (legacy relay): store tokens server-side and deep link with relay code only
   if (!window.opener && stateParam !== "{}") {
     try {
       const oauthState = JSON.parse(atob(stateParam));
       if (oauthState.redirectScheme && code) {
-        const deepLinkParams = new URLSearchParams();
-        deepLinkParams.set("provider", "github");
-        deepLinkParams.set("code", code);
-        window.location.href = `${oauthState.redirectScheme}://oauth-callback?${deepLinkParams.toString()}`;
+        const relayCode = await storeOAuthRelay({
+          code,
+          api_key: oauthState.apiKey,
+          target_origin: oauthState.targetOrigin,
+          auth_type: "github",
+        });
+        window.location.href = `${oauthState.redirectScheme}://oauth-callback?relay_code=${relayCode}`;
         return { success: true, data: void 0 };
       }
     } catch { /* fall through to normal error */ }
   }
 
+  // Fallback: check sessionStorage set by /rn/login page
   if (!window.opener) {
+    if (code) {
+      const redirected = tryRnOsBrowserRedirect({
+        provider: "github",
+        auth_type: "github",
+        code,
+      });
+      if (redirected) return { success: true, data: void 0 };
+    }
+
     return {
       success: false,
       err: {

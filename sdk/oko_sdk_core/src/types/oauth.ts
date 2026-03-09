@@ -16,6 +16,9 @@ export type OAuthState = {
   codeVerifier?: string;
   /** Deep link scheme for React Native OAuth callback (e.g. "okowallet") */
   redirectScheme?: string;
+  /** When true, callback pages redirect to /rn/login/complete instead of deep-linking.
+   *  Used by the OS-browser login flow where keygen runs inside the browser. */
+  rnOsBrowser?: boolean;
 };
 
 export enum RedirectUriSearchParamsKey {

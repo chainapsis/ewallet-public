@@ -1,168 +1,126 @@
 import * as WebBrowser from "expo-web-browser";
-import type {
-  OkoWalletMsg,
-  SignInType,
-  OAuthPayload,
-  OAuthTokenRequestPayload,
-} from "@oko-wallet/oko-sdk-core";
-import type { WebViewBridge } from "../bridge/WebViewBridge";
+import type { SignInType } from "@oko-wallet/oko-sdk-core";
 
 export interface SignInOptions {
   redirectScheme: string;
 }
 
+export interface SignInResult {
+  walletInfo: unknown;
+  deviceKey: string;
+}
+
 const DEFAULT_REDIRECT_SCHEME = "okowallet";
 
 /**
- * Sign in via system browser.
+ * Sign in via OS browser — the entire login + keygen flow runs
+ * in the system browser, completely outside the host app's WebView.
  *
- * 1. Request OAuth URL from attached (via bridge)
- * 2. Open system browser (expo-web-browser)
- * 3. User completes OAuth
- * 4. Callback page redirects to deep link
- * 5. Parse deep link params
- * 6. Send oauth_info_pass to attached (via bridge)
+ * 1. Generate device_key locally (crypto.getRandomValues)
+ * 2. Create server session (sets session cookie only)
+ * 3. Open OS browser at /rn/login (OAuth + keygen + key share upload)
+ * 4. Deep link back with wallet_info_code
+ * 5. Consume relay code → public wallet info
+ *
+ * The server NEVER sees the device_key.
+ * Key shares never enter the RN app JS runtime or WebView.
  */
 export async function signInRN(
-  bridge: WebViewBridge,
+  sdkEndpoint: string,
   type: SignInType,
   apiKey: string,
   options?: SignInOptions,
-): Promise<void> {
+): Promise<SignInResult> {
   const redirectScheme =
     options?.redirectScheme ?? DEFAULT_REDIRECT_SCHEME;
 
-  // 1. Get OAuth URL from attached
-  const urlAck = await bridge.sendMessage({
-    target: "oko_attached",
-    msg_type: "generate_oauth_url",
-    payload: {
-      provider: type,
-      apiKey,
-      targetOrigin: `${redirectScheme}://`,
-      redirectScheme,
-    },
-  } as OkoWalletMsg);
+  // 1. Generate device_key client-side — server never sees this
+  const deviceKey = generateDeviceKey();
 
-  if (urlAck.msg_type !== "generate_oauth_url_ack") {
-    throw new Error(
-      `Failed to generate OAuth URL for ${type}: unexpected ack type ${urlAck.msg_type}`,
-    );
-  }
+  // 2. Open OS browser at /rn/login
+  // Session cookie is created by the /rn/login route handler in the OS browser context.
+  // This ensures the cookie lives in ASWebAuthenticationSession's cookie jar,
+  // not in the RN app's HTTP client.
+  const loginUrl = buildLoginUrl(
+    sdkEndpoint,
+    type,
+    apiKey,
+    redirectScheme,
+    deviceKey,
+  );
 
-  if (!urlAck.payload.success) {
-    throw new Error(
-      `Failed to generate OAuth URL for ${type}: ${urlAck.payload.err}`,
-    );
-  }
-
-  const oauthUrl: string = urlAck.payload.data.url;
-
-  // 2. Open system browser
   const result = await WebBrowser.openAuthSessionAsync(
-    oauthUrl,
+    loginUrl,
     `${redirectScheme}://`,
   );
 
   if (result.type !== "success") {
-    throw new Error(
-      `OAuth sign-in cancelled or failed: ${result.type}`,
-    );
+    throw new Error(`Sign-in cancelled or failed: ${result.type}`);
   }
 
-  // 3. Parse the callback URL
+  // 4. Parse wallet_info_code from deep link
   const callbackUrl = new URL(result.url);
+  const walletInfoCode = callbackUrl.searchParams.get("wallet_info_code");
 
-  // 4. Build oauth_info_pass payload based on provider
-  const oauthPayload = buildOAuthPayload(type, callbackUrl, apiKey, redirectScheme);
-
-  // 5. Send to attached for processing
-  const passAck = await bridge.sendMessage({
-    target: "oko_attached",
-    msg_type: "oauth_info_pass",
-    payload: oauthPayload,
-  } as unknown as OkoWalletMsg);
-
-  if (passAck.msg_type !== "oauth_info_pass_ack") {
+  if (!walletInfoCode) {
     throw new Error(
-      `oauth_info_pass failed: unexpected ack type ${passAck.msg_type}`,
+      "Missing wallet_info_code in callback — login may have failed",
     );
   }
+
+  // 5. Consume relay code to get public wallet info
+  const consumeRes = await fetch(
+    `${sdkEndpoint}/api/rn/sign-relay/consume`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: walletInfoCode }),
+    },
+  );
+
+  if (!consumeRes.ok) {
+    throw new Error(`Failed to consume wallet info: ${consumeRes.status}`);
+  }
+
+  const consumeData = (await consumeRes.json()) as {
+    success: boolean;
+    payload?: unknown;
+  };
+
+  if (!consumeData.success || !consumeData.payload) {
+    throw new Error("Failed to consume wallet info: invalid or expired code");
+  }
+
+  return {
+    walletInfo: consumeData.payload,
+    deviceKey,
+  };
 }
 
-function buildOAuthPayload(
-  provider: SignInType,
-  callbackUrl: URL,
+/**
+ * Generate a 256-bit device key using crypto.getRandomValues (polyfilled by
+ * react-native-get-random-values). Returns hex string.
+ */
+function generateDeviceKey(): string {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function buildLoginUrl(
+  sdkEndpoint: string,
+  provider: string,
   apiKey: string,
   redirectScheme: string,
-): OAuthPayload | OAuthTokenRequestPayload {
-  const params = callbackUrl.searchParams;
-
-  const targetOrigin = `${redirectScheme}://`;
-
-  switch (provider) {
-    case "google": {
-      return {
-        access_token: params.get("access_token") ?? "",
-        id_token: params.get("id_token") ?? "",
-        api_key: apiKey,
-        target_origin: targetOrigin,
-        auth_type: "google",
-      } satisfies OAuthPayload;
-    }
-
-    case "x": {
-      return {
-        code: params.get("code") ?? "",
-        api_key: apiKey,
-        target_origin: targetOrigin,
-        auth_type: "x",
-      };
-    }
-
-    case "discord": {
-      return {
-        code: params.get("code") ?? "",
-        api_key: apiKey,
-        target_origin: targetOrigin,
-        auth_type: "discord",
-      };
-    }
-
-    case "github": {
-      return {
-        code: params.get("code") ?? "",
-        api_key: apiKey,
-        target_origin: targetOrigin,
-        auth_type: "github",
-      };
-    }
-
-    case "telegram": {
-      const telegramData: Record<string, string> = {};
-      for (const [key, value] of params.entries()) {
-        telegramData[key] = value;
-      }
-      return {
-        telegram_data: telegramData,
-        api_key: apiKey,
-        target_origin: targetOrigin,
-        auth_type: "telegram",
-      };
-    }
-
-    case "email": {
-      // Email uses Auth0 implicit flow — same shape as Google (access_token + id_token)
-      return {
-        access_token: params.get("access_token") ?? "",
-        id_token: params.get("id_token") ?? "",
-        api_key: apiKey,
-        target_origin: targetOrigin,
-        auth_type: "auth0",
-      } satisfies OAuthPayload;
-    }
-
-    default:
-      throw new Error(`Unsupported sign-in provider: ${provider}`);
-  }
+  deviceKey: string,
+): string {
+  const url = new URL("/rn/login", sdkEndpoint);
+  url.searchParams.set("provider", provider);
+  url.searchParams.set("api_key", apiKey);
+  url.searchParams.set("redirect_scheme", redirectScheme);
+  url.searchParams.set("host_origin", sdkEndpoint);
+  // device_key goes in fragment — never sent to server in URL
+  return `${url.toString()}#dk=${deviceKey}`;
 }

@@ -20,9 +20,9 @@ async function RnBridgeContent({
   const searchParams = await searchParamsPromise;
   const hostOrigin = searchParams.host_origin ?? "";
   const apiKey = searchParams.api_key ?? "";
-  const upstreamOrigin = process.env.PROXY_UPSTREAM_ORIGIN ?? "";
-
-  const iframeSrc = buildIframeSrc(upstreamOrigin, hostOrigin, apiKey);
+  // iframe loads attached via the proxy itself (relative path), not upstream directly.
+  // The phone's WebView can't reach the upstream localhost.
+  const iframeSrc = buildIframeSrc(hostOrigin, apiKey);
 
   return (
     <html>
@@ -42,7 +42,7 @@ async function RnBridgeContent({
         <iframe id="oko-attached" src={iframeSrc} />
         <script
           dangerouslySetInnerHTML={{
-            __html: buildBridgeScript(upstreamOrigin),
+            __html: buildBridgeScript(),
           }}
         />
       </body>
@@ -50,27 +50,24 @@ async function RnBridgeContent({
   );
 }
 
-function buildIframeSrc(
-  upstreamOrigin: string,
-  hostOrigin: string,
-  apiKey: string,
-): string {
-  const url = new URL(upstreamOrigin);
-  if (hostOrigin) url.searchParams.set("host_origin", hostOrigin);
-  if (apiKey) url.searchParams.set("api_key", apiKey);
-  return url.toString();
+function buildIframeSrc(hostOrigin: string, apiKey: string): string {
+  // Use relative path — the proxy's catch-all route will forward to upstream
+  const params = new URLSearchParams();
+  if (hostOrigin) params.set("host_origin", hostOrigin);
+  if (apiKey) params.set("api_key", apiKey);
+  return `/?${params.toString()}`;
 }
 
-function buildBridgeScript(attachedOrigin: string): string {
+function buildBridgeScript(): string {
   return `
 (function() {
   'use strict';
 
   var iframe = document.getElementById('oko-attached');
-  var attachedOrigin = ${JSON.stringify(new URL(attachedOrigin).origin)};
-  var iframeReady = false;
+  // iframe is loaded via the same proxy origin, so use window.location.origin
+  var attachedOrigin = window.location.origin;
 
-  // --- 1. Handle messages FROM attached iframe (init, oauth_sign_in_update, etc.) ---
+  // --- 1. Handle messages FROM attached iframe (init) ---
   window.addEventListener('message', function(event) {
     if (event.origin !== attachedOrigin) return;
 
@@ -79,8 +76,6 @@ function buildBridgeScript(attachedOrigin: string): string {
 
     // init message: attached loaded and ready
     if (msg.msg_type === 'init') {
-      iframeReady = true;
-
       // Respond with init_ack via port
       if (event.ports && event.ports[0]) {
         event.ports[0].postMessage({
@@ -101,25 +96,6 @@ function buildBridgeScript(attachedOrigin: string): string {
       return;
     }
 
-    // oauth_sign_in_update: forwarded to RN as event
-    if (msg.msg_type === 'oauth_sign_in_update') {
-      if (event.ports && event.ports[0]) {
-        event.ports[0].postMessage({
-          target: 'oko_attached',
-          msg_type: 'oauth_sign_in_update_ack',
-          payload: null
-        });
-      }
-
-      if (window.ReactNativeWebView) {
-        window.ReactNativeWebView.postMessage(JSON.stringify({
-          type: 'event',
-          eventType: 'oauth_sign_in_update',
-          payload: msg.payload
-        }));
-      }
-      return;
-    }
   });
 
   // --- 2. Handle messages FROM RN SDK (forwarded to attached iframe) ---

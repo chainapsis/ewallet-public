@@ -94,6 +94,7 @@ export function useArbitrarySigModal(args: UseEthereumSigModalArgs) {
           error: signatureRes.err,
         };
         setError(err);
+        closeModal(err);
 
         return;
       }
@@ -123,6 +124,7 @@ export function useArbitrarySigModal(args: UseEthereumSigModalArgs) {
         },
       };
       setError(err);
+      closeModal(err);
     } finally {
       setIsLoading(false);
     }

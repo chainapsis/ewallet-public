@@ -13,6 +13,9 @@ import type { Auth0DecodedHash } from "auth0-js";
 import { getAuth0WebAuth } from "@oko-wallet-attached/config/auth0";
 import type { HandleCallbackError } from "@oko-wallet-attached/components/google_callback/types";
 import { sendOAuthPayloadToEmbeddedWindow } from "@oko-wallet-attached/components/oauth_callback/send_oauth_payload";
+import { storeOAuthRelay } from "@oko-wallet-attached/components/oauth_callback/store_oauth_relay";
+import { redirectToRnLoginComplete } from "@oko-wallet-attached/components/oauth_callback/redirect_to_rn_login_complete";
+import { tryRnOsBrowserRedirect } from "@oko-wallet-attached/components/oauth_callback/try_rn_os_browser_redirect";
 
 const EMAIL_STORAGE_KEY = "oko_email_login_pending_email";
 
@@ -62,26 +65,51 @@ export function useEmailCallback(): { error: string | null } {
 export async function handleEmailCallback(): Promise<
   Result<void, HandleCallbackError>
 > {
-  const parsedHash = await parseAuth0Hash();
-
-  // React Native: no opener, redirect OAuth result to deep link
+  // React Native: no opener, parse hash manually — auth0-js's parseHash validates
+  // state against its internal transaction store, but the RN flow bypasses auth0-js
+  // (redirects to Auth0's Universal Login directly) so no transaction was stored.
   if (!window.opener) {
-    const accessToken = parsedHash.accessToken;
-    const idToken = parsedHash.idToken;
-    const stateString = parsedHash.state;
+    const { accessToken, idToken, state: stateString } = parseHashParams();
     if (stateString && (accessToken || idToken)) {
       try {
         const oauthState = JSON.parse(stateString) as OAuthState;
+
+        // RN OS-browser: redirect to login/complete page for keygen inside the browser
+        if (oauthState.rnOsBrowser) {
+          redirectToRnLoginComplete({
+            provider: oauthState.provider ?? "auth0",
+            api_key: oauthState.apiKey,
+            target_origin: oauthState.targetOrigin,
+            auth_type: oauthState.provider ?? "auth0",
+            access_token: accessToken,
+            id_token: idToken,
+          });
+          return { success: true, data: void 0 };
+        }
+
+        // Legacy relay: store tokens server-side and deep link with relay code
         if (oauthState.redirectScheme) {
-          const deepLinkParams = new URLSearchParams();
-          deepLinkParams.set("provider", "auth0");
-          if (accessToken) deepLinkParams.set("access_token", accessToken);
-          if (idToken) deepLinkParams.set("id_token", idToken);
-          window.location.href = `${oauthState.redirectScheme}://oauth-callback?${deepLinkParams.toString()}`;
+          const relayCode = await storeOAuthRelay({
+            access_token: accessToken,
+            id_token: idToken,
+            api_key: oauthState.apiKey,
+            target_origin: oauthState.targetOrigin,
+            auth_type: oauthState.provider ?? "auth0",
+          });
+          window.location.href = `${oauthState.redirectScheme}://oauth-callback?relay_code=${relayCode}`;
           return { success: true, data: void 0 };
         }
       } catch { /* fall through to normal error */ }
     }
+
+    // Fallback: check sessionStorage set by /rn/login page
+    const redirected = tryRnOsBrowserRedirect({
+      provider: "auth0",
+      auth_type: "auth0",
+      access_token: accessToken,
+      id_token: idToken,
+    });
+    if (redirected) return { success: true, data: void 0 };
 
     return {
       success: false,
@@ -90,6 +118,9 @@ export async function handleEmailCallback(): Promise<
       },
     };
   }
+  // Web popup flow: auth0-js parseHash validates state properly
+  const parsedHash = await parseAuth0Hash();
+
   window.history.replaceState(
     {},
     document.title,
@@ -188,6 +219,27 @@ export async function handleEmailCallback(): Promise<
     },
   });
   return { success: true, data: void 0 };
+}
+
+/**
+ * Parse hash fragment manually (RN flow).
+ * Avoids auth0-js parseHash which requires a matching transaction in storage.
+ */
+function parseHashParams(): {
+  accessToken: string | undefined;
+  idToken: string | undefined;
+  state: string | undefined;
+} {
+  const hash = window.location.hash;
+  if (!hash || hash.length < 2) {
+    return { accessToken: undefined, idToken: undefined, state: undefined };
+  }
+  const params = new URLSearchParams(hash.substring(1));
+  return {
+    accessToken: params.get("access_token") ?? undefined,
+    idToken: params.get("id_token") ?? undefined,
+    state: params.get("state") ?? undefined,
+  };
 }
 
 async function parseAuth0Hash(): Promise<Auth0DecodedHash> {

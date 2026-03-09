@@ -539,6 +539,7 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
           },
         };
         setError(err);
+        closeModal(err);
 
         return;
       }
@@ -564,6 +565,7 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
           error: signedTransactionRes.err,
         };
         setError(err);
+        closeModal(err);
 
         return;
       }
@@ -595,6 +597,7 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
       };
 
       setError(ack);
+      closeModal(ack);
     } finally {
       setIsLoading(false);
     }

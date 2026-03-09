@@ -7,6 +7,9 @@ import type { HandleCallbackError } from "./types";
 import { postLog } from "@oko-wallet-attached/requests/logging";
 import { errorToLog } from "@oko-wallet-attached/logging/error";
 import { sendOAuthPayloadToEmbeddedWindow } from "@oko-wallet-attached/components/oauth_callback/send_oauth_payload";
+import { storeOAuthRelay } from "@oko-wallet-attached/components/oauth_callback/store_oauth_relay";
+import { redirectToRnLoginComplete } from "@oko-wallet-attached/components/oauth_callback/redirect_to_rn_login_complete";
+import { tryRnOsBrowserRedirect } from "@oko-wallet-attached/components/oauth_callback/try_rn_os_browser_redirect";
 
 export function useGoogleCallback() {
   const [error, setError] = useState<string | null>(null);
@@ -49,17 +52,42 @@ export async function handleGoogleCallback(): Promise<
 
   const oauthState = getOAuthStateFromUrl();
 
-  // React Native: no opener, redirect OAuth result to deep link
-  if (!window.opener && oauthState.redirectScheme) {
-    const deepLinkParams = new URLSearchParams();
-    deepLinkParams.set("provider", "google");
-    if (accessToken) deepLinkParams.set("access_token", accessToken);
-    if (idToken) deepLinkParams.set("id_token", idToken);
-    window.location.href = `${oauthState.redirectScheme}://oauth-callback?${deepLinkParams.toString()}`;
+  // RN OS-browser: redirect to login/complete page for keygen inside the browser
+  if (!window.opener && oauthState.rnOsBrowser) {
+    redirectToRnLoginComplete({
+      provider: "google",
+      api_key: oauthState.apiKey,
+      target_origin: oauthState.targetOrigin,
+      auth_type: "google",
+      access_token: accessToken,
+      id_token: idToken,
+    });
     return { success: true, data: void 0 };
   }
 
+  // React Native (legacy relay): store tokens server-side and deep link with relay code only
+  if (!window.opener && oauthState.redirectScheme) {
+    const relayCode = await storeOAuthRelay({
+      access_token: accessToken,
+      id_token: idToken,
+      api_key: oauthState.apiKey,
+      target_origin: oauthState.targetOrigin,
+      auth_type: "google",
+    });
+    window.location.href = `${oauthState.redirectScheme}://oauth-callback?relay_code=${relayCode}`;
+    return { success: true, data: void 0 };
+  }
+
+  // Fallback: check sessionStorage set by /rn/login page
   if (!window.opener) {
+    const redirected = tryRnOsBrowserRedirect({
+      provider: "google",
+      auth_type: "google",
+      access_token: accessToken,
+      id_token: idToken,
+    });
+    if (redirected) return { success: true, data: void 0 };
+
     return {
       success: false,
       err: {

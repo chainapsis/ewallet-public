@@ -4,9 +4,8 @@ import React, {
   useEffect,
   useMemo,
   useRef,
-  useState,
 } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 import WebView from "react-native-webview";
 import type { WebViewMessageEvent } from "react-native-webview";
 
@@ -25,6 +24,15 @@ export interface OkoWalletProviderProps {
   children: React.ReactNode;
 }
 
+/**
+ * Provider component that manages the hidden WebView bridge.
+ *
+ * The WebView is always hidden — it only handles read-only operations
+ * (getPublicKey, getEmail, etc.) via the attached iframe.
+ *
+ * Signing and login happen in the OS browser, not the WebView.
+ * Key shares NEVER exist in this WebView.
+ */
 export function OkoWalletProvider({
   apiKey,
   sdkEndpoint,
@@ -32,7 +40,6 @@ export function OkoWalletProvider({
   children,
 }: OkoWalletProviderProps) {
   const webViewRef = useRef<WebView | null>(null);
-  const [modalVisible, setModalVisible] = useState(false);
 
   const wallet = useMemo(() => {
     const config: OkoWalletRNConfig = {
@@ -50,8 +57,6 @@ export function OkoWalletProvider({
   // Connect bridge to wallet
   useEffect(() => {
     wallet._setBridge(bridge);
-    wallet._showModal = () => setModalVisible(true);
-    wallet._hideModal = () => setModalVisible(false);
 
     return () => {
       bridge.dispose();
@@ -73,49 +78,46 @@ export function OkoWalletProvider({
 
   return (
     <OkoWalletContext.Provider value={wallet}>
-      {children}
-      <WebView
-        ref={webViewRef}
-        source={{ uri: bridgePageUrl }}
-        style={modalVisible ? styles.visible : styles.hidden}
-        onMessage={handleMessage}
-        onLoad={handleLoad}
-        javaScriptEnabled
-        domStorageEnabled
-        originWhitelist={["*"]}
-        // Allow third-party cookies for attached iframe session
-        thirdPartyCookiesEnabled
-        // Prevent WebView from opening links in external browser
-        setSupportMultipleWindows={false}
-      />
+      <View style={styles.container}>
+        {children}
+      </View>
+      {/* WebView is always hidden — read-only bridge only, no key shares */}
+      <View style={styles.webviewContainer} pointerEvents="none">
+        <WebView
+          ref={webViewRef}
+          source={{ uri: bridgePageUrl }}
+          style={styles.webview}
+          onMessage={handleMessage}
+          onLoad={handleLoad}
+          javaScriptEnabled
+          domStorageEnabled
+          originWhitelist={["*"]}
+          thirdPartyCookiesEnabled
+          setSupportMultipleWindows={false}
+        />
+      </View>
     </OkoWalletContext.Provider>
   );
 }
 
 function buildBridgePageUrl(sdkEndpoint: string, apiKey: string): string {
   const url = new URL("/rn", sdkEndpoint);
-  // The bridge page will use this as the host_origin for the attached iframe
   url.searchParams.set("host_origin", sdkEndpoint);
   url.searchParams.set("api_key", apiKey);
   return url.toString();
 }
 
 const styles = StyleSheet.create({
-  hidden: {
+  container: {
+    flex: 1,
+  },
+  webviewContainer: {
     position: "absolute",
     width: 0,
     height: 0,
-    opacity: 0,
-    // Keep it rendered but invisible so it stays loaded
     overflow: "hidden",
   },
-  visible: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 9999,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  webview: {
+    flex: 1,
   },
 });

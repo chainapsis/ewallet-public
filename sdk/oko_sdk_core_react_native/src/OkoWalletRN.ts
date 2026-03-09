@@ -12,6 +12,7 @@ import {
 } from "@oko-wallet/oko-sdk-core";
 import type { OpenModalError } from "@oko-wallet/oko-sdk-core";
 import type { SignInType } from "@oko-wallet/oko-sdk-core";
+import * as SecureStore from "expo-secure-store";
 
 import type { WebViewBridge } from "./bridge/WebViewBridge";
 import {
@@ -26,6 +27,8 @@ import { openModalRN } from "./methods/open_modal";
 import { signInRN, type SignInOptions } from "./methods/sign_in";
 import { signOutRN } from "./methods/sign_out";
 
+const DEVICE_KEY_STORE_KEY = "oko_rn_device_key";
+
 export interface OkoWalletRNConfig {
   apiKey: string;
   sdkEndpoint: string;
@@ -35,12 +38,12 @@ export interface OkoWalletRNConfig {
 /**
  * React Native implementation of OkoWallet SDK.
  *
- * Replaces oko_sdk_core's browser-based iframe transport with
- * a WebView bridge that forwards messages to the attached iframe
- * hosted on the proxy bridge page.
+ * Architecture:
+ * - Read-only ops (getPublicKey, getEmail, etc.): WebView bridge → attached iframe
+ * - Login + keygen: OS browser (/rn/login) — key shares never enter WebView
+ * - Signing: OS browser (/rn/sign) — key shares restored from server, never in WebView
  *
- * Chain SDKs (cosmos, eth, svm) can use this via `sendMsgToIframe()`
- * which routes through the WebView bridge internally.
+ * Key shares NEVER exist in the WebView or app JS runtime.
  */
 export class OkoWalletRN {
   state: OkoWalletState;
@@ -64,15 +67,12 @@ export class OkoWalletRN {
   /** @internal */
   bridge!: WebViewBridge;
 
-  /** @internal Callbacks set by OkoWalletProvider */
-  _showModal: (() => void) | null = null;
-  _hideModal: (() => void) | null = null;
-
   private _resolveInit!: (
     value: Result<OkoWalletState, string>,
   ) => void;
   private _initResolved = false;
   private _cachedPublicKeyEd25519: string | null = null;
+  private _deviceKey: string | null = null;
 
   constructor(config: OkoWalletRNConfig) {
     this.apiKey = config.apiKey;
@@ -93,6 +93,35 @@ export class OkoWalletRN {
     this.waitUntilInitialized = new Promise((resolve) => {
       this._resolveInit = resolve;
     });
+
+    // Restore device_key from secure storage
+    this._loadDeviceKey();
+  }
+
+  private async _loadDeviceKey(): Promise<void> {
+    try {
+      this._deviceKey = await SecureStore.getItemAsync(DEVICE_KEY_STORE_KEY);
+    } catch {
+      // SecureStore unavailable or empty — will be set on sign-in
+    }
+  }
+
+  private async _saveDeviceKey(key: string): Promise<void> {
+    this._deviceKey = key;
+    try {
+      await SecureStore.setItemAsync(DEVICE_KEY_STORE_KEY, key);
+    } catch (error) {
+      console.error("[oko-rn] failed to save device key:", error);
+    }
+  }
+
+  private async _clearDeviceKey(): Promise<void> {
+    this._deviceKey = null;
+    try {
+      await SecureStore.deleteItemAsync(DEVICE_KEY_STORE_KEY);
+    } catch {
+      // ignore
+    }
   }
 
   /** @internal Called by OkoWalletProvider when WebView bridge is ready */
@@ -104,15 +133,10 @@ export class OkoWalletRN {
     };
   }
 
-  /** @internal Handle events from the bridge (init, oauth_sign_in_update) */
+  /** @internal Handle events from the bridge (init) */
   private _handleBridgeEvent(eventType: string, payload: unknown): void {
     if (eventType === "init") {
       this._handleInit(payload);
-      return;
-    }
-
-    if (eventType === "oauth_sign_in_update") {
-      // State update will be handled by signIn method via getWalletInfo
       return;
     }
   }
@@ -163,26 +187,36 @@ export class OkoWalletRN {
 
   /**
    * Send a message to the attached iframe via WebView bridge.
-   * Chain SDKs call this for operations like get_cosmos_chain_info, open_modal, etc.
+   * Used for read-only operations only (getPublicKey, getEmail, etc.)
    */
   async sendMsgToIframe(msg: OkoWalletMsg): Promise<OkoWalletMsg> {
     await this.waitUntilInitialized;
     return this.bridge.sendMessage(msg);
   }
 
+  /**
+   * Open a signing modal via OS browser.
+   * Key shares are restored from the server in the OS browser context.
+   */
   async openModal(
     msg: OkoWalletMsgOpenModal,
   ): Promise<Result<OpenModalAckPayload, OpenModalError>> {
     await this.waitUntilInitialized;
 
     return openModalRN(
-      this.bridge,
+      this.sdkEndpoint,
       msg,
-      () => this._showModal?.(),
-      () => this._hideModal?.(),
+      this._deviceKey,
+      this.redirectScheme,
+      this.apiKey,
     );
   }
 
+  /**
+   * Sign in via OS browser. The entire login + keygen flow runs
+   * in the system browser. Key shares are encrypted and stored on
+   * the server, never entering the WebView or app JS runtime.
+   */
   async signIn(type: SignInType): Promise<void> {
     await this.waitUntilInitialized;
 
@@ -190,24 +224,32 @@ export class OkoWalletRN {
       redirectScheme: this.redirectScheme,
     };
 
-    await signInRN(this.bridge, type, this.apiKey, signInOptions);
+    const result = await signInRN(
+      this.sdkEndpoint,
+      type,
+      this.apiKey,
+      signInOptions,
+    );
 
-    // Refresh state from attached after sign-in
-    const walletInfo = await this.getWalletInfo();
-    if (walletInfo) {
+    // Store device_key in Keychain/Keystore
+    await this._saveDeviceKey(result.deviceKey);
+
+    // Update state from the public wallet info returned via relay
+    const info = result.walletInfo as WalletInfo | null;
+    if (info) {
       this.state = {
-        authType: walletInfo.authType,
-        publicKey: walletInfo.publicKey,
-        email: walletInfo.email,
-        name: walletInfo.name,
+        authType: info.authType,
+        publicKey: info.publicKey,
+        email: info.email,
+        name: info.name,
       };
 
       this.eventEmitter.emit({
         type: "CORE__accountsChanged",
-        authType: walletInfo.authType,
-        publicKey: walletInfo.publicKey,
-        email: walletInfo.email,
-        name: walletInfo.name,
+        authType: info.authType,
+        publicKey: info.publicKey,
+        email: info.email,
+        name: info.name,
       });
     }
   }
@@ -215,6 +257,7 @@ export class OkoWalletRN {
   async signOut(): Promise<void> {
     await this.waitUntilInitialized;
     await signOutRN(this.bridge);
+    await this._clearDeviceKey();
 
     this.state = {
       authType: null,
@@ -287,13 +330,10 @@ export class OkoWalletRN {
   }
 
   closeModal(): void {
-    this._hideModal?.();
+    // No-op in OS browser architecture — modal is in the OS browser
   }
 
   async openSignInModal(): Promise<void> {
-    // In RN, there's no built-in sign-in modal.
-    // The host app should build its own provider selection UI
-    // and call signIn(type) directly.
     throw new Error(
       "[oko-rn] openSignInModal is not supported in React Native. " +
         "Build your own provider selection UI and call signIn(type) directly.",

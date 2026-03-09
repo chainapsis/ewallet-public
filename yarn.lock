@@ -11249,14 +11249,18 @@ __metadata:
     "@oko-wallet/stdlib-js": "workspace:*"
     "@types/react": "npm:^19.0.0"
     "@types/react-native": "npm:^0.73.0"
+    buffer: "npm:^6.0.3"
+    expo-secure-store: "npm:^14.0.0"
     expo-web-browser: "npm:^14.0.0"
     react-native-webview: "npm:^13.0.0"
     typescript: "npm:^5.8.3"
   peerDependencies:
     expo-linking: ">=7"
+    expo-secure-store: ">=14"
     expo-web-browser: ">=14"
     react: ">=18"
     react-native: ">=0.70"
+    react-native-get-random-values: ">=1"
     react-native-webview: ">=13"
   languageName: unknown
   linkType: soft
@@ -27038,6 +27042,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-secure-store@npm:^14.0.0":
+  version: 14.2.4
+  resolution: "expo-secure-store@npm:14.2.4"
+  peerDependencies:
+    expo: "*"
+  checksum: 10c0/490009d561f03609b819251d71c741643ad9e556afc744dcc5dce1e4b4ea288fc602cc4d93f6045e9a1b09a7f821f1cde5005971d98ab01bbac9b46a054c5e31
+  languageName: node
+  linkType: hard
+
 "expo-server@npm:^1.0.5":
   version: 1.0.5
   resolution: "expo-server@npm:1.0.5"
@@ -27257,6 +27270,13 @@ __metadata:
   version: 0.1.8
   resolution: "eyes@npm:0.1.8"
   checksum: 10c0/4c79a9cbf45746d8c9f48cc957e35ad8ea336add1c7b8d5a0e002efc791a7a62b27b2188184ef1a1eea7bc3cd06b161791421e0e6c5fe78309705a162c53eea8
+  languageName: node
+  linkType: hard
+
+"fast-base64-decode@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "fast-base64-decode@npm:1.0.0"
+  checksum: 10c0/6d8feab513222a463d1cb58d24e04d2e04b0791ac6559861f99543daaa590e2636d040d611b40a50799bfb5c5304265d05e3658b5adf6b841a50ef6bf833d821
   languageName: node
   linkType: hard
 
@@ -39480,6 +39500,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-get-random-values@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "react-native-get-random-values@npm:2.0.0"
+  dependencies:
+    fast-base64-decode: "npm:^1.0.0"
+  peerDependencies:
+    react-native: ">=0.81"
+  checksum: 10c0/fd2e10ab3bca54bff8f5844e3314b797e02822e86663bc2dafe00a511b8a8e1c05d96aa0b8dc1ffad428387d44bbf458ce770a429858433d36f58a16e6e52986
+  languageName: node
+  linkType: hard
+
 "react-native-is-edge-to-edge@npm:^1.1.6, react-native-is-edge-to-edge@npm:^1.2.1":
   version: 1.2.1
   resolution: "react-native-is-edge-to-edge@npm:1.2.1"
@@ -41159,6 +41190,7 @@ __metadata:
     "@react-navigation/elements": "npm:^2.6.3"
     "@react-navigation/native": "npm:^7.1.8"
     "@types/react": "npm:~19.1.0"
+    buffer: "npm:^6.0.3"
     eslint: "npm:^9.25.0"
     eslint-config-expo: "npm:~10.0.0"
     expo: "npm:~54.0.31"
@@ -41177,6 +41209,7 @@ __metadata:
     react-dom: "npm:19.1.0"
     react-native: "npm:0.81.5"
     react-native-gesture-handler: "npm:~2.28.0"
+    react-native-get-random-values: "npm:^2.0.0"
     react-native-reanimated: "npm:~4.1.1"
     react-native-safe-area-context: "npm:~5.6.0"
     react-native-screens: "npm:~4.16.0"

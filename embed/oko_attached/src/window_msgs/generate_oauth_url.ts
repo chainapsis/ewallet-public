@@ -15,6 +15,11 @@ import {
   generateNonce,
   X_CLIENT_ID,
 } from "@oko-wallet-attached/config/oauth";
+import {
+  AUTH0_CLIENT_ID,
+  AUTH0_CONNECTION,
+  AUTH0_DOMAIN,
+} from "@oko-wallet-attached/config/auth0";
 import { useAppState } from "@oko-wallet-attached/store/app";
 
 function buildGoogleOAuthUrl(
@@ -22,6 +27,7 @@ function buildGoogleOAuthUrl(
   targetOrigin: string,
   nonce: string,
   redirectScheme?: string,
+  rnOsBrowser?: boolean,
 ): string {
   const redirectUri = `${window.location.origin}/google/callback`;
 
@@ -30,6 +36,7 @@ function buildGoogleOAuthUrl(
     targetOrigin,
     provider: "google",
     ...(redirectScheme && { redirectScheme }),
+    ...(rnOsBrowser && { rnOsBrowser }),
   };
 
   const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
@@ -49,6 +56,7 @@ function buildXOAuthUrl(
   targetOrigin: string,
   codeChallenge: string,
   redirectScheme?: string,
+  rnOsBrowser?: boolean,
 ): string {
   const redirectUri = `${window.location.origin}/x/callback`;
 
@@ -57,6 +65,7 @@ function buildXOAuthUrl(
     targetOrigin,
     provider: "x",
     ...(redirectScheme && { redirectScheme }),
+    ...(rnOsBrowser && { rnOsBrowser }),
   };
   const oauthStateString = btoa(JSON.stringify(oauthState));
 
@@ -77,6 +86,7 @@ function buildDiscordOAuthUrl(
   targetOrigin: string,
   codeChallenge: string,
   redirectScheme?: string,
+  rnOsBrowser?: boolean,
 ): string {
   const redirectUri = `${window.location.origin}/discord/callback`;
 
@@ -85,6 +95,7 @@ function buildDiscordOAuthUrl(
     targetOrigin,
     provider: "discord",
     ...(redirectScheme && { redirectScheme }),
+    ...(rnOsBrowser && { rnOsBrowser }),
   };
   const oauthStateString = btoa(JSON.stringify(oauthState));
 
@@ -105,6 +116,7 @@ function buildGithubOAuthUrl(
   targetOrigin: string,
   codeChallenge: string,
   redirectScheme?: string,
+  rnOsBrowser?: boolean,
 ): string {
   const redirectUri = `${window.location.origin}/github/callback`;
 
@@ -113,6 +125,7 @@ function buildGithubOAuthUrl(
     targetOrigin,
     provider: "github",
     ...(redirectScheme && { redirectScheme }),
+    ...(rnOsBrowser && { rnOsBrowser }),
   };
   const oauthStateString = btoa(JSON.stringify(oauthState));
 
@@ -132,6 +145,7 @@ function buildEmailLoginUrl(
   targetOrigin: string,
   nonce: string,
   redirectScheme?: string,
+  rnOsBrowser?: boolean,
 ): string {
   const modalId = `rn-email-${Date.now()}`;
 
@@ -141,8 +155,29 @@ function buildEmailLoginUrl(
     provider: "auth0",
     modalId,
     ...(redirectScheme && { redirectScheme }),
+    ...(rnOsBrowser && { rnOsBrowser }),
   };
 
+  // RN: redirect to Auth0's Universal Login directly.
+  // Mobile Safari blocks 3rd-party cookies, which breaks auth0-js's
+  // cross-origin passwordlessLogin flow. By going through Auth0's own
+  // domain the entire email OTP flow happens without cross-origin auth.
+  if (redirectScheme || rnOsBrowser) {
+    const auth0Url = new URL(`https://${AUTH0_DOMAIN}/authorize`);
+    auth0Url.searchParams.set("client_id", AUTH0_CLIENT_ID);
+    auth0Url.searchParams.set(
+      "redirect_uri",
+      `${window.location.origin}/email/callback`,
+    );
+    auth0Url.searchParams.set("response_type", "token id_token");
+    auth0Url.searchParams.set("scope", "openid profile email");
+    auth0Url.searchParams.set("connection", AUTH0_CONNECTION);
+    auth0Url.searchParams.set("nonce", nonce);
+    auth0Url.searchParams.set("state", JSON.stringify(oauthState));
+    return auth0Url.toString();
+  }
+
+  // Web popup: use our custom email page
   const emailUrl = new URL(`${window.location.origin}/email/`);
   emailUrl.searchParams.set("modal_id", modalId);
   emailUrl.searchParams.set("host_origin", targetOrigin);
@@ -159,6 +194,7 @@ async function buildOAuthUrl(
   targetOrigin: string,
   hostOrigin: string,
   redirectScheme?: string,
+  rnOsBrowser?: boolean,
 ): Promise<string> {
   const appState = useAppState.getState();
 
@@ -167,10 +203,10 @@ async function buildOAuthUrl(
     appState.setNonce(hostOrigin, nonce);
 
     if (provider === "email") {
-      return buildEmailLoginUrl(apiKey, targetOrigin, nonce, redirectScheme);
+      return buildEmailLoginUrl(apiKey, targetOrigin, nonce, redirectScheme, rnOsBrowser);
     }
 
-    return buildGoogleOAuthUrl(apiKey, targetOrigin, nonce, redirectScheme);
+    return buildGoogleOAuthUrl(apiKey, targetOrigin, nonce, redirectScheme, rnOsBrowser);
   }
 
   // X, Discord, GitHub use PKCE
@@ -179,11 +215,11 @@ async function buildOAuthUrl(
 
   switch (provider) {
     case "x":
-      return buildXOAuthUrl(apiKey, targetOrigin, codeChallenge, redirectScheme);
+      return buildXOAuthUrl(apiKey, targetOrigin, codeChallenge, redirectScheme, rnOsBrowser);
     case "discord":
-      return buildDiscordOAuthUrl(apiKey, targetOrigin, codeChallenge, redirectScheme);
+      return buildDiscordOAuthUrl(apiKey, targetOrigin, codeChallenge, redirectScheme, rnOsBrowser);
     case "github":
-      return buildGithubOAuthUrl(apiKey, targetOrigin, codeChallenge, redirectScheme);
+      return buildGithubOAuthUrl(apiKey, targetOrigin, codeChallenge, redirectScheme, rnOsBrowser);
     default:
       throw new Error(`Unsupported OAuth provider: ${provider}`);
   }
@@ -197,8 +233,9 @@ export async function handleGenerateOAuthUrl(
 
   try {
     const { provider, apiKey, targetOrigin, redirectScheme } = message.payload;
+    const rnOsBrowser = (message.payload as { rnOsBrowser?: boolean }).rnOsBrowser;
 
-    const url = await buildOAuthUrl(provider, apiKey, targetOrigin, hostOrigin, redirectScheme);
+    const url = await buildOAuthUrl(provider, apiKey, targetOrigin, hostOrigin, redirectScheme, rnOsBrowser);
 
     const ack: OkoWalletMsgGenerateOAuthUrlAck = {
       target: OKO_SDK_TARGET,
