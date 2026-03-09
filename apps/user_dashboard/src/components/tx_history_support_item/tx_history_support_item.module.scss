@@ -6,6 +6,10 @@
   background: var(--bg-secondary);
   gap: 8px;
 
+  &:hover {
+    background: var(--bg-secondary-hover);
+  }
+
   width: auto;
   min-width: 148px;
 
