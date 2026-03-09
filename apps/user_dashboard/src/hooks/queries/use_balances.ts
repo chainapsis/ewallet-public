@@ -13,6 +13,7 @@ import {
   isAlchemySupported,
 } from "@oko-wallet-user-dashboard/constants/alchemy";
 import { fetchErc20TokenBalances } from "@oko-wallet-user-dashboard/fetch/erc20_token_balances";
+import { fetchSplTokenBalances } from "@oko-wallet-user-dashboard/fetch/spl_token_balances";
 import { DEFAULT_ENABLED_CHAINS } from "@oko-wallet-user-dashboard/state/chains";
 import { useAssetMetaStore } from "@oko-wallet-user-dashboard/store/asset_meta";
 import type {
@@ -346,6 +347,108 @@ async function getSvmBalances(
   ];
 }
 
+function getSvmChainIdentifier(chainId: string): string {
+  const colonIndex = chainId.indexOf(":");
+  return colonIndex !== -1 ? chainId.slice(0, colonIndex) : chainId;
+}
+
+async function getSvmSplBalances(
+  chain: ModularChainInfo,
+  svmAddress: string,
+  priceMap: PriceMap,
+  resolveTokenMetadata: (
+    tokens: { chainIdentifier: string; contractAddress: string }[],
+  ) => Promise<Map<string, Currency>>,
+): Promise<TokenBalance[]> {
+  const svm = chain.svm;
+  if (!svm?.rpc) {
+    return [];
+  }
+
+  const splBalances = await fetchSplTokenBalances(svm.rpc, svmAddress);
+  if (splBalances.length === 0) {
+    return [];
+  }
+
+  const knownCurrencyMap = new Map<string, Currency>();
+  for (const c of svm.currencies) {
+    if (c.coinMinimalDenom.startsWith("spl:")) {
+      knownCurrencyMap.set(c.coinMinimalDenom.slice(4).toLowerCase(), c);
+    }
+  }
+
+  const unknownTokens: {
+    chainIdentifier: string;
+    contractAddress: string;
+  }[] = [];
+  const decimalsMap = new Map<string, number>();
+
+  for (const tb of splBalances) {
+    const mintLower = tb.mint.toLowerCase();
+    if (!knownCurrencyMap.has(mintLower)) {
+      unknownTokens.push({
+        chainIdentifier: getSvmChainIdentifier(chain.chainId),
+        contractAddress: tb.mint,
+      });
+    }
+    decimalsMap.set(mintLower, tb.decimals);
+  }
+
+  const resolvedMap =
+    unknownTokens.length > 0
+      ? await resolveTokenMetadata(unknownTokens)
+      : new Map<string, Currency>();
+
+  const missingPriceIds: string[] = [];
+  for (const tb of splBalances) {
+    const mintLower = tb.mint.toLowerCase();
+    const currency =
+      knownCurrencyMap.get(mintLower) ?? resolvedMap.get(mintLower);
+    if (currency?.coinGeckoId && priceMap[currency.coinGeckoId] === undefined) {
+      missingPriceIds.push(currency.coinGeckoId);
+    }
+  }
+
+  const splPriceMap: Record<string, number> = {};
+  if (missingPriceIds.length > 0) {
+    try {
+      const priceResponse = await fetchPrices(missingPriceIds);
+      for (const [coinId, data] of Object.entries(priceResponse)) {
+        splPriceMap[coinId] = data.usd;
+      }
+    } catch (error) {
+      console.error(
+        `Failed to fetch SPL token prices for ${chain.chainId}:`,
+        error,
+      );
+    }
+  }
+
+  const mergedPriceMap: PriceMap = { ...priceMap, ...splPriceMap };
+  const results: TokenBalance[] = [];
+
+  for (const tb of splBalances) {
+    const mintLower = tb.mint.toLowerCase();
+    let currency =
+      knownCurrencyMap.get(mintLower) ?? resolvedMap.get(mintLower);
+
+    if (!currency) {
+      const shortMint = `${tb.mint.slice(0, 6)}...${tb.mint.slice(-4)}`;
+      currency = {
+        coinDenom: shortMint,
+        coinMinimalDenom: `spl:${tb.mint}`,
+        coinDecimals: tb.decimals,
+      };
+    }
+
+    results.push(
+      buildTokenBalance(chain, currency, tb.amount, svmAddress, mergedPriceMap),
+    );
+  }
+
+  return results;
+}
+
 async function fetchChainBalances(
   chain: ModularChainInfo,
   addresses: {
@@ -403,6 +506,20 @@ async function fetchChainBalances(
       getSvmBalances(chain, addresses.svm, priceMap).catch((error) => {
         console.error(
           `Failed to fetch SVM balance for ${chain.chainId}:`,
+          error,
+        );
+        return [];
+      }),
+    );
+    tasks.push(
+      getSvmSplBalances(
+        chain,
+        addresses.svm,
+        priceMap,
+        resolveTokenMetadata,
+      ).catch((error) => {
+        console.error(
+          `Failed to fetch SPL token balances for ${chain.chainId}:`,
           error,
         );
         return [];
