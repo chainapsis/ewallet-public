@@ -72,7 +72,7 @@ export async function handleEmailCallback(): Promise<
       try {
         const oauthState = JSON.parse(stateString) as OAuthState;
         const provider = oauthState.provider ?? "auth0";
-        const mobileRedirected = await handleMobileRedirect({
+        const mobileRedirected = handleMobileRedirect({
           provider,
           authType: provider,
           oauthState,
@@ -85,7 +85,7 @@ export async function handleEmailCallback(): Promise<
 
     // Fallback with no parsed state: try sessionStorage from /mobile/login page
     const { accessToken: at, idToken: it } = parseHashParams();
-    const mobileRedirected = await handleMobileRedirect({
+    const mobileRedirected = handleMobileRedirect({
       provider: "auth0",
       authType: "auth0",
       oauthState: {},

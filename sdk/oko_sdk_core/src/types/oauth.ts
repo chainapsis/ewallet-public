@@ -14,8 +14,6 @@ export type OAuthState = {
   provider: AuthType;
   modalId?: string;
   codeVerifier?: string;
-  /** Deep link scheme for mobile OAuth callback (e.g. "okowallet") */
-  redirectScheme?: string;
   /** When true, callback pages redirect to /mobile/login/complete instead of deep-linking.
    *  Used by the OS-browser login flow where keygen runs inside the browser. */
   mobileOsBrowser?: boolean;

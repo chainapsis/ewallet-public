@@ -81,7 +81,6 @@ async function buildOAuthUrl(
   apiKey: string,
   targetOrigin: string,
   hostOrigin: string,
-  redirectScheme?: string,
   mobileOsBrowser?: boolean,
 ): Promise<string> {
   const appState = useAppState.getState();
@@ -90,7 +89,6 @@ async function buildOAuthUrl(
     apiKey,
     targetOrigin,
     provider: provider as AuthType,
-    ...(redirectScheme && { redirectScheme }),
     ...(mobileOsBrowser && { mobileOsBrowser }),
   };
 
@@ -123,9 +121,9 @@ export async function handleGenerateOAuthUrl(
   const { port, hostOrigin } = ctx;
 
   try {
-    const { provider, apiKey, targetOrigin, redirectScheme, mobileOsBrowser } = message.payload;
+    const { provider, apiKey, targetOrigin, mobileOsBrowser } = message.payload;
 
-    const url = await buildOAuthUrl(provider, apiKey, targetOrigin, hostOrigin, redirectScheme, mobileOsBrowser);
+    const url = await buildOAuthUrl(provider, apiKey, targetOrigin, hostOrigin, mobileOsBrowser);
 
     const ack: OkoWalletMsgGenerateOAuthUrlAck = {
       target: OKO_SDK_TARGET,

@@ -50,8 +50,8 @@ export async function handleGoogleCallback(): Promise<
 
   const oauthState = getOAuthStateFromUrl();
 
-  // Mobile: handle all redirect paths (OS-browser, legacy relay, sessionStorage fallback)
-  const mobileRedirected = await handleMobileRedirect({
+  // Mobile: OS-browser flow or sessionStorage fallback
+  const mobileRedirected = handleMobileRedirect({
     provider: "google",
     authType: "google",
     oauthState,

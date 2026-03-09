@@ -75,11 +75,11 @@ export async function handleGithubCallback(): Promise<
   const code = urlParams.get("code");
   const stateParam = urlParams.get(RedirectUriSearchParamsKey.STATE) || "{}";
 
-  // Mobile: handle all redirect paths
+  // Mobile: OS-browser flow or sessionStorage fallback
   if (stateParam !== "{}") {
     try {
       const oauthState = JSON.parse(atob(stateParam));
-      const mobileRedirected = await handleMobileRedirect({
+      const mobileRedirected = handleMobileRedirect({
         provider: "github",
         authType: "github",
         oauthState,

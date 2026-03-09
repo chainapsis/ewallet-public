@@ -60,11 +60,11 @@ export async function handleDiscordCallback(): Promise<
   const code = urlParams.get("code");
   const stateParam = urlParams.get(RedirectUriSearchParamsKey.STATE) || "{}";
 
-  // Mobile: handle all redirect paths
+  // Mobile: OS-browser flow or sessionStorage fallback
   if (stateParam !== "{}") {
     try {
       const oauthState = JSON.parse(atob(stateParam));
-      const mobileRedirected = await handleMobileRedirect({
+      const mobileRedirected = handleMobileRedirect({
         provider: "discord",
         authType: "discord",
         oauthState,
