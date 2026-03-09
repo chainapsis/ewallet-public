@@ -276,8 +276,16 @@ function sendMsgToPopupWindow(
 
     const closeWatcher = window.setInterval(() => {
       if (popupWindow.closed && !resolved) {
-        cleanup();
-        reject(new Error("Popup closed before responding"));
+        window.clearInterval(closeWatcher);
+        // Grace period: allow pending postMessage events to be processed
+        // before rejecting (the callback posts open_modal_ack right before
+        // calling window.close()).
+        setTimeout(() => {
+          if (!resolved) {
+            cleanup();
+            reject(new Error("Popup closed before responding"));
+          }
+        }, 100);
       }
     }, 500);
 
