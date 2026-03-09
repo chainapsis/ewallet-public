@@ -212,4 +212,6 @@ Understanding how Oko works will help you integrate it effectively:
 **🎯 Want to understand the technology?**
 
 - **[Threshold ECDSA Explained](../concepts/threshold-ecdsa.md)** - Learn about
-  the cryptography behind Oko
+  the cryptography behind Oko (EVM/Cosmos)
+- **[Threshold EdDSA Explained](../concepts/threshold-eddsa.md)** - Learn about
+  the cryptography behind Oko (SVM)

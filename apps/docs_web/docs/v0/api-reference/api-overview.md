@@ -380,9 +380,9 @@ POST /tss/v1/sign
 Content-Type: application/json
 Headers: Authorization: Bearer <JWT Token>
 
-Purpose: Complete ECDSA signature using presignatures and message
+Purpose: Complete ECDSA/EdDSA signature using presignatures and message
 Implementation: Final signature creation step
-Output: Standard ECDSA signature (r, s) format
+Output: Standard ECDSA signature (r, s) or EdDSA signature format
 ```
 
 #### Session Management
