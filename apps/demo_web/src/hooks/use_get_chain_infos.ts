@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
 import type { ChainInfo } from "@keplr-wallet/types";
+import { useQuery } from "@tanstack/react-query";
 
 const CHAIN_INFO_ENDPOINT = "https://keplr-api.keplr.app/v1/chains/all";
 
@@ -17,7 +17,12 @@ export function useGetChainInfos() {
           const aName = a.chainName.toLowerCase();
           const bName = b.chainName.toLowerCase();
 
-          const priorityChains = ["ethereum", "cosmos hub", "osmosis"];
+          const priorityChains = [
+            "ethereum",
+            "solana",
+            "cosmos hub",
+            "osmosis",
+          ];
 
           const aPriority = priorityChains.indexOf(aName);
           const bPriority = priorityChains.indexOf(bName);
