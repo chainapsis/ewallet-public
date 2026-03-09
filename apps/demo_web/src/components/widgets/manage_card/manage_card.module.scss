@@ -80,6 +80,14 @@
   }
 }
 
+.detailsRow:hover .title {
+  color: var(--text-secondary-hover);
+}
+
+.detailsRow:hover .description {
+  color: var(--text-tertiary-hover);
+}
+
 .detailsRow:hover .linkButton {
   background: var(--bg-primary-hover);
   color: var(--text-tertiary-hover);

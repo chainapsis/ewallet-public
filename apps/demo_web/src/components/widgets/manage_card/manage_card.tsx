@@ -46,6 +46,7 @@ export const ManageCard: FC<ManageCardProps> = ({
                 size="md"
                 weight="semibold"
                 color="secondary"
+                className={styles.title}
               >
                 Dapp Dashboard
               </Typography>
@@ -61,7 +62,12 @@ export const ManageCard: FC<ManageCardProps> = ({
                 </Typography>
               </div>
             </div>
-            <Typography size="sm" weight="medium" color="tertiary">
+            <Typography
+              size="sm"
+              weight="medium"
+              color="tertiary"
+              className={styles.description}
+            >
               Control integrations for your dapps
             </Typography>
           </div>
@@ -84,6 +90,7 @@ export const ManageCard: FC<ManageCardProps> = ({
                 size="md"
                 weight="semibold"
                 color="secondary"
+                className={styles.title}
               >
                 Oko Home
               </Typography>
@@ -99,7 +106,12 @@ export const ManageCard: FC<ManageCardProps> = ({
                 </Typography>
               </div>
             </div>
-            <Typography size="sm" weight="medium" color="tertiary">
+            <Typography
+              size="sm"
+              weight="medium"
+              color="tertiary"
+              className={styles.description}
+            >
               Manage your assets and wallets
             </Typography>
           </div>
