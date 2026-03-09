@@ -116,10 +116,11 @@ function buildEmailLoginScript(apiKey: string, redirectScheme: string): string {
     }
   }
 
-  // 2. Generate nonce
+  // 2. Generate nonce and store in sessionStorage for /mobile/login/complete
   var nonceBytes = new Uint8Array(16);
   crypto.getRandomValues(nonceBytes);
   var nonce = Array.from(nonceBytes).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+  sessionStorage.setItem('oko_mobile_email_nonce', nonce);
 
   // 3. Build Auth0 Universal Login URL
   var state = JSON.stringify({

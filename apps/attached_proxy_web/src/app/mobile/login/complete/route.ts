@@ -126,6 +126,21 @@ function buildCompleteScript(serializedParams: string): string {
       }
 
       statusEl.textContent = 'Processing sign-in...';
+
+      // Inject nonce/codeVerifier into attached before oauth_info_pass.
+      // Email login generates nonce in the /mobile/login page script (not in attached),
+      // so we pass it via set_reauth_params. OAuth providers set nonce/PKCE via
+      // generate_oauth_url which already persists to attached's localStorage.
+      var emailNonce = sessionStorage.getItem('oko_mobile_email_nonce');
+      if (emailNonce) {
+        iframe.contentWindow.postMessage({
+          target: 'oko_attached',
+          msg_type: 'set_reauth_params',
+          payload: { nonce: emailNonce }
+        }, attachedOrigin);
+        sessionStorage.removeItem('oko_mobile_email_nonce');
+      }
+
       sendOAuthInfoPass();
       return;
     }
