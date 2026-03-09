@@ -1,9 +1,9 @@
 import { CodeIcon } from "@oko-wallet/oko-common-ui/icons/code";
 import { CompassIcon } from "@oko-wallet/oko-common-ui/icons/compass";
 import { ExternalLinkOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/external_link_outlined";
+import { UsersIcon } from "@oko-wallet/oko-common-ui/icons/users";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import { UsersIcon } from "@oko-wallet/oko-common-ui/icons/users";
 import type { FC } from "react";
 
 import { Widget } from "../widget_components";
@@ -38,7 +38,11 @@ export const ManageCard: FC<ManageCardProps> = ({
 
         <Spacing height={12} />
 
-        <div className={styles.detailsRow}>
+        <button
+          type="button"
+          className={styles.detailsRow}
+          onClick={handleOpenDashboard}
+        >
           <div className={styles.linkContent}>
             <div className={styles.titleRow}>
               <Typography
@@ -71,18 +75,18 @@ export const ManageCard: FC<ManageCardProps> = ({
               Control integrations for your dapps
             </Typography>
           </div>
-          <button
-            type="button"
-            className={styles.linkButton}
-            onClick={handleOpenDashboard}
-          >
+          <span className={styles.linkIcon}>
             <ExternalLinkOutlinedIcon color="currentColor" />
-          </button>
-        </div>
+          </span>
+        </button>
 
         <Spacing height={8} />
 
-        <div className={styles.detailsRow}>
+        <button
+          type="button"
+          className={styles.detailsRow}
+          onClick={handleOpenHome}
+        >
           <div className={styles.linkContent}>
             <div className={styles.titleRow}>
               <Typography
@@ -115,14 +119,10 @@ export const ManageCard: FC<ManageCardProps> = ({
               Manage your assets and wallets
             </Typography>
           </div>
-          <button
-            type="button"
-            className={styles.linkButton}
-            onClick={handleOpenHome}
-          >
+          <span className={styles.linkIcon}>
             <ExternalLinkOutlinedIcon color="currentColor" />
-          </button>
-        </div>
+          </span>
+        </button>
       </div>
     </Widget>
   );
