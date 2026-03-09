@@ -15,11 +15,6 @@ import {
   generateNonce,
   X_CLIENT_ID,
 } from "@oko-wallet-attached/config/oauth";
-import {
-  AUTH0_CLIENT_ID,
-  AUTH0_CONNECTION,
-  AUTH0_DOMAIN,
-} from "@oko-wallet-attached/config/auth0";
 import { useAppState } from "@oko-wallet-attached/store/app";
 
 function buildGoogleOAuthUrl(
@@ -140,54 +135,6 @@ function buildGithubOAuthUrl(
   return authUrl.toString();
 }
 
-function buildEmailLoginUrl(
-  apiKey: string,
-  targetOrigin: string,
-  nonce: string,
-  redirectScheme?: string,
-  mobileOsBrowser?: boolean,
-): string {
-  const modalId = `mobile-email-${Date.now()}`;
-
-  const oauthState: OAuthState = {
-    apiKey,
-    targetOrigin,
-    provider: "auth0",
-    modalId,
-    ...(redirectScheme && { redirectScheme }),
-    ...(mobileOsBrowser && { mobileOsBrowser }),
-  };
-
-  // Mobile: redirect to Auth0's Universal Login directly.
-  // Mobile Safari blocks 3rd-party cookies, which breaks auth0-js's
-  // cross-origin passwordlessLogin flow. By going through Auth0's own
-  // domain the entire email OTP flow happens without cross-origin auth.
-  if (redirectScheme || mobileOsBrowser) {
-    const auth0Url = new URL(`https://${AUTH0_DOMAIN}/authorize`);
-    auth0Url.searchParams.set("client_id", AUTH0_CLIENT_ID);
-    auth0Url.searchParams.set(
-      "redirect_uri",
-      `${window.location.origin}/email/callback`,
-    );
-    auth0Url.searchParams.set("response_type", "token id_token");
-    auth0Url.searchParams.set("scope", "openid profile email");
-    auth0Url.searchParams.set("connection", AUTH0_CONNECTION);
-    auth0Url.searchParams.set("nonce", nonce);
-    auth0Url.searchParams.set("state", JSON.stringify(oauthState));
-    return auth0Url.toString();
-  }
-
-  // Web popup: use our custom email page
-  const emailUrl = new URL(`${window.location.origin}/email/`);
-  emailUrl.searchParams.set("modal_id", modalId);
-  emailUrl.searchParams.set("host_origin", targetOrigin);
-  emailUrl.searchParams.set("popup_layout", "inline");
-  emailUrl.searchParams.set("rn_nonce", nonce);
-  emailUrl.searchParams.set("rn_state", JSON.stringify(oauthState));
-
-  return emailUrl.toString();
-}
-
 async function buildOAuthUrl(
   provider: OAuthProvider,
   apiKey: string,
@@ -198,14 +145,9 @@ async function buildOAuthUrl(
 ): Promise<string> {
   const appState = useAppState.getState();
 
-  if (provider === "google" || provider === "email") {
+  if (provider === "google") {
     const nonce = generateNonce();
     appState.setNonce(hostOrigin, nonce);
-
-    if (provider === "email") {
-      return buildEmailLoginUrl(apiKey, targetOrigin, nonce, redirectScheme, mobileOsBrowser);
-    }
-
     return buildGoogleOAuthUrl(apiKey, targetOrigin, nonce, redirectScheme, mobileOsBrowser);
   }
 

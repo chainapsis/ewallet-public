@@ -4,6 +4,12 @@ import { createSession } from "../../../relay/session_store";
 
 const COOKIE_NAME = "oko_mobile_session";
 
+// Auth0 config for email login — built directly in the login page
+// so we don't route email through attached's generate_oauth_url.
+const AUTH0_DOMAIN = "auth0.oko.app";
+const AUTH0_CLIENT_ID = "GnPcFAjGKAcXZpAzQ8vGBmzfcfV2hu1Q";
+const AUTH0_CONNECTION = "email";
+
 function sessionCookie(sessionId: string): string {
   return `${COOKIE_NAME}=${sessionId}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=86400`;
 }
@@ -32,7 +38,8 @@ export async function GET(request: NextRequest) {
   // Create session — cookie is set in the OS browser context
   const { sessionId } = createSession();
 
-  const iframeSrc = buildIframeSrc(hostOrigin, apiKey);
+  const isEmail = provider === "email";
+  const iframeSrc = isEmail ? "" : buildIframeSrc(hostOrigin, apiKey);
 
   const html = `<!DOCTYPE html>
 <html>
@@ -50,9 +57,9 @@ export async function GET(request: NextRequest) {
 </head>
 <body>
   <div class="status" id="status">Preparing sign-in...</div>
-  <iframe id="oko-attached" src="${escapeHtml(iframeSrc)}"></iframe>
+  ${isEmail ? "" : `<iframe id="oko-attached" src="${escapeHtml(iframeSrc)}"></iframe>`}
   <script>
-${buildLoginScript(provider, apiKey, redirectScheme)}
+${isEmail ? buildEmailLoginScript(apiKey, redirectScheme) : buildOAuthLoginScript(provider, apiKey, redirectScheme)}
   </script>
 </body>
 </html>`;
@@ -81,7 +88,70 @@ function buildIframeSrc(hostOrigin: string, apiKey: string): string {
   return `/?${params.toString()}`;
 }
 
-function buildLoginScript(
+/**
+ * Email login: redirect to Auth0 Universal Login directly.
+ * No attached iframe needed — Auth0 handles the entire email OTP flow
+ * on its own domain (avoids 3rd-party cookie issues on mobile).
+ */
+function buildEmailLoginScript(apiKey: string, redirectScheme: string): string {
+  return `
+(function() {
+  'use strict';
+
+  var apiKey = ${JSON.stringify(apiKey)};
+  var redirectScheme = ${JSON.stringify(redirectScheme)};
+  var statusEl = document.getElementById('status');
+
+  // 1. Store device_key from URL fragment into sessionStorage
+  var hash = window.location.hash;
+  if (hash) {
+    var dkMatch = hash.match(/dk=([a-f0-9]+)/);
+    if (dkMatch && dkMatch[1]) {
+      sessionStorage.setItem('oko_mobile_device_key', dkMatch[1]);
+    }
+    sessionStorage.setItem('oko_mobile_redirect_scheme', redirectScheme);
+    sessionStorage.setItem('oko_mobile_api_key', apiKey);
+    if (window.history && window.history.replaceState) {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+  }
+
+  // 2. Generate nonce
+  var nonceBytes = new Uint8Array(16);
+  crypto.getRandomValues(nonceBytes);
+  var nonce = Array.from(nonceBytes).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+
+  // 3. Build Auth0 Universal Login URL
+  var state = JSON.stringify({
+    apiKey: apiKey,
+    targetOrigin: window.location.origin,
+    provider: 'auth0',
+    mobileOsBrowser: true
+  });
+
+  var auth0Url = new URL(${JSON.stringify(`https://${AUTH0_DOMAIN}/authorize`)});
+  auth0Url.searchParams.set('client_id', ${JSON.stringify(AUTH0_CLIENT_ID)});
+  auth0Url.searchParams.set('redirect_uri', window.location.origin + '/email/callback');
+  auth0Url.searchParams.set('response_type', 'token id_token');
+  auth0Url.searchParams.set('scope', 'openid profile email');
+  auth0Url.searchParams.set('connection', ${JSON.stringify(AUTH0_CONNECTION)});
+  auth0Url.searchParams.set('nonce', nonce);
+  auth0Url.searchParams.set('state', state);
+
+  // 4. Redirect immediately
+  statusEl.textContent = 'Redirecting to email login...';
+  window.location.href = auth0Url.toString();
+
+  console.log('[oko-mobile-login] email login, redirecting to Auth0');
+})();
+  `;
+}
+
+/**
+ * OAuth login (Google, X, Discord, GitHub): load attached iframe,
+ * request OAuth URL via generate_oauth_url message, then redirect.
+ */
+function buildOAuthLoginScript(
   provider: string,
   apiKey: string,
   redirectScheme: string,
@@ -104,10 +174,8 @@ function buildLoginScript(
     if (dkMatch && dkMatch[1]) {
       sessionStorage.setItem('oko_mobile_device_key', dkMatch[1]);
     }
-    // Also store redirect_scheme for the complete page
     sessionStorage.setItem('oko_mobile_redirect_scheme', redirectScheme);
     sessionStorage.setItem('oko_mobile_api_key', apiKey);
-    // Clear fragment from URL (don't leak device_key in history)
     if (window.history && window.history.replaceState) {
       window.history.replaceState(null, '', window.location.pathname + window.location.search);
     }
@@ -120,7 +188,6 @@ function buildLoginScript(
     if (!msg || typeof msg !== 'object') return;
 
     if (msg.msg_type === 'init') {
-      // Respond with init_ack
       if (event.ports && event.ports[0]) {
         event.ports[0].postMessage({
           target: 'oko_attached',
@@ -129,7 +196,6 @@ function buildLoginScript(
         });
       }
 
-      // Check if attached init succeeded (WASM loaded, etc.)
       if (msg.payload && !msg.payload.success) {
         statusEl.textContent = 'Error: wallet initialization failed — ' + (msg.payload.err || 'unknown');
         console.error('[oko-mobile-login] attached init failed:', msg.payload);
@@ -147,7 +213,6 @@ function buildLoginScript(
     channel.port1.onmessage = function(ackEvent) {
       var ack = ackEvent.data;
       if (ack.msg_type === 'generate_oauth_url_ack' && ack.payload && ack.payload.success) {
-        // 4. Redirect to OAuth provider
         window.location.href = ack.payload.data.url;
       } else {
         statusEl.textContent = 'Failed to generate OAuth URL';
