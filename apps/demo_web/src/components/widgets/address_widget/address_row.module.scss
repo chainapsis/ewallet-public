@@ -4,9 +4,9 @@
 }
 
 .loggedOut {
-  align-items: center;
-  height: 26px;
-  gap: 8px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
 }
 
 .loggedIn {
