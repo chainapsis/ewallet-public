@@ -22,6 +22,8 @@ export function useGoogleCallback() {
             return; // Parent will close popup when iframes are ready
           }
           window.close();
+        } else {
+          setError(cbRes.err.type);
         }
       } catch (err) {
         postLog({
