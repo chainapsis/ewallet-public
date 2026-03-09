@@ -1,7 +1,7 @@
 import { CodeIcon } from "@oko-wallet/oko-common-ui/icons/code";
 import { CompassIcon } from "@oko-wallet/oko-common-ui/icons/compass";
 import { ExternalLinkOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/external_link_outlined";
-import { UsersIcon } from "@oko-wallet/oko-common-ui/icons/users";
+import { UserIcon } from "@oko-wallet/oko-common-ui/icons/user";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import type { FC } from "react";
@@ -55,7 +55,7 @@ export const ManageCard: FC<ManageCardProps> = ({
                 Dapp Dashboard
               </Typography>
               <div className={styles.badge}>
-                <CodeIcon size={12} color="var(--fg-secondary)" />
+                <CodeIcon size={12} color="var(--text-quaternary)" />
                 <Typography
                   tagType="span"
                   size="xs"
@@ -99,7 +99,7 @@ export const ManageCard: FC<ManageCardProps> = ({
                 Oko Home
               </Typography>
               <div className={styles.badge}>
-                <UsersIcon size={12} color="var(--fg-secondary)" />
+                <UserIcon size={12} color="var(--text-quaternary)" />
                 <Typography
                   tagType="span"
                   size="xs"
