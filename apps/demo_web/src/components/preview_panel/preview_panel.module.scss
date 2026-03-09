@@ -15,7 +15,7 @@
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-secondary);
 
-  padding: 20px 16px;
+  padding: 16px;
   overflow: auto;
 
   display: flex;
@@ -153,6 +153,7 @@
 
 .onchainDisclaimer {
   margin: 0;
+  font-family: var(--font-family-body);
   font-size: var(--font-size-sm);
   font-weight: 500;
   line-height: var(--font-line-height-sm);
