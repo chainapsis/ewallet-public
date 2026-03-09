@@ -8,6 +8,7 @@ import { Input } from "@oko-wallet/oko-common-ui/input";
 import { Logo } from "@oko-wallet/oko-common-ui/logo";
 import { OtpInput } from "@oko-wallet/oko-common-ui/otp_input";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
@@ -448,7 +449,9 @@ export default function ForgotPasswordPage() {
   return (
     <div className={styles.wrapper}>
       <header className={styles.header}>
-        <Logo theme="light" />
+        <Link href={paths.home}>
+          <Logo theme="light" />
+        </Link>
         <div className={styles.headerSpacer} />
       </header>
 
