@@ -174,8 +174,7 @@ export async function handleGenerateOAuthUrl(
   const { port, hostOrigin } = ctx;
 
   try {
-    const { provider, apiKey, targetOrigin, redirectScheme } = message.payload;
-    const mobileOsBrowser = (message.payload as { mobileOsBrowser?: boolean }).mobileOsBrowser;
+    const { provider, apiKey, targetOrigin, redirectScheme, mobileOsBrowser } = message.payload;
 
     const url = await buildOAuthUrl(provider, apiKey, targetOrigin, hostOrigin, redirectScheme, mobileOsBrowser);
 
