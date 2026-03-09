@@ -1,7 +1,7 @@
 import cn from "classnames";
 
-import { Typography } from "@oko-wallet-common-ui/typography/typography";
 import styles from "./badge.module.scss";
+import { Typography } from "@oko-wallet-common-ui/typography/typography";
 
 type Color = "gray" | "success" | "warning" | "error" | "brand";
 type Size = "sm" | "md" | "lg";
@@ -40,7 +40,7 @@ export const Badge = ({
       <Typography
         tagType="span"
         size={getSize(size)}
-        weight="regular"
+        weight="medium"
         customColor={`${color}-700`}
       >
         {label}
