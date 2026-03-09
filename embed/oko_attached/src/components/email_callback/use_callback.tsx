@@ -13,9 +13,7 @@ import type { Auth0DecodedHash } from "auth0-js";
 import { getAuth0WebAuth } from "@oko-wallet-attached/config/auth0";
 import type { HandleCallbackError } from "@oko-wallet-attached/components/google_callback/types";
 import { sendOAuthPayloadToEmbeddedWindow } from "@oko-wallet-attached/components/oauth_callback/send_oauth_payload";
-import { storeOAuthRelay } from "@oko-wallet-attached/components/oauth_callback/store_oauth_relay";
-import { redirectToMobileLoginComplete } from "@oko-wallet-attached/components/oauth_callback/redirect_to_mobile_login_complete";
-import { tryMobileOsBrowserRedirect } from "@oko-wallet-attached/components/oauth_callback/try_mobile_os_browser_redirect";
+import { handleMobileRedirect } from "@oko-wallet-attached/components/oauth_callback/handle_mobile_redirect";
 
 const EMAIL_STORAGE_KEY = "oko_email_login_pending_email";
 
@@ -73,49 +71,32 @@ export async function handleEmailCallback(): Promise<
     if (stateString && (accessToken || idToken)) {
       try {
         const oauthState = JSON.parse(stateString) as OAuthState;
-
-        // Mobile OS-browser: redirect to login/complete page for keygen inside the browser
-        if (oauthState.mobileOsBrowser) {
-          redirectToMobileLoginComplete({
-            provider: oauthState.provider ?? "auth0",
-            api_key: oauthState.apiKey,
-            target_origin: oauthState.targetOrigin,
-            auth_type: oauthState.provider ?? "auth0",
-            access_token: accessToken,
-            id_token: idToken,
-          });
-          return { success: true, data: void 0 };
-        }
-
-        // Legacy relay: store tokens server-side and deep link with relay code
-        if (oauthState.redirectScheme) {
-          const relayCode = await storeOAuthRelay({
-            access_token: accessToken,
-            id_token: idToken,
-            api_key: oauthState.apiKey,
-            target_origin: oauthState.targetOrigin,
-            auth_type: oauthState.provider ?? "auth0",
-          });
-          window.location.href = `${oauthState.redirectScheme}://oauth-callback?relay_code=${relayCode}`;
-          return { success: true, data: void 0 };
-        }
+        const provider = oauthState.provider ?? "auth0";
+        const mobileRedirected = await handleMobileRedirect({
+          provider,
+          authType: provider,
+          oauthState,
+          access_token: accessToken,
+          id_token: idToken,
+        });
+        if (mobileRedirected) return { success: true, data: void 0 };
       } catch { /* fall through to normal error */ }
     }
 
-    // Fallback: check sessionStorage set by /mobile/login page
-    const redirected = tryMobileOsBrowserRedirect({
+    // Fallback with no parsed state: try sessionStorage from /mobile/login page
+    const { accessToken: at, idToken: it } = parseHashParams();
+    const mobileRedirected = await handleMobileRedirect({
       provider: "auth0",
-      auth_type: "auth0",
-      access_token: accessToken,
-      id_token: idToken,
+      authType: "auth0",
+      oauthState: {},
+      access_token: at,
+      id_token: it,
     });
-    if (redirected) return { success: true, data: void 0 };
+    if (mobileRedirected) return { success: true, data: void 0 };
 
     return {
       success: false,
-      err: {
-        type: "opener_window_not_exists",
-      },
+      err: { type: "opener_window_not_exists" },
     };
   }
   // Web popup flow: auth0-js parseHash validates state properly

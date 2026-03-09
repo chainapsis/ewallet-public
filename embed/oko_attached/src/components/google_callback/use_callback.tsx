@@ -7,9 +7,7 @@ import type { HandleCallbackError } from "./types";
 import { postLog } from "@oko-wallet-attached/requests/logging";
 import { errorToLog } from "@oko-wallet-attached/logging/error";
 import { sendOAuthPayloadToEmbeddedWindow } from "@oko-wallet-attached/components/oauth_callback/send_oauth_payload";
-import { storeOAuthRelay } from "@oko-wallet-attached/components/oauth_callback/store_oauth_relay";
-import { redirectToMobileLoginComplete } from "@oko-wallet-attached/components/oauth_callback/redirect_to_mobile_login_complete";
-import { tryMobileOsBrowserRedirect } from "@oko-wallet-attached/components/oauth_callback/try_mobile_os_browser_redirect";
+import { handleMobileRedirect } from "@oko-wallet-attached/components/oauth_callback/handle_mobile_redirect";
 
 export function useGoogleCallback() {
   const [error, setError] = useState<string | null>(null);
@@ -52,47 +50,20 @@ export async function handleGoogleCallback(): Promise<
 
   const oauthState = getOAuthStateFromUrl();
 
-  // Mobile OS-browser: redirect to login/complete page for keygen inside the browser
-  if (!window.opener && oauthState.mobileOsBrowser) {
-    redirectToMobileLoginComplete({
-      provider: "google",
-      api_key: oauthState.apiKey,
-      target_origin: oauthState.targetOrigin,
-      auth_type: "google",
-      access_token: accessToken,
-      id_token: idToken,
-    });
-    return { success: true, data: void 0 };
-  }
+  // Mobile: handle all redirect paths (OS-browser, legacy relay, sessionStorage fallback)
+  const mobileRedirected = await handleMobileRedirect({
+    provider: "google",
+    authType: "google",
+    oauthState,
+    access_token: accessToken,
+    id_token: idToken,
+  });
+  if (mobileRedirected) return { success: true, data: void 0 };
 
-  // Mobile (legacy relay): store tokens server-side and deep link with relay code only
-  if (!window.opener && oauthState.redirectScheme) {
-    const relayCode = await storeOAuthRelay({
-      access_token: accessToken,
-      id_token: idToken,
-      api_key: oauthState.apiKey,
-      target_origin: oauthState.targetOrigin,
-      auth_type: "google",
-    });
-    window.location.href = `${oauthState.redirectScheme}://oauth-callback?relay_code=${relayCode}`;
-    return { success: true, data: void 0 };
-  }
-
-  // Fallback: check sessionStorage set by /mobile/login page
   if (!window.opener) {
-    const redirected = tryMobileOsBrowserRedirect({
-      provider: "google",
-      auth_type: "google",
-      access_token: accessToken,
-      id_token: idToken,
-    });
-    if (redirected) return { success: true, data: void 0 };
-
     return {
       success: false,
-      err: {
-        type: "opener_window_not_exists",
-      },
+      err: { type: "opener_window_not_exists" },
     };
   }
 

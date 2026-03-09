@@ -9,9 +9,7 @@ import type { HandleXCallbackError } from "./types";
 import { postLog } from "@oko-wallet-attached/requests/logging";
 import { errorToLog } from "@oko-wallet-attached/logging/error";
 import { sendOAuthPayloadToEmbeddedWindow } from "@oko-wallet-attached/components/oauth_callback/send_oauth_payload";
-import { storeOAuthRelay } from "@oko-wallet-attached/components/oauth_callback/store_oauth_relay";
-import { redirectToMobileLoginComplete } from "@oko-wallet-attached/components/oauth_callback/redirect_to_mobile_login_complete";
-import { tryMobileOsBrowserRedirect } from "@oko-wallet-attached/components/oauth_callback/try_mobile_os_browser_redirect";
+import { handleMobileRedirect } from "@oko-wallet-attached/components/oauth_callback/handle_mobile_redirect";
 
 export function useXCallback() {
   const [error, setError] = useState<string | null>(null);
@@ -62,56 +60,24 @@ export async function handleXCallback(): Promise<
   const code = urlParams.get("code");
   const stateParam = urlParams.get(RedirectUriSearchParamsKey.STATE) || "{}";
 
-  // Mobile OS-browser: redirect to login/complete page for keygen inside the browser
-  if (!window.opener && stateParam !== "{}") {
+  // Mobile: handle all redirect paths
+  if (stateParam !== "{}") {
     try {
       const oauthState = JSON.parse(atob(stateParam));
-      if (oauthState.mobileOsBrowser && code) {
-        redirectToMobileLoginComplete({
-          provider: "x",
-          api_key: oauthState.apiKey,
-          target_origin: oauthState.targetOrigin,
-          auth_type: "x",
-          code,
-        });
-        return { success: true, data: void 0 };
-      }
-    } catch { /* fall through */ }
-  }
-
-  // Mobile (legacy relay): store tokens server-side and deep link with relay code only
-  if (!window.opener && stateParam !== "{}") {
-    try {
-      const oauthState = JSON.parse(atob(stateParam));
-      if (oauthState.redirectScheme && code) {
-        const relayCode = await storeOAuthRelay({
-          code,
-          api_key: oauthState.apiKey,
-          target_origin: oauthState.targetOrigin,
-          auth_type: "x",
-        });
-        window.location.href = `${oauthState.redirectScheme}://oauth-callback?relay_code=${relayCode}`;
-        return { success: true, data: void 0 };
-      }
-    } catch { /* fall through to normal error */ }
-  }
-
-  // Fallback: check sessionStorage set by /mobile/login page
-  if (!window.opener) {
-    if (code) {
-      const redirected = tryMobileOsBrowserRedirect({
+      const mobileRedirected = await handleMobileRedirect({
         provider: "x",
-        auth_type: "x",
+        authType: "x",
+        oauthState,
         code,
       });
-      if (redirected) return { success: true, data: void 0 };
-    }
+      if (mobileRedirected) return { success: true, data: void 0 };
+    } catch { /* fall through to web flow */ }
+  }
 
+  if (!window.opener) {
     return {
       success: false,
-      err: {
-        type: "opener_window_not_exists",
-      },
+      err: { type: "opener_window_not_exists" },
     };
   }
 
