@@ -54,7 +54,7 @@ export function useEmailLogin({
   const closeModal = useMemoryState((state) => state.closeModal);
   const memoryHostOrigin = useMemoryState((state) => state.hostOrigin);
 
-  // In RN mode (system browser), MemoryState is empty.
+  // In mobile mode (system browser), MemoryState is empty.
   // Fall back to host_origin from URL query params.
   const hostOrigin = useMemo(() => {
     if (memoryHostOrigin) return memoryHostOrigin;

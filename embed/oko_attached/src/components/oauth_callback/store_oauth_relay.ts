@@ -2,11 +2,11 @@
  * Stores OAuth tokens in the proxy's server-side relay store
  * and returns a single-use retrieval code.
  *
- * Used by callback pages in the RN flow so that raw tokens
- * never appear in deep link URLs or pass through the RN app.
+ * Used by callback pages in the mobile flow so that raw tokens
+ * never appear in deep link URLs or pass through the mobile app.
  */
 export async function storeOAuthRelay(payload: unknown): Promise<string> {
-  const res = await fetch("/api/rn/oauth-store", {
+  const res = await fetch("/api/mobile/oauth-store", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ payload }),

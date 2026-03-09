@@ -10,7 +10,7 @@ import type { OpenModalError } from "@oko-wallet/oko-sdk-core";
  * Open a signing modal via OS browser.
  *
  * 1. Store signing request in relay → relay_code
- * 2. Open OS browser at /rn/sign (restore key shares + show modal)
+ * 2. Open OS browser at /mobile/sign (restore key shares + show modal)
  * 3. Deep link back with result_code
  * 4. Consume result relay → signing result
  *
@@ -33,7 +33,7 @@ export async function openModalRN(
   try {
     // 1. Store signing request in relay
     const storeRes = await fetch(
-      `${sdkEndpoint}/api/rn/sign-relay/store`,
+      `${sdkEndpoint}/api/mobile/sign-relay/store`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -62,7 +62,7 @@ export async function openModalRN(
 
     const relayCode = storeData.code;
 
-    // 2. Open OS browser at /rn/sign
+    // 2. Open OS browser at /mobile/sign
     const signUrl = buildSignUrl(
       sdkEndpoint,
       relayCode,
@@ -96,7 +96,7 @@ export async function openModalRN(
 
     // 4. Consume result relay
     const consumeRes = await fetch(
-      `${sdkEndpoint}/api/rn/sign-relay/result-consume`,
+      `${sdkEndpoint}/api/mobile/sign-relay/result-consume`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -139,7 +139,7 @@ function buildSignUrl(
   deviceKey: string,
   apiKey: string,
 ): string {
-  const url = new URL("/rn/sign", sdkEndpoint);
+  const url = new URL("/mobile/sign", sdkEndpoint);
   url.searchParams.set("relay_code", relayCode);
   url.searchParams.set("redirect_scheme", redirectScheme);
   url.searchParams.set("host_origin", sdkEndpoint);

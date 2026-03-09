@@ -27,7 +27,7 @@ import { openModalRN } from "./methods/open_modal";
 import { signInRN, type SignInOptions } from "./methods/sign_in";
 import { signOutRN } from "./methods/sign_out";
 
-const DEVICE_KEY_STORE_KEY = "oko_rn_device_key";
+const DEVICE_KEY_STORE_KEY = "oko_mobile_device_key";
 
 export interface OkoWalletRNConfig {
   apiKey: string;
@@ -40,8 +40,8 @@ export interface OkoWalletRNConfig {
  *
  * Architecture:
  * - Read-only ops (getPublicKey, getEmail, etc.): WebView bridge → attached iframe
- * - Login + keygen: OS browser (/rn/login) — key shares never enter WebView
- * - Signing: OS browser (/rn/sign) — key shares restored from server, never in WebView
+ * - Login + keygen: OS browser (/mobile/login) — key shares never enter WebView
+ * - Signing: OS browser (/mobile/sign) — key shares restored from server, never in WebView
  *
  * Key shares NEVER exist in the WebView or app JS runtime.
  */

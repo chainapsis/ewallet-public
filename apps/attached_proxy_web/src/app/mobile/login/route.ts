@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { createSession } from "../../../relay/session_store";
 
-const COOKIE_NAME = "oko_rn_session";
+const COOKIE_NAME = "oko_mobile_session";
 
 function sessionCookie(sessionId: string): string {
   return `${COOKIE_NAME}=${sessionId}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=86400`;
@@ -11,7 +11,7 @@ function sessionCookie(sessionId: string): string {
 /**
  * OS-browser login entry page (raw HTML route handler).
  *
- * Opened via expo-web-browser's openAuthSessionAsync.
+ * Opened via the mobile SDK's OS browser integration.
  * Creates a server session (sets HttpOnly cookie) and returns a standalone
  * HTML page that:
  * 1. Stores device_key (from URL fragment) in sessionStorage
@@ -20,7 +20,7 @@ function sessionCookie(sessionId: string): string {
  * 4. Redirects to OAuth provider
  *
  * The session cookie is set HERE so it lives in the OS browser context
- * (ASWebAuthenticationSession / Custom Tabs), not in the RN app's HTTP client.
+ * (ASWebAuthenticationSession / Custom Tabs), not in the mobile app's HTTP client.
  */
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Oko RN Login</title>
+  <title>Oko Mobile Login</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 100%; height: 100%; }
@@ -102,11 +102,11 @@ function buildLoginScript(
   if (hash) {
     var dkMatch = hash.match(/dk=([a-f0-9]+)/);
     if (dkMatch && dkMatch[1]) {
-      sessionStorage.setItem('oko_rn_device_key', dkMatch[1]);
+      sessionStorage.setItem('oko_mobile_device_key', dkMatch[1]);
     }
     // Also store redirect_scheme for the complete page
-    sessionStorage.setItem('oko_rn_redirect_scheme', redirectScheme);
-    sessionStorage.setItem('oko_rn_api_key', apiKey);
+    sessionStorage.setItem('oko_mobile_redirect_scheme', redirectScheme);
+    sessionStorage.setItem('oko_mobile_api_key', apiKey);
     // Clear fragment from URL (don't leak device_key in history)
     if (window.history && window.history.replaceState) {
       window.history.replaceState(null, '', window.location.pathname + window.location.search);
@@ -132,7 +132,7 @@ function buildLoginScript(
       // Check if attached init succeeded (WASM loaded, etc.)
       if (msg.payload && !msg.payload.success) {
         statusEl.textContent = 'Error: wallet initialization failed — ' + (msg.payload.err || 'unknown');
-        console.error('[oko-rn-login] attached init failed:', msg.payload);
+        console.error('[oko-mobile-login] attached init failed:', msg.payload);
         return;
       }
 
@@ -151,7 +151,7 @@ function buildLoginScript(
         window.location.href = ack.payload.data.url;
       } else {
         statusEl.textContent = 'Failed to generate OAuth URL';
-        console.error('[oko-rn-login] generate_oauth_url failed:', ack);
+        console.error('[oko-mobile-login] generate_oauth_url failed:', ack);
       }
     };
 
@@ -163,12 +163,12 @@ function buildLoginScript(
         apiKey: apiKey,
         targetOrigin: window.location.origin,
         redirectScheme: null,
-        rnOsBrowser: true
+        mobileOsBrowser: true
       }
     }, attachedOrigin, [channel.port2]);
   }
 
-  console.log('[oko-rn-login] login page initialized, provider:', provider);
+  console.log('[oko-mobile-login] login page initialized, provider:', provider);
 })();
   `;
 }

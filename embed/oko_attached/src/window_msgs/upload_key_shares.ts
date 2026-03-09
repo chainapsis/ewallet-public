@@ -1,12 +1,12 @@
 import { OKO_SDK_TARGET } from "./target";
 import type { MsgEventContext } from "./types";
-import { uploadKeyShares } from "@oko-wallet-attached/requests/rn_key_share_sync";
+import { uploadKeyShares } from "@oko-wallet-attached/requests/mobile_key_share_sync";
 
 /**
  * Encrypts key shares from appState with the provided device_key
  * and uploads them to the proxy server.
  *
- * Called by the /rn/login/complete page after keygen completes.
+ * Called by the /mobile/login/complete page after keygen completes.
  * Only runs in the OS browser context.
  */
 export async function handleUploadKeyShares(

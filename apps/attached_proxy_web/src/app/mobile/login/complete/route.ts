@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Oko RN Login Complete</title>
+  <title>Oko Mobile Login Complete</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 100%; height: 100%; }
@@ -81,14 +81,14 @@ function buildCompleteScript(serializedParams: string): string {
   var iframe = document.getElementById('oko-attached');
   var attachedOrigin = window.location.origin;
 
-  // Read stored values from sessionStorage (set by /rn/login entry page)
-  var deviceKey = sessionStorage.getItem('oko_rn_device_key');
-  var redirectScheme = sessionStorage.getItem('oko_rn_redirect_scheme');
-  var apiKey = sessionStorage.getItem('oko_rn_api_key');
+  // Read stored values from sessionStorage (set by /mobile/login entry page)
+  var deviceKey = sessionStorage.getItem('oko_mobile_device_key');
+  var redirectScheme = sessionStorage.getItem('oko_mobile_redirect_scheme');
+  var apiKey = sessionStorage.getItem('oko_mobile_api_key');
 
   if (!deviceKey || !redirectScheme) {
     statusEl.textContent = 'Error: missing session data. Please try again.';
-    console.error('[oko-rn-login-complete] missing deviceKey or redirectScheme from sessionStorage');
+    console.error('[oko-mobile-login-complete] missing deviceKey or redirectScheme from sessionStorage');
     return;
   }
 
@@ -98,7 +98,7 @@ function buildCompleteScript(serializedParams: string): string {
 
   if (!oauthPayload) {
     statusEl.textContent = 'Error: invalid OAuth response. Provider=' + provider + ', keys=' + Object.keys(oauthParams).join(',');
-    console.error('[oko-rn-login-complete] invalid OAuth response. oauthParams:', JSON.stringify(oauthParams), 'provider:', provider);
+    console.error('[oko-mobile-login-complete] invalid OAuth response. oauthParams:', JSON.stringify(oauthParams), 'provider:', provider);
     return;
   }
 
@@ -121,7 +121,7 @@ function buildCompleteScript(serializedParams: string): string {
       // Check if attached init succeeded (WASM loaded, etc.)
       if (msg.payload && !msg.payload.success) {
         statusEl.textContent = 'Error: wallet initialization failed — ' + (msg.payload.err || 'unknown');
-        console.error('[oko-rn-login-complete] attached init failed:', msg.payload);
+        console.error('[oko-mobile-login-complete] attached init failed:', msg.payload);
         return;
       }
 
@@ -151,7 +151,7 @@ function buildCompleteScript(serializedParams: string): string {
     var channel = new MessageChannel();
     channel.port1.onmessage = function(ackEvent) {
       var ack = ackEvent.data;
-      console.log('[oko-rn-login-complete] oauth_info_pass_ack:', ack);
+      console.log('[oko-mobile-login-complete] oauth_info_pass_ack:', ack);
       // Ack received. Keygen may still be in progress.
       // We wait for oauth_sign_in_update event for completion.
     };
@@ -192,7 +192,7 @@ function buildCompleteScript(serializedParams: string): string {
       var walletData = (publicInfo && publicInfo.success) ? publicInfo.data : publicInfo;
 
       // Store public wallet info in relay
-      var relayRes = await fetch('/api/rn/sign-relay/store', {
+      var relayRes = await fetch('/api/mobile/sign-relay/store', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ payload: walletData })
@@ -209,7 +209,7 @@ function buildCompleteScript(serializedParams: string): string {
       window.location.href = deepLink;
     } catch(err) {
       statusEl.textContent = 'Error: ' + err.message;
-      console.error('[oko-rn-login-complete] error:', err);
+      console.error('[oko-mobile-login-complete] error:', err);
     }
   }
 
@@ -256,7 +256,7 @@ function buildCompleteScript(serializedParams: string): string {
     return null;
   }
 
-  console.log('[oko-rn-login-complete] complete page initialized, provider:', provider);
+  console.log('[oko-mobile-login-complete] complete page initialized, provider:', provider);
 })();
   `;
 }

@@ -1,15 +1,15 @@
 /**
- * Redirects the callback page to /rn/login/complete with the OAuth tokens.
+ * Redirects the callback page to /mobile/login/complete with the OAuth tokens.
  * Used in the OS-browser login flow where keygen runs inside the browser.
  *
- * The /rn/login/complete page will:
+ * The /mobile/login/complete page will:
  * 1. Load attached iframe
  * 2. Send oauth_info_pass
  * 3. Wait for keygen
  * 4. Upload encrypted key shares
  * 5. Deep link back to app
  */
-export function redirectToRnLoginComplete(params: {
+export function redirectToMobileLoginComplete(params: {
   provider: string;
   api_key: string;
   target_origin: string;
@@ -20,7 +20,7 @@ export function redirectToRnLoginComplete(params: {
   // Discord/X/GitHub
   code?: string | null;
 }): void {
-  const url = new URL("/rn/login/complete", window.location.origin);
+  const url = new URL("/mobile/login/complete", window.location.origin);
 
   url.searchParams.set("provider", params.provider);
   url.searchParams.set("api_key", params.api_key);

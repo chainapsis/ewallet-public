@@ -18,7 +18,7 @@ const DEFAULT_REDIRECT_SCHEME = "okowallet";
  *
  * 1. Generate device_key locally (crypto.getRandomValues)
  * 2. Create server session (sets session cookie only)
- * 3. Open OS browser at /rn/login (OAuth + keygen + key share upload)
+ * 3. Open OS browser at /mobile/login (OAuth + keygen + key share upload)
  * 4. Deep link back with wallet_info_code
  * 5. Consume relay code → public wallet info
  *
@@ -37,8 +37,8 @@ export async function signInRN(
   // 1. Generate device_key client-side — server never sees this
   const deviceKey = generateDeviceKey();
 
-  // 2. Open OS browser at /rn/login
-  // Session cookie is created by the /rn/login route handler in the OS browser context.
+  // 2. Open OS browser at /mobile/login
+  // Session cookie is created by the /mobile/login route handler in the OS browser context.
   // This ensures the cookie lives in ASWebAuthenticationSession's cookie jar,
   // not in the RN app's HTTP client.
   const loginUrl = buildLoginUrl(
@@ -70,7 +70,7 @@ export async function signInRN(
 
   // 5. Consume relay code to get public wallet info
   const consumeRes = await fetch(
-    `${sdkEndpoint}/api/rn/sign-relay/consume`,
+    `${sdkEndpoint}/api/mobile/sign-relay/consume`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -116,7 +116,7 @@ function buildLoginUrl(
   redirectScheme: string,
   deviceKey: string,
 ): string {
-  const url = new URL("/rn/login", sdkEndpoint);
+  const url = new URL("/mobile/login", sdkEndpoint);
   url.searchParams.set("provider", provider);
   url.searchParams.set("api_key", apiKey);
   url.searchParams.set("redirect_scheme", redirectScheme);

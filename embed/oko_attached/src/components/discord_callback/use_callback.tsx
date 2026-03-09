@@ -10,8 +10,8 @@ import { postLog } from "@oko-wallet-attached/requests/logging";
 import { errorToLog } from "@oko-wallet-attached/logging/error";
 import { sendOAuthPayloadToEmbeddedWindow } from "@oko-wallet-attached/components/oauth_callback/send_oauth_payload";
 import { storeOAuthRelay } from "@oko-wallet-attached/components/oauth_callback/store_oauth_relay";
-import { redirectToRnLoginComplete } from "@oko-wallet-attached/components/oauth_callback/redirect_to_rn_login_complete";
-import { tryRnOsBrowserRedirect } from "@oko-wallet-attached/components/oauth_callback/try_rn_os_browser_redirect";
+import { redirectToMobileLoginComplete } from "@oko-wallet-attached/components/oauth_callback/redirect_to_mobile_login_complete";
+import { tryMobileOsBrowserRedirect } from "@oko-wallet-attached/components/oauth_callback/try_mobile_os_browser_redirect";
 
 export function useDiscordCallback() {
   const [error, setError] = useState<string | null>(null);
@@ -62,12 +62,12 @@ export async function handleDiscordCallback(): Promise<
   const code = urlParams.get("code");
   const stateParam = urlParams.get(RedirectUriSearchParamsKey.STATE) || "{}";
 
-  // RN OS-browser: redirect to login/complete page for keygen inside the browser
+  // Mobile OS-browser: redirect to login/complete page for keygen inside the browser
   if (!window.opener && stateParam !== "{}") {
     try {
       const oauthState = JSON.parse(atob(stateParam));
-      if (oauthState.rnOsBrowser && code) {
-        redirectToRnLoginComplete({
+      if (oauthState.mobileOsBrowser && code) {
+        redirectToMobileLoginComplete({
           provider: "discord",
           api_key: oauthState.apiKey,
           target_origin: oauthState.targetOrigin,
@@ -79,7 +79,7 @@ export async function handleDiscordCallback(): Promise<
     } catch { /* fall through */ }
   }
 
-  // React Native (legacy relay): store tokens server-side and deep link with relay code only
+  // Mobile (legacy relay): store tokens server-side and deep link with relay code only
   if (!window.opener && stateParam !== "{}") {
     try {
       const oauthState = JSON.parse(atob(stateParam));
@@ -96,10 +96,10 @@ export async function handleDiscordCallback(): Promise<
     } catch { /* fall through to normal error */ }
   }
 
-  // Fallback: check sessionStorage set by /rn/login page
+  // Fallback: check sessionStorage set by /mobile/login page
   if (!window.opener) {
     if (code) {
-      const redirected = tryRnOsBrowserRedirect({
+      const redirected = tryMobileOsBrowserRedirect({
         provider: "discord",
         auth_type: "discord",
         code,

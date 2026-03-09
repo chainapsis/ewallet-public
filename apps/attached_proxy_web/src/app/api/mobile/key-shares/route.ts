@@ -7,7 +7,7 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const COOKIE_NAME = "oko_rn_session";
+const COOKIE_NAME = "oko_mobile_session";
 
 function getSessionIdFromCookie(request: Request): string | null {
   const cookie = request.headers.get("cookie");

@@ -1,12 +1,12 @@
 import { OKO_SDK_TARGET } from "./target";
 import type { MsgEventContext } from "./types";
-import { downloadAndRestoreKeyShares } from "@oko-wallet-attached/requests/rn_key_share_sync";
+import { downloadAndRestoreKeyShares } from "@oko-wallet-attached/requests/mobile_key_share_sync";
 
 /**
  * Downloads encrypted key shares from the proxy server, decrypts them
  * with the provided device_key, and restores them into appState.
  *
- * Called by the /rn/sign page before presenting the signing modal.
+ * Called by the /mobile/sign page before presenting the signing modal.
  * Only runs in the OS browser context.
  */
 export async function handleRestoreKeyShares(

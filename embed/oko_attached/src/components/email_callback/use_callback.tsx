@@ -14,8 +14,8 @@ import { getAuth0WebAuth } from "@oko-wallet-attached/config/auth0";
 import type { HandleCallbackError } from "@oko-wallet-attached/components/google_callback/types";
 import { sendOAuthPayloadToEmbeddedWindow } from "@oko-wallet-attached/components/oauth_callback/send_oauth_payload";
 import { storeOAuthRelay } from "@oko-wallet-attached/components/oauth_callback/store_oauth_relay";
-import { redirectToRnLoginComplete } from "@oko-wallet-attached/components/oauth_callback/redirect_to_rn_login_complete";
-import { tryRnOsBrowserRedirect } from "@oko-wallet-attached/components/oauth_callback/try_rn_os_browser_redirect";
+import { redirectToMobileLoginComplete } from "@oko-wallet-attached/components/oauth_callback/redirect_to_mobile_login_complete";
+import { tryMobileOsBrowserRedirect } from "@oko-wallet-attached/components/oauth_callback/try_mobile_os_browser_redirect";
 
 const EMAIL_STORAGE_KEY = "oko_email_login_pending_email";
 
@@ -65,8 +65,8 @@ export function useEmailCallback(): { error: string | null } {
 export async function handleEmailCallback(): Promise<
   Result<void, HandleCallbackError>
 > {
-  // React Native: no opener, parse hash manually — auth0-js's parseHash validates
-  // state against its internal transaction store, but the RN flow bypasses auth0-js
+  // Mobile: no opener, parse hash manually — auth0-js's parseHash validates
+  // state against its internal transaction store, but the mobile flow bypasses auth0-js
   // (redirects to Auth0's Universal Login directly) so no transaction was stored.
   if (!window.opener) {
     const { accessToken, idToken, state: stateString } = parseHashParams();
@@ -74,9 +74,9 @@ export async function handleEmailCallback(): Promise<
       try {
         const oauthState = JSON.parse(stateString) as OAuthState;
 
-        // RN OS-browser: redirect to login/complete page for keygen inside the browser
-        if (oauthState.rnOsBrowser) {
-          redirectToRnLoginComplete({
+        // Mobile OS-browser: redirect to login/complete page for keygen inside the browser
+        if (oauthState.mobileOsBrowser) {
+          redirectToMobileLoginComplete({
             provider: oauthState.provider ?? "auth0",
             api_key: oauthState.apiKey,
             target_origin: oauthState.targetOrigin,
@@ -102,8 +102,8 @@ export async function handleEmailCallback(): Promise<
       } catch { /* fall through to normal error */ }
     }
 
-    // Fallback: check sessionStorage set by /rn/login page
-    const redirected = tryRnOsBrowserRedirect({
+    // Fallback: check sessionStorage set by /mobile/login page
+    const redirected = tryMobileOsBrowserRedirect({
       provider: "auth0",
       auth_type: "auth0",
       access_token: accessToken,
@@ -222,7 +222,7 @@ export async function handleEmailCallback(): Promise<
 }
 
 /**
- * Parse hash fragment manually (RN flow).
+ * Parse hash fragment manually (mobile flow).
  * Avoids auth0-js parseHash which requires a matching transaction in storage.
  */
 function parseHashParams(): {

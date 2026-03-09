@@ -1,5 +1,5 @@
 /**
- * Key share sync for RN OS-browser architecture.
+ * Key share sync for mobile OS-browser architecture.
  *
  * Encrypts sensitive key shares (keyshare_1, keyPackageEd25519, seedEd25519,
  * authToken) with a device_key using AES-256-GCM, then uploads/downloads
@@ -44,7 +44,7 @@ export async function uploadKeyShares(
   const plaintext = new TextEncoder().encode(JSON.stringify(payload));
   const encrypted = await encryptAesGcm(deviceKeyHex, plaintext);
 
-  const res = await fetch("/api/rn/key-shares", {
+  const res = await fetch("/api/mobile/key-shares", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
@@ -67,7 +67,7 @@ export async function downloadAndRestoreKeyShares(
   deviceKeyHex: string,
   hostOrigin: string,
 ): Promise<void> {
-  const res = await fetch("/api/rn/key-shares", {
+  const res = await fetch("/api/mobile/key-shares", {
     method: "GET",
     credentials: "include",
   });

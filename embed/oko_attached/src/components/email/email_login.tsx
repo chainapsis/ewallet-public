@@ -9,8 +9,8 @@ import { LoginPopupErrorView } from "../login_popup/login_popup_error_view";
 import styles from "./email_login.module.scss";
 
 /**
- * Build email modal data from URL query params (RN mode).
- * When the email login page is opened in a system browser by the RN SDK,
+ * Build email modal data from URL query params (mobile mode).
+ * When the email login page is opened in a system browser by the mobile SDK,
  * there is no MemoryState — nonce and state come from URL params instead.
  */
 function useRnEmailModalPayload(): {
@@ -45,7 +45,7 @@ export const EmailLogin: FC = () => {
       ? modalRequest.msg.payload
       : null;
 
-  // Fallback: RN mode — read from URL query params
+  // Fallback: mobile mode — read from URL query params
   const rnPayload = useRnEmailModalPayload();
 
   const effectiveModalId = emailModalPayload?.modal_id ?? rnPayload?.modalId;

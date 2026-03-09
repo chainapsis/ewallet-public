@@ -1,19 +1,19 @@
-import { redirectToRnLoginComplete } from "./redirect_to_rn_login_complete";
+import { redirectToMobileLoginComplete } from "./redirect_to_mobile_login_complete";
 
 /**
- * Check if we're in the RN OS-browser login flow by looking at sessionStorage.
+ * Check if we're in the mobile OS-browser login flow by looking at sessionStorage.
  *
- * The /rn/login page stores `oko_rn_device_key` in sessionStorage before
+ * The /mobile/login page stores `oko_mobile_device_key` in sessionStorage before
  * redirecting to the OAuth provider. Since ASWebAuthenticationSession
  * preserves sessionStorage across redirects within the same session,
  * we can use this as a reliable signal.
  *
  * This serves as a fallback when the OAuth state parameter doesn't
- * contain rnOsBrowser (e.g., due to provider state handling quirks).
+ * contain mobileOsBrowser (e.g., due to provider state handling quirks).
  *
  * Returns true if the redirect was initiated.
  */
-export function tryRnOsBrowserRedirect(params: {
+export function tryMobileOsBrowserRedirect(params: {
   provider: string;
   auth_type: string;
   access_token?: string | null;
@@ -21,12 +21,12 @@ export function tryRnOsBrowserRedirect(params: {
   code?: string | null;
 }): boolean {
   try {
-    const deviceKey = sessionStorage.getItem("oko_rn_device_key");
-    const apiKey = sessionStorage.getItem("oko_rn_api_key");
+    const deviceKey = sessionStorage.getItem("oko_mobile_device_key");
+    const apiKey = sessionStorage.getItem("oko_mobile_api_key");
 
     if (!deviceKey) return false;
 
-    redirectToRnLoginComplete({
+    redirectToMobileLoginComplete({
       provider: params.provider,
       api_key: apiKey ?? "",
       target_origin: window.location.origin,

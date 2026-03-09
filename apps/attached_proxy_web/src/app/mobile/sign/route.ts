@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Oko RN Sign</title>
+  <title>Oko Mobile Sign</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 100%; height: 100%; }
@@ -97,13 +97,13 @@ function buildSignScript(relayCode: string, redirectScheme: string): string {
 
   if (!deviceKey) {
     statusEl.textContent = 'Error: missing device key.';
-    console.error('[oko-rn-sign] missing device_key from URL fragment');
+    console.error('[oko-mobile-sign] missing device_key from URL fragment');
     return;
   }
 
   if (!relayCode) {
     statusEl.textContent = 'Error: missing relay code.';
-    console.error('[oko-rn-sign] missing relay_code');
+    console.error('[oko-mobile-sign] missing relay_code');
     return;
   }
 
@@ -141,7 +141,7 @@ function buildSignScript(relayCode: string, redirectScheme: string): string {
       }
 
       // 4. Consume signing request from relay
-      var consumeRes = await fetch('/api/rn/sign-relay/consume', {
+      var consumeRes = await fetch('/api/mobile/sign-relay/consume', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code: relayCode })
@@ -177,7 +177,7 @@ function buildSignScript(relayCode: string, redirectScheme: string): string {
       statusEl.className = '';
       statusEl.textContent = 'Returning to app...';
 
-      var resultStoreRes = await fetch('/api/rn/sign-relay/result-store', {
+      var resultStoreRes = await fetch('/api/mobile/sign-relay/result-store', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ payload: modalResult.payload })
@@ -195,7 +195,7 @@ function buildSignScript(relayCode: string, redirectScheme: string): string {
       statusEl.className = '';
       iframe.className = 'hidden';
       statusEl.textContent = 'Error: ' + err.message;
-      console.error('[oko-rn-sign] error:', err);
+      console.error('[oko-mobile-sign] error:', err);
 
       // Still try to return an error result to the app
       try {
@@ -203,7 +203,7 @@ function buildSignScript(relayCode: string, redirectScheme: string): string {
           type: 'error',
           error: { type: 'os_browser_error', message: err.message }
         };
-        var errStoreRes = await fetch('/api/rn/sign-relay/result-store', {
+        var errStoreRes = await fetch('/api/mobile/sign-relay/result-store', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ payload: errorPayload })
@@ -215,7 +215,7 @@ function buildSignScript(relayCode: string, redirectScheme: string): string {
           }, 2000);
         }
       } catch(e) {
-        console.error('[oko-rn-sign] failed to store error result:', e);
+        console.error('[oko-mobile-sign] failed to store error result:', e);
       }
     }
   }
@@ -237,7 +237,7 @@ function buildSignScript(relayCode: string, redirectScheme: string): string {
     });
   }
 
-  console.log('[oko-rn-sign] sign page initialized');
+  console.log('[oko-mobile-sign] sign page initialized');
 })();
   `;
 }
