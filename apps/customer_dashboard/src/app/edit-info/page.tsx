@@ -38,7 +38,7 @@ export default function EditInfoPage() {
 
           <Typography
             size="md"
-            weight="regular"
+            weight="medium"
             color="secondary"
             className={styles.description}
           >
