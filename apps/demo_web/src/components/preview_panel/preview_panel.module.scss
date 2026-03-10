@@ -19,6 +19,14 @@
 
   padding: 20px 16px;
 
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Crect x='4' y='4' width='2' height='2' rx='1' fill='%23E9EAEB'/%3E%3C/svg%3E");
+  background-size: 16px 16px;
+  background-position: 7px -4px;
+
+  :global([data-theme="dark"]) & {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Crect x='4' y='4' width='2' height='2' rx='1' fill='%2322262F'/%3E%3C/svg%3E");
+  }
+
   display: flex;
   flex-direction: column;
   align-items: flex-start;
