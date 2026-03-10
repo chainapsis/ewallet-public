@@ -3,43 +3,38 @@
 import { type FC, type ReactNode, useCallback, useEffect, useState } from "react";
 
 type ExpiryTimerProps = {
-  expiresAt?: string;
-  duration?: number;
+  duration: number;
+  startedAt?: number;
   children: (props: {
     timeDisplay: string;
     isExpired: boolean;
-    resetTimer: (newExpiresAt: string) => void;
+    resetTimer: () => void;
   }) => ReactNode;
 };
 
-const EXPIRY_BUFFER_SECONDS = 1;
-
-function calcSecondsLeft(expiresAt: string): number {
-  return Math.max(
-    0,
-    Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000) -
-      EXPIRY_BUFFER_SECONDS,
-  );
+function calcSecondsLeft(duration: number, startedAt: number): number {
+  const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+  return Math.max(0, duration - elapsed);
 }
 
 export const ExpiryTimer: FC<ExpiryTimerProps> = ({
-  expiresAt,
-  duration = 0,
+  duration,
+  startedAt,
   children,
 }) => {
   const [secondLeft, setSecondLeft] = useState(() =>
-    expiresAt ? calcSecondsLeft(expiresAt) : duration,
+    startedAt ? calcSecondsLeft(duration, startedAt) : duration,
   );
 
   useEffect(() => {
-    if (expiresAt) {
-      setSecondLeft(calcSecondsLeft(expiresAt));
+    if (startedAt) {
+      setSecondLeft(calcSecondsLeft(duration, startedAt));
     }
-  }, [expiresAt]);
+  }, [duration, startedAt]);
 
-  const resetTimer = useCallback((newExpiresAt: string) => {
-    setSecondLeft(calcSecondsLeft(newExpiresAt));
-  }, []);
+  const resetTimer = useCallback(() => {
+    setSecondLeft(duration);
+  }, [duration]);
 
   useEffect(() => {
     if (secondLeft <= 0) {
