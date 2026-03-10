@@ -20,12 +20,7 @@ export const DocsWidget: FC = () => {
       <div className={styles.container}>
         <div className={styles.title}>
           <BookOpenIcon size={16} color="#ED6B25" />
-          <Typography
-            tagType="h3"
-            size="md"
-            weight="semibold"
-            color="secondary"
-          >
+          <Typography tagType="h3" size="md" weight="semibold" color="primary">
             Build with Oko
           </Typography>
         </div>
