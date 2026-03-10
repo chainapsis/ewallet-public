@@ -84,6 +84,7 @@ function buildCompleteScript(serializedParams: string): string {
 
   // Read stored values from sessionStorage (set by /mobile/login entry page)
   var sessionId = sessionStorage.getItem('oko_mobile_session_id');
+  var redirectScheme = sessionStorage.getItem('oko_mobile_redirect_scheme') || '';
   var apiKey = sessionStorage.getItem('oko_mobile_api_key');
 
   if (!sessionId) {
@@ -209,10 +210,17 @@ function buildCompleteScript(serializedParams: string): string {
         throw new Error('Failed to store wallet info in relay');
       }
 
-      statusEl.textContent = 'Done! Returning to app...';
+      returnToApp();
     } catch(err) {
       statusEl.textContent = 'Error: ' + err.message;
       console.error('[oko-mobile-login-complete] error:', err);
+    }
+  }
+
+  // Navigate to custom scheme to trigger openAuthSessionAsync close
+  function returnToApp() {
+    if (redirectScheme) {
+      window.location.href = redirectScheme + '://done';
     }
   }
 

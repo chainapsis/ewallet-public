@@ -33,6 +33,7 @@ export async function GET(request: NextRequest) {
   const provider = searchParams.get("provider") ?? "";
   const apiKey = searchParams.get("api_key") ?? "";
   const pollSessionId = searchParams.get("session_id") ?? "";
+  const redirectScheme = searchParams.get("redirect_scheme") ?? "";
   const hostOrigin = searchParams.get("host_origin") ?? "";
 
   // Create session — cookie is set in the OS browser context
@@ -59,7 +60,7 @@ export async function GET(request: NextRequest) {
   <div class="status" id="status">Preparing sign-in...</div>
   ${isEmail ? "" : `<iframe id="oko-attached" src="${escapeHtml(iframeSrc)}"></iframe>`}
   <script>
-${isEmail ? buildEmailLoginScript(apiKey, pollSessionId) : buildOAuthLoginScript(provider, apiKey, pollSessionId)}
+${isEmail ? buildEmailLoginScript(apiKey, pollSessionId, redirectScheme) : buildOAuthLoginScript(provider, apiKey, pollSessionId, redirectScheme)}
   </script>
 </body>
 </html>`;
@@ -93,17 +94,19 @@ function buildIframeSrc(hostOrigin: string, apiKey: string): string {
  * No attached iframe needed — Auth0 handles the entire email OTP flow
  * on its own domain (avoids 3rd-party cookie issues on mobile).
  */
-function buildEmailLoginScript(apiKey: string, sessionId: string): string {
+function buildEmailLoginScript(apiKey: string, sessionId: string, redirectScheme: string): string {
   return `
 (function() {
   'use strict';
 
   var apiKey = ${JSON.stringify(apiKey)};
   var sessionId = ${JSON.stringify(sessionId)};
+  var redirectScheme = ${JSON.stringify(redirectScheme)};
   var statusEl = document.getElementById('status');
 
   // 1. Store session info in sessionStorage for /mobile/login/complete
   if (sessionId) sessionStorage.setItem('oko_mobile_session_id', sessionId);
+  if (redirectScheme) sessionStorage.setItem('oko_mobile_redirect_scheme', redirectScheme);
   sessionStorage.setItem('oko_mobile_api_key', apiKey);
 
   // 2. Generate nonce and store in sessionStorage for /mobile/login/complete
@@ -146,6 +149,7 @@ function buildOAuthLoginScript(
   provider: string,
   apiKey: string,
   sessionId: string,
+  redirectScheme: string,
 ): string {
   return `
 (function() {
@@ -154,12 +158,14 @@ function buildOAuthLoginScript(
   var provider = ${JSON.stringify(provider)};
   var apiKey = ${JSON.stringify(apiKey)};
   var sessionId = ${JSON.stringify(sessionId)};
+  var redirectScheme = ${JSON.stringify(redirectScheme)};
   var statusEl = document.getElementById('status');
   var iframe = document.getElementById('oko-attached');
   var attachedOrigin = window.location.origin;
 
   // 1. Store session info in sessionStorage for /mobile/login/complete
   if (sessionId) sessionStorage.setItem('oko_mobile_session_id', sessionId);
+  if (redirectScheme) sessionStorage.setItem('oko_mobile_redirect_scheme', redirectScheme);
   sessionStorage.setItem('oko_mobile_api_key', apiKey);
 
   // 2. Wait for attached iframe init

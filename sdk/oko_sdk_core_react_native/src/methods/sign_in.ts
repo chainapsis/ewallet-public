@@ -33,7 +33,7 @@ export async function signInRN(
     options?.redirectScheme ?? DEFAULT_REDIRECT_SCHEME;
 
   const sessionId = generateSessionId();
-  const loginUrl = buildLoginUrl(sdkEndpoint, type, apiKey, sessionId);
+  const loginUrl = buildLoginUrl(sdkEndpoint, type, apiKey, sessionId, redirectScheme);
 
   // Start Custom Tab and poll relay concurrently.
   // When polling detects the wallet info, dismissAuthSession closes the Custom Tab.
@@ -121,11 +121,13 @@ function buildLoginUrl(
   provider: string,
   apiKey: string,
   sessionId: string,
+  redirectScheme: string,
 ): string {
   const url = new URL("/mobile/login", sdkEndpoint);
   url.searchParams.set("provider", provider);
   url.searchParams.set("api_key", apiKey);
   url.searchParams.set("session_id", sessionId);
+  url.searchParams.set("redirect_scheme", redirectScheme);
   url.searchParams.set("host_origin", sdkEndpoint);
   return url.toString();
 }

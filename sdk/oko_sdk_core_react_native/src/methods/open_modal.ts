@@ -57,7 +57,7 @@ export async function openModalRN(
     const resultKey = `result:${relayCode}`;
 
     // 2. Open OS browser at /mobile/sign
-    const signUrl = buildSignUrl(sdkEndpoint, relayCode, apiKey);
+    const signUrl = buildSignUrl(sdkEndpoint, relayCode, apiKey, redirectScheme);
 
     // 3. Start Custom Tab and poll relay concurrently.
     //    When polling detects the result, dismissAuthSession closes the Custom Tab.
@@ -148,10 +148,12 @@ function buildSignUrl(
   sdkEndpoint: string,
   relayCode: string,
   apiKey: string,
+  redirectScheme: string,
 ): string {
   const url = new URL("/mobile/sign", sdkEndpoint);
   url.searchParams.set("relay_code", relayCode);
   url.searchParams.set("host_origin", sdkEndpoint);
   url.searchParams.set("api_key", apiKey);
+  url.searchParams.set("redirect_scheme", redirectScheme);
   return url.toString();
 }

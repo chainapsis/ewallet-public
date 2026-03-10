@@ -20,6 +20,7 @@ export async function GET(request: NextRequest) {
   const relayCode = searchParams.get("relay_code") ?? "";
   const hostOrigin = searchParams.get("host_origin") ?? "";
   const apiKey = searchParams.get("api_key") ?? "";
+  const redirectScheme = searchParams.get("redirect_scheme") ?? "";
 
   const iframeSrc = buildIframeSrc(hostOrigin, apiKey);
 
@@ -43,7 +44,7 @@ export async function GET(request: NextRequest) {
   <div id="status">Preparing...</div>
   <iframe id="oko-attached" class="hidden" src="${escapeHtml(iframeSrc)}"></iframe>
   <script>
-${buildSignScript(relayCode)}
+${buildSignScript(relayCode, redirectScheme)}
   </script>
 </body>
 </html>`;
@@ -71,12 +72,13 @@ function buildIframeSrc(hostOrigin: string, apiKey: string): string {
   return `/?${params.toString()}`;
 }
 
-function buildSignScript(relayCode: string): string {
+function buildSignScript(relayCode: string, redirectScheme: string): string {
   return `
 (function() {
   'use strict';
 
   var relayCode = ${JSON.stringify(relayCode)};
+  var redirectScheme = ${JSON.stringify(redirectScheme)};
   var resultKey = 'result:' + relayCode;
   var statusEl = document.getElementById('status');
   var iframe = document.getElementById('oko-attached');
@@ -146,9 +148,8 @@ function buildSignScript(relayCode: string): string {
       // Got result — store in relay with known key so SDK can poll for it
       iframe.className = 'hidden';
       statusEl.className = '';
-      statusEl.textContent = 'Done! Returning to app...';
-
       await storeResult(modalResult.payload);
+      returnToApp();
 
     } catch(err) {
       statusEl.className = '';
@@ -162,9 +163,17 @@ function buildSignScript(relayCode: string): string {
           type: 'error',
           error: { type: 'os_browser_error', message: err.message }
         });
+        returnToApp();
       } catch(e) {
         console.error('[oko-mobile-sign] failed to store error result:', e);
       }
+    }
+  }
+
+  // Navigate to custom scheme to trigger openAuthSessionAsync close
+  function returnToApp() {
+    if (redirectScheme) {
+      window.location.href = redirectScheme + '://done';
     }
   }
 
