@@ -18,7 +18,7 @@ type ExpiryTimerProps = {
   }) => ReactNode;
 };
 
-const EXPIRY_BUFFER_SECONDS = 10;
+const EXPIRY_BUFFER_SECONDS = 5;
 
 function calcSecondsLeft(expiresAt: string): number {
   return Math.max(
