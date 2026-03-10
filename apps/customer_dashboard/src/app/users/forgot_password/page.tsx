@@ -196,6 +196,7 @@ export default function ForgotPasswordPage() {
     try {
       const res = await requestForgotPassword(email);
       if (res.success) {
+        setCodeDigits(EMPTY_CODE);
         resetTimer(res.data.expires_at);
       } else {
         setError(res.msg || "Failed to resend code");
