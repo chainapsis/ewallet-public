@@ -43,6 +43,18 @@
 
 @media (min-width: $tablet_min_width) {
   .widget {
+    width: 100%;
+    max-width: 360px;
+
+    &.gradientBorder {
+      width: calc(100% - 6px);
+      max-width: 354px;
+    }
+  }
+}
+
+@media (min-width: $desktop_min_width) {
+  .widget {
     width: 360px;
 
     &.gradientBorder {

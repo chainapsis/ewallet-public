@@ -55,7 +55,7 @@
   height: 100%;
 }
 
-@media (min-width: $tablet_min_width) {
+@media (min-width: $desktop_min_width) {
   .inner {
     border-radius: 28px;
   }
@@ -166,6 +166,28 @@
   }
 
   .col {
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .signingCol {
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .docsStandalone {
+    width: 100%;
+    max-width: 360px;
+  }
+}
+
+@media (min-width: $desktop_min_width) {
+  .wrapper {
+    overflow-y: hidden;
+    padding: 8px 24px 52px 0;
+  }
+
+  .col {
     width: 360px;
   }
 
@@ -175,13 +197,6 @@
 
   .docsStandalone {
     width: 360px;
-  }
-}
-
-@media (min-width: $desktop_min_width) {
-  .wrapper {
-    overflow-y: hidden;
-    padding: 8px 24px 52px 0;
   }
 
   .content {
