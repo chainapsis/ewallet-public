@@ -11280,6 +11280,7 @@ __metadata:
     expo-secure-store: "npm:^14.0.0"
     expo-web-browser: "npm:^14.0.0"
     react-native-webview: "npm:^13.0.0"
+    tsx: "npm:^4.20.3"
     typescript: "npm:^5.8.3"
   peerDependencies:
     expo-linking: ">=7"
