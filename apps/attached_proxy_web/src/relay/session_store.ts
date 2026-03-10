@@ -1,7 +1,6 @@
 import { randomBytes } from "node:crypto";
 
 interface Session {
-  encryptedKeyShares: string | null;
   createdAt: number;
   expiresAt: number;
 }
@@ -20,16 +19,11 @@ setInterval(() => {
   }
 }, 5 * 60 * 1000); // every 5 minutes
 
-/**
- * Create a new session. Returns only the sessionId.
- * device_key is generated client-side (SDK) and stored in Keychain/Keystore.
- * The server never sees the device_key.
- */
+/** Create a new session. Returns only the sessionId. */
 export function createSession(): { sessionId: string } {
   const sessionId = randomBytes(32).toString("hex");
 
   sessions.set(sessionId, {
-    encryptedKeyShares: null,
     createdAt: Date.now(),
     expiresAt: Date.now() + SESSION_TTL_MS,
   });
@@ -47,18 +41,3 @@ export function getSession(sessionId: string): Session | null {
   return session;
 }
 
-export function storeEncryptedKeyShares(
-  sessionId: string,
-  encryptedBlob: string,
-): boolean {
-  const session = getSession(sessionId);
-  if (!session) return false;
-  session.encryptedKeyShares = encryptedBlob;
-  return true;
-}
-
-export function getEncryptedKeyShares(sessionId: string): string | null {
-  const session = getSession(sessionId);
-  if (!session) return null;
-  return session.encryptedKeyShares;
-}

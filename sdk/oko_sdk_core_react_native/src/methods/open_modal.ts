@@ -10,26 +10,19 @@ import type { OpenModalError } from "@oko-wallet/oko-sdk-core";
  * Open a signing modal via OS browser.
  *
  * 1. Store signing request in relay → relay_code
- * 2. Open OS browser at /mobile/sign (restore key shares + show modal)
+ * 2. Open OS browser at /mobile/sign (key shares restored from localStorage)
  * 3. Deep link back with result_code
  * 4. Consume result relay → signing result
  *
- * Key shares are only present in the OS browser, never in WebView.
+ * Key shares persist in attached's localStorage (zustand persist), shared
+ * across OS browser sessions. No server-side key share storage needed.
  */
 export async function openModalRN(
   sdkEndpoint: string,
   msg: OkoWalletMsgOpenModal,
-  deviceKey: string | null,
   redirectScheme: string,
   apiKey: string,
 ): Promise<Result<OpenModalAckPayload, OpenModalError>> {
-  if (!deviceKey) {
-    return {
-      success: false,
-      err: { type: "unknown_error", error: "Not signed in — no device key available" },
-    };
-  }
-
   try {
     // 1. Store signing request in relay
     const storeRes = await fetch(
@@ -63,13 +56,7 @@ export async function openModalRN(
     const relayCode = storeData.code;
 
     // 2. Open OS browser at /mobile/sign
-    const signUrl = buildSignUrl(
-      sdkEndpoint,
-      relayCode,
-      redirectScheme,
-      deviceKey,
-      apiKey,
-    );
+    const signUrl = buildSignUrl(sdkEndpoint, relayCode, redirectScheme, apiKey);
 
     const result = await WebBrowser.openAuthSessionAsync(
       signUrl,
@@ -136,7 +123,6 @@ function buildSignUrl(
   sdkEndpoint: string,
   relayCode: string,
   redirectScheme: string,
-  deviceKey: string,
   apiKey: string,
 ): string {
   const url = new URL("/mobile/sign", sdkEndpoint);
@@ -144,6 +130,5 @@ function buildSignUrl(
   url.searchParams.set("redirect_scheme", redirectScheme);
   url.searchParams.set("host_origin", sdkEndpoint);
   url.searchParams.set("api_key", apiKey);
-  // device_key in fragment — never sent to server
-  return `${url.toString()}#dk=${deviceKey}`;
+  return url.toString();
 }

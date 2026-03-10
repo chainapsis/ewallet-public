@@ -19,26 +19,17 @@ import { handleGetPublicKeyEd25519 } from "./get_public_key_ed25519";
 import { handleGetWalletInfo } from "./get_wallet_info";
 import { handleOAuthInfoPassV2 } from "./oauth_info_pass";
 import { handleOpenModal } from "./open_modal";
-import { handleRestoreKeyShares } from "./restore_key_shares";
 import { handleSetCodeVerifier } from "./set_code_verifier";
 import { handleSetOAuthNonce } from "./set_oauth_nonce";
 import { handleSignOut } from "./sign_out";
-import { handleUploadKeyShares } from "./upload_key_shares";
 import { OKO_SDK_TARGET } from "./target";
 import type { MsgEventContext } from "./types";
 
 // NOTE: Some types are used only within certain apps, such as "user_dashboard"
-type RnKeyShareMsg = {
-  target: "oko_attached";
-  msg_type: "upload_key_shares" | "restore_key_shares";
-  payload: { device_key: string } | null;
-};
-
 type ExtendedOkoWalletMsg =
   | OkoWalletMsg
   | OkoWalletMsgGetConnectedApps
-  | OkoWalletMsgExportPrivateKey
-  | RnKeyShareMsg;
+  | OkoWalletMsgExportPrivateKey;
 
 export function makeMsgHandler() {
   return async function msgHandler(event: MessageEvent) {
@@ -175,22 +166,6 @@ export function makeMsgHandler() {
 
       case "__export_private_key__": {
         await handleExportPrivateKey(ctx, message.payload);
-        break;
-      }
-
-      case "upload_key_shares": {
-        await handleUploadKeyShares(
-          ctx,
-          message.payload as { device_key: string } | null,
-        );
-        break;
-      }
-
-      case "restore_key_shares": {
-        await handleRestoreKeyShares(
-          ctx,
-          message.payload as { device_key: string } | null,
-        );
         break;
       }
 

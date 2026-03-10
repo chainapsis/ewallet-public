@@ -5,13 +5,12 @@ import { type NextRequest, NextResponse } from "next/server";
  *
  * Opened via expo-web-browser's openAuthSessionAsync for every signing request.
  * Returns a standalone HTML page that:
- * 1. Reads relay_code from query, device_key from URL fragment
- * 2. Loads attached iframe
- * 3. Restores key shares (download + decrypt with device_key)
- * 4. Consumes signing request from relay
- * 5. Sends open_modal to attached (user sees signing UI)
- * 6. Waits for open_modal_ack (approve/reject/error)
- * 7. Stores result in relay, deep-links back to app
+ * 1. Reads relay_code from query
+ * 2. Loads attached iframe (key shares restored from localStorage automatically)
+ * 3. Consumes signing request from relay
+ * 4. Sends open_modal to attached (user sees signing UI)
+ * 5. Waits for open_modal_ack (approve/reject/error)
+ * 6. Stores result in relay, deep-links back to app
  */
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -80,26 +79,6 @@ function buildSignScript(relayCode: string, redirectScheme: string): string {
   var statusEl = document.getElementById('status');
   var iframe = document.getElementById('oko-attached');
   var attachedOrigin = window.location.origin;
-  var deviceKey = null;
-
-  // 1. Read device_key from URL fragment
-  var hash = window.location.hash;
-  if (hash) {
-    var dkMatch = hash.match(/dk=([a-f0-9]+)/);
-    if (dkMatch && dkMatch[1]) {
-      deviceKey = dkMatch[1];
-    }
-    // Clear fragment from URL
-    if (window.history && window.history.replaceState) {
-      window.history.replaceState(null, '', window.location.pathname + window.location.search);
-    }
-  }
-
-  if (!deviceKey) {
-    statusEl.textContent = 'Error: missing device key.';
-    console.error('[oko-mobile-sign] missing device_key from URL fragment');
-    return;
-  }
 
   if (!relayCode) {
     statusEl.textContent = 'Error: missing relay code.';
@@ -125,22 +104,13 @@ function buildSignScript(relayCode: string, redirectScheme: string): string {
     }
   });
 
+  // Key shares are already in attached's localStorage (zustand persist).
+  // No restore needed — localStorage is shared across OS browser sessions.
   async function startSigningFlow() {
     try {
       statusEl.textContent = 'Loading wallet...';
 
-      // 3. Restore key shares from server
-      var restoreResult = await sendMessageToAttached({
-        target: 'oko_attached',
-        msg_type: 'restore_key_shares',
-        payload: { device_key: deviceKey }
-      });
-
-      if (!restoreResult.payload || !restoreResult.payload.success) {
-        throw new Error('Failed to restore key shares: ' + JSON.stringify(restoreResult.payload));
-      }
-
-      // 4. Consume signing request from relay
+      // 3. Consume signing request from relay
       var consumeRes = await fetch('/api/mobile/sign-relay/consume', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

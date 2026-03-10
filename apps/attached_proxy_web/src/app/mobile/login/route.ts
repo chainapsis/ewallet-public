@@ -20,7 +20,7 @@ function sessionCookie(sessionId: string): string {
  * Opened via the mobile SDK's OS browser integration.
  * Creates a server session (sets HttpOnly cookie) and returns a standalone
  * HTML page that:
- * 1. Stores device_key (from URL fragment) in sessionStorage
+ * 1. Stores redirect scheme / api key in sessionStorage
  * 2. Loads attached iframe
  * 3. Requests OAuth URL from attached (generate_oauth_url)
  * 4. Redirects to OAuth provider
@@ -102,19 +102,9 @@ function buildEmailLoginScript(apiKey: string, redirectScheme: string): string {
   var redirectScheme = ${JSON.stringify(redirectScheme)};
   var statusEl = document.getElementById('status');
 
-  // 1. Store device_key from URL fragment into sessionStorage
-  var hash = window.location.hash;
-  if (hash) {
-    var dkMatch = hash.match(/dk=([a-f0-9]+)/);
-    if (dkMatch && dkMatch[1]) {
-      sessionStorage.setItem('oko_mobile_device_key', dkMatch[1]);
-    }
-    sessionStorage.setItem('oko_mobile_redirect_scheme', redirectScheme);
-    sessionStorage.setItem('oko_mobile_api_key', apiKey);
-    if (window.history && window.history.replaceState) {
-      window.history.replaceState(null, '', window.location.pathname + window.location.search);
-    }
-  }
+  // 1. Store redirect info in sessionStorage for /mobile/login/complete
+  sessionStorage.setItem('oko_mobile_redirect_scheme', redirectScheme);
+  sessionStorage.setItem('oko_mobile_api_key', apiKey);
 
   // 2. Generate nonce and store in sessionStorage for /mobile/login/complete
   var nonceBytes = new Uint8Array(16);
@@ -168,19 +158,9 @@ function buildOAuthLoginScript(
   var iframe = document.getElementById('oko-attached');
   var attachedOrigin = window.location.origin;
 
-  // 1. Store device_key from URL fragment into sessionStorage
-  var hash = window.location.hash;
-  if (hash) {
-    var dkMatch = hash.match(/dk=([a-f0-9]+)/);
-    if (dkMatch && dkMatch[1]) {
-      sessionStorage.setItem('oko_mobile_device_key', dkMatch[1]);
-    }
-    sessionStorage.setItem('oko_mobile_redirect_scheme', redirectScheme);
-    sessionStorage.setItem('oko_mobile_api_key', apiKey);
-    if (window.history && window.history.replaceState) {
-      window.history.replaceState(null, '', window.location.pathname + window.location.search);
-    }
-  }
+  // 1. Store redirect info in sessionStorage for /mobile/login/complete
+  sessionStorage.setItem('oko_mobile_redirect_scheme', redirectScheme);
+  sessionStorage.setItem('oko_mobile_api_key', apiKey);
 
   // 2. Wait for attached iframe init
   window.addEventListener('message', function(event) {

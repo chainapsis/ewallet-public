@@ -8,10 +8,9 @@ import { type NextRequest, NextResponse } from "next/server";
  * 1. Loads attached iframe
  * 2. Sends oauth_info_pass to attached (triggers keygen)
  * 3. Waits for oauth_sign_in_update (keygen complete)
- * 4. Sends upload_key_shares to attached (encrypt + upload)
- * 5. Gets public wallet info
- * 6. Stores wallet info in relay
- * 7. Deep-links back to app with wallet_info_code
+ * 4. Gets public wallet info (key shares persist in attached's localStorage)
+ * 5. Stores wallet info in relay
+ * 6. Deep-links back to app with wallet_info_code
  */
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -82,13 +81,12 @@ function buildCompleteScript(serializedParams: string): string {
   var attachedOrigin = window.location.origin;
 
   // Read stored values from sessionStorage (set by /mobile/login entry page)
-  var deviceKey = sessionStorage.getItem('oko_mobile_device_key');
   var redirectScheme = sessionStorage.getItem('oko_mobile_redirect_scheme');
   var apiKey = sessionStorage.getItem('oko_mobile_api_key');
 
-  if (!deviceKey || !redirectScheme) {
+  if (!redirectScheme) {
     statusEl.textContent = 'Error: missing session data. Please try again.';
-    console.error('[oko-mobile-login-complete] missing deviceKey or redirectScheme from sessionStorage');
+    console.error('[oko-mobile-login-complete] missing redirectScheme from sessionStorage');
     return;
   }
 
@@ -178,20 +176,11 @@ function buildCompleteScript(serializedParams: string): string {
     }, attachedOrigin, [channel.port2]);
   }
 
-  // Step 2: After keygen, upload encrypted key shares
+  // Step 2: After keygen, get wallet info and redirect back to app
+  // Key shares are already persisted in attached's localStorage (zustand persist).
+  // No server upload needed — localStorage is shared across OS browser sessions.
   async function handleKeygenComplete() {
     try {
-      // Ask attached to upload encrypted key shares
-      var uploadResult = await sendMessageToAttached({
-        target: 'oko_attached',
-        msg_type: 'upload_key_shares',
-        payload: { device_key: deviceKey }
-      });
-
-      if (uploadResult.msg_type !== 'upload_key_shares_ack' || !uploadResult.payload || !uploadResult.payload.success) {
-        throw new Error('Key share upload failed: ' + JSON.stringify(uploadResult.payload));
-      }
-
       statusEl.textContent = 'Finalizing...';
 
       // Get public wallet info from attached

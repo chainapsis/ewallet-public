@@ -6,7 +6,7 @@ import { tryMobileOsBrowserRedirect } from "./try_mobile_os_browser_redirect";
  *
  * Checks two paths in order:
  * 1. OS-browser flow (mobileOsBrowser) → redirect to /mobile/login/complete
- * 2. SessionStorage fallback → check device_key from /mobile/login page
+ * 2. SessionStorage fallback → check redirect_scheme from /mobile/login page
  *    (catches edge cases where OAuth provider corrupts/truncates state)
  *
  * Returns true if a mobile redirect was initiated.

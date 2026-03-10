@@ -12,8 +12,6 @@ import {
 } from "@oko-wallet/oko-sdk-core";
 import type { OpenModalError } from "@oko-wallet/oko-sdk-core";
 import type { SignInType } from "@oko-wallet/oko-sdk-core";
-import * as SecureStore from "expo-secure-store";
-
 import type { WebViewBridge } from "./bridge/WebViewBridge";
 import {
   getPublicKey,
@@ -27,8 +25,6 @@ import { openModalRN } from "./methods/open_modal";
 import { signInRN, type SignInOptions } from "./methods/sign_in";
 import { signOutRN } from "./methods/sign_out";
 
-const DEVICE_KEY_STORE_KEY = "oko_mobile_device_key";
-
 export interface OkoWalletRNConfig {
   apiKey: string;
   sdkEndpoint: string;
@@ -40,8 +36,8 @@ export interface OkoWalletRNConfig {
  *
  * Architecture:
  * - Read-only ops (getPublicKey, getEmail, etc.): WebView bridge → attached iframe
- * - Login + keygen: OS browser (/mobile/login) — key shares never enter WebView
- * - Signing: OS browser (/mobile/sign) — key shares restored from server, never in WebView
+ * - Login + keygen: OS browser (/mobile/login) — key shares persist in localStorage
+ * - Signing: OS browser (/mobile/sign) — key shares restored from localStorage
  *
  * Key shares NEVER exist in the WebView or app JS runtime.
  */
@@ -72,7 +68,6 @@ export class OkoWalletRN {
   ) => void;
   private _initResolved = false;
   private _cachedPublicKeyEd25519: string | null = null;
-  private _deviceKey: string | null = null;
 
   constructor(config: OkoWalletRNConfig) {
     this.apiKey = config.apiKey;
@@ -93,35 +88,6 @@ export class OkoWalletRN {
     this.waitUntilInitialized = new Promise((resolve) => {
       this._resolveInit = resolve;
     });
-
-    // Restore device_key from secure storage
-    this._loadDeviceKey();
-  }
-
-  private async _loadDeviceKey(): Promise<void> {
-    try {
-      this._deviceKey = await SecureStore.getItemAsync(DEVICE_KEY_STORE_KEY);
-    } catch {
-      // SecureStore unavailable or empty — will be set on sign-in
-    }
-  }
-
-  private async _saveDeviceKey(key: string): Promise<void> {
-    this._deviceKey = key;
-    try {
-      await SecureStore.setItemAsync(DEVICE_KEY_STORE_KEY, key);
-    } catch (error) {
-      console.error("[oko-rn] failed to save device key:", error);
-    }
-  }
-
-  private async _clearDeviceKey(): Promise<void> {
-    this._deviceKey = null;
-    try {
-      await SecureStore.deleteItemAsync(DEVICE_KEY_STORE_KEY);
-    } catch {
-      // ignore
-    }
   }
 
   /** @internal Called by OkoWalletProvider when WebView bridge is ready */
@@ -196,7 +162,7 @@ export class OkoWalletRN {
 
   /**
    * Open a signing modal via OS browser.
-   * Key shares are restored from the server in the OS browser context.
+   * Key shares are restored from attached's localStorage automatically.
    */
   async openModal(
     msg: OkoWalletMsgOpenModal,
@@ -206,7 +172,6 @@ export class OkoWalletRN {
     return openModalRN(
       this.sdkEndpoint,
       msg,
-      this._deviceKey,
       this.redirectScheme,
       this.apiKey,
     );
@@ -214,8 +179,8 @@ export class OkoWalletRN {
 
   /**
    * Sign in via OS browser. The entire login + keygen flow runs
-   * in the system browser. Key shares are encrypted and stored on
-   * the server, never entering the WebView or app JS runtime.
+   * in the system browser. Key shares persist in attached's localStorage,
+   * never entering the WebView or app JS runtime.
    */
   async signIn(type: SignInType): Promise<void> {
     await this.waitUntilInitialized;
@@ -230,9 +195,6 @@ export class OkoWalletRN {
       this.apiKey,
       signInOptions,
     );
-
-    // Store device_key in Keychain/Keystore
-    await this._saveDeviceKey(result.deviceKey);
 
     // Update state from the public wallet info returned via relay
     const info = result.walletInfo as WalletInfo | null;
@@ -257,7 +219,6 @@ export class OkoWalletRN {
   async signOut(): Promise<void> {
     await this.waitUntilInitialized;
     await signOutRN(this.bridge);
-    await this._clearDeviceKey();
 
     this.state = {
       authType: null,

@@ -19,7 +19,7 @@ function getSessionIdFromCookie(request: Request): string | null {
   return match?.[1] ?? null;
 }
 
-/** POST — create a new session (device_key is generated client-side, not here) */
+/** POST — create a new session */
 export async function POST() {
   const { sessionId } = createSession();
 
