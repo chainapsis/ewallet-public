@@ -217,12 +217,12 @@ function buildCompleteScript(serializedParams: string): string {
     }
   }
 
-  // Navigate to custom scheme to trigger openAuthSessionAsync close.
-  // iOS (ASWebAuthenticationSession) auto-closes on scheme redirect.
-  // Android (Chrome Custom Tab) shows a confirmation popup, so skip it —
-  // user presses back instead, and polling already delivered the result.
+  // Navigate to custom scheme to close the OS browser session.
+  // iOS: ASWebAuthenticationSession detects scheme redirect → auto-close.
+  // Android: Navigates to oko.auth.callback:// → OkoAuthCallbackActivity
+  //   (sole handler) receives intent, Custom Tab auto-closes.
   function returnToApp() {
-    if (redirectScheme && !/android/i.test(navigator.userAgent)) {
+    if (redirectScheme) {
       window.location.href = redirectScheme + '://';
     }
   }

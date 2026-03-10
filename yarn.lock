@@ -5833,6 +5833,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@expo/config-plugins@npm:^55.0.6":
+  version: 55.0.6
+  resolution: "@expo/config-plugins@npm:55.0.6"
+  dependencies:
+    "@expo/config-types": "npm:^55.0.5"
+    "@expo/json-file": "npm:~10.0.12"
+    "@expo/plist": "npm:^0.5.2"
+    "@expo/sdk-runtime-versions": "npm:^1.0.0"
+    chalk: "npm:^4.1.2"
+    debug: "npm:^4.3.5"
+    getenv: "npm:^2.0.0"
+    glob: "npm:^13.0.0"
+    resolve-from: "npm:^5.0.0"
+    semver: "npm:^7.5.4"
+    slugify: "npm:^1.6.6"
+    xcode: "npm:^3.0.1"
+    xml2js: "npm:0.6.0"
+  checksum: 10c0/1292600b50f28ba42b4a3b43238eb99a2ae3703fb86c1ebeb8235c1f0db2738bac79a0ff6107acf9dc448baefc5f6209517369614056f5b13f927345e86fcc2b
+  languageName: node
+  linkType: hard
+
 "@expo/config-plugins@npm:~54.0.4":
   version: 54.0.4
   resolution: "@expo/config-plugins@npm:54.0.4"
@@ -5859,6 +5880,13 @@ __metadata:
   version: 54.0.10
   resolution: "@expo/config-types@npm:54.0.10"
   checksum: 10c0/a304e18314937cbe3a146fe7daf23d5b78049676dabc14b1e181330f9e74ab2f4ada288f23999f254b59ee7c59380f895ffcb536f537e9039cd10336b1c1d7bc
+  languageName: node
+  linkType: hard
+
+"@expo/config-types@npm:^55.0.5":
+  version: 55.0.5
+  resolution: "@expo/config-types@npm:55.0.5"
+  checksum: 10c0/24ce0481cc465ddd3b53cfdde099ef4e899b1f8fff224a0f249b88c93e6c98930e99a55f3929eb53d08138b1b66102ece7b76e16f4e5fadcdf5bbac26c9c3d7e
   languageName: node
   linkType: hard
 
@@ -5970,6 +5998,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@expo/json-file@npm:~10.0.12":
+  version: 10.0.12
+  resolution: "@expo/json-file@npm:10.0.12"
+  dependencies:
+    "@babel/code-frame": "npm:^7.20.0"
+    json5: "npm:^2.2.3"
+  checksum: 10c0/52131a6426e96208ff1b295d580fc70eebb8e292b29fde1db016b2f21a0942a7521feec96b3f58efe5b32dcc1642d569b4211d651146fcdb9bf7e5f08b635878
+  languageName: node
+  linkType: hard
+
 "@expo/metro-config@npm:54.0.14, @expo/metro-config@npm:~54.0.14":
   version: 54.0.14
   resolution: "@expo/metro-config@npm:54.0.14"
@@ -6077,6 +6115,17 @@ __metadata:
     base64-js: "npm:^1.2.3"
     xmlbuilder: "npm:^15.1.1"
   checksum: 10c0/5bacdb6f8c5e0e56da07f4504290036e3a5433164a29bea7857e72234137d8eaa04adb319221fcc1ec7f931d40d7f9f6fc9528fa601ed18c308a4cf8179f7783
+  languageName: node
+  linkType: hard
+
+"@expo/plist@npm:^0.5.2":
+  version: 0.5.2
+  resolution: "@expo/plist@npm:0.5.2"
+  dependencies:
+    "@xmldom/xmldom": "npm:^0.8.8"
+    base64-js: "npm:^1.5.1"
+    xmlbuilder: "npm:^15.1.1"
+  checksum: 10c0/19adae2a365ac1a12db93682fb310ff8be03c711f9173bebe5841cbe60cdfb749247bc1a95fa0977b5bac3aa6a078a0fceeafe4ff6c66d1ed67cce496679e310
   languageName: node
   linkType: hard
 
@@ -11271,6 +11320,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@oko-wallet/oko-sdk-core-react-native@workspace:sdk/oko_sdk_core_react_native"
   dependencies:
+    "@expo/config-plugins": "npm:^55.0.6"
     "@oko-wallet/oko-sdk-core": "workspace:*"
     "@oko-wallet/oko-types": "workspace:*"
     "@oko-wallet/stdlib-js": "workspace:*"

@@ -1,10 +1,14 @@
-import * as WebBrowser from "expo-web-browser";
 import type { Result } from "@oko-wallet/stdlib-js";
 import type {
   OkoWalletMsgOpenModal,
   OpenModalAckPayload,
 } from "@oko-wallet/oko-sdk-core";
 import type { OpenModalError } from "@oko-wallet/oko-sdk-core";
+import {
+  openAuthSession,
+  dismissAuthSession,
+  getServerRedirectScheme,
+} from "../native/OkoAuthBrowser";
 
 /**
  * Open a signing modal via OS browser.
@@ -57,17 +61,15 @@ export async function openModalRN(
     const resultKey = `result:${relayCode}`;
 
     // 2. Open OS browser at /mobile/sign
-    const signUrl = buildSignUrl(sdkEndpoint, relayCode, apiKey, redirectScheme);
+    const serverScheme = getServerRedirectScheme(redirectScheme);
+    const signUrl = buildSignUrl(sdkEndpoint, relayCode, apiKey, serverScheme);
 
     // 3. Start Custom Tab and poll relay concurrently.
     //    When polling detects the result, dismissAuthSession closes the Custom Tab.
     let stopped = false;
     let pollResult: OpenModalAckPayload | null = null;
 
-    const authPromise = WebBrowser.openAuthSessionAsync(
-      signUrl,
-      `${redirectScheme}://`,
-    );
+    const authPromise = openAuthSession(signUrl, redirectScheme);
 
     const pollPromise = (async (): Promise<void> => {
       while (!stopped) {
@@ -103,7 +105,7 @@ export async function openModalRN(
 
     if (pollResult) {
       try {
-        WebBrowser.dismissAuthSession();
+        dismissAuthSession();
       } catch {
         // Already closed
       }

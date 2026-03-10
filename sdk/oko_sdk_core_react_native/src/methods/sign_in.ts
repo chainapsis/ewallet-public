@@ -1,5 +1,9 @@
-import * as WebBrowser from "expo-web-browser";
 import type { SignInType } from "@oko-wallet/oko-sdk-core";
+import {
+  openAuthSession,
+  dismissAuthSession,
+  getServerRedirectScheme,
+} from "../native/OkoAuthBrowser";
 
 export interface SignInOptions {
   redirectScheme: string;
@@ -33,17 +37,15 @@ export async function signInRN(
     options?.redirectScheme ?? DEFAULT_REDIRECT_SCHEME;
 
   const sessionId = generateSessionId();
-  const loginUrl = buildLoginUrl(sdkEndpoint, type, apiKey, sessionId, redirectScheme);
+  const serverScheme = getServerRedirectScheme(redirectScheme);
+  const loginUrl = buildLoginUrl(sdkEndpoint, type, apiKey, sessionId, serverScheme);
 
   // Start Custom Tab and poll relay concurrently.
   // When polling detects the wallet info, dismissAuthSession closes the Custom Tab.
   let stopped = false;
   let pollResult: unknown = null;
 
-  const authPromise = WebBrowser.openAuthSessionAsync(
-    loginUrl,
-    `${redirectScheme}://`,
-  );
+  const authPromise = openAuthSession(loginUrl, redirectScheme);
 
   const pollPromise = (async (): Promise<void> => {
     while (!stopped) {
@@ -79,7 +81,7 @@ export async function signInRN(
 
   if (pollResult) {
     try {
-      WebBrowser.dismissAuthSession();
+      dismissAuthSession();
     } catch {
       // Already closed
     }

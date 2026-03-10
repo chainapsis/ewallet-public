@@ -40,7 +40,8 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "@oko-wallet/oko-sdk-core-react-native"
     ],
     "experiments": {
       "typedRoutes": true,
