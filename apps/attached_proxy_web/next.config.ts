@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-const PROXY_HOST = "127.0.0.1:3207";
+const PROXY_HOST = "proxy.damn.it.com";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
