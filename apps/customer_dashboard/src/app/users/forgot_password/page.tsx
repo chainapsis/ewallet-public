@@ -16,7 +16,6 @@ import styles from "./page.module.scss";
 import { ExpiryTimer } from "@oko-wallet-ct-dashboard/components/expiry_timer/expiry_timer";
 import {
   EMAIL_REGEX,
-  EMAIL_VERIFICATION_TIMER_SECONDS,
   PASSWORD_CONTAINS_NUMBER_REGEX,
   PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
@@ -52,6 +51,7 @@ export default function ForgotPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [isCodeExpired, setIsCodeExpired] = useState(false);
+  const [expiresAt, setExpiresAt] = useState("");
 
   const codeValue = useMemo(() => codeDigits.join(""), [codeDigits]);
 
@@ -75,6 +75,7 @@ export default function ForgotPasswordPage() {
       if (res.success) {
         setCodeDigits(EMPTY_CODE);
         setVerifiedCode("");
+        setExpiresAt(res.data.expires_at);
         goToStep(Step.CODE);
       } else {
         setError(res.msg || "Failed to send code");
@@ -173,6 +174,7 @@ export default function ForgotPasswordPage() {
         setVerifiedCode("");
         setPassword("");
         setConfirmPassword("");
+        setExpiresAt(res.data.expires_at);
         goToStep(Step.CODE);
       } else {
         setError(res.msg || "Failed to send code");
@@ -184,7 +186,7 @@ export default function ForgotPasswordPage() {
     }
   };
 
-  const handleResend = async (resetTimer: () => void) => {
+  const handleResend = async (resetTimer: (newExpiresAt: string) => void) => {
     if (!email || isResending) {
       return;
     }
@@ -195,7 +197,7 @@ export default function ForgotPasswordPage() {
       const res = await requestForgotPassword(email);
       if (res.success) {
         setCodeDigits(EMPTY_CODE);
-        resetTimer();
+        resetTimer(res.data.expires_at);
       } else {
         setError(res.msg || "Failed to resend code");
       }
@@ -305,7 +307,7 @@ export default function ForgotPasswordPage() {
             )}
           </div>
 
-          <ExpiryTimer duration={EMAIL_VERIFICATION_TIMER_SECONDS}>
+          <ExpiryTimer expiresAt={expiresAt}>
             {({ timeDisplay, isExpired, resetTimer }) => (
               <div className={styles.resendRow}>
                 <Typography size="sm" weight="medium" color="primary">
