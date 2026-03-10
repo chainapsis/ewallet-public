@@ -9,8 +9,10 @@ import { type NextRequest, NextResponse } from "next/server";
  * 2. Sends oauth_info_pass to attached (triggers keygen)
  * 3. Waits for oauth_sign_in_update (keygen complete)
  * 4. Gets public wallet info (key shares persist in attached's localStorage)
- * 5. Stores wallet info in relay
- * 6. Deep-links back to app with wallet_info_code
+ * 5. Stores wallet info in relay with key = session_id
+ *
+ * The SDK polls the relay for the result and dismisses the Custom Tab
+ * programmatically — no deep link or redirect needed.
  */
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -81,12 +83,12 @@ function buildCompleteScript(serializedParams: string): string {
   var attachedOrigin = window.location.origin;
 
   // Read stored values from sessionStorage (set by /mobile/login entry page)
-  var redirectScheme = sessionStorage.getItem('oko_mobile_redirect_scheme');
+  var sessionId = sessionStorage.getItem('oko_mobile_session_id');
   var apiKey = sessionStorage.getItem('oko_mobile_api_key');
 
-  if (!redirectScheme) {
+  if (!sessionId) {
     statusEl.textContent = 'Error: missing session data. Please try again.';
-    console.error('[oko-mobile-login-complete] missing redirectScheme from sessionStorage');
+    console.error('[oko-mobile-login-complete] missing session_id from sessionStorage');
     return;
   }
 
@@ -176,9 +178,9 @@ function buildCompleteScript(serializedParams: string): string {
     }, attachedOrigin, [channel.port2]);
   }
 
-  // Step 2: After keygen, get wallet info and redirect back to app
+  // Step 2: After keygen, get wallet info and store in relay.
   // Key shares are already persisted in attached's localStorage (zustand persist).
-  // No server upload needed — localStorage is shared across OS browser sessions.
+  // SDK polls the relay for the result and dismisses the Custom Tab.
   async function handleKeygenComplete() {
     try {
       statusEl.textContent = 'Finalizing...';
@@ -195,11 +197,11 @@ function buildCompleteScript(serializedParams: string): string {
       // SDK expects the flat data object, so unwrap it
       var walletData = (publicInfo && publicInfo.success) ? publicInfo.data : publicInfo;
 
-      // Store public wallet info in relay
+      // Store public wallet info in relay with session_id as key
       var relayRes = await fetch('/api/mobile/sign-relay/store', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ payload: walletData })
+        body: JSON.stringify({ payload: walletData, key: sessionId })
       });
       var relayData = await relayRes.json();
 
@@ -207,10 +209,7 @@ function buildCompleteScript(serializedParams: string): string {
         throw new Error('Failed to store wallet info in relay');
       }
 
-      // Deep link back to app
-      var deepLink = redirectScheme + '://?type=login&wallet_info_code=' + relayData.code;
-      statusEl.textContent = 'Redirecting to app...';
-      window.location.href = deepLink;
+      statusEl.textContent = 'Done! Returning to app...';
     } catch(err) {
       statusEl.textContent = 'Error: ' + err.message;
       console.error('[oko-mobile-login-complete] error:', err);

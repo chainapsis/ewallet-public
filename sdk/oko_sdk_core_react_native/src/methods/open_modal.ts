@@ -11,11 +11,11 @@ import type { OpenModalError } from "@oko-wallet/oko-sdk-core";
  *
  * 1. Store signing request in relay → relay_code
  * 2. Open OS browser at /mobile/sign (key shares restored from localStorage)
- * 3. Deep link back with result_code
- * 4. Consume result relay → signing result
+ * 3. Poll relay for result (key = result:{relay_code})
+ * 4. When result found, dismiss Custom Tab and return
  *
- * Key shares persist in attached's localStorage (zustand persist), shared
- * across OS browser sessions. No server-side key share storage needed.
+ * No deep link or redirect needed — the SDK polls the relay directly
+ * and closes the Custom Tab programmatically via dismissAuthSession.
  */
 export async function openModalRN(
   sdkEndpoint: string,
@@ -54,63 +54,88 @@ export async function openModalRN(
     }
 
     const relayCode = storeData.code;
+    const resultKey = `result:${relayCode}`;
 
     // 2. Open OS browser at /mobile/sign
-    const signUrl = buildSignUrl(sdkEndpoint, relayCode, redirectScheme, apiKey);
+    const signUrl = buildSignUrl(sdkEndpoint, relayCode, apiKey);
 
-    const result = await WebBrowser.openAuthSessionAsync(
+    // 3. Start Custom Tab and poll relay concurrently.
+    //    When polling detects the result, dismissAuthSession closes the Custom Tab.
+    let stopped = false;
+    let pollResult: OpenModalAckPayload | null = null;
+
+    const authPromise = WebBrowser.openAuthSessionAsync(
       signUrl,
       `${redirectScheme}://`,
     );
 
-    if (result.type !== "success") {
-      return {
-        success: false,
-        err: { type: "unknown_error", error: `user_cancelled: ${result.type}` },
-      };
+    const pollPromise = (async (): Promise<void> => {
+      while (!stopped) {
+        try {
+          const res = await fetch(
+            `${sdkEndpoint}/api/mobile/sign-relay/result-consume`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ code: resultKey }),
+            },
+          );
+          const data = (await res.json()) as {
+            success: boolean;
+            payload?: OpenModalAckPayload;
+          };
+          if (data.success && data.payload) {
+            pollResult = data.payload;
+            return;
+          }
+        } catch {
+          // Ignore network errors, keep polling
+        }
+        if (!stopped) {
+          await new Promise((r) => setTimeout(r, 500));
+        }
+      }
+    })();
+
+    // Race: either Custom Tab closes (user dismiss) or poll finds result
+    await Promise.race([authPromise, pollPromise]);
+    stopped = true;
+
+    if (pollResult) {
+      try {
+        WebBrowser.dismissAuthSession();
+      } catch {
+        // Already closed
+      }
+      return { success: true, data: pollResult };
     }
 
-    // 3. Parse result_code from deep link
-    const callbackUrl = new URL(result.url);
-    const resultCode = callbackUrl.searchParams.get("result_code");
-
-    if (!resultCode) {
-      return {
-        success: false,
-        err: { type: "unknown_error", error: "missing_result_code in callback URL" },
+    // Custom Tab was dismissed by user. One last check in case result
+    // was stored right as the Custom Tab closed.
+    try {
+      const res = await fetch(
+        `${sdkEndpoint}/api/mobile/sign-relay/result-consume`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code: resultKey }),
+        },
+      );
+      const data = (await res.json()) as {
+        success: boolean;
+        payload?: OpenModalAckPayload;
       };
+      if (data.success && data.payload) {
+        return { success: true, data: data.payload };
+      }
+    } catch {
+      // Ignore
     }
 
-    // 4. Consume result relay
-    const consumeRes = await fetch(
-      `${sdkEndpoint}/api/mobile/sign-relay/result-consume`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: resultCode }),
-      },
-    );
-
-    if (!consumeRes.ok) {
-      return {
-        success: false,
-        err: { type: "unknown_error", error: `result_consume_failed: HTTP ${consumeRes.status}` },
-      };
-    }
-
-    const consumeData = (await consumeRes.json()) as {
-      success: boolean;
-      payload?: OpenModalAckPayload;
+    return {
+      success: false,
+      err: { type: "unknown_error", error: "user_cancelled" },
     };
-
-    if (!consumeData.success || !consumeData.payload) {
-      return {
-        success: false,
-        err: { type: "unknown_error", error: "result_consume_failed: invalid or expired code" },
-      };
-    }
-
-    return { success: true, data: consumeData.payload };
   } catch (error) {
     return {
       success: false,
@@ -122,12 +147,10 @@ export async function openModalRN(
 function buildSignUrl(
   sdkEndpoint: string,
   relayCode: string,
-  redirectScheme: string,
   apiKey: string,
 ): string {
   const url = new URL("/mobile/sign", sdkEndpoint);
   url.searchParams.set("relay_code", relayCode);
-  url.searchParams.set("redirect_scheme", redirectScheme);
   url.searchParams.set("host_origin", sdkEndpoint);
   url.searchParams.set("api_key", apiKey);
   return url.toString();

@@ -28,6 +28,14 @@ export function storeTokens(payload: unknown): string {
   return code;
 }
 
+/** Store with a caller-provided key instead of generating a random one. */
+export function storeWithKey(key: string, payload: unknown): void {
+  store.set(key, {
+    payload,
+    expiresAt: Date.now() + TTL_MS,
+  });
+}
+
 export function consumeTokens(code: string): unknown | null {
   const entry = store.get(code);
   if (!entry) return null;

@@ -10,12 +10,14 @@ import { type NextRequest, NextResponse } from "next/server";
  * 3. Consumes signing request from relay
  * 4. Sends open_modal to attached (user sees signing UI)
  * 5. Waits for open_modal_ack (approve/reject/error)
- * 6. Stores result in relay, deep-links back to app
+ * 6. Stores result in relay with key = result:{relay_code}
+ *
+ * The SDK polls the relay for the result and dismisses the Custom Tab
+ * programmatically — no deep link or redirect needed.
  */
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const relayCode = searchParams.get("relay_code") ?? "";
-  const redirectScheme = searchParams.get("redirect_scheme") ?? "";
   const hostOrigin = searchParams.get("host_origin") ?? "";
   const apiKey = searchParams.get("api_key") ?? "";
 
@@ -41,7 +43,7 @@ export async function GET(request: NextRequest) {
   <div id="status">Preparing...</div>
   <iframe id="oko-attached" class="hidden" src="${escapeHtml(iframeSrc)}"></iframe>
   <script>
-${buildSignScript(relayCode, redirectScheme)}
+${buildSignScript(relayCode)}
   </script>
 </body>
 </html>`;
@@ -69,13 +71,13 @@ function buildIframeSrc(hostOrigin: string, apiKey: string): string {
   return `/?${params.toString()}`;
 }
 
-function buildSignScript(relayCode: string, redirectScheme: string): string {
+function buildSignScript(relayCode: string): string {
   return `
 (function() {
   'use strict';
 
   var relayCode = ${JSON.stringify(relayCode)};
-  var redirectScheme = ${JSON.stringify(redirectScheme)};
+  var resultKey = 'result:' + relayCode;
   var statusEl = document.getElementById('status');
   var iframe = document.getElementById('oko-attached');
   var attachedOrigin = window.location.origin;
@@ -86,7 +88,7 @@ function buildSignScript(relayCode: string, redirectScheme: string): string {
     return;
   }
 
-  // 2. Wait for attached iframe init
+  // Wait for attached iframe init
   window.addEventListener('message', function(event) {
     if (event.origin !== attachedOrigin) return;
     var msg = event.data;
@@ -110,7 +112,7 @@ function buildSignScript(relayCode: string, redirectScheme: string): string {
     try {
       statusEl.textContent = 'Loading wallet...';
 
-      // 3. Consume signing request from relay
+      // Consume signing request from relay
       var consumeRes = await fetch('/api/mobile/sign-relay/consume', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -124,42 +126,29 @@ function buildSignScript(relayCode: string, redirectScheme: string): string {
 
       var signingRequest = consumeData.payload;
 
-      // Patch origin: SDK sets origin to the app's redirect scheme (e.g. "okosandbox://"),
-      // but appState stores apiKey/keyShares under the proxy origin (window.location.origin).
-      // The modal reads hostOrigin from data.payload.origin, so we need to align it.
+      // Patch origin: SDK sets origin to the app's redirect scheme,
+      // but appState stores apiKey/keyShares under the proxy origin.
       if (signingRequest.data && signingRequest.data.payload) {
         signingRequest.data.payload.origin = attachedOrigin;
       }
 
-      // 5. Show modal: make iframe visible, hide status
+      // Show modal: make iframe visible, hide status
       statusEl.className = 'hidden';
       iframe.className = '';
 
-      // 6. Send open_modal to attached
+      // Send open_modal to attached
       var modalResult = await sendMessageToAttached({
         target: 'oko_attached',
         msg_type: 'open_modal',
         payload: signingRequest
       });
 
-      // 7. Got result — store in relay and deep link back
+      // Got result — store in relay with known key so SDK can poll for it
       iframe.className = 'hidden';
       statusEl.className = '';
-      statusEl.textContent = 'Returning to app...';
+      statusEl.textContent = 'Done! Returning to app...';
 
-      var resultStoreRes = await fetch('/api/mobile/sign-relay/result-store', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ payload: modalResult.payload })
-      });
-      var resultStoreData = await resultStoreRes.json();
-
-      if (!resultStoreData.success) {
-        throw new Error('Failed to store signing result');
-      }
-
-      var deepLink = redirectScheme + '://?type=sign&result_code=' + resultStoreData.code;
-      window.location.href = deepLink;
+      await storeResult(modalResult.payload);
 
     } catch(err) {
       statusEl.className = '';
@@ -167,26 +156,29 @@ function buildSignScript(relayCode: string, redirectScheme: string): string {
       statusEl.textContent = 'Error: ' + err.message;
       console.error('[oko-mobile-sign] error:', err);
 
-      // Still try to return an error result to the app
+      // Store error result so SDK can detect the failure
       try {
-        var errorPayload = {
+        await storeResult({
           type: 'error',
           error: { type: 'os_browser_error', message: err.message }
-        };
-        var errStoreRes = await fetch('/api/mobile/sign-relay/result-store', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ payload: errorPayload })
         });
-        var errStoreData = await errStoreRes.json();
-        if (errStoreData.success) {
-          setTimeout(function() {
-            window.location.href = redirectScheme + '://?type=sign&result_code=' + errStoreData.code;
-          }, 2000);
-        }
       } catch(e) {
         console.error('[oko-mobile-sign] failed to store error result:', e);
       }
+    }
+  }
+
+  // Store result in relay with key = result:{relayCode}
+  // SDK polls this key to detect completion.
+  async function storeResult(payload) {
+    var res = await fetch('/api/mobile/sign-relay/result-store', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ payload: payload, key: resultKey })
+    });
+    var data = await res.json();
+    if (!data.success) {
+      throw new Error('Failed to store signing result');
     }
   }
 
