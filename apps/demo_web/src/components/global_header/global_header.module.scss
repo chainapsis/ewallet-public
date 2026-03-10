@@ -6,13 +6,13 @@
   flex-shrink: 0;
   flex-grow: 0;
   align-items: center;
-  padding: 16px 20px;
+  padding: 18px 20px;
   background-color: var(--bg-primary);
 }
 
 @media (min-width: $desktop_min_width) {
   .wrapper {
-    padding: 16px 32px;
+    padding: 18px 32px;
   }
 }
 
