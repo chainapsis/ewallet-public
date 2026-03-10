@@ -12,6 +12,7 @@ import {
 } from "@oko-wallet/oko-sdk-core";
 import type { OpenModalError } from "@oko-wallet/oko-sdk-core";
 import type { SignInType } from "@oko-wallet/oko-sdk-core";
+import * as SecureStore from "expo-secure-store";
 import type { WebViewBridge } from "./bridge/WebViewBridge";
 import {
   getPublicKey,
@@ -24,6 +25,8 @@ import {
 import { openModalRN } from "./methods/open_modal";
 import { signInRN, type SignInOptions } from "./methods/sign_in";
 import { signOutRN } from "./methods/sign_out";
+
+const WALLET_INFO_STORE_KEY = "oko_rn_wallet_info";
 
 export interface OkoWalletRNConfig {
   apiKey: string;
@@ -107,7 +110,7 @@ export class OkoWalletRN {
     }
   }
 
-  private _handleInit(payload: unknown): void {
+  private async _handleInit(payload: unknown): Promise<void> {
     if (this._initResolved) return;
     this._initResolved = true;
 
@@ -129,24 +132,25 @@ export class OkoWalletRN {
         publicKey: data.data.public_key,
         name: data.data.name,
       };
+    }
 
-      if (data.data.email && data.data.public_key) {
-        this.eventEmitter.emit({
-          type: "CORE__accountsChanged",
-          authType: data.data.auth_type,
-          publicKey: data.data.public_key,
-          email: data.data.email,
-          name: data.data.name,
-        });
-      }
+    // WebView's attached has separate localStorage from OS browser,
+    // so it won't have login state. Restore from persisted storage.
+    if (!this.state.publicKey) {
+      await this._restoreWalletInfo();
+    }
 
-      this._resolveInit({ success: true, data: this.state });
-    } else {
-      this._resolveInit({
-        success: false,
-        err: data.err ?? "init failed",
+    if (this.state.email && this.state.publicKey) {
+      this.eventEmitter.emit({
+        type: "CORE__accountsChanged",
+        authType: this.state.authType,
+        publicKey: this.state.publicKey,
+        email: this.state.email,
+        name: this.state.name,
       });
     }
+
+    this._resolveInit({ success: true, data: this.state });
   }
 
   // ─── OkoWalletInterface compatible methods ───
@@ -206,6 +210,8 @@ export class OkoWalletRN {
         name: info.name,
       };
 
+      await this._persistWalletInfo();
+
       this.eventEmitter.emit({
         type: "CORE__accountsChanged",
         authType: info.authType,
@@ -227,6 +233,7 @@ export class OkoWalletRN {
       name: null,
     };
     this._cachedPublicKeyEd25519 = null;
+    await this._clearPersistedWalletInfo();
 
     this.eventEmitter.emit({
       type: "CORE__accountsChanged",
@@ -319,5 +326,39 @@ export class OkoWalletRN {
 
   off(handlerDef: OkoWalletCoreEventHandler2): void {
     this.eventEmitter.off(handlerDef);
+  }
+
+  // ─── Wallet info persistence (public data only) ───
+
+  private async _persistWalletInfo(): Promise<void> {
+    try {
+      await SecureStore.setItemAsync(
+        WALLET_INFO_STORE_KEY,
+        JSON.stringify(this.state),
+      );
+    } catch {
+      // Non-critical — app will require re-login on next launch
+    }
+  }
+
+  private async _restoreWalletInfo(): Promise<void> {
+    try {
+      const raw = await SecureStore.getItemAsync(WALLET_INFO_STORE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as OkoWalletState;
+      if (parsed.publicKey) {
+        this.state = parsed;
+      }
+    } catch {
+      // Corrupted or missing — ignore
+    }
+  }
+
+  private async _clearPersistedWalletInfo(): Promise<void> {
+    try {
+      await SecureStore.deleteItemAsync(WALLET_INFO_STORE_KEY);
+    } catch {
+      // Non-critical
+    }
   }
 }
