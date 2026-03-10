@@ -75,6 +75,38 @@ async function queryCw20Balance(
   return result.data.balance;
 }
 
+interface Cw20TokenInfoResponse {
+  data: {
+    name: string;
+    symbol: string;
+    decimals: number;
+    total_supply?: string;
+  };
+}
+
+async function queryCw20TokenInfo(
+  restEndpoint: string,
+  contractAddress: string,
+): Promise<Currency> {
+  const query = JSON.stringify({ token_info: {} });
+  const queryBase64 = btoa(query);
+  const url = `${restEndpoint}/cosmwasm/wasm/v1/contract/${contractAddress}/smart/${queryBase64}`;
+
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(
+      `CW20 token_info query failed for ${contractAddress}: ${response.statusText}`,
+    );
+  }
+
+  const result: Cw20TokenInfoResponse = await response.json();
+  return {
+    coinDenom: result.data.symbol,
+    coinMinimalDenom: `cw20:${contractAddress}:${result.data.symbol}`,
+    coinDecimals: result.data.decimals,
+  };
+}
+
 function contractInfoToCurrency(info: TokenContractInfo): Currency {
   return {
     coinDenom: info.metadata.symbol,
@@ -100,10 +132,18 @@ export async function fetchCw20TokenBalances(
         contract.contractAddress,
         walletAddress,
       );
+
+      let currency: Currency;
+      if (contract.metadata.symbol && contract.metadata.decimals != null) {
+        currency = contractInfoToCurrency(contract);
+      } else {
+        currency = await queryCw20TokenInfo(restEndpoint, contract.contractAddress);
+      }
+
       return {
         contractAddress: contract.contractAddress,
         balance,
-        currency: contractInfoToCurrency(contract),
+        currency,
       };
     }),
   );
