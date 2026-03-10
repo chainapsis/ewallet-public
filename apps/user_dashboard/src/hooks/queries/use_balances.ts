@@ -12,6 +12,10 @@ import {
   getAlchemyEndpoint,
   isAlchemySupported,
 } from "@oko-wallet-user-dashboard/constants/alchemy";
+import {
+  fetchCw20TokenBalances,
+  fetchCw20TokenRegistry,
+} from "@oko-wallet-user-dashboard/fetch/cw20_token_balances";
 import { fetchErc20TokenBalances } from "@oko-wallet-user-dashboard/fetch/erc20_token_balances";
 import { fetchSplTokenBalances } from "@oko-wallet-user-dashboard/fetch/spl_token_balances";
 import { DEFAULT_ENABLED_CHAINS } from "@oko-wallet-user-dashboard/state/chains";
@@ -203,6 +207,75 @@ async function getCosmosBalances(
   if (mainCurrency && !mainCurrencyAdded) {
     results.push(
       buildTokenBalance(chain, mainCurrency, "0", cosmosAddress, priceMap),
+    );
+  }
+
+  return results;
+}
+
+async function getCw20Balances(
+  chain: ModularChainInfo,
+  cosmosAddress: string,
+  priceMap: PriceMap,
+): Promise<TokenBalance[]> {
+  const cosmos = chain.cosmos;
+  if (!cosmos?.rest || !cosmos.features?.includes("cosmwasm")) {
+    return [];
+  }
+
+  const registry = await fetchCw20TokenRegistry();
+  const chainIdentifier = getChainIdentifier(chain.chainId);
+  const tokenContracts = registry[chainIdentifier];
+  if (!tokenContracts || tokenContracts.length === 0) {
+    return [];
+  }
+
+  const cw20Balances = await fetchCw20TokenBalances(
+    cosmos.rest,
+    cosmosAddress,
+    tokenContracts,
+  );
+  if (cw20Balances.length === 0) {
+    return [];
+  }
+
+  const missingPriceIds: string[] = [];
+  for (const tb of cw20Balances) {
+    if (
+      tb.currency.coinGeckoId &&
+      priceMap[tb.currency.coinGeckoId] === undefined
+    ) {
+      missingPriceIds.push(tb.currency.coinGeckoId);
+    }
+  }
+
+  const cw20PriceMap: Record<string, number> = {};
+  if (missingPriceIds.length > 0) {
+    try {
+      const priceResponse = await fetchPrices(missingPriceIds);
+      for (const [coinId, data] of Object.entries(priceResponse)) {
+        cw20PriceMap[coinId] = data.usd;
+      }
+    } catch (error) {
+      console.error(
+        `Failed to fetch CW20 prices for ${chain.chainId}:`,
+        error,
+      );
+    }
+  }
+
+  const mergedPriceMap: PriceMap = { ...priceMap, ...cw20PriceMap };
+  const results: TokenBalance[] = [];
+
+  for (const tb of cw20Balances) {
+    results.push(
+      buildTokenBalance(
+        chain,
+        tb.currency,
+        tb.balance,
+        cosmosAddress,
+        mergedPriceMap,
+      ),
     );
   }
 
@@ -468,6 +541,15 @@ async function fetchChainBalances(
       getCosmosBalances(chain, addresses.cosmos, priceMap, resolveTokenMetadata).catch((error) => {
         console.error(
           `Failed to fetch Cosmos balances for ${chain.chainId}:`,
+          error,
+        );
+        return [];
+      }),
+    );
+    tasks.push(
+      getCw20Balances(chain, addresses.cosmos, priceMap).catch((error) => {
+        console.error(
+          `Failed to fetch CW20 balances for ${chain.chainId}:`,
           error,
         );
         return [];
