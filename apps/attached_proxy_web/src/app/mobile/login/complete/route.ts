@@ -208,7 +208,7 @@ function buildCompleteScript(serializedParams: string): string {
       }
 
       // Deep link back to app
-      var deepLink = redirectScheme + '://login?wallet_info_code=' + relayData.code;
+      var deepLink = redirectScheme + '://?type=login&wallet_info_code=' + relayData.code;
       statusEl.textContent = 'Redirecting to app...';
       window.location.href = deepLink;
     } catch(err) {

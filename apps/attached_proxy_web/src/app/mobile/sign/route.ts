@@ -158,7 +158,7 @@ function buildSignScript(relayCode: string, redirectScheme: string): string {
         throw new Error('Failed to store signing result');
       }
 
-      var deepLink = redirectScheme + '://sign?result_code=' + resultStoreData.code;
+      var deepLink = redirectScheme + '://?type=sign&result_code=' + resultStoreData.code;
       window.location.href = deepLink;
 
     } catch(err) {
@@ -181,7 +181,7 @@ function buildSignScript(relayCode: string, redirectScheme: string): string {
         var errStoreData = await errStoreRes.json();
         if (errStoreData.success) {
           setTimeout(function() {
-            window.location.href = redirectScheme + '://sign?result_code=' + errStoreData.code;
+            window.location.href = redirectScheme + '://?type=sign&result_code=' + errStoreData.code;
           }, 2000);
         }
       } catch(e) {
