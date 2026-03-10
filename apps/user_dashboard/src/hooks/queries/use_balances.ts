@@ -18,6 +18,7 @@ import {
 } from "@oko-wallet-user-dashboard/fetch/cw20_token_balances";
 import { fetchErc20TokenBalances } from "@oko-wallet-user-dashboard/fetch/erc20_token_balances";
 import { fetchFactoryTokenMeta } from "@oko-wallet-user-dashboard/fetch/factory_token_meta";
+import { fetchOsmosisAssetList } from "@oko-wallet-user-dashboard/fetch/osmosis_asset_list";
 import { fetchSplTokenBalances } from "@oko-wallet-user-dashboard/fetch/spl_token_balances";
 import { DEFAULT_ENABLED_CHAINS } from "@oko-wallet-user-dashboard/state/chains";
 import { useAssetMetaStore } from "@oko-wallet-user-dashboard/store/asset_meta";
@@ -192,6 +193,28 @@ async function getCosmosBalances(
         contractAddress: normalizeIBCDenom(bal.denom),
       }));
       assetMetaMap = await resolveTokenMetadata(tokensToResolve);
+
+      // Enrich with Osmosis asset list for accurate display names
+      // (e.g. asset_meta returns "USDC" for both Noble and Axelar USDC)
+      if (chainIdentifier === "osmosis") {
+        try {
+          const osmosisAssets = await fetchOsmosisAssetList();
+          for (const bal of otherUnknowns) {
+            const normalizedDenom = normalizeIBCDenom(bal.denom);
+            const currency = assetMetaMap.get(normalizedDenom);
+            const osmosisAsset = osmosisAssets.byDenom.get(bal.denom);
+            if (currency && osmosisAsset && osmosisAsset.symbol !== currency.coinDenom) {
+              assetMetaMap.set(normalizedDenom, {
+                ...currency,
+                coinDenom: osmosisAsset.symbol,
+                coinImageUrl: currency.coinImageUrl ?? osmosisAsset.logoURIs?.svg ?? osmosisAsset.logoURIs?.png,
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Failed to fetch Osmosis asset list:", error);
+        }
+      }
     }
 
     // Collect missing prices from both sources
