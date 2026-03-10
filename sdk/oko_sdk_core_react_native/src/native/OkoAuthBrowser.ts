@@ -1,5 +1,4 @@
-import { Platform, AppState } from "react-native";
-import type { AppStateStatus } from "react-native";
+import { Platform } from "react-native";
 import * as WebBrowser from "expo-web-browser";
 
 /**
@@ -32,28 +31,38 @@ export type AuthSessionResult =
 
 /**
  * Returns the redirect scheme to pass to the server.
- * Android uses a dedicated SDK callback scheme handled by CallbackActivity.
- * iOS uses the app's own scheme handled by ASWebAuthenticationSession.
+ * Android (native module): SDK's dedicated callback scheme for CallbackActivity.
+ * iOS / fallback: app's own scheme for ASWebAuthenticationSession auto-close.
  */
 export function getServerRedirectScheme(appScheme: string): string {
-  return Platform.OS === "android" && nativeModule != null
-    ? ANDROID_CALLBACK_SCHEME
-    : appScheme;
+  if (Platform.OS === "android" && nativeModule) {
+    return ANDROID_CALLBACK_SCHEME;
+  }
+  return appScheme;
 }
 
 /**
  * Open an auth session in the system browser.
  *
  * - iOS: ASWebAuthenticationSession via expo-web-browser
- * - Android: Chrome Custom Tab via native OkoAuthBrowserModule
- *   (falls back to expo-web-browser if the native module is unavailable)
+ * - Android: Chrome Custom Tab via native OkoAuthBrowserModule.
+ *   ManagementActivity keeps the Custom Tab in the same task as the app.
+ *   CallbackActivity receives the redirect and uses CLEAR_TOP to pop
+ *   the Custom Tab — no "Open in app?" popup.
+ *   (Falls back to expo-web-browser if the native module is unavailable.)
  */
 export async function openAuthSession(
   url: string,
   callbackScheme: string,
 ): Promise<AuthSessionResult> {
   if (Platform.OS === "android" && nativeModule) {
-    return androidOpenAuthSession(url, nativeModule);
+    try {
+      const callbackUrl = await nativeModule.openAuthSessionAsync(url);
+      return { type: "success", url: callbackUrl };
+    } catch {
+      // CompletableDeferred was cancelled (user pressed back)
+      return { type: "cancel" };
+    }
   }
 
   // iOS (or Android fallback)
@@ -65,63 +74,4 @@ export async function openAuthSession(
     return { type: "success", url: result.url };
   }
   return { type: "cancel" };
-}
-
-/**
- * Android-specific implementation.
- * Opens a Chrome Custom Tab and races two signals:
- * 1. CallbackActivity receives the redirect → CompletableDeferred completes
- * 2. User presses back → AppState becomes "active" without a callback
- */
-function androidOpenAuthSession(
-  url: string,
-  mod: OkoAuthBrowserNative,
-): Promise<AuthSessionResult> {
-  return new Promise((resolve) => {
-    let settled = false;
-
-    const onAppState = (state: AppStateStatus) => {
-      if (state === "active" && !settled) {
-        // Small delay so CallbackActivity can fire first if this is a redirect
-        setTimeout(() => {
-          if (!settled) {
-            settled = true;
-            subscription.remove();
-            mod.cancelAuthSession();
-            resolve({ type: "cancel" });
-          }
-        }, 1000);
-      }
-    };
-
-    const subscription = AppState.addEventListener("change", onAppState);
-
-    mod.openAuthSessionAsync(url).then(
-      (callbackUrl) => {
-        if (!settled) {
-          settled = true;
-          subscription.remove();
-          resolve({ type: "success", url: callbackUrl });
-        }
-      },
-      () => {
-        if (!settled) {
-          settled = true;
-          subscription.remove();
-          resolve({ type: "cancel" });
-        }
-      },
-    );
-  });
-}
-
-/**
- * Dismiss the current auth session (close the Custom Tab / Safari VC).
- */
-export function dismissAuthSession(): void {
-  if (Platform.OS === "android" && nativeModule) {
-    nativeModule.cancelAuthSession();
-    return;
-  }
-  WebBrowser.dismissAuthSession();
 }

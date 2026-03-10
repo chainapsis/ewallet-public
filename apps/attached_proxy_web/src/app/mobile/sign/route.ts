@@ -170,10 +170,10 @@ function buildSignScript(relayCode: string, redirectScheme: string): string {
     }
   }
 
-  // Navigate to custom scheme to close the OS browser session.
-  // iOS: ASWebAuthenticationSession detects scheme redirect → auto-close.
-  // Android: Navigates to oko.auth.callback:// → OkoAuthCallbackActivity
-  //   (sole handler) receives intent, Custom Tab auto-closes.
+  // Close the OS browser session by navigating to the callback scheme.
+  // iOS: ASWebAuthenticationSession auto-closes on custom scheme navigation.
+  // Android: CallbackActivity catches the scheme → CLEAR_TOP pops the Custom Tab.
+  //   No popup because the Custom Tab runs in the same task as the app.
   function returnToApp() {
     if (redirectScheme) {
       window.location.href = redirectScheme + '://';

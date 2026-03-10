@@ -10,8 +10,11 @@ import android.os.Bundle
  * Android routes the intent here — the sole handler for this scheme.
  * No disambiguation popup because there is exactly one handler.
  *
- * Extracts the redirect URL, delivers it to the pending OkoAuthBrowserModule promise,
- * and finishes itself. The Custom Tab auto-closes as control returns to the app.
+ * After receiving the callback:
+ * 1. Delivers the URL to the pending OkoAuthBrowserModule promise
+ * 2. Starts OkoAuthManagementActivity with CLEAR_TOP | SINGLE_TOP,
+ *    which pops the Custom Tab off the task stack
+ * 3. Finishes itself
  */
 class OkoAuthCallbackActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,6 +25,9 @@ class OkoAuthCallbackActivity : Activity() {
             OkoAuthBrowserModule.onCallbackReceived(url)
         }
 
+        // Bring ManagementActivity to foreground with CLEAR_TOP,
+        // which removes the Custom Tab from the task stack.
+        startActivity(OkoAuthManagementActivity.createResponseHandlingIntent(this))
         finish()
     }
 }

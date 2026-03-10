@@ -186,17 +186,14 @@ function buildCompleteScript(serializedParams: string): string {
     try {
       statusEl.textContent = 'Finalizing...';
 
-      // Get public wallet info from attached
-      var walletInfo = await sendMessageToAttached({
-        target: 'oko_attached',
-        msg_type: 'get_wallet_info',
-        payload: null
-      });
+      // Read wallet data directly from localStorage (same origin as attached iframe).
+      // The attached iframe's Zustand persist store writes wallet data synchronously
+      // before dispatching oauth_sign_in_update, so it's guaranteed to be available.
+      var walletData = readWalletFromLocalStorage();
 
-      var publicInfo = walletInfo.payload;
-      // get_wallet_info returns { success, data: { authType, publicKey, ... } }
-      // SDK expects the flat data object, so unwrap it
-      var walletData = (publicInfo && publicInfo.success) ? publicInfo.data : publicInfo;
+      if (!walletData) {
+        throw new Error('Wallet data not found in localStorage after keygen');
+      }
 
       // Store public wallet info in relay with session_id as key
       var relayRes = await fetch('/api/mobile/sign-relay/store', {
@@ -217,31 +214,37 @@ function buildCompleteScript(serializedParams: string): string {
     }
   }
 
-  // Navigate to custom scheme to close the OS browser session.
-  // iOS: ASWebAuthenticationSession detects scheme redirect → auto-close.
-  // Android: Navigates to oko.auth.callback:// → OkoAuthCallbackActivity
-  //   (sole handler) receives intent, Custom Tab auto-closes.
+  // Read wallet info from attached iframe's Zustand persist store in localStorage.
+  // Storage key: "oko-wallet-app-2", structure: { state: { perOrigin: { [origin]: { wallet } } } }
+  function readWalletFromLocalStorage() {
+    try {
+      var raw = localStorage.getItem('oko-wallet-app-2');
+      if (!raw) return null;
+      var parsed = JSON.parse(raw);
+      var wallet = parsed && parsed.state && parsed.state.perOrigin
+        && parsed.state.perOrigin[attachedOrigin]
+        && parsed.state.perOrigin[attachedOrigin].wallet;
+      if (!wallet) return null;
+      return {
+        authType: wallet.authType || null,
+        publicKey: wallet.publicKey || null,
+        email: wallet.email || null,
+        name: wallet.name || null
+      };
+    } catch(e) {
+      console.error('[oko-mobile-login-complete] failed to read wallet from localStorage:', e);
+      return null;
+    }
+  }
+
+  // Close the OS browser session by navigating to the callback scheme.
+  // iOS: ASWebAuthenticationSession auto-closes on custom scheme navigation.
+  // Android: CallbackActivity catches the scheme → CLEAR_TOP pops the Custom Tab.
+  //   No popup because the Custom Tab runs in the same task as the app.
   function returnToApp() {
     if (redirectScheme) {
       window.location.href = redirectScheme + '://';
     }
-  }
-
-  // Helper: send message to attached iframe and wait for ack
-  function sendMessageToAttached(msg) {
-    return new Promise(function(resolve, reject) {
-      var channel = new MessageChannel();
-      var timer = setTimeout(function() {
-        reject(new Error('Timeout waiting for ' + msg.msg_type + '_ack'));
-      }, 120000); // 2 min timeout for keygen
-
-      channel.port1.onmessage = function(ackEvent) {
-        clearTimeout(timer);
-        resolve(ackEvent.data);
-      };
-
-      iframe.contentWindow.postMessage(msg, attachedOrigin, [channel.port2]);
-    });
   }
 
   // Build OAuth payload based on available params (token-based vs code-based)

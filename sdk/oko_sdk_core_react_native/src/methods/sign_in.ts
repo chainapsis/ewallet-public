@@ -1,7 +1,6 @@
 import type { SignInType } from "@oko-wallet/oko-sdk-core";
 import {
   openAuthSession,
-  dismissAuthSession,
   getServerRedirectScheme,
 } from "../native/OkoAuthBrowser";
 
@@ -21,11 +20,9 @@ const DEFAULT_REDIRECT_SCHEME = "okowallet";
  *
  * 1. Generate session_id, open OS browser at /mobile/login (OAuth + keygen)
  * 2. Key shares persist in attached's localStorage (zustand persist)
- * 3. Login complete page stores wallet info in relay with key = session_id
- * 4. SDK polls relay for result, then dismisses the Custom Tab
- *
- * No deep link or redirect needed — key shares never enter the RN app
- * JS runtime or WebView.
+ * 3. Login complete page stores wallet info in relay, then redirects to callback
+ * 4. CallbackActivity receives redirect → Custom Tab auto-closes
+ * 5. SDK fetches wallet info from relay
  */
 export async function signInRN(
   sdkEndpoint: string,
@@ -40,76 +37,57 @@ export async function signInRN(
   const serverScheme = getServerRedirectScheme(redirectScheme);
   const loginUrl = buildLoginUrl(sdkEndpoint, type, apiKey, sessionId, serverScheme);
 
-  // Start Custom Tab and poll relay concurrently.
-  // When polling detects the wallet info, dismissAuthSession closes the Custom Tab.
-  let stopped = false;
-  let pollResult: unknown = null;
+  // Open OS browser — blocks until callback redirect or user cancel.
+  // On Android: ManagementActivity keeps Custom Tab in same task.
+  //   CallbackActivity receives oko.auth.callback:// → CLEAR_TOP pops Custom Tab.
+  // On iOS: ASWebAuthenticationSession auto-closes on scheme match.
+  const result = await openAuthSession(loginUrl, redirectScheme);
 
-  const authPromise = openAuthSession(loginUrl, redirectScheme);
+  if (result.type === "cancel") {
+    throw new Error("Sign-in cancelled");
+  }
 
-  const pollPromise = (async (): Promise<void> => {
-    while (!stopped) {
-      try {
-        const res = await fetch(
-          `${sdkEndpoint}/api/mobile/sign-relay/consume`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ code: sessionId }),
-          },
-        );
-        const data = (await res.json()) as {
-          success: boolean;
-          payload?: unknown;
-        };
-        if (data.success && data.payload) {
-          pollResult = data.payload;
-          return;
-        }
-      } catch {
-        // Ignore network errors, keep polling
-      }
-      if (!stopped) {
-        await new Promise((r) => setTimeout(r, 500));
-      }
-    }
-  })();
+  // Custom Tab closed via callback — fetch wallet info from relay.
+  // The server page stores the result before redirecting, but a brief
+  // race is possible, so we retry a few times.
+  const walletInfo = await fetchRelayResult(sdkEndpoint, sessionId);
+  return { walletInfo };
+}
 
-  // Race: either Custom Tab closes (user dismiss) or poll finds result
-  await Promise.race([authPromise, pollPromise]);
-  stopped = true;
-
-  if (pollResult) {
+/**
+ * Fetch result from relay with retries.
+ */
+async function fetchRelayResult(
+  sdkEndpoint: string,
+  code: string,
+  maxRetries = 10,
+  delayMs = 500,
+): Promise<unknown> {
+  for (let i = 0; i < maxRetries; i++) {
     try {
-      dismissAuthSession();
+      const res = await fetch(
+        `${sdkEndpoint}/api/mobile/sign-relay/consume`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code }),
+        },
+      );
+      const data = (await res.json()) as {
+        success: boolean;
+        payload?: unknown;
+      };
+      if (data.success && data.payload) {
+        return data.payload;
+      }
     } catch {
-      // Already closed
+      // Network error, retry
     }
-    return { walletInfo: pollResult };
-  }
-
-  // Custom Tab was dismissed by user. One last check.
-  try {
-    const res = await fetch(
-      `${sdkEndpoint}/api/mobile/sign-relay/consume`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: sessionId }),
-      },
-    );
-    const data = (await res.json()) as {
-      success: boolean;
-      payload?: unknown;
-    };
-    if (data.success && data.payload) {
-      return { walletInfo: data.payload };
+    if (i < maxRetries - 1) {
+      await new Promise((r) => setTimeout(r, delayMs));
     }
-  } catch {
-    // Ignore
   }
-
-  throw new Error("Sign-in cancelled or failed");
+  throw new Error("Failed to retrieve sign-in result from relay");
 }
 
 function generateSessionId(): string {

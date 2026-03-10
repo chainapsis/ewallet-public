@@ -4,7 +4,9 @@ import {
   AndroidConfig,
 } from "@expo/config-plugins";
 
-const ACTIVITY_CLASS = "com.okowallet.auth.OkoAuthCallbackActivity";
+const CALLBACK_ACTIVITY_CLASS = "com.okowallet.auth.OkoAuthCallbackActivity";
+const MANAGEMENT_ACTIVITY_CLASS =
+  "com.okowallet.auth.OkoAuthManagementActivity";
 
 export const withOkoAuthBrowserAndroid: ConfigPlugin<{
   callbackScheme: string;
@@ -16,17 +18,20 @@ export const withOkoAuthBrowserAndroid: ConfigPlugin<{
     // Remove existing entries to avoid duplicates on re-prebuild
     if (mainApplication.activity) {
       mainApplication.activity = mainApplication.activity.filter(
-        (activity) => activity.$?.["android:name"] !== ACTIVITY_CLASS,
+        (activity) =>
+          activity.$?.["android:name"] !== CALLBACK_ACTIVITY_CLASS &&
+          activity.$?.["android:name"] !== MANAGEMENT_ACTIVITY_CLASS,
       );
     } else {
       mainApplication.activity = [];
     }
 
+    // CallbackActivity: handles custom scheme redirect from Chrome Custom Tab.
+    // No launchMode — matches flutter_web_auth_2's CallbackActivity pattern.
     mainApplication.activity.push({
       $: {
-        "android:name": ACTIVITY_CLASS,
+        "android:name": CALLBACK_ACTIVITY_CLASS,
         "android:exported": "true",
-        "android:launchMode": "singleTop",
       },
       "intent-filter": [
         {
@@ -38,6 +43,16 @@ export const withOkoAuthBrowserAndroid: ConfigPlugin<{
           data: [{ $: { "android:scheme": callbackScheme } }],
         },
       ],
+    });
+
+    // ManagementActivity: transparent coordinator that opens Custom Tab and
+    // receives CLEAR_TOP intent from CallbackActivity to pop the Custom Tab.
+    mainApplication.activity.push({
+      $: {
+        "android:name": MANAGEMENT_ACTIVITY_CLASS,
+        "android:exported": "false",
+        "android:theme": "@android:style/Theme.Translucent.NoTitleBar",
+      },
     });
 
     return config;
