@@ -592,7 +592,7 @@ const Page = () => {
         resAny.msg_type === "__export_private_key_ack__" &&
         resAny.payload.success
       ) {
-        // Keep popup open — Step2Content.onReady will close it
+        // Popup closes itself after OAuth callback; Step2Content.onReady handles cleanup
         exportSucceeded = true;
         popupRef.current = popup;
         setStep(2);

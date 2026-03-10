@@ -26,7 +26,8 @@ export function useGithubCallback() {
             try {
               const oauthState = JSON.parse(atob(stateParam));
               if (oauthState.apiKey === "export_key_reauth") {
-                return; // Parent will close popup when iframes are ready
+                window.close();
+                return;
               }
             } catch {
               /* ignore parse errors */
