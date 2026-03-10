@@ -220,7 +220,7 @@ function buildCompleteScript(serializedParams: string): string {
   // Navigate to custom scheme to trigger openAuthSessionAsync close
   function returnToApp() {
     if (redirectScheme) {
-      window.location.href = redirectScheme + '://done';
+      window.location.href = redirectScheme + '://';
     }
   }
 
