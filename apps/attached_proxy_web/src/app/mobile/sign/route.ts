@@ -170,9 +170,12 @@ function buildSignScript(relayCode: string, redirectScheme: string): string {
     }
   }
 
-  // Navigate to custom scheme to trigger openAuthSessionAsync close
+  // Navigate to custom scheme to trigger openAuthSessionAsync close.
+  // iOS (ASWebAuthenticationSession) auto-closes on scheme redirect.
+  // Android (Chrome Custom Tab) shows a confirmation popup, so skip it —
+  // user presses back instead, and polling already delivered the result.
   function returnToApp() {
-    if (redirectScheme) {
+    if (redirectScheme && !/android/i.test(navigator.userAgent)) {
       window.location.href = redirectScheme + '://';
     }
   }
