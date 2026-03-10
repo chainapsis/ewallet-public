@@ -15,8 +15,9 @@
   width: 100%;
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-secondary);
+  overflow: hidden;
 
-  padding: 16px;
+  padding: 20px 16px;
 
   display: flex;
   flex-direction: column;
@@ -25,25 +26,29 @@
 
 .bgDecoration {
   position: absolute;
-  top: -197px;
-  left: -221px;
+  top: -277px;
+  left: -271px;
   width: 1120px;
   height: 900px;
   opacity: 0.11;
   pointer-events: none;
   z-index: 0;
 
+  :global([data-theme="dark"]) & {
+    opacity: 0.05;
+  }
+
   img {
     position: absolute;
-    width: 1217px;
-    height: 1055px;
+    width: 1217.27px;
+    height: 1054.855px;
     left: calc(50% + 50.37px);
     top: calc(50% + 7.43px);
     transform: translate(-50%, -50%) scaleX(-1);
     object-fit: cover;
     mask-image: url("/bg_eye_mask.svg");
-    mask-size: 962px 776px;
-    mask-position: 74px 161px;
+    mask-size: 961.841px 776.102px;
+    mask-position: 74.293px 160.802px;
     mask-repeat: no-repeat;
   }
 }
