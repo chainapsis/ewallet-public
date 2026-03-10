@@ -12,19 +12,21 @@
 .loggedIn {
   flex-direction: column;
   align-items: flex-start;
-  gap: 4px;
+  gap: 2px;
 }
 
 .chainLabel {
   display: flex;
   align-items: center;
   gap: 6px;
+  padding: 4px 0;
 }
 
 .chainLabelChip {
   display: flex;
   align-items: center;
   gap: 6px;
+  padding: 4px 0;
 }
 
 .addressContent {
@@ -40,7 +42,7 @@
 }
 
 .placeholderPrefix {
-  color: var(--Colors-Text-text-disabled, #717680);
+  color: var(--text-tertiary);
 }
 
 .address {
