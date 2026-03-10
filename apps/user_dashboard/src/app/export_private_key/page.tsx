@@ -525,11 +525,16 @@ const Page = () => {
           : 285;
       const popupLeft = Math.max((window.screen.width - popupWidth) / 2, 0);
       const popupTop = Math.max((window.screen.height - popupHeight) / 2, 0);
+      // Open about:blank first to avoid cross-origin popup blocking,
+      // then redirect — same pattern as SDK sign-in handlers.
       popup = window.open(
-        `${attachedOrigin}/export/reauth?auth_type=${authType}&email=${encodeURIComponent(email ?? "")}`,
+        "about:blank",
         "oko_re_auth",
         `width=${popupWidth},height=${popupHeight},left=${popupLeft},top=${popupTop},resizable=yes`,
       );
+      if (popup) {
+        popup.location.href = `${attachedOrigin}/export/reauth?auth_type=${authType}&email=${encodeURIComponent(email ?? "")}`;
+      }
 
       // 2. Send export request to attached iframe
       const resPromise = okoWallet.sendMsgToIframe({
