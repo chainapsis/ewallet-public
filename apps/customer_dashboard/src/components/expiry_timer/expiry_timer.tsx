@@ -1,51 +1,25 @@
 "use client";
 
-import {
-  type FC,
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { type FC, type ReactNode, useCallback, useEffect, useState } from "react";
 
 type ExpiryTimerProps = {
-  expiresAt?: string;
-  duration?: number;
+  duration: number;
   children: (props: {
     timeDisplay: string;
     isExpired: boolean;
-    resetTimer: (newExpiresAt: string) => void;
+    resetTimer: () => void;
   }) => ReactNode;
 };
 
-const EXPIRY_BUFFER_SECONDS = 5;
-
-function calcSecondsLeft(expiresAt: string): number {
-  return Math.max(
-    0,
-    Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000) -
-      EXPIRY_BUFFER_SECONDS,
-  );
-}
-
 export const ExpiryTimer: FC<ExpiryTimerProps> = ({
-  expiresAt,
-  duration = 0,
+  duration,
   children,
 }) => {
-  const [secondLeft, setSecondLeft] = useState(() =>
-    expiresAt ? calcSecondsLeft(expiresAt) : duration,
-  );
+  const [secondLeft, setSecondLeft] = useState(duration);
 
-  useEffect(() => {
-    if (expiresAt) {
-      setSecondLeft(calcSecondsLeft(expiresAt));
-    }
-  }, [expiresAt]);
-
-  const resetTimer = useCallback((newExpiresAt: string) => {
-    setSecondLeft(calcSecondsLeft(newExpiresAt));
-  }, []);
+  const resetTimer = useCallback(() => {
+    setSecondLeft(duration);
+  }, [duration]);
 
   useEffect(() => {
     if (secondLeft <= 0) {

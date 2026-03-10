@@ -90,10 +90,12 @@ export async function sendEmailVerificationCode(
   // Generate verification code
   const verificationCode = generateVerificationCode();
 
+  const EXPIRY_BUFFER_SECONDS = 8;
   const expiresAt = new Date();
   expiresAt.setMinutes(
     expiresAt.getMinutes() + request.email_verification_expiration_minutes,
   );
+  expiresAt.setSeconds(expiresAt.getSeconds() + EXPIRY_BUFFER_SECONDS);
 
   // Save to database
   const createEmailVerificationRes = await createEmailVerification(db, {
