@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { buildIframeSrc } from "../../_shared/build_iframe_src";
+import { ProxyThemeStyle } from "../../_shared/theme_style";
 import { LoginCompleteClient } from "./_client";
 
 export const metadata: Metadata = {
@@ -40,6 +41,7 @@ export default async function MobileLoginCompletePage({
     >
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <ProxyThemeStyle />
       </head>
       <body
         style={{
@@ -51,7 +53,6 @@ export default async function MobileLoginCompletePage({
           alignItems: "center",
           justifyContent: "center",
           fontFamily: "-apple-system, sans-serif",
-          background: "#f5f5f5",
         }}
       >
         <LoginCompleteClient iframeSrc={iframeSrc} oauthParams={oauthParams} />

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { buildIframeSrc } from "../_shared/build_iframe_src";
+import { ProxyThemeStyle } from "../_shared/theme_style";
 import { EmailLoginClient, OAuthLoginClient } from "./_client";
 
 export const metadata: Metadata = {
@@ -33,6 +34,7 @@ export default async function MobileLoginPage({
     >
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <ProxyThemeStyle />
       </head>
       <body
         style={{
@@ -44,7 +46,6 @@ export default async function MobileLoginPage({
           alignItems: "center",
           justifyContent: "center",
           fontFamily: "-apple-system, sans-serif",
-          background: "#f5f5f5",
         }}
       >
         {isEmail ? (

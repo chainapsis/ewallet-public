@@ -156,7 +156,6 @@ export function SignClient({
         <div
           style={{
             textAlign: "center",
-            color: "#666",
             fontSize: 16,
             padding: 20,
           }}

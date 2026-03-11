@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { buildIframeSrc } from "../_shared/build_iframe_src";
+import { ProxyThemeStyle } from "../_shared/theme_style";
 import { SignClient } from "./_client";
 
 export const metadata: Metadata = {
@@ -32,6 +33,7 @@ export default async function MobileSignPage({
     >
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <ProxyThemeStyle />
       </head>
       <body
         style={{
@@ -42,7 +44,6 @@ export default async function MobileSignPage({
           display: "flex",
           flexDirection: "column",
           fontFamily: "-apple-system, sans-serif",
-          background: "#f5f5f5",
         }}
       >
         <SignClient

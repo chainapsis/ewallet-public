@@ -12,7 +12,6 @@ const AUTH0_CONNECTION = "email";
 
 const statusStyle = {
   textAlign: "center" as const,
-  color: "#666",
   fontSize: 16,
 };
 

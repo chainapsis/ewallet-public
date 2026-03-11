@@ -143,12 +143,7 @@ export function useInitializeApp() {
 
         const isMobileParam = searchParams.get("mobile") === "true";
 
-        // iOS mobile: force light mode (ASWebAuthenticationSession chrome is always light)
-        if (isMobileParam && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
-          determinedThemeByCustomer = "light";
-        }
-
-        // Android mobile: watch for system theme settling
+        // Mobile: watch for system theme settling
         // (Chrome Custom Tab may report "light" initially then switch to "dark")
         if (isMobileParam && themeResult.usesSystemPreference) {
           const mq = window.matchMedia("(prefers-color-scheme: dark)");
