@@ -74,13 +74,6 @@ export async function handleDiscordCallback(): Promise<
     } catch { /* fall through to web flow */ }
   }
 
-  if (!window.opener) {
-    return {
-      success: false,
-      err: { type: "opener_window_not_exists" },
-    };
-  }
-
   console.log("[discord callback] code: %s, stateParam: %s", code, stateParam);
 
   if (!code) {

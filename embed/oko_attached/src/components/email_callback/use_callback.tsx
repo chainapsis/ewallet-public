@@ -63,15 +63,15 @@ export function useEmailCallback(): { error: string | null } {
 export async function handleEmailCallback(): Promise<
   Result<void, HandleCallbackError>
 > {
-  // Mobile: no opener, parse hash manually — auth0-js's parseHash validates
-  // state against its internal transaction store, but the mobile flow bypasses auth0-js
-  // (redirects to Auth0's Universal Login directly) so no transaction was stored.
+  // No opener: mobile OS-browser flow, or Safari iOS web (window.opener stripped)
   if (!window.opener) {
     const { accessToken, idToken, state: stateString } = parseHashParams();
     if (stateString && (accessToken || idToken)) {
       try {
         const oauthState = JSON.parse(stateString) as OAuthState;
         const provider = oauthState.provider ?? "auth0";
+
+        // 1. Mobile: redirect to /mobile/login/complete
         const mobileRedirected = handleMobileRedirect({
           provider,
           authType: provider,
@@ -80,7 +80,24 @@ export async function handleEmailCallback(): Promise<
           id_token: idToken,
         });
         if (mobileRedirected) return { success: true, data: void 0 };
-      } catch { /* fall through to normal error */ }
+
+        // 2. Safari iOS web: send via BroadcastChannel fallback
+        if (accessToken && idToken && oauthState.apiKey && oauthState.targetOrigin) {
+          const payload: OAuthPayload = {
+            access_token: accessToken,
+            id_token: idToken,
+            api_key: oauthState.apiKey,
+            target_origin: oauthState.targetOrigin,
+            auth_type: oauthState.provider as "auth0",
+          };
+
+          const sendRes = await sendOAuthPayloadToEmbeddedWindow(payload);
+          if (!sendRes.success) {
+            return sendRes;
+          }
+          return { success: true, data: void 0 };
+        }
+      } catch { /* fall through */ }
     }
 
     // Fallback with no parsed state: try sessionStorage from /mobile/login page
@@ -260,13 +277,17 @@ function sendAckToSDK(
   oauthState: OAuthState,
   payload: EmailLoginModalApproveAckPayload | EmailLoginModalErrorAckPayload,
 ) {
-  window.opener!.postMessage(
+  if (!window.opener || !oauthState.targetOrigin) {
+    return;
+  }
+
+  window.opener.postMessage(
     {
       target: "oko_sdk",
       msg_type: "open_modal_ack",
       payload,
     },
-    oauthState.targetOrigin!,
+    oauthState.targetOrigin,
   );
 }
 

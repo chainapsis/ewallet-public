@@ -60,13 +60,6 @@ export async function handleGoogleCallback(): Promise<
   });
   if (mobileRedirected) return { success: true, data: void 0 };
 
-  if (!window.opener) {
-    return {
-      success: false,
-      err: { type: "opener_window_not_exists" },
-    };
-  }
-
   const apiKey: string = oauthState.apiKey;
   const targetOrigin: string = oauthState.targetOrigin;
 
