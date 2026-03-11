@@ -50,10 +50,10 @@ async function fetchRelayResult(
 ): Promise<unknown> {
   for (let i = 0; i < maxRetries; i++) {
     try {
-      const res = await fetch(`${sdkEndpoint}/api/mobile/sign-relay/consume`, {
+      const res = await fetch(`${sdkEndpoint}/api/mobile/relay`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ action: "consume", code }),
       });
       const data = (await res.json()) as {
         success: boolean;

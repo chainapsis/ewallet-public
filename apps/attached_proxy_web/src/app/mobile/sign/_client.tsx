@@ -32,10 +32,10 @@ export function SignClient({
     try {
       setStatus("Loading wallet...");
 
-      const consumeRes = await fetch("/api/mobile/sign-relay/consume", {
+      const consumeRes = await fetch("/api/mobile/relay", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: relayCode }),
+        body: JSON.stringify({ action: "consume", code: relayCode }),
       });
       const consumeData = await consumeRes.json();
 
@@ -83,10 +83,10 @@ export function SignClient({
   }
 
   async function storeResult(payload: unknown) {
-    const res = await fetch("/api/mobile/sign-relay/result-store", {
+    const res = await fetch("/api/mobile/relay", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ payload, key: `result:${relayCode}` }),
+      body: JSON.stringify({ action: "store", payload, key: `result:${relayCode}` }),
     });
     const data = await res.json();
     if (!data.success) {

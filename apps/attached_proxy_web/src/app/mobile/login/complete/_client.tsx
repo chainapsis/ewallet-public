@@ -106,10 +106,11 @@ export function LoginCompleteClient({
         throw new Error("Wallet data not found in localStorage after keygen");
       }
 
-      const res = await fetch("/api/mobile/sign-relay/store", {
+      const res = await fetch("/api/mobile/relay", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          action: "store",
           payload: walletData,
           key: sessionDataRef.current!.sessionId,
         }),

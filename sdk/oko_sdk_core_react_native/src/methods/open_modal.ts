@@ -16,10 +16,10 @@ export async function openModalRN(
   apiKey: string,
 ): Promise<Result<OpenModalAckPayload, OpenModalError>> {
   try {
-    const storeRes = await fetch(`${sdkEndpoint}/api/mobile/sign-relay/store`, {
+    const storeRes = await fetch(`${sdkEndpoint}/api/mobile/relay`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ payload: msg.payload }),
+      body: JSON.stringify({ action: "store", payload: msg.payload }),
     });
 
     if (!storeRes.ok) {
@@ -80,11 +80,11 @@ async function fetchRelayResult(
   for (let i = 0; i < maxRetries; i++) {
     try {
       const res = await fetch(
-        `${sdkEndpoint}/api/mobile/sign-relay/result-consume`,
+        `${sdkEndpoint}/api/mobile/relay`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code }),
+          body: JSON.stringify({ action: "consume", code }),
         },
       );
       const data = (await res.json()) as {
