@@ -18,4 +18,4 @@ export const OkoEthWallet = function (
     address: null,
   };
   this.waitUntilInitialized = lazyInit(this).then();
-} as any as OkoEthWalletStaticInterface;
+} as unknown as OkoEthWalletStaticInterface;

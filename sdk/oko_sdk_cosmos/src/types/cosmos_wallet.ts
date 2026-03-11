@@ -41,7 +41,7 @@ export interface OkoCosmosWalletState {
 }
 
 export interface OkoCosmosWalletStaticInterface {
-  new (okoWallet: OkoWalletInterface): void;
+  new (okoWallet: OkoWalletInterface): OkoCosmosWalletInterface;
   init: (
     args: OkoWalletInitArgs,
   ) => Result<OkoCosmosWalletInterface, OkoCosmosWalletInitError>;

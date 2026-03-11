@@ -3,12 +3,12 @@ import type { Result } from "@oko-wallet/stdlib-js";
 import type {
   OkoWalletMsg,
   OkoWalletMsgInitAck,
-  OkoWalletInterface,
+  OkoWalletWebInterface,
 } from "@oko-wallet-sdk-core/types";
 import type { InitPayload } from "@oko-wallet-sdk-core/types/init";
 
 export function registerMsgListener(
-  _okoWallet: OkoWalletInterface,
+  _okoWallet: OkoWalletWebInterface,
 ): Promise<Result<InitPayload, string>> {
   if (window.__oko_ev) {
     // TODO: theoretically unreachable but this can happen

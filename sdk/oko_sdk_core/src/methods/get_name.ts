@@ -1,8 +1,8 @@
-import type { OkoWalletInterface } from "@oko-wallet-sdk-core/types";
+import type { OkoWalletWebInterface } from "@oko-wallet-sdk-core/types";
 import { OKO_ATTACHED_TARGET } from "@oko-wallet-sdk-core/window_msg/target";
 
 export async function getName(
-  this: OkoWalletInterface,
+  this: OkoWalletWebInterface,
 ): Promise<string | null> {
   await this.waitUntilInitialized;
 

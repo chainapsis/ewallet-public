@@ -2,6 +2,7 @@ import type { Result } from "@oko-wallet/stdlib-js";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import {
   EventEmitter3,
+  type OkoWalletInterface,
   type OkoWalletMsg,
   type OkoWalletMsgOpenModal,
   type OkoWalletState,
@@ -44,18 +45,13 @@ export interface OkoWalletRNConfig {
  *
  * Key shares NEVER exist in the WebView or app JS runtime.
  */
-export class OkoWalletRN {
+export class OkoWalletRN implements OkoWalletInterface {
   state: OkoWalletState;
   apiKey: string;
   sdkEndpoint: string;
   redirectScheme: string;
   origin: string;
   eventEmitter: EventEmitter3<OkoWalletCoreEvent2, OkoWalletCoreEventHandler2>;
-
-  // Stubs for OkoWalletInterface compat (unused in RN)
-  iframe: null = null;
-  activePopupId: string | null = null;
-  activePopupWindow: null = null;
 
   /** Resolves when the attached iframe sends its init message */
   waitUntilInitialized: Promise<Result<OkoWalletState, string>>;

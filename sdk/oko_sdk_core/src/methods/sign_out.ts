@@ -1,7 +1,7 @@
-import type { OkoWalletInterface } from "@oko-wallet-sdk-core/types";
+import type { OkoWalletWebInterface } from "@oko-wallet-sdk-core/types";
 import { OKO_ATTACHED_TARGET } from "@oko-wallet-sdk-core/window_msg/target";
 
-export async function signOut(this: OkoWalletInterface) {
+export async function signOut(this: OkoWalletWebInterface) {
   await this.waitUntilInitialized;
 
   await this.sendMsgToIframe({

@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import { OKO_ATTACHED_TARGET } from "@oko-wallet-sdk-core/window_msg/target";
 import type {
   OAuthState,
-  OkoWalletInterface,
+  OkoWalletWebInterface,
   OkoWalletMsg,
   OkoWalletMsgOAuthSignInUpdate,
   OkoWalletMsgOAuthSignInUpdateAck,
@@ -12,7 +12,7 @@ import type {
 
 const FIVE_MINS_MS = 5 * 60 * 1000;
 
-export async function handleTelegramSignIn(okoWallet: OkoWalletInterface) {
+export async function handleTelegramSignIn(okoWallet: OkoWalletWebInterface) {
   const signInRes = await tryTelegramSignIn(okoWallet);
 
   if (!signInRes.payload.success) {
@@ -23,7 +23,7 @@ export async function handleTelegramSignIn(okoWallet: OkoWalletInterface) {
 }
 
 async function tryTelegramSignIn(
-  okoWallet: OkoWalletInterface,
+  okoWallet: OkoWalletWebInterface,
 ): Promise<OkoWalletMsgOAuthSignInUpdate> {
   const modalId = uuidv4();
 
@@ -66,7 +66,7 @@ async function tryTelegramSignIn(
   return await oauthSignInUpdateWaiter.promise;
 }
 
-function waitForOAuthSignInUpdate(okoWallet: OkoWalletInterface) {
+function waitForOAuthSignInUpdate(okoWallet: OkoWalletWebInterface) {
   let cleanup: (() => void) | null = null;
 
   const promise = new Promise<OkoWalletMsgOAuthSignInUpdate>(

@@ -1,9 +1,9 @@
-import type { OkoWalletInterface } from "@oko-wallet-sdk-core/types";
+import type { OkoWalletWebInterface } from "@oko-wallet-sdk-core/types";
 import { renderSignInModal } from "@oko-wallet-sdk-core/ui/signin_modal";
 
 const state = { isModalOpen: false };
 
-export async function openSignInModal(this: OkoWalletInterface): Promise<void> {
+export async function openSignInModal(this: OkoWalletWebInterface): Promise<void> {
   await this.waitUntilInitialized;
 
   if (state.isModalOpen) {

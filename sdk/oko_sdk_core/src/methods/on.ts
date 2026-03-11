@@ -1,10 +1,10 @@
 import type {
   OkoWalletCoreEventHandler2,
-  OkoWalletInterface,
+  OkoWalletWebInterface,
 } from "@oko-wallet-sdk-core/types";
 
 export function on(
-  this: OkoWalletInterface,
+  this: OkoWalletWebInterface,
   handlerDef: OkoWalletCoreEventHandler2,
 ) {
   this.eventEmitter.on(handlerDef);

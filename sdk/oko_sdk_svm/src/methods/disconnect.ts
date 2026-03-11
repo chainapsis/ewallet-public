@@ -7,7 +7,7 @@ export async function disconnect(this: OkoSvmWalletInterface): Promise<void> {
   const internal = this as OkoSvmWalletInternal;
 
   // Remove event listener from core wallet
-  this.okoWallet.eventEmitter.off({
+  this.okoWallet.off({
     type: "CORE__accountsChanged",
     handler: internal._accountsChangedHandler,
   });
