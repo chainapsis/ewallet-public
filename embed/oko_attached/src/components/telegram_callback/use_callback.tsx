@@ -55,15 +55,6 @@ export function useTelegramCallback() {
 export async function handleTelegramCallback(): Promise<
   Result<void, HandleTelegramCallbackError>
 > {
-  if (!window.opener) {
-    return {
-      success: false,
-      err: {
-        type: "opener_window_not_exists",
-      },
-    };
-  }
-
   const urlParams = new URLSearchParams(window.location.search);
   const stateParam = urlParams.get(RedirectUriSearchParamsKey.STATE) || "{}";
   const modalIdFromQuery = urlParams.get("modal_id");

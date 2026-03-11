@@ -75,13 +75,6 @@ export async function handleXCallback(): Promise<
     } catch { /* fall through to web flow */ }
   }
 
-  if (!window.opener) {
-    return {
-      success: false,
-      err: { type: "opener_window_not_exists" },
-    };
-  }
-
   if (!code) {
     return {
       success: false,
