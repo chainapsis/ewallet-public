@@ -1,6 +1,6 @@
 "use client";
 
-import { CoinPretty, Dec, PricePretty } from "@keplr-wallet/unit";
+import { PricePretty } from "@keplr-wallet/unit";
 import { Badge } from "@oko-wallet/oko-common-ui/badge";
 import { CheckCircleOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/check_circle_outlined";
 import { CopyOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/copy_outlined";
@@ -16,7 +16,7 @@ import styles from "./token_item.module.scss";
 import { AddressQrModal } from "@oko-wallet-user-dashboard/components/address_qr_modal/address_qr_modal";
 import { useCopyToClipboard } from "@oko-wallet-user-dashboard/hooks/use_copy_to_clipboard";
 import type { TokenBalance } from "@oko-wallet-user-dashboard/types/token";
-import { calculateUsdValue } from "@oko-wallet-user-dashboard/utils/format_token_amount";
+import { calculateUsdValue, formatDisplayBalance } from "@oko-wallet-user-dashboard/utils/format_token_amount";
 
 interface TokenItemProps {
   tokenBalance: TokenBalance;
@@ -129,11 +129,7 @@ export const TokenItem: FC<TokenItemProps> = ({
             ) : (
               <>
                 <Typography size="sm" weight="medium" color="secondary">
-                  {new CoinPretty(currency, new Dec(tokenBalance.token.amount))
-                    .maxDecimals(4)
-                    .shrink(true)
-                    .hideDenom(true)
-                    .toString()}
+                  {formatDisplayBalance(tokenBalance.token.amount, currency)}
                 </Typography>
                 <Typography size="xs" weight="medium" color="tertiary">
                   {valueUsd !== undefined
