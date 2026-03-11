@@ -1,4 +1,24 @@
-import { Dec, Int } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
+
+import type { Currency } from "@oko-wallet-user-dashboard/types/chain";
+
+const MIN_DISPLAY_THRESHOLD = new Dec("0.000001");
+
+/**
+ * Formats a raw token amount for display with up to 6 decimal places.
+ * Returns "< 0.000001" for non-zero amounts smaller than 0.000001.
+ */
+export function formatDisplayBalance(
+  rawAmount: string,
+  currency: Currency,
+): string {
+  const coin = new CoinPretty(currency, new Dec(rawAmount));
+  const decAmount = coin.toDec();
+  if (decAmount.gt(new Dec(0)) && decAmount.lt(MIN_DISPLAY_THRESHOLD)) {
+    return "< 0.000001";
+  }
+  return coin.maxDecimals(6).shrink(true).hideDenom(true).toString();
+}
 
 /**
  * Converts a raw token amount (in smallest unit) to a decimal value.
