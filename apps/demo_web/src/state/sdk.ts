@@ -234,6 +234,19 @@ function setupSolListener(solSDK: OkoSvmWalletInterface) {
     console.log("[Demo] Sol accountChanged event received:", {
       ed25519Key: ed25519Key ? "exists" : "null",
     });
+
+    // If user is signed in but has no ed25519 wallet (V1 user),
+    // force sign out since demo web requires both key types
+    const { isSignedIn, clearUserInfo } = useUserInfoState.getState();
+    if (isSignedIn && !ed25519Key) {
+      console.warn(
+        "[Demo] Signed-in user has no Ed25519 wallet. Forcing sign out.",
+      );
+      solSDK.okoWallet.signOut();
+      clearUserInfo();
+      return;
+    }
+
     setPublicKeyEd25519(ed25519Key);
   });
 }
