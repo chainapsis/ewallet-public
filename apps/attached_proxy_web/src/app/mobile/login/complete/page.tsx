@@ -12,7 +12,7 @@ export const metadata: Metadata = {
  *
  * Loaded after OAuth callback redirects here with tokens.
  * Sends oauth_info_pass to attached iframe (triggers keygen),
- * waits for completion, then stores wallet info in the relay.
+ * waits for completion, then deep-links wallet info back to the app.
  */
 export default async function MobileLoginCompletePage({
   searchParams,

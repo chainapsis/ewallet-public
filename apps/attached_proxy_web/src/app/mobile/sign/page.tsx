@@ -11,8 +11,8 @@ export const metadata: Metadata = {
  * OS-browser signing page.
  *
  * Opened via expo-web-browser's openAuthSessionAsync for every signing request.
- * Loads the attached iframe, consumes a signing request from the relay,
- * displays the signing modal, and stores the result back in the relay.
+ * Loads the attached iframe, reads a signing request from the URL,
+ * displays the signing modal, and deep-links the result back to the app.
  */
 export default async function MobileSignPage({
   searchParams,
@@ -47,7 +47,6 @@ export default async function MobileSignPage({
       >
         <SignClient
           iframeSrc={iframeSrc}
-          relayCode={params.relay_code ?? ""}
           redirectScheme={params.redirect_scheme ?? ""}
         />
       </body>

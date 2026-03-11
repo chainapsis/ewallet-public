@@ -1,5 +1,6 @@
 "use client";
 
+import type { OkoWalletMsgGenerateOAuthUrlAck } from "@oko-wallet/oko-sdk-core";
 import { useEffect, useRef, useState } from "react";
 
 import { sendToAttached } from "../_shared/send_to_attached";
@@ -21,21 +22,15 @@ const statusStyle = {
 
 export function EmailLoginClient({
   apiKey,
-  sessionId,
   redirectScheme,
 }: {
   apiKey: string;
-  sessionId: string;
   redirectScheme: string;
 }) {
   const [status, setStatus] = useState("Preparing sign-in...");
 
   useEffect(() => {
     (async () => {
-      // Store values for /mobile/login/complete
-      if (sessionId) {
-        sessionStorage.setItem("oko_mobile_session_id", sessionId);
-      }
       if (redirectScheme) {
         sessionStorage.setItem("oko_mobile_redirect_scheme", redirectScheme);
       }
@@ -66,6 +61,7 @@ export function EmailLoginClient({
           apiKey,
           targetOrigin: window.location.origin,
           provider: "auth0",
+          redirectScheme,
           mobileOsBrowser: true,
         }),
       );
@@ -73,7 +69,7 @@ export function EmailLoginClient({
       setStatus("Redirecting to email login...");
       window.location.href = auth0Url.toString();
     })();
-  }, [apiKey, sessionId, redirectScheme]);
+  }, [apiKey, redirectScheme]);
 
   return <div style={statusStyle}>{status}</div>;
 }
@@ -85,29 +81,23 @@ export function EmailLoginClient({
 export function OAuthLoginClient({
   provider,
   apiKey,
-  sessionId,
   redirectScheme,
   iframeSrc,
 }: {
   provider: string;
   apiKey: string;
-  sessionId: string;
   redirectScheme: string;
   iframeSrc: string;
 }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [status, setStatus] = useState("Preparing sign-in...");
 
-  // Store values for /mobile/login/complete
   useEffect(() => {
-    if (sessionId) {
-      sessionStorage.setItem("oko_mobile_session_id", sessionId);
-    }
     if (redirectScheme) {
       sessionStorage.setItem("oko_mobile_redirect_scheme", redirectScheme);
     }
     sessionStorage.setItem("oko_mobile_api_key", apiKey);
-  }, [apiKey, sessionId, redirectScheme]);
+  }, [apiKey, redirectScheme]);
 
   useAttachedInit((payload) => {
     if (payload && !payload.success) {
@@ -124,17 +114,20 @@ export function OAuthLoginClient({
 
   async function requestOAuthUrl() {
     try {
-      const result = await sendToAttached(iframeRef.current!, {
-        target: "oko_attached",
-        msg_type: "generate_oauth_url",
-        payload: {
-          provider,
-          apiKey,
-          targetOrigin: window.location.origin,
-          redirectScheme: null,
-          mobileOsBrowser: true,
+      const result = await sendToAttached<OkoWalletMsgGenerateOAuthUrlAck>(
+        iframeRef.current!,
+        {
+          target: "oko_attached",
+          msg_type: "generate_oauth_url",
+          payload: {
+            provider,
+            apiKey,
+            targetOrigin: window.location.origin,
+            redirectScheme,
+            mobileOsBrowser: true,
+          },
         },
-      });
+      );
 
       if (
         result.msg_type === "generate_oauth_url_ack" &&

@@ -18,6 +18,7 @@ export function handleMobileRedirect(params: {
   oauthState: {
     apiKey?: string;
     targetOrigin?: string;
+    redirectScheme?: string | null;
     mobileOsBrowser?: boolean;
   };
   access_token?: string | null;
@@ -36,6 +37,7 @@ export function handleMobileRedirect(params: {
       api_key: oauthState.apiKey ?? "",
       target_origin: oauthState.targetOrigin ?? "",
       auth_type: authType,
+      redirect_scheme: oauthState.redirectScheme,
       access_token: params.access_token,
       id_token: params.id_token,
       code: params.code,

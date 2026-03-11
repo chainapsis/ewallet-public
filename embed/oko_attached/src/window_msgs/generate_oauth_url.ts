@@ -47,7 +47,10 @@ function buildXOAuthUrl(codeChallenge: string, state: OAuthState): string {
   return authUrl.toString();
 }
 
-function buildDiscordOAuthUrl(codeChallenge: string, state: OAuthState): string {
+function buildDiscordOAuthUrl(
+  codeChallenge: string,
+  state: OAuthState,
+): string {
   const redirectUri = `${window.location.origin}/discord/callback`;
 
   const authUrl = new URL("https://discord.com/api/oauth2/authorize");
@@ -81,6 +84,7 @@ async function buildOAuthUrl(
   apiKey: string,
   targetOrigin: string,
   hostOrigin: string,
+  redirectScheme?: string | null,
   mobileOsBrowser?: boolean,
 ): Promise<string> {
   const appState = useAppState.getState();
@@ -89,6 +93,7 @@ async function buildOAuthUrl(
     apiKey,
     targetOrigin,
     provider: provider as AuthType,
+    ...(redirectScheme ? { redirectScheme } : {}),
     ...(mobileOsBrowser && { mobileOsBrowser }),
   };
 
@@ -121,9 +126,20 @@ export async function handleGenerateOAuthUrl(
   const { port, hostOrigin } = ctx;
 
   try {
-    const { provider, apiKey, targetOrigin, mobileOsBrowser } = message.payload;
+    const payload = message.payload as typeof message.payload & {
+      redirectScheme?: string | null;
+    };
+    const { provider, apiKey, targetOrigin, redirectScheme, mobileOsBrowser } =
+      payload;
 
-    const url = await buildOAuthUrl(provider, apiKey, targetOrigin, hostOrigin, mobileOsBrowser);
+    const url = await buildOAuthUrl(
+      provider,
+      apiKey,
+      targetOrigin,
+      hostOrigin,
+      redirectScheme,
+      mobileOsBrowser,
+    );
 
     const ack: OkoWalletMsgGenerateOAuthUrlAck = {
       target: OKO_SDK_TARGET,

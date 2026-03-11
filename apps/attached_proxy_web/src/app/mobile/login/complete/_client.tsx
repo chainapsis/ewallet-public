@@ -1,7 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { OkoWalletMsgOAuthInfoPassAck } from "@oko-wallet/oko-sdk-core";
 
+import {
+  encodeLoginResultPayloadWithStats,
+  LOGIN_URL_CODEC_VERSION,
+  LOGIN_URL_RESULT_PARAM,
+  LOGIN_URL_VERSION_PARAM,
+  type LoginWalletInfo,
+} from "../../_shared/login_url_codec";
 import { sendToAttached } from "../../_shared/send_to_attached";
 import { useAttachedInit } from "../../_shared/use_attached_init";
 
@@ -17,22 +25,23 @@ export function LoginCompleteClient({
 
   // Session data read from sessionStorage on mount
   const sessionDataRef = useRef<{
-    sessionId: string;
     redirectScheme: string;
     oauthPayload: Record<string, string>;
   } | null>(null);
 
   // Read session data and validate OAuth payload on mount
   useEffect(() => {
-    const sessionId = sessionStorage.getItem("oko_mobile_session_id");
     const redirectScheme =
-      sessionStorage.getItem("oko_mobile_redirect_scheme") || "";
-    const apiKey = sessionStorage.getItem("oko_mobile_api_key") || "";
+      oauthParams.redirect_scheme ||
+      sessionStorage.getItem("oko_mobile_redirect_scheme") ||
+      "";
+    const apiKey =
+      oauthParams.api_key || sessionStorage.getItem("oko_mobile_api_key") || "";
 
-    if (!sessionId) {
-      setStatus("Error: missing session data. Please try again.");
+    if (!redirectScheme) {
+      setStatus("Error: missing redirect scheme. Please try again.");
       console.error(
-        "[oko-mobile-login-complete] missing session_id from sessionStorage",
+        "[oko-mobile-login-complete] missing redirect_scheme for callback",
       );
       return;
     }
@@ -51,7 +60,7 @@ export function LoginCompleteClient({
       return;
     }
 
-    sessionDataRef.current = { sessionId, redirectScheme, oauthPayload };
+    sessionDataRef.current = { redirectScheme, oauthPayload };
   }, [oauthParams]);
 
   // Handle init from attached iframe
@@ -88,7 +97,7 @@ export function LoginCompleteClient({
     }
 
     // Send OAuth tokens to attached for keygen
-    sendToAttached(iframeRef.current!, {
+    sendToAttached<OkoWalletMsgOAuthInfoPassAck>(iframeRef.current!, {
       target: "oko_attached",
       msg_type: "oauth_info_pass",
       payload: sessionDataRef.current.oauthPayload,
@@ -106,26 +115,26 @@ export function LoginCompleteClient({
         throw new Error("Wallet data not found in localStorage after keygen");
       }
 
-      const res = await fetch("/api/mobile/relay", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "store",
-          payload: walletData,
-          key: sessionDataRef.current!.sessionId,
-        }),
-      });
-      const data = await res.json();
-
-      if (!data.success) {
-        throw new Error("Failed to store wallet info in relay");
-      }
-
-      // Close OS browser by navigating to callback scheme
       const redirectScheme = sessionDataRef.current?.redirectScheme;
       if (redirectScheme) {
-        window.location.href = `${redirectScheme}://`;
+        const query = new URLSearchParams();
+        const { encoded, stats } =
+          encodeLoginResultPayloadWithStats(walletData);
+        query.set(LOGIN_URL_VERSION_PARAM, LOGIN_URL_CODEC_VERSION);
+        query.set(LOGIN_URL_RESULT_PARAM, encoded);
+        const callbackUrl = `${redirectScheme}://?${query.toString()}`;
+        console.info("[oko-mobile-login-size] result", {
+          authType: walletData.authType,
+          jsonBytes: stats.jsonBytes,
+          compressedBytes: stats.compressedBytes,
+          encodedChars: stats.encodedChars,
+          callbackUrlChars: callbackUrl.length,
+        });
+        window.location.replace(callbackUrl);
+        return;
       }
+
+      throw new Error("Missing redirect scheme");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
       setStatus(`Error: ${message}`);
@@ -184,7 +193,7 @@ export function LoginCompleteClient({
   );
 }
 
-function readWalletFromLocalStorage() {
+function readWalletFromLocalStorage(): LoginWalletInfo | null {
   try {
     const raw = localStorage.getItem("oko-wallet-app-2");
     if (!raw) {
@@ -197,13 +206,20 @@ function readWalletFromLocalStorage() {
     if (!wallet) {
       return null;
     }
-    return {
-      authType: wallet.authType || null,
-      publicKey: wallet.publicKey || null,
+    if (
+      typeof wallet.authType !== "string" ||
+      typeof wallet.publicKey !== "string"
+    ) {
+      return null;
+    }
+    const walletInfo: LoginWalletInfo = {
+      authType: wallet.authType,
+      publicKey: wallet.publicKey,
       publicKeyEd25519: originState?.ed25519Wallet?.publicKey || null,
       email: wallet.email || null,
       name: wallet.name || null,
     };
+    return walletInfo;
   } catch (e) {
     console.error(
       "[oko-mobile-login-complete] failed to read wallet from localStorage:",
@@ -218,6 +234,10 @@ function buildOAuthPayload(
   apiKey: string,
   provider: string,
 ): Record<string, string> | null {
+  if (!apiKey) {
+    return null;
+  }
+
   const base: Record<string, string> = {
     provider,
     api_key: apiKey,

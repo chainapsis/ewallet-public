@@ -16,6 +16,7 @@ import type { SignInType } from "@oko-wallet/oko-sdk-core";
 import * as SecureStore from "expo-secure-store";
 import { openModalRN } from "./methods/open_modal";
 import { signInRN, type SignInOptions } from "./methods/sign_in";
+import type { LoginWalletInfo } from "./methods/login_url_codec";
 import { getEthChainInfo, getCosmosChainInfo } from "./chain_info";
 
 const WALLET_INFO_STORE_KEY = "oko_rn_wallet_info";
@@ -101,8 +102,7 @@ export class OkoWalletRN implements OkoWalletInterface {
           msg_type: "get_eth_chain_info_ack",
           payload: {
             success: false as const,
-            err:
-              error instanceof Error ? error.message : "Unknown error",
+            err: error instanceof Error ? error.message : "Unknown error",
           },
         } as OkoWalletMsg;
       }
@@ -122,8 +122,7 @@ export class OkoWalletRN implements OkoWalletInterface {
           msg_type: "get_cosmos_chain_info_ack",
           payload: {
             success: false as const,
-            err:
-              error instanceof Error ? error.message : "Unknown error",
+            err: error instanceof Error ? error.message : "Unknown error",
           },
         } as OkoWalletMsg;
       }
@@ -156,9 +155,7 @@ export class OkoWalletRN implements OkoWalletInterface {
       signInOptions,
     );
 
-    const info = result.walletInfo as
-      | (WalletInfo & { publicKeyEd25519?: string })
-      | null;
+    const info: LoginWalletInfo | null = result.walletInfo;
     if (info) {
       this.state = {
         authType: info.authType,

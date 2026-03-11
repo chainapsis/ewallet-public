@@ -22,7 +22,6 @@ export default async function MobileLoginPage({
   const params = await searchParams;
   const provider = params.provider ?? "";
   const apiKey = params.api_key ?? "";
-  const pollSessionId = params.session_id ?? "";
   const redirectScheme = params.redirect_scheme ?? "";
   const hostOrigin = params.host_origin ?? "";
   const isEmail = provider === "email";
@@ -49,16 +48,11 @@ export default async function MobileLoginPage({
         }}
       >
         {isEmail ? (
-          <EmailLoginClient
-            apiKey={apiKey}
-            sessionId={pollSessionId}
-            redirectScheme={redirectScheme}
-          />
+          <EmailLoginClient apiKey={apiKey} redirectScheme={redirectScheme} />
         ) : (
           <OAuthLoginClient
             provider={provider}
             apiKey={apiKey}
-            sessionId={pollSessionId}
             redirectScheme={redirectScheme}
             iframeSrc={buildIframeSrc(hostOrigin, apiKey)}
           />

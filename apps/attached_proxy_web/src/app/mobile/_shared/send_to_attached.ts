@@ -2,11 +2,11 @@
  * Send a message to the attached iframe via `MessageChannel` and wait for
  * the ack response. Returns a promise that resolves with the ack data.
  */
-export function sendToAttached(
+export function sendToAttached<TAck>(
   iframe: HTMLIFrameElement,
   msg: { target: string; msg_type: string; payload: unknown },
   timeoutMs = 300_000,
-): Promise<Record<string, any>> {
+): Promise<TAck> {
   return new Promise((resolve, reject) => {
     const channel = new MessageChannel();
     const timer = setTimeout(() => {
@@ -15,7 +15,7 @@ export function sendToAttached(
 
     channel.port1.onmessage = (event) => {
       clearTimeout(timer);
-      resolve(event.data);
+      resolve(event.data as TAck);
     };
 
     iframe.contentWindow!.postMessage(msg, window.location.origin, [

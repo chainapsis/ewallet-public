@@ -241,6 +241,7 @@ export type OkoWalletMsgGenerateOAuthUrl = {
     provider: OAuthProvider;
     apiKey: string;
     targetOrigin: string;
+    redirectScheme?: string | null;
     /** When true, OAuth URL includes mobileOsBrowser flag in state.
      *  Used by the OS-browser login flow. */
     mobileOsBrowser?: boolean;
