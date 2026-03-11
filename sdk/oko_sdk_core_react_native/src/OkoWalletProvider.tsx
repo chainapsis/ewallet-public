@@ -99,7 +99,7 @@ export function OkoWalletProvider({
 }
 
 function buildBridgePageUrl(sdkEndpoint: string, apiKey: string): string {
-  const url = new URL("/rn", sdkEndpoint);
+  const url = new URL("/mobile/bridge", sdkEndpoint);
   url.searchParams.set("host_origin", sdkEndpoint);
   url.searchParams.set("api_key", apiKey);
   return url.toString();

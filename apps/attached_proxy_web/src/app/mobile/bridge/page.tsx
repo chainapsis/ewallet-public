@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Oko RN Bridge",
+  title: "Oko Mobile Bridge",
 };
 
-export default function RnBridgePage({
+export default function MobileBridgePage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
-  return <RnBridgeContent searchParamsPromise={searchParams} />;
+  return <MobileBridgeContent searchParamsPromise={searchParams} />;
 }
 
-async function RnBridgeContent({
+async function MobileBridgeContent({
   searchParamsPromise,
 }: {
   searchParamsPromise: Promise<Record<string, string | undefined>>;
@@ -85,7 +85,7 @@ function buildBridgeScript(): string {
         });
       }
 
-      // Forward init event to RN
+      // Forward init event to native SDK
       if (window.ReactNativeWebView) {
         window.ReactNativeWebView.postMessage(JSON.stringify({
           type: 'event',
@@ -98,8 +98,8 @@ function buildBridgeScript(): string {
 
   });
 
-  // --- 2. Handle messages FROM RN SDK (forwarded to attached iframe) ---
-  function handleRnMessage(data) {
+  // --- 2. Handle messages FROM native SDK (forwarded to attached iframe) ---
+  function handleNativeMessage(data) {
     var parsed;
     try {
       parsed = JSON.parse(data);
@@ -139,20 +139,20 @@ function buildBridgeScript(): string {
     iframe.contentWindow.postMessage(parsed.msg, attachedOrigin, [channel.port2]);
   }
 
-  // react-native-webview posts messages that arrive via both window and document
+  // WebView posts messages that arrive via both window and document
   // depending on the platform (iOS vs Android)
   window.addEventListener('message', function(event) {
     // Skip messages from attached iframe (already handled above)
     if (event.origin === attachedOrigin) return;
 
     if (typeof event.data === 'string') {
-      handleRnMessage(event.data);
+      handleNativeMessage(event.data);
     }
   });
 
   document.addEventListener('message', function(event) {
     if (typeof event.data === 'string') {
-      handleRnMessage(event.data);
+      handleNativeMessage(event.data);
     }
   });
 
