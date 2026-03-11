@@ -16,6 +16,7 @@ import type { SignInType } from "@oko-wallet/oko-sdk-core";
 import * as SecureStore from "expo-secure-store";
 import { openModalRN } from "./methods/open_modal";
 import { signInRN, type SignInOptions } from "./methods/sign_in";
+import { getEthChainInfo, getCosmosChainInfo } from "./chain_info";
 
 const WALLET_INFO_STORE_KEY = "oko_rn_wallet_info";
 
@@ -85,10 +86,51 @@ export class OkoWalletRN implements OkoWalletInterface {
     this._resolveInit({ success: true, data: this.state });
   }
 
-  async sendMsgToIframe(_msg: OkoWalletMsg): Promise<OkoWalletMsg> {
+  async sendMsgToIframe(msg: OkoWalletMsg): Promise<OkoWalletMsg> {
+    if (msg.msg_type === "get_eth_chain_info") {
+      try {
+        const chains = await getEthChainInfo(msg.payload.chain_id);
+        return {
+          target: "oko_sdk",
+          msg_type: "get_eth_chain_info_ack",
+          payload: { success: true as const, data: chains },
+        } as OkoWalletMsg;
+      } catch (error) {
+        return {
+          target: "oko_sdk",
+          msg_type: "get_eth_chain_info_ack",
+          payload: {
+            success: false as const,
+            err:
+              error instanceof Error ? error.message : "Unknown error",
+          },
+        } as OkoWalletMsg;
+      }
+    }
+
+    if (msg.msg_type === "get_cosmos_chain_info") {
+      try {
+        const chains = await getCosmosChainInfo(msg.payload.chain_id);
+        return {
+          target: "oko_sdk",
+          msg_type: "get_cosmos_chain_info_ack",
+          payload: { success: true as const, data: chains },
+        } as OkoWalletMsg;
+      } catch (error) {
+        return {
+          target: "oko_sdk",
+          msg_type: "get_cosmos_chain_info_ack",
+          payload: {
+            success: false as const,
+            err:
+              error instanceof Error ? error.message : "Unknown error",
+          },
+        } as OkoWalletMsg;
+      }
+    }
+
     throw new Error(
-      "[oko-rn] sendMsgToIframe is not supported in React Native. " +
-        "Use getter methods (getPublicKey, getEmail, etc.) which read from local cache.",
+      `[oko-rn] sendMsgToIframe: unsupported message type "${msg.msg_type}".`,
     );
   }
 
