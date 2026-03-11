@@ -28,8 +28,15 @@ import { setUserId } from "@oko-wallet-attached/analytics/amplitude";
 
 export function useInitializeApp() {
   const { setHostOrigin, setReferralInfo } = useMemoryState();
-  const { getAuthToken, getWallet, setAuthToken, setTheme, getTheme } =
-    useAppState();
+  const {
+    getAuthToken,
+    getWallet,
+    getWalletEd25519,
+    resetAll,
+    setAuthToken,
+    setTheme,
+    getTheme,
+  } = useAppState();
   const [isHydrated, setIsHydrated] = useState(false);
   const [resolvedTheme, setResolvedTheme] = useState<Theme | null>(null);
 
@@ -137,6 +144,21 @@ export function useInitializeApp() {
           walletForAuth?.authType,
         );
 
+        // Force sign-out for legacy users who have secp256k1 but no ed25519.
+        // Re-signing in will trigger the needs_keygen_ed25519 flow automatically.
+        const preCheckWallet = getWallet(hostOrigin);
+        const preCheckEd25519 = getWalletEd25519(hostOrigin);
+        if (preCheckWallet && !preCheckEd25519) {
+          console.log(
+            "[attached] legacy user without ed25519 key detected, forcing sign-out for re-keygen",
+          );
+          const savedTheme = getTheme(hostOrigin);
+          resetAll(hostOrigin);
+          if (savedTheme) {
+            setTheme(hostOrigin, savedTheme);
+          }
+        }
+
         const oldTheme = getTheme(hostOrigin);
         const determinedThemeByCustomer = await determineTheme(
           hostOrigin,
@@ -206,7 +228,7 @@ export function useInitializeApp() {
     }
 
     fn().then();
-  }, [getAuthToken, setAuthToken, isHydrated]);
+  }, [getAuthToken, setAuthToken, getWallet, getWalletEd25519, getTheme, setTheme, resetAll, setHostOrigin, setReferralInfo, isHydrated]);
 
   return { theme: resolvedTheme };
 }
