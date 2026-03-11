@@ -99,6 +99,15 @@ export async function signEd25519Round2(
   const user = res.locals.user;
   const body = req.body;
 
+  if (!user.wallet_id_ed25519) {
+    res.status(401).json({
+      success: false,
+      code: "INVALID_REQUEST",
+      msg: "Ed25519 wallet not available. Please create an Ed25519 wallet first.",
+    });
+    return;
+  }
+
   const result = await runSignEd25519Round2(state.db, state.encryption_secret, {
     email: user.email,
     wallet_id: user.wallet_id_ed25519,
