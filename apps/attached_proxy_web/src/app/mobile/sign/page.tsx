@@ -1,13 +1,20 @@
 import type { Metadata } from "next";
 
 import { buildIframeSrc } from "../_shared/build_iframe_src";
-import { BridgeClient } from "./_client";
+import { SignClient } from "./_client";
 
 export const metadata: Metadata = {
-  title: "Oko Mobile Bridge",
+  title: "Oko Wallet",
 };
 
-export default async function MobileBridgePage({
+/**
+ * OS-browser signing page.
+ *
+ * Opened via expo-web-browser's openAuthSessionAsync for every signing request.
+ * Loads the attached iframe, consumes a signing request from the relay,
+ * displays the signing modal, and stores the result back in the relay.
+ */
+export default async function MobileSignPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
@@ -32,10 +39,17 @@ export default async function MobileBridgePage({
           padding: 0,
           width: "100%",
           height: "100%",
-          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+          fontFamily: "-apple-system, sans-serif",
+          background: "#f5f5f5",
         }}
       >
-        <BridgeClient iframeSrc={iframeSrc} />
+        <SignClient
+          iframeSrc={iframeSrc}
+          relayCode={params.relay_code ?? ""}
+          redirectScheme={params.redirect_scheme ?? ""}
+        />
       </body>
     </html>
   );
