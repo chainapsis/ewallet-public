@@ -107,7 +107,9 @@ export function SiwsWidget() {
 
     try {
       // Create StandardWallet wrapper with config
-      const standardWallet = new OkoStandardWallet(okoSvmWallet, [SOLANA_CONFIG]);
+      const standardWallet = new OkoStandardWallet(okoSvmWallet, [
+        SOLANA_CONFIG,
+      ]);
 
       // Call solana:signIn feature (cast to proper type since features is Record<string, unknown>)
       const signInFeature = standardWallet.features[

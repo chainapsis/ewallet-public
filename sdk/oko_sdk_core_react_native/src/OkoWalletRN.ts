@@ -50,10 +50,7 @@ export class OkoWalletRN {
   sdkEndpoint: string;
   redirectScheme: string;
   origin: string;
-  eventEmitter: EventEmitter3<
-    OkoWalletCoreEvent2,
-    OkoWalletCoreEventHandler2
-  >;
+  eventEmitter: EventEmitter3<OkoWalletCoreEvent2, OkoWalletCoreEventHandler2>;
 
   // Stubs for OkoWalletInterface compat (unused in RN)
   iframe: null = null;
@@ -66,9 +63,7 @@ export class OkoWalletRN {
   /** @internal */
   bridge!: WebViewBridge;
 
-  private _resolveInit!: (
-    value: Result<OkoWalletState, string>,
-  ) => void;
+  private _resolveInit!: (value: Result<OkoWalletState, string>) => void;
   private _initResolved = false;
   private _cachedPublicKeyEd25519: string | null = null;
 
@@ -173,12 +168,7 @@ export class OkoWalletRN {
   ): Promise<Result<OpenModalAckPayload, OpenModalError>> {
     await this.waitUntilInitialized;
 
-    return openModalRN(
-      this.sdkEndpoint,
-      msg,
-      this.redirectScheme,
-      this.apiKey,
-    );
+    return openModalRN(this.sdkEndpoint, msg, this.redirectScheme, this.apiKey);
   }
 
   /**

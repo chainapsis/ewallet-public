@@ -7,7 +7,9 @@ const __dirname = path.dirname(__filename);
 const PKG_ROOT = path.resolve(__dirname, "..");
 
 async function main() {
-  console.log("Start build (typecheck only — source is consumed directly by Metro)");
+  console.log(
+    "Start build (typecheck only — source is consumed directly by Metro)",
+  );
 
   await new Promise<void>((resolve, reject) => {
     const child = spawn("yarn", ["run", "typecheck"], {

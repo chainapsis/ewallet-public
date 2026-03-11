@@ -9,8 +9,6 @@ export async function signOutRN(bridge: WebViewBridge): Promise<void> {
   } as OkoWalletMsg);
 
   if (ack.msg_type !== "sign_out_ack") {
-    throw new Error(
-      `sign_out failed: unexpected ack type ${ack.msg_type}`,
-    );
+    throw new Error(`sign_out failed: unexpected ack type ${ack.msg_type}`);
   }
 }

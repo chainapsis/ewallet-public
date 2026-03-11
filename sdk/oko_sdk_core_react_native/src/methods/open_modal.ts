@@ -26,19 +26,19 @@ export async function openModalRN(
 ): Promise<Result<OpenModalAckPayload, OpenModalError>> {
   try {
     // 1. Store signing request in relay
-    const storeRes = await fetch(
-      `${sdkEndpoint}/api/mobile/sign-relay/store`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ payload: msg.payload }),
-      },
-    );
+    const storeRes = await fetch(`${sdkEndpoint}/api/mobile/sign-relay/store`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ payload: msg.payload }),
+    });
 
     if (!storeRes.ok) {
       return {
         success: false,
-        err: { type: "unknown_error", error: `relay_store_failed: HTTP ${storeRes.status}` },
+        err: {
+          type: "unknown_error",
+          error: `relay_store_failed: HTTP ${storeRes.status}`,
+        },
       };
     }
 
@@ -50,7 +50,10 @@ export async function openModalRN(
     if (!storeData.success || !storeData.code) {
       return {
         success: false,
-        err: { type: "unknown_error", error: "relay_store_failed: no code returned" },
+        err: {
+          type: "unknown_error",
+          error: "relay_store_failed: no code returned",
+        },
       };
     }
 
@@ -72,7 +75,6 @@ export async function openModalRN(
     // 3. Custom Tab closed via callback — fetch signing result from relay
     const payload = await fetchRelayResult(sdkEndpoint, resultKey);
     return { success: true, data: payload };
-
   } catch (error) {
     return {
       success: false,

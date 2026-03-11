@@ -44,10 +44,7 @@ async function tryGoogleSignIn(
     },
   });
 
-  if (
-    ack.msg_type !== "generate_oauth_url_ack" ||
-    !ack.payload.success
-  ) {
+  if (ack.msg_type !== "generate_oauth_url_ack" || !ack.payload.success) {
     popup.close();
     throw new Error("Failed to generate Google OAuth URL");
   }

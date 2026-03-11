@@ -78,9 +78,7 @@ export function OkoWalletProvider({
 
   return (
     <OkoWalletContext.Provider value={wallet}>
-      <View style={styles.container}>
-        {children}
-      </View>
+      <View style={styles.container}>{children}</View>
       {/* WebView is always hidden — read-only bridge only, no key shares */}
       <View style={styles.webviewContainer} pointerEvents="none">
         <WebView

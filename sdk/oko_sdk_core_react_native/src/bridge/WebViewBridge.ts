@@ -1,11 +1,7 @@
 import type { RefObject } from "react";
 import type WebView from "react-native-webview";
 import type { OkoWalletMsg } from "@oko-wallet/oko-sdk-core";
-import type {
-  BridgeRequest,
-  BridgeResponse,
-  PendingRequest,
-} from "./types";
+import type { BridgeRequest, BridgeResponse, PendingRequest } from "./types";
 
 const REQUEST_TIMEOUT_MS = 30_000;
 

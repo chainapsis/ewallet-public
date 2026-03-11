@@ -24,7 +24,11 @@ async function tryGithubSignIn(
   apiKey: string,
   sendMsgToIframe: (msg: OkoWalletMsg) => Promise<OkoWalletMsg>,
 ): Promise<OkoWalletMsgOAuthSignInUpdate> {
-  const popup = window.open("about:blank", "github_oauth", "width=1200,height=800");
+  const popup = window.open(
+    "about:blank",
+    "github_oauth",
+    "width=1200,height=800",
+  );
 
   if (!popup) {
     throw new Error("Failed to open new window for GitHub oauth sign in");
@@ -40,10 +44,7 @@ async function tryGithubSignIn(
     },
   });
 
-  if (
-    ack.msg_type !== "generate_oauth_url_ack" ||
-    !ack.payload.success
-  ) {
+  if (ack.msg_type !== "generate_oauth_url_ack" || !ack.payload.success) {
     popup.close();
     throw new Error("Failed to generate GitHub OAuth URL");
   }

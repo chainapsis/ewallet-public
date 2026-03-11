@@ -3,9 +3,10 @@ import { withOkoAuthBrowserAndroid } from "./withOkoAuthBrowserAndroid";
 
 const DEFAULT_CALLBACK_SCHEME = "oko.auth.callback";
 
-const withOkoAuthBrowser: ConfigPlugin<
-  { callbackScheme?: string } | void
-> = (config, props) => {
+const withOkoAuthBrowser: ConfigPlugin<{ callbackScheme?: string } | void> = (
+  config,
+  props,
+) => {
   const callbackScheme = props?.callbackScheme ?? DEFAULT_CALLBACK_SCHEME;
   config = withOkoAuthBrowserAndroid(config, { callbackScheme });
   return config;

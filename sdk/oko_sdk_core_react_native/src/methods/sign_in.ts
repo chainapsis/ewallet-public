@@ -30,12 +30,17 @@ export async function signInRN(
   apiKey: string,
   options?: SignInOptions,
 ): Promise<SignInResult> {
-  const redirectScheme =
-    options?.redirectScheme ?? DEFAULT_REDIRECT_SCHEME;
+  const redirectScheme = options?.redirectScheme ?? DEFAULT_REDIRECT_SCHEME;
 
   const sessionId = generateSessionId();
   const serverScheme = getServerRedirectScheme(redirectScheme);
-  const loginUrl = buildLoginUrl(sdkEndpoint, type, apiKey, sessionId, serverScheme);
+  const loginUrl = buildLoginUrl(
+    sdkEndpoint,
+    type,
+    apiKey,
+    sessionId,
+    serverScheme,
+  );
 
   // Open OS browser — blocks until callback redirect or user cancel.
   // On Android: ManagementActivity keeps Custom Tab in same task.
@@ -65,14 +70,11 @@ async function fetchRelayResult(
 ): Promise<unknown> {
   for (let i = 0; i < maxRetries; i++) {
     try {
-      const res = await fetch(
-        `${sdkEndpoint}/api/mobile/sign-relay/consume`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code }),
-        },
-      );
+      const res = await fetch(`${sdkEndpoint}/api/mobile/sign-relay/consume`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
       const data = (await res.json()) as {
         success: boolean;
         payload?: unknown;

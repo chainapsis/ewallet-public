@@ -46,11 +46,7 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
     moduleName.startsWith("react/") ||
     moduleName.startsWith("react-native/")
   ) {
-    const redirected = path.resolve(
-      projectRoot,
-      "node_modules",
-      moduleName,
-    );
+    const redirected = path.resolve(projectRoot, "node_modules", moduleName);
     return context.resolveRequest(
       { ...context, resolveRequest: undefined },
       redirected,
