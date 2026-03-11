@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 
 import type { HandleGithubCallbackError } from "./types";
 import { sendOAuthPayloadToEmbeddedWindow } from "@oko-wallet-attached/components/oauth_callback/send_oauth_payload";
+import { handleMobileRedirect } from "@oko-wallet-attached/components/oauth_callback/handle_mobile_redirect";
 import { errorToLog } from "@oko-wallet-attached/logging/error";
 import { postLog } from "@oko-wallet-attached/requests/logging";
 
@@ -72,17 +73,29 @@ export async function handleGithubCallback(): Promise<
     };
   }
 
+  const code = urlParams.get("code");
+  const stateParam = urlParams.get(RedirectUriSearchParamsKey.STATE) || "{}";
+
+  // Mobile: OS-browser flow or sessionStorage fallback
+  if (stateParam !== "{}") {
+    try {
+      const oauthState = JSON.parse(atob(stateParam));
+      const mobileRedirected = handleMobileRedirect({
+        provider: "github",
+        authType: "github",
+        oauthState,
+        code,
+      });
+      if (mobileRedirected) return { success: true, data: void 0 };
+    } catch { /* fall through to web flow */ }
+  }
+
   if (!window.opener) {
     return {
       success: false,
-      err: {
-        type: "opener_window_not_exists",
-      },
+      err: { type: "opener_window_not_exists" },
     };
   }
-
-  const code = urlParams.get("code");
-  const stateParam = urlParams.get(RedirectUriSearchParamsKey.STATE) || "{}";
 
   if (!code) {
     return {

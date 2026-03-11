@@ -73,14 +73,14 @@ export function useArbitrarySigModal(args: UseCosmosArbitrarySigModalArgs) {
 
       closeModal(ack);
     } catch (error: any) {
-      // const ack: OpenModalAckPayload = {
-      //   modal_type: "make_signature",
-      //   modal_id: modalId,
-      //   type: "error",
-      //   error: error.toString(),
-      // };
-      // closeModal(ack);
-      // onError(error);
+      console.error("Error making cosmos arbitrary sig", error);
+      const ack: OpenModalAckPayload = {
+        modal_type: "cosmos/make_signature",
+        modal_id: modalId,
+        type: "error",
+        error: error.toString(),
+      };
+      closeModal(ack);
     } finally {
       setIsLoading(false);
     }

@@ -13,6 +13,7 @@ import type { Auth0DecodedHash } from "auth0-js";
 import { getAuth0WebAuth } from "@oko-wallet-attached/config/auth0";
 import type { HandleCallbackError } from "@oko-wallet-attached/components/google_callback/types";
 import { sendOAuthPayloadToEmbeddedWindow } from "@oko-wallet-attached/components/oauth_callback/send_oauth_payload";
+import { handleMobileRedirect } from "@oko-wallet-attached/components/oauth_callback/handle_mobile_redirect";
 
 const EMAIL_STORAGE_KEY = "oko_email_login_pending_email";
 
@@ -63,16 +64,45 @@ export function useEmailCallback(): { error: string | null } {
 export async function handleEmailCallback(): Promise<
   Result<void, HandleCallbackError>
 > {
+  // Mobile: no opener, parse hash manually — auth0-js's parseHash validates
+  // state against its internal transaction store, but the mobile flow bypasses auth0-js
+  // (redirects to Auth0's Universal Login directly) so no transaction was stored.
   if (!window.opener) {
+    const { accessToken, idToken, state: stateString } = parseHashParams();
+    if (stateString && (accessToken || idToken)) {
+      try {
+        const oauthState = JSON.parse(stateString) as OAuthState;
+        const provider = oauthState.provider ?? "auth0";
+        const mobileRedirected = handleMobileRedirect({
+          provider,
+          authType: provider,
+          oauthState,
+          access_token: accessToken,
+          id_token: idToken,
+        });
+        if (mobileRedirected) return { success: true, data: void 0 };
+      } catch { /* fall through to normal error */ }
+    }
+
+    // Fallback with no parsed state: try sessionStorage from /mobile/login page
+    const { accessToken: at, idToken: it } = parseHashParams();
+    const mobileRedirected = handleMobileRedirect({
+      provider: "auth0",
+      authType: "auth0",
+      oauthState: {},
+      access_token: at,
+      id_token: it,
+    });
+    if (mobileRedirected) return { success: true, data: void 0 };
+
     return {
       success: false,
-      err: {
-        type: "opener_window_not_exists",
-      },
+      err: { type: "opener_window_not_exists" },
     };
   }
-
+  // Web popup flow: auth0-js parseHash validates state properly
   const parsedHash = await parseAuth0Hash();
+
   window.history.replaceState(
     {},
     document.title,
@@ -171,6 +201,27 @@ export async function handleEmailCallback(): Promise<
     },
   });
   return { success: true, data: void 0 };
+}
+
+/**
+ * Parse hash fragment manually (mobile flow).
+ * Avoids auth0-js parseHash which requires a matching transaction in storage.
+ */
+function parseHashParams(): {
+  accessToken: string | undefined;
+  idToken: string | undefined;
+  state: string | undefined;
+} {
+  const hash = window.location.hash;
+  if (!hash || hash.length < 2) {
+    return { accessToken: undefined, idToken: undefined, state: undefined };
+  }
+  const params = new URLSearchParams(hash.substring(1));
+  return {
+    accessToken: params.get("access_token") ?? undefined,
+    idToken: params.get("id_token") ?? undefined,
+    state: params.get("state") ?? undefined,
+  };
 }
 
 async function parseAuth0Hash(): Promise<Auth0DecodedHash> {

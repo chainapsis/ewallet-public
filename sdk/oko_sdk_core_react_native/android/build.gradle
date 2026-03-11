@@ -1,0 +1,21 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'com.okowallet'
+version = '0.1.0'
+
+android {
+  namespace "com.okowallet.auth"
+
+  defaultConfig {
+    versionCode 1
+    versionName "0.1.0"
+  }
+}
+
+dependencies {
+  api "androidx.browser:browser:1.9.0"
+  api "androidx.activity:activity-ktx:1.10.1"
+}

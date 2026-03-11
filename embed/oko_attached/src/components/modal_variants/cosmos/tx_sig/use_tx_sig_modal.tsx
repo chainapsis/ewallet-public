@@ -60,6 +60,7 @@ export function useTxSigModal(
     };
 
     setError(err);
+    closeModal(err);
 
     return {
       success: false,
@@ -217,6 +218,7 @@ export function useTxSigModal(
         };
 
         setError(err);
+        closeModal(err);
         return;
       }
 
@@ -237,15 +239,17 @@ export function useTxSigModal(
     } catch (error: any) {
       console.error("Error making cosmos sig", error);
 
-      setError({
-        modal_type: "cosmos/make_signature",
+      const err = {
+        modal_type: "cosmos/make_signature" as const,
         modal_id: modalId,
-        type: "error",
+        type: "error" as const,
         error: {
-          type: "unknown_error",
+          type: "unknown_error" as const,
           error: error,
         },
-      });
+      };
+      setError(err);
+      closeModal(err);
     } finally {
       setIsLoading(false);
     }
