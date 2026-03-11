@@ -1,7 +1,7 @@
 {
   "name": "@oko-wallet/crypto-js",
   "type": "module",
-  "version": "0.1.2-alpha.9",
+  "version": "0.1.2-alpha.10",
   "publishConfig": {
     "access": "public"
   },
@@ -23,8 +23,8 @@
   "dependencies": {
     "@noble/curves": "2.0.1",
     "@noble/hashes": "2.0.1",
-    "@oko-wallet/bytes": "^0.1.2-alpha.9",
-    "@oko-wallet/stdlib-js": "^0.1.2-alpha.9",
+    "@oko-wallet/bytes": "^0.1.2-alpha.10",
+    "@oko-wallet/stdlib-js": "^0.1.2-alpha.10",
     "bcryptjs": "^3.0.2",
     "supertest": "^7.0.0"
   },
