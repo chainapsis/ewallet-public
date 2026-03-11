@@ -24,8 +24,14 @@ export function makeApp(state: ServerState) {
     }),
   );
 
+  const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(",").map((o) => o.trim())
+    : undefined;
+
   app.use(
     cors({
+      origin: allowedOrigins,
+      credentials: true,
       exposedHeaders: ["X-New-Token"],
     }),
   );
