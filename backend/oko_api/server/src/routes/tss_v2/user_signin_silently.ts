@@ -1,8 +1,5 @@
-import type { Request, Response } from "express";
-import type { SignInSilentlyResponse } from "@oko-wallet/oko-types/user";
-import type { AuthType } from "@oko-wallet/oko-types/auth";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
+import { registry } from "@oko-wallet/oko-api-openapi";
 import {
   ErrorResponseSchema,
   UserAuthHeaderSchema,
@@ -11,14 +8,16 @@ import {
   SignInRequestSchema,
   SignInSilentlySuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/tss";
-import { registry } from "@oko-wallet/oko-api-openapi";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
+import type { SignInSilentlyResponse } from "@oko-wallet/oko-types/user";
+import type { Request, Response } from "express";
 
-import { signInV2 } from "@oko-wallet-api/api/tss/v2/user";
 import {
   generateUserTokenV2,
-  verifyUserToken,
   verifyUserTokenV2,
 } from "@oko-wallet-api/api/tss/keplr_auth";
+import { signInV2 } from "@oko-wallet-api/api/tss/v2/user";
 
 registry.registerPath({
   method: "post",
@@ -92,6 +91,8 @@ export async function userSignInSilentlyV2(
   // Try V2 token first
   const v2Result = verifyUserTokenV2({ token, jwt_config: jwtConfig });
 
+  console.log("v2Result", v2Result);
+
   if (v2Result.success) {
     // V2 token is still valid
     res.status(200).json({ success: true, data: { token: null } });
@@ -100,12 +101,11 @@ export async function userSignInSilentlyV2(
 
   if (v2Result.err.type === "expired") {
     const payload = v2Result.err.payload;
+    const isV2Payload =
+      "wallet_id_secp256k1" in payload && !!payload.wallet_id_secp256k1;
+    const isV1Payload = "wallet_id" in payload && !!payload.wallet_id;
 
-    if (
-      !payload.email ||
-      !("wallet_id_secp256k1" in payload) ||
-      !payload.wallet_id_secp256k1
-    ) {
+    if (!payload.email || (!isV2Payload && !isV1Payload)) {
       res.status(401).json({
         success: false,
         code: "INVALID_AUTH_TOKEN",
@@ -114,87 +114,36 @@ export async function userSignInSilentlyV2(
       return;
     }
 
-    const signInRes = await signInV2(
-      state.db,
-      payload.email,
-      auth_type,
-      {
-        secret: state.jwt_secret,
-        expires_in: state.jwt_expires_in,
-      },
-      state.encryption_secret,
-      state.logger,
-    );
+    if (isV2Payload) {
+      // Expired V2 token — refresh via signInV2
+      const signInRes = await signInV2(
+        state.db,
+        payload.email,
+        auth_type,
+        {
+          secret: state.jwt_secret,
+          expires_in: state.jwt_expires_in,
+        },
+        state.encryption_secret,
+        state.logger,
+      );
 
-    if (signInRes.success === false) {
-      res.status(ErrorCodeMap[signInRes.code] ?? 500).json(signInRes);
-      return;
-    }
+      if (signInRes.success === false) {
+        res.status(ErrorCodeMap[signInRes.code] ?? 500).json(signInRes);
+        return;
+      }
 
-    res.status(200).json({
-      success: true,
-      data: { token: signInRes.data.token },
-    });
-    return;
-  }
-
-  // V2 verify failed (not expired) — try V1 token fallback
-  const v1Result = verifyUserToken({ token, jwt_config: jwtConfig });
-
-  if (v1Result.success) {
-    const payload = v1Result.data;
-
-    if (!payload.email || !payload.wallet_id) {
-      res.status(401).json({
-        success: false,
-        code: "INVALID_AUTH_TOKEN",
-        msg: "Unauthorized: Invalid token",
+      res.status(200).json({
+        success: true,
+        data: { token: signInRes.data.token },
       });
       return;
     }
 
-    // Issue a V2 token with secp256k1 only (no ed25519)
+    // Expired V1 token — issue V2 token with secp256k1 only
+    const v1WalletId = (payload as { wallet_id: string }).wallet_id;
     const tokenResult = generateUserTokenV2({
-      wallet_id_secp256k1: payload.wallet_id,
-      wallet_id_ed25519: "",
-      email: payload.email,
-      jwt_config: {
-        secret: state.jwt_secret,
-        expires_in: state.jwt_expires_in,
-      },
-    });
-
-    if (tokenResult.success === false) {
-      res.status(500).json({
-        success: false,
-        code: "UNKNOWN_ERROR",
-        msg: "Failed to generate token",
-      });
-      return;
-    }
-
-    res.status(200).json({
-      success: true,
-      data: { token: tokenResult.data.token },
-    });
-    return;
-  }
-
-  if (v1Result.err.type === "expired") {
-    const payload = v1Result.err.payload;
-
-    if (!payload.email || !("wallet_id" in payload) || !payload.wallet_id) {
-      res.status(401).json({
-        success: false,
-        code: "INVALID_AUTH_TOKEN",
-        msg: "Unauthorized: Invalid token",
-      });
-      return;
-    }
-
-    // Issue a V2 token with secp256k1 only (no ed25519)
-    const tokenResult = generateUserTokenV2({
-      wallet_id_secp256k1: payload.wallet_id,
+      wallet_id_secp256k1: v1WalletId,
       wallet_id_ed25519: "",
       email: payload.email,
       jwt_config: {
@@ -222,6 +171,6 @@ export async function userSignInSilentlyV2(
   res.status(401).json({
     success: false,
     code: "INVALID_REQUEST",
-    msg: v1Result.err.toString(),
+    msg: v2Result.err.toString(),
   });
 }
