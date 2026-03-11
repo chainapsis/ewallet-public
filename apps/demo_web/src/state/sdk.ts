@@ -207,13 +207,28 @@ function setupCosmosListener(cosmosSDK: OkoCosmosWalletInterface) {
     console.log("[Demo] Setting up Cosmos accountsChanged listener");
     cosmosSDK.on({
       type: "accountsChanged",
-      handler: ({ authType, email, publicKey, name }) => {
+      handler: async ({ authType, email, publicKey, name }) => {
         console.log("[Demo] accountsChanged event received:", {
           authType,
           email,
           publicKey: publicKey ? "exists" : "null",
           name,
         });
+
+        // If user signed in but has no ed25519 wallet (V1 user),
+        // force sign out since demo web requires both key types
+        if (publicKey) {
+          const ed25519Key = await cosmosSDK.okoWallet.getPublicKeyEd25519();
+
+          if (!ed25519Key) {
+            console.warn(
+              "[Demo] Signed-in user has no Ed25519 wallet. Forcing sign out.",
+            );
+            cosmosSDK.okoWallet.signOut();
+            return;
+          }
+        }
+
         setUserInfo({
           authType: authType || null,
           email: email || null,
