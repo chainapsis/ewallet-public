@@ -1,7 +1,4 @@
-import {
-  createSession,
-  getSession,
-} from "../../../../relay/session_store";
+import { createSession, getSession } from "../../../../relay/session_store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

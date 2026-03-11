@@ -10,14 +10,17 @@ const SESSION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const sessions = new Map<string, Session>();
 
 // Periodic cleanup of expired sessions
-setInterval(() => {
-  const now = Date.now();
-  for (const [id, session] of sessions) {
-    if (session.expiresAt <= now) {
-      sessions.delete(id);
+setInterval(
+  () => {
+    const now = Date.now();
+    for (const [id, session] of sessions) {
+      if (session.expiresAt <= now) {
+        sessions.delete(id);
+      }
     }
-  }
-}, 5 * 60 * 1000); // every 5 minutes
+  },
+  5 * 60 * 1000,
+); // every 5 minutes
 
 /** Create a new session. Returns only the sessionId. */
 export function createSession(): { sessionId: string } {
@@ -40,4 +43,3 @@ export function getSession(sessionId: string): Session | null {
   }
   return session;
 }
-

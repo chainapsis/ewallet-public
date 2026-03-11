@@ -94,7 +94,11 @@ function buildIframeSrc(hostOrigin: string, apiKey: string): string {
  * No attached iframe needed — Auth0 handles the entire email OTP flow
  * on its own domain (avoids 3rd-party cookie issues on mobile).
  */
-function buildEmailLoginScript(apiKey: string, sessionId: string, redirectScheme: string): string {
+function buildEmailLoginScript(
+  apiKey: string,
+  sessionId: string,
+  redirectScheme: string,
+): string {
   return `
 (function() {
   'use strict';
