@@ -91,6 +91,28 @@ export function makeMsgHandler() {
       hostOrigin: event.origin,
     };
 
+    // Messages that don't require a registered origin (setup / auth flow)
+    const openMsgTypes = new Set([
+      "oauth_info_pass",
+      "open_modal",
+      "generate_oauth_url",
+      "set_oauth_nonce",
+      "set_code_verifier",
+    ]);
+
+    if (!openMsgTypes.has(message.msg_type)) {
+      const appState = useAppState.getState();
+      const registeredApiKey = appState.getApiKey(event.origin);
+      if (!registeredApiKey) {
+        port.postMessage({
+          target: OKO_SDK_TARGET,
+          msg_type: "error",
+          payload: "Origin not registered",
+        });
+        return;
+      }
+    }
+
     switch (message.msg_type) {
       case "set_oauth_nonce": {
         handleSetOAuthNonce(ctx, message);
