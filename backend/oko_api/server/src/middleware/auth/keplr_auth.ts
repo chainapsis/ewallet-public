@@ -1,4 +1,4 @@
-import type { Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response } from "express";
 
 import {
   verifyUserToken,
@@ -65,8 +65,13 @@ export async function userJwtMiddleware(
 }
 
 /**
- * Verify a V2 JWT token and set `res.locals.user` with the decoded payload.
+ * Verify a V2 (or V1) JWT token and set `res.locals.user` with the decoded payload.
  * Shared by `userJwtMiddlewareV2` (header) and `userJwtFromBodyMiddleware` (body).
+ *
+ * Supports V1 token fallback: if the token contains `wallet_id` (V1) instead of
+ * `wallet_id_secp256k1` (V2), it maps `wallet_id` → `wallet_id_secp256k1` and
+ * leaves `wallet_id_ed25519` as `null`. This allows V1 users to use secp256k1
+ * signing through V2 endpoints.
  */
 function verifyJwtV2AndSetLocals(
   token: string,
@@ -76,39 +81,51 @@ function verifyJwtV2AndSetLocals(
 ): void {
   try {
     const state = req.app.locals;
+    const jwtConfig = { secret: state.jwt_secret };
 
-    const verifyTokenRes = verifyUserTokenV2({
-      token,
-      jwt_config: {
-        secret: state.jwt_secret,
-      },
-    });
+    // Try V2 token first
+    const v2Result = verifyUserTokenV2({ token, jwt_config: jwtConfig });
 
-    if (!verifyTokenRes.success) {
-      res.status(401).json({ error: verifyTokenRes.err });
+    if (v2Result.success) {
+      const payload = v2Result.data;
+
+      if (!payload.email || !payload.wallet_id_secp256k1) {
+        res.status(401).json({ error: "Unauthorized: Invalid token" });
+        return;
+      }
+
+      res.locals.user = {
+        email: payload.email,
+        wallet_id_secp256k1: payload.wallet_id_secp256k1,
+        wallet_id_ed25519: payload.wallet_id_ed25519 || null,
+      };
+
+      next();
       return;
     }
 
-    const payload = verifyTokenRes.data;
+    // Fallback: try V1 token (has `wallet_id` instead of `wallet_id_secp256k1`)
+    const v1Result = verifyUserToken({ token, jwt_config: jwtConfig });
 
-    if (
-      !payload.email ||
-      !payload.wallet_id_secp256k1 ||
-      !payload.wallet_id_ed25519
-    ) {
-      res.status(401).json({
-        error: "Unauthorized: Invalid token",
-      });
+    if (v1Result.success) {
+      const payload = v1Result.data;
+
+      if (!payload.email || !payload.wallet_id) {
+        res.status(401).json({ error: "Unauthorized: Invalid token" });
+        return;
+      }
+
+      res.locals.user = {
+        email: payload.email,
+        wallet_id_secp256k1: payload.wallet_id,
+        wallet_id_ed25519: null,
+      };
+
+      next();
       return;
     }
 
-    res.locals.user = {
-      email: payload.email,
-      wallet_id_secp256k1: payload.wallet_id_secp256k1,
-      wallet_id_ed25519: payload.wallet_id_ed25519,
-    };
-
-    next();
+    res.status(401).json({ error: v2Result.err });
   } catch (error) {
     res.status(500).json({
       error: `Token validation failed: ${error instanceof Error ? error.message : String(error)}`,
