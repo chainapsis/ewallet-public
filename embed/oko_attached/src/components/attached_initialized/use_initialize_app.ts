@@ -138,10 +138,16 @@ export function useInitializeApp() {
         );
 
         const oldTheme = getTheme(hostOrigin);
-        const determinedThemeByCustomer = await determineTheme(
+        let determinedThemeByCustomer = await determineTheme(
           hostOrigin,
           oldTheme,
         );
+
+        // iOS mobile: force light mode (ASWebAuthenticationSession chrome is always light)
+        const isMobileParam = searchParams.get("mobile") === "true";
+        if (isMobileParam && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
+          determinedThemeByCustomer = "light";
+        }
 
         setTheme(hostOrigin, determinedThemeByCustomer);
         setColorScheme(determinedThemeByCustomer);
