@@ -1,6 +1,7 @@
 import { Button } from "@oko-wallet/oko-common-ui/button";
 import { ChevronRightIcon } from "@oko-wallet/oko-common-ui/icons/chevron_right";
 import { DiscordIcon } from "@oko-wallet/oko-common-ui/icons/discord_icon";
+import { GithubIcon } from "@oko-wallet/oko-common-ui/icons/github_icon";
 import { GoogleIcon } from "@oko-wallet/oko-common-ui/icons/google_icon";
 import { MailboxIcon } from "@oko-wallet/oko-common-ui/icons/mailbox";
 import { TelegramIcon } from "@oko-wallet/oko-common-ui/icons/telegram_icon";
@@ -53,6 +54,7 @@ export const LoginDefaultView: FC<LoginDefaultViewProps> = ({
             <XIcon size={16} />
             <TelegramIcon size={16} />
             <DiscordIcon size={16} />
+            <GithubIcon size={16} />
           </div>
           <Typography
             size="sm"
