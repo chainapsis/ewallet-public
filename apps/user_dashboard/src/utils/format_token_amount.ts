@@ -17,7 +17,7 @@ export function formatDisplayBalance(
   if (decAmount.gt(new Dec(0)) && decAmount.lt(MIN_DISPLAY_THRESHOLD)) {
     return "< 0.000001";
   }
-  return coin.maxDecimals(6).trim(true).shrink(true).hideDenom(true).toString();
+  return coin.maxDecimals(6).trim(true).hideDenom(true).toString();
 }
 
 /**
