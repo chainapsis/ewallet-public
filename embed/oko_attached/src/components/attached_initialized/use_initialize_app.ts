@@ -15,6 +15,9 @@ import {
 } from "@oko-wallet-attached/requests/oko_api";
 import { determineTheme, setColorScheme } from "./color_scheme";
 import { makeMsgHandler } from "@oko-wallet-attached/window_msgs";
+import { handleOAuthInfoPassV2 } from "@oko-wallet-attached/window_msgs/oauth_info_pass";
+import { OAUTH_BROADCAST_CHANNEL } from "@oko-wallet-attached/window_msgs/target";
+import type { MsgEventContext } from "@oko-wallet-attached/window_msgs/types";
 import {
   errorToLog,
   initErrorLogging,
@@ -48,8 +51,33 @@ export function useInitializeApp() {
     console.debug("[attached] adding msg event listener");
     window.addEventListener("message", msgHandler);
 
+    // BroadcastChannel fallback for Safari (iOS) where popup's window.opener
+    // is null after cross-origin OAuth navigation. The callback popup sends
+    // oauth_info_pass via BroadcastChannel instead of window.opener.frames[].
+    const bc = new BroadcastChannel(OAUTH_BROADCAST_CHANNEL);
+    bc.onmessage = async (event) => {
+      const message = event.data;
+
+      if (
+        message?.target === "oko_attached" &&
+        message?.msg_type === "oauth_info_pass"
+      ) {
+        const port: Pick<MessagePort, "postMessage"> = {
+          postMessage: (msg: unknown) => bc.postMessage(msg),
+        };
+
+        const ctx: MsgEventContext = {
+          port: port as MessagePort,
+          hostOrigin: message.payload.target_origin,
+        };
+
+        await handleOAuthInfoPassV2(ctx, message);
+      }
+    };
+
     return () => {
       window.removeEventListener("message", msgHandler);
+      bc.close();
     };
   }, []);
 

@@ -7,6 +7,7 @@ import type {
 } from "@oko-wallet/oko-sdk-core";
 
 import { sendMsgToWindow } from "@oko-wallet-attached/window_msgs/send";
+import { OAUTH_BROADCAST_CHANNEL } from "@oko-wallet-attached/window_msgs/target";
 import type {
   HandleCallbackError,
   SendMsgToEmbeddedWindowError,
@@ -15,22 +16,15 @@ import type {
 export async function sendOAuthPayloadToEmbeddedWindow(
   payload: OAuthPayload | OAuthTokenRequestPayload,
 ): Promise<Result<void, HandleCallbackError>> {
-  if (!window.opener) {
-    return {
-      success: false,
-      err: {
-        type: "opener_window_not_exists",
-      },
-    };
-  }
-
   const msg: OkoWalletMsgOAuthInfoPass = {
     target: "oko_attached",
     msg_type: "oauth_info_pass",
     payload,
   };
 
-  const sendRes = await sendMsgToEmbeddedWindow(msg);
+  const sendRes = window.opener
+    ? await sendMsgToEmbeddedWindow(msg)
+    : await sendMsgViaBroadcastChannel(msg);
 
   if (!sendRes.success) {
     return {
@@ -90,4 +84,37 @@ async function sendMsgToEmbeddedWindow(
       type: "window_not_found",
     },
   };
+}
+
+/**
+ * Fallback for Safari (iOS) where window.opener is null after cross-origin
+ * OAuth navigation. Uses BroadcastChannel to communicate with the attached
+ * iframe on the same origin.
+ */
+async function sendMsgViaBroadcastChannel(
+  msg: OkoWalletMsgOAuthInfoPass,
+): Promise<Result<OkoWalletMsg, SendMsgToEmbeddedWindowError>> {
+  return new Promise((resolve) => {
+    const bc = new BroadcastChannel(OAUTH_BROADCAST_CHANNEL);
+
+    const timeout = setTimeout(() => {
+      bc.close();
+      resolve({
+        success: false,
+        err: { type: "window_not_found" },
+      });
+    }, 30_000);
+
+    bc.onmessage = (event) => {
+      const data = event.data as OkoWalletMsg;
+
+      if (data.msg_type === "oauth_info_pass_ack") {
+        clearTimeout(timeout);
+        bc.close();
+        resolve({ success: true, data });
+      }
+    };
+
+    bc.postMessage(msg);
+  });
 }
