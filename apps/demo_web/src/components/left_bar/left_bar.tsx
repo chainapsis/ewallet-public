@@ -1,15 +1,15 @@
 "use client";
 
-import { type FC } from "react";
-import cn from "classnames";
-import { MenuItem } from "@oko-wallet/oko-common-ui/menu";
 import { HomeOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/home_outlined";
+import { MenuItem } from "@oko-wallet/oko-common-ui/menu";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
+import cn from "classnames";
+import { type FC } from "react";
 
-import styles from "./left_bar.module.scss";
 import { IntegrationCard } from "./integration_card/integration_card";
+import styles from "./left_bar.module.scss";
 import { useViewState } from "@oko-wallet-demo-web/state/view";
-import { ThemeButton } from "@oko-wallet-demo-web/components/theme/theme_button";
+// import { ThemeButton } from "@oko-wallet-demo-web/components/theme/theme_button";
 
 export const LeftBar: FC = () => {
   const isLeftBarOpen = useViewState((state) => state.isLeftBarOpen);
@@ -44,7 +44,7 @@ export const LeftBar: FC = () => {
             </>
           )}
 
-          <ThemeButton />
+          {/* <ThemeButton /> */}
         </div>
       </ul>
     </>
