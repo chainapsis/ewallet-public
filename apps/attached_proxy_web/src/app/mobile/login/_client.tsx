@@ -32,9 +32,6 @@ export function EmailLoginClient({
 
   useEffect(() => {
     (async () => {
-      // Create session cookie in the OS browser context
-      await fetch("/api/mobile/session", { method: "POST" });
-
       // Store values for /mobile/login/complete
       if (sessionId) {
         sessionStorage.setItem("oko_mobile_session_id", sessionId);
@@ -101,9 +98,8 @@ export function OAuthLoginClient({
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [status, setStatus] = useState("Preparing sign-in...");
 
-  // Create session + store values for /mobile/login/complete
+  // Store values for /mobile/login/complete
   useEffect(() => {
-    fetch("/api/mobile/session", { method: "POST" });
     if (sessionId) {
       sessionStorage.setItem("oko_mobile_session_id", sessionId);
     }

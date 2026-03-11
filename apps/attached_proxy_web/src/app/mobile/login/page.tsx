@@ -13,8 +13,6 @@ export const metadata: Metadata = {
  * Opened via the mobile SDK's OS browser integration.
  * - Email: redirects directly to Auth0 Universal Login (no iframe).
  * - OAuth: loads attached iframe, requests OAuth URL, redirects to provider.
- *
- * Session cookie is set via POST /api/mobile/session in the client component.
  */
 export default async function MobileLoginPage({
   searchParams,
