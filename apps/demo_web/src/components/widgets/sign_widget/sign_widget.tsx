@@ -16,7 +16,7 @@ export const SignWidget: FC<SignWidgetProps> = ({
   renderBottom,
 }) => {
   const [signResult, setSignResult] = useState<SignStep>("initial");
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     return () => {

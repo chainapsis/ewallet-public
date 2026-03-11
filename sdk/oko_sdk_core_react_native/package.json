@@ -37,8 +37,8 @@
   },
   "peerDependencies": {
     "expo": ">=52",
-    "expo-modules-core": ">=2",
     "expo-linking": ">=7",
+    "expo-modules-core": ">=2",
     "expo-secure-store": ">=14",
     "expo-web-browser": ">=14",
     "react": ">=18",

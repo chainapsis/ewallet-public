@@ -11333,7 +11333,9 @@ __metadata:
     tsx: "npm:^4.20.3"
     typescript: "npm:^5.8.3"
   peerDependencies:
+    expo: ">=52"
     expo-linking: ">=7"
+    expo-modules-core: ">=2"
     expo-secure-store: ">=14"
     expo-web-browser: ">=14"
     react: ">=18"
