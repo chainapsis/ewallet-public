@@ -1,0 +1,59 @@
+{
+  "name": "@oko-wallet/oko-sdk-core-react-native",
+  "version": "0.1.2-alpha.8",
+  "type": "module",
+  "scripts": {
+    "build": "tsx ./scripts/build.ts",
+    "build:plugin": "tsc -p plugin/tsconfig.json",
+    "typecheck": "tsc --noEmit"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    },
+    "./app.plugin.js": "./app.plugin.cjs"
+  },
+  "keywords": [
+    "oko",
+    "wallet",
+    "react-native"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chainapsis/oko.git",
+    "directory": "sdk/oko_sdk_core_react_native"
+  },
+  "dependencies": {
+    "@oko-wallet/oko-sdk-core": "workspace:*",
+    "@oko-wallet/oko-types": "workspace:*",
+    "@oko-wallet/stdlib-js": "workspace:*",
+    "buffer": "^6.0.3"
+  },
+  "peerDependencies": {
+    "expo": ">=52",
+    "expo-modules-core": ">=2",
+    "expo-linking": ">=7",
+    "expo-secure-store": ">=14",
+    "expo-web-browser": ">=14",
+    "react": ">=18",
+    "react-native": ">=0.70",
+    "react-native-get-random-values": ">=1",
+    "react-native-webview": ">=13"
+  },
+  "devDependencies": {
+    "@expo/config-plugins": "^55.0.6",
+    "@types/react": "^19.0.0",
+    "@types/react-native": "^0.73.0",
+    "expo-secure-store": "^14.0.0",
+    "expo-web-browser": "^14.0.0",
+    "react-native-webview": "^13.0.0",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}

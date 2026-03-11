@@ -9,6 +9,7 @@ import type { HandleDiscordCallbackError } from "./types";
 import { postLog } from "@oko-wallet-attached/requests/logging";
 import { errorToLog } from "@oko-wallet-attached/logging/error";
 import { sendOAuthPayloadToEmbeddedWindow } from "@oko-wallet-attached/components/oauth_callback/send_oauth_payload";
+import { handleMobileRedirect } from "@oko-wallet-attached/components/oauth_callback/handle_mobile_redirect";
 
 export function useDiscordCallback() {
   const [error, setError] = useState<string | null>(null);
@@ -55,18 +56,30 @@ export function useDiscordCallback() {
 export async function handleDiscordCallback(): Promise<
   Result<void, HandleDiscordCallbackError>
 > {
-  if (!window.opener) {
-    return {
-      success: false,
-      err: {
-        type: "opener_window_not_exists",
-      },
-    };
-  }
-
   const urlParams = new URLSearchParams(window.location.search);
   const code = urlParams.get("code");
   const stateParam = urlParams.get(RedirectUriSearchParamsKey.STATE) || "{}";
+
+  // Mobile: OS-browser flow or sessionStorage fallback
+  if (stateParam !== "{}") {
+    try {
+      const oauthState = JSON.parse(atob(stateParam));
+      const mobileRedirected = handleMobileRedirect({
+        provider: "discord",
+        authType: "discord",
+        oauthState,
+        code,
+      });
+      if (mobileRedirected) return { success: true, data: void 0 };
+    } catch { /* fall through to web flow */ }
+  }
+
+  if (!window.opener) {
+    return {
+      success: false,
+      err: { type: "opener_window_not_exists" },
+    };
+  }
 
   console.log("[discord callback] code: %s, stateParam: %s", code, stateParam);
 

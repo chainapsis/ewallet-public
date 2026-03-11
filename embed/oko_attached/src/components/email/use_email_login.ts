@@ -52,7 +52,15 @@ export function useEmailLogin({
   data,
 }: UseEmailLoginArgs): UseEmailLoginResult {
   const closeModal = useMemoryState((state) => state.closeModal);
-  const hostOrigin = useMemoryState((state) => state.hostOrigin);
+  const memoryHostOrigin = useMemoryState((state) => state.hostOrigin);
+
+  // In mobile mode (system browser), MemoryState is empty.
+  // Fall back to host_origin from URL query params.
+  const hostOrigin = useMemo(() => {
+    if (memoryHostOrigin) return memoryHostOrigin;
+    if (typeof window === "undefined") return null;
+    return new URLSearchParams(window.location.search).get("host_origin");
+  }, [memoryHostOrigin]);
 
   const oauthContext = data.oauth ?? null;
   const parsedOAuthState = useMemo<OAuthState | null>(() => {

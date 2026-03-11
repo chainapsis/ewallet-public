@@ -9,7 +9,8 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.eldeniyenden.sandbox-react-native"
     },
     "android": {
       "adaptiveIcon": {
@@ -39,7 +40,8 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "@oko-wallet/oko-sdk-core-react-native"
     ],
     "experiments": {
       "typedRoutes": true,

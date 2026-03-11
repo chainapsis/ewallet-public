@@ -100,7 +100,7 @@ class HardhatManager {
   private static instances: Map<number, HardhatManager> = new Map();
   private process: ChildProcess | null = null;
   private isRunning = false;
-  private timeouts: Set<NodeJS.Timeout> = new Set();
+  private timeouts: Set<number> = new Set();
   private port: number;
 
   private constructor(port: number) {
@@ -114,7 +114,7 @@ class HardhatManager {
     return HardhatManager.instances.get(port)!;
   }
 
-  private addTimeout(timeout: NodeJS.Timeout): NodeJS.Timeout {
+  private addTimeout(timeout: number): number {
     this.timeouts.add(timeout);
     return timeout;
   }
@@ -198,7 +198,7 @@ class HardhatManager {
                 console.log("✅ Hardhat node is ready!");
                 resolve();
               }
-            }, 3000),
+            }, 3000) as unknown as number,
           );
         }
       });
@@ -232,7 +232,7 @@ class HardhatManager {
                 cleanup();
                 resolve();
               }
-            }, 2000),
+            }, 2000) as unknown as number,
           );
         }
       });
@@ -253,7 +253,7 @@ class HardhatManager {
             cleanup();
             reject(new Error("Hardhat failed to start within 30 seconds"));
           }
-        }, 30000),
+        }, 30000) as unknown as number,
       );
     });
   }
@@ -320,7 +320,7 @@ class HardhatManager {
 
       console.log(`⏳ Node health check ${i + 1}/${maxRetries}...`);
       await new Promise((resolve) => {
-        const timeout = this.addTimeout(setTimeout(resolve, 1000));
+        const timeout = this.addTimeout(setTimeout(resolve, 1000) as unknown as number);
       });
     }
     return false;

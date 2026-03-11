@@ -7,6 +7,7 @@ import type { HandleCallbackError } from "./types";
 import { postLog } from "@oko-wallet-attached/requests/logging";
 import { errorToLog } from "@oko-wallet-attached/logging/error";
 import { sendOAuthPayloadToEmbeddedWindow } from "@oko-wallet-attached/components/oauth_callback/send_oauth_payload";
+import { handleMobileRedirect } from "@oko-wallet-attached/components/oauth_callback/handle_mobile_redirect";
 
 export function useGoogleCallback() {
   const [error, setError] = useState<string | null>(null);
@@ -43,20 +44,28 @@ export function useGoogleCallback() {
 export async function handleGoogleCallback(): Promise<
   Result<void, HandleCallbackError>
 > {
-  if (!window.opener) {
-    return {
-      success: false,
-      err: {
-        type: "opener_window_not_exists",
-      },
-    };
-  }
-
   const params = new URLSearchParams(window.location.hash.substring(1));
   const accessToken = params.get("access_token");
   const idToken = params.get("id_token");
 
   const oauthState = getOAuthStateFromUrl();
+
+  // Mobile: OS-browser flow or sessionStorage fallback
+  const mobileRedirected = handleMobileRedirect({
+    provider: "google",
+    authType: "google",
+    oauthState,
+    access_token: accessToken,
+    id_token: idToken,
+  });
+  if (mobileRedirected) return { success: true, data: void 0 };
+
+  if (!window.opener) {
+    return {
+      success: false,
+      err: { type: "opener_window_not_exists" },
+    };
+  }
 
   const apiKey: string = oauthState.apiKey;
   const targetOrigin: string = oauthState.targetOrigin;

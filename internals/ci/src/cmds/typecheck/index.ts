@@ -10,6 +10,7 @@ const DEFAULT_CONCURRENCY = 4;
 export async function typeCheck(..._args: any[]) {
   const pkgPaths = [
     paths.sdk_core,
+    paths.sdk_core_react_native,
     paths.sdk_cosmos,
     paths.sdk_eth,
     paths.sdk_svm,
