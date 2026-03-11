@@ -12,7 +12,13 @@ import {
   getAlchemyEndpoint,
   isAlchemySupported,
 } from "@oko-wallet-user-dashboard/constants/alchemy";
+import {
+  fetchCw20TokenBalances,
+  fetchCw20TokenRegistry,
+} from "@oko-wallet-user-dashboard/fetch/cw20_token_balances";
 import { fetchErc20TokenBalances } from "@oko-wallet-user-dashboard/fetch/erc20_token_balances";
+import { fetchFactoryTokenMeta } from "@oko-wallet-user-dashboard/fetch/factory_token_meta";
+import { fetchOsmosisAssetList } from "@oko-wallet-user-dashboard/fetch/osmosis_asset_list";
 import { fetchSplTokenBalances } from "@oko-wallet-user-dashboard/fetch/spl_token_balances";
 import { DEFAULT_ENABLED_CHAINS } from "@oko-wallet-user-dashboard/state/chains";
 import { useAssetMetaStore } from "@oko-wallet-user-dashboard/store/asset_meta";
@@ -151,17 +157,76 @@ async function getCosmosBalances(
   }
 
   if (unknownBalances.length > 0) {
-    const chainIdentifier = getChainIdentifier(chain.chainId);
-    const tokensToResolve = unknownBalances.map((bal) => ({
-      chainIdentifier,
-      contractAddress: normalizeIBCDenom(bal.denom),
-    }));
-
-    const resolvedMap = await resolveTokenMetadata(tokensToResolve);
-
-    const missingPriceIds: string[] = [];
+    // Separate factory tokens from other unknowns (IBC, native, etc.)
+    const factoryBalances: RawBalance[] = [];
+    const otherUnknowns: RawBalance[] = [];
     for (const bal of unknownBalances) {
-      const currency = resolvedMap.get(normalizeIBCDenom(bal.denom));
+      if (bal.denom.startsWith("factory/")) {
+        factoryBalances.push(bal);
+      } else {
+        otherUnknowns.push(bal);
+      }
+    }
+
+    // Resolve factory tokens via Chainapsis API
+    let factoryMap = new Map<string, Currency>();
+    if (factoryBalances.length > 0) {
+      try {
+        factoryMap = await fetchFactoryTokenMeta(
+          chain.chainId,
+          factoryBalances.map((b) => b.denom),
+        );
+      } catch (error) {
+        console.error(
+          `Failed to fetch factory token meta for ${chain.chainId}:`,
+          error,
+        );
+      }
+    }
+
+    // Resolve other unknown tokens via Keplr asset_meta API
+    const chainIdentifier = getChainIdentifier(chain.chainId);
+    let assetMetaMap = new Map<string, Currency>();
+    if (otherUnknowns.length > 0) {
+      const tokensToResolve = otherUnknowns.map((bal) => ({
+        chainIdentifier,
+        contractAddress: normalizeIBCDenom(bal.denom),
+      }));
+      assetMetaMap = await resolveTokenMetadata(tokensToResolve);
+
+      // Enrich with Osmosis asset list for accurate display names
+      // (e.g. asset_meta returns "USDC" for both Noble and Axelar USDC)
+      if (chainIdentifier === "osmosis") {
+        try {
+          const osmosisAssets = await fetchOsmosisAssetList();
+          for (const bal of otherUnknowns) {
+            const normalizedDenom = normalizeIBCDenom(bal.denom);
+            const currency = assetMetaMap.get(normalizedDenom);
+            const osmosisAsset = osmosisAssets.byDenom.get(bal.denom);
+            if (currency && osmosisAsset && osmosisAsset.symbol !== currency.coinDenom) {
+              assetMetaMap.set(normalizedDenom, {
+                ...currency,
+                coinDenom: osmosisAsset.symbol,
+                coinImageUrl: currency.coinImageUrl ?? osmosisAsset.logoURIs?.svg ?? osmosisAsset.logoURIs?.png,
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Failed to fetch Osmosis asset list:", error);
+        }
+      }
+    }
+
+    // Collect missing prices from both sources
+    const missingPriceIds: string[] = [];
+    for (const bal of factoryBalances) {
+      const currency = factoryMap.get(bal.denom);
+      if (currency?.coinGeckoId && priceMap[currency.coinGeckoId] === undefined) {
+        missingPriceIds.push(currency.coinGeckoId);
+      }
+    }
+    for (const bal of otherUnknowns) {
+      const currency = assetMetaMap.get(normalizeIBCDenom(bal.denom));
       if (currency?.coinGeckoId && priceMap[currency.coinGeckoId] === undefined) {
         missingPriceIds.push(currency.coinGeckoId);
       }
@@ -184,17 +249,19 @@ async function getCosmosBalances(
 
     const mergedPriceMap: PriceMap = { ...priceMap, ...extraPriceMap };
 
-    for (const bal of unknownBalances) {
-      const currency = resolvedMap.get(normalizeIBCDenom(bal.denom));
+    for (const bal of factoryBalances) {
+      const currency = factoryMap.get(bal.denom);
       if (currency) {
         results.push(
-          buildTokenBalance(
-            chain,
-            currency,
-            bal.amount,
-            cosmosAddress,
-            mergedPriceMap,
-          ),
+          buildTokenBalance(chain, currency, bal.amount, cosmosAddress, mergedPriceMap),
+        );
+      }
+    }
+    for (const bal of otherUnknowns) {
+      const currency = assetMetaMap.get(normalizeIBCDenom(bal.denom));
+      if (currency) {
+        results.push(
+          buildTokenBalance(chain, currency, bal.amount, cosmosAddress, mergedPriceMap),
         );
       }
     }
@@ -203,6 +270,75 @@ async function getCosmosBalances(
   if (mainCurrency && !mainCurrencyAdded) {
     results.push(
       buildTokenBalance(chain, mainCurrency, "0", cosmosAddress, priceMap),
+    );
+  }
+
+  return results;
+}
+
+async function getCw20Balances(
+  chain: ModularChainInfo,
+  cosmosAddress: string,
+  priceMap: PriceMap,
+): Promise<TokenBalance[]> {
+  const cosmos = chain.cosmos;
+  if (!cosmos?.rest || !cosmos.features?.includes("cosmwasm")) {
+    return [];
+  }
+
+  const registry = await fetchCw20TokenRegistry();
+  const chainIdentifier = getChainIdentifier(chain.chainId);
+  const tokenContracts = registry[chainIdentifier];
+  if (!tokenContracts || tokenContracts.length === 0) {
+    return [];
+  }
+
+  const cw20Balances = await fetchCw20TokenBalances(
+    cosmos.rest,
+    cosmosAddress,
+    tokenContracts,
+  );
+  if (cw20Balances.length === 0) {
+    return [];
+  }
+
+  const missingPriceIds: string[] = [];
+  for (const tb of cw20Balances) {
+    if (
+      tb.currency.coinGeckoId &&
+      priceMap[tb.currency.coinGeckoId] === undefined
+    ) {
+      missingPriceIds.push(tb.currency.coinGeckoId);
+    }
+  }
+
+  const cw20PriceMap: Record<string, number> = {};
+  if (missingPriceIds.length > 0) {
+    try {
+      const priceResponse = await fetchPrices(missingPriceIds);
+      for (const [coinId, data] of Object.entries(priceResponse)) {
+        cw20PriceMap[coinId] = data.usd;
+      }
+    } catch (error) {
+      console.error(
+        `Failed to fetch CW20 prices for ${chain.chainId}:`,
+        error,
+      );
+    }
+  }
+
+  const mergedPriceMap: PriceMap = { ...priceMap, ...cw20PriceMap };
+  const results: TokenBalance[] = [];
+
+  for (const tb of cw20Balances) {
+    results.push(
+      buildTokenBalance(
+        chain,
+        tb.currency,
+        tb.balance,
+        cosmosAddress,
+        mergedPriceMap,
+      ),
     );
   }
 
@@ -468,6 +604,15 @@ async function fetchChainBalances(
       getCosmosBalances(chain, addresses.cosmos, priceMap, resolveTokenMetadata).catch((error) => {
         console.error(
           `Failed to fetch Cosmos balances for ${chain.chainId}:`,
+          error,
+        );
+        return [];
+      }),
+    );
+    tasks.push(
+      getCw20Balances(chain, addresses.cosmos, priceMap).catch((error) => {
+        console.error(
+          `Failed to fetch CW20 balances for ${chain.chainId}:`,
           error,
         );
         return [];

@@ -31,17 +31,17 @@ const robotoMono = Roboto_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Oko User Dashboard",
-  description: "Oko User Dashboard",
+  title: "Oko Home",
+  description: "Oko Home",
   icons: {
     icon: "/oko_favicon.png",
   },
   openGraph: {
     type: "website",
-    url: "https://dashboard.oko.app",
-    title: "Oko User Dashboard",
-    description: "Oko User Dashboard",
-    siteName: "Oko User Dashboard",
+    url: "https://home.oko.app",
+    title: "Oko Home",
+    description: "Oko Home",
+    siteName: "Oko Home",
     images: [
       {
         url: "https://oko-wallet.s3.ap-northeast-2.amazonaws.com/assets/oko-dapp-og-image.png",

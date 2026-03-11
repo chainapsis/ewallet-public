@@ -1,7 +1,9 @@
 .codeBlockContainer {
+  width: 100%;
   border-radius: 12px;
   background: var(--bg-secondary);
   padding: 16px;
   padding-right: 8px; // scrollbar-to-container edge gap
   overflow: hidden;
+  box-sizing: border-box;
 }

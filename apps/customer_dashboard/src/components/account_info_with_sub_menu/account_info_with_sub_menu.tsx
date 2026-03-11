@@ -47,34 +47,38 @@ export const AccountInfoWithSubMenu: FC = () => {
           className={styles.menuHeader}
         />
       }
-      menuItems={[
-        {
-          id: "edit-info",
-          label: "Edit Info",
-          icon: <EditIcon size={16} />,
-          onClick: () => {
-            router.push(paths.edit_info);
+      menuSections={[]}
+      footerSection={{
+        id: "actions",
+        items: [
+          {
+            id: "edit-info",
+            label: "Edit Info",
+            icon: <EditIcon size={16} />,
+            onClick: () => {
+              router.push(paths.edit_info);
+            },
           },
-        },
-        {
-          id: "change-password",
-          label: "Change Password",
-          icon: <PasswordIcon size={16} />,
-          onClick: () => {
-            router.push(paths.change_password);
+          {
+            id: "change-password",
+            label: "Change Password",
+            icon: <PasswordIcon size={16} />,
+            onClick: () => {
+              router.push(paths.change_password);
+            },
           },
-        },
-        {
-          id: "sign-out",
-          label: "Sign Out",
-          icon: <LogoutIcon size={16} />,
-          onClick: () => {
-            queryClient.clear();
-            resetUser();
-            resetToken();
+          {
+            id: "sign-out",
+            label: "Sign Out",
+            icon: <LogoutIcon size={16} />,
+            onClick: () => {
+              queryClient.clear();
+              resetUser();
+              resetToken();
+            },
           },
-        },
-      ]}
+        ],
+      }}
       className={styles.menu}
     />
   );

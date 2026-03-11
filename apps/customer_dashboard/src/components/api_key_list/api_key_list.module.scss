@@ -5,13 +5,15 @@
   gap: 36px;
 }
 
-.apiKeyCell {
+.apiKeyCellInner {
   display: flex;
   align-items: center;
 }
 
 .dateCell {
-  width: 150px;
+  min-width: 130px;
+  width: 1%;
+  white-space: nowrap;
 }
 
 .apiKey {

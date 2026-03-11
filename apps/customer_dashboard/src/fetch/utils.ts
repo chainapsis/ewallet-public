@@ -7,7 +7,7 @@ function checkIsTokenInvalid(errorCode: string, status: number) {
   return errorCode === "INVALID_TOKEN" || status === 401;
 }
 
-let resetTimeout: NodeJS.Timeout | null = null;
+let resetTimeout: ReturnType<typeof setTimeout> | null = null;
 
 // TODO: @elden
 // rework

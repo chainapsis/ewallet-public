@@ -43,7 +43,8 @@ export function useEmailCallback(): { error: string | null } {
 
         if (cbRes.success) {
           if (isReauth) {
-            return; // Parent will close popup when iframes are ready
+            window.close();
+            return;
           }
           window.close();
         } else {
