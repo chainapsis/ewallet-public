@@ -228,7 +228,7 @@ export function useInitializeApp() {
     }
 
     fn().then();
-  }, [getAuthToken, setAuthToken, getWallet, getWalletEd25519, getTheme, setTheme, resetAll, setHostOrigin, setReferralInfo, isHydrated]);
+  }, [getAuthToken, setAuthToken, isHydrated]);
 
   return { theme: resolvedTheme };
 }
