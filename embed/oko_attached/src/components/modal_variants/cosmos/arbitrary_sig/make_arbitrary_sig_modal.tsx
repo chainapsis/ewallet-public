@@ -35,10 +35,10 @@ export const MakeArbitrarySigModal: FC<MakeArbitrarySigModalProps> = ({
           <CosmosArbitrarySignatureContent payload={data.payload} />
         </div>
 
-        <Spacing height={20} />
+        <Spacing height={12} />
         <ArbitrarySignatureDesc />
 
-        <Spacing height={20} />
+        <Spacing height={12} />
 
         <div className={styles.buttonContainer}>
           <Button
