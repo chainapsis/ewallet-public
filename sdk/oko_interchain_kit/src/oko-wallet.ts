@@ -59,24 +59,27 @@ export class OkoWallet extends CosmosWallet {
 
     const key = await this.okoClient.getKey(chainId);
 
-    // Ensure pubkey is a Uint8Array (handles deserialized Buffer format)
-    let pubkey = key.pubKey;
+    // Normalize pubkey to a plain Uint8Array.
+    // key.pubKey may be a Buffer, a deserialized {type:"Buffer",data:[...]}
+    // object, or already a Uint8Array.
+    let raw: Uint8Array;
+    const pk = key.pubKey as any;
     if (
-      pubkey &&
-      typeof pubkey === "object" &&
-      "type" in pubkey &&
-      pubkey.type === "Buffer" &&
-      "data" in pubkey
+      pk &&
+      typeof pk === "object" &&
+      pk.type === "Buffer" &&
+      Array.isArray(pk.data)
     ) {
-      // Convert from {type: "Buffer", data: [...]} to Uint8Array
-      pubkey = new Uint8Array((pubkey as any).data);
+      raw = new Uint8Array(pk.data);
+    } else {
+      raw = new Uint8Array(pk);
     }
 
     return {
       username: key.name,
       address: key.bech32Address,
       algo: key.algo as any,
-      pubkey,
+      pubkey: raw,
       isNanoLedger: key.isNanoLedger,
     };
   }

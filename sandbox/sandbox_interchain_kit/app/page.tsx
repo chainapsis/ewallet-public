@@ -31,6 +31,14 @@ export default function Home() {
         assetLists={filteredAssetLists}
         wallets={okoWallet ? [okoWallet] : []}
         walletModal={() => <InterchainWalletModal />}
+        endpointOptions={{
+          endpoints: {
+            osmosis: {
+              rpc: ["https://rpc.cosmos.directory/osmosis"],
+              rest: ["https://rest.cosmos.directory/osmosis"],
+            },
+          },
+        }}
       >
         <App />
       </ChainProvider>
