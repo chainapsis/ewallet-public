@@ -1,9 +1,10 @@
 import {
-  useState,
-  useRef,
-  type KeyboardEvent,
   type ClipboardEvent,
   type FC,
+  type KeyboardEvent,
+  useEffect,
+  useRef,
+  useState,
 } from "react";
 
 import styles from "./otp_input.module.scss";
@@ -40,18 +41,39 @@ export const OtpInput: FC<OtpInputProps> = ({
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   const digits = value;
 
-  const focusInput = (index: number) => {
-    if (inputRefs.current[index]) {
-      inputRefs.current[index]?.focus();
+  const getActiveIndex = () => {
+    const idx = digits.findIndex((d) => !d);
+    return idx === -1 ? length - 1 : idx;
+  };
+
+  const prevDisabledRef = useRef(disabled);
+
+  useEffect(() => {
+    if (prevDisabledRef.current && !disabled && isComplete(digits, length)) {
+      inputRefs.current[length - 1]?.focus();
     }
+    prevDisabledRef.current = disabled;
+  }, [disabled, digits, length]);
+
+  const focusInput = (index: number) => {
+    inputRefs.current[index]?.focus();
   };
 
   const handleChange = (index: number, inputValue: string) => {
-    if (inputValue.length > 1) return;
-    if (inputValue && !/^\d$/.test(inputValue)) return;
+    if (!inputValue || inputValue.length > 1) {
+      return;
+    }
+    if (!/^\d$/.test(inputValue)) {
+      return;
+    }
+
+    const targetIndex = digits[index] === "" ? index : getActiveIndex();
+    if (targetIndex === -1 || digits.every((d) => d !== "")) {
+      return;
+    }
 
     const newDigits = [...digits];
-    newDigits[index] = inputValue;
+    newDigits[targetIndex] = inputValue;
 
     while (newDigits.length < length) {
       newDigits.push("");
@@ -59,8 +81,11 @@ export const OtpInput: FC<OtpInputProps> = ({
 
     onChange(newDigits.slice(0, length));
 
-    if (inputValue && index < length - 1) {
-      focusInput(index + 1);
+    const nextEmpty = newDigits.indexOf("");
+    if (nextEmpty !== -1) {
+      focusInput(nextEmpty);
+    } else if (targetIndex < length - 1) {
+      focusInput(targetIndex + 1);
     }
 
     if (isComplete(newDigits, length) && onComplete) {
@@ -70,13 +95,26 @@ export const OtpInput: FC<OtpInputProps> = ({
 
   const handleKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Backspace") {
-      if (!digits[index] && index > 0) {
-        focusInput(index - 1);
+      e.preventDefault();
+      const newDigits = [...digits];
+
+      if (newDigits[index] !== "") {
+        newDigits[index] = "";
+        onChange(newDigits.slice(0, length));
+        setFocusedIndex(index);
+      } else if (index > 0) {
+        const prevFilled = newDigits
+          .slice(0, index)
+          .reduceRight(
+            (found, d, i) => (found === -1 && d !== "" ? i : found),
+            -1,
+          );
+        if (prevFilled !== -1) {
+          newDigits[prevFilled] = "";
+          onChange(newDigits.slice(0, length));
+          focusInput(prevFilled);
+        }
       }
-    } else if (e.key === "ArrowLeft" && index > 0) {
-      focusInput(index - 1);
-    } else if (e.key === "ArrowRight" && index < length - 1) {
-      focusInput(index + 1);
     }
   };
 
@@ -88,11 +126,19 @@ export const OtpInput: FC<OtpInputProps> = ({
       .slice(0, length)
       .split("");
 
-    if (pastedDigits) {
-      onChange(pastedDigits);
+    if (pastedDigits.length > 0) {
+      while (pastedDigits.length < length) {
+        pastedDigits.push("");
+      }
+      onChange(pastedDigits.slice(0, length));
 
       if (isComplete(pastedDigits, length) && onComplete) {
         onComplete(pastedDigits);
+      } else {
+        const nextEmpty = pastedDigits.findIndex((d) => !d);
+        if (nextEmpty !== -1) {
+          focusInput(nextEmpty);
+        }
       }
     }
   };

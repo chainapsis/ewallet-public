@@ -7,6 +7,7 @@
   height: 100%;
   background-color: var(--bg-primary);
   padding: 0;
+  overflow-x: hidden;
 }
 
 .inner {
@@ -14,9 +15,17 @@
   width: 100%;
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-secondary);
+  overflow: hidden;
 
-  padding: 20px 16px;
-  overflow: auto;
+  padding: 16px 8px 16px 16px;
+
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Crect x='4' y='4' width='2' height='2' rx='1' fill='%23E9EAEB'/%3E%3C/svg%3E");
+  background-size: 16px 16px;
+  background-position: 0 0;
+
+  :global([data-theme="dark"]) & {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Crect x='4' y='4' width='2' height='2' rx='1' fill='%2322262F'/%3E%3C/svg%3E");
+  }
 
   display: flex;
   flex-direction: column;
@@ -25,25 +34,29 @@
 
 .bgDecoration {
   position: absolute;
-  top: -197px;
-  left: -221px;
+  top: -277px;
+  left: -271px;
   width: 1120px;
   height: 900px;
   opacity: 0.11;
   pointer-events: none;
   z-index: 0;
 
+  :global([data-theme="dark"]) & {
+    opacity: 0.05;
+  }
+
   img {
     position: absolute;
-    width: 1217px;
-    height: 1055px;
+    width: 1217.27px;
+    height: 1054.855px;
     left: calc(50% + 50.37px);
     top: calc(50% + 7.43px);
     transform: translate(-50%, -50%) scaleX(-1);
     object-fit: cover;
     mask-image: url("/bg_eye_mask.svg");
-    mask-size: 962px 776px;
-    mask-position: 74px 161px;
+    mask-size: 961.841px 776.102px;
+    mask-position: 74.293px 160.802px;
     mask-repeat: no-repeat;
   }
 }
@@ -55,7 +68,7 @@
   height: 100%;
 }
 
-@media (min-width: $tablet_min_width) {
+@media (min-width: $desktop_min_width) {
   .inner {
     border-radius: 28px;
   }
@@ -69,10 +82,11 @@
   border: none;
 
   overflow: auto;
+  padding-right: 4px;
 
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
   align-items: center;
 }
 
@@ -109,6 +123,7 @@
 }
 
 .signingHeaderTitle {
+  font-family: var(--font-family-body);
   font-size: 18px;
   font-weight: 600;
   line-height: 28px;
@@ -153,6 +168,7 @@
 
 .onchainDisclaimer {
   margin: 0;
+  font-family: var(--font-family-body);
   font-size: var(--font-size-sm);
   font-weight: 500;
   line-height: var(--font-line-height-sm);
@@ -160,8 +176,34 @@
 }
 
 @media (min-width: $tablet_min_width) {
+  .inner {
+    padding: 16px 8px 16px 16px;
+  }
+
   .wrapper {
     padding: 8px 0px 32px 0px;
+  }
+
+  .col {
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .signingCol {
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .docsStandalone {
+    width: 100%;
+    max-width: 360px;
+  }
+}
+
+@media (min-width: $desktop_min_width) {
+  .wrapper {
+    overflow-y: hidden;
+    padding: 8px 24px 52px 0;
   }
 
   .col {
@@ -175,17 +217,11 @@
   .docsStandalone {
     width: 360px;
   }
-}
-
-@media (min-width: $desktop_min_width) {
-  .wrapper {
-    overflow-y: hidden;
-    padding: 8px 24px 52px 0;
-  }
 
   .content {
     flex-direction: row;
     align-items: flex-start;
+    gap: 16px;
   }
 
   .signingSection {

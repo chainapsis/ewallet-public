@@ -8,7 +8,9 @@ import { handleDiscordSignIn } from "./discord";
 import { handleGithubSignIn } from "./github";
 
 export async function signIn(this: OkoWalletInterface, type: SignInType) {
-  await this.waitUntilInitialized;
+  // NOTE: Do NOT await before calling handlers that use window.open().
+  // Awaiting here loses the user gesture context, causing browsers to
+  // open a new tab instead of a popup window.
 
   try {
     switch (type) {

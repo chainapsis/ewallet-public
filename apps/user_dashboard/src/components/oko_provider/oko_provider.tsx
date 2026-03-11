@@ -19,18 +19,18 @@ export const OkoProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const setActiveUser = useChainStore((state) => state.setActiveUser);
   const clearActiveUser = useChainStore((state) => state.clearActiveUser);
-  const { email, authType, isSignedIn, setAuthType } = useUserInfoState();
+  const { publicKey, authType, isSignedIn, setAuthType } = useUserInfoState();
 
   const isCosmosLazyInitialized = useSDKState(selectCosmosInitialized);
 
   useEffect(() => {
-    if (email && authType) {
-      setActiveUser(authType, email);
+    if (publicKey && authType) {
+      setActiveUser(authType, publicKey);
       return;
     }
 
     clearActiveUser();
-  }, [email, authType, setActiveUser, clearActiveUser]);
+  }, [publicKey, authType, setActiveUser, clearActiveUser]);
 
   useEffect(() => {
     if (!isCosmosLazyInitialized) {

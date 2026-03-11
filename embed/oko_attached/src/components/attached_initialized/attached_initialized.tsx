@@ -11,6 +11,6 @@ export const AttachedInitialized: FC<PropsWithChildren> = ({ children }) => {
   return theme ? (
     <ThemeProvider theme={theme}>{children}</ThemeProvider>
   ) : (
-    <>Initializing...</>
+    null
   );
 };

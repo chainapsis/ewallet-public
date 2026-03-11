@@ -12,14 +12,14 @@ export const CodeIcon: FC<BasicIconProps> = ({
       xmlns="http://www.w3.org/2000/svg"
       width={size}
       height={size}
-      viewBox="0 0 16 16"
+      viewBox="0 0 12 11"
       fill="none"
       className={className}
     >
       <path
-        d="M10.6666 12L14.6666 8L10.6666 4M5.33325 4L1.33325 8L5.33325 12"
+        d="M8.25 7.75L10.75 5.25L8.25 2.75M3.25 2.75L0.75 5.25L3.25 7.75M6.75 0.75L4.75 9.75"
         stroke={color}
-        strokeWidth="1.33333"
+        strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />

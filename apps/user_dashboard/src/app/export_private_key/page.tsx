@@ -254,7 +254,7 @@ const Step1Content = ({
         </div>
       </div>
 
-      <Button size="lg" fullWidth isLoading={isLoading} onClick={onContinue}>
+      <Button size="lg" fullWidth isLoading={isLoading} disabled={isLoading} onClick={onContinue}>
         Continue
       </Button>
     </>
@@ -491,6 +491,7 @@ const Page = () => {
 
   const handleExportDisplayError = useCallback(() => {
     setStep(1);
+    setIsLoading(false);
     displayToast({
       variant: "confirm",
       title: "Export Failed",
@@ -524,11 +525,16 @@ const Page = () => {
           : 285;
       const popupLeft = Math.max((window.screen.width - popupWidth) / 2, 0);
       const popupTop = Math.max((window.screen.height - popupHeight) / 2, 0);
+      // Open about:blank first to avoid cross-origin popup blocking,
+      // then redirect — same pattern as SDK sign-in handlers.
       popup = window.open(
-        `${attachedOrigin}/export/reauth?auth_type=${authType}&email=${encodeURIComponent(email ?? "")}`,
+        "about:blank",
         "oko_re_auth",
         `width=${popupWidth},height=${popupHeight},left=${popupLeft},top=${popupTop},resizable=yes`,
       );
+      if (popup) {
+        popup.location.href = `${attachedOrigin}/export/reauth?auth_type=${authType}&email=${encodeURIComponent(email ?? "")}`;
+      }
 
       // 2. Send export request to attached iframe
       const resPromise = okoWallet.sendMsgToIframe({
@@ -586,7 +592,7 @@ const Page = () => {
         resAny.msg_type === "__export_private_key_ack__" &&
         resAny.payload.success
       ) {
-        // Keep popup open — Step2Content.onReady will close it
+        // Popup closes itself after OAuth callback; Step2Content.onReady handles cleanup
         exportSucceeded = true;
         popupRef.current = popup;
         setStep(2);

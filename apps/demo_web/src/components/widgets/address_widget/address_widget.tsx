@@ -41,7 +41,7 @@ export const AddressWidget: FC<AddressWidgetProps> = ({}) => {
         <div className={styles.container}>
           <div className={styles.title}>
             <WalletIcon size={16} color="#ED6B25" />
-            <Typography size="md" weight="semibold" color="secondary">
+            <Typography size="md" weight="semibold" color="primary">
               Wallet Address
             </Typography>
           </div>

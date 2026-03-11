@@ -30,7 +30,7 @@ interface ChainPreferencesState {
 }
 
 interface ChainPreferencesActions {
-  setActiveUser: (authType: AuthType, email: string) => void;
+  setActiveUser: (authType: AuthType, publicKey: string) => void;
   clearActiveUser: () => void;
   enableChains: (...chainIds: string[]) => void;
   disableChains: (...chainIds: string[]) => void;
@@ -38,8 +38,8 @@ interface ChainPreferencesActions {
   getEnabledChainIds: () => string[];
 }
 
-function createUserKey(authType: AuthType, email: string): UserKey {
-  return `${authType}/${email.trim()}`;
+function createUserKey(authType: AuthType, publicKey: string): UserKey {
+  return `${authType}/${publicKey}`;
 }
 
 function getEnabledChains(state: ChainPreferencesState): string[] {
@@ -78,8 +78,8 @@ export const useChainStore = create<
       enabledChainsByUser: {},
       activeUserKey: null,
 
-      setActiveUser: (authType, email) => {
-        set({ activeUserKey: createUserKey(authType, email) });
+      setActiveUser: (authType, publicKey) => {
+        set({ activeUserKey: createUserKey(authType, publicKey) });
       },
 
       clearActiveUser: () => {

@@ -52,6 +52,7 @@
 }
 
 .headerText {
+  font-family: var(--font-family-body);
   font-size: 14px;
   font-weight: 600;
   line-height: 20px;
@@ -75,6 +76,7 @@
 }
 
 .listItem {
+  font-family: var(--font-family-body);
   font-size: 14px;
   font-weight: 500;
   line-height: 20px;

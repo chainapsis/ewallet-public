@@ -422,3 +422,6 @@ esm/
 
 # env
 .env*.local
+
+# Next.js auto-generated type declarations
+next-env.d.ts

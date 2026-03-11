@@ -124,11 +124,13 @@ export async function forgotPassword(
       return;
     }
 
+    const EXPIRY_BUFFER_SECONDS = 5;
     const verificationCode = generateVerificationCode();
     const expiresAt = new Date();
     expiresAt.setMinutes(
       expiresAt.getMinutes() + state.email_verification_expiration_minutes,
     );
+    expiresAt.setSeconds(expiresAt.getSeconds() + EXPIRY_BUFFER_SECONDS);
 
     const createRes = await createEmailVerification(state.db, {
       email,

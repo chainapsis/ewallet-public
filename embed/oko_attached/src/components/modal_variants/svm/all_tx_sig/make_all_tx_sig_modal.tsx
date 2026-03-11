@@ -60,7 +60,7 @@ export const MakeAllTxSigModal: FC<MakeAllTxSigModalProps> = ({
           <SvmAllTxSignatureContent payload={data.payload} />
         </div>
 
-        <Spacing height={16} />
+        <Spacing height={12} />
 
         <div className={styles.buttonContainer}>
           <Button

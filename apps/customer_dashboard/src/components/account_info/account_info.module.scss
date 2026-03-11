@@ -14,7 +14,7 @@
   img {
     width: 40px;
     height: 40px;
-    border-radius: 8px;
+    border-radius: 999px;
     object-fit: cover;
     flex-shrink: 0;
   }
@@ -30,7 +30,7 @@
   justify-content: center;
   align-items: center;
 
-  border-radius: 8px;
+  border-radius: 999px;
   border: 1px solid var(--gray-200);
   background: var(--bg-tertiary);
 

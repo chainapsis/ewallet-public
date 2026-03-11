@@ -44,7 +44,8 @@ export const APIKeyItemRow: FC<APIKeyItemRowProps> = ({
 
   return (
     <TableRow key={apiKey}>
-      <TableCell className={styles.apiKeyCell}>
+      <TableCell>
+        <div className={styles.apiKeyCellInner}>
         <Badge
           label={status.charAt(0).toUpperCase() + status.slice(1)}
           color={status === "active" ? "success" : "error"}
@@ -88,6 +89,7 @@ export const APIKeyItemRow: FC<APIKeyItemRowProps> = ({
         >
           <CopyOutlinedIcon color="var(--fg-tertiary)" size={20} />
         </button>
+        </div>
       </TableCell>
 
       <TableCell className={styles.dateCell}>
