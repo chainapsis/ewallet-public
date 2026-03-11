@@ -95,3 +95,9 @@
   height: 1px;
   background: var(--border-primary);
 }
+
+// Mobile app mode: enlarge label text
+:global(html[data-mobile]) .tokenAddressLabel {
+  font-size: var(--font-size-sm);
+  line-height: var(--font-line-height-sm);
+}

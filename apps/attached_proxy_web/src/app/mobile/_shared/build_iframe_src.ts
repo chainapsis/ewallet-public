@@ -10,5 +10,6 @@ export function buildIframeSrc(hostOrigin: string, apiKey: string): string {
   if (apiKey) {
     params.set("api_key", apiKey);
   }
+  params.set("mobile", "true");
   return `/?${params.toString()}`;
 }

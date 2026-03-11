@@ -26,3 +26,9 @@
 .riskWarningCheckBoxInputContainerClassName {
   padding-top: 0px;
 }
+
+// Mobile app mode: enlarge warning text
+:global(html[data-mobile]) .riskWarningBox p {
+  font-size: var(--font-size-sm);
+  line-height: var(--font-line-height-sm);
+}

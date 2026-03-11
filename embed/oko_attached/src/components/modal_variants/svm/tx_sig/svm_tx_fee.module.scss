@@ -4,3 +4,9 @@
   gap: 4px;
   justify-content: center;
 }
+
+// Mobile app mode: enlarge fee text
+:global(html[data-mobile]) .feeContainer p {
+  font-size: var(--font-size-sm);
+  line-height: var(--font-line-height-sm);
+}

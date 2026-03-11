@@ -4,20 +4,31 @@ import { OkoLogoWithNameIcon } from "@oko-wallet-common-ui/icons/oko_logo_with_n
 import type { Theme } from "@oko-wallet/oko-common-ui/theme";
 
 import styles from "./sign_with_oko_box.module.scss";
+import { useMobileMode } from "@oko-wallet-attached/hooks/mobile_mode";
 
 export const SignWithOkoBox: FC<SignWithOkoBoxProps> = ({
   theme,
   hideText,
 }) => {
+  const isMobile = useMobileMode();
+
   return (
     <div className={styles.container}>
       {!hideText && (
-        <Typography size="xs" color="quaternary" weight="medium">
+        <Typography
+          size={isMobile ? "sm" : "xs"}
+          color="quaternary"
+          weight="medium"
+        >
           Sign with
         </Typography>
       )}
       <div className={styles.logoContainer}>
-        <OkoLogoWithNameIcon width={39} height={16} theme={theme} />
+        <OkoLogoWithNameIcon
+          width={isMobile ? 52 : 39}
+          height={isMobile ? 20 : 16}
+          theme={theme}
+        />
       </div>
     </div>
   );

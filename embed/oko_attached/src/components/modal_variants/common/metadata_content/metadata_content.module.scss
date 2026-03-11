@@ -73,3 +73,10 @@
   color: #595959;
   word-break: break-all;
 }
+
+// ── Mobile app mode overrides ──
+
+:global(html[data-mobile]) .wrapper .originRow .originFavicon {
+  width: 24px;
+  height: 24px;
+}

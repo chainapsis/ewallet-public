@@ -73,3 +73,29 @@
 .rejectButton {
   border: 1px solid var(--border-primary) !important;
 }
+
+// ── Mobile app mode overrides ──
+
+:global(html[data-mobile]) .container {
+  height: 100%;
+}
+
+:global(html[data-mobile]) .modal {
+  max-height: 100dvh;
+  height: 100%;
+}
+
+:global(html[data-mobile]) .closeButton {
+  display: none;
+}
+
+:global(html[data-mobile]) .buttonContainer {
+  padding: 0;
+
+  button {
+    padding: 12px 18px;
+    min-height: 52px;
+    font-size: var(--font-size-lg);
+    line-height: var(--font-line-height-lg);
+  }
+}
