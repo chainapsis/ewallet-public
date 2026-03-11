@@ -10,8 +10,9 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "default": "./dist/index.js"
     }
   },
   "files": [
@@ -36,7 +37,7 @@
     "embed"
   ],
   "dependencies": {
-    "@interchain-kit/core": "^0.3.55",
+    "@interchain-kit/core": "^0.10.0",
     "@keplr-wallet/types": "0.12.297",
     "@oko-wallet/oko-sdk-core": "^0.1.2-alpha.9",
     "@oko-wallet/oko-sdk-cosmos": "^0.1.2-alpha.9"
