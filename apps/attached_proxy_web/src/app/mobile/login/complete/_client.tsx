@@ -191,13 +191,15 @@ function readWalletFromLocalStorage() {
     }
     const parsed = JSON.parse(raw);
     const origin = window.location.origin;
-    const wallet = parsed?.state?.perOrigin?.[origin]?.wallet;
+    const originState = parsed?.state?.perOrigin?.[origin];
+    const wallet = originState?.wallet;
     if (!wallet) {
       return null;
     }
     return {
       authType: wallet.authType || null,
       publicKey: wallet.publicKey || null,
+      publicKeyEd25519: originState?.ed25519Wallet?.publicKey || null,
       email: wallet.email || null,
       name: wallet.name || null,
     };

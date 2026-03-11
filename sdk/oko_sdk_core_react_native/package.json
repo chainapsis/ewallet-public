@@ -43,8 +43,7 @@
     "expo-web-browser": ">=14",
     "react": ">=18",
     "react-native": ">=0.70",
-    "react-native-get-random-values": ">=1",
-    "react-native-webview": ">=13"
+    "react-native-get-random-values": ">=1"
   },
   "devDependencies": {
     "@expo/config-plugins": "^55.0.6",
@@ -52,7 +51,6 @@
     "@types/react-native": "^0.73.0",
     "expo-secure-store": "^14.0.0",
     "expo-web-browser": "^14.0.0",
-    "react-native-webview": "^13.0.0",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3"
   }

@@ -9,7 +9,6 @@ const TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 const store = new Map<string, RelayEntry>();
 
-// Periodic cleanup of expired entries
 setInterval(() => {
   const now = Date.now();
   for (const [code, entry] of store) {
@@ -28,7 +27,6 @@ export function storeTokens(payload: unknown): string {
   return code;
 }
 
-/** Store with a caller-provided key instead of generating a random one. */
 export function storeWithKey(key: string, payload: unknown): void {
   store.set(key, {
     payload,

@@ -1,4 +1,3 @@
-// Polyfills for React Native — must run before chain SDKs that use Buffer/crypto.
 import "react-native-get-random-values";
 import { Buffer } from "buffer";
 if (typeof globalThis.Buffer === "undefined") {
