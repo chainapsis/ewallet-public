@@ -138,15 +138,28 @@ export function useInitializeApp() {
         );
 
         const oldTheme = getTheme(hostOrigin);
-        let determinedThemeByCustomer = await determineTheme(
-          hostOrigin,
-          oldTheme,
-        );
+        const themeResult = await determineTheme(hostOrigin, oldTheme);
+        let determinedThemeByCustomer = themeResult.theme;
+
+        const isMobileParam = searchParams.get("mobile") === "true";
 
         // iOS mobile: force light mode (ASWebAuthenticationSession chrome is always light)
-        const isMobileParam = searchParams.get("mobile") === "true";
         if (isMobileParam && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
           determinedThemeByCustomer = "light";
+        }
+
+        // Android mobile: watch for system theme settling
+        // (Chrome Custom Tab may report "light" initially then switch to "dark")
+        if (isMobileParam && themeResult.usesSystemPreference) {
+          const mq = window.matchMedia("(prefers-color-scheme: dark)");
+          mq.addEventListener("change", () => {
+            const t: typeof determinedThemeByCustomer = mq.matches
+              ? "dark"
+              : "light";
+            setColorScheme(t);
+            setTheme(hostOrigin, t);
+            setResolvedTheme(t);
+          });
         }
 
         setTheme(hostOrigin, determinedThemeByCustomer);

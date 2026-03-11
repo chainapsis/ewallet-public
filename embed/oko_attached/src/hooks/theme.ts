@@ -50,7 +50,7 @@ export function useSetThemeInCallback(providerType: AuthType) {
       }
 
       const oldTheme = getTheme(hostOrigin);
-      const theme = await determineTheme(hostOrigin, oldTheme);
+      const { theme } = await determineTheme(hostOrigin, oldTheme);
 
       setColorScheme(theme);
       _setTheme(theme);
