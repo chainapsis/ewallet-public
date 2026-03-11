@@ -40,8 +40,11 @@ function handleWindowMessage(event: MessageEvent): void {
   if (data.type === REQUEST_KEYS_MSG) {
     if (storedKeys) {
       const responder = event.source as Window | null;
+      const keysToSend = storedKeys;
+      storedKeys = null;
+      clearCleanupTimer();
       responder?.postMessage(
-        { type: RESPONSE_KEYS_MSG, keys: storedKeys },
+        { type: RESPONSE_KEYS_MSG, keys: keysToSend },
         event.origin,
       );
     } else if (window.location.pathname === "/") {
