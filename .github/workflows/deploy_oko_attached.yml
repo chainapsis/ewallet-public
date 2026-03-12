@@ -15,6 +15,8 @@ jobs:
   publish:
     runs-on: ubuntu-22.04
     timeout-minutes: 60
+    environment:
+      name: ${{ contains(inputs.git_tag, '/release/') && 'Production' || 'Preview' }}
     steps:
       - name: Checkout self repository
         uses: actions/checkout@v4
