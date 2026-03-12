@@ -16,13 +16,21 @@ import type { SignInType } from "@oko-wallet/oko-sdk-core";
 import * as SecureStore from "expo-secure-store";
 import { openModalRN } from "./methods/open_modal";
 import { signInRN, type SignInOptions } from "./methods/sign_in";
+import { signOutRN } from "./methods/sign_out";
 import type { LoginWalletInfo } from "./methods/login_url_codec";
 import { getEthChainInfo, getCosmosChainInfo } from "./chain_info";
 
 const WALLET_INFO_STORE_KEY = "oko_rn_wallet_info";
+const BROWSER_SESSION_MISSING_ERROR_TYPES = new Set([
+  "api_key_not_found",
+  "key_share_not_combined",
+  "wallet_not_found",
+  "jwt_not_found",
+]);
 
 interface PersistedWalletInfo extends OkoWalletState {
   publicKeyEd25519?: string | null;
+  sdkEndpoint?: string;
 }
 
 const DEFAULT_SDK_ENDPOINT = "https://proxy.oko.app";
@@ -140,7 +148,24 @@ export class OkoWalletRN implements OkoWalletInterface {
   ): Promise<Result<OpenModalAckPayload, OpenModalError>> {
     await this.waitUntilInitialized;
 
-    return openModalRN(this.sdkEndpoint, msg, this.redirectScheme, this.apiKey);
+    const result = await openModalRN(
+      this.sdkEndpoint,
+      msg,
+      this.redirectScheme,
+      this.apiKey,
+    );
+
+    if (
+      result.success &&
+      result.data.type === "error" &&
+      BROWSER_SESSION_MISSING_ERROR_TYPES.has(result.data.error.type)
+    ) {
+      await this._resetPersistedSession(
+        `[oko-rn] clearing cached wallet info after browser session error: ${result.data.error.type}`,
+      );
+    }
+
+    return result;
   }
 
   async signIn(type: SignInType): Promise<void> {
@@ -182,22 +207,13 @@ export class OkoWalletRN implements OkoWalletInterface {
   async signOut(): Promise<void> {
     await this.waitUntilInitialized;
 
-    this.state = {
-      authType: null,
-      email: null,
-      publicKey: null,
-      name: null,
-    };
-    this._cachedPublicKeyEd25519 = null;
-    await this._clearPersistedWalletInfo();
+    try {
+      await signOutRN(this.sdkEndpoint, this.redirectScheme);
+    } catch (error) {
+      console.warn("[oko-rn] OS-browser sign-out failed:", error);
+    }
 
-    this.eventEmitter.emit({
-      type: "CORE__accountsChanged",
-      authType: null,
-      publicKey: null,
-      email: null,
-      name: null,
-    });
+    await this._resetPersistedSession();
   }
 
   async getPublicKey(): Promise<string | null> {
@@ -270,6 +286,7 @@ export class OkoWalletRN implements OkoWalletInterface {
       const data: PersistedWalletInfo = {
         ...this.state,
         publicKeyEd25519: this._cachedPublicKeyEd25519,
+        sdkEndpoint: this.sdkEndpoint,
       };
       await SecureStore.setItemAsync(
         WALLET_INFO_STORE_KEY,
@@ -283,6 +300,10 @@ export class OkoWalletRN implements OkoWalletInterface {
       const raw = await SecureStore.getItemAsync(WALLET_INFO_STORE_KEY);
       if (!raw) return;
       const parsed = JSON.parse(raw) as PersistedWalletInfo;
+      if (parsed.sdkEndpoint && parsed.sdkEndpoint !== this.sdkEndpoint) {
+        await this._clearPersistedWalletInfo();
+        return;
+      }
       if (parsed.publicKey) {
         this.state = {
           authType: parsed.authType,
@@ -299,5 +320,39 @@ export class OkoWalletRN implements OkoWalletInterface {
     try {
       await SecureStore.deleteItemAsync(WALLET_INFO_STORE_KEY);
     } catch {}
+  }
+
+  private async _resetPersistedSession(logMessage?: string): Promise<void> {
+    if (logMessage) {
+      console.warn(logMessage);
+    }
+
+    const hadState =
+      this.state.authType !== null ||
+      this.state.email !== null ||
+      this.state.publicKey !== null ||
+      this.state.name !== null ||
+      this._cachedPublicKeyEd25519 !== null;
+
+    this.state = {
+      authType: null,
+      email: null,
+      publicKey: null,
+      name: null,
+    };
+    this._cachedPublicKeyEd25519 = null;
+    await this._clearPersistedWalletInfo();
+
+    if (!hadState) {
+      return;
+    }
+
+    this.eventEmitter.emit({
+      type: "CORE__accountsChanged",
+      authType: null,
+      publicKey: null,
+      email: null,
+      name: null,
+    });
   }
 }
