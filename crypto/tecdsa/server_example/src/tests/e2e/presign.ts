@@ -1,10 +1,4 @@
 import {
-  TECDSAClientState,
-  PresignStep1V2Request,
-  PresignStep2V2Request,
-  PresignStep3V2Request,
-} from "@oko-wallet/tecdsa-interface";
-import {
   reqPresignStep1,
   reqPresignStep2,
   reqPresignStep3,
@@ -15,6 +9,12 @@ import {
   runPresignClientStep2,
   runPresignClientStep3,
 } from "@oko-wallet/cait-sith-keplr-addon/src/client";
+import type {
+  PresignStep1V2Request,
+  PresignStep2V2Request,
+  PresignStep3V2Request,
+  TECDSAClientState,
+} from "@oko-wallet/tecdsa-interface";
 
 export async function e2ePresignTest(clientState: TECDSAClientState) {
   const triplesStep1Resp = await reqTriplesStep1({

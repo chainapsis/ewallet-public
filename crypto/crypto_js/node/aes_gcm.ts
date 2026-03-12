@@ -1,11 +1,11 @@
 // TODO: Remove sync functions @chemonoworld after publishing new version
 
 import {
-  randomBytes,
-  pbkdf2Sync,
   createCipheriv,
   createDecipheriv,
   pbkdf2,
+  pbkdf2Sync,
+  randomBytes,
 } from "crypto";
 import { promisify } from "util";
 

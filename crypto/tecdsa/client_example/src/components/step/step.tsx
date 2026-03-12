@@ -1,5 +1,3 @@
-import React from "react";
-
 import styles from "./step.module.css";
 
 export const Step: FC<StepProps> = ({
@@ -13,7 +11,7 @@ export const Step: FC<StepProps> = ({
     <div className={styles.wrapper}>
       <p className={styles.label}>{label}</p>
       <div className={styles.buttonArea}>
-        <button onClick={handleClick} disabled={disabled}>
+        <button type="button" onClick={handleClick} disabled={disabled}>
           Run
         </button>
       </div>
@@ -22,6 +20,7 @@ export const Step: FC<StepProps> = ({
         {result.length > 0 && (
           <div className={styles.result}>
             {result.map((r, idx) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: display-only list
               <pre key={idx}>{r}</pre>
             ))}
           </div>

@@ -1,13 +1,5 @@
-import type {
-  ClientTriplesStepOutput,
-  TriplesGenManyResult,
-  TECDSATriplesState,
-} from "@oko-wallet/tecdsa-interface";
-import { Participant } from "@oko-wallet/tecdsa-interface";
 import {
   reqTriplesStep1,
-  reqTriplesStep10,
-  reqTriplesStep11,
   reqTriplesStep2,
   reqTriplesStep3,
   reqTriplesStep4,
@@ -16,6 +8,8 @@ import {
   reqTriplesStep7,
   reqTriplesStep8,
   reqTriplesStep9,
+  reqTriplesStep10,
+  reqTriplesStep11,
 } from "@oko-wallet/api-lib";
 import { wasmModule } from "@oko-wallet/cait-sith-keplr-wasm";
 import type {
@@ -32,6 +26,12 @@ import type {
   TriplesStep11Body,
 } from "@oko-wallet/oko-types/tss";
 import type { Result } from "@oko-wallet/stdlib-js";
+import type {
+  ClientTriplesStepOutput,
+  TECDSATriplesState,
+  TriplesGenManyResult,
+} from "@oko-wallet/tecdsa-interface";
+import { Participant } from "@oko-wallet/tecdsa-interface";
 
 import type { TriplesResult } from "./types";
 
@@ -46,7 +46,7 @@ export async function runTriples(
   getIsAborted: () => boolean,
   // onAuthTokenRefresh: (newToken: string) => void,
 ): Promise<Result<TriplesResult, RunTriplesError>> {
-  let currentAuthToken = authToken;
+  const currentAuthToken = authToken;
 
   // // wrap the onAuthTokenRefresh function to handle change of authToken
   // const handleTokenRefresh = (newToken: string) => {

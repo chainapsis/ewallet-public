@@ -1,20 +1,20 @@
 import type {
+  CentralizedKeygenOutput,
   ClientKeygenStepOutput,
+  ClientPresignStepOutput,
+  ClientSignStep1Output,
+  KeyCombineInput,
   KeygenOutput,
   KeyshareState,
+  PresignOutput,
   PresignState,
   RcvdKeyshareMessages,
   RcvdPresignMessages,
-  TriplePub,
-  TriplesShare,
-  PresignOutput,
-  SignState,
   RcvdSignMessages,
   SignOutput,
-  ClientPresignStepOutput,
-  ClientSignStep1Output,
-  CentralizedKeygenOutput,
-  KeyCombineInput,
+  SignState,
+  TriplePub,
+  TriplesShare,
 } from "@oko-wallet/tecdsa-interface";
 
 import {
@@ -24,13 +24,13 @@ import {
   napiRunKeygenClientStep3,
   napiRunKeygenClientStep4,
   napiRunKeygenClientStep5,
+  napiRunKeygenCombineShares,
   napiRunPresignClientStep1,
   napiRunPresignClientStep2,
   napiRunPresignClientStep3,
   napiRunSignClientStep1,
   napiRunSignClientStep1V2,
   napiRunSignClientStep2,
-  napiRunKeygenCombineShares,
 } from "../../addon/index.js";
 
 export * from "./triples";

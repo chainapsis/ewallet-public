@@ -1,6 +1,6 @@
 import { sha256 as nobleSHA256 } from "@noble/hashes/sha2.js";
-import { type Result } from "@oko-wallet/stdlib-js";
 import { Bytes, type Bytes32 } from "@oko-wallet/bytes";
+import type { Result } from "@oko-wallet/stdlib-js";
 
 export function sha256(data: string | Uint8Array): Result<Bytes32, string> {
   try {

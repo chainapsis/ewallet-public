@@ -1,4 +1,9 @@
-import { Router } from "express";
+import {
+  runPresignServerStep1,
+  runPresignServerStep2,
+  runPresignServerStep3,
+  runTriplesServerStep1,
+} from "@oko-wallet/cait-sith-keplr-addon/src/server";
 import type {
   PresignStep1Request,
   PresignStep1Response,
@@ -9,19 +14,14 @@ import type {
   TriplesStep1Request,
   TriplesStep1Response,
 } from "@oko-wallet/tecdsa-interface";
-import {
-  runPresignServerStep1,
-  runPresignServerStep2,
-  runPresignServerStep3,
-  runTriplesServerStep1,
-} from "@oko-wallet/cait-sith-keplr-addon/src/server";
+import type { Router } from "express";
 
 import { appServerState } from "../state";
 
 export function setPresignRoutes(router: Router) {
   router.post<object, TriplesStep1Response, TriplesStep1Request>(
     "/triples_step_1",
-    (req, res) => {
+    (_req, res) => {
       try {
         const { serverState } = appServerState;
 

@@ -1,24 +1,24 @@
-import type {
-  ClientPresignStepOutput,
-  PresignOutput,
-  TECDSAPresignState,
-  TriplePub,
-  TriplesShare,
-  KeygenOutput,
-} from "@oko-wallet/tecdsa-interface";
-import { Participant } from "@oko-wallet/tecdsa-interface";
 import {
   reqPresignStep1,
   reqPresignStep2,
   reqPresignStep3,
 } from "@oko-wallet/api-lib";
 import { wasmModule } from "@oko-wallet/cait-sith-keplr-wasm";
-import type { Result } from "@oko-wallet/stdlib-js";
 import type {
   PresignStep1Body,
   PresignStep2Body,
   PresignStep3Body,
 } from "@oko-wallet/oko-types/tss";
+import type { Result } from "@oko-wallet/stdlib-js";
+import type {
+  ClientPresignStepOutput,
+  KeygenOutput,
+  PresignOutput,
+  TECDSAPresignState,
+  TriplePub,
+  TriplesShare,
+} from "@oko-wallet/tecdsa-interface";
+import { Participant } from "@oko-wallet/tecdsa-interface";
 
 export type RunPresignError =
   | { type: "aborted" }
@@ -41,7 +41,7 @@ export async function runPresign(
   authToken: string,
   getIsAborted: () => boolean,
 ): Promise<Result<PresignOutput, RunPresignError>> {
-  let currentAuthToken = authToken;
+  const currentAuthToken = authToken;
 
   // const handleTokenRefresh = (newToken: string) => {
   //   if (currentAuthToken !== newToken) {

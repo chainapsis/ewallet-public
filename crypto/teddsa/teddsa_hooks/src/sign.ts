@@ -1,14 +1,14 @@
 import { wasmModule } from "@oko-wallet/frost-ed25519-keplr-wasm";
-import type { Result } from "@oko-wallet/stdlib-js";
 import type {
-  SigningCommitmentOutput,
-  SignatureShareOutput,
-  SignatureOutput,
   CommitmentEntry,
-  SignatureShareEntry,
   KeyPackageRaw,
   PublicKeyPackageRaw,
+  SignatureOutput,
+  SignatureShareEntry,
+  SignatureShareOutput,
+  SigningCommitmentOutput,
 } from "@oko-wallet/oko-types/teddsa";
+import type { Result } from "@oko-wallet/stdlib-js";
 import {
   reqSignEd25519Round1,
   reqSignEd25519Round2,

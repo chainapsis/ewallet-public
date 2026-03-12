@@ -1,5 +1,4 @@
 import type {
-  SignOutput,
   KeygenOutput,
   KeyshareState,
   PresignOutput,
@@ -9,6 +8,7 @@ import type {
   RcvdSignMessages,
   ServerKeygenStepOutput,
   ServerSignStepOutput,
+  SignOutput,
   SignState,
   TriplePub,
   TriplesGenResult,

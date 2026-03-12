@@ -32,7 +32,11 @@ export function identifierMatchesParticipant(
 export function participantFromIdentifier(
   identifier: number[] | Uint8Array,
 ): Participant | null {
-  if (identifier[0] === 1) return Participant.P0;
-  if (identifier[0] === 2) return Participant.P1;
+  if (identifier[0] === 1) {
+    return Participant.P0;
+  }
+  if (identifier[0] === 2) {
+    return Participant.P1;
+  }
   return null;
 }

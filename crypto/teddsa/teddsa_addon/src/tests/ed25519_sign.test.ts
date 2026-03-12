@@ -1,17 +1,17 @@
-import { Participant } from "@oko-wallet/teddsa-interface";
 import type {
   CommitmentEntry,
   SignatureShareEntry,
 } from "@oko-wallet/teddsa-interface";
+import { Participant } from "@oko-wallet/teddsa-interface";
 
 import {
+  type NapiCentralizedKeygenOutput,
+  type NapiSigningCommitmentOutput,
+  runAggregateEd25519,
   runKeygenCentralizedEd25519,
   runSignRound1Ed25519,
   runSignRound2Ed25519,
-  runAggregateEd25519,
   runVerifyEd25519,
-  type NapiCentralizedKeygenOutput,
-  type NapiSigningCommitmentOutput,
 } from "../server";
 
 interface TeddsaClientState {
@@ -805,7 +805,7 @@ async function signRound2MessageDependencyTest() {
   const clientRound1 = runSignRound1Ed25519(clientKeyPackage);
   const serverRound1 = runSignRound1Ed25519(serverKeyPackage);
 
-  const allCommitments: CommitmentEntry[] = [
+  const _allCommitments: CommitmentEntry[] = [
     {
       identifier: clientRound1.identifier,
       commitments: clientRound1.commitments,
