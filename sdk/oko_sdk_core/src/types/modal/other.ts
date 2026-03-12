@@ -1,6 +1,7 @@
 export interface OtherModalPayload {
   modal_type: "other";
   modal_id: string;
+  // biome-ignore lint/complexity/noBannedTypes: intentional empty object type
   data: {};
 }
 

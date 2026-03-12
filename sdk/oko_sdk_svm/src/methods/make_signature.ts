@@ -1,6 +1,6 @@
 import type {
-  OkoWalletMsgOpenModal,
   MakeSvmSigData,
+  OkoWalletMsgOpenModal,
 } from "@oko-wallet/oko-sdk-core";
 import type { PublicKey } from "@solana/web3.js";
 import { v4 as uuidv4 } from "uuid";

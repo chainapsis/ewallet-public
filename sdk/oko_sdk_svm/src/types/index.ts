@@ -1,28 +1,25 @@
 export type {
-  OkoSvmWalletState,
-  OkoSvmWalletInitArgs,
-  OkoSvmWalletStaticInterface,
-  OkoSvmWalletInterface,
-} from "./svm_wallet";
-
+  SvmWalletEvent,
+  SvmWalletEventHandler,
+  SvmWalletEventMap,
+} from "./event";
 export type {
+  OkoSvmWalletChainOptions,
+  OkoSvmWalletInternal,
+} from "./internal";
+export type {
+  SvmSignAllTransactionsParams,
+  SvmSignAllTransactionsResult,
+  SvmSignMessageParams,
+  SvmSignMessageResult,
   SvmSignParams,
   SvmSignResult,
   SvmSignTransactionParams,
-  SvmSignAllTransactionsParams,
-  SvmSignMessageParams,
   SvmSignTransactionResult,
-  SvmSignAllTransactionsResult,
-  SvmSignMessageResult,
 } from "./sign";
-
 export type {
-  SvmWalletEvent,
-  SvmWalletEventMap,
-  SvmWalletEventHandler,
-} from "./event";
-
-export type {
-  OkoSvmWalletInternal,
-  OkoSvmWalletChainOptions,
-} from "./internal";
+  OkoSvmWalletInitArgs,
+  OkoSvmWalletInterface,
+  OkoSvmWalletState,
+  OkoSvmWalletStaticInterface,
+} from "./svm_wallet";

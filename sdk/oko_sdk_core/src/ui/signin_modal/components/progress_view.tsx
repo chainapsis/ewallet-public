@@ -1,16 +1,16 @@
-import { type FunctionComponent as FC } from "preact";
+import type { FunctionComponent as FC } from "preact";
 
-import type { SignInType } from "@oko-wallet-sdk-core/types/oauth";
 import {
-  GoogleIcon,
-  EmailIcon,
-  XIcon,
-  TelegramIcon,
   DiscordIcon,
+  EmailIcon,
   GithubIcon,
-  SpinnerLoadingIcon,
+  GoogleIcon,
   SpinnerFailedIcon,
+  SpinnerLoadingIcon,
+  TelegramIcon,
+  XIcon,
 } from "./icons";
+import type { SignInType } from "@oko-wallet-sdk-core/types/oauth";
 
 export interface ProgressViewProps {
   status: "loading" | "failed";

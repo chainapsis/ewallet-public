@@ -26,5 +26,5 @@ export type OkoWalletCoreEventHandler2 =
     }
   | {
       type: "CORE__chainChanged";
-      handler: (payload: void) => void;
+      handler: (payload: undefined) => void;
     };

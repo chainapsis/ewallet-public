@@ -1,4 +1,4 @@
-import { type Hex } from "viem";
+import type { Hex } from "viem";
 
 import type { OkoEthWalletInterface } from "@oko-wallet-sdk-eth/types";
 

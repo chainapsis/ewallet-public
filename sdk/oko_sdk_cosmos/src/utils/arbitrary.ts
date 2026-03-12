@@ -1,9 +1,9 @@
-import { Buffer } from "buffer";
 import type { StdSignDoc } from "@cosmjs/amino";
 import { serializeSignDoc } from "@cosmjs/amino";
+import { secp256k1 } from "@noble/curves/secp256k1";
 import { sha256 } from "@noble/hashes/sha2";
 import { keccak_256 } from "@noble/hashes/sha3";
-import { secp256k1 } from "@noble/curves/secp256k1";
+import { Buffer } from "buffer";
 
 import { getBech32Address, getCosmosAddress, getEthAddress } from "./address";
 
@@ -49,8 +49,7 @@ export function checkAndValidateADR36AminoSignDoc(
 ): boolean {
   const hasOnlyMsgSignData = (() => {
     if (
-      signDoc &&
-      signDoc.msgs &&
+      signDoc?.msgs &&
       Array.isArray(signDoc.msgs) &&
       signDoc.msgs.length === 1
     ) {

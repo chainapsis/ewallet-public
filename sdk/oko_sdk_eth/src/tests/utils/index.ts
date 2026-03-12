@@ -1,20 +1,20 @@
 import type { AddEthereumChainParameter, Hex } from "viem";
 import {
-  keccak256,
   hashMessage,
+  hashTypedData,
+  keccak256,
+  parseSignature,
   serializeTransaction,
   toHex,
-  hashTypedData,
-  parseSignature,
 } from "viem";
-import { mainnet } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
+import type { mainnet } from "viem/chains";
 
-import { hardhat } from "../hardhat";
+import type { hardhat } from "../hardhat";
 import type {
-  OkoEthSigner,
   EthSignParams,
   EthSignResult,
+  OkoEthSigner,
 } from "@oko-wallet-sdk-eth/types";
 import {
   parseTypedDataDefinition,
@@ -22,8 +22,8 @@ import {
 } from "@oko-wallet-sdk-eth/utils";
 import { VERSION } from "@oko-wallet-sdk-eth/version";
 
-export * from "./viemHelpers";
 export * from "./ethersHelpers";
+export * from "./viemHelpers";
 
 // Constants
 export const DUMMY_PROVIDER_ID = "123e4567-e89b-12d3-a456-426614174000";

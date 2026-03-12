@@ -1,12 +1,12 @@
 import type { Result } from "@oko-wallet/stdlib-js";
 
+import type { OpenModalError } from "@oko-wallet-sdk-core/errors";
 import type {
-  OkoWalletWebInterface,
   OkoWalletMsg,
   OkoWalletMsgOpenModal,
+  OkoWalletWebInterface,
   OpenModalAckPayload,
 } from "@oko-wallet-sdk-core/types";
-import type { OpenModalError } from "@oko-wallet-sdk-core/errors";
 
 const TEN_MINS = 60 * 10 * 1000;
 const POPUP_READY_TIMEOUT = 30 * 1000;

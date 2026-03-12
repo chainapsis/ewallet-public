@@ -1,38 +1,34 @@
-export { OkoSvmWallet } from "./svm_wallet";
 export { SvmWalletEventEmitter } from "./emitter";
-
 export type {
-  OkoSvmWalletState,
+  LazyInitError,
+  OkoSvmWalletError,
+  OkoSvmWalletInitError,
+} from "./errors";
+export { OkoSvmWallet } from "./svm_wallet";
+export type {
   OkoSvmWalletInitArgs,
-  OkoSvmWalletStaticInterface,
   OkoSvmWalletInterface,
+  OkoSvmWalletState,
+  OkoSvmWalletStaticInterface,
+  SvmSignAllTransactionsParams,
+  SvmSignAllTransactionsResult,
+  SvmSignMessageParams,
+  SvmSignMessageResult,
   SvmSignParams,
   SvmSignResult,
   SvmSignTransactionParams,
-  SvmSignAllTransactionsParams,
-  SvmSignMessageParams,
   SvmSignTransactionResult,
-  SvmSignAllTransactionsResult,
-  SvmSignMessageResult,
   SvmWalletEvent,
-  SvmWalletEventMap,
   SvmWalletEventHandler,
+  SvmWalletEventMap,
 } from "./types";
-
-export type {
-  OkoSvmWalletInitError,
-  LazyInitError,
-  OkoSvmWalletError,
-} from "./errors";
-
+export type { WalletStandardConfig } from "./wallet-standard";
 // Wallet Standard
 export {
-  registerWalletStandard,
-  OkoStandardWallet,
-  OKO_WALLET_NAME,
-  OkoSvmWalletAccount,
   buildSignInMessage,
   createSignInFeature,
+  OKO_WALLET_NAME,
+  OkoStandardWallet,
+  OkoSvmWalletAccount,
+  registerWalletStandard,
 } from "./wallet-standard";
-
-export type { WalletStandardConfig } from "./wallet-standard";

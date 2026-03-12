@@ -1,14 +1,14 @@
-import { describe, it, expect, jest, beforeEach } from "@jest/globals";
+import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import type { ChainInfo } from "@keplr-wallet/types";
 
 import { getAccounts } from "@oko-wallet-sdk-cosmos/methods/get_accounts";
 import {
+  cosmosHubChainInfo,
   cosmosPublicKey,
-  initiaPublicKey,
   expectedCosmosBech32Address,
   expectedInitiaBech32Address,
-  cosmosHubChainInfo,
   initiaChainInfo,
+  initiaPublicKey,
 } from "@oko-wallet-sdk-cosmos/tests/test-data";
 import type { OkoCosmosWalletInterface } from "@oko-wallet-sdk-cosmos/types";
 

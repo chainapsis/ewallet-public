@@ -1,16 +1,15 @@
 import { v4 as uuidv4 } from "uuid";
 
-import { OKO_ATTACHED_TARGET } from "@oko-wallet-sdk-core/window_msg/target";
+import { generateNonce } from "./utils";
 import type {
   OAuthState,
-  OkoWalletWebInterface,
   OkoWalletMsg,
   OkoWalletMsgOAuthSignInUpdate,
   OkoWalletMsgOAuthSignInUpdateAck,
   OkoWalletMsgOpenModal,
+  OkoWalletWebInterface,
 } from "@oko-wallet-sdk-core/types";
-
-import { generateNonce } from "./utils";
+import { OKO_ATTACHED_TARGET } from "@oko-wallet-sdk-core/window_msg/target";
 
 const TEN_MINS_MS = 10 * 60 * 1000;
 

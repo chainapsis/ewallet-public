@@ -6,9 +6,9 @@ import type {
   VersionedTransaction,
 } from "@solana/web3.js";
 
-import type { OkoSvmWalletInterface } from "@oko-wallet-sdk-svm/types";
-import { signAllTransactions } from "./sign_all_transactions";
 import { SolanaRpcError, SolanaRpcErrorCode } from "./make_signature";
+import { signAllTransactions } from "./sign_all_transactions";
+import type { OkoSvmWalletInterface } from "@oko-wallet-sdk-svm/types";
 
 export async function signAndSendAllTransactions(
   this: OkoSvmWalletInterface,

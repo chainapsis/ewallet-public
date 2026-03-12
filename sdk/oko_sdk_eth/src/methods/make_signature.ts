@@ -1,21 +1,21 @@
 import type {
-  OkoWalletMsgOpenModal,
-  MakeEthereumSigData,
   ChainInfoForAttachedModal,
+  MakeEthereumSigData,
+  OkoWalletMsgOpenModal,
 } from "@oko-wallet/oko-sdk-core";
 import { v4 as uuidv4 } from "uuid";
 
-import type {
-  OkoEthWalletInterface,
-  EthSignParams,
-  EthSignResult,
-  MakeSignatureBasePayload,
-} from "@oko-wallet-sdk-eth/types";
 import {
   EthereumRpcError,
   ProviderRpcErrorCode,
   RpcErrorCode,
 } from "@oko-wallet-sdk-eth/provider";
+import type {
+  EthSignParams,
+  EthSignResult,
+  MakeSignatureBasePayload,
+  OkoEthWalletInterface,
+} from "@oko-wallet-sdk-eth/types";
 import { toSignableTransaction } from "@oko-wallet-sdk-eth/utils";
 
 export async function makeSignature(

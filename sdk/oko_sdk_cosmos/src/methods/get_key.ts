@@ -1,12 +1,12 @@
 import type { Key } from "@keplr-wallet/types";
 
+import type { OkoCosmosWalletInterface } from "@oko-wallet-sdk-cosmos/types";
 import {
   getBech32Address,
   getCosmosAddress,
   getEthAddress,
   isEthereumCompatible,
 } from "@oko-wallet-sdk-cosmos/utils/address";
-import type { OkoCosmosWalletInterface } from "@oko-wallet-sdk-cosmos/types";
 
 export async function getKey(
   this: OkoCosmosWalletInterface,

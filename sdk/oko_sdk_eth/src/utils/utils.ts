@@ -1,6 +1,6 @@
-import type { Hex, Address, ByteArray } from "viem";
-import { publicKeyToAddress } from "viem/accounts";
 import { secp256k1 } from "@noble/curves/secp256k1";
+import type { Address, ByteArray, Hex } from "viem";
+import { publicKeyToAddress } from "viem/accounts";
 
 import type { RpcChain } from "@oko-wallet-sdk-eth/provider/types";
 
@@ -48,7 +48,7 @@ export function validateHexChainId(chainId: string): {
     const decimalChainId = parseInt(chainId, 16);
 
     // Ensure the chain ID is a 0x-prefixed hexadecimal string and can be parsed to an integer
-    if (!/^0x[0-9a-fA-F]+$/.test(chainId) || isNaN(decimalChainId)) {
+    if (!/^0x[0-9a-fA-F]+$/.test(chainId) || Number.isNaN(decimalChainId)) {
       return { isValid: false, error: "Invalid chain ID format" };
     }
 
@@ -61,7 +61,7 @@ export function validateHexChainId(chainId: string): {
     }
 
     return { isValid: true, decimalValue: decimalChainId };
-  } catch (error) {
+  } catch (_error) {
     return { isValid: false, error: "Invalid chain ID format" };
   }
 }

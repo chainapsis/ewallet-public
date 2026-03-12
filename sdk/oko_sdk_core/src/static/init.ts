@@ -1,13 +1,13 @@
-import { type Result } from "@oko-wallet/stdlib-js";
-import { UTM_SOURCE, UTM_CAMPAIGN } from "@oko-wallet/oko-types/referral";
+import { UTM_CAMPAIGN, UTM_SOURCE } from "@oko-wallet/oko-types/referral";
+import type { Result } from "@oko-wallet/stdlib-js";
 
+import { OkoWallet } from "@oko-wallet-sdk-core/constructor";
+import type { OkoWalletInitError } from "@oko-wallet-sdk-core/errors";
 import { setUpIframeElement } from "@oko-wallet-sdk-core/iframe";
 import type {
   OkoWalletInitArgs,
   OkoWalletWebInterface,
 } from "@oko-wallet-sdk-core/types";
-import { OkoWallet } from "@oko-wallet-sdk-core/constructor";
-import type { OkoWalletInitError } from "@oko-wallet-sdk-core/errors";
 
 const SDK_ENDPOINT = `https://attached.oko.app`;
 
@@ -54,7 +54,7 @@ export function init(
     const sdkEndpoint = args.sdk_endpoint ?? SDK_ENDPOINT;
 
     // Check if endpoint is valid url format
-    let sdkEndpointURL;
+    let sdkEndpointURL: URL;
     try {
       sdkEndpointURL = new URL(sdkEndpoint);
       sdkEndpointURL.searchParams.append("host_origin", hostOrigin);
@@ -72,7 +72,7 @@ export function init(
       }
 
       sdkEndpointURL.searchParams.append("sdk_version", OkoWallet.version);
-    } catch (err) {
+    } catch (_err) {
       return {
         success: false,
         err: { type: "sdk_endpoint_invalid_url" },

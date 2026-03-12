@@ -1,11 +1,11 @@
+import { handleDiscordSignIn } from "./discord";
+import { handleEmailSignIn } from "./email";
+import { handleGithubSignIn } from "./github";
+import { handleGoogleSignIn } from "./google";
+import { handleTelegramSignIn } from "./telegram";
+import { handleXSignIn } from "./x";
 import type { OkoWalletWebInterface } from "@oko-wallet-sdk-core/types";
 import type { SignInType } from "@oko-wallet-sdk-core/types/oauth";
-import { handleGoogleSignIn } from "./google";
-import { handleEmailSignIn } from "./email";
-import { handleXSignIn } from "./x";
-import { handleTelegramSignIn } from "./telegram";
-import { handleDiscordSignIn } from "./discord";
-import { handleGithubSignIn } from "./github";
 
 export async function signIn(this: OkoWalletWebInterface, type: SignInType) {
   // NOTE: Do NOT await before calling handlers that use window.open().

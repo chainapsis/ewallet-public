@@ -1,17 +1,4 @@
 import type {
-  EventEmitter3,
-  OkoWalletInitArgs,
-  OkoWalletInterface,
-  MakeCosmosSigData,
-  OpenModalAckPayload,
-} from "@oko-wallet/oko-sdk-core";
-import type {
-  ChainInfo,
-  KeplrSignOptions,
-  SettledResponses,
-} from "@keplr-wallet/types";
-import type { Key } from "@keplr-wallet/types";
-import type {
   AccountData,
   AminoSignResponse,
   OfflineAminoSigner,
@@ -22,18 +9,31 @@ import type {
   DirectSignResponse,
   OfflineDirectSigner,
 } from "@cosmjs/proto-signing";
+import type {
+  ChainInfo,
+  KeplrSignOptions,
+  Key,
+  SettledResponses,
+} from "@keplr-wallet/types";
+import type {
+  EventEmitter3,
+  MakeCosmosSigData,
+  OkoWalletInitArgs,
+  OkoWalletInterface,
+  OpenModalAckPayload,
+} from "@oko-wallet/oko-sdk-core";
 import type { Result } from "@oko-wallet/stdlib-js";
 
 import type {
   OkoCosmosWalletEvent2,
   OkoCosmosWalletEventHandler2,
 } from "./event";
-import type { SignDoc } from "@oko-wallet-sdk-cosmos/types/sign";
 import type {
-  OkoCosmosWalletInitError,
   LazyInitError,
+  OkoCosmosWalletInitError,
 } from "@oko-wallet-sdk-cosmos/errors";
 import type { ArbitrarySigVerificationResult } from "@oko-wallet-sdk-cosmos/methods/verify_arbitrary";
+import type { SignDoc } from "@oko-wallet-sdk-cosmos/types/sign";
 
 export interface OkoCosmosWalletState {
   publicKey: Uint8Array | null;

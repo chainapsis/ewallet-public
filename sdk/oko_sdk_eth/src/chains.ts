@@ -1,13 +1,13 @@
+import type { ChainInfo } from "@keplr-wallet/types";
 import type {
-  OkoWalletMsgGetEthChainInfo,
   OkoWalletInterface,
+  OkoWalletMsgGetEthChainInfo,
 } from "@oko-wallet/oko-sdk-core";
 import type { Result } from "@oko-wallet/stdlib-js";
-import type { ChainInfo } from "@keplr-wallet/types";
 import { toHex } from "viem";
 
-import type { OkoEthRpcChain } from "@oko-wallet-sdk-eth/provider";
 import type { SendGetEthChainInfoError } from "@oko-wallet-sdk-eth/errors";
+import type { OkoEthRpcChain } from "@oko-wallet-sdk-eth/provider";
 import { parseChainId } from "@oko-wallet-sdk-eth/utils";
 
 export const DEFAULT_CHAIN_ID = 1;
