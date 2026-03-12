@@ -100,11 +100,12 @@ persist한다. iOS(ASWebAuthenticationSession)와 Android(Chrome Custom Tab) 모
 불필요한 key share 잔존을 방지하기 위해 정리한다.
 
 **구현:**
-- RN SDK가 RPC URL에 `expected_pk` query param으로 현재 유저의 publicKey를 포함
-  (`sdk/oko_sdk_core_react_native/src/codec/rpc_codec.ts`의 `buildRpcUrl()`)
-- RPC 페이지가 이를 `RpcClient`에 전달 (`page.tsx`)
-- `RpcClient`가 iframe init 응답의 `public_key`와 비교하여 불일치하면
-  `sign_out` postMessage를 보내 stale session 정리 후 실제 RPC 실행 (`_client.tsx`)
+- **RPC 페이지 (`/mobile/rpc`):** RN SDK가 RPC URL에 `expected_pk` query param으로
+  현재 유저의 publicKey를 포함. `RpcClient`가 iframe init 응답의 `public_key`와 비교하여
+  불일치하면 `sign_out` postMessage를 보내 stale session 정리 후 실제 RPC 실행.
+- **Login Complete 페이지 (`/mobile/login/complete`):** 새로운 sign-in을 시작하기 전에
+  iframe init 응답에 기존 `public_key`가 남아있으면 무조건 `sign_out`으로 정리.
+  sign-in은 항상 clean slate에서 시작해야 하므로 `expected_pk` 비교 없이 정리한다.
 - `use_attached_init.ts`의 `AttachedInitPayload` 타입이 init 응답의 `data.public_key`를
   포함하여 이 비교를 가능하게 함
 

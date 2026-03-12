@@ -84,7 +84,27 @@ export function LoginCompleteClient({
       return;
     }
 
+    void handlePostInit(payload);
+  });
+
+  async function handlePostInit(
+    payload: Parameters<Parameters<typeof useAttachedInit>[0]>[0],
+  ) {
+    if (!sessionDataRef.current) return;
+
     setStatus("Processing sign-in...");
+
+    // Clear any stale session before starting a new sign-in
+    if (payload?.data?.public_key) {
+      console.info(
+        "[oko-mobile-login-complete] clearing stale session before sign-in",
+      );
+      await sendToAttached(iframeRef.current!, {
+        target: "oko_attached",
+        msg_type: "sign_out",
+        payload: null,
+      });
+    }
 
     // Inject nonce for email login (generated in /mobile/login, not in attached)
     const emailNonce = sessionStorage.getItem("oko_mobile_email_nonce");
@@ -108,7 +128,7 @@ export function LoginCompleteClient({
     }).then((ack) => {
       console.log("[oko-mobile-login-complete] oauth_info_pass_ack:", ack);
     });
-  });
+  }
 
   const handleKeygenComplete = useCallback(async () => {
     try {
