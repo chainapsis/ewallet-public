@@ -1,9 +1,9 @@
 import { spawn } from "node:child_process";
 import chalk from "chalk";
 
+import { runWithConcurrency } from "@oko-wallet-ci/concurrency";
 import { paths } from "@oko-wallet-ci/paths";
 import { getPkgName } from "@oko-wallet-ci/pkg_name";
-import { runWithConcurrency } from "@oko-wallet-ci/concurrency";
 
 const DEFAULT_CONCURRENCY = 4;
 

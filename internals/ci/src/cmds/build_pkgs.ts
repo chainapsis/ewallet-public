@@ -1,5 +1,5 @@
-import { paths } from "@oko-wallet-ci/paths";
 import { buildInStages } from "@oko-wallet-ci/build";
+import { paths } from "@oko-wallet-ci/paths";
 
 export async function buildPkgs(..._args: any[]) {
   await doBuildPkgs();

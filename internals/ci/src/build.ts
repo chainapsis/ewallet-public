@@ -1,8 +1,8 @@
 import { spawn } from "node:child_process";
 import chalk from "chalk";
 
-import { getPkgName } from "@oko-wallet-ci/pkg_name";
 import { runWithConcurrency } from "@oko-wallet-ci/concurrency";
+import { getPkgName } from "@oko-wallet-ci/pkg_name";
 
 /**
  * Builds packages in stages. Each stage runs concurrently,
