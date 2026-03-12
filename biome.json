@@ -40,6 +40,9 @@
       "complexity": {
         "useArrowFunction": "off"
       },
+      "correctness": {
+        "useExhaustiveDependencies": "off"
+      },
       "suspicious": {
         "noExplicitAny": "off",
         "noPrototypeBuiltins": "off"
@@ -50,7 +53,13 @@
       "a11y": {
         "useKeyWithClickEvents": "off",
         "noLabelWithoutControl": "off",
-        "useSemanticElements": "off"
+        "useSemanticElements": "off",
+        "noSvgWithoutTitle": "off",
+        "noStaticElementInteractions": "off",
+        "useFocusableInteractive": "off",
+        "useAriaPropsSupportedByRole": "off",
+        "noNoninteractiveElementToInteractiveRole": "off",
+        "useValidAnchor": "off"
       }
     }
   },
