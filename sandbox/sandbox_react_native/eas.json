@@ -4,14 +4,19 @@
     "appVersionSource": "remote"
   },
   "build": {
+    "base": {},
     "development": {
+      "extends": "base",
       "developmentClient": true,
       "distribution": "internal"
     },
     "preview": {
+      "extends": "base",
+      "credentialsSource": "local",
       "distribution": "internal"
     },
     "production": {
+      "extends": "base",
       "autoIncrement": true
     }
   },
