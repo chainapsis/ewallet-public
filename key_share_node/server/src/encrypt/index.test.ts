@@ -1,4 +1,4 @@
-import { encryptDataAsync, decryptDataAsync } from "./index";
+import { decryptDataAsync, encryptDataAsync } from "./index";
 
 describe("Encryption/Decryption Tests", () => {
   const testPassword = "test_password_123";

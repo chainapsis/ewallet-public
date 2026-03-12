@@ -1,9 +1,9 @@
 import type { Express } from "express";
 
-import { makePgDumpRouter } from "./pg_dump";
-import { addStatusRoutes } from "./status";
 import { makeKeyshareRouter } from "./key_share/v1";
 import { makeKeyshareV2Router } from "./key_share_v2";
+import { makePgDumpRouter } from "./pg_dump";
+import { addStatusRoutes } from "./status";
 
 export function setRoutes(app: Express) {
   const keyshareRouter = makeKeyshareRouter();

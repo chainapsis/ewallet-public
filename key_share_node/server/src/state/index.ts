@@ -1,5 +1,5 @@
-import type { Pool } from "pg";
 import type { EddsaKeypair } from "@oko-wallet/crypto-js/node/ecdhe";
+import type { Pool } from "pg";
 
 export interface ServerState {
   db: Pool;

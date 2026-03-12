@@ -1,14 +1,14 @@
-import path from "path";
-import os from "node:os";
 import fs from "node:fs";
+import os from "node:os";
 import chalk from "chalk";
+import path from "path";
 
 import {
   ENV_FILE_NAME,
-  EXAMPLE_ENV_FILE,
   ENV_FILE_NAME_2,
-  EXAMPLE_ENV_FILE_2,
   ENV_FILE_NAME_3,
+  EXAMPLE_ENV_FILE,
+  EXAMPLE_ENV_FILE_2,
   EXAMPLE_ENV_FILE_3,
 } from "@oko-wallet-ksn-server/envs";
 

@@ -1,4 +1,4 @@
-import { Router, type Response } from "express";
+import { Bytes, type Bytes64 } from "@oko-wallet/bytes";
 import type {
   CheckKeyShareRequestBody,
   CheckKeyShareResponse,
@@ -7,9 +7,9 @@ import type {
   RegisterKeyShareBody,
   ReshareKeyShareBody,
 } from "@oko-wallet/ksn-interface/key_share";
-import type { AuthType } from "@oko-wallet/oko-types/auth";
-import { Bytes, type Bytes64 } from "@oko-wallet/bytes";
 import type { KSNodeApiResponse } from "@oko-wallet/ksn-interface/response";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
+import { type Response, Router } from "express";
 
 import {
   checkKeyShare,
@@ -17,26 +17,26 @@ import {
   registerKeyShare,
   reshareKeyShare,
 } from "@oko-wallet-ksn-server/api/key_share";
-import {
-  bearerTokenMiddleware,
-  type AuthenticatedRequest,
-} from "@oko-wallet-ksn-server/middlewares";
 import { ErrorCodeMap } from "@oko-wallet-ksn-server/error";
-import type {
-  ResponseLocal,
-  KSNodeRequest,
-} from "@oko-wallet-ksn-server/routes/io";
+import {
+  type AuthenticatedRequest,
+  bearerTokenMiddleware,
+} from "@oko-wallet-ksn-server/middlewares";
 import { registry } from "@oko-wallet-ksn-server/openapi/doc";
 import {
   CheckKeyShareRequestBodySchema,
+  CheckKeyShareSuccessResponseSchema,
+  ErrorResponseSchema,
   GetKeyShareRequestBodySchema,
+  GetKeyShareSuccessResponseSchema,
+  KeyShareEmptySuccessResponseSchema,
   RegisterKeyShareBodySchema,
   ReshareKeyShareBodySchema,
-  ErrorResponseSchema,
-  KeyShareEmptySuccessResponseSchema,
-  GetKeyShareSuccessResponseSchema,
-  CheckKeyShareSuccessResponseSchema,
 } from "@oko-wallet-ksn-server/openapi/schema";
+import type {
+  KSNodeRequest,
+  ResponseLocal,
+} from "@oko-wallet-ksn-server/routes/io";
 
 export function makeKeyshareRouter() {
   const router = Router();

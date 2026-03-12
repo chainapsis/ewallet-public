@@ -1,5 +1,5 @@
-import { Pool, type PoolClient } from "pg";
 import type { Result } from "@oko-wallet/stdlib-js";
+import { Pool, type PoolClient } from "pg";
 
 import { logger } from "@oko-wallet-ksn-server/logger";
 

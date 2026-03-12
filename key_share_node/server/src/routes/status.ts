@@ -1,14 +1,14 @@
-import type { Express, Response } from "express";
 import type { ServerStatus } from "@oko-wallet/ksn-interface/status";
 import { getLatestCompletedPgDump } from "@oko-wallet/ksn-pg-interface";
 import dayjs from "dayjs";
+import type { Express, Response } from "express";
+
+import { logger } from "@oko-wallet-ksn-server/logger";
 import { registry } from "@oko-wallet-ksn-server/openapi/doc";
 import {
   ErrorResponseSchema,
   ServerStatusSchema,
 } from "@oko-wallet-ksn-server/openapi/schema";
-
-import { logger } from "@oko-wallet-ksn-server/logger";
 
 export function addStatusRoutes(app: Express) {
   registry.registerPath({

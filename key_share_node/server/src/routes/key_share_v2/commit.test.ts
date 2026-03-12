@@ -1,15 +1,15 @@
-import request from "supertest";
-import express from "express";
-import { Pool } from "pg";
-import dayjs from "dayjs";
-import { Bytes } from "@oko-wallet/bytes";
 import { randomBytes } from "node:crypto";
+import { Bytes } from "@oko-wallet/bytes";
+import dayjs from "dayjs";
+import express from "express";
+import type { Pool } from "pg";
+import request from "supertest";
 import { v4 as uuidv4 } from "uuid";
 
+import { commit } from "./commit";
 import { connectPG, resetPgDatabase } from "@oko-wallet-ksn-server/database";
 import { testPgConfig } from "@oko-wallet-ksn-server/database/test_config";
 import type { ServerState } from "@oko-wallet-ksn-server/state";
-import { commit } from "./commit";
 
 // Mock keypair for testing
 const privateKeyRes = Bytes.fromHexString(

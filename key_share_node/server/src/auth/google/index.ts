@@ -1,8 +1,8 @@
-import type { Result } from "@oko-wallet/stdlib-js";
 import type { GoogleTokenInfo } from "@oko-wallet/ksn-interface/auth";
+import type { Result } from "@oko-wallet/stdlib-js";
 
-import { GOOGLE_CLIENT_ID } from "./client_id";
 import type { OAuthValidationFail } from "../types";
+import { GOOGLE_CLIENT_ID } from "./client_id";
 
 export async function validateGoogleOAuthToken(
   idToken: string,

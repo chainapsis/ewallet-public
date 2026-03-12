@@ -1,5 +1,5 @@
+import type { Express } from "express";
 import swaggerUi from "swagger-ui-express";
-import { type Express } from "express";
 
 import { getOpenApiDocument } from "./doc";
 import { logger } from "@oko-wallet-ksn-server/logger";

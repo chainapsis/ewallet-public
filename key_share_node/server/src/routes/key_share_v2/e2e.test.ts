@@ -1,28 +1,28 @@
-import request from "supertest";
-import express from "express";
-import { Pool } from "pg";
-import dayjs from "dayjs";
 import { Bytes } from "@oko-wallet/bytes";
-import { v4 as uuidv4 } from "uuid";
+import { sha256 } from "@oko-wallet/crypto-js";
 import {
+  convertEddsaSignatureToBytes,
   generateEddsaKeypair,
   signMessage,
-  convertEddsaSignatureToBytes,
 } from "@oko-wallet/crypto-js/node/ecdhe";
-import { sha256 } from "@oko-wallet/crypto-js";
 import type { OperationType } from "@oko-wallet/ksn-interface/commit_reveal";
 import { getCommitRevealSessionBySessionId } from "@oko-wallet/ksn-pg-interface/commit_reveal";
+import dayjs from "dayjs";
+import express from "express";
+import type { Pool } from "pg";
+import request from "supertest";
+import { v4 as uuidv4 } from "uuid";
 
+import { commit } from "./commit";
+import { registerKeyshareEd25519 } from "./ed25519";
+import { getKeysharesV2 } from "./get_key_shares";
+import { keyshareV2Register } from "./register";
+import { keyshareV2Reshare } from "./reshare";
+import { checkKeyShareV2 } from "@oko-wallet-ksn-server/api/key_share";
 import { connectPG, resetPgDatabase } from "@oko-wallet-ksn-server/database";
 import { testPgConfig } from "@oko-wallet-ksn-server/database/test_config";
-import type { ServerState } from "@oko-wallet-ksn-server/state";
-import { checkKeyShareV2 } from "@oko-wallet-ksn-server/api/key_share";
 import { commitRevealMiddleware } from "@oko-wallet-ksn-server/middlewares";
-import { keyshareV2Register } from "./register";
-import { getKeysharesV2 } from "./get_key_shares";
-import { registerKeyshareEd25519 } from "./ed25519";
-import { keyshareV2Reshare } from "./reshare";
-import { commit } from "./commit";
+import type { ServerState } from "@oko-wallet-ksn-server/state";
 
 // Mock server keypair (must match the one used by the commit endpoint)
 const serverPrivateKeyRes = Bytes.fromHexString(
@@ -259,7 +259,7 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
           cr_session_id: ctx.sessionId,
           cr_signature: registerSignature,
           auth_type: ctx.authType,
-                    wallets: {
+          wallets: {
             secp256k1: {
               public_key: TEST_SECP256K1_PK,
               share: secp256k1Share,
@@ -340,7 +340,7 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
           cr_session_id: ctx.sessionId,
           cr_signature: registerSignature,
           auth_type: ctx.authType,
-                    wallets: {
+          wallets: {
             secp256k1: {
               public_key: TEST_SECP256K1_PK,
               share: generateRandomShare(),
@@ -474,7 +474,7 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
           cr_session_id: signInCtx.sessionId,
           cr_signature: getSignature,
           auth_type: signInCtx.authType,
-                    wallets: {
+          wallets: {
             secp256k1: TEST_SECP256K1_PK,
             ed25519: TEST_ED25519_PK,
           },
@@ -623,7 +623,7 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
           cr_session_id: reshareCtx.sessionId,
           cr_signature: reshareSignature,
           auth_type: reshareCtx.authType,
-                    wallets: {
+          wallets: {
             secp256k1: {
               public_key: TEST_SECP256K1_PK,
               share: secp256k1Share,
