@@ -18,6 +18,7 @@ import { openModalRN } from "./methods/open_modal";
 import { signInRN, type SignInOptions } from "./methods/sign_in";
 import type { LoginWalletInfo } from "./methods/login_url_codec";
 import { getEthChainInfo, getCosmosChainInfo } from "./chain_info";
+import { callRpc } from "./methods/call_rpc";
 
 const WALLET_INFO_STORE_KEY = "oko_rn_wallet_info";
 
@@ -90,6 +91,7 @@ export class OkoWalletRN implements OkoWalletInterface {
   }
 
   async sendMsgToIframe(msg: OkoWalletMsg): Promise<OkoWalletMsg> {
+    // Chain info queries are handled locally (no iframe needed)
     if (msg.msg_type === "get_eth_chain_info") {
       try {
         const chains = await getEthChainInfo(msg.payload.chain_id);
@@ -130,9 +132,20 @@ export class OkoWalletRN implements OkoWalletInterface {
       }
     }
 
-    throw new Error(
-      `[oko-rn] sendMsgToIframe: unsupported message type "${msg.msg_type}".`,
+    // All other messages are forwarded via generic RPC
+    const result = await callRpc(
+      this.sdkEndpoint,
+      msg.msg_type,
+      msg.payload,
+      this.apiKey,
+      this.redirectScheme,
     );
+
+    return {
+      target: "oko_sdk",
+      msg_type: `${msg.msg_type}_ack`,
+      payload: result,
+    } as OkoWalletMsg;
   }
 
   async openModal(

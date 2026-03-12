@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 
+import { ATTACHED_ORIGIN } from "./build_iframe_src";
+
 /**
  * Listens for the `init` message from the attached iframe, replies with
  * `init_ack`, and invokes the callback with the init payload.
@@ -15,10 +17,8 @@ export function useAttachedInit(
   callbackRef.current = onInit;
 
   useEffect(() => {
-    const origin = window.location.origin;
-
     function handleMessage(event: MessageEvent) {
-      if (event.origin !== origin) {
+      if (event.origin !== ATTACHED_ORIGIN) {
         return;
       }
       const msg = event.data;

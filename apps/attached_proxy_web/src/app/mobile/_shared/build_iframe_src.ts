@@ -1,15 +1,20 @@
+const ATTACHED_ORIGIN = "https://attached.oko.app";
+
 /**
  * Build the iframe src for the attached wallet.
- * Uses a relative path so the proxy's catch-all route forwards to upstream.
+ * Uses the attached origin directly so the iframe runs cross-origin,
+ * matching the web SDK's behavior.
  */
 export function buildIframeSrc(hostOrigin: string, apiKey: string): string {
-  const params = new URLSearchParams();
+  const url = new URL("/", ATTACHED_ORIGIN);
   if (hostOrigin) {
-    params.set("host_origin", hostOrigin);
+    url.searchParams.set("host_origin", hostOrigin);
   }
   if (apiKey) {
-    params.set("api_key", apiKey);
+    url.searchParams.set("api_key", apiKey);
   }
-  params.set("mobile", "true");
-  return `/?${params.toString()}`;
+  url.searchParams.set("mobile", "true");
+  return url.toString();
 }
+
+export { ATTACHED_ORIGIN };
