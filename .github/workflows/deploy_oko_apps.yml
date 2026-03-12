@@ -5,13 +5,14 @@ env:
   VERCEL_PRJ_ID__CT_DASHBOARD: ${{ secrets.VERCEL_PRJ_ID__CT_DASHBOARD }}
   VERCEL_PRJ_ID__USER_DASHBOARD: ${{ secrets.VERCEL_PRJ_ID__USER_DASHBOARD }}
   VERCEL_PRJ_ID__ADMIN_WEB: ${{ secrets.VERCEL_PRJ_ID__ADMIN_WEB }}
+  VERCEL_PRJ_ID__DOCS_WEB: ${{ secrets.VERCEL_PRJ_ID__DOCS_WEB }}
 on:
   workflow_dispatch:
     inputs:
       git_tag:
         description: >
           "Git tag (format: <app>/develop/v0.0.1 or <app>/release/v0.0.1).
-          Apps: demo_web, user_dashboard, ct_dashboard, admin_web"
+          Apps: demo_web, user_dashboard, ct_dashboard, admin_web, docs_web"
         required: true
         type: string
 
@@ -62,6 +63,10 @@ jobs:
               ;;
             admin_web)
               echo "VERCEL_PROJECT_ID=$VERCEL_PRJ_ID__ADMIN_WEB" >> \
+                "$GITHUB_ENV"
+              ;;
+            docs_web)
+              echo "VERCEL_PROJECT_ID=$VERCEL_PRJ_ID__DOCS_WEB" >> \
                 "$GITHUB_ENV"
               ;;
             *)
