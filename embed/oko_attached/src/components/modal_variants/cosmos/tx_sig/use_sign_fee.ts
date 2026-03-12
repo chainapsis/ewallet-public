@@ -12,7 +12,7 @@ import {
   getSelectableFees,
   sortSelectableFees,
 } from "@oko-wallet-attached/requests/cosmos_selectable_fees";
-import { DEMO_WEB_ORIGIN } from "@oko-wallet-attached/requests/endpoints";
+import { isDemoOrSandboxOrigin } from "@oko-wallet-attached/requests/endpoints";
 import type { InsufficientBalanceFee } from "./types";
 import { useGetParsedMsgs } from "@oko-wallet-attached/components/modal_variants/cosmos/tx_sig/use_parse_msgs";
 
@@ -76,7 +76,7 @@ export function useCosmosSignFee(
     (s) => s.findOrUpdateAssetMeta,
   );
 
-  const isDemo = !!hostOrigin && hostOrigin === DEMO_WEB_ORIGIN;
+  const isDemo = isDemoOrSandboxOrigin(hostOrigin);
 
   const chainInfo = toChainInfo(modalChainInfo);
   const { data: parsedMsgs } = useGetParsedMsgs({

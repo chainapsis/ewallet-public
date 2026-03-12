@@ -27,7 +27,7 @@ import {
   useBaseSponsorshipFlow,
 } from "@oko-wallet-attached/web3/ethereum/queries";
 import { useMemoryState } from "@oko-wallet-attached/store/memory";
-import { DEMO_WEB_ORIGIN } from "@oko-wallet-attached/requests/endpoints";
+import { isDemoOrSandboxOrigin } from "@oko-wallet-attached/requests/endpoints";
 import { DEFAULT_GAS_ESTIMATION } from "@oko-wallet-attached/web3/ethereum/queries/types";
 import {
   DEFAULT_ETH_FEE_TYPE,
@@ -205,7 +205,7 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
     getL1GasEstimationError !== null ||
     getFeeCurrencyBalanceError !== null;
 
-  const isDemo = !!hostOrigin && hostOrigin === DEMO_WEB_ORIGIN;
+  const isDemo = !!hostOrigin && isDemoOrSandboxOrigin(hostOrigin);
 
   // Fee sponsorship flow for Base chain
   const {
@@ -362,12 +362,6 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
 
   // check if the balance is sufficient for the transaction
   useEffect(() => {
-    if (isDemo) {
-      setHasSufficientBalanceForTotal(true);
-      setHasSufficientBalanceForValue(true);
-      return;
-    }
-
     if (estimatedFee === null) {
       return;
     }
@@ -389,11 +383,6 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
 
   // set the primary error message
   useEffect(() => {
-    if (isDemo) {
-      setPrimaryErrorMessage("");
-      return;
-    }
-
     if (isSimulating) {
       setPrimaryErrorMessage("");
       return;

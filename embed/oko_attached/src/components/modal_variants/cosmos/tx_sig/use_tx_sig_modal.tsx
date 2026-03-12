@@ -26,7 +26,7 @@ import {
   signDocToJson,
 } from "@oko-wallet-attached/web3/cosmos/sign_doc";
 import { useMemoryState } from "@oko-wallet-attached/store/memory";
-import { DEMO_WEB_ORIGIN } from "@oko-wallet-attached/requests/endpoints";
+import { isDemoOrSandboxOrigin } from "@oko-wallet-attached/requests/endpoints";
 import type { FeeCalculated, InsufficientBalanceFee } from "./types";
 
 export function useTxSigModal(
@@ -41,7 +41,7 @@ export function useTxSigModal(
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const isDemo = !!hostOrigin && hostOrigin === DEMO_WEB_ORIGIN;
+  const isDemo = isDemoOrSandboxOrigin(hostOrigin);
 
   const feeFromSignDoc = extractFeeFromSignDoc(payload.signDoc);
 
