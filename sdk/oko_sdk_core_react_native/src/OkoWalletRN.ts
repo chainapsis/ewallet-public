@@ -13,7 +13,7 @@ import {
 } from "@oko-wallet/oko-sdk-core";
 import type { OpenModalError } from "@oko-wallet/oko-sdk-core";
 import type { SignInType } from "@oko-wallet/oko-sdk-core";
-import * as SecureStore from "expo-secure-store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { openModalRN } from "./methods/open_modal";
 import { signInRN, type SignInOptions } from "./methods/sign_in";
 import type { LoginWalletInfo } from "./methods/login_url_codec";
@@ -284,16 +284,13 @@ export class OkoWalletRN implements OkoWalletInterface {
         ...this.state,
         publicKeyEd25519: this._cachedPublicKeyEd25519,
       };
-      await SecureStore.setItemAsync(
-        WALLET_INFO_STORE_KEY,
-        JSON.stringify(data),
-      );
+      await AsyncStorage.setItem(WALLET_INFO_STORE_KEY, JSON.stringify(data));
     } catch {}
   }
 
   private async _restoreWalletInfo(): Promise<void> {
     try {
-      const raw = await SecureStore.getItemAsync(WALLET_INFO_STORE_KEY);
+      const raw = await AsyncStorage.getItem(WALLET_INFO_STORE_KEY);
       if (!raw) return;
       const parsed = JSON.parse(raw) as PersistedWalletInfo;
       if (parsed.publicKey) {
@@ -310,7 +307,7 @@ export class OkoWalletRN implements OkoWalletInterface {
 
   private async _clearPersistedWalletInfo(): Promise<void> {
     try {
-      await SecureStore.deleteItemAsync(WALLET_INFO_STORE_KEY);
+      await AsyncStorage.removeItem(WALLET_INFO_STORE_KEY);
     } catch {}
   }
 }
