@@ -1,11 +1,11 @@
-import type { Pool, PoolClient } from "pg";
-import { v4 as uuidv4 } from "uuid";
 import type {
   CreateKeyShareRequest,
   KeyShare,
   KeyShareStatus,
 } from "@oko-wallet/ksn-interface/key_share";
 import type { Result } from "@oko-wallet/stdlib-js";
+import type { Pool, PoolClient } from "pg";
+import { v4 as uuidv4 } from "uuid";
 
 export async function createKeyShare(
   db: Pool | PoolClient,

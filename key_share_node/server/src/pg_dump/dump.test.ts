@@ -1,18 +1,18 @@
-import { Pool } from "pg";
 import fs from "node:fs/promises";
-import { join } from "node:path";
 import os from "node:os";
+import { join } from "node:path";
 import {
-  getPgDumpById,
   getAllPgDumps,
+  getPgDumpById,
   type PgDumpConfig,
 } from "@oko-wallet/ksn-pg-interface";
+import type { Pool } from "pg";
 
 import { connectPG, resetPgDatabase } from "@oko-wallet-ksn-server/database";
 import { testPgConfig } from "@oko-wallet-ksn-server/database/test_config";
 import {
-  processPgDump,
   deleteOldPgDumps,
+  processPgDump,
 } from "@oko-wallet-ksn-server/pg_dump/dump";
 
 describe("pg_dump_test", () => {

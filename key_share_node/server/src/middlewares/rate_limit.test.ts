@@ -1,5 +1,5 @@
-import request from "supertest";
 import express from "express";
+import request from "supertest";
 
 import { rateLimitMiddleware } from "./rate_limit";
 
@@ -13,7 +13,7 @@ describe("rate_limit_test", () => {
   describe("rateLimitMiddleware", () => {
     it("should allow normal requests", async () => {
       app.use(rateLimitMiddleware({ windowSeconds: 30, maxRequests: 10 }));
-      app.get("/test", (req, res) => res.json({ success: true }));
+      app.get("/test", (_req, res) => res.json({ success: true }));
 
       const response = await request(app).get("/test");
       expect(response.status).toBe(200);
@@ -21,7 +21,7 @@ describe("rate_limit_test", () => {
 
     it("should include rate limit headers", async () => {
       app.use(rateLimitMiddleware({ windowSeconds: 30, maxRequests: 10 }));
-      app.get("/test", (req, res) => res.json({ success: true }));
+      app.get("/test", (_req, res) => res.json({ success: true }));
 
       const response = await request(app).get("/test");
       expect(response.headers["ratelimit-limit"]).toBeDefined();
@@ -31,7 +31,7 @@ describe("rate_limit_test", () => {
 
     it("should block requests when limit exceeded", async () => {
       app.use(rateLimitMiddleware({ windowSeconds: 1, maxRequests: 1 }));
-      app.get("/test", (req, res) => res.json({ success: true }));
+      app.get("/test", (_req, res) => res.json({ success: true }));
 
       await request(app).get("/test");
       const response = await request(app).get("/test");
@@ -42,7 +42,7 @@ describe("rate_limit_test", () => {
 
     it("should include headers when blocked", async () => {
       app.use(rateLimitMiddleware({ windowSeconds: 1, maxRequests: 1 }));
-      app.get("/test", (req, res) => res.json({ success: true }));
+      app.get("/test", (_req, res) => res.json({ success: true }));
 
       await request(app).get("/test");
       const response = await request(app).get("/test");
@@ -53,7 +53,7 @@ describe("rate_limit_test", () => {
 
     it("should work with strict limits", async () => {
       app.use(rateLimitMiddleware({ windowSeconds: 1, maxRequests: 1 }));
-      app.get("/test", (req, res) => res.json({ success: true }));
+      app.get("/test", (_req, res) => res.json({ success: true }));
 
       const response1 = await request(app).get("/test");
       expect(response1.status).toBe(200);
@@ -64,7 +64,7 @@ describe("rate_limit_test", () => {
 
     it("should work with generous limits", async () => {
       app.use(rateLimitMiddleware({ windowSeconds: 3600, maxRequests: 1000 }));
-      app.get("/test", (req, res) => res.json({ success: true }));
+      app.get("/test", (_req, res) => res.json({ success: true }));
 
       for (let i = 0; i < 5; i++) {
         const response = await request(app).get("/test");
@@ -75,7 +75,7 @@ describe("rate_limit_test", () => {
     it("should include time in error message", async () => {
       const windowSeconds = 45;
       app.use(rateLimitMiddleware({ windowSeconds, maxRequests: 1 }));
-      app.get("/test", (req, res) => res.json({ success: true }));
+      app.get("/test", (_req, res) => res.json({ success: true }));
 
       await request(app).get("/test");
       const response = await request(app).get("/test");

@@ -1,6 +1,6 @@
-import { Pool } from "pg";
-import { v4 as uuidv4 } from "uuid";
 import type { Result } from "@oko-wallet/stdlib-js";
+import type { Pool } from "pg";
+import { v4 as uuidv4 } from "uuid";
 
 export type PgDumpStatus = "IN_PROGRESS" | "COMPLETED" | "FAILED" | "DELETED";
 

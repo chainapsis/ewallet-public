@@ -1,24 +1,24 @@
-import { type Response } from "express";
+import { Bytes } from "@oko-wallet/bytes";
 import type {
   CheckKeyShareV2Request,
   CheckKeyShareV2RequestBody,
   CheckKeyShareV2Response,
 } from "@oko-wallet/ksn-interface/key_share";
-import { Bytes } from "@oko-wallet/bytes";
 import type { KSNodeApiResponse } from "@oko-wallet/ksn-interface/response";
+import type { Response } from "express";
 
 import { checkKeyShareV2 } from "@oko-wallet-ksn-server/api/key_share";
 import { ErrorCodeMap } from "@oko-wallet-ksn-server/error";
-import type {
-  ResponseLocal,
-  KSNodeRequest,
-} from "@oko-wallet-ksn-server/routes/io";
 import { registry } from "@oko-wallet-ksn-server/openapi/doc";
 import {
   CheckKeyShareV2RequestBodySchema,
   CheckKeyShareV2SuccessResponseSchema,
   ErrorResponseSchema,
 } from "@oko-wallet-ksn-server/openapi/schema";
+import type {
+  KSNodeRequest,
+  ResponseLocal,
+} from "@oko-wallet-ksn-server/routes/io";
 
 // --- POST /check ---
 registry.registerPath({

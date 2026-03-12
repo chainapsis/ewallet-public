@@ -1,21 +1,21 @@
-import { type Request, type Response } from "express";
 import { Bytes } from "@oko-wallet/bytes";
-import type { KSNodeApiResponse } from "@oko-wallet/ksn-interface/response";
 import {
-  signMessage,
   convertEddsaSignatureToBytes,
+  signMessage,
 } from "@oko-wallet/crypto-js/node/ecdhe";
+import type { KSNodeApiResponse } from "@oko-wallet/ksn-interface/response";
 import { createCommitRevealSession } from "@oko-wallet/ksn-pg-interface/commit_reveal";
+import type { Request, Response } from "express";
 
+import { ErrorCodeMap } from "@oko-wallet-ksn-server/error";
 import { registry } from "@oko-wallet-ksn-server/openapi/doc";
 import {
+  type CommitRequestBody,
   CommitRequestBodySchema,
+  type CommitResponseData,
   CommitSuccessResponseSchema,
   ErrorResponseSchema,
-  type CommitRequestBody,
-  type CommitResponseData,
 } from "@oko-wallet-ksn-server/openapi/schema";
-import { ErrorCodeMap } from "@oko-wallet-ksn-server/error";
 import type { ServerState } from "@oko-wallet-ksn-server/state";
 
 const SESSION_EXPIRY_MINUTES = 5;

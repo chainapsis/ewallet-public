@@ -1,14 +1,14 @@
-import { join } from "node:path";
 import os from "node:os";
-import request from "supertest";
-import express from "express";
-import { Pool } from "pg";
-import dayjs from "dayjs";
+import { join } from "node:path";
 import { Bytes } from "@oko-wallet/bytes";
+import dayjs from "dayjs";
+import express from "express";
+import type { Pool } from "pg";
+import request from "supertest";
 
+import { makePgDumpRouter } from ".";
 import { connectPG, resetPgDatabase } from "@oko-wallet-ksn-server/database";
 import { testPgConfig } from "@oko-wallet-ksn-server/database/test_config";
-import { makePgDumpRouter } from ".";
 import type { ServerState } from "@oko-wallet-ksn-server/state";
 
 // Mock keypair for testing
@@ -28,7 +28,7 @@ const mockServerKeypair = {
   publicKey: publicKeyRes.data,
 };
 
-function makeUnsuccessfulAppStatus(pool: Pool): ServerState {
+function _makeUnsuccessfulAppStatus(pool: Pool): ServerState {
   return {
     db: pool,
     encryptionSecret: "temp_enc_secret",

@@ -1,10 +1,10 @@
-import type { Pool, PoolClient } from "pg";
-import type { Result } from "@oko-wallet/stdlib-js";
 import type {
   CommitRevealSession,
   CreateSessionParams,
   SessionState,
 } from "@oko-wallet/ksn-interface/commit_reveal";
+import type { Result } from "@oko-wallet/stdlib-js";
+import type { Pool, PoolClient } from "pg";
 
 export async function createCommitRevealSession(
   db: Pool | PoolClient,
