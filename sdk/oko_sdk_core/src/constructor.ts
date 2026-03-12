@@ -2,13 +2,13 @@ import { lazyInit } from "./private/lazy_init";
 import type {
   OkoWalletCoreEvent2,
   OkoWalletCoreEventHandler2,
-  OkoWalletInterface,
+  OkoWalletWebInterface,
   OkoWalletStaticInterface,
 } from "./types";
 import { EventEmitter3 } from "./event";
 
 export const OkoWallet = function (
-  this: OkoWalletInterface,
+  this: OkoWalletWebInterface,
   apiKey: string,
   iframe: HTMLIFrameElement,
   sdkEndpoint: string,
@@ -30,4 +30,4 @@ export const OkoWallet = function (
     name: null,
   };
   this.waitUntilInitialized = lazyInit(this).then();
-} as any as OkoWalletStaticInterface;
+} as unknown as OkoWalletStaticInterface;

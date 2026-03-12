@@ -28,7 +28,7 @@ export function init(
     };
   }
 
-  const instance = new (OkoEthWallet as any)(okoEthWalletRes.data);
+  const instance = new OkoEthWallet(okoEthWalletRes.data);
 
   return {
     success: true,

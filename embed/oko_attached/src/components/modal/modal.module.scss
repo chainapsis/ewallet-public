@@ -27,3 +27,15 @@
   opacity: 0;
   pointer-events: none;
 }
+
+// Mobile app mode: full-screen, no overlay
+:global(html[data-mobile]) .overlay {
+  background-color: var(--bg-primary);
+  backdrop-filter: none;
+}
+
+:global(html[data-mobile]) .floatingWrapper {
+  max-width: none;
+  padding: 0;
+  height: 100%;
+}

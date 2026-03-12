@@ -1,12 +1,12 @@
 import type {
   OkoWalletMsg,
-  OkoWalletInterface,
+  OkoWalletWebInterface,
 } from "@oko-wallet-sdk-core/types";
 
 const TIMEOUT_MS = 30_000;
 
 export async function sendMsgToIframe(
-  this: OkoWalletInterface,
+  this: OkoWalletWebInterface,
   msg: OkoWalletMsg,
 ): Promise<OkoWalletMsg> {
   await this.waitUntilInitialized;

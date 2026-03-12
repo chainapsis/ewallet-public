@@ -1,7 +1,7 @@
 import type { Result } from "@oko-wallet/stdlib-js";
 
 import type {
-  OkoWalletInterface,
+  OkoWalletWebInterface,
   OkoWalletMsg,
   OkoWalletMsgOpenModal,
   OpenModalAckPayload,
@@ -18,7 +18,7 @@ interface PopupContext {
 }
 
 export async function openModal(
-  this: OkoWalletInterface,
+  this: OkoWalletWebInterface,
   msg: OkoWalletMsgOpenModal,
 ): Promise<Result<OpenModalAckPayload, OpenModalError>> {
   const emailLogin = msg.payload.modal_type === "auth/email_login";
@@ -88,7 +88,7 @@ export async function openModal(
 }
 
 function openEmailLoginPopup(
-  this: OkoWalletInterface,
+  this: OkoWalletWebInterface,
   msg: OkoWalletMsgOpenModal,
 ): PopupContext {
   const modalId =
@@ -164,7 +164,7 @@ function openEmailLoginPopup(
 }
 
 function openTelegramLoginPopup(
-  this: OkoWalletInterface,
+  this: OkoWalletWebInterface,
   msg: OkoWalletMsgOpenModal,
 ): PopupContext {
   const modalId =

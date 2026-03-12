@@ -2,6 +2,7 @@ import type { Result } from "@oko-wallet/stdlib-js";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import {
   EventEmitter3,
+  type OkoWalletInterface,
   type OkoWalletMsg,
   type OkoWalletMsgOpenModal,
   type OkoWalletState,
@@ -13,68 +14,42 @@ import {
 import type { OpenModalError } from "@oko-wallet/oko-sdk-core";
 import type { SignInType } from "@oko-wallet/oko-sdk-core";
 import * as SecureStore from "expo-secure-store";
-import type { WebViewBridge } from "./bridge/WebViewBridge";
-import {
-  getPublicKey,
-  getPublicKeyEd25519,
-  getEmail,
-  getName,
-  getWalletInfo,
-  getAuthType,
-} from "./methods/getters";
 import { openModalRN } from "./methods/open_modal";
 import { signInRN, type SignInOptions } from "./methods/sign_in";
-import { signOutRN } from "./methods/sign_out";
+import type { LoginWalletInfo } from "./methods/login_url_codec";
+import { getEthChainInfo, getCosmosChainInfo } from "./chain_info";
 
 const WALLET_INFO_STORE_KEY = "oko_rn_wallet_info";
 
+interface PersistedWalletInfo extends OkoWalletState {
+  publicKeyEd25519?: string | null;
+}
+
+const DEFAULT_SDK_ENDPOINT = "https://proxy.oko.app";
+
 export interface OkoWalletRNConfig {
   apiKey: string;
-  sdkEndpoint: string;
+  sdkEndpoint?: string;
   redirectScheme?: string;
 }
 
-/**
- * React Native implementation of OkoWallet SDK.
- *
- * Architecture:
- * - Read-only ops (getPublicKey, getEmail, etc.): WebView bridge → attached iframe
- * - Login + keygen: OS browser (/mobile/login) — key shares persist in localStorage
- * - Signing: OS browser (/mobile/sign) — key shares restored from localStorage
- *
- * Key shares NEVER exist in the WebView or app JS runtime.
- */
-export class OkoWalletRN {
+export class OkoWalletRN implements OkoWalletInterface {
   state: OkoWalletState;
   apiKey: string;
   sdkEndpoint: string;
   redirectScheme: string;
   origin: string;
-  eventEmitter: EventEmitter3<
-    OkoWalletCoreEvent2,
-    OkoWalletCoreEventHandler2
-  >;
+  eventEmitter: EventEmitter3<OkoWalletCoreEvent2, OkoWalletCoreEventHandler2>;
 
-  // Stubs for OkoWalletInterface compat (unused in RN)
-  iframe: null = null;
-  activePopupId: string | null = null;
-  activePopupWindow: null = null;
-
-  /** Resolves when the attached iframe sends its init message */
   waitUntilInitialized: Promise<Result<OkoWalletState, string>>;
 
-  /** @internal */
-  bridge!: WebViewBridge;
-
-  private _resolveInit!: (
-    value: Result<OkoWalletState, string>,
-  ) => void;
+  private _resolveInit!: (value: Result<OkoWalletState, string>) => void;
   private _initResolved = false;
   private _cachedPublicKeyEd25519: string | null = null;
 
   constructor(config: OkoWalletRNConfig) {
     this.apiKey = config.apiKey;
-    this.sdkEndpoint = config.sdkEndpoint;
+    this.sdkEndpoint = config.sdkEndpoint ?? DEFAULT_SDK_ENDPOINT;
     this.redirectScheme = config.redirectScheme ?? "okowallet";
     this.origin = `${this.redirectScheme}://`;
     this.state = {
@@ -91,54 +66,15 @@ export class OkoWalletRN {
     this.waitUntilInitialized = new Promise((resolve) => {
       this._resolveInit = resolve;
     });
+
+    this._initialize();
   }
 
-  /** @internal Called by OkoWalletProvider when WebView bridge is ready */
-  _setBridge(bridge: WebViewBridge): void {
-    this.bridge = bridge;
-
-    bridge.onEvent = (eventType: string, payload: unknown) => {
-      this._handleBridgeEvent(eventType, payload);
-    };
-  }
-
-  /** @internal Handle events from the bridge (init) */
-  private _handleBridgeEvent(eventType: string, payload: unknown): void {
-    if (eventType === "init") {
-      this._handleInit(payload);
-      return;
-    }
-  }
-
-  private async _handleInit(payload: unknown): Promise<void> {
+  private async _initialize(): Promise<void> {
     if (this._initResolved) return;
     this._initResolved = true;
 
-    const data = payload as {
-      success: boolean;
-      data?: {
-        auth_type: AuthType | null;
-        email: string | null;
-        public_key: string | null;
-        name: string | null;
-      };
-      err?: string;
-    };
-
-    if (data.success && data.data) {
-      this.state = {
-        authType: data.data.auth_type,
-        email: data.data.email,
-        publicKey: data.data.public_key,
-        name: data.data.name,
-      };
-    }
-
-    // WebView's attached has separate localStorage from OS browser,
-    // so it won't have login state. Restore from persisted storage.
-    if (!this.state.publicKey) {
-      await this._restoreWalletInfo();
-    }
+    await this._restoreWalletInfo();
 
     if (this.state.email && this.state.publicKey) {
       this.eventEmitter.emit({
@@ -153,39 +89,60 @@ export class OkoWalletRN {
     this._resolveInit({ success: true, data: this.state });
   }
 
-  // ─── OkoWalletInterface compatible methods ───
-
-  /**
-   * Send a message to the attached iframe via WebView bridge.
-   * Used for read-only operations only (getPublicKey, getEmail, etc.)
-   */
   async sendMsgToIframe(msg: OkoWalletMsg): Promise<OkoWalletMsg> {
-    await this.waitUntilInitialized;
-    return this.bridge.sendMessage(msg);
+    if (msg.msg_type === "get_eth_chain_info") {
+      try {
+        const chains = await getEthChainInfo(msg.payload.chain_id);
+        return {
+          target: "oko_sdk",
+          msg_type: "get_eth_chain_info_ack",
+          payload: { success: true as const, data: chains },
+        } as OkoWalletMsg;
+      } catch (error) {
+        return {
+          target: "oko_sdk",
+          msg_type: "get_eth_chain_info_ack",
+          payload: {
+            success: false as const,
+            err: error instanceof Error ? error.message : "Unknown error",
+          },
+        } as OkoWalletMsg;
+      }
+    }
+
+    if (msg.msg_type === "get_cosmos_chain_info") {
+      try {
+        const chains = await getCosmosChainInfo(msg.payload.chain_id);
+        return {
+          target: "oko_sdk",
+          msg_type: "get_cosmos_chain_info_ack",
+          payload: { success: true as const, data: chains },
+        } as OkoWalletMsg;
+      } catch (error) {
+        return {
+          target: "oko_sdk",
+          msg_type: "get_cosmos_chain_info_ack",
+          payload: {
+            success: false as const,
+            err: error instanceof Error ? error.message : "Unknown error",
+          },
+        } as OkoWalletMsg;
+      }
+    }
+
+    throw new Error(
+      `[oko-rn] sendMsgToIframe: unsupported message type "${msg.msg_type}".`,
+    );
   }
 
-  /**
-   * Open a signing modal via OS browser.
-   * Key shares are restored from attached's localStorage automatically.
-   */
   async openModal(
     msg: OkoWalletMsgOpenModal,
   ): Promise<Result<OpenModalAckPayload, OpenModalError>> {
     await this.waitUntilInitialized;
 
-    return openModalRN(
-      this.sdkEndpoint,
-      msg,
-      this.redirectScheme,
-      this.apiKey,
-    );
+    return openModalRN(this.sdkEndpoint, msg, this.redirectScheme, this.apiKey);
   }
 
-  /**
-   * Sign in via OS browser. The entire login + keygen flow runs
-   * in the system browser. Key shares persist in attached's localStorage,
-   * never entering the WebView or app JS runtime.
-   */
   async signIn(type: SignInType): Promise<void> {
     await this.waitUntilInitialized;
 
@@ -200,8 +157,7 @@ export class OkoWalletRN {
       signInOptions,
     );
 
-    // Update state from the public wallet info returned via relay
-    const info = result.walletInfo as WalletInfo | null;
+    const info: LoginWalletInfo | null = result.walletInfo;
     if (info) {
       this.state = {
         authType: info.authType,
@@ -209,6 +165,7 @@ export class OkoWalletRN {
         email: info.email,
         name: info.name,
       };
+      this._cachedPublicKeyEd25519 = info.publicKeyEd25519 ?? null;
 
       await this._persistWalletInfo();
 
@@ -224,7 +181,6 @@ export class OkoWalletRN {
 
   async signOut(): Promise<void> {
     await this.waitUntilInitialized;
-    await signOutRN(this.bridge);
 
     this.state = {
       authType: null,
@@ -246,60 +202,41 @@ export class OkoWalletRN {
 
   async getPublicKey(): Promise<string | null> {
     await this.waitUntilInitialized;
-    const result = await getPublicKey(this.bridge, this.state.publicKey);
-    if (result && !this.state.publicKey) {
-      this.state.publicKey = result;
-    }
-    return result;
+    return this.state.publicKey;
   }
 
   async getPublicKeyEd25519(): Promise<string | null> {
     await this.waitUntilInitialized;
-    const result = await getPublicKeyEd25519(
-      this.bridge,
-      this._cachedPublicKeyEd25519,
-    );
-    if (result) {
-      this._cachedPublicKeyEd25519 = result;
-    }
-    return result;
+    return this._cachedPublicKeyEd25519;
   }
 
   async getEmail(): Promise<string | null> {
     await this.waitUntilInitialized;
-    const result = await getEmail(this.bridge, this.state.email);
-    if (result && !this.state.email) {
-      this.state.email = result;
-    }
-    return result;
+    return this.state.email;
   }
 
   async getName(): Promise<string | null> {
     await this.waitUntilInitialized;
-    const result = await getName(this.bridge, this.state.name);
-    if (result && !this.state.name) {
-      this.state.name = result;
-    }
-    return result;
+    return this.state.name;
   }
 
   async getWalletInfo(): Promise<WalletInfo | null> {
     await this.waitUntilInitialized;
-    return getWalletInfo(this.bridge);
+    if (!this.state.publicKey || !this.state.authType) return null;
+    return {
+      authType: this.state.authType,
+      publicKey: this.state.publicKey,
+      email: this.state.email,
+      name: this.state.name,
+    };
   }
 
   async getAuthType(): Promise<AuthType | null> {
     await this.waitUntilInitialized;
-    const result = await getAuthType(this.bridge, this.state.authType);
-    if (result && !this.state.authType) {
-      this.state.authType = result;
-    }
-    return result;
+    return this.state.authType;
   }
 
-  closeModal(): void {
-    // No-op in OS browser architecture — modal is in the OS browser
-  }
+  closeModal(): void {}
 
   async openSignInModal(): Promise<void> {
     throw new Error(
@@ -328,37 +265,39 @@ export class OkoWalletRN {
     this.eventEmitter.off(handlerDef);
   }
 
-  // ─── Wallet info persistence (public data only) ───
-
   private async _persistWalletInfo(): Promise<void> {
     try {
+      const data: PersistedWalletInfo = {
+        ...this.state,
+        publicKeyEd25519: this._cachedPublicKeyEd25519,
+      };
       await SecureStore.setItemAsync(
         WALLET_INFO_STORE_KEY,
-        JSON.stringify(this.state),
+        JSON.stringify(data),
       );
-    } catch {
-      // Non-critical — app will require re-login on next launch
-    }
+    } catch {}
   }
 
   private async _restoreWalletInfo(): Promise<void> {
     try {
       const raw = await SecureStore.getItemAsync(WALLET_INFO_STORE_KEY);
       if (!raw) return;
-      const parsed = JSON.parse(raw) as OkoWalletState;
+      const parsed = JSON.parse(raw) as PersistedWalletInfo;
       if (parsed.publicKey) {
-        this.state = parsed;
+        this.state = {
+          authType: parsed.authType,
+          email: parsed.email,
+          publicKey: parsed.publicKey,
+          name: parsed.name,
+        };
+        this._cachedPublicKeyEd25519 = parsed.publicKeyEd25519 ?? null;
       }
-    } catch {
-      // Corrupted or missing — ignore
-    }
+    } catch {}
   }
 
   private async _clearPersistedWalletInfo(): Promise<void> {
     try {
       await SecureStore.deleteItemAsync(WALLET_INFO_STORE_KEY);
-    } catch {
-      // Non-critical
-    }
+    } catch {}
   }
 }

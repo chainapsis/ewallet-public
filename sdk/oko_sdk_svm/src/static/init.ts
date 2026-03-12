@@ -34,10 +34,6 @@ export function init(
 
   return {
     success: true,
-    data: new (
-      OkoSvmWallet as unknown as new (
-        ...args: unknown[]
-      ) => OkoSvmWalletInterface
-    )(okoSvmWalletRes.data, chainOptions),
+    data: new OkoSvmWallet(okoSvmWalletRes.data, chainOptions),
   };
 }

@@ -14,6 +14,7 @@ export function redirectToMobileLoginComplete(params: {
   api_key: string;
   target_origin: string;
   auth_type: string;
+  redirect_scheme?: string | null;
   // Google/Email
   access_token?: string | null;
   id_token?: string | null;
@@ -26,6 +27,9 @@ export function redirectToMobileLoginComplete(params: {
   url.searchParams.set("api_key", params.api_key);
   url.searchParams.set("host_origin", params.target_origin);
   url.searchParams.set("auth_type", params.auth_type);
+  if (params.redirect_scheme) {
+    url.searchParams.set("redirect_scheme", params.redirect_scheme);
+  }
 
   if (params.access_token) {
     url.searchParams.set("access_token", params.access_token);

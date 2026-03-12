@@ -1,4 +1,3 @@
-// Re-export core types that chain SDKs and host apps need
 export type {
   OkoWalletState,
   OkoWalletMsg,

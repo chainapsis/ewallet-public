@@ -1,5 +1,5 @@
 import type {
-  OkoWalletInterface,
+  OkoWalletWebInterface,
   OkoWalletMsg,
   OkoWalletMsgOAuthSignInUpdate,
   OkoWalletMsgOAuthSignInUpdateAck,
@@ -7,7 +7,7 @@ import type {
 
 const FIVE_MINS_MS = 5 * 60 * 1000;
 
-export async function handleGoogleSignIn(okoWallet: OkoWalletInterface) {
+export async function handleGoogleSignIn(okoWallet: OkoWalletWebInterface) {
   const signInRes = await tryGoogleSignIn(
     okoWallet.apiKey,
     okoWallet.sendMsgToIframe.bind(okoWallet),
@@ -44,10 +44,7 @@ async function tryGoogleSignIn(
     },
   });
 
-  if (
-    ack.msg_type !== "generate_oauth_url_ack" ||
-    !ack.payload.success
-  ) {
+  if (ack.msg_type !== "generate_oauth_url_ack" || !ack.payload.success) {
     popup.close();
     throw new Error("Failed to generate Google OAuth URL");
   }

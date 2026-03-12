@@ -7,6 +7,7 @@ import styles from "./metadata_content.module.scss";
 import { SignerAddressOrEmail } from "./signer_address_or_email/signer_address_or_email";
 import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
 import { getFaviconUrl } from "@oko-wallet-attached/utils/favicon";
+import { useMobileMode } from "@oko-wallet-attached/hooks/mobile_mode";
 
 interface MakeSignatureModalMetadataContentProps {
   origin: string;
@@ -20,6 +21,9 @@ export const MetadataContent: FC<MakeSignatureModalMetadataContentProps> = ({
   signer,
 }) => {
   const faviconUrl = getFaviconUrl(origin);
+  const isMobile = useMobileMode();
+
+  const headingSize = isMobile ? "display-xs" : "lg";
 
   return (
     <div className={styles.wrapper}>
@@ -31,26 +35,26 @@ export const MetadataContent: FC<MakeSignatureModalMetadataContentProps> = ({
             className={styles.originFavicon}
           />
         )}
-        <Typography size="lg" color="primary" weight="semibold">
+        <Typography size={headingSize} color="primary" weight="semibold">
           {origin.replace(/^https?:\/\//, "")}
         </Typography>
       </div>
 
-      <Spacing height={4} />
+      <Spacing height={isMobile ? 8 : 4} />
 
       <div className={styles.signInfoColumn}>
         <div className={styles.chainInfoRow}>
-          <Typography size="lg" color="secondary" weight="semibold">
+          <Typography size={headingSize} color="secondary" weight="semibold">
             requested your
           </Typography>
           <div className={styles.chainNameGroup}>
             <Avatar
               src={chainInfo.chain_symbol_image_url}
               alt="chain icon"
-              size="sm"
+              size={isMobile ? "md" : "sm"}
               variant="rounded"
             />
-            <Typography size="lg" color="secondary" weight="semibold">
+            <Typography size={headingSize} color="secondary" weight="semibold">
               {chainInfo.chain_name} signature
             </Typography>
           </div>

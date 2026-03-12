@@ -14,22 +14,27 @@ import type { SignInType } from "./oauth";
 export type { WalletInfo };
 
 export interface OkoWalletStaticInterface {
-  new (apiKey: string, iframe: HTMLIFrameElement, sdkEndpoint: string): void;
+  new (
+    apiKey: string,
+    iframe: HTMLIFrameElement,
+    sdkEndpoint: string,
+  ): OkoWalletWebInterface;
   version: string;
   init: (
     args: OkoWalletInitArgs,
   ) => Result<OkoWalletInterface, OkoWalletInitError>;
 }
 
+/**
+ * Wallet interface consumed by chain SDKs (eth, cosmos, svm).
+ * Both the web OkoWallet and React Native OkoWalletRN implement this.
+ */
 export interface OkoWalletInterface {
+  origin: string;
   state: OkoWalletState;
   apiKey: string;
-  iframe: HTMLIFrameElement;
-  activePopupId: string | null;
-  activePopupWindow: Window | null;
   sdkEndpoint: string;
   eventEmitter: EventEmitter3<OkoWalletCoreEvent2, OkoWalletCoreEventHandler2>;
-  origin: string;
   waitUntilInitialized: Promise<Result<OkoWalletState, string>>;
 
   openModal: (
@@ -50,6 +55,16 @@ export interface OkoWalletInterface {
   completeEmailSignIn: (email: string, code: string) => Promise<void>;
   on: (handlerDef: OkoWalletCoreEventHandler2) => void;
   off: (handlerDef: OkoWalletCoreEventHandler2) => void;
+}
+
+/**
+ * Web-specific wallet interface used internally by oko_sdk_core.
+ * Extends OkoWalletInterface with browser-only fields.
+ */
+export interface OkoWalletWebInterface extends OkoWalletInterface {
+  iframe: HTMLIFrameElement;
+  activePopupId: string | null;
+  activePopupWindow: Window | null;
 }
 
 export interface OkoWalletInitArgs {

@@ -25,4 +25,4 @@ export const OkoCosmosWallet = function (
     publicKeyRaw: null,
   };
   this.waitUntilInitialized = lazyInit(this).then();
-} as any as OkoCosmosWalletStaticInterface;
+} as unknown as OkoCosmosWalletStaticInterface;

@@ -21,9 +21,9 @@ const COSMOS_CHAIN_ID = "cosmoshub-4";
 
 export default function Index() {
   const okoWallet = useOkoWallet();
-  const [initStatus, setInitStatus] = useState<
-    "loading" | "ready" | "error"
-  >("loading");
+  const [initStatus, setInitStatus] = useState<"loading" | "ready" | "error">(
+    "loading",
+  );
 
   useEffect(() => {
     okoWallet.waitUntilInitialized.then((res) => {

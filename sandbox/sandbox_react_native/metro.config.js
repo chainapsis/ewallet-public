@@ -2,32 +2,20 @@ const { getDefaultConfig } = require("expo/metro-config");
 const path = require("path");
 
 const projectRoot = __dirname;
-const monorepoRoot = path.resolve(projectRoot, "../..");
-
 const config = getDefaultConfig(projectRoot);
 
-// Watch the entire monorepo so workspace packages are resolved
-config.watchFolders = [monorepoRoot];
+// Singleton packages — resolve to actual location (may be hoisted to monorepo root)
+function resolveModule(name) {
+  return path.dirname(require.resolve(`${name}/package.json`));
+}
 
-// Resolve from sandbox first, then monorepo root
-config.resolver.nodeModulesPaths = [
-  path.resolve(projectRoot, "node_modules"),
-  path.resolve(monorepoRoot, "node_modules"),
-];
-
-// Singleton packages — always resolve to sandbox's copy
+const reactDir = resolveModule("react");
 const singletons = {
-  react: path.resolve(projectRoot, "node_modules/react"),
-  "react-native": path.resolve(projectRoot, "node_modules/react-native"),
-  "react-dom": path.resolve(projectRoot, "node_modules/react-dom"),
-  "react/jsx-runtime": path.resolve(
-    projectRoot,
-    "node_modules/react/jsx-runtime",
-  ),
-  "react/jsx-dev-runtime": path.resolve(
-    projectRoot,
-    "node_modules/react/jsx-dev-runtime",
-  ),
+  react: reactDir,
+  "react-native": resolveModule("react-native"),
+  "react-dom": resolveModule("react-dom"),
+  "react/jsx-runtime": path.resolve(reactDir, "jsx-runtime"),
+  "react/jsx-dev-runtime": path.resolve(reactDir, "jsx-dev-runtime"),
 };
 
 const defaultResolveRequest = config.resolver.resolveRequest;
@@ -41,16 +29,19 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
       platform,
     );
   }
-  // For modules starting with "react/" or "react-native/", redirect too
-  if (
-    moduleName.startsWith("react/") ||
-    moduleName.startsWith("react-native/")
-  ) {
-    const redirected = path.resolve(
-      projectRoot,
-      "node_modules",
-      moduleName,
+  // For modules starting with "react/" or "react-native/", redirect to actual location
+  if (moduleName.startsWith("react/")) {
+    const subpath = moduleName.slice("react/".length);
+    const redirected = path.resolve(reactDir, subpath);
+    return context.resolveRequest(
+      { ...context, resolveRequest: undefined },
+      redirected,
+      platform,
     );
+  }
+  if (moduleName.startsWith("react-native/")) {
+    const subpath = moduleName.slice("react-native/".length);
+    const redirected = path.resolve(singletons["react-native"], subpath);
     return context.resolveRequest(
       { ...context, resolveRequest: undefined },
       redirected,

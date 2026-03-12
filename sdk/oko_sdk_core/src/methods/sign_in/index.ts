@@ -1,4 +1,4 @@
-import type { OkoWalletInterface } from "@oko-wallet-sdk-core/types";
+import type { OkoWalletWebInterface } from "@oko-wallet-sdk-core/types";
 import type { SignInType } from "@oko-wallet-sdk-core/types/oauth";
 import { handleGoogleSignIn } from "./google";
 import { handleEmailSignIn } from "./email";
@@ -7,7 +7,7 @@ import { handleTelegramSignIn } from "./telegram";
 import { handleDiscordSignIn } from "./discord";
 import { handleGithubSignIn } from "./github";
 
-export async function signIn(this: OkoWalletInterface, type: SignInType) {
+export async function signIn(this: OkoWalletWebInterface, type: SignInType) {
   // NOTE: Do NOT await before calling handlers that use window.open().
   // Awaiting here loses the user gesture context, causing browsers to
   // open a new tab instead of a popup window.

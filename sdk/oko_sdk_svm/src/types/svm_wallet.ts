@@ -13,6 +13,7 @@ import type {
 } from "@solana/web3.js";
 
 import type { SvmWalletEvent, SvmWalletEventHandler } from "./event";
+import type { OkoSvmWalletChainOptions } from "./internal";
 import type {
   OkoSvmWalletInitError,
   LazyInitError,
@@ -29,7 +30,10 @@ export type OkoSvmWalletInitArgs = OkoWalletInitArgs & {
 };
 
 export interface OkoSvmWalletStaticInterface {
-  new (okoWallet: OkoWalletInterface): undefined;
+  new (
+    okoWallet: OkoWalletInterface,
+    chainOptions: OkoSvmWalletChainOptions,
+  ): OkoSvmWalletInterface;
   init: (
     args: OkoSvmWalletInitArgs,
   ) => Result<OkoSvmWalletInterface, OkoSvmWalletInitError>;

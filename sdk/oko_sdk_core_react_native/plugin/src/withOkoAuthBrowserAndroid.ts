@@ -12,8 +12,9 @@ export const withOkoAuthBrowserAndroid: ConfigPlugin<{
   callbackScheme: string;
 }> = (config, { callbackScheme }) => {
   return withAndroidManifest(config, (config) => {
-    const mainApplication =
-      AndroidConfig.Manifest.getMainApplicationOrThrow(config.modResults);
+    const mainApplication = AndroidConfig.Manifest.getMainApplicationOrThrow(
+      config.modResults,
+    );
 
     // Remove existing entries to avoid duplicates on re-prebuild
     if (mainApplication.activity) {

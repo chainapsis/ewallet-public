@@ -92,3 +92,14 @@
 .infoIcon {
   cursor: help;
 }
+
+// Mobile app mode: enlarge label text
+:global(html[data-mobile]) .headerContent > p {
+  font-size: var(--font-size-sm);
+  line-height: var(--font-line-height-sm);
+}
+
+:global(html[data-mobile]) .rowLabel > p {
+  font-size: var(--font-size-sm);
+  line-height: var(--font-line-height-sm);
+}

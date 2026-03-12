@@ -43,3 +43,15 @@
     cursor: pointer;
   }
 }
+
+// Mobile app mode: enlarge toggle text
+:global(html[data-mobile]) .messageHeader .viewButtonTextRow p {
+  font-size: var(--font-size-sm);
+  line-height: var(--font-line-height-sm);
+}
+
+// Mobile app mode: enlarge raw data text
+:global(html[data-mobile]) .dataContainer .rawData pre {
+  font-size: var(--font-size-sm);
+  line-height: var(--font-line-height-sm);
+}

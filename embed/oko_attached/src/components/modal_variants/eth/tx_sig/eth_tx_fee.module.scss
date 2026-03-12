@@ -42,3 +42,9 @@
     background-clip: padding-box;
   }
 }
+
+// Mobile app mode: enlarge fee text
+:global(html[data-mobile]) .feeSummaryContainer p {
+  font-size: var(--font-size-sm);
+  line-height: var(--font-line-height-sm);
+}

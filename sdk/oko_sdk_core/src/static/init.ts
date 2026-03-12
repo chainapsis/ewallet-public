@@ -4,7 +4,7 @@ import { UTM_SOURCE, UTM_CAMPAIGN } from "@oko-wallet/oko-types/referral";
 import { setUpIframeElement } from "@oko-wallet-sdk-core/iframe";
 import type {
   OkoWalletInitArgs,
-  OkoWalletInterface,
+  OkoWalletWebInterface,
 } from "@oko-wallet-sdk-core/types";
 import { OkoWallet } from "@oko-wallet-sdk-core/constructor";
 import type { OkoWalletInitError } from "@oko-wallet-sdk-core/errors";
@@ -13,7 +13,7 @@ const SDK_ENDPOINT = `https://attached.oko.app`;
 
 export function init(
   args: OkoWalletInitArgs,
-): Result<OkoWalletInterface, OkoWalletInitError> {
+): Result<OkoWalletWebInterface, OkoWalletInitError> {
   try {
     console.log("[oko] init");
 
@@ -92,7 +92,7 @@ export function init(
 
     const iframe = iframeRes.data;
 
-    const okoWallet = new (OkoWallet as any)(args.api_key, iframe, sdkEndpoint);
+    const okoWallet = new OkoWallet(args.api_key, iframe, sdkEndpoint);
 
     if (window.__oko) {
       console.warn("[oko] oko wallet has been initialized by another process");

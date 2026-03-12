@@ -1,3 +1,9 @@
 .description {
   text-align: center;
 }
+
+// Mobile app mode: add horizontal padding
+:global(html[data-mobile]) .description {
+  padding-left: 20px;
+  padding-right: 20px;
+}

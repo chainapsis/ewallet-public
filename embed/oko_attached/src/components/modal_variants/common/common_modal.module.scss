@@ -6,3 +6,12 @@
 
   box-shadow: var(--shadow-xl);
 }
+
+// Mobile app mode: full-screen container, no decorations
+:global(html[data-mobile]) .modalContainer {
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  padding: 32px 20px 16px;
+  height: 100%;
+}

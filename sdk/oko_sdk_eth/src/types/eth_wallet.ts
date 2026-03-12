@@ -22,7 +22,7 @@ export interface OkoEthWalletState {
 export type OkoEthWalletInitArgs = OkoWalletInitArgs;
 
 export interface OkoEthWalletStaticInterface {
-  new (okoWallet: OkoWalletInterface): void;
+  new (okoWallet: OkoWalletInterface): OkoEthWalletInterface;
   init: (
     args: OkoEthWalletInitArgs,
   ) => Result<OkoEthWalletInterface, OkoEthWalletInitError>;

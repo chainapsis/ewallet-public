@@ -8,8 +8,7 @@ import {
 import { FrostProvider } from "@rialo/frost";
 import {
   RIALO_CHAINS,
-  RIALO_DEVNET_CHAIN,  
-
+  RIALO_DEVNET_CHAIN,
   RIALO_TESTNET_CHAIN,
   RialoSignAndSendTransaction,
   RialoSignMessage,

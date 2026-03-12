@@ -320,7 +320,9 @@ class HardhatManager {
 
       console.log(`⏳ Node health check ${i + 1}/${maxRetries}...`);
       await new Promise((resolve) => {
-        const timeout = this.addTimeout(setTimeout(resolve, 1000) as unknown as number);
+        const timeout = this.addTimeout(
+          setTimeout(resolve, 1000) as unknown as number,
+        );
       });
     }
     return false;

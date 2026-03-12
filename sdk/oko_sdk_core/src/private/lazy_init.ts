@@ -3,12 +3,12 @@ import type { Result } from "@oko-wallet/stdlib-js";
 import { OKO_IFRAME_ID } from "@oko-wallet-sdk-core/iframe";
 import { registerMsgListener } from "@oko-wallet-sdk-core/window_msg/listener";
 import type {
-  OkoWalletInterface,
+  OkoWalletWebInterface,
   OkoWalletState,
 } from "@oko-wallet-sdk-core/types";
 
 export async function lazyInit(
-  okoWallet: OkoWalletInterface,
+  okoWallet: OkoWalletWebInterface,
 ): Promise<Result<OkoWalletState, string>> {
   await waitUntilDocumentLoad();
 

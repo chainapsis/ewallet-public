@@ -11,9 +11,7 @@ export function registerWalletStandard(
   configs: WalletStandardConfig[],
 ): void {
   if (state.isRegistered) {
-    console.warn(
-      "[oko-svm] Wallet-standard already registered.",
-    );
+    console.warn("[oko-svm] Wallet-standard already registered.");
     return;
   }
 

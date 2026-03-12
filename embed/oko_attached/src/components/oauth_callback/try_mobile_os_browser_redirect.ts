@@ -31,6 +31,7 @@ export function tryMobileOsBrowserRedirect(params: {
       api_key: apiKey ?? "",
       target_origin: window.location.origin,
       auth_type: params.auth_type,
+      redirect_scheme: redirectScheme,
       access_token: params.access_token,
       id_token: params.id_token,
       code: params.code,

@@ -114,3 +114,9 @@
     max-height: 174px;
   }
 }
+
+// Mobile app mode: enlarge title text
+:global(html[data-mobile]) .container .titleRow p {
+  font-size: var(--font-size-sm);
+  line-height: var(--font-line-height-sm);
+}

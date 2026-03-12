@@ -8,18 +8,22 @@ import { DiscordIcon } from "@oko-wallet/oko-common-ui/icons/discord_icon";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 
 import { useAppState } from "@oko-wallet-attached/store/app";
+import { useMobileMode } from "@oko-wallet-attached/hooks/mobile_mode";
 import styles from "./signer_address_or_email.module.scss";
 
-function renderAuthIcon(authType: AuthType | undefined): ReactNode {
+function renderAuthIcon(
+  authType: AuthType | undefined,
+  size: number = 16,
+): ReactNode {
   switch (authType) {
     case "google":
-      return <GoogleIcon width={16} height={16} />;
+      return <GoogleIcon width={size} height={size} />;
     case "x":
-      return <XIcon size={16} />;
+      return <XIcon size={size} />;
     case "telegram":
-      return <TelegramIcon size={16} />;
+      return <TelegramIcon size={size} />;
     case "discord":
-      return <DiscordIcon size={16} />;
+      return <DiscordIcon size={size} />;
     default:
       return null;
   }
@@ -47,14 +51,19 @@ export const SignerAddressOrEmailView: FC<ViewProps> = ({
   const wallet = useAppState((state) => state.getWallet(origin));
   const email = wallet?.email;
   const authType = wallet?.authType;
+  const isMobile = useMobileMode();
 
   const displayValue =
     type === "address" ? `${value.slice(0, 9)}...${value.slice(-9)}` : email;
 
   return (
     <>
-      {type === "email" && renderAuthIcon(authType)}
-      <Typography size="sm" color="brand-tertiary" weight="medium">
+      {type === "email" && renderAuthIcon(authType, isMobile ? 20 : 16)}
+      <Typography
+        size={isMobile ? "md" : "sm"}
+        color="brand-tertiary"
+        weight="medium"
+      >
         {prefix && `${prefix} `}
         {displayValue}
       </Typography>

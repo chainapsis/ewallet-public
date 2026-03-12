@@ -13,14 +13,14 @@ import { getAuthType } from "./methods/get_auth_type";
 import { closeModal } from "./methods/close_modal";
 import { on } from "./methods/on";
 import { off } from "./methods/off";
-import type { OkoWalletInterface } from "./types";
+import type { OkoWalletWebInterface } from "./types";
 import { init } from "./static/init";
 import { OkoWallet } from "./constructor";
 
 OkoWallet.init = init;
 OkoWallet.version = pJson.version;
 
-const ptype: OkoWalletInterface = OkoWallet.prototype;
+const ptype: OkoWalletWebInterface = OkoWallet.prototype;
 
 ptype.openModal = openModal;
 ptype.openSignInModal = openSignInModal;

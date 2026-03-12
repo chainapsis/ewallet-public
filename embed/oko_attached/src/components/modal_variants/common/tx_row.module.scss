@@ -6,3 +6,9 @@
   gap: 4px;
   padding: 0 8px;
 }
+
+// Mobile app mode: enlarge label text
+:global(html[data-mobile]) .txRow > p:first-child {
+  font-size: var(--font-size-sm);
+  line-height: var(--font-line-height-sm);
+}

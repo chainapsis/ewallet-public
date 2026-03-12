@@ -70,7 +70,7 @@ export async function openAuthSession(
     url,
     `${callbackScheme}://`,
   );
-  if (result.type === "success") {
+  if (result.type === "success" && result.url) {
     return { type: "success", url: result.url };
   }
   return { type: "cancel" };

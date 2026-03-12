@@ -1,10 +1,10 @@
-import type {
-  OkoWalletInterface,
-  OpenModalAckPayload,
+import {
+  type OkoWalletInterface,
+  type OpenModalAckPayload,
+  type OpenModalError,
+  EventEmitter3,
 } from "@oko-wallet/oko-sdk-core";
 import type { Result } from "@oko-wallet/stdlib-js";
-import type { OpenModalError } from "@oko-wallet/oko-sdk-core";
-import { EventEmitter } from "eventemitter3";
 
 // Mock Ed25519 public key (32 bytes in hex)
 export const MOCK_ED25519_PUBLIC_KEY =
@@ -33,22 +33,19 @@ export function createMockOkoWallet(
     signaturesResponse = [MOCK_SIGNATURE],
   } = config;
 
-  const eventEmitter = new EventEmitter();
+  const mockState = {
+    authType: publicKeyEd25519 ? ("google" as const) : null,
+    email: publicKeyEd25519 ? "test@example.com" : null,
+    publicKey: publicKey,
+    name: publicKeyEd25519 ? "Test User" : null,
+  };
 
   const mockWallet: OkoWalletInterface = {
-    state: {
-      authType: publicKeyEd25519 ? "google" : null,
-      email: publicKeyEd25519 ? "test@example.com" : null,
-      publicKey: publicKey,
-      name: publicKeyEd25519 ? "Test User" : null,
-    },
-    apiKey: "test-api-key",
-    iframe: {} as HTMLIFrameElement,
-    activePopupId: null,
-    activePopupWindow: null,
-    sdkEndpoint: "https://test.oko.wallet",
-    eventEmitter: eventEmitter as any,
     origin: "https://test-dapp.com",
+    state: mockState,
+    apiKey: "test-api-key",
+    sdkEndpoint: "https://test-sdk.example.com",
+    eventEmitter: new EventEmitter3(),
     waitUntilInitialized: Promise.resolve({
       success: true,
       data: {
@@ -108,44 +105,31 @@ export function createMockOkoWallet(
       };
     },
 
+    openSignInModal: async () => {},
+
     closeModal: () => {},
 
     sendMsgToIframe: async (msg) => msg,
 
     signIn: async () => {},
 
-    signOut: async () => {
-      mockWallet.state.authType = null;
-      mockWallet.state.email = null;
-      mockWallet.state.publicKey = null;
-      mockWallet.state.name = null;
-    },
+    signOut: async () => {},
 
     getPublicKey: async () => publicKey,
 
     getPublicKeyEd25519: async () => publicKeyEd25519,
 
-    getEmail: async () => (publicKeyEd25519 ? "test@example.com" : null),
+    getEmail: async () => mockState.email,
 
-    getName: async () => (publicKeyEd25519 ? "Test User" : null),
+    getName: async () => mockState.name,
 
-    getAuthType: async () => (publicKeyEd25519 ? "google" : null),
+    getWalletInfo: async () => null,
 
-    getWalletInfo: async () =>
-      publicKeyEd25519
-        ? {
-            authType: "google" as const,
-            publicKey: publicKey ?? "",
-            email: "test@example.com",
-            name: "Test User",
-          }
-        : null,
+    getAuthType: async () => mockState.authType,
 
     startEmailSignIn: async () => {},
 
     completeEmailSignIn: async () => {},
-
-    openSignInModal: async () => {},
 
     on: (handlerDef) => {
       // No-op for tests

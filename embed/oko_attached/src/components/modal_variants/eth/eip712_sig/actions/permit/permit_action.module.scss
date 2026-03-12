@@ -60,3 +60,9 @@
 .collapsibleCodeBlock {
   max-height: 230px;
 }
+
+// Mobile app mode: enlarge label text
+:global(html[data-mobile]) .summaryContainer p {
+  font-size: var(--font-size-sm);
+  line-height: var(--font-line-height-sm);
+}

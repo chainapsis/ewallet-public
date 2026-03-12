@@ -29,18 +29,29 @@ function resolveTheme(theme: Theme): Theme | null {
   return null;
 }
 
+export interface ThemeResult {
+  theme: Theme;
+  usesSystemPreference: boolean;
+}
+
 export async function determineTheme(
   hostOrigin: string,
   oldTheme: Theme | null,
-): Promise<Theme> {
+): Promise<ThemeResult> {
+  const usesSystemFallback = oldTheme === null;
   const fallbackTheme: Theme = oldTheme ?? getSystemTheme();
 
   const themeRes = await getThemeByHostOrigin(hostOrigin);
 
   if (themeRes.success) {
+    const isSystem = themeRes.data === "system";
     const resolvedTheme = resolveTheme(themeRes.data);
-    return resolvedTheme ?? fallbackTheme;
+    return {
+      theme: resolvedTheme ?? fallbackTheme,
+      usesSystemPreference:
+        isSystem || (resolvedTheme === null && usesSystemFallback),
+    };
   }
 
-  return fallbackTheme;
+  return { theme: fallbackTheme, usesSystemPreference: usesSystemFallback };
 }

@@ -12,6 +12,7 @@ export type OAuthState = {
   apiKey: string;
   targetOrigin: string;
   provider: AuthType;
+  redirectScheme?: string | null;
   modalId?: string;
   codeVerifier?: string;
   /** When true, callback pages redirect to /mobile/login/complete instead of deep-linking.

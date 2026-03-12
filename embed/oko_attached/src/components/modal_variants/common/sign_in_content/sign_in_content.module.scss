@@ -47,3 +47,14 @@
     height: 20px;
   }
 }
+
+// Mobile app mode: enlarge label text
+:global(html[data-mobile]) .chainInfoContainer p {
+  font-size: var(--font-size-sm);
+  line-height: var(--font-line-height-sm);
+}
+
+:global(html[data-mobile]) .messageContainer p {
+  font-size: var(--font-size-sm);
+  line-height: var(--font-line-height-sm);
+}
