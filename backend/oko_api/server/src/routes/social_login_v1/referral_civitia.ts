@@ -1,16 +1,16 @@
-import type { Response, Request } from "express";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
-import { ErrorResponseSchema } from "@oko-wallet/oko-api-openapi/common";
+import { Bytes } from "@oko-wallet/bytes";
 import { registry } from "@oko-wallet/oko-api-openapi";
+import { ErrorResponseSchema } from "@oko-wallet/oko-api-openapi/common";
 import {
   GetReferralQuerySchema,
   GetReferralSuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/social_login";
-import { Bytes } from "@oko-wallet/bytes";
 import {
   getReferralsByPublicKeyAndOrigin,
   type ReferralPublicInfo,
 } from "@oko-wallet/oko-pg-interface/referrals";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { Request, Response } from "express";
 
 const CIVITIA_ORIGIN = "https://app.civitia.org";
 
@@ -58,6 +58,7 @@ registry.registerPath({
 });
 
 export async function referralCivitia(
+  // biome-ignore lint/complexity/noBannedTypes: Express generic params
   req: Request<{}, {}, {}, { public_key: string }>,
   res: Response<OkoApiResponse<GetReferralResponse>>,
 ) {

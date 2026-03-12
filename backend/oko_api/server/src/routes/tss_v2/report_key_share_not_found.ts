@@ -1,13 +1,13 @@
-import type { Response } from "express";
+import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type {
   ReportKeyShareNotFoundBody,
   ReportKeyShareNotFoundResponse,
 } from "@oko-wallet/oko-types/user";
-import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
+import type { Response } from "express";
 
 import { reportKeyShareNotFoundV2 } from "@oko-wallet-api/api/tss/v2/user";
-import { type UserAuthenticatedRequest } from "@oko-wallet-api/middleware/auth/keplr_auth";
+import type { UserAuthenticatedRequest } from "@oko-wallet-api/middleware/auth/keplr_auth";
 
 export async function reportKeyShareNotFound(
   req: UserAuthenticatedRequest<ReportKeyShareNotFoundBody>,

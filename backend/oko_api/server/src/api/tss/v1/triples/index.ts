@@ -1,9 +1,25 @@
-import { Pool } from "pg";
+import {
+  runTriples2ServerStep1,
+  runTriples2ServerStep2,
+  runTriples2ServerStep3,
+  runTriples2ServerStep4,
+  runTriples2ServerStep5,
+  runTriples2ServerStep6,
+  runTriples2ServerStep7,
+  runTriples2ServerStep8,
+  runTriples2ServerStep9,
+  runTriples2ServerStep10,
+  runTriples2ServerStep11,
+} from "@oko-wallet/cait-sith-keplr-addon/src/server/triples";
+import {
+  createTssSession,
+  createTssStage,
+  getTssStageWithSessionData,
+  updateTssStage,
+} from "@oko-wallet/oko-pg-interface/tss";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type {
-  TriplesStep10Request,
-  TriplesStep10Response,
-  TriplesStep11Request,
-  TriplesStep11Response,
+  TriplesStageData,
   TriplesStep1Request,
   TriplesStep1Response,
   TriplesStep2Request,
@@ -22,36 +38,20 @@ import type {
   TriplesStep8Response,
   TriplesStep9Request,
   TriplesStep9Response,
-  TriplesStageData,
+  TriplesStep10Request,
+  TriplesStep10Response,
+  TriplesStep11Request,
+  TriplesStep11Response,
 } from "@oko-wallet/oko-types/tss";
 import { TriplesStageStatus, TssStageType } from "@oko-wallet/oko-types/tss";
-import {
-  createTssSession,
-  createTssStage,
-  getTssStageWithSessionData,
-  updateTssStage,
-} from "@oko-wallet/oko-pg-interface/tss";
-import {
-  runTriples2ServerStep1,
-  runTriples2ServerStep10,
-  runTriples2ServerStep11,
-  runTriples2ServerStep2,
-  runTriples2ServerStep3,
-  runTriples2ServerStep4,
-  runTriples2ServerStep5,
-  runTriples2ServerStep6,
-  runTriples2ServerStep7,
-  runTriples2ServerStep8,
-  runTriples2ServerStep9,
-} from "@oko-wallet/cait-sith-keplr-addon/src/server/triples";
 import { Participant, type TriplePub } from "@oko-wallet/tecdsa-interface";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { Pool } from "pg";
 
 import {
+  validateCustomer,
   validateTssSession,
   validateTssStage,
   validateWalletEmailAndCurveType,
-  validateCustomer,
 } from "@oko-wallet-api/api/tss/utils";
 
 export async function runTriplesStep1(

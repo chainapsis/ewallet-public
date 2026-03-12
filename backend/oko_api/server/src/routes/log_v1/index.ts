@@ -1,7 +1,7 @@
 import express from "express";
 
-import { rateLimitMiddleware } from "@oko-wallet-api/middleware/rate_limit";
 import { postLog } from "./post_log";
+import { rateLimitMiddleware } from "@oko-wallet-api/middleware/rate_limit";
 
 // interface LogRouterOptions {
 //   esUrl: string | null;

@@ -1,5 +1,5 @@
+import type { NextFunction, Request, Response } from "express";
 import multer from "multer";
-import type { Request, Response, NextFunction } from "express";
 
 export const customerLogoUpload = multer({
   limits: {
@@ -7,7 +7,7 @@ export const customerLogoUpload = multer({
     files: 1, // Only 1 file allowed
     fields: 3, // Max 3 fields (label, delete_logo, logo)
   },
-  fileFilter: (req, file, cb) => {
+  fileFilter: (_req, file, cb) => {
     // Check file type (no SVG, no GIF)
     const allowedMimeTypes = [
       "image/png",

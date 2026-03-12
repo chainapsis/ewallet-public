@@ -1,19 +1,19 @@
-import type { Response } from "express";
-import type { AuthType } from "@oko-wallet/oko-types/auth";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
-import type { ReshareRequestV2 } from "@oko-wallet/oko-types/user";
+import { Bytes } from "@oko-wallet/bytes";
 import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
+import { registry } from "@oko-wallet/oko-api-openapi";
 import {
   ErrorResponseSchema,
   OAuthHeaderSchema,
   SuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/common";
 import { ReshareRequestV2Schema } from "@oko-wallet/oko-api-openapi/tss";
-import { Bytes } from "@oko-wallet/bytes";
-import { registry } from "@oko-wallet/oko-api-openapi";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
+import type { ReshareRequestV2 } from "@oko-wallet/oko-types/user";
+import type { Response } from "express";
 
 import { updateWalletKSNodesForReshareV2 } from "@oko-wallet-api/api/tss/v2/user";
-import { type OAuthAuthenticatedRequest } from "@oko-wallet-api/middleware/auth/oauth";
+import type { OAuthAuthenticatedRequest } from "@oko-wallet-api/middleware/auth/oauth";
 import type { OAuthLocals } from "@oko-wallet-api/middleware/auth/types";
 
 registry.registerPath({
@@ -21,8 +21,7 @@ registry.registerPath({
   path: "/tss/v2/user/reshare",
   tags: ["TSS"],
   summary: "Reshare wallet key shares",
-  description:
-    "Updates wallet key share nodes after reshare for both wallets",
+  description: "Updates wallet key share nodes after reshare for both wallets",
   security: [{ oauthAuth: [] }],
   request: {
     headers: OAuthHeaderSchema,

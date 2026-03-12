@@ -1,22 +1,22 @@
-import request from "supertest";
-import express from "express";
-import type { Pool } from "pg";
-import { Bytes } from "@oko-wallet/bytes";
 import { randomBytes } from "node:crypto";
-import { v4 as uuidv4 } from "uuid";
-import { createPgConn } from "@oko-wallet/postgres-lib";
-import winston from "winston";
+import { Bytes } from "@oko-wallet/bytes";
 import { sha256 } from "@oko-wallet/crypto-js";
 import {
+  convertEddsaSignatureToBytes,
   generateEddsaKeypair,
   signMessage,
-  convertEddsaSignatureToBytes,
 } from "@oko-wallet/crypto-js/node/ecdhe";
+import { createPgConn } from "@oko-wallet/postgres-lib";
+import express from "express";
+import type { Pool } from "pg";
+import request from "supertest";
+import { v4 as uuidv4 } from "uuid";
+import winston from "winston";
 
-import { testPgConfig } from "@oko-wallet-api/database/test_config";
-import { resetPgDatabase } from "@oko-wallet-api/testing/database";
 import { commitRevealCommit } from "./commit";
+import { testPgConfig } from "@oko-wallet-api/database/test_config";
 import { commitRevealMiddleware } from "@oko-wallet-api/middleware/commit_reveal";
+import { resetPgDatabase } from "@oko-wallet-api/testing/database";
 
 // Mock keypair for testing
 const privateKeyRes = Bytes.fromHexString(
@@ -231,7 +231,7 @@ describe("tss_v2_commit_reveal_e2e_test", () => {
           cr_session_id: sessionId,
           cr_signature: signature,
           auth_type: authType,
-                  })
+        })
         .expect(200);
 
       expect(keygenResponse.body.success).toBe(true);
@@ -292,7 +292,7 @@ describe("tss_v2_commit_reveal_e2e_test", () => {
           cr_session_id: sessionId,
           cr_signature: signature,
           auth_type: authType,
-                  })
+        })
         .expect(200);
 
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -366,7 +366,7 @@ describe("tss_v2_commit_reveal_e2e_test", () => {
           cr_session_id: sessionId,
           cr_signature: signature,
           auth_type: authType,
-                  })
+        })
         .expect(200);
 
       expect(signinResponse.body.success).toBe(true);
@@ -449,7 +449,7 @@ describe("tss_v2_commit_reveal_e2e_test", () => {
           cr_session_id: sessionId,
           cr_signature: reshareSignature,
           auth_type: authType,
-                    // V2 schema: both secp256k1 and ed25519 public keys required
+          // V2 schema: both secp256k1 and ed25519 public keys required
           secp256k1_public_key: "02" + "a".repeat(64),
           ed25519_public_key: "b".repeat(64),
           reshared_key_shares: [
@@ -518,7 +518,7 @@ describe("tss_v2_commit_reveal_e2e_test", () => {
           cr_session_id: sessionId,
           cr_signature: signature,
           auth_type: authType,
-                  })
+        })
         .expect(200);
 
       expect(keygenResponse.body.success).toBe(true);

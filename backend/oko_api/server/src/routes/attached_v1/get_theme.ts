@@ -1,13 +1,13 @@
-import type { Request, Response } from "express";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
-import type { CustomerTheme } from "@oko-wallet/oko-types/customers";
-import { getCustomerThemeByHostOrigin } from "@oko-wallet/oko-pg-interface/attached";
 import { registry } from "@oko-wallet/oko-api-openapi";
-import { ErrorResponseSchema } from "@oko-wallet/oko-api-openapi/common";
 import {
   GetAttachedThemeQuerySchema,
   GetAttachedThemeSuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/attached";
+import { ErrorResponseSchema } from "@oko-wallet/oko-api-openapi/common";
+import { getCustomerThemeByHostOrigin } from "@oko-wallet/oko-pg-interface/attached";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { CustomerTheme } from "@oko-wallet/oko-types/customers";
+import type { Request, Response } from "express";
 
 interface GetThemeByHostOriginReq {
   host_origin: string;

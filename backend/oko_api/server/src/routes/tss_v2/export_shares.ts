@@ -1,10 +1,5 @@
-import type { Response } from "express";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
-import type {
-  ExportSharesRequest,
-  ExportSharesResponse,
-} from "@oko-wallet/oko-types/user";
 import { decryptDataAsync } from "@oko-wallet/crypto-js/node";
+import { registry } from "@oko-wallet/oko-api-openapi";
 import {
   ErrorResponseSchema,
   OAuthHeaderSchema,
@@ -13,11 +8,16 @@ import {
   ExportSharesRequestSchema,
   ExportSharesSuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/tss";
-import { registry } from "@oko-wallet/oko-api-openapi";
 import { getUserByEmailAndAuthType } from "@oko-wallet/oko-pg-interface/oko_users";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type {
+  ExportSharesRequest,
+  ExportSharesResponse,
+} from "@oko-wallet/oko-types/user";
+import type { Response } from "express";
 
 import { validateWalletEmailAndCurveType } from "@oko-wallet-api/api/tss/utils";
-import { type UserAuthenticatedRequest } from "@oko-wallet-api/middleware/auth/keplr_auth";
+import type { UserAuthenticatedRequest } from "@oko-wallet-api/middleware/auth/keplr_auth";
 import type { OAuthLocals } from "@oko-wallet-api/middleware/auth/types";
 
 registry.registerPath({
@@ -68,7 +68,10 @@ registry.registerPath({
 
 export async function exportShares(
   req: UserAuthenticatedRequest<ExportSharesRequest>,
-  res: Response<OkoApiResponse<ExportSharesResponse>, OAuthLocals & Record<string, any>>,
+  res: Response<
+    OkoApiResponse<ExportSharesResponse>,
+    OAuthLocals & Record<string, any>
+  >,
 ) {
   const state = req.app.locals;
   const user = res.locals.user;
