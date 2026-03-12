@@ -35,6 +35,14 @@ jobs:
         env:
           GIT_TAG: "${{ inputs.git_tag }}"
 
+      - name: Verify app name
+        run: |
+          APP_NAME=$(echo "${{ inputs.git_tag }}" | cut -d'/' -f1)
+          if [ "$APP_NAME" != "attached" ]; then
+            echo "::error::This workflow only supports 'attached' app, got: $APP_NAME"
+            exit 1
+          fi
+
       - name: Determine deploy environment
         id: deploy_env
         run: node ./internals/github/dist/determine_deploy_env.js
