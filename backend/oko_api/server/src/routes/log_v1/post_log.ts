@@ -1,6 +1,3 @@
-import type { Response, Request } from "express";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
-import type { PostLogBody, PostLogResponse } from "@oko-wallet/oko-types/log";
 import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
 import { registry } from "@oko-wallet/oko-api-openapi";
 import { ErrorResponseSchema } from "@oko-wallet/oko-api-openapi/common";
@@ -8,6 +5,9 @@ import {
   PostLogRequestSchema,
   PostLogSuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/log";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { PostLogBody, PostLogResponse } from "@oko-wallet/oko-types/log";
+import type { Request, Response } from "express";
 
 import { ingestLog } from "@oko-wallet-api/api/log";
 

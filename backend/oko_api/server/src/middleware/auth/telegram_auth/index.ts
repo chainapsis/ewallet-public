@@ -1,10 +1,10 @@
-import type { Request, Response, NextFunction } from "express";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
+import type { NextFunction, Request, Response } from "express";
 
 import {
-  validateTelegramHash,
   type TelegramUserData,
   type TelegramUserInfo,
+  validateTelegramHash,
 } from "@oko-wallet-api/middleware/auth/telegram_auth/validate";
 import type { OAuthLocals } from "@oko-wallet-api/middleware/auth/types";
 
@@ -31,7 +31,7 @@ export async function telegramAuthMiddleware(
   let userData: TelegramUserData;
   try {
     userData = JSON.parse(bearerToken) as TelegramUserData;
-  } catch (error) {
+  } catch (_error) {
     res.status(401).json({
       error: "Invalid token format: Expected JSON string",
     });

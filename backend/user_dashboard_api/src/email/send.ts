@@ -8,7 +8,7 @@ import type {
   SendVerificationRequest,
   SendVerificationResponse,
 } from "@oko-wallet/oko-types/ct_dashboard";
-import { Pool } from "pg";
+import type { Pool } from "pg";
 
 import {
   CAN_RESEND_CODE_INTERVAL_SECONDS,
@@ -75,7 +75,7 @@ export async function sendEmailVerificationCode(
   // Check if there's already an active verification
   if (activeVerification !== null) {
     const diffTime = Math.abs(
-      new Date().getTime() - activeVerification.created_at.getTime(),
+      Date.now() - activeVerification.created_at.getTime(),
     );
     const diffSeconds = Math.ceil(diffTime / 1000);
     if (diffSeconds < CAN_RESEND_CODE_INTERVAL_SECONDS) {

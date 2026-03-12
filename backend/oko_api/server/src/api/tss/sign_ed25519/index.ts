@@ -1,8 +1,10 @@
+import { decryptDataAsync } from "@oko-wallet/crypto-js/node";
 import {
   createTssSession,
   createTssStage,
   getTssStageWithSessionData,
 } from "@oko-wallet/oko-pg-interface/tss";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type {
   SignEd25519Round1Request,
   SignEd25519Round1Response,
@@ -11,28 +13,26 @@ import type {
   SignEd25519StageData,
 } from "@oko-wallet/oko-types/tss";
 import {
-  TssStageType,
   SignEd25519StageStatus,
   TssSessionState,
+  TssStageType,
 } from "@oko-wallet/oko-types/tss";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
-import { Pool } from "pg";
-import { decryptDataAsync } from "@oko-wallet/crypto-js/node";
 import {
+  reconstructKeyPackageEd25519,
   runSignRound1Ed25519,
   runSignRound2Ed25519,
-  reconstructKeyPackageEd25519,
 } from "@oko-wallet/teddsa-addon/src/server";
 import {
   Participant,
   participantToIdentifier,
 } from "@oko-wallet/teddsa-interface";
+import type { Pool } from "pg";
 
 import {
-  validateWalletEmailAndCurveType,
+  updateTssStageWithSessionState,
   validateTssSession,
   validateTssStage,
-  updateTssStageWithSessionState,
+  validateWalletEmailAndCurveType,
 } from "@oko-wallet-api/api/tss/utils";
 
 export async function runSignEd25519Round1(

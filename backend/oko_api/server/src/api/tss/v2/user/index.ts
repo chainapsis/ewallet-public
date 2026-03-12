@@ -1,45 +1,45 @@
-import { Pool } from "pg";
-import type { Logger } from "winston";
+import { Bytes, type Bytes32, type Bytes33 } from "@oko-wallet/bytes";
+import { decryptDataAsync } from "@oko-wallet/crypto-js/node";
+import { getKeyShareNodeMeta } from "@oko-wallet/oko-pg-interface/key_share_node_meta";
 import {
-  getActiveWalletByUserIdAndCurveType,
-  getWalletByPublicKey,
-  getWalletByIdWithAuthInfo,
-} from "@oko-wallet/oko-pg-interface/oko_wallets";
-import type {
-  CheckEmailResponseV2,
-  ReshareReason,
-  ReportKeyShareNotFoundRequest,
-  ReportKeyShareNotFoundResponse,
-  SignInResponseV2,
-  User,
-} from "@oko-wallet/oko-types/user";
-import type { AuthType } from "@oko-wallet/oko-types/auth";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+  getActiveKSNodes,
+  getKSNodesByServerUrl,
+  getWalletKSNodesByWalletId,
+  updateWalletKSNodeStatusToDataLoss,
+  upsertWalletKSNodes,
+} from "@oko-wallet/oko-pg-interface/ks_nodes";
 import {
   getUserByEmailAndAuthType,
   updateUserMetadata,
 } from "@oko-wallet/oko-pg-interface/oko_users";
 import {
-  getActiveKSNodes,
-  getWalletKSNodesByWalletId,
-  getKSNodesByServerUrl,
-  upsertWalletKSNodes,
-  updateWalletKSNodeStatusToDataLoss,
-} from "@oko-wallet/oko-pg-interface/ks_nodes";
+  getActiveWalletByUserIdAndCurveType,
+  getWalletByIdWithAuthInfo,
+  getWalletByPublicKey,
+} from "@oko-wallet/oko-pg-interface/oko_wallets";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type {
-  WalletKSNodeStatus,
   KeyShareNode,
   KeyShareNodeMetaWithNodeStatusInfo,
+  WalletKSNodeStatus,
 } from "@oko-wallet/oko-types/tss";
-import { getKeyShareNodeMeta } from "@oko-wallet/oko-pg-interface/key_share_node_meta";
+import type {
+  CheckEmailResponseV2,
+  ReportKeyShareNotFoundRequest,
+  ReportKeyShareNotFoundResponse,
+  ReshareReason,
+  SignInResponseV2,
+  User,
+} from "@oko-wallet/oko-types/user";
 import type { Wallet } from "@oko-wallet/oko-types/wallets";
-import { Bytes, type Bytes32, type Bytes33 } from "@oko-wallet/bytes";
-import { decryptDataAsync } from "@oko-wallet/crypto-js/node";
 import type { Result } from "@oko-wallet/stdlib-js";
+import type { Pool } from "pg";
+import type { Logger } from "winston";
 
+import { saveUserCustomerConnection } from "@oko-wallet-api/api/tss/connection";
 import { generateUserTokenV2 } from "@oko-wallet-api/api/tss/keplr_auth";
 import { checkKeyShareFromKSNodesV2 } from "@oko-wallet-api/api/tss/ks_node";
-import { saveUserCustomerConnection } from "@oko-wallet-api/api/tss/connection";
 import { requestCheckKeyShareV2 } from "@oko-wallet-api/requests";
 
 // Higher = worse (needs more attention)
@@ -171,10 +171,11 @@ export async function signInV2(
         logger,
         getUserRes.data.user_id,
         customerId,
-      )
-        .catch((err) => {
-          logger.error(`signInV2 error inserting user-customer connection: ${err}`);
-        });
+      ).catch((err) => {
+        logger.error(
+          `signInV2 error inserting user-customer connection: ${err}`,
+        );
+      });
     }
 
     return {

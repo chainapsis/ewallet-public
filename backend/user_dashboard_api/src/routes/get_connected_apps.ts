@@ -7,14 +7,11 @@ import { CustomerAuthHeaderSchema } from "@oko-wallet/oko-api-openapi/ct_dashboa
 import { getWalletById } from "@oko-wallet/oko-pg-interface/oko_wallets";
 import { getConnectionsByUserId } from "@oko-wallet/oko-pg-interface/user_customer_connections";
 import type { ConnectedApp } from "@oko-wallet/oko-types/user_dashboard";
-import express, { type IRouter, type Response } from "express";
+import type { Response } from "express";
 import type { Pool } from "pg";
 
 import type { OkoApiResponse } from "@oko-wallet-types/api_response";
-import {
-  type UserAuthenticatedRequest,
-  userJwtMiddleware,
-} from "@oko-wallet-usrd-api/middleware/auth";
+import type { UserAuthenticatedRequest } from "@oko-wallet-usrd-api/middleware/auth";
 
 registry.registerPath({
   method: "post",

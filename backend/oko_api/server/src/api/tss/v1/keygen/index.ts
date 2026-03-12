@@ -1,31 +1,31 @@
-import { Pool } from "pg";
-import type { Logger } from "winston";
+import { Bytes, type Bytes33 } from "@oko-wallet/bytes";
+import { encryptDataAsync } from "@oko-wallet/crypto-js/node";
+import { getKeyShareNodeMeta } from "@oko-wallet/oko-pg-interface/key_share_node_meta";
+import {
+  createWalletKSNodes,
+  getActiveKSNodes,
+} from "@oko-wallet/oko-pg-interface/ks_nodes";
 import {
   createUser,
   getUserByEmailAndAuthType,
   updateUserMetadata,
 } from "@oko-wallet/oko-pg-interface/oko_users";
-import type { Result } from "@oko-wallet/stdlib-js";
-import { encryptDataAsync } from "@oko-wallet/crypto-js/node";
-import { Bytes, type Bytes33 } from "@oko-wallet/bytes";
-import { type WalletStatus, type Wallet } from "@oko-wallet/oko-types/wallets";
-import type { KeygenRequest } from "@oko-wallet/oko-types/tss";
-import type { SignInResponse, User } from "@oko-wallet/oko-types/user";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import {
   createWallet,
   getActiveWalletByUserIdAndCurveType,
   getWalletByPublicKey,
 } from "@oko-wallet/oko-pg-interface/oko_wallets";
-import {
-  createWalletKSNodes,
-  getActiveKSNodes,
-} from "@oko-wallet/oko-pg-interface/ks_nodes";
-import { getKeyShareNodeMeta } from "@oko-wallet/oko-pg-interface/key_share_node_meta";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { KeygenRequest } from "@oko-wallet/oko-types/tss";
+import type { SignInResponse, User } from "@oko-wallet/oko-types/user";
+import type { Wallet, WalletStatus } from "@oko-wallet/oko-types/wallets";
+import type { Result } from "@oko-wallet/stdlib-js";
+import type { Pool } from "pg";
+import type { Logger } from "winston";
 
+import { saveUserCustomerConnection } from "@oko-wallet-api/api/tss/connection";
 import { generateUserToken } from "@oko-wallet-api/api/tss/keplr_auth";
 import { checkKeyShareFromKSNodes } from "@oko-wallet-api/api/tss/ks_node";
-import { saveUserCustomerConnection } from "@oko-wallet-api/api/tss/connection";
 
 export async function runKeygen(
   db: Pool,
@@ -39,7 +39,8 @@ export async function runKeygen(
   customerId: string,
 ): Promise<OkoApiResponse<SignInResponse>> {
   try {
-    const { auth_type, user_identifier, keygen_2, email, name, metadata } = keygenRequest;
+    const { auth_type, user_identifier, keygen_2, email, name, metadata } =
+      keygenRequest;
 
     const getUserRes = await getUserByEmailAndAuthType(
       db,
@@ -60,9 +61,15 @@ export async function runKeygen(
 
       // Update user metadata if user already exists
       if (metadata) {
-        const updateMetadataRes = await updateUserMetadata(db, user.user_id, metadata);
+        const updateMetadataRes = await updateUserMetadata(
+          db,
+          user.user_id,
+          metadata,
+        );
         if (updateMetadataRes.success === false) {
-          logger.error(`Failed to update user metadata: ${updateMetadataRes.err}`);
+          logger.error(
+            `Failed to update user metadata: ${updateMetadataRes.err}`,
+          );
         }
       }
 
@@ -86,7 +93,12 @@ export async function runKeygen(
         };
       }
     } else {
-      const createUserRes = await createUser(db, user_identifier, auth_type, metadata);
+      const createUserRes = await createUser(
+        db,
+        user_identifier,
+        auth_type,
+        metadata,
+      );
       if (createUserRes.success === false) {
         return {
           success: false,
@@ -230,9 +242,13 @@ export async function runKeygen(
       };
     }
 
-    saveUserCustomerConnection(db, logger, user.user_id, customerId).catch((err) => {
-      logger.error(`runKeygen error inserting user-customer connection: ${err}`);
-    });
+    saveUserCustomerConnection(db, logger, user.user_id, customerId).catch(
+      (err) => {
+        logger.error(
+          `runKeygen error inserting user-customer connection: ${err}`,
+        );
+      },
+    );
 
     return {
       success: true,

@@ -1,25 +1,27 @@
-import type { Response, Router } from "express";
-import type { KeygenBody } from "@oko-wallet/oko-types/tss";
 import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
-import type { SignInResponse } from "@oko-wallet/oko-types/user";
-import type { AuthType } from "@oko-wallet/oko-types/auth";
+import { registry } from "@oko-wallet/oko-api-openapi";
 import {
   ErrorResponseSchema,
   OAuthHeaderSchema,
 } from "@oko-wallet/oko-api-openapi/common";
-import { SignInSuccessResponseSchema } from "@oko-wallet/oko-api-openapi/tss";
-import { registry } from "@oko-wallet/oko-api-openapi";
-import { KeygenRequestSchema } from "@oko-wallet/oko-api-openapi/tss";
+import {
+  KeygenRequestSchema,
+  SignInSuccessResponseSchema,
+} from "@oko-wallet/oko-api-openapi/tss";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
+import type { KeygenBody } from "@oko-wallet/oko-types/tss";
+import type { SignInResponse } from "@oko-wallet/oko-types/user";
+import type { Response, Router } from "express";
 
 import { runKeygen } from "@oko-wallet-api/api/tss/v1/keygen";
+import { apiKeyMiddleware } from "@oko-wallet-api/middleware/auth/api_key_auth";
 import {
   type OAuthAuthenticatedRequest,
   oauthMiddleware,
 } from "@oko-wallet-api/middleware/auth/oauth";
 import { tssActivateMiddleware } from "@oko-wallet-api/middleware/auth/tss_activate";
 import type { OAuthLocalsWithAPIKey } from "@oko-wallet-api/middleware/auth/types";
-import { apiKeyMiddleware } from "@oko-wallet-api/middleware/auth/api_key_auth";
 
 export function setKeygenV1Routes(router: Router) {
   registry.registerPath({

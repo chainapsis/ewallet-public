@@ -1,21 +1,20 @@
-import type { Request, Response } from "express";
 import { Bytes } from "@oko-wallet/bytes";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import {
-  signMessage,
   convertEddsaSignatureToBytes,
+  signMessage,
 } from "@oko-wallet/crypto-js/node/ecdhe";
-import { createCommitRevealSession } from "@oko-wallet/oko-pg-interface/commit_reveal";
-import type { ServerState } from "@oko-wallet/oko-api-server-state";
-
 import { registry } from "@oko-wallet/oko-api-openapi";
 import { ErrorResponseSchema } from "@oko-wallet/oko-api-openapi/common";
 import {
-  CommitRequestBodySchema,
-  CommitSuccessResponseSchema,
   type CommitRequestBody,
+  CommitRequestBodySchema,
   type CommitResponseData,
+  CommitSuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/tss";
+import type { ServerState } from "@oko-wallet/oko-api-server-state";
+import { createCommitRevealSession } from "@oko-wallet/oko-pg-interface/commit_reveal";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { Request, Response } from "express";
 
 const SESSION_EXPIRY_MINUTES = 5;
 
@@ -144,7 +143,10 @@ export async function commitRevealCommit(
 
   // Sign the node's public key with the node's private key
   const nodePubkeyHex = state.server_keypair.publicKey.toHex();
-  const signResult = signMessage(nodePubkeyHex, state.server_keypair.privateKey);
+  const signResult = signMessage(
+    nodePubkeyHex,
+    state.server_keypair.privateKey,
+  );
   if (!signResult.success) {
     return res.status(500).json({
       success: false,

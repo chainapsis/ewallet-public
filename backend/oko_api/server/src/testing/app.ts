@@ -1,7 +1,7 @@
-import express from "express";
-import morgan from "morgan";
-import helmet from "helmet";
 import cors from "cors";
+import express from "express";
+import helmet from "helmet";
+import morgan from "morgan";
 import winston from "winston";
 
 import { makeTSSRouterV1 } from "@oko-wallet-api/routes/tss_v1";
@@ -36,6 +36,7 @@ export function makeApp(env: TestEnvs) {
   app.use(cors());
   app.use(express.json({ limit: "10mb" }));
 
+  // biome-ignore lint/complexity/noBannedTypes: Express generic params
   app.get<{}, string>("/", (_, res) => {
     res.send("Ok");
   });

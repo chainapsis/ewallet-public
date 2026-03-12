@@ -1,17 +1,17 @@
-import type { Request, Response } from "express";
-import type {
-  CheckEmailRequest,
-  CheckEmailResponseV2,
-} from "@oko-wallet/oko-types/user";
-import type { AuthType } from "@oko-wallet/oko-types/auth";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
+import { registry } from "@oko-wallet/oko-api-openapi";
 import { ErrorResponseSchema } from "@oko-wallet/oko-api-openapi/common";
 import {
   CheckEmailRequestSchema,
   CheckEmailSuccessResponseV2Schema,
 } from "@oko-wallet/oko-api-openapi/tss";
-import { registry } from "@oko-wallet/oko-api-openapi";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
+import type {
+  CheckEmailRequest,
+  CheckEmailResponseV2,
+} from "@oko-wallet/oko-types/user";
+import type { Request, Response } from "express";
 
 import { checkEmailV2 } from "@oko-wallet-api/api/tss/v2/user";
 

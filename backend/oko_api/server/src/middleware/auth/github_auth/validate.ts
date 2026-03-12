@@ -1,5 +1,5 @@
-import type { Result } from "@oko-wallet/stdlib-js";
 import type { SocialLoginGithubVerifyUserResponse } from "@oko-wallet/oko-types/social_login";
+import type { Result } from "@oko-wallet/stdlib-js";
 
 import { getGithubUserInfo } from "@oko-wallet-api/api/github";
 

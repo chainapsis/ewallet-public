@@ -1,14 +1,14 @@
-import express from "express";
-import morgan from "morgan";
-import helmet from "helmet";
-import cors from "cors";
-import type { ServerState } from "@oko-wallet/oko-api-server-state";
-
-import { setRoutes } from "@oko-wallet-api/routes";
-import { installSwaggerDocs } from "@oko-wallet-api/openapi";
-import { loggingMiddleware } from "@oko-wallet-api/middleware/logging";
 import { registry } from "@oko-wallet/oko-api-openapi";
 import { OkoApiRootResponseSchema } from "@oko-wallet/oko-api-openapi/oko";
+import type { ServerState } from "@oko-wallet/oko-api-server-state";
+import cors from "cors";
+import express from "express";
+import helmet from "helmet";
+import morgan from "morgan";
+
+import { loggingMiddleware } from "@oko-wallet-api/middleware/logging";
+import { installSwaggerDocs } from "@oko-wallet-api/openapi";
+import { setRoutes } from "@oko-wallet-api/routes";
 
 export function makeApp(state: ServerState) {
   const app = express();
@@ -60,6 +60,7 @@ export function makeApp(state: ServerState) {
       },
     },
   });
+  // biome-ignore lint/complexity/noBannedTypes: Express generic params
   app.get<{}, string>("/", (_, res) => {
     res.send("Ok");
   });

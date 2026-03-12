@@ -1,21 +1,20 @@
 loadEnv(ENV_FILE_NAME);
 
-import knex from "knex";
-import knexConfig from "@oko-wallet/oko-pg-interface/knexfile";
-
-import {
-  type ServerState,
-  makeServerState,
-} from "@oko-wallet/oko-api-server-state";
 import { loadEnv, verifyEnv } from "@oko-wallet/dotenv";
-import { startInactiveCustomerUserReminderRuntime } from "@oko-wallet-api/runtime/inactive_customer_user_reminders";
-import { startUnverifiedCustomerUserReminderRuntime } from "@oko-wallet-api/runtime/unverified_customer_user_reminders";
+import {
+  makeServerState,
+  type ServerState,
+} from "@oko-wallet/oko-api-server-state";
+import knexConfig from "@oko-wallet/oko-pg-interface/knexfile";
+import knex from "knex";
 
 import { makeApp } from "@oko-wallet-api/app";
 import { ENV_FILE_NAME, envSchema } from "@oko-wallet-api/envs";
 import { getCommitHash } from "@oko-wallet-api/git";
 import { startKSNodeHealthCheckRuntime } from "@oko-wallet-api/runtime/health_check_node";
+import { startInactiveCustomerUserReminderRuntime } from "@oko-wallet-api/runtime/inactive_customer_user_reminders";
 import { startKSNodeHeartbeatRuntime } from "@oko-wallet-api/runtime/ks_node_monitor";
+import { startUnverifiedCustomerUserReminderRuntime } from "@oko-wallet-api/runtime/unverified_customer_user_reminders";
 
 async function main() {
   console.log("NODE_ENV: %s", process.env.NODE_ENV);

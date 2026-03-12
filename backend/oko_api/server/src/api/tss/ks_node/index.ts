@@ -1,8 +1,8 @@
 import type { Bytes32, Bytes33 } from "@oko-wallet/bytes";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
-import type { KeyShareNode } from "@oko-wallet/oko-types/tss";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { CurveType } from "@oko-wallet/oko-types/crypto";
+import type { KeyShareNode } from "@oko-wallet/oko-types/tss";
 
 import {
   requestCheckKeyShare,
@@ -67,7 +67,7 @@ export async function checkKeyShareFromKSNodes(
 
     if (errorResults.length > 0) {
       const errArr = [];
-      for (let err of errorResults) {
+      for (const err of errorResults) {
         const comm = targetKSNodes[err.index];
 
         if (err.resContent.status === "rejected") {

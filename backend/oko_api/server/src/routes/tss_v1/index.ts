@@ -1,12 +1,12 @@
 import { Router } from "express";
 
 import { setKeygenV1Routes } from "./keygen";
-import { setTriplesV1Routes } from "./triples";
+import { setKSNodeTelemetryRoutes } from "./ks_node_telemetry";
 import { setPresignV1Routes } from "./presign";
 import { setSignV1Routes } from "./sign";
-import { setUserV1Routes } from "./user";
+import { setTriplesV1Routes } from "./triples";
 import { setTssSessionRoutes } from "./tss_session";
-import { setKSNodeTelemetryRoutes } from "./ks_node_telemetry";
+import { setUserV1Routes } from "./user";
 
 export function makeTSSRouterV1() {
   const router = Router();
