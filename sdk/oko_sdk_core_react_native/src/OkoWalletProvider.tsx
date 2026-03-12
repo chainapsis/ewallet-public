@@ -7,7 +7,7 @@ export interface OkoWalletProviderProps {
   /** Oko API key */
   apiKey: string;
   /** Proxy endpoint for OS browser flows (e.g. https://proxy.oko.app) */
-  sdkEndpoint: string;
+  sdkEndpoint?: string;
   /** Deep link scheme for OAuth callbacks (default: "okowallet") */
   redirectScheme?: string;
   children: React.ReactNode;

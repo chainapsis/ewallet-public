@@ -25,9 +25,11 @@ interface PersistedWalletInfo extends OkoWalletState {
   publicKeyEd25519?: string | null;
 }
 
+const DEFAULT_SDK_ENDPOINT = "https://proxy.oko.app";
+
 export interface OkoWalletRNConfig {
   apiKey: string;
-  sdkEndpoint: string;
+  sdkEndpoint?: string;
   redirectScheme?: string;
 }
 
@@ -47,7 +49,7 @@ export class OkoWalletRN implements OkoWalletInterface {
 
   constructor(config: OkoWalletRNConfig) {
     this.apiKey = config.apiKey;
-    this.sdkEndpoint = config.sdkEndpoint;
+    this.sdkEndpoint = config.sdkEndpoint ?? DEFAULT_SDK_ENDPOINT;
     this.redirectScheme = config.redirectScheme ?? "okowallet";
     this.origin = `${this.redirectScheme}://`;
     this.state = {
