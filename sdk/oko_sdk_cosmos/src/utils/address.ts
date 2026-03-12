@@ -1,9 +1,9 @@
-import { sha256 } from "@noble/hashes/sha2";
-import { ripemd160 } from "@noble/hashes/legacy";
-import { bech32 } from "bech32";
-import { keccak_256 } from "@noble/hashes/sha3";
-import { secp256k1 } from "@noble/curves/secp256k1";
 import type { ChainInfo } from "@keplr-wallet/types";
+import { secp256k1 } from "@noble/curves/secp256k1";
+import { ripemd160 } from "@noble/hashes/legacy";
+import { sha256 } from "@noble/hashes/sha2";
+import { keccak_256 } from "@noble/hashes/sha3";
+import { bech32 } from "bech32";
 
 export function getCosmosAddress(pubKey: Uint8Array) {
   return ripemd160(sha256(pubKey));

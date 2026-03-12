@@ -23,5 +23,5 @@ export type OkoCosmosWalletEventHandler2 =
     }
   | {
       type: "chainChanged";
-      handler: (payload: void) => void;
+      handler: (payload: undefined) => void;
     };

@@ -1,6 +1,8 @@
-import type { TransactionRequest, Signer } from "ethers";
+import type { Signer, TransactionRequest } from "ethers";
 import {
   BrowserProvider,
+  Contract,
+  ContractFactory,
   hashMessage,
   isAddress,
   parseEther,
@@ -8,27 +10,25 @@ import {
   recoverAddress,
   Transaction,
   TypedDataEncoder,
-  ContractFactory,
-  Contract,
 } from "ethers";
 import { isAddressEqual } from "viem";
 import { mainnet } from "viem/chains";
 
-import {
-  createChainParam,
-  createProviderOptions,
-  createDummySigner,
-  DUMMY_ADDRESS,
-  createEthSigner,
-  generateRandomAddress,
-  COUNTER_ABI,
-  COUNTER_DEPLOYMENT_BYTECODE,
-  generateInvalidBytecode,
-} from "./utils";
 import { hardhat, hardhatAccounts, hardhatNode } from "./hardhat";
 import {
-  createEthersTransactionHelper,
+  COUNTER_ABI,
+  COUNTER_DEPLOYMENT_BYTECODE,
+  createChainParam,
+  createDummySigner,
+  createEthSigner,
+  createProviderOptions,
+  DUMMY_ADDRESS,
+  generateInvalidBytecode,
+  generateRandomAddress,
+} from "./utils";
+import {
   createEthersContractHelper,
+  createEthersTransactionHelper,
 } from "./utils/ethersHelpers";
 import { OkoEIP1193Provider } from "@oko-wallet-sdk-eth/provider";
 import type { OkoEthSigner } from "@oko-wallet-sdk-eth/types";
@@ -66,13 +66,13 @@ describe("Oko Provider - Ethers.js Integration", () => {
     let hardhatProvider: OkoEIP1193Provider;
     let delta: OkoEthSigner;
     let epsilon: OkoEthSigner;
-    let foxtrot: OkoEthSigner;
+    let _foxtrot: OkoEthSigner;
 
     beforeAll(async () => {
       // Use accounts 3, 4, 5 for ethers.test.ts to avoid conflicts with viem.test.ts
       delta = createEthSigner(hardhat.id, hardhatAccounts[3].privateKey);
       epsilon = createEthSigner(hardhat.id, hardhatAccounts[4].privateKey);
-      foxtrot = createEthSigner(hardhat.id, hardhatAccounts[5].privateKey);
+      _foxtrot = createEthSigner(hardhat.id, hardhatAccounts[5].privateKey);
 
       try {
         await hardhatNode.start();
@@ -405,7 +405,7 @@ describe("Oko Provider - Ethers.js Integration", () => {
       });
 
       it("should successfully perform contract creation and calls", async () => {
-        const { contract, address: counterAddress } =
+        const { address: counterAddress } =
           await contractHelper.deployContract();
         expect(counterAddress).toBeDefined();
         expect(typeof counterAddress).toBe("string");
@@ -445,7 +445,7 @@ describe("Oko Provider - Ethers.js Integration", () => {
       });
 
       it("should fail contract call with insufficient gas", async () => {
-        const { contract, address: counterAddress } =
+        const { address: counterAddress } =
           await contractHelper.deployContract();
         const counterContract = new Contract(
           counterAddress,

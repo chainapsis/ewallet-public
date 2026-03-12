@@ -1,14 +1,14 @@
 import type { OkoWalletInterface } from "@oko-wallet/oko-sdk-core";
 import { PublicKey } from "@solana/web3.js";
 
+import { SvmWalletEventEmitter } from "./emitter";
+import { lazyInit } from "./private/lazy_init";
 import type {
+  OkoSvmWalletChainOptions,
   OkoSvmWalletInterface,
   OkoSvmWalletInternal,
   OkoSvmWalletStaticInterface,
-  OkoSvmWalletChainOptions,
 } from "./types";
-import { SvmWalletEventEmitter } from "./emitter";
-import { lazyInit } from "./private/lazy_init";
 
 export const OkoSvmWallet = function (
   this: OkoSvmWalletInternal,

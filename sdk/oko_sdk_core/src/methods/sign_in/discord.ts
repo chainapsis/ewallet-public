@@ -1,8 +1,8 @@
 import type {
-  OkoWalletWebInterface,
   OkoWalletMsg,
   OkoWalletMsgOAuthSignInUpdate,
   OkoWalletMsgOAuthSignInUpdateAck,
+  OkoWalletWebInterface,
 } from "@oko-wallet-sdk-core/types";
 
 const FIVE_MINS_MS = 5 * 60 * 1000;

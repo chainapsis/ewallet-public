@@ -1,7 +1,7 @@
-import { spawn, ChildProcess } from "child_process";
-import type { Address, Chain, Hex } from "viem";
+import { type ChildProcess, spawn } from "child_process";
 import path from "path";
 import { fileURLToPath } from "url";
+import type { Address, Chain, Hex } from "viem";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -120,7 +120,9 @@ class HardhatManager {
   }
 
   private clearAllTimeouts(): void {
-    this.timeouts.forEach((timeout) => clearTimeout(timeout));
+    for (const timeout of this.timeouts) {
+      clearTimeout(timeout);
+    }
     this.timeouts.clear();
   }
 
@@ -135,7 +137,9 @@ class HardhatManager {
   }
 
   private async _doStart(): Promise<void> {
-    if (this.isRunning) return;
+    if (this.isRunning) {
+      return;
+    }
 
     // Check if already running with more thorough validation
     if (await this.checkNodeHealth()) {
@@ -189,7 +193,7 @@ class HardhatManager {
         ) {
           console.log("🔄 Server started, verifying node health...");
 
-          const timeout = this.addTimeout(
+          const _timeout = this.addTimeout(
             setTimeout(async () => {
               if (!resolved && (await this.waitForNodeReady())) {
                 resolved = true;
@@ -224,7 +228,7 @@ class HardhatManager {
         if (error.includes("EADDRINUSE") && !resolved) {
           console.log("✅ Port already in use, verifying existing node...");
 
-          const timeout = this.addTimeout(
+          const _timeout = this.addTimeout(
             setTimeout(async () => {
               if (!resolved && (await this.waitForNodeReady())) {
                 resolved = true;
@@ -246,7 +250,7 @@ class HardhatManager {
         }
       });
 
-      const mainTimeout = this.addTimeout(
+      const _mainTimeout = this.addTimeout(
         setTimeout(() => {
           if (!resolved) {
             resolved = true;
@@ -263,7 +267,9 @@ class HardhatManager {
   }
 
   private async _doStop(): Promise<void> {
-    if (!this.process && !this.isRunning) return;
+    if (!this.process && !this.isRunning) {
+      return;
+    }
 
     console.log("🛑 Stopping Hardhat node...");
 
@@ -320,7 +326,7 @@ class HardhatManager {
 
       console.log(`⏳ Node health check ${i + 1}/${maxRetries}...`);
       await new Promise((resolve) => {
-        const timeout = this.addTimeout(
+        const _timeout = this.addTimeout(
           setTimeout(resolve, 1000) as unknown as number,
         );
       });
@@ -347,11 +353,13 @@ class HardhatManager {
 
       clearTimeout(timeoutId);
 
-      if (!response.ok) return false;
+      if (!response.ok) {
+        return false;
+      }
 
       const result = await response.json();
       return result && !result.error && result.result !== undefined;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -375,11 +383,13 @@ class HardhatManager {
 
       clearTimeout(timeoutId);
 
-      if (!response.ok) return false;
+      if (!response.ok) {
+        return false;
+      }
 
       const result = await response.json();
       return result && !result.error && result.result !== null;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

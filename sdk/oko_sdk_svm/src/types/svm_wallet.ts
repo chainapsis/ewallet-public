@@ -15,8 +15,8 @@ import type {
 import type { SvmWalletEvent, SvmWalletEventHandler } from "./event";
 import type { OkoSvmWalletChainOptions } from "./internal";
 import type {
-  OkoSvmWalletInitError,
   LazyInitError,
+  OkoSvmWalletInitError,
 } from "@oko-wallet-sdk-svm/errors";
 
 export interface OkoSvmWalletState {

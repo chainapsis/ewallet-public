@@ -1,5 +1,5 @@
-import type { OkoSvmWalletInterface } from "./svm_wallet";
 import type { SvmWalletEventEmitter } from "../emitter";
+import type { OkoSvmWalletInterface } from "./svm_wallet";
 
 export interface OkoSvmWalletChainOptions {
   chain_id: string;

@@ -4,10 +4,10 @@ import type {
   TypedDataDefinition,
 } from "viem";
 import {
-  serializeTransaction,
   hashMessage,
   hashTypedData,
   keccak256,
+  serializeTransaction,
   toBytes,
 } from "viem";
 

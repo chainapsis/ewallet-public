@@ -1,4 +1,4 @@
-import { type Result } from "@oko-wallet/stdlib-js";
+import type { Result } from "@oko-wallet/stdlib-js";
 
 export const OKO_IFRAME_ID = "oko-attached";
 

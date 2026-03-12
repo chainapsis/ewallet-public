@@ -24,7 +24,7 @@ function normalizeQuantity(
     return toHex(n);
   }
 
-  let s = input.trim();
+  const s = input.trim();
   if (s.length === 0 || s === "0x") {
     return undefined;
   }
@@ -206,7 +206,6 @@ export function toRpcTransactionRequest(
         gasPrice: convertToHexValue(transaction.gasPrice),
         accessList: transaction.accessList,
       };
-    case "eip1559":
     default:
       return {
         ...baseFields,

@@ -1,11 +1,11 @@
 import type { Transaction, VersionedTransaction } from "@solana/web3.js";
 
-import type { OkoSvmWalletInterface } from "@oko-wallet-sdk-svm/types";
 import {
   makeSignature,
   SolanaRpcError,
   SolanaRpcErrorCode,
 } from "./make_signature";
+import type { OkoSvmWalletInterface } from "@oko-wallet-sdk-svm/types";
 
 export async function signAllTransactions<
   T extends Transaction | VersionedTransaction,

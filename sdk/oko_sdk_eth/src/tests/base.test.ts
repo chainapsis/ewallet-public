@@ -1,21 +1,21 @@
 import type { AddEthereumChainParameter } from "viem";
 import { toHex } from "viem";
-import { sepolia, mainnet } from "viem/chains";
+import { mainnet, sepolia } from "viem/chains";
 
+import {
+  createMockRpcServer,
+  createMockSigner,
+  MOCK_ADDRESS,
+  MOCK_SIGNATURE,
+  type MockRpcServer,
+  mockMainnetRpc,
+} from "./mock";
 import {
   createChainParam,
   createProviderOptions,
   EXPECTED_NAME,
   EXPECTED_VERSION,
 } from "./utils";
-import {
-  createMockSigner,
-  MockRpcServer,
-  createMockRpcServer,
-  mockMainnetRpc,
-  MOCK_ADDRESS,
-  MOCK_SIGNATURE,
-} from "./mock";
 import {
   OkoEIP1193Provider,
   ProviderRpcErrorCode,
@@ -293,7 +293,7 @@ describe("Oko Provider - Base", () => {
         expect(provider.chainId).toBe(toHex(mainnet.id));
         expect(provider.isConnected).toBe(true);
 
-        let addedChains = (provider as any).addedChains;
+        const addedChains = (provider as any).addedChains;
         expect(addedChains).toHaveLength(1);
         expect(addedChains[0].connected).toBe(true);
       });

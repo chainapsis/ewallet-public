@@ -273,34 +273,34 @@ describe("EventEmitter2", () => {
     });
 
     test("should reject null/undefined handlers during registration", () => {
-      // @ts-ignore - intentionally testing with invalid input
+      // @ts-expect-error - intentionally testing with invalid input
       expect(() => emitter.on("userLogin", null)).toThrow(
         'The "handler" argument must be of type function. Received null',
       );
 
-      // @ts-ignore - intentionally testing with invalid input
+      // @ts-expect-error - intentionally testing with invalid input
       expect(() => emitter.on("userLogin", undefined)).toThrow(
         'The "handler" argument must be of type function. Received undefined',
       );
 
-      // @ts-ignore - intentionally testing with invalid input
+      // @ts-expect-error - intentionally testing with invalid input
       expect(() => emitter.off("userLogin", null)).not.toThrow();
-      // @ts-ignore - intentionally testing with invalid input
+      // @ts-expect-error - intentionally testing with invalid input
       expect(() => emitter.off("userLogin", undefined)).not.toThrow();
     });
 
     test("should reject non-function handlers during registration", () => {
-      // @ts-ignore - intentionally testing with invalid input
+      // @ts-expect-error - intentionally testing with invalid input
       expect(() => emitter.on("userLogin", "not a function")).toThrow(
         'The "handler" argument must be of type function. Received string',
       );
 
-      // @ts-ignore - intentionally testing with invalid input
+      // @ts-expect-error - intentionally testing with invalid input
       expect(() => emitter.on("userLogin", 123)).toThrow(
         'The "handler" argument must be of type function. Received number',
       );
 
-      // @ts-ignore - intentionally testing with invalid input
+      // @ts-expect-error - intentionally testing with invalid input
       expect(() => emitter.on("userLogin", {})).toThrow(
         'The "handler" argument must be of type function. Received object',
       );

@@ -1,9 +1,9 @@
 import { OkoWallet, type OkoWalletInitArgs } from "@oko-wallet/oko-sdk-core";
 import type { Result } from "@oko-wallet/stdlib-js";
 
-import type { OkoCosmosWalletInterface } from "@oko-wallet-sdk-cosmos/types";
-import type { OkoCosmosWalletInitError } from "@oko-wallet-sdk-cosmos/errors";
 import { OkoCosmosWallet } from "@oko-wallet-sdk-cosmos/constructor";
+import type { OkoCosmosWalletInitError } from "@oko-wallet-sdk-cosmos/errors";
+import type { OkoCosmosWalletInterface } from "@oko-wallet-sdk-cosmos/types";
 
 export function init(
   args: OkoWalletInitArgs,

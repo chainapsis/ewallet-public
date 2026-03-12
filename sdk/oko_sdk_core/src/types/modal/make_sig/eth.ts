@@ -1,7 +1,7 @@
 import type { Hex, RpcTransactionRequest, SignableMessage } from "viem";
 
-import type { ChainInfoForAttachedModal } from "@oko-wallet-sdk-core/types/modal/common";
 import type { MakeSigError } from "./common";
+import type { ChainInfoForAttachedModal } from "@oko-wallet-sdk-core/types/modal/common";
 
 export interface MakeEthSigModalResult {
   chain_type: "eth";

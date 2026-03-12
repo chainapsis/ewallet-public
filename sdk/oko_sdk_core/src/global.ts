@@ -7,5 +7,3 @@ declare global {
     __oko_ev: ((ev: MessageEvent) => void) | null | undefined;
   }
 }
-
-export {};

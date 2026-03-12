@@ -1,7 +1,7 @@
 import { Buffer } from "buffer";
 
-import { simpleFetch } from "@oko-wallet-sdk-cosmos/utils";
 import type { OkoCosmosWalletInterface } from "@oko-wallet-sdk-cosmos/types";
+import { simpleFetch } from "@oko-wallet-sdk-cosmos/utils";
 
 export async function sendTx(
   this: OkoCosmosWalletInterface,
@@ -18,7 +18,7 @@ export async function sendTx(
 
   const isProtoTx = Buffer.isBuffer(tx) || tx instanceof Uint8Array;
 
-  let _mode;
+  let _mode: string;
   switch (mode) {
     case "async":
       _mode = "BROADCAST_MODE_ASYNC";
@@ -51,10 +51,10 @@ export async function sendTx(
       },
     );
 
-    const txResponse = isProtoTx ? result.data["tx_response"] : result.data;
+    const txResponse = isProtoTx ? result.data.tx_response : result.data;
 
     if (txResponse.code != null && txResponse.code !== 0) {
-      throw new Error(txResponse["raw_log"]);
+      throw new Error(txResponse.raw_log);
     }
 
     const txHash = Buffer.from(txResponse.txhash, "hex");
