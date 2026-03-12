@@ -10,8 +10,19 @@ import { ATTACHED_ORIGIN } from "./build_iframe_src";
  *
  * Uses a ref for the callback so callers don't need `useCallback`.
  */
+export interface AttachedInitPayload {
+  success: boolean;
+  err?: string;
+  data?: {
+    auth_type?: string | null;
+    email?: string | null;
+    public_key?: string | null;
+    name?: string | null;
+  } | null;
+}
+
 export function useAttachedInit(
-  onInit: (payload: { success: boolean; err?: string } | null) => void,
+  onInit: (payload: AttachedInitPayload | null) => void,
 ) {
   const callbackRef = useRef(onInit);
   callbackRef.current = onInit;

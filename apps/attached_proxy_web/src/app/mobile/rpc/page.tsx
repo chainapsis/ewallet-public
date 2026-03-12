@@ -50,6 +50,7 @@ export default async function MobileRpcPage({
           iframeSrc={iframeSrc}
           method={params.method ?? ""}
           redirectScheme={params.redirect_scheme ?? ""}
+          expectedPublicKey={params.expected_pk ?? null}
         />
       </body>
     </html>

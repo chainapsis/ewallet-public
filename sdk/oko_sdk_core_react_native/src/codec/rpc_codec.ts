@@ -168,12 +168,16 @@ export function buildRpcUrl(
   payload: unknown,
   apiKey: string,
   redirectScheme: string,
+  expectedPublicKey?: string | null,
 ): { url: string; stats: RpcEncodingStats } {
   const url = new URL("/mobile/rpc", sdkEndpoint);
   url.searchParams.set("method", method);
   url.searchParams.set("host_origin", sdkEndpoint);
   url.searchParams.set("api_key", apiKey);
   url.searchParams.set("redirect_scheme", redirectScheme);
+  if (expectedPublicKey) {
+    url.searchParams.set("expected_pk", expectedPublicKey);
+  }
 
   const { encoded, stats } = encodeRpcPayloadWithStats(payload);
   const hashParams = new URLSearchParams();

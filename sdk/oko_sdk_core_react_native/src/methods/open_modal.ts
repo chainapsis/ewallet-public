@@ -18,6 +18,7 @@ export async function openModalRN(
   msg: OkoWalletMsgOpenModal,
   redirectScheme: string,
   apiKey: string,
+  expectedPublicKey?: string | null,
 ): Promise<Result<OpenModalAckPayload, OpenModalError>> {
   try {
     const serverScheme = getServerRedirectScheme(redirectScheme);
@@ -27,6 +28,7 @@ export async function openModalRN(
       msg.payload,
       apiKey,
       serverScheme,
+      expectedPublicKey,
     );
     console.info("[oko-rn-rpc] open_modal request", {
       modalType: msg.payload.modal_type,

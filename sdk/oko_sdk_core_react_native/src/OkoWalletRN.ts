@@ -139,6 +139,7 @@ export class OkoWalletRN implements OkoWalletInterface {
       msg.payload,
       this.apiKey,
       this.redirectScheme,
+      this.state.publicKey,
     );
 
     return {
@@ -153,7 +154,7 @@ export class OkoWalletRN implements OkoWalletInterface {
   ): Promise<Result<OpenModalAckPayload, OpenModalError>> {
     await this.waitUntilInitialized;
 
-    return openModalRN(this.sdkEndpoint, msg, this.redirectScheme, this.apiKey);
+    return openModalRN(this.sdkEndpoint, msg, this.redirectScheme, this.apiKey, this.state.publicKey);
   }
 
   async signIn(type: SignInType): Promise<void> {

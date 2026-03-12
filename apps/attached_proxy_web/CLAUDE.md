@@ -87,6 +87,27 @@ iframe은 `https://attached.oko.app`에서 로드되며 cross-origin으로 동�
 - 그 외 method는 iframe을 숨긴 채 처리 후 즉시 결과 반환
 - 결과를 `buildRpcCallbackUrl(redirectScheme, result)`로 인코딩하여 `window.location.replace`
 
+### Stale session cleanup
+
+RN SDK의 `signOut()`은 앱 로컬 state만 지우고, attached iframe의 localStorage
+(Zustand persist store — key share, auth token 등)는 건드리지 않는다. signOut 시점에
+OS 브라우저를 여는 것은 UX가 나쁘므로, **다음 RPC 호출 시 lazy하게 정리**한다.
+
+**배경:** attached iframe은 `oko-wallet-app-2` 키로 localStorage에 per-origin 데이터를
+persist한다. iOS(ASWebAuthenticationSession)와 Android(Chrome Custom Tab) 모두
+브라우저 localStorage가 세션 간 공유될 수 있어, signOut 후에도 이전 유저의 key share가
+남아있을 수 있다. 실질적 보안 위험은 낮지만(RN SDK가 signOut 상태에서 RPC 호출을 막음),
+불필요한 key share 잔존을 방지하기 위해 정리한다.
+
+**구현:**
+- RN SDK가 RPC URL에 `expected_pk` query param으로 현재 유저의 publicKey를 포함
+  (`sdk/oko_sdk_core_react_native/src/codec/rpc_codec.ts`의 `buildRpcUrl()`)
+- RPC 페이지가 이를 `RpcClient`에 전달 (`page.tsx`)
+- `RpcClient`가 iframe init 응답의 `public_key`와 비교하여 불일치하면
+  `sign_out` postMessage를 보내 stale session 정리 후 실제 RPC 실행 (`_client.tsx`)
+- `use_attached_init.ts`의 `AttachedInitPayload` 타입이 init 응답의 `data.public_key`를
+  포함하여 이 비교를 가능하게 함
+
 ### Login Complete (`/mobile/login/complete/_client.tsx`)
 
 - OAuth 콜백으로 받은 토큰을 iframe에 `oauth_info_pass`로 전달

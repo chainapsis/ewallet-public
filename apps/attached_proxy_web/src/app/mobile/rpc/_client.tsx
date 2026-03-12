@@ -9,7 +9,10 @@ import {
   parseRpcRequestFromLocation,
 } from "../_shared/rpc_codec";
 import { sendToAttached } from "../_shared/send_to_attached";
-import { useAttachedInit } from "../_shared/use_attached_init";
+import {
+  useAttachedInit,
+  type AttachedInitPayload,
+} from "../_shared/use_attached_init";
 
 /** Methods that show the iframe (user-facing UI). */
 const VISIBLE_METHODS = new Set([
@@ -21,26 +24,44 @@ export function RpcClient({
   iframeSrc,
   method,
   redirectScheme,
+  expectedPublicKey,
 }: {
   iframeSrc: string;
   method: string;
   redirectScheme: string;
+  expectedPublicKey: string | null;
 }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [status, setStatus] = useState("Preparing...");
   const [showIframe, setShowIframe] = useState(false);
 
-  useAttachedInit(() => {
-    void executeRpc();
+  useAttachedInit((initPayload) => {
+    void executeRpc(initPayload);
   });
 
-  async function executeRpc() {
+  async function executeRpc(initPayload: AttachedInitPayload | null) {
     try {
       if (!method) {
         throw new Error("Missing method in URL");
       }
 
       setStatus("Loading wallet...");
+
+      // Clean up stale session if the iframe's stored user doesn't match
+      if (expectedPublicKey !== null) {
+        const iframePk = initPayload?.data?.public_key ?? null;
+        if (iframePk !== null && iframePk !== expectedPublicKey) {
+          console.info("[oko-mobile-rpc] stale session detected, clearing", {
+            expected: expectedPublicKey,
+            found: iframePk,
+          });
+          await sendToAttached(iframeRef.current!, {
+            target: "oko_attached",
+            msg_type: "sign_out",
+            payload: null,
+          });
+        }
+      }
 
       // Parse payload from URL
       const { encodedPayload } = parseRpcRequestFromLocation();
