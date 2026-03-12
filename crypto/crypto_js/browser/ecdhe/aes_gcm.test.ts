@@ -1,9 +1,9 @@
 import { describe, expect, it } from "@jest/globals";
 import { Bytes } from "@oko-wallet/bytes";
 
-import { encryptWithEcdheKey, decryptWithEcdheKey } from "./aes_gcm";
 import { generateEddsaKeypair } from "../../common/ecdhe/curve25519";
 import { deriveSessionKey } from "../../common/ecdhe/key_derivation";
+import { decryptWithEcdheKey, encryptWithEcdheKey } from "./aes_gcm";
 
 describe("AES-GCM encryption and decryption", () => {
   const createSessionKey = () => {
@@ -32,7 +32,9 @@ describe("AES-GCM encryption and decryption", () => {
       const result = await encryptWithEcdheKey(plaintext, sessionKey);
 
       expect(result.success).toBe(true);
-      if (!result.success) return;
+      if (!result.success) {
+        return;
+      }
 
       // iv(12) + ciphertext + authTag(16)
       expect(result.data.length).toBeGreaterThan(12 + 16);
@@ -47,7 +49,9 @@ describe("AES-GCM encryption and decryption", () => {
 
       expect(result1.success).toBe(true);
       expect(result2.success).toBe(true);
-      if (!result1.success || !result2.success) return;
+      if (!result1.success || !result2.success) {
+        return;
+      }
 
       // Same plaintext, different IV, different ciphertext
       const hex1 = result1.data.toHex();
@@ -62,7 +66,9 @@ describe("AES-GCM encryption and decryption", () => {
       const result = await encryptWithEcdheKey(plaintext, sessionKey);
 
       expect(result.success).toBe(true);
-      if (!result.success) return;
+      if (!result.success) {
+        return;
+      }
 
       // iv(12) + authTag(16) = 28 bytes minimum
       expect(result.data.length).toBe(12 + 16);
@@ -75,7 +81,9 @@ describe("AES-GCM encryption and decryption", () => {
       const result = await encryptWithEcdheKey(plaintext, sessionKey);
 
       expect(result.success).toBe(true);
-      if (!result.success) return;
+      if (!result.success) {
+        return;
+      }
 
       expect(result.data.length).toBe(12 + 10000 + 16);
     });
@@ -89,11 +97,15 @@ describe("AES-GCM encryption and decryption", () => {
 
       const encrypted = await encryptWithEcdheKey(plaintext, sessionKey);
       expect(encrypted.success).toBe(true);
-      if (!encrypted.success) return;
+      if (!encrypted.success) {
+        return;
+      }
 
       const decrypted = await decryptWithEcdheKey(encrypted.data, sessionKey);
       expect(decrypted.success).toBe(true);
-      if (!decrypted.success) return;
+      if (!decrypted.success) {
+        return;
+      }
 
       const decryptedText = new TextDecoder().decode(
         decrypted.data.toUint8Array(),
@@ -107,11 +119,15 @@ describe("AES-GCM encryption and decryption", () => {
 
       const encrypted = await encryptWithEcdheKey(plaintext, sessionKey);
       expect(encrypted.success).toBe(true);
-      if (!encrypted.success) return;
+      if (!encrypted.success) {
+        return;
+      }
 
       const decrypted = await decryptWithEcdheKey(encrypted.data, sessionKey);
       expect(decrypted.success).toBe(true);
-      if (!decrypted.success) return;
+      if (!decrypted.success) {
+        return;
+      }
 
       expect(decrypted.data.length).toBe(0);
     });
@@ -125,11 +141,15 @@ describe("AES-GCM encryption and decryption", () => {
 
       const encrypted = await encryptWithEcdheKey(plaintext, sessionKey);
       expect(encrypted.success).toBe(true);
-      if (!encrypted.success) return;
+      if (!encrypted.success) {
+        return;
+      }
 
       const decrypted = await decryptWithEcdheKey(encrypted.data, sessionKey);
       expect(decrypted.success).toBe(true);
-      if (!decrypted.success) return;
+      if (!decrypted.success) {
+        return;
+      }
 
       expect(decrypted.data.toUint8Array()).toEqual(plaintext);
     });
@@ -139,12 +159,16 @@ describe("AES-GCM encryption and decryption", () => {
       const shortData = new Uint8Array(10); // < 12 + 16
       const shortDataBytes = Bytes.fromUint8Array(shortData, shortData.length);
       expect(shortDataBytes.success).toBe(true);
-      if (!shortDataBytes.success) return;
+      if (!shortDataBytes.success) {
+        return;
+      }
 
       const result = await decryptWithEcdheKey(shortDataBytes.data, sessionKey);
 
       expect(result.success).toBe(false);
-      if (result.success) return;
+      if (result.success) {
+        return;
+      }
       expect(result.err).toBe("Encrypted data is too short");
     });
 
@@ -155,7 +179,9 @@ describe("AES-GCM encryption and decryption", () => {
 
       const encrypted = await encryptWithEcdheKey(plaintext, sessionKey1);
       expect(encrypted.success).toBe(true);
-      if (!encrypted.success) return;
+      if (!encrypted.success) {
+        return;
+      }
 
       const decrypted = await decryptWithEcdheKey(encrypted.data, sessionKey2);
       expect(decrypted.success).toBe(false);
@@ -167,14 +193,18 @@ describe("AES-GCM encryption and decryption", () => {
 
       const encrypted = await encryptWithEcdheKey(plaintext, sessionKey);
       expect(encrypted.success).toBe(true);
-      if (!encrypted.success) return;
+      if (!encrypted.success) {
+        return;
+      }
 
       // Tampering with ciphertext (modifying data after the IV)
       const tampered = new Uint8Array(encrypted.data.toUint8Array());
       tampered[15] ^= 0xff;
       const tamperedBytes = Bytes.fromUint8Array(tampered, tampered.length);
       expect(tamperedBytes.success).toBe(true);
-      if (!tamperedBytes.success) return;
+      if (!tamperedBytes.success) {
+        return;
+      }
 
       const decrypted = await decryptWithEcdheKey(
         tamperedBytes.data,
@@ -189,14 +219,18 @@ describe("AES-GCM encryption and decryption", () => {
 
       const encrypted = await encryptWithEcdheKey(plaintext, sessionKey);
       expect(encrypted.success).toBe(true);
-      if (!encrypted.success) return;
+      if (!encrypted.success) {
+        return;
+      }
 
       // Tampering with IV
       const tampered = new Uint8Array(encrypted.data.toUint8Array());
       tampered[0] ^= 0xff;
       const tamperedBytes = Bytes.fromUint8Array(tampered, tampered.length);
       expect(tamperedBytes.success).toBe(true);
-      if (!tamperedBytes.success) return;
+      if (!tamperedBytes.success) {
+        return;
+      }
 
       const decrypted = await decryptWithEcdheKey(
         tamperedBytes.data,
@@ -211,14 +245,18 @@ describe("AES-GCM encryption and decryption", () => {
 
       const encrypted = await encryptWithEcdheKey(plaintext, sessionKey);
       expect(encrypted.success).toBe(true);
-      if (!encrypted.success) return;
+      if (!encrypted.success) {
+        return;
+      }
 
       // Tampering with auth tag (last 16 bytes)
       const tampered = new Uint8Array(encrypted.data.toUint8Array());
       tampered[tampered.length - 1] ^= 0xff;
       const tamperedBytes = Bytes.fromUint8Array(tampered, tampered.length);
       expect(tamperedBytes.success).toBe(true);
-      if (!tamperedBytes.success) return;
+      if (!tamperedBytes.success) {
+        return;
+      }
 
       const decrypted = await decryptWithEcdheKey(
         tamperedBytes.data,
@@ -236,11 +274,15 @@ describe("AES-GCM encryption and decryption", () => {
 
       const encrypted = await encryptWithEcdheKey(plaintext, sessionKey);
       expect(encrypted.success).toBe(true);
-      if (!encrypted.success) return;
+      if (!encrypted.success) {
+        return;
+      }
 
       const decrypted = await decryptWithEcdheKey(encrypted.data, sessionKey);
       expect(decrypted.success).toBe(true);
-      if (!decrypted.success) return;
+      if (!decrypted.success) {
+        return;
+      }
 
       const decryptedText = new TextDecoder().decode(
         decrypted.data.toUint8Array(),
@@ -254,11 +296,15 @@ describe("AES-GCM encryption and decryption", () => {
 
       const encrypted = await encryptWithEcdheKey(binaryData, sessionKey);
       expect(encrypted.success).toBe(true);
-      if (!encrypted.success) return;
+      if (!encrypted.success) {
+        return;
+      }
 
       const decrypted = await decryptWithEcdheKey(encrypted.data, sessionKey);
       expect(decrypted.success).toBe(true);
-      if (!decrypted.success) return;
+      if (!decrypted.success) {
+        return;
+      }
 
       expect(decrypted.data.toUint8Array()).toEqual(binaryData);
     });
@@ -278,11 +324,15 @@ describe("AES-GCM encryption and decryption", () => {
 
         const encrypted = await encryptWithEcdheKey(plaintext, sessionKey);
         expect(encrypted.success).toBe(true);
-        if (!encrypted.success) continue;
+        if (!encrypted.success) {
+          continue;
+        }
 
         const decrypted = await decryptWithEcdheKey(encrypted.data, sessionKey);
         expect(decrypted.success).toBe(true);
-        if (!decrypted.success) continue;
+        if (!decrypted.success) {
+          continue;
+        }
 
         const decryptedText = new TextDecoder().decode(
           decrypted.data.toUint8Array(),

@@ -1,8 +1,8 @@
-import { Participant } from "@oko-wallet/tecdsa-interface";
 import type {
   TECDSAClientState,
   TECDSAServerState,
 } from "@oko-wallet/tecdsa-interface";
+import { Participant } from "@oko-wallet/tecdsa-interface";
 
 import {
   runKeygenClientStep1,

@@ -1,4 +1,52 @@
 import type {
+  ErrorCode,
+  OkoApiErrorResponse,
+  OkoApiResponse,
+} from "@oko-wallet/oko-types/api_response";
+import type { CommitRevealParams } from "@oko-wallet/oko-types/commit_reveal";
+import type {
+  AbortTssSessionBody,
+  AbortTssSessionResponse,
+  KeygenRequestBody,
+  KeygenRequestBodyV2,
+  PresignStep1Body,
+  PresignStep1Response,
+  PresignStep2Body,
+  PresignStep2Response,
+  PresignStep3Body,
+  PresignStep3Response,
+  SignStep1Body,
+  SignStep1Response,
+  SignStep2Body,
+  SignStep2Response,
+  TriplesStep1Body,
+  TriplesStep1Response,
+  TriplesStep2Body,
+  TriplesStep2Response,
+  TriplesStep3Body,
+  TriplesStep3Response,
+  TriplesStep4Body,
+  TriplesStep4Response,
+  TriplesStep5Body,
+  TriplesStep5Response,
+  TriplesStep6Body,
+  TriplesStep6Response,
+  TriplesStep7Body,
+  TriplesStep7Response,
+  TriplesStep8Body,
+  TriplesStep8Response,
+  TriplesStep9Body,
+  TriplesStep9Response,
+  TriplesStep10Body,
+  TriplesStep10Response,
+  TriplesStep11Body,
+  TriplesStep11Response,
+} from "@oko-wallet/oko-types/tss";
+import type {
+  SignInResponse,
+  SignInResponseV2,
+} from "@oko-wallet/oko-types/user";
+import type {
   KeygenStep1Response,
   KeygenStep1V2Request,
   KeygenStep2Response,
@@ -10,54 +58,6 @@ import type {
   KeygenStep5Response,
   KeygenStep5V2Request,
 } from "@oko-wallet/tecdsa-interface";
-import type {
-  KeygenRequestBody,
-  PresignStep1Response,
-  PresignStep2Response,
-  PresignStep3Response,
-  SignStep1Response,
-  SignStep2Response,
-  TriplesStep10Response,
-  TriplesStep11Response,
-  TriplesStep1Response,
-  TriplesStep2Response,
-  TriplesStep3Response,
-  TriplesStep4Response,
-  TriplesStep5Response,
-  TriplesStep6Response,
-  TriplesStep7Response,
-  TriplesStep8Response,
-  TriplesStep9Response,
-  TriplesStep1Body,
-  TriplesStep2Body,
-  TriplesStep3Body,
-  TriplesStep4Body,
-  TriplesStep5Body,
-  TriplesStep6Body,
-  TriplesStep7Body,
-  TriplesStep8Body,
-  TriplesStep9Body,
-  TriplesStep10Body,
-  TriplesStep11Body,
-  PresignStep1Body,
-  PresignStep2Body,
-  PresignStep3Body,
-  SignStep1Body,
-  SignStep2Body,
-  AbortTssSessionBody,
-  AbortTssSessionResponse,
-} from "@oko-wallet/oko-types/tss";
-import {
-  type SignInResponse,
-  type SignInResponseV2,
-} from "@oko-wallet/oko-types/user";
-import type { KeygenRequestBodyV2 } from "@oko-wallet/oko-types/tss";
-import {
-  type ErrorCode,
-  type OkoApiErrorResponse,
-  type OkoApiResponse,
-} from "@oko-wallet/oko-types/api_response";
-import type { CommitRevealParams } from "@oko-wallet/oko-types/commit_reveal";
 
 /* NOTE - The error type returned by the middleware is not compatible with OkoApiErrorResponse.
    So we use a separate function to handle it.

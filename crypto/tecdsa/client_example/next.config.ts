@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  webpack: (config, { isServer, dev, webpack }) => {
+  webpack: (config, { isServer, dev }) => {
     config.output.webassemblyModuleFilename =
       isServer && !dev
         ? "../static/pkg/[modulehash].wasm"

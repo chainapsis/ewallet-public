@@ -1,5 +1,5 @@
-import type { Result } from "@oko-wallet/stdlib-js";
 import { Bytes, type BytesN } from "@oko-wallet/bytes";
+import type { Result } from "@oko-wallet/stdlib-js";
 
 import type { EcdheSessionKey } from "../../common/ecdhe";
 

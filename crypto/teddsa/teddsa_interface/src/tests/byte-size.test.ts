@@ -1,16 +1,16 @@
-import { describe, it, expect, beforeAll } from "@jest/globals";
+import { beforeAll, describe, expect, it } from "@jest/globals";
 
-import { initWasmForTest, wasmModule } from "./wasm-helper";
 import type { CentralizedKeygenOutput } from "../keygen";
 import type {
+  AggregateInput,
+  SignatureOutput,
+  SignatureShareOutput,
+  SigningCommitmentOutput,
   SignRound1Input,
   SignRound2Input,
-  AggregateInput,
   VerifyInput,
-  SigningCommitmentOutput,
-  SignatureShareOutput,
-  SignatureOutput,
 } from "../sign";
+import { initWasmForTest, wasmModule } from "./wasm-helper";
 
 function toArray(obj: number[] | Record<number, number>): number[] {
   if (Array.isArray(obj)) {

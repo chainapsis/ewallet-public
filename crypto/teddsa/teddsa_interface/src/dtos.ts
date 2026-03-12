@@ -8,8 +8,7 @@ import {
   type Bytes69,
   type Bytes138,
 } from "@oko-wallet/bytes";
-
-import {
+import type {
   CentralizedKeygenOutput,
   CommitmentEntry,
   KeyPackageRaw,

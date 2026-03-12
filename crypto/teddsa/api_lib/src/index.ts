@@ -1,4 +1,10 @@
 import type {
+  ErrorCode,
+  OkoApiErrorResponse,
+  OkoApiResponse,
+} from "@oko-wallet/oko-types/api_response";
+import type { CommitRevealParams } from "@oko-wallet/oko-types/commit_reveal";
+import type {
   KeygenEd25519RequestBody,
   SignEd25519Round1Body,
   SignEd25519Round1Response,
@@ -6,12 +12,6 @@ import type {
   SignEd25519Round2Response,
 } from "@oko-wallet/oko-types/tss";
 import type { SignInResponseV2 } from "@oko-wallet/oko-types/user";
-import type {
-  ErrorCode,
-  OkoApiErrorResponse,
-  OkoApiResponse,
-} from "@oko-wallet/oko-types/api_response";
-import type { CommitRevealParams } from "@oko-wallet/oko-types/commit_reveal";
 
 interface MiddlewareErrorResponse {
   error: string;

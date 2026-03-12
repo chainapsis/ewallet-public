@@ -1,4 +1,4 @@
-import { Participant } from "./participant";
+import type { Participant } from "./participant";
 
 export interface TriplePub {
   big_a: string;

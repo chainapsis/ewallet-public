@@ -1,26 +1,14 @@
+import { reqSignStep1, reqSignStep2 } from "@oko-wallet/api-lib";
 import {
-  TECDSAClientState,
-  PresignStep2Request,
-  PresignStep3Request,
-  SignStep1Request,
-  SignStep2Request,
-} from "@oko-wallet/tecdsa-interface";
-import {
-  reqPresignStep1,
-  reqPresignStep2,
-  reqPresignStep3,
-  reqSignStep1,
-  reqSignStep2,
-  reqTriplesStep1,
-} from "@oko-wallet/api-lib";
-import {
-  runPresignClientStep1,
-  runPresignClientStep2,
-  runPresignClientStep3,
   runSignClientStep1,
   runSignClientStep2,
 } from "@oko-wallet/cait-sith-keplr-addon/src/client";
 import { runVerify } from "@oko-wallet/cait-sith-keplr-addon/src/server";
+import type {
+  SignStep1Request,
+  SignStep2Request,
+  TECDSAClientState,
+} from "@oko-wallet/tecdsa-interface";
 
 export async function e2eSignTest(clientState: TECDSAClientState) {
   const msg = "TestMsg";
@@ -75,7 +63,7 @@ export async function e2eSignTest(clientState: TECDSAClientState) {
 
   const isVerified = runVerify(
     fullSignature0,
-    clientState.keygenOutput0?.public_key!,
+    clientState.keygenOutput0!.public_key,
     msg,
   );
 

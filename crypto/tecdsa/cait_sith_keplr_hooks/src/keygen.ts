@@ -1,15 +1,3 @@
-import type {
-  ClientKeygenStepOutput,
-  KeygenStep1V2Request,
-  KeygenStep2V2Request,
-  KeygenStep3V2Request,
-  KeygenStep4V2Request,
-  KeygenStep5V2Request,
-  CentralizedKeygenOutput,
-  KeygenOutput,
-  TECDSAClientKeygenState,
-} from "@oko-wallet/tecdsa-interface";
-import { Participant } from "@oko-wallet/tecdsa-interface";
 import {
   reqKeygenStep1,
   reqKeygenStep2,
@@ -17,9 +5,21 @@ import {
   reqKeygenStep4,
   reqKeygenStep5,
 } from "@oko-wallet/api-lib";
+import { Bytes, type Bytes32 } from "@oko-wallet/bytes";
 import { wasmModule } from "@oko-wallet/cait-sith-keplr-wasm";
 import type { Result } from "@oko-wallet/stdlib-js";
-import { Bytes, type Bytes32 } from "@oko-wallet/bytes";
+import type {
+  CentralizedKeygenOutput,
+  ClientKeygenStepOutput,
+  KeygenOutput,
+  KeygenStep1V2Request,
+  KeygenStep2V2Request,
+  KeygenStep3V2Request,
+  KeygenStep4V2Request,
+  KeygenStep5V2Request,
+  TECDSAClientKeygenState,
+} from "@oko-wallet/tecdsa-interface";
+import { Participant } from "@oko-wallet/tecdsa-interface";
 
 import type { KeygenOutputBytes, KeygenResult } from "./types";
 
@@ -249,7 +249,7 @@ export async function runKeygenDecentralized(
   const keygenStep5Resp = await reqKeygenStep5(endpoint, keygenStep5Req);
   console.log("\n keygen step5 srv resp: %j", keygenStep5Resp);
 
-  if (keygenStep5Resp.public_key != keygenClientStep5Result.public_key) {
+  if (keygenStep5Resp.public_key !== keygenClientStep5Result.public_key) {
     throw new Error("public key is not same!");
   }
 

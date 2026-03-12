@@ -1,4 +1,4 @@
-import type { SignOutput, RcvdSignMessages } from "../sign";
+import type { RcvdSignMessages, SignOutput } from "../sign";
 
 export interface SignStep1Request {
   msg: string;

@@ -1,6 +1,6 @@
 import type { Result } from "@oko-wallet/stdlib-js";
 
-const HEX_STRING_REGEX = new RegExp("^[0-9a-fA-F]*$");
+const HEX_STRING_REGEX = /^[0-9a-fA-F]*$/;
 
 // Type definition for a fixed-length byte array
 // Only supports big endian.
@@ -73,7 +73,7 @@ export class Bytes<N extends number> {
       };
     }
 
-    let hexString = accept0x && hex.startsWith("0x") ? hex.slice(2) : hex;
+    const hexString = accept0x && hex.startsWith("0x") ? hex.slice(2) : hex;
 
     if (hexString.length <= 0 || bytesLength <= 0) {
       return {
@@ -219,7 +219,7 @@ export class Bytes<N extends number> {
    * @returns Hexadecimal string
    */
   toHex(include0x: boolean = false): string {
-    let hex = Array.from(this._bytes)
+    const hex = Array.from(this._bytes)
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
     return include0x ? "0x" + hex : hex;

@@ -1,11 +1,11 @@
 import { Participant } from "@oko-wallet/teddsa-interface";
 
 import {
+  extractKeyPackageSharesEd25519,
+  reconstructKeyPackageEd25519,
+  reconstructPublicKeyPackageEd25519,
   runKeygenCentralizedEd25519,
   runKeygenImportEd25519,
-  extractKeyPackageSharesEd25519,
-  reconstructPublicKeyPackageEd25519,
-  reconstructKeyPackageEd25519,
 } from "../server";
 
 export async function keygenCentralizedTest() {
