@@ -4,30 +4,21 @@ env:
   VERCEL_PRJ_ID__OKO_DEMO_WEB: ${{ secrets.VERCEL_PRJ_ID__OKO_DEMO_WEB }}
   VERCEL_PRJ_ID__CT_DASHBOARD: ${{ secrets.VERCEL_PRJ_ID__CT_DASHBOARD }}
   VERCEL_PRJ_ID__USER_DASHBOARD: ${{ secrets.VERCEL_PRJ_ID__USER_DASHBOARD }}
-  VERCEL_PRJ_ID__OKO_ATTACHED: ${{ secrets.VERCEL_PRJ_ID__OKO_ATTACHED }}
+  VERCEL_PRJ_ID__ADMIN_WEB: ${{ secrets.VERCEL_PRJ_ID__ADMIN_WEB }}
 on:
   workflow_dispatch:
     inputs:
       git_tag:
         description: >
-          "Git tag for deployment (format: develop/v0.0.1 or release/v0.0.1)"
+          "Git tag (format: <app>/develop/v0.0.1 or <app>/release/v0.0.1).
+          Apps: demo_web, user_dashboard, ct_dashboard, admin_web"
         required: true
         type: string
-      oko_app:
-        description: 'App'
-        required: true
-        type: choice
-        options:
-          - 'demo_web'
-          - 'user_dashboard'
-          - 'ct_dashboard'
 
 jobs:
   publish:
     runs-on: ubuntu-22.04
     timeout-minutes: 60
-    environment:
-      name: ${{ contains(inputs.git_tag, 'release/') && 'Production' || 'Preview' }}
     steps:
       - name: Checkout self repository
         uses: actions/checkout@v4
@@ -48,10 +39,15 @@ jobs:
         env:
           GIT_TAG: "${{ inputs.git_tag }}"
 
+      - name: Determine deploy environment
+        id: deploy_env
+        run: node ./internals/github/dist/determine_deploy_env.js
+        env:
+          GIT_TAG: "${{ inputs.git_tag }}"
+
       - name: Set Vercel Project Id
-        id: vercel_project
         run: |
-          case "${{ inputs.oko_app }}" in
+          case "${{ steps.deploy_env.outputs.vercel_app }}" in
             demo_web)
               echo "VERCEL_PROJECT_ID=$VERCEL_PRJ_ID__OKO_DEMO_WEB" >> \
                 "$GITHUB_ENV"
@@ -62,18 +58,18 @@ jobs:
               ;;
             user_dashboard)
               echo "VERCEL_PROJECT_ID=$VERCEL_PRJ_ID__USER_DASHBOARD" >> \
-               "$GITHUB_ENV"
+                "$GITHUB_ENV"
               ;;
-            oko_attached)
-              echo "VERCEL_PROJECT_ID=$VERCEL_PRJ_ID__OKO_ATTACHED" >> \
-              "$GITHUB_ENV"
+            admin_web)
+              echo "VERCEL_PROJECT_ID=$VERCEL_PRJ_ID__ADMIN_WEB" >> \
+                "$GITHUB_ENV"
               ;;
             *)
-              echo "Unknown app: ${{ inputs.oko_app }}"
+              echo "Unknown app: ${{ steps.deploy_env.outputs.vercel_app }}"
               exit 1
               ;;
           esac
-      
+
       - name: Enable Corepack
         run: corepack enable
 
@@ -89,20 +85,24 @@ jobs:
       - name: Build SDK packages
         run: yarn ci build_sdk
 
-      - name: Determine deploy environment
-        id: deploy_env
-        run: node ./internals/github/dist/determine_deploy_env.js
-        env:
-          GIT_TAG: "${{ inputs.git_tag }}"
-
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
 
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=${{ steps.deploy_env.outputs.vercel_env }} --token=${{ secrets.VERCEL_TOKEN }}
 
+      - name: Verify environment variables
+        run: |
+          ENV_FILE=".vercel/.env.${{ steps.deploy_env.outputs.vercel_env }}.local"
+          if [ ! -f "$ENV_FILE" ]; then
+            echo "::error::Environment file not found: $ENV_FILE"
+            echo "vercel pull may have failed to fetch environment variables."
+            exit 1
+          fi
+          echo "Environment file found: $ENV_FILE"
+
       - name: Build Project Artifacts
-        run: vercel build ${{ steps.deploy_env.outputs.vercel_build_flag }} --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --yes ${{ steps.deploy_env.outputs.vercel_build_flag }} --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy Project Artifacts to Vercel
         run: vercel deploy --prebuilt ${{ steps.deploy_env.outputs.vercel_deploy_flag }} --token=${{ secrets.VERCEL_TOKEN }}
