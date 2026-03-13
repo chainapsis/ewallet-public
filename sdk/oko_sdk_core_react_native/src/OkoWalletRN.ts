@@ -12,17 +12,26 @@ import {
 } from "@oko-wallet/oko-sdk-core";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { Result } from "@oko-wallet/stdlib-js";
-import * as SecureStore from "expo-secure-store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { getCosmosChainInfo, getEthChainInfo } from "./chain_info";
+import { callRpc } from "./methods/call_rpc";
 import type { LoginWalletInfo } from "./methods/login_url_codec";
 import { openModalRN } from "./methods/open_modal";
 import { type SignInOptions, signInRN } from "./methods/sign_in";
+import { signOutRN } from "./methods/sign_out";
 
 const WALLET_INFO_STORE_KEY = "oko_rn_wallet_info";
+const BROWSER_SESSION_MISSING_ERROR_TYPES = new Set([
+  "api_key_not_found",
+  "key_share_not_combined",
+  "wallet_not_found",
+  "jwt_not_found",
+]);
 
 interface PersistedWalletInfo extends OkoWalletState {
   publicKeyEd25519?: string | null;
+  sdkEndpoint?: string;
 }
 
 const DEFAULT_SDK_ENDPOINT = "https://proxy.oko.app";
@@ -92,6 +101,7 @@ export class OkoWalletRN implements OkoWalletInterface {
   }
 
   async sendMsgToIframe(msg: OkoWalletMsg): Promise<OkoWalletMsg> {
+    // Chain info queries are handled locally (no iframe needed)
     if (msg.msg_type === "get_eth_chain_info") {
       try {
         const chains = await getEthChainInfo(msg.payload.chain_id);
@@ -132,9 +142,21 @@ export class OkoWalletRN implements OkoWalletInterface {
       }
     }
 
-    throw new Error(
-      `[oko-rn] sendMsgToIframe: unsupported message type "${msg.msg_type}".`,
+    // All other messages are forwarded via generic RPC
+    const result = await callRpc(
+      this.sdkEndpoint,
+      msg.msg_type,
+      msg.payload,
+      this.apiKey,
+      this.redirectScheme,
+      this.state.publicKey,
     );
+
+    return {
+      target: "oko_sdk",
+      msg_type: `${msg.msg_type}_ack`,
+      payload: result,
+    } as OkoWalletMsg;
   }
 
   async openModal(
@@ -142,7 +164,25 @@ export class OkoWalletRN implements OkoWalletInterface {
   ): Promise<Result<OpenModalAckPayload, OpenModalError>> {
     await this.waitUntilInitialized;
 
-    return openModalRN(this.sdkEndpoint, msg, this.redirectScheme, this.apiKey);
+    const result = await openModalRN(
+      this.sdkEndpoint,
+      msg,
+      this.redirectScheme,
+      this.apiKey,
+      this.state.publicKey,
+    );
+
+    if (
+      result.success &&
+      result.data.type === "error" &&
+      BROWSER_SESSION_MISSING_ERROR_TYPES.has(result.data.error.type)
+    ) {
+      await this._resetPersistedSession(
+        `[oko-rn] clearing cached wallet info after browser session error: ${result.data.error.type}`,
+      );
+    }
+
+    return result;
   }
 
   async signIn(type: SignInType): Promise<void> {
@@ -184,22 +224,13 @@ export class OkoWalletRN implements OkoWalletInterface {
   async signOut(): Promise<void> {
     await this.waitUntilInitialized;
 
-    this.state = {
-      authType: null,
-      email: null,
-      publicKey: null,
-      name: null,
-    };
-    this._cachedPublicKeyEd25519 = null;
-    await this._clearPersistedWalletInfo();
+    try {
+      await signOutRN(this.sdkEndpoint, this.redirectScheme);
+    } catch (error) {
+      console.warn("[oko-rn] OS-browser sign-out failed:", error);
+    }
 
-    this.eventEmitter.emit({
-      type: "CORE__accountsChanged",
-      authType: null,
-      publicKey: null,
-      email: null,
-      name: null,
-    });
+    await this._resetPersistedSession();
   }
 
   async getPublicKey(): Promise<string | null> {
@@ -274,21 +305,23 @@ export class OkoWalletRN implements OkoWalletInterface {
       const data: PersistedWalletInfo = {
         ...this.state,
         publicKeyEd25519: this._cachedPublicKeyEd25519,
+        sdkEndpoint: this.sdkEndpoint,
       };
-      await SecureStore.setItemAsync(
-        WALLET_INFO_STORE_KEY,
-        JSON.stringify(data),
-      );
+      await AsyncStorage.setItem(WALLET_INFO_STORE_KEY, JSON.stringify(data));
     } catch {}
   }
 
   private async _restoreWalletInfo(): Promise<void> {
     try {
-      const raw = await SecureStore.getItemAsync(WALLET_INFO_STORE_KEY);
+      const raw = await AsyncStorage.getItem(WALLET_INFO_STORE_KEY);
       if (!raw) {
         return;
       }
       const parsed = JSON.parse(raw) as PersistedWalletInfo;
+      if (parsed.sdkEndpoint && parsed.sdkEndpoint !== this.sdkEndpoint) {
+        await this._clearPersistedWalletInfo();
+        return;
+      }
       if (parsed.publicKey) {
         this.state = {
           authType: parsed.authType,
@@ -303,7 +336,41 @@ export class OkoWalletRN implements OkoWalletInterface {
 
   private async _clearPersistedWalletInfo(): Promise<void> {
     try {
-      await SecureStore.deleteItemAsync(WALLET_INFO_STORE_KEY);
+      await AsyncStorage.removeItem(WALLET_INFO_STORE_KEY);
     } catch {}
+  }
+
+  private async _resetPersistedSession(logMessage?: string): Promise<void> {
+    if (logMessage) {
+      console.warn(logMessage);
+    }
+
+    const hadState =
+      this.state.authType !== null ||
+      this.state.email !== null ||
+      this.state.publicKey !== null ||
+      this.state.name !== null ||
+      this._cachedPublicKeyEd25519 !== null;
+
+    this.state = {
+      authType: null,
+      email: null,
+      publicKey: null,
+      name: null,
+    };
+    this._cachedPublicKeyEd25519 = null;
+    await this._clearPersistedWalletInfo();
+
+    if (!hadState) {
+      return;
+    }
+
+    this.eventEmitter.emit({
+      type: "CORE__accountsChanged",
+      authType: null,
+      publicKey: null,
+      email: null,
+      name: null,
+    });
   }
 }

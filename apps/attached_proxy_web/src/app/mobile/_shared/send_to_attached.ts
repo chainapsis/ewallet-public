@@ -1,3 +1,5 @@
+import { ATTACHED_ORIGIN } from "./build_iframe_src";
+
 /**
  * Send a message to the attached iframe via `MessageChannel` and wait for
  * the ack response. Returns a promise that resolves with the ack data.
@@ -18,8 +20,6 @@ export function sendToAttached<TAck>(
       resolve(event.data as TAck);
     };
 
-    iframe.contentWindow!.postMessage(msg, window.location.origin, [
-      channel.port2,
-    ]);
+    iframe.contentWindow!.postMessage(msg, ATTACHED_ORIGIN, [channel.port2]);
   });
 }

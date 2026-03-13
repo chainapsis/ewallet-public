@@ -5,43 +5,39 @@ import type {
 } from "@oko-wallet/oko-sdk-core";
 import type { Result } from "@oko-wallet/stdlib-js";
 
+import { buildRpcUrl, parseRpcResultFromCallbackUrl } from "../codec/rpc_codec";
 import {
   getServerRedirectScheme,
   openAuthSession,
 } from "../native/OkoAuthBrowser";
-import {
-  decodeSignResultFromCallbackUrl,
-  encodeSignRequestPayloadWithStats,
-  SIGN_URL_CODEC_VERSION,
-  SIGN_URL_REQUEST_PARAM,
-  SIGN_URL_VERSION_PARAM,
-} from "./sign_url_codec";
 
 export async function openModalRN(
   sdkEndpoint: string,
   msg: OkoWalletMsgOpenModal,
   redirectScheme: string,
   apiKey: string,
+  expectedPublicKey?: string | null,
 ): Promise<Result<OpenModalAckPayload, OpenModalError>> {
   try {
     const serverScheme = getServerRedirectScheme(redirectScheme);
-    const { encoded: encodedPayload, stats } =
-      encodeSignRequestPayloadWithStats(msg.payload);
-    const signUrl = buildSignUrl(
+    const { url: rpcUrl, stats } = buildRpcUrl(
       sdkEndpoint,
-      encodedPayload,
+      "open_modal",
+      msg.payload,
       apiKey,
       serverScheme,
+      expectedPublicKey,
     );
-    console.info("[oko-rn-sign-size] request", {
+    console.info("[oko-rn-rpc] open_modal request", {
       modalType: msg.payload.modal_type,
       modalId: msg.payload.modal_id,
       jsonBytes: stats.jsonBytes,
       compressedBytes: stats.compressedBytes,
       encodedChars: stats.encodedChars,
-      signUrlChars: signUrl.length,
+      rpcUrlChars: rpcUrl.length,
     });
-    const authResult = await openAuthSession(signUrl, redirectScheme);
+
+    const authResult = await openAuthSession(rpcUrl, redirectScheme);
 
     if (authResult.type === "cancel") {
       return {
@@ -50,7 +46,9 @@ export async function openModalRN(
       };
     }
 
-    const payload = decodeSignResultFromCallbackUrl(authResult.url);
+    const payload = parseRpcResultFromCallbackUrl<OpenModalAckPayload>(
+      authResult.url,
+    );
     return { success: true, data: payload };
   } catch (error) {
     return {
@@ -58,21 +56,4 @@ export async function openModalRN(
       err: { type: "unknown_error", error },
     };
   }
-}
-
-function buildSignUrl(
-  sdkEndpoint: string,
-  encodedPayload: string,
-  apiKey: string,
-  redirectScheme: string,
-): string {
-  const url = new URL("/mobile/sign", sdkEndpoint);
-  url.searchParams.set("host_origin", sdkEndpoint);
-  url.searchParams.set("api_key", apiKey);
-  url.searchParams.set("redirect_scheme", redirectScheme);
-  const hashParams = new URLSearchParams();
-  hashParams.set(SIGN_URL_VERSION_PARAM, SIGN_URL_CODEC_VERSION);
-  hashParams.set(SIGN_URL_REQUEST_PARAM, encodedPayload);
-  url.hash = hashParams.toString();
-  return url.toString();
 }

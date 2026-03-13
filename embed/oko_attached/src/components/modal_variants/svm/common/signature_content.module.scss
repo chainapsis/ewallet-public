@@ -66,3 +66,9 @@
   align-items: center;
   gap: 4px;
 }
+
+// ── Mobile app mode overrides ──
+
+:global(html[data-mobile]) .chainInfoRow {
+  row-gap: 8px;
+}

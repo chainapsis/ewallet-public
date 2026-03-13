@@ -1,20 +1,22 @@
-import type {
-  OpenModalAckPayload,
-  OpenModalPayload,
-} from "@oko-wallet/oko-sdk-core";
 import { Buffer } from "buffer";
 import pako from "pako";
 
-export const SIGN_URL_CODEC_VERSION = "1";
-export const SIGN_URL_REQUEST_PARAM = "p";
-export const SIGN_URL_RESULT_PARAM = "r";
-export const SIGN_URL_VERSION_PARAM = "v";
+/**
+ * Generic RPC codec for app ↔ attached_proxy_web communication.
+ *
+ * Handles types that can't be directly serialized to JSON:
+ * - bigint  → { __oko_t: "bigint", value: "123" }
+ * - Uint8Array → { __oko_t: "u8", value: "<base64url>" }
+ *
+ * Encoding pipeline: value → tag special types → JSON → pako deflate → base64url
+ */
 
-export interface SignUrlEncodingStats {
-  jsonBytes: number;
-  compressedBytes: number;
-  encodedChars: number;
-}
+export const RPC_CODEC_VERSION = "1";
+export const RPC_PAYLOAD_PARAM = "p";
+export const RPC_RESULT_PARAM = "r";
+export const RPC_VERSION_PARAM = "v";
+
+// ─── Tagged value types ───
 
 type EncodedValue =
   | null
@@ -25,14 +27,10 @@ type EncodedValue =
   | { [key: string]: EncodedValue };
 
 type TaggedValue =
-  | {
-      __oko_t: "bigint";
-      value: string;
-    }
-  | {
-      __oko_t: "u8";
-      value: string;
-    };
+  | { __oko_t: "bigint"; value: string }
+  | { __oko_t: "u8"; value: string };
+
+// ─── Base64url ───
 
 function encodeBase64Url(bytes: Uint8Array): string {
   return Buffer.from(bytes)
@@ -49,20 +47,15 @@ function decodeBase64Url(value: string): Uint8Array {
   return Uint8Array.from(Buffer.from(normalized + padding, "base64"));
 }
 
-function getUtf8ByteLength(value: string): number {
-  return Buffer.byteLength(value, "utf8");
-}
+// ─── Tag / untag ───
 
 function toEncodedValue(value: unknown): EncodedValue {
-  if (value === null) {
+  if (value === null || value === undefined) {
     return null;
   }
 
   if (typeof value === "bigint") {
-    const tagged: TaggedValue = {
-      __oko_t: "bigint",
-      value: value.toString(),
-    };
+    const tagged: TaggedValue = { __oko_t: "bigint", value: value.toString() };
     return tagged as EncodedValue;
   }
 
@@ -83,8 +76,6 @@ function toEncodedValue(value: unknown): EncodedValue {
     case "number":
     case "string":
       return value;
-    case "undefined":
-      return null;
     case "object": {
       const out: Record<string, EncodedValue> = {};
       for (const [key, nested] of Object.entries(value)) {
@@ -130,13 +121,21 @@ function fromEncodedValue(value: EncodedValue): unknown {
   return out;
 }
 
-function encodeValue<T>(value: T): string {
-  return encodeValueWithStats(value).encoded;
+// ─── Public API ───
+
+export interface RpcEncodingStats {
+  jsonBytes: number;
+  compressedBytes: number;
+  encodedChars: number;
 }
 
-function encodeValueWithStats<T>(value: T): {
+export function encodeRpcPayload<T>(value: T): string {
+  return encodeRpcPayloadWithStats(value).encoded;
+}
+
+export function encodeRpcPayloadWithStats<T>(value: T): {
   encoded: string;
-  stats: SignUrlEncodingStats;
+  stats: RpcEncodingStats;
 } {
   const normalized = toEncodedValue(value);
   const json = JSON.stringify(normalized);
@@ -145,64 +144,59 @@ function encodeValueWithStats<T>(value: T): {
   return {
     encoded,
     stats: {
-      jsonBytes: getUtf8ByteLength(json),
+      jsonBytes: Buffer.byteLength(json, "utf8"),
       compressedBytes: compressed.length,
       encodedChars: encoded.length,
     },
   };
 }
 
-function decodeValue<T>(encoded: string): T {
+export function decodeRpcPayload<T>(encoded: string): T {
   const compressed = decodeBase64Url(encoded);
   const json = Buffer.from(pako.inflateRaw(compressed)).toString("utf8");
   const parsed = JSON.parse(json) as EncodedValue;
   return fromEncodedValue(parsed) as T;
 }
 
-export function encodeSignRequestPayload(payload: OpenModalPayload): string {
-  return encodeValue(payload);
+// ─── URL helpers (RN SDK side) ───
+
+export function buildRpcUrl(
+  sdkEndpoint: string,
+  method: string,
+  payload: unknown,
+  apiKey: string,
+  redirectScheme: string,
+  expectedPublicKey?: string | null,
+): { url: string; stats: RpcEncodingStats } {
+  const url = new URL("/mobile/rpc", sdkEndpoint);
+  url.searchParams.set("method", method);
+  url.searchParams.set("host_origin", sdkEndpoint);
+  url.searchParams.set("api_key", apiKey);
+  url.searchParams.set("redirect_scheme", redirectScheme);
+  if (expectedPublicKey) {
+    url.searchParams.set("expected_pk", expectedPublicKey);
+  }
+
+  const { encoded, stats } = encodeRpcPayloadWithStats(payload);
+  const hashParams = new URLSearchParams();
+  hashParams.set(RPC_VERSION_PARAM, RPC_CODEC_VERSION);
+  hashParams.set(RPC_PAYLOAD_PARAM, encoded);
+  url.hash = hashParams.toString();
+
+  return { url: url.toString(), stats };
 }
 
-export function encodeSignRequestPayloadWithStats(payload: OpenModalPayload): {
-  encoded: string;
-  stats: SignUrlEncodingStats;
-} {
-  return encodeValueWithStats(payload);
-}
-
-export function decodeSignResultPayload(encoded: string): OpenModalAckPayload {
-  return decodeValue<OpenModalAckPayload>(encoded);
-}
-
-export function encodeSignResultPayloadWithStats(
-  payload: OpenModalAckPayload,
-): { encoded: string; stats: SignUrlEncodingStats } {
-  return encodeValueWithStats(payload);
-}
-
-export function decodeSignResultFromCallbackUrl(
-  callbackUrl: string,
-): OpenModalAckPayload {
+export function parseRpcResultFromCallbackUrl<T>(callbackUrl: string): T {
   const url = new URL(callbackUrl);
   const encoded =
-    url.searchParams.get(SIGN_URL_RESULT_PARAM) ??
+    url.searchParams.get(RPC_RESULT_PARAM) ??
     new URLSearchParams(
       url.hash.startsWith("#") ? url.hash.slice(1) : url.hash,
-    ).get(SIGN_URL_RESULT_PARAM);
+    ).get(RPC_RESULT_PARAM);
 
   if (!encoded) {
-    throw new Error("Missing signing result in callback URL");
+    throw new Error("Missing RPC result in callback URL");
   }
 
-  const version =
-    url.searchParams.get(SIGN_URL_VERSION_PARAM) ??
-    new URLSearchParams(
-      url.hash.startsWith("#") ? url.hash.slice(1) : url.hash,
-    ).get(SIGN_URL_VERSION_PARAM);
-
-  if (version && version !== SIGN_URL_CODEC_VERSION) {
-    throw new Error(`Unsupported signing result codec version: ${version}`);
-  }
-
-  return decodeSignResultPayload(encoded);
+  return decodeRpcPayload<T>(encoded);
 }

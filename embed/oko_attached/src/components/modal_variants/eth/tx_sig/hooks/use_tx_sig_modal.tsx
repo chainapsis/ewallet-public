@@ -17,7 +17,7 @@ import {
 } from "viem";
 
 import type { SponsoredFeeInfo } from "../sponsored_fee/types";
-import { DEMO_WEB_ORIGIN } from "@oko-wallet-attached/requests/endpoints";
+import { isDemoOrSandboxOrigin } from "@oko-wallet-attached/requests/endpoints";
 import { isSponsorshipSupportedChain } from "@oko-wallet-attached/requests/fee_sponsorship";
 import { useAppState } from "@oko-wallet-attached/store/app";
 import { useMemoryState } from "@oko-wallet-attached/store/memory";
@@ -205,7 +205,7 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
     getL1GasEstimationError !== null ||
     getFeeCurrencyBalanceError !== null;
 
-  const isDemo = !!hostOrigin && hostOrigin === DEMO_WEB_ORIGIN;
+  const isDemo = !!hostOrigin && isDemoOrSandboxOrigin(hostOrigin);
 
   // Fee sponsorship flow for Base chain
   const {
@@ -383,7 +383,7 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
 
     setHasSufficientBalanceForTotal(feeCurrencyBalance.amount >= totalValue);
     setHasSufficientBalanceForValue(feeCurrencyBalance.amount >= txValue);
-  }, [estimatedFee, feeCurrencyBalance, originalTransaction]);
+  }, [isDemo, estimatedFee, feeCurrencyBalance, originalTransaction]);
 
   // set the primary error message
   useEffect(() => {
@@ -481,6 +481,7 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
 
     setPrimaryErrorMessage("");
   }, [
+    isDemo,
     isSimulating,
     getNonceError,
     getFeeDataError,

@@ -2,29 +2,19 @@ import type { Metadata } from "next";
 
 import { buildIframeSrc } from "../_shared/build_iframe_src";
 import { ProxyThemeStyle } from "../_shared/theme_style";
-import { SignClient } from "./_client";
+import { SignOutClient } from "./_client";
 
 export const metadata: Metadata = {
   title: "Oko Wallet",
 };
 
-/**
- * OS-browser signing page.
- *
- * Opened via expo-web-browser's openAuthSessionAsync for every signing request.
- * Loads the attached iframe, reads a signing request from the URL,
- * displays the signing modal, and deep-links the result back to the app.
- */
-export default async function MobileSignPage({
+export default async function MobileSignOutPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const params = await searchParams;
-  const iframeSrc = buildIframeSrc(
-    params.host_origin ?? "",
-    params.api_key ?? "",
-  );
+  const iframeSrc = buildIframeSrc(params.host_origin ?? "", "");
 
   return (
     <html
@@ -42,11 +32,12 @@ export default async function MobileSignPage({
           width: "100%",
           height: "100%",
           display: "flex",
-          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
           fontFamily: "-apple-system, sans-serif",
         }}
       >
-        <SignClient
+        <SignOutClient
           iframeSrc={iframeSrc}
           redirectScheme={params.redirect_scheme ?? ""}
         />

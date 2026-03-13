@@ -10580,7 +10580,6 @@ __metadata:
     "@types/react": "npm:^19.2.7"
     "@types/react-dom": "npm:^19.2.3"
     buffer: "npm:^6.0.3"
-    dotenv: "npm:^16.4.5"
     next: "npm:^16.1.1"
     pako: "npm:^2.1.0"
     react: "npm:^19.2.1"
@@ -11433,9 +11432,9 @@ __metadata:
     tsx: "npm:^4.20.3"
     typescript: "npm:^5.8.3"
   peerDependencies:
+    "@react-native-async-storage/async-storage": ">=1.17"
     expo: ">=52"
     expo-linking: ">=7"
-    expo-secure-store: ">=14"
     expo-web-browser: ">=14"
     react: ">=18"
     react-native: ">=0.70"
@@ -14005,6 +14004,17 @@ __metadata:
   peerDependencies:
     react-native: ^0.0.0-0 || >=0.60 <1.0
   checksum: 10c0/cad2098ef84251f2ab8ebc07b750e585a20ac7ca07f26e5441e957a76f2b66f01d10ef5fbddb63d675431377b31beb5208548093e1eb17d262d2184b51133f4d
+  languageName: node
+  linkType: hard
+
+"@react-native-async-storage/async-storage@npm:^2.1.2":
+  version: 2.2.0
+  resolution: "@react-native-async-storage/async-storage@npm:2.2.0"
+  dependencies:
+    merge-options: "npm:^3.0.4"
+  peerDependencies:
+    react-native: ^0.0.0-0 || >=0.65 <1.0
+  checksum: 10c0/84900eba46a40225c4ac9bf5eb58885200dc1e789d873ecda46a2a213870cc7110536ed1fd7a74b873071f3603c093958fbd84c635d6f6d4f94bfbb616ffa0ef
   languageName: node
   linkType: hard
 
@@ -27126,15 +27136,6 @@ __metadata:
     react-server-dom-webpack:
       optional: true
   checksum: 10c0/7ab32e86a044b4472bb054b26353b1ba4bd00bd260d1d003afcc8ea043b68da6a6ef6239d2739e0d601a5014cd29cf1c0b679bcd29aa1d6c3af88cc28c766345
-  languageName: node
-  linkType: hard
-
-"expo-secure-store@npm:~55.0.8":
-  version: 55.0.8
-  resolution: "expo-secure-store@npm:55.0.8"
-  peerDependencies:
-    expo: "*"
-  checksum: 10c0/7c393e96f0793d8c1d7f24595183e8d1ba3b77665487376d2b7b6830526063be322837741116c1d824aeb1aaef89a5efb20c0c79293a0c385a32c38994d22a04
   languageName: node
   linkType: hard
 
@@ -41191,15 +41192,19 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "sandbox_react_native@workspace:sandbox/sandbox_react_native"
   dependencies:
+    "@cosmjs/proto-signing": "npm:0.36.1"
     "@expo/vector-icons": "npm:^15.1.1"
+    "@keplr-wallet/proto-types": "npm:^0.12.253"
     "@oko-wallet/oko-sdk-core": "workspace:*"
     "@oko-wallet/oko-sdk-core-react-native": "workspace:*"
     "@oko-wallet/oko-sdk-cosmos": "workspace:*"
     "@oko-wallet/oko-sdk-eth": "workspace:*"
     "@oko-wallet/oko-sdk-svm": "workspace:*"
+    "@react-native-async-storage/async-storage": "npm:^2.1.2"
     "@react-navigation/bottom-tabs": "npm:^7.10.1"
     "@react-navigation/elements": "npm:^2.9.10"
     "@react-navigation/native": "npm:^7.1.28"
+    "@solana/web3.js": "npm:^1.98.0"
     "@types/react": "npm:~19.2.10"
     buffer: "npm:^6.0.3"
     eslint: "npm:^9.25.0"
@@ -41211,7 +41216,6 @@ __metadata:
     expo-image: "npm:~55.0.6"
     expo-linking: "npm:~55.0.7"
     expo-router: "npm:~55.0.5"
-    expo-secure-store: "npm:~55.0.8"
     expo-splash-screen: "npm:~55.0.10"
     expo-status-bar: "npm:~55.0.4"
     expo-symbols: "npm:~55.0.5"
@@ -41228,6 +41232,7 @@ __metadata:
     react-native-web: "npm:~0.21.2"
     react-native-worklets: "npm:0.7.2"
     typescript: "npm:~5.9.2"
+    viem: "npm:^2.41.2"
   languageName: unknown
   linkType: soft
 

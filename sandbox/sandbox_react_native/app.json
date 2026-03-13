@@ -42,8 +42,7 @@
           }
         }
       ],
-      "@oko-wallet/oko-sdk-core-react-native",
-      "expo-secure-store"
+      "@oko-wallet/oko-sdk-core-react-native"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -5,7 +5,7 @@ import type {
 } from "@oko-wallet/oko-sdk-core";
 import { useEffect, useState } from "react";
 
-import { DEMO_WEB_ORIGIN } from "@oko-wallet-attached/requests/endpoints";
+import { isDemoOrSandboxOrigin } from "@oko-wallet-attached/requests/endpoints";
 import { useAppState } from "@oko-wallet-attached/store/app";
 import { useMemoryState } from "@oko-wallet-attached/store/memory";
 import { useSupportedEthChain } from "@oko-wallet-attached/web3/ethereum/hooks/use_supported_eth_chain";
@@ -31,7 +31,7 @@ export function useEIP712SigModal(args: UseEthereumSigModalArgs) {
   const [isLoading, setIsLoading] = useState(false);
   const [isApproveEnabled, setIsApproveEnabled] = useState(false);
 
-  const isDemo = !!hostOrigin && hostOrigin === DEMO_WEB_ORIGIN;
+  const isDemo = isDemoOrSandboxOrigin(hostOrigin);
 
   useEffect(() => {
     if (!isSupportChecked) {

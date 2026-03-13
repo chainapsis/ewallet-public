@@ -1,8 +1,12 @@
 "use client";
 
-import type { OkoWalletMsgOAuthInfoPassAck } from "@oko-wallet/oko-sdk-core";
+import type {
+  OkoWalletMsgGetWalletInfoAck,
+  OkoWalletMsgOAuthInfoPassAck,
+} from "@oko-wallet/oko-sdk-core";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { ATTACHED_ORIGIN } from "../../_shared/build_iframe_src";
 import {
   encodeLoginResultPayloadWithStats,
   LOGIN_URL_CODEC_VERSION,
@@ -80,7 +84,29 @@ export function LoginCompleteClient({
       return;
     }
 
+    void handlePostInit(payload);
+  });
+
+  async function handlePostInit(
+    payload: Parameters<Parameters<typeof useAttachedInit>[0]>[0],
+  ) {
+    if (!sessionDataRef.current) {
+      return;
+    }
+
     setStatus("Processing sign-in...");
+
+    // Clear any stale session before starting a new sign-in
+    if (payload?.data?.public_key) {
+      console.info(
+        "[oko-mobile-login-complete] clearing stale session before sign-in",
+      );
+      await sendToAttached(iframeRef.current!, {
+        target: "oko_attached",
+        msg_type: "sign_out",
+        payload: null,
+      });
+    }
 
     // Inject nonce for email login (generated in /mobile/login, not in attached)
     const emailNonce = sessionStorage.getItem("oko_mobile_email_nonce");
@@ -91,7 +117,7 @@ export function LoginCompleteClient({
           msg_type: "set_reauth_params",
           payload: { nonce: emailNonce },
         },
-        window.location.origin,
+        ATTACHED_ORIGIN,
       );
       sessionStorage.removeItem("oko_mobile_email_nonce");
     }
@@ -104,15 +130,16 @@ export function LoginCompleteClient({
     }).then((ack) => {
       console.log("[oko-mobile-login-complete] oauth_info_pass_ack:", ack);
     });
-  });
+  }
 
   const handleKeygenComplete = useCallback(async () => {
     try {
       setStatus("Finalizing...");
 
-      const walletData = readWalletFromLocalStorage();
+      // Request wallet info from attached iframe via postMessage (cross-origin)
+      const walletData = await fetchWalletInfoFromAttached(iframeRef.current!);
       if (!walletData) {
-        throw new Error("Wallet data not found in localStorage after keygen");
+        throw new Error("Wallet data not available from attached iframe");
       }
 
       const redirectScheme = sessionDataRef.current?.redirectScheme;
@@ -144,10 +171,8 @@ export function LoginCompleteClient({
 
   // Listen for oauth_sign_in_update (keygen complete — separate from init)
   useEffect(() => {
-    const origin = window.location.origin;
-
     function handleMessage(event: MessageEvent) {
-      if (event.origin !== origin) {
+      if (event.origin !== ATTACHED_ORIGIN) {
         return;
       }
       const msg = event.data;
@@ -192,36 +217,56 @@ export function LoginCompleteClient({
   );
 }
 
-function readWalletFromLocalStorage(): LoginWalletInfo | null {
+/**
+ * Fetch wallet info from the attached iframe via get_wallet_info postMessage.
+ * Replaces the previous same-origin localStorage read.
+ */
+async function fetchWalletInfoFromAttached(
+  iframe: HTMLIFrameElement,
+): Promise<LoginWalletInfo | null> {
   try {
-    const raw = localStorage.getItem("oko-wallet-app-2");
-    if (!raw) {
+    const ack = await sendToAttached<OkoWalletMsgGetWalletInfoAck>(iframe, {
+      target: "oko_attached",
+      msg_type: "get_wallet_info",
+      payload: null,
+    });
+
+    if (!ack.payload?.success || !ack.payload.data) {
       return null;
     }
-    const parsed = JSON.parse(raw);
-    const origin = window.location.origin;
-    const originState = parsed?.state?.perOrigin?.[origin];
-    const wallet = originState?.wallet;
-    if (!wallet) {
+
+    const { authType, publicKey, email, name } = ack.payload.data;
+    if (typeof authType !== "string" || typeof publicKey !== "string") {
       return null;
     }
-    if (
-      typeof wallet.authType !== "string" ||
-      typeof wallet.publicKey !== "string"
-    ) {
-      return null;
+
+    // Also request ed25519 public key
+    let publicKeyEd25519: string | null = null;
+    try {
+      const ed25519Ack = await sendToAttached<{
+        payload?: { success: boolean; data?: string };
+      }>(iframe, {
+        target: "oko_attached",
+        msg_type: "get_public_key_ed25519",
+        payload: null,
+      });
+      if (ed25519Ack.payload?.success && ed25519Ack.payload.data) {
+        publicKeyEd25519 = ed25519Ack.payload.data;
+      }
+    } catch {
+      // Ed25519 key may not exist — non-critical
     }
-    const walletInfo: LoginWalletInfo = {
-      authType: wallet.authType,
-      publicKey: wallet.publicKey,
-      publicKeyEd25519: originState?.ed25519Wallet?.publicKey || null,
-      email: wallet.email || null,
-      name: wallet.name || null,
+
+    return {
+      authType,
+      publicKey,
+      publicKeyEd25519,
+      email: email ?? null,
+      name: name ?? null,
     };
-    return walletInfo;
   } catch (e) {
     console.error(
-      "[oko-mobile-login-complete] failed to read wallet from localStorage:",
+      "[oko-mobile-login-complete] failed to get wallet info from attached:",
       e,
     );
     return null;

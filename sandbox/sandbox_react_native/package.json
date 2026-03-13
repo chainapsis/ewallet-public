@@ -12,15 +12,19 @@
     "eas-build-post-install": "cd ../.. && yarn ci build_pkgs && yarn ci build_sdk"
   },
   "dependencies": {
+    "@cosmjs/proto-signing": "0.36.1",
     "@expo/vector-icons": "^15.1.1",
+    "@keplr-wallet/proto-types": "^0.12.253",
     "@oko-wallet/oko-sdk-core": "workspace:*",
     "@oko-wallet/oko-sdk-core-react-native": "workspace:*",
     "@oko-wallet/oko-sdk-cosmos": "workspace:*",
     "@oko-wallet/oko-sdk-eth": "workspace:*",
     "@oko-wallet/oko-sdk-svm": "workspace:*",
+    "@react-native-async-storage/async-storage": "^2.1.2",
     "@react-navigation/bottom-tabs": "^7.10.1",
     "@react-navigation/elements": "^2.9.10",
     "@react-navigation/native": "^7.1.28",
+    "@solana/web3.js": "^1.98.0",
     "buffer": "^6.0.3",
     "expo": "~55.0.6",
     "expo-constants": "~55.0.7",
@@ -29,7 +33,6 @@
     "expo-image": "~55.0.6",
     "expo-linking": "~55.0.7",
     "expo-router": "~55.0.5",
-    "expo-secure-store": "~55.0.8",
     "expo-splash-screen": "~55.0.10",
     "expo-status-bar": "~55.0.4",
     "expo-symbols": "~55.0.5",
@@ -44,7 +47,8 @@
     "react-native-safe-area-context": "~5.6.2",
     "react-native-screens": "~4.23.0",
     "react-native-web": "~0.21.2",
-    "react-native-worklets": "0.7.2"
+    "react-native-worklets": "0.7.2",
+    "viem": "^2.41.2"
   },
   "devDependencies": {
     "@types/react": "~19.2.10",
