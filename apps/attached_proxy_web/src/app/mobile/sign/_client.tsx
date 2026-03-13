@@ -1,13 +1,14 @@
 "use client";
 
 import type {
-  MakeSigModalPayload,
   MakeSigModalErrorAckPayload,
-  OpenModalAckPayload,
+  MakeSigModalPayload,
   OkoWalletMsgOpenModalAck,
+  OpenModalAckPayload,
 } from "@oko-wallet/oko-sdk-core";
 import { useRef, useState } from "react";
 
+import { sendToAttached } from "../_shared/send_to_attached";
 import {
   decodeSignRequestPayload,
   encodeSignResultPayloadWithStats,
@@ -16,7 +17,6 @@ import {
   SIGN_URL_RESULT_PARAM,
   SIGN_URL_VERSION_PARAM,
 } from "../_shared/sign_url_codec";
-import { sendToAttached } from "../_shared/send_to_attached";
 import { useAttachedInit } from "../_shared/use_attached_init";
 
 function isMakeSigModalPayload(
