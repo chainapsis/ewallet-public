@@ -16,13 +16,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Enable Corepack
+        run: corepack enable
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+          cache: "yarn"
 
-      - name: Enable Corepack
-        run: corepack enable
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: wasm-build
 
       - name: Install dependencies
         run: yarn install --immutable
@@ -55,6 +66,11 @@ jobs:
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@nightly
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: cargo-check
 
       - name: Run cargo check
         run: cargo check --workspace

@@ -24,10 +24,14 @@ jobs:
           ref: ${{ inputs.git_tag }}
           token: ${{ secrets.GH_PAT }}
 
+      - name: Enable Corepack
+        run: corepack enable
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+          cache: "yarn"
 
       - name: Check Node version
         run: node -v
@@ -51,9 +55,6 @@ jobs:
         env:
           GIT_TAG: "${{ inputs.git_tag }}"
 
-      - name: Enable Corepack
-        run: corepack enable
-
       - name: Yarn version
         run: yarn -v
 
@@ -62,6 +63,13 @@ jobs:
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: wasm-build
 
       - name: Build CS packages
         run: yarn ci build_cs
