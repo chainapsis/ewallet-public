@@ -15,12 +15,12 @@ import {
 import type { Result } from "@oko-wallet/stdlib-js";
 import { useState } from "react";
 
-import type { FeeCalculated, FeeCalculated, InsufficientBalanceFee, InsufficientBalanceFee } from "./types";
+import type { FeeCalculated, InsufficientBalanceFee } from "./types";
 import { useCosmosSignFee } from "./use_sign_fee";
 import { makeCosmosSignature } from "@oko-wallet-attached/components/modal_variants/cosmos/cosmos_sig";
-import { DEMO_WEB_ORIGIN, isDemoOrSandboxOrigin } from "@oko-wallet-attached/requests/endpoints";
+import { isDemoOrSandboxOrigin } from "@oko-wallet-attached/requests/endpoints";
 import { useAppState } from "@oko-wallet-attached/store/app";
-import { useMemoryState, useMemoryState } from "@oko-wallet-attached/store/memory";
+import { useMemoryState } from "@oko-wallet-attached/store/memory";
 import { normalizeIBCDenom } from "@oko-wallet-attached/web3/cosmos/normalize_denom";
 import {
   extractMsgsFromSignDoc,

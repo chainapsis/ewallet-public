@@ -35,7 +35,9 @@ export function OAuthCallbackRedirect() {
       stateStr = searchParams.get("state");
     }
 
-    if (!stateStr) return;
+    if (!stateStr) {
+      return;
+    }
 
     // Parse state — JSON (Google, Auth0) or base64+JSON (X, Discord, GitHub)
     let state: Record<string, string> = {};

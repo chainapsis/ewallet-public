@@ -90,7 +90,9 @@ export function LoginCompleteClient({
   async function handlePostInit(
     payload: Parameters<Parameters<typeof useAttachedInit>[0]>[0],
   ) {
-    if (!sessionDataRef.current) return;
+    if (!sessionDataRef.current) {
+      return;
+    }
 
     setStatus("Processing sign-in...");
 

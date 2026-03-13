@@ -6,14 +6,15 @@ import { CoinPretty } from "@keplr-wallet/unit";
 import type { ChainInfoForAttachedModal } from "@oko-wallet/oko-sdk-core";
 import { useQuery } from "@tanstack/react-query";
 
-import type { InsufficientBalanceFee, InsufficientBalanceFee } from "./types";
-import { useGetParsedMsgs, useGetParsedMsgs } from "@oko-wallet-attached/components/modal_variants/cosmos/tx_sig/use_parse_msgs";
+import type { InsufficientBalanceFee } from "./types";
+import { useGetParsedMsgs } from "@oko-wallet-attached/components/modal_variants/cosmos/tx_sig/use_parse_msgs";
 import {
   getAvailableSelectableFees,
   getSelectableFees,
   sortSelectableFees,
 } from "@oko-wallet-attached/requests/cosmos_selectable_fees";
 import { isDemoOrSandboxOrigin } from "@oko-wallet-attached/requests/endpoints";
+import { useAssetMetaStore } from "@oko-wallet-attached/store/asset_meta";
 
 export interface UseCosmosSignFeeArgs {
   preferNoSetFee: boolean;

@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 
-import { ATTACHED_ORIGIN } from "../_shared/build_iframe_src";
 import {
   buildRpcCallbackUrl,
   decodeRpcPayload,

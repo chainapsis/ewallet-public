@@ -22,7 +22,7 @@ import { handleSetOAuthNonce } from "./set_oauth_nonce";
 import { handleSignOut } from "./sign_out";
 import { OKO_SDK_TARGET } from "./target";
 import type { MsgEventContext } from "./types";
-import { useAppState, useAppState } from "@oko-wallet-attached/store/app";
+import { useAppState } from "@oko-wallet-attached/store/app";
 import { useMemoryState } from "@oko-wallet-attached/store/memory";
 
 // NOTE: Some types are used only within certain apps, such as "user_dashboard"

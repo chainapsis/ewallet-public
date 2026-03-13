@@ -16,7 +16,9 @@ import {
   type RpcTransactionRequest,
 } from "viem";
 
+import type { SponsoredFeeInfo } from "../sponsored_fee/types";
 import { isDemoOrSandboxOrigin } from "@oko-wallet-attached/requests/endpoints";
+import { isSponsorshipSupportedChain } from "@oko-wallet-attached/requests/fee_sponsorship";
 import { useAppState } from "@oko-wallet-attached/store/app";
 import { useMemoryState } from "@oko-wallet-attached/store/memory";
 import {
@@ -26,20 +28,14 @@ import {
 import { useSupportedEthChain } from "@oko-wallet-attached/web3/ethereum/hooks/use_supported_eth_chain";
 import {
   useBaseSponsorshipFlow,
-  useBaseSponsorshipFlow,
-  useGetFeeCurrencyBalance,
   useGetFeeCurrencyBalance,
   useGetFeeData,
-  useGetFeeData,
-  useGetGasEstimation,
   useGetGasEstimation,
   useGetL1GasEstimation,
-  useGetL1GasEstimation,
-  useGetNonce,
   useGetNonce,
 } from "@oko-wallet-attached/web3/ethereum/queries";
-import { DEFAULT_GAS_ESTIMATION, DEFAULT_GAS_ESTIMATION } from "@oko-wallet-attached/web3/ethereum/queries/types";
-import { makeEthereumTxSignature, makeEthereumTxSignature } from "@oko-wallet-attached/web3/ethereum/sig";
+import { DEFAULT_GAS_ESTIMATION } from "@oko-wallet-attached/web3/ethereum/queries/types";
+import { makeEthereumTxSignature } from "@oko-wallet-attached/web3/ethereum/sig";
 
 export interface UseEthereumSigModalArgs {
   modalId: string;

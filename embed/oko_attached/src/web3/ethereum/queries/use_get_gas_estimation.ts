@@ -16,6 +16,7 @@ import {
   type StructuredRpcError,
 } from "./types";
 import { isDemoOrSandboxOrigin } from "@oko-wallet-attached/requests/endpoints";
+import { classifyViemErrorDetailed } from "@oko-wallet-attached/web3/ethereum/error";
 
 export interface UseGetGasEstimationProps {
   simulationKey: string;

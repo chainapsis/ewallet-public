@@ -8,6 +8,7 @@ import { useState } from "react";
 
 import { makeCosmosSignature } from "../cosmos_sig";
 import { isDemoOrSandboxOrigin } from "@oko-wallet-attached/requests/endpoints";
+import { useAppState } from "@oko-wallet-attached/store/app";
 import { useMemoryState } from "@oko-wallet-attached/store/memory";
 
 export function useArbitrarySigModal(args: UseCosmosArbitrarySigModalArgs) {

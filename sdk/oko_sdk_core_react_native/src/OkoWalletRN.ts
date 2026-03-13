@@ -1,4 +1,4 @@
-import type { OpenModalError, OpenModalError, SignInType, SignInType } from "@oko-wallet/oko-sdk-core";
+import type { OpenModalError, SignInType } from "@oko-wallet/oko-sdk-core";
 import {
   EventEmitter3,
   type OkoWalletCoreEvent2,
@@ -10,6 +10,8 @@ import {
   type OpenModalAckPayload,
   type WalletInfo,
 } from "@oko-wallet/oko-sdk-core";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
+import type { Result } from "@oko-wallet/stdlib-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { getCosmosChainInfo, getEthChainInfo } from "./chain_info";
@@ -312,7 +314,9 @@ export class OkoWalletRN implements OkoWalletInterface {
   private async _restoreWalletInfo(): Promise<void> {
     try {
       const raw = await AsyncStorage.getItem(WALLET_INFO_STORE_KEY);
-      if (!raw) return;
+      if (!raw) {
+        return;
+      }
       const parsed = JSON.parse(raw) as PersistedWalletInfo;
       if (parsed.sdkEndpoint && parsed.sdkEndpoint !== this.sdkEndpoint) {
         await this._clearPersistedWalletInfo();
