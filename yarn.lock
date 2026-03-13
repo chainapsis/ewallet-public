@@ -10575,6 +10575,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@oko-wallet/attached-proxy-web@workspace:apps/attached_proxy_web"
   dependencies:
+    "@oko-wallet/dotenv": "npm:^0.0.2-alpha.29"
     "@types/node": "npm:^24.10.1"
     "@types/react": "npm:^19.2.7"
     "@types/react-dom": "npm:^19.2.3"
@@ -10583,7 +10584,9 @@ __metadata:
     pako: "npm:^2.1.0"
     react: "npm:^19.2.1"
     react-dom: "npm:^19.2.1"
+    tsx: "npm:^4.20.3"
     typescript: "npm:^5.8.3"
+    zod: "npm:^4.1.12"
   languageName: unknown
   linkType: soft
 

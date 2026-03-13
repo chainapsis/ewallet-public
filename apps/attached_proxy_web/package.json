@@ -4,9 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev",
+    "create_env": "tsx src/bin/create_env.ts",
+    "dev": "tsx src/bin/launch.ts",
     "build": "next build",
-    "start": "next start",
+    "start": "NODE_ENV=production tsx src/bin/launch.ts",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
   },
@@ -18,9 +19,12 @@
     "react-dom": "^19.2.1"
   },
   "devDependencies": {
+    "@oko-wallet/dotenv": "^0.0.2-alpha.29",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "typescript": "^5.8.3"
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3",
+    "zod": "^4.1.12"
   }
 }
