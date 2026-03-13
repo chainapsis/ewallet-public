@@ -13,12 +13,14 @@ interface MakeSignatureModalMetadataContentProps {
   origin: string;
   chainInfo: ChainInfoForAttachedModal;
   signer: string;
+  initialViewType?: "View Address" | "Login Info" | null;
 }
 
 export const MetadataContent: FC<MakeSignatureModalMetadataContentProps> = ({
   origin,
   chainInfo,
   signer,
+  initialViewType = null,
 }) => {
   const faviconUrl = getFaviconUrl(origin);
   const isMobile = useMobileMode();
@@ -63,7 +65,7 @@ export const MetadataContent: FC<MakeSignatureModalMetadataContentProps> = ({
         <SignerAddressOrEmail
           signer={signer}
           origin={origin}
-          initialViewType={null}
+          initialViewType={initialViewType}
         />
       </div>
     </div>

@@ -23,6 +23,7 @@ export const CosmosTxSignatureContent: FC<CosmosTxSignatureContentProps> = ({
         origin={payload.origin}
         chainInfo={payload.chain_info}
         signer={payload.signer}
+        initialViewType="Login Info"
       />
       <Spacing height={28} />
       <CosmosTxSummary
