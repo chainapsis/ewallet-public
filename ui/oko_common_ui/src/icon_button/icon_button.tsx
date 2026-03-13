@@ -1,5 +1,6 @@
-import React, { type FC, type ReactNode } from "react";
 import cn from "classnames";
+import type React from "react";
+import type { FC, ReactNode } from "react";
 
 import styles from "./icon_button.module.scss";
 

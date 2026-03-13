@@ -1,4 +1,4 @@
-import { type FC } from "react";
+import type { FC } from "react";
 
 export const XIcon: FC<TelegramIconProps> = ({ size = 24 }) => {
   return (

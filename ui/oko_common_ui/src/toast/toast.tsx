@@ -1,14 +1,14 @@
 "use client";
 
-import { type FC, type MouseEvent } from "react";
+import type { FC, MouseEvent } from "react";
 
+import styles from "./toast.module.scss";
 import { CheckCircleOutlinedIcon } from "@oko-wallet-common-ui/icons/check_circle_outlined";
 import { ErrorIcon } from "@oko-wallet-common-ui/icons/error_icon";
-import { WarningIcon } from "@oko-wallet-common-ui/icons/warning_icon";
 import { InfoCircleIcon } from "@oko-wallet-common-ui/icons/info_circle";
-import { Typography } from "@oko-wallet-common-ui/typography/typography";
+import { WarningIcon } from "@oko-wallet-common-ui/icons/warning_icon";
 import { XCloseIcon } from "@oko-wallet-common-ui/icons/x_close";
-import styles from "./toast.module.scss";
+import { Typography } from "@oko-wallet-common-ui/typography/typography";
 
 export type ToastVariant = "success" | "error" | "warning" | "info" | "confirm";
 export type ToastItemProps = {

@@ -1,11 +1,8 @@
-import { type FC } from "react";
+import type { FC } from "react";
 
 import { s3BucketURL } from "./paths";
 
-export const RialoIcon: FC<RialoIconProps> = ({
-  width = 16,
-  height = 16,
-}) => {
+export const RialoIcon: FC<RialoIconProps> = ({ width = 16, height = 16 }) => {
   return (
     <img
       src={`${s3BucketURL}/rialo.png`}

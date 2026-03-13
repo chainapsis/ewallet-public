@@ -1,5 +1,5 @@
-import React from "react";
 import cn from "classnames";
+import type React from "react";
 
 import styles from "./button.module.scss";
 import { LoadingIcon } from "@oko-wallet-common-ui/icons/loading";

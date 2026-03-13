@@ -1,15 +1,15 @@
+import cn from "classnames";
 import {
+  cloneElement,
   createContext,
-  useContext,
-  useState,
-  useRef,
-  useEffect,
   type FC,
   isValidElement,
-  cloneElement,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
 } from "react";
 import { createPortal } from "react-dom";
-import cn from "classnames";
 
 import styles from "./dropdown.module.scss";
 
@@ -295,6 +295,7 @@ const DropdownItem: FC<DropdownItemProps> = ({
 
   return (
     <button
+      type="button"
       className={cn(styles.item, className)}
       onClick={handleClick}
       onKeyDown={handleKeyDown}

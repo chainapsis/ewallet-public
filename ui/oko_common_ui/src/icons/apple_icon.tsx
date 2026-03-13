@@ -1,4 +1,4 @@
-import { type FC } from "react";
+import type { FC } from "react";
 
 export const AppleIcon: FC<AppleIconProps> = ({ size = 20 }) => {
   return (
