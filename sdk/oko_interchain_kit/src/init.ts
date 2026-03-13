@@ -1,5 +1,5 @@
-import { OkoCosmosWallet } from "@oko-wallet/oko-sdk-cosmos";
 import type { OkoCosmosWalletInterface } from "@oko-wallet/oko-sdk-cosmos";
+import { OkoCosmosWallet } from "@oko-wallet/oko-sdk-cosmos";
 
 import type { OkoWalletOptions } from "./types";
 
