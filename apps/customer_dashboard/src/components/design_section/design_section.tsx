@@ -92,7 +92,7 @@ export const DesignSection: FC = () => {
       } else {
         setThemeError(result.msg ?? "Failed to update theme.");
       }
-    } catch (err) {
+    } catch (_err) {
       setThemeError("An error occurred while updating the theme.");
     } finally {
       setIsSavingTheme(false);

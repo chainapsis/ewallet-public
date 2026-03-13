@@ -20,7 +20,7 @@ export const Providers: FC<PropsWithChildren> = ({ children }) => {
   return (
     <QueryClientProvider client={queryClient}>
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <>{children}</>
+        {children}
       </HydrationBoundary>
     </QueryClientProvider>
   );

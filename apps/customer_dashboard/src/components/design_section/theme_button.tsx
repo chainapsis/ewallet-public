@@ -1,7 +1,7 @@
-import type { FC } from "react";
 import { CheckIcon } from "@oko-wallet/oko-common-ui/icons/check_icon";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import type { CustomerTheme } from "@oko-wallet/oko-types/customers";
+import type { FC } from "react";
 
 import styles from "./theme_button.module.scss";
 
@@ -95,6 +95,7 @@ export const ThemeButton: FC<ThemeButtonProps> = ({
   return (
     <div className={styles.buttonContainer}>
       <button
+        type="button"
         className={`${styles.button} ${active ? styles.active : ""}`}
         onClick={onClick}
       >

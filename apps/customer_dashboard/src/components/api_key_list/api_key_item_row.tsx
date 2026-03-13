@@ -46,49 +46,50 @@ export const APIKeyItemRow: FC<APIKeyItemRowProps> = ({
     <TableRow key={apiKey}>
       <TableCell>
         <div className={styles.apiKeyCellInner}>
-        <Badge
-          label={status.charAt(0).toUpperCase() + status.slice(1)}
-          color={status === "active" ? "success" : "error"}
-          size="sm"
-          type="pill"
-        />
-        <Spacing width={8} />
+          <Badge
+            label={status.charAt(0).toUpperCase() + status.slice(1)}
+            color={status === "active" ? "success" : "error"}
+            size="sm"
+            type="pill"
+          />
+          <Spacing width={8} />
 
-        <Typography
-          tagType="span"
-          size="md"
-          weight="medium"
-          color="secondary"
-          className={styles.apiKey}
-        >
-          {isVisible
-            ? apiKey
-            : apiKey.slice(0, apiKeyHalfLength) + "•".repeat(apiKeyHalfLength)}
-        </Typography>
+          <Typography
+            tagType="span"
+            size="md"
+            weight="medium"
+            color="secondary"
+            className={styles.apiKey}
+          >
+            {isVisible
+              ? apiKey
+              : apiKey.slice(0, apiKeyHalfLength) +
+                "•".repeat(apiKeyHalfLength)}
+          </Typography>
 
-        <Spacing width={8} />
+          <Spacing width={8} />
 
-        <button
-          type="button"
-          onClick={() => setIsVisible(!isVisible)}
-          className={styles.buttonIcon}
-        >
-          {isVisible ? (
-            <EyeOffIcon color="var(--fg-tertiary)" size={20} />
-          ) : (
-            <EyeIcon color="var(--fg-tertiary)" size={20} />
-          )}
-        </button>
+          <button
+            type="button"
+            onClick={() => setIsVisible(!isVisible)}
+            className={styles.buttonIcon}
+          >
+            {isVisible ? (
+              <EyeOffIcon color="var(--fg-tertiary)" size={20} />
+            ) : (
+              <EyeIcon color="var(--fg-tertiary)" size={20} />
+            )}
+          </button>
 
-        <Spacing width={4} />
+          <Spacing width={4} />
 
-        <button
-          type="button"
-          onClick={handleCopy}
-          className={styles.buttonIcon}
-        >
-          <CopyOutlinedIcon color="var(--fg-tertiary)" size={20} />
-        </button>
+          <button
+            type="button"
+            onClick={handleCopy}
+            className={styles.buttonIcon}
+          >
+            <CopyOutlinedIcon color="var(--fg-tertiary)" size={20} />
+          </button>
         </div>
       </TableCell>
 
