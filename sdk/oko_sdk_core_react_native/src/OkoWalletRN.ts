@@ -167,6 +167,7 @@ export class OkoWalletRN implements OkoWalletInterface {
       msg,
       this.redirectScheme,
       this.apiKey,
+      this.state.publicKey,
     );
 
     if (
