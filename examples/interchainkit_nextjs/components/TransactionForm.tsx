@@ -1,17 +1,17 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import Link from "next/link";
-import { SigningStargateClient, StargateClient } from "@cosmjs/stargate";
 import { fromBech32 } from "@cosmjs/encoding";
+import type { OfflineSigner } from "@cosmjs/proto-signing";
+import { SigningStargateClient, StargateClient } from "@cosmjs/stargate";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useChain } from "@interchain-kit/react";
+import { useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
 
 import Button from "./Button";
-import { useChain } from "@interchain-kit/react";
-import { OfflineSigner } from "@cosmjs/proto-signing";
 
 interface TransactionFormProps {
   className?: string;
@@ -131,7 +131,7 @@ export default function TransactionForm({ className }: TransactionFormProps) {
             exact: true,
           });
         }
-      } catch (err) {
+      } catch (_err) {
         // keep polling
       }
     }, 2000);

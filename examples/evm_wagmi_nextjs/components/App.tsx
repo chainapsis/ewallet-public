@@ -2,8 +2,8 @@
 
 import { useAccount } from "wagmi";
 
-import LoginView from "./LoginView";
 import ConnectedView from "./ConnectedView";
+import LoginView from "./LoginView";
 
 export default function App() {
   const { isConnected } = useAccount();

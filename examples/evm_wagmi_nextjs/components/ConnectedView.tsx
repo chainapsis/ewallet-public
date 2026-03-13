@@ -1,7 +1,7 @@
 "use client";
 
-import TransactionForm from "./TransactionForm";
 import ConnectWalletButton from "./ConnectWalletButton";
+import TransactionForm from "./TransactionForm";
 
 export default function ConnectedView() {
   return (

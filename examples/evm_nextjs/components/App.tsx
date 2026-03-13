@@ -1,8 +1,8 @@
 "use client";
 
-import LoginView from "./LoginView";
-import ConnectedView from "./ConnectedView";
 import useOkoEvm from "@/hooks/useOkoEvm";
+import ConnectedView from "./ConnectedView";
+import LoginView from "./LoginView";
 
 export default function App() {
   const { isSignedIn } = useOkoEvm();

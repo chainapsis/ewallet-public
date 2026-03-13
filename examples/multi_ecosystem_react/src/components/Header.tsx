@@ -11,12 +11,13 @@ function Header() {
       </div>
       <div className="flex gap-2">
         <button
+          type="button"
           onClick={signIn}
           disabled={!isReady || isSigningIn || isSignedIn}
         >
           Sign In
         </button>
-        <button onClick={signOut} disabled={!isSignedIn}>
+        <button type="button" onClick={signOut} disabled={!isSignedIn}>
           Sign Out
         </button>
       </div>
