@@ -1,4 +1,5 @@
-const ATTACHED_ORIGIN = "https://attached.oko.app";
+const ATTACHED_ORIGIN =
+  process.env.NEXT_PUBLIC_ATTACHED_ORIGIN ?? "https://attached.oko.app";
 
 /**
  * Build the iframe src for the attached wallet.
