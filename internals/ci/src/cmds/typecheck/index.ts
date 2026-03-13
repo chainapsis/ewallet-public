@@ -26,6 +26,7 @@ export async function typeCheck(..._args: any[]) {
     paths.oko_admin_web,
     paths.ct_dashboard_web,
     paths.user_dashboard,
+    paths.attached_proxy_web,
   ];
 
   // NOTE: Currently not used
