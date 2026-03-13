@@ -322,7 +322,8 @@ describe("Ed25519 Signing", () => {
     });
 
     it("should fail with invalid session_id", async () => {
-      const { clientKeygenOutput } = await setUpEd25519Wallet(pool);
+      const { walletId, clientKeygenOutput } =
+        await setUpEd25519Wallet(pool);
       const _testMessage = new TextEncoder().encode("Test message");
 
       const clientRound1 = clientRunSignRound1Ed25519(

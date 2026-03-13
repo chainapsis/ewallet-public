@@ -54,4 +54,3 @@ async function main() {
     console.log("  vercel_deploy_flag=%s", vercelDeployFlag);
 }
 main().then();
-export {};
