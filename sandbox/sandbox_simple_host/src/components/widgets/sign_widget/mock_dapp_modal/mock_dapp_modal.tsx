@@ -1,8 +1,8 @@
 import type { FC } from "react";
 import { createPortal } from "react-dom";
 
-import styles from "./mock_dapp_modal.module.scss";
 import { SignWidgetContent, type SignWidgetProps } from "../sign_widget";
+import styles from "./mock_dapp_modal.module.scss";
 
 export interface MockDappModalProps {
   isOpen: boolean;
@@ -15,7 +15,9 @@ export const MockDappModal: FC<MockDappModalProps> = ({
   onClose,
   signWidgetProps,
 }) => {
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   return createPortal(
     <>

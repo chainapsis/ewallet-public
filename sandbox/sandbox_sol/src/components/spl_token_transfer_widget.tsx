@@ -50,7 +50,7 @@ export function SplTokenTransferWidget() {
       }
 
       const tokenAmount = BigInt(
-        Math.floor(parseFloat(amount) * Math.pow(10, selectedToken.decimals)),
+        Math.floor(parseFloat(amount) * 10 ** selectedToken.decimals),
       );
       if (tokenAmount <= BigInt(0)) {
         throw new Error("Amount must be greater than 0");
@@ -128,7 +128,7 @@ export function SplTokenTransferWidget() {
       }
 
       const tokenAmount = BigInt(
-        Math.floor(parseFloat(amount) * Math.pow(10, selectedToken.decimals)),
+        Math.floor(parseFloat(amount) * 10 ** selectedToken.decimals),
       );
       if (tokenAmount <= BigInt(0)) {
         throw new Error("Amount must be greater than 0");

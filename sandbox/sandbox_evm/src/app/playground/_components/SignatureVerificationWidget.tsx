@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import {
-  recoverMessageAddress,
-  recoverTypedDataAddress,
-  recoverTransactionAddress,
-  type TransactionSerialized,
   createPublicClient,
   http,
+  recoverMessageAddress,
+  recoverTransactionAddress,
+  recoverTypedDataAddress,
+  type TransactionSerialized,
 } from "viem";
 import { mainnet } from "viem/chains";
 import { parseSiweMessage } from "viem/siwe";
@@ -86,12 +86,17 @@ function PersonalSignVerifier() {
 
       <div className="flex gap-2">
         <button
+          type="button"
           onClick={verifyPersonalSignature}
           className="btn btn-primary flex-1"
         >
           Verify Signature
         </button>
-        <button onClick={resetPersonalVerification} className="btn btn-ghost">
+        <button
+          type="button"
+          onClick={resetPersonalVerification}
+          className="btn btn-ghost"
+        >
           Reset
         </button>
       </div>
@@ -204,12 +209,17 @@ function SiweVerifier() {
 
       <div className="flex gap-2">
         <button
+          type="button"
           onClick={verifySiweSignature}
           className="btn btn-warning flex-1"
         >
           Verify SIWE
         </button>
-        <button onClick={resetSiweVerification} className="btn btn-ghost">
+        <button
+          type="button"
+          onClick={resetSiweVerification}
+          className="btn btn-ghost"
+        >
           Reset
         </button>
       </div>
@@ -269,7 +279,9 @@ function TypedDataVerifier() {
   const parsedTypes = (() => {
     try {
       const t = JSON.parse(typedDataTypes);
-      if (t && typeof t === "object") return t as Record<string, any>;
+      if (t && typeof t === "object") {
+        return t as Record<string, any>;
+      }
     } catch {}
     return {} as Record<string, any>;
   })();
@@ -476,12 +488,17 @@ function TypedDataVerifier() {
 
       <div className="flex gap-2">
         <button
+          type="button"
           onClick={verifyTypedDataSignature}
           className="btn btn-success flex-1"
         >
           Verify Permit
         </button>
-        <button onClick={resetTypedDataVerification} className="btn btn-ghost">
+        <button
+          type="button"
+          onClick={resetTypedDataVerification}
+          className="btn btn-ghost"
+        >
           Reset
         </button>
       </div>
@@ -559,10 +576,18 @@ function TransactionVerifier() {
       </p>
 
       <div className="flex gap-2">
-        <button onClick={verifyTransaction} className="btn btn-info flex-1">
+        <button
+          type="button"
+          onClick={verifyTransaction}
+          className="btn btn-info flex-1"
+        >
           Verify Transaction
         </button>
-        <button onClick={resetTxVerification} className="btn btn-ghost">
+        <button
+          type="button"
+          onClick={resetTxVerification}
+          className="btn btn-ghost"
+        >
           Reset
         </button>
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { AvatarComponent } from "@rainbow-me/rainbowkit";
+import type { AvatarComponent } from "@rainbow-me/rainbowkit";
 import { blo } from "blo";
 
 // Custom Avatar for RainbowKit

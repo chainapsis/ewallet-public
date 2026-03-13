@@ -1,7 +1,7 @@
 "use client";
 
+import { type Address as AddressType, getAddress, isAddress } from "viem";
 import { normalize } from "viem/ens";
-import { Address as AddressType, getAddress, isAddress } from "viem";
 import { useEnsAvatar, useEnsName } from "wagmi";
 
 import { AddressCopyIcon } from "./AddressCopyIcon";
@@ -135,8 +135,8 @@ export const Address = ({
         <div
           className="shrink-0 skeleton rounded-full"
           style={{
-            width: (blockieSizeMap[blockieSize] * 24) / blockieSizeMap["base"],
-            height: (blockieSizeMap[blockieSize] * 24) / blockieSizeMap["base"],
+            width: (blockieSizeMap[blockieSize] * 24) / blockieSizeMap.base,
+            height: (blockieSizeMap[blockieSize] * 24) / blockieSizeMap.base,
           }}
         ></div>
         <div className="flex flex-col space-y-1">
@@ -172,7 +172,7 @@ export const Address = ({
         <BlockieAvatar
           address={checkSumAddress}
           ensImage={ensAvatar}
-          size={(blockieSizeMap[blockieSize] * 24) / blockieSizeMap["base"]}
+          size={(blockieSizeMap[blockieSize] * 24) / blockieSizeMap.base}
         />
       </div>
       <div className="flex flex-col">

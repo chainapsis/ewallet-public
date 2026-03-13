@@ -1,14 +1,14 @@
-import type { FC } from "react";
-import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
 import { coin } from "@cosmjs/amino";
-import { useQuery, useMutation } from "@tanstack/react-query";
-
 import { GasPrice, SigningStargateClient } from "@cosmjs/stargate";
+import { MsgSend } from "@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import type { FC } from "react";
+
+import { TEST_COSMOS_CHAIN_ID, TEST_COSMOS_CHAIN_RPC } from "@/constants";
+import { useOko } from "@/hooks/use_oko";
+import { useUserInfoState } from "@/state/user_info";
 import { makeMockSendTokenAminoSignDoc } from "@/utils/cosmos";
 import styles from "./cosmos_onchain_cosmjs_sign_widget.module.scss";
-import { useOko } from "@/hooks/use_oko";
-import { TEST_COSMOS_CHAIN_ID, TEST_COSMOS_CHAIN_RPC } from "@/constants";
-import { useUserInfoState } from "@/state/user_info";
 
 interface AccountInfo {
   address: string;
@@ -218,6 +218,7 @@ const ActionButton: FC<ActionButtonProps> = ({
   return (
     <div className={styles.actionButtonContainer}>
       <button
+        type="button"
         className={styles.sendTxButton}
         onClick={onClick}
         disabled={mutation.isPending}

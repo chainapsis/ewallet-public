@@ -82,7 +82,9 @@ export function Eip712SignWidget() {
   const [error, setError] = useState<string>("");
 
   const handleSignTypedData = async () => {
-    if (!walletClient || !address) return;
+    if (!walletClient || !address) {
+      return;
+    }
 
     try {
       setIsSigning(true);
@@ -143,14 +145,18 @@ export function Eip712SignWidget() {
   };
 
   const copySignature = async () => {
-    if (!signature) return;
+    if (!signature) {
+      return;
+    }
     try {
       await navigator.clipboard.writeText(signature);
     } catch {}
   };
 
   const copyTypedData = async () => {
-    if (!signedPayload) return;
+    if (!signedPayload) {
+      return;
+    }
     try {
       await navigator.clipboard.writeText(signedPayload);
     } catch {}
@@ -190,6 +196,7 @@ export function Eip712SignWidget() {
         </div>
 
         <button
+          type="button"
           onClick={handleSignTypedData}
           disabled={disabled}
           className="btn btn-primary w-full mt-4"
@@ -221,18 +228,24 @@ export function Eip712SignWidget() {
             </div>
             <div className="flex gap-2">
               <button
+                type="button"
                 onClick={copySignature}
                 className="btn btn-xs btn-outline"
               >
                 Copy Signature
               </button>
               <button
+                type="button"
                 onClick={copyTypedData}
                 className="btn btn-xs btn-outline"
               >
                 Copy Typed Data
               </button>
-              <button onClick={resetForm} className="btn btn-xs btn-ghost">
+              <button
+                type="button"
+                onClick={resetForm}
+                className="btn btn-xs btn-ghost"
+              >
                 Reset
               </button>
             </div>

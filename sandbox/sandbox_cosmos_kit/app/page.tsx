@@ -1,9 +1,10 @@
 "use client";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ChainProvider } from "@cosmos-kit/react";
 import { makeOkoWallet } from "@oko-wallet/oko-cosmos-kit";
-import { chains, assets } from "chain-registry";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { assets, chains } from "chain-registry";
+
 import App from "@/components/App";
 import "@interchain-ui/react/styles";
 

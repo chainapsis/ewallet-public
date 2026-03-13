@@ -1,20 +1,20 @@
-import { Pool } from "pg";
+import {
+  createKsnDbConfig,
+  ensureDatabaseExists,
+  initializeKsnSchema,
+  initializeOkoApiSchema,
+  okoApiDbConfig,
+  resetDatabase,
+  seedOkoApiTestData,
+} from "@e2e/setup/database";
+import { createKsnApp } from "@e2e/setup/ksn";
+import { createOkoApiApp } from "@e2e/setup/oko_api";
 import { Bytes } from "@oko-wallet/bytes";
 import type { Application } from "express";
 import type { Server } from "http";
+import { Pool } from "pg";
 
-import {
-  okoApiDbConfig,
-  createKsnDbConfig,
-  resetDatabase,
-  ensureDatabaseExists,
-  initializeOkoApiSchema,
-  initializeKsnSchema,
-  seedOkoApiTestData,
-} from "@e2e/setup/database";
-import { createOkoApiApp } from "@e2e/setup/oko_api";
-import { createKsnApp } from "@e2e/setup/ksn";
-import { OKO_API_KEYPAIR, KSN_KEYPAIRS } from "./keys";
+import { KSN_KEYPAIRS, OKO_API_KEYPAIR } from "./keys";
 
 const KSN_BASE_PORT = 13001;
 
@@ -29,9 +29,9 @@ export interface TestContext {
   resetAllDatabases: () => Promise<void>;
 }
 
-export async function createTestContext(
-  opts?: { ksnCount?: number },
-): Promise<TestContext> {
+export async function createTestContext(opts?: {
+  ksnCount?: number;
+}): Promise<TestContext> {
   // Ensure all databases exist
   await ensureDatabaseExists(okoApiDbConfig);
   const targetKsnCount = opts?.ksnCount ?? KSN_KEYPAIRS.length;
@@ -57,8 +57,9 @@ export async function createTestContext(
   }
 
   const okoApiPool = new Pool(okoApiDbConfig);
-  const ksnPools = Array.from({ length: targetKsnCount }, (_, i) =>
-    new Pool(createKsnDbConfig(i + 1)),
+  const ksnPools = Array.from(
+    { length: targetKsnCount },
+    (_, i) => new Pool(createKsnDbConfig(i + 1)),
   );
 
   // Initialize schemas

@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
-import { useChain } from "@interchain-kit/react";
 import { WalletState } from "@interchain-kit/core";
+import { useChain } from "@interchain-kit/react";
+import Image from "next/image";
 
 import Button from "./Button";
 

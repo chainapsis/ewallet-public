@@ -1,13 +1,13 @@
-import { v4 as uuidv4 } from "uuid";
-import { sha256, buildRevealMessage } from "@oko-wallet/crypto-js";
+import type { Bytes } from "@oko-wallet/bytes";
+import { buildRevealMessage, sha256 } from "@oko-wallet/crypto-js";
+import type { EddsaKeypair } from "@oko-wallet/crypto-js/node/ecdhe";
 import {
+  convertEddsaSignatureToBytes,
   generateEddsaKeypair,
   signMessage,
-  convertEddsaSignatureToBytes,
 } from "@oko-wallet/crypto-js/node/ecdhe";
-import type { EddsaKeypair } from "@oko-wallet/crypto-js/node/ecdhe";
-import type { Bytes } from "@oko-wallet/bytes";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
+import { v4 as uuidv4 } from "uuid";
 
 export type { EddsaKeypair };
 
@@ -23,7 +23,10 @@ export function generateClientKeypair(): EddsaKeypair {
   return result.data;
 }
 
-export function computeIdTokenHash(authType: AuthType, idToken: string): string {
+export function computeIdTokenHash(
+  authType: AuthType,
+  idToken: string,
+): string {
   const hashRes = sha256(`${authType}${idToken}`);
   if (!hashRes.success) {
     throw new Error(`Failed to compute id_token hash: ${hashRes.err}`);

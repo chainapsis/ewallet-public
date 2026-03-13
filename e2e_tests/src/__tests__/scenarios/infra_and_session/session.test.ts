@@ -1,12 +1,11 @@
-import request from "supertest";
-import type { AuthType } from "@oko-wallet/oko-types/auth";
-
-import { createTestContext, type TestContext } from "@e2e/utils/test_context";
 import {
-  generateSessionId,
-  generateClientKeypair,
   computeIdTokenHash,
+  generateClientKeypair,
+  generateSessionId,
 } from "@e2e/utils/signature";
+import { createTestContext, type TestContext } from "@e2e/utils/test_context";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
+import request from "supertest";
 
 describe("e2e_test_session_timeout_and_duplicate_commit", () => {
   let ctx: TestContext;

@@ -17,7 +17,7 @@ export const AddressLinkWrapper = ({
   const { targetNetwork } = useTargetNetwork();
 
   return disableAddressLink ? (
-    <>{children}</>
+    children
   ) : (
     <Link
       href={blockExplorerAddressLink}

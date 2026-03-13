@@ -91,6 +91,7 @@ export function getBlockExplorerTxLink(chainId: number, txnHash: string) {
   const chainNames = Object.keys(chains);
 
   const targetChainArr = chainNames.filter((chainName) => {
+    // biome-ignore lint/performance/noDynamicNamespaceImportAccess: dynamic chain access
     const wagmiChain = chains[chainName as keyof typeof chains];
     return wagmiChain.id === chainId;
   });
@@ -100,6 +101,7 @@ export function getBlockExplorerTxLink(chainId: number, txnHash: string) {
   }
 
   const targetChain = targetChainArr[0] as keyof typeof chains;
+  // biome-ignore lint/performance/noDynamicNamespaceImportAccess: dynamic chain access
   const blockExplorerTxURL = chains[targetChain]?.blockExplorers?.default?.url;
 
   if (!blockExplorerTxURL) {

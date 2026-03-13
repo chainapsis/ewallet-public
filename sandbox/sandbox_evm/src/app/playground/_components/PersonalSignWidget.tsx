@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useAccount, useWalletClient } from "wagmi";
 
-import { useSignMessage } from "@oko-wallet-sandbox-evm/hooks/scaffold-eth";
 import { TextAreaInput } from "@oko-wallet-sandbox-evm/components/scaffold-eth/Input";
+import { useSignMessage } from "@oko-wallet-sandbox-evm/hooks/scaffold-eth";
 
 export function PersonalSignWidget() {
   const { address } = useAccount();
@@ -29,7 +29,9 @@ export function PersonalSignWidget() {
   };
 
   const copySignature = async () => {
-    if (!signature) return;
+    if (!signature) {
+      return;
+    }
     try {
       await navigator.clipboard.writeText(signature);
     } catch {}
@@ -57,6 +59,7 @@ export function PersonalSignWidget() {
           />
         </div>
         <button
+          type="button"
           onClick={handlePersonalSign}
           disabled={!walletClient || !address || personalSignLoading}
           className="btn btn-primary w-full mt-4"
@@ -87,12 +90,14 @@ export function PersonalSignWidget() {
             </div>
             <div className="flex gap-2">
               <button
+                type="button"
                 onClick={copySignature}
                 className="btn btn-xs btn-outline"
               >
                 Copy
               </button>
               <button
+                type="button"
                 onClick={resetPersonalSign}
                 className="btn btn-xs btn-ghost"
               >

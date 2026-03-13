@@ -1,18 +1,17 @@
-import request from "supertest";
-import type { AuthType } from "@oko-wallet/oko-types/auth";
 import {
-  runKeygenCentralizedEd25519,
-  extractKeyPackageSharesEd25519,
-  sssSplitEd25519,
-} from "@oko-wallet/teddsa-addon/src/server";
-
-import { createTestContext, type TestContext } from "@e2e/utils/test_context";
-import {
-  generateSessionId,
-  generateClientKeypair,
   computeIdTokenHash,
   createRevealSignature,
+  generateClientKeypair,
+  generateSessionId,
 } from "@e2e/utils/signature";
+import { createTestContext, type TestContext } from "@e2e/utils/test_context";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
+import {
+  extractKeyPackageSharesEd25519,
+  runKeygenCentralizedEd25519,
+  sssSplitEd25519,
+} from "@oko-wallet/teddsa-addon/src/server";
+import request from "supertest";
 
 describe("e2e_test_sign_up", () => {
   let ctx: TestContext;
@@ -294,7 +293,11 @@ describe("e2e_test_sign_up", () => {
             public_key: "03" + "a".repeat(64),
             share: "c1".repeat(64),
           },
-          ed25519: { public_key: "b".repeat(64), share: "d1".repeat(64), seed_share: TEST_SEED_SHARE },
+          ed25519: {
+            public_key: "b".repeat(64),
+            share: "d1".repeat(64),
+            seed_share: TEST_SEED_SHARE,
+          },
         },
         cr_session_id: sessionId,
         cr_signature: registerSignature,
@@ -350,7 +353,11 @@ describe("e2e_test_sign_up", () => {
             public_key: "03" + "a".repeat(64),
             share: "c1".repeat(64),
           },
-          ed25519: { public_key: "b".repeat(64), share: "d1".repeat(64), seed_share: TEST_SEED_SHARE },
+          ed25519: {
+            public_key: "b".repeat(64),
+            share: "d1".repeat(64),
+            seed_share: TEST_SEED_SHARE,
+          },
         },
         cr_session_id: sessionId,
         cr_signature: badSignature,
@@ -469,7 +476,7 @@ describe("e2e_test_sign_up", () => {
     const frostKeygen = runKeygenCentralizedEd25519();
     const serverFrostOutput = frostKeygen.keygen_outputs[1];
     const ed25519PublicKey = frostKeygen.public_key;
-    const ed25519PublicKeyHex = Buffer.from(ed25519PublicKey).toString("hex");
+    const _ed25519PublicKeyHex = Buffer.from(ed25519PublicKey).toString("hex");
     const secp256k1PublicKey = "03" + "a".repeat(64);
 
     const commitRes = await request(ctx.okoApiApp).post("/tss/v2/commit").send({
@@ -646,7 +653,11 @@ describe("e2e_test_sign_up", () => {
               public_key: secpPk1,
               share: generateSecp256k1Share(i),
             },
-            ed25519: { public_key: edPkHex1, share: edShare, seed_share: TEST_SEED_SHARE },
+            ed25519: {
+              public_key: edPkHex1,
+              share: edShare,
+              seed_share: TEST_SEED_SHARE,
+            },
           },
           cr_session_id: sessionId1,
           cr_signature: regSig,

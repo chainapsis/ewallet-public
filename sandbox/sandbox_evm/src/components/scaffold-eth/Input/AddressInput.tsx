@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
 import { blo } from "blo";
+import { useEffect, useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
-import { Address, isAddress } from "viem";
+import { type Address, isAddress } from "viem";
 import { normalize } from "viem/ens";
 import { useEnsAddress, useEnsAvatar, useEnsName } from "wagmi";
 
 import {
-  CommonInputProps,
+  type CommonInputProps,
   InputBase,
   isENS,
 } from "@oko-wallet-sandbox-evm/components/scaffold-eth";
@@ -70,7 +70,9 @@ export const AddressInput = ({
 
   // ens => address
   useEffect(() => {
-    if (!ensAddress) return;
+    if (!ensAddress) {
+      return;
+    }
 
     // ENS resolved successfully
     setEnteredEnsName(debouncedValue);

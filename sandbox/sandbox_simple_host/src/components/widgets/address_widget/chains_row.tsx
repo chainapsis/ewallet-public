@@ -1,4 +1,4 @@
-import { type FC, type ReactElement } from "react";
+import type { FC, ReactElement } from "react";
 
 import styles from "./chains_row.module.scss";
 

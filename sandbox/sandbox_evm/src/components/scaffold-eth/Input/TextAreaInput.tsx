@@ -1,6 +1,6 @@
-import { ReactNode, useCallback } from "react";
+import { type ReactNode, useCallback } from "react";
 
-import { CommonInputProps } from "@oko-wallet-sandbox-evm/components/scaffold-eth";
+import type { CommonInputProps } from "@oko-wallet-sandbox-evm/components/scaffold-eth";
 
 type TextAreaInputProps = CommonInputProps<string> & {
   error?: boolean;

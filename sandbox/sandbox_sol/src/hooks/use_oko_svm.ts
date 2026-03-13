@@ -17,10 +17,10 @@ import {
   SolanaSignMessage,
   SolanaSignTransaction,
 } from "@solana/wallet-standard-features";
+import type { PublicKey } from "@solana/web3.js";
 import { useCallback, useEffect, useState } from "react";
 
 import { useSdkStore } from "@/store/sdk";
-import { PublicKey } from "@solana/web3.js";
 
 const SOLANA_CONFIG: WalletStandardConfig = {
   chains: SOLANA_CHAINS,

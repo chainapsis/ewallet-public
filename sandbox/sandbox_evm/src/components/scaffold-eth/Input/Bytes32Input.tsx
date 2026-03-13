@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { hexToString, isHex, stringToHex } from "viem";
 
 import {
-  CommonInputProps,
+  type CommonInputProps,
   InputBase,
 } from "@oko-wallet-sandbox-evm/components/scaffold-eth";
 

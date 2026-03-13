@@ -5,16 +5,16 @@ import {
   Keypair,
   LAMPORTS_PER_SOL,
   Lockup,
+  type ParsedAccountData,
   PublicKey,
   StakeProgram,
   SystemProgram,
   Transaction,
   TransactionMessage,
   VersionedTransaction,
-  type ParsedAccountData,
 } from "@solana/web3.js";
 import bs58 from "bs58";
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { DEVNET_CONNECTION } from "@/lib/connection";
 import { useSdkStore } from "@/store/sdk";
@@ -369,7 +369,9 @@ export function StakingWidget() {
           .sort((a, b) => b.activatedStake - a.activatedStake)
           .slice(0, 20);
 
-        if (cancelled) return;
+        if (cancelled) {
+          return;
+        }
 
         const list: ValidatorInfo[] = sorted.map((v) => ({
           name: `${v.votePubkey.slice(0, 8)}... (stake: ${formatSol(v.activatedStake)})`,
@@ -383,7 +385,9 @@ export function StakingWidget() {
       } catch (err) {
         console.error("Failed to fetch validators:", err);
       } finally {
-        if (!cancelled) setIsLoadingValidators(false);
+        if (!cancelled) {
+          setIsLoadingValidators(false);
+        }
       }
     };
 
@@ -395,7 +399,9 @@ export function StakingWidget() {
 
   // Fetch stake accounts owned by the user
   const fetchStakeAccounts = useCallback(async () => {
-    if (!publicKey) return;
+    if (!publicKey) {
+      return;
+    }
 
     setIsLoadingAccounts(true);
     try {
@@ -447,7 +453,9 @@ export function StakingWidget() {
 
   // Create stake account and delegate
   const handleStake = async () => {
-    if (!okoSvmWallet || !publicKey) return;
+    if (!okoSvmWallet || !publicKey) {
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
@@ -527,7 +535,9 @@ export function StakingWidget() {
 
   // Deactivate a stake account
   const handleDeactivate = async (stakeAccountPubkey: string) => {
-    if (!okoSvmWallet || !publicKey) return;
+    if (!okoSvmWallet || !publicKey) {
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
@@ -579,7 +589,9 @@ export function StakingWidget() {
     stakeAccountPubkey: string,
     lamports: number,
   ) => {
-    if (!okoSvmWallet || !publicKey) return;
+    if (!okoSvmWallet || !publicKey) {
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
@@ -714,6 +726,7 @@ export function StakingWidget() {
         <div className="flex items-center justify-between mb-4">
           <h4 className="text-lg font-semibold">Your Stake Accounts</h4>
           <button
+            type="button"
             onClick={fetchStakeAccounts}
             disabled={isLoadingAccounts}
             className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
@@ -753,6 +766,7 @@ export function StakingWidget() {
                   <div className="flex gap-2">
                     {canDeactivate(account.state) && (
                       <button
+                        type="button"
                         onClick={() => handleDeactivate(account.pubkey)}
                         disabled={isLoading}
                         className="px-3 py-1 text-xs bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 rounded-lg hover:bg-yellow-500/30 transition-colors disabled:opacity-50"
@@ -762,6 +776,7 @@ export function StakingWidget() {
                     )}
                     {canWithdraw(account.state) && (
                       <button
+                        type="button"
                         onClick={() =>
                           handleWithdraw(account.pubkey, account.lamports)
                         }

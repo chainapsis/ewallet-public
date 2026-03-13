@@ -1,11 +1,11 @@
-import { useState, type FC } from "react";
+import { type FC, useState } from "react";
 
-import styles from "./address_widget.module.scss";
 import { Widget } from "../widget_components";
+import styles from "./address_widget.module.scss";
 import { ViewChainsButton } from "./view_chains_button";
 import { ViewChainsModal } from "./view_chains_modal";
 
-export const AddressWidget: FC<AddressWidgetProps> = ({}) => {
+export const AddressWidget: FC<AddressWidgetProps> = () => {
   const [showModal, setShowModal] = useState(false);
 
   const handleViewChains = () => {
@@ -30,4 +30,5 @@ export const AddressWidget: FC<AddressWidgetProps> = ({}) => {
   );
 };
 
-export interface AddressWidgetProps {}
+// biome-ignore lint/complexity/noBannedTypes: empty props type
+export type AddressWidgetProps = {};
