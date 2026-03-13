@@ -17,8 +17,8 @@ import {
 } from "@oko-wallet-attached/config/oauth";
 import { useAppState } from "@oko-wallet-attached/store/app";
 
-function buildGoogleOAuthUrl(nonce: string, state: OAuthState): string {
-  const redirectUri = `${window.location.origin}/google/callback`;
+function buildGoogleOAuthUrl(nonce: string, state: OAuthState, redirectBaseOrigin: string): string {
+  const redirectUri = `${redirectBaseOrigin}/google/callback`;
 
   const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
   authUrl.searchParams.set("client_id", GOOGLE_CLIENT_ID);
@@ -32,8 +32,8 @@ function buildGoogleOAuthUrl(nonce: string, state: OAuthState): string {
   return authUrl.toString();
 }
 
-function buildXOAuthUrl(codeChallenge: string, state: OAuthState): string {
-  const redirectUri = `${window.location.origin}/x/callback`;
+function buildXOAuthUrl(codeChallenge: string, state: OAuthState, redirectBaseOrigin: string): string {
+  const redirectUri = `${redirectBaseOrigin}/x/callback`;
 
   const authUrl = new URL("https://twitter.com/i/oauth2/authorize");
   authUrl.searchParams.set("response_type", "code");
@@ -50,8 +50,9 @@ function buildXOAuthUrl(codeChallenge: string, state: OAuthState): string {
 function buildDiscordOAuthUrl(
   codeChallenge: string,
   state: OAuthState,
+  redirectBaseOrigin: string,
 ): string {
-  const redirectUri = `${window.location.origin}/discord/callback`;
+  const redirectUri = `${redirectBaseOrigin}/discord/callback`;
 
   const authUrl = new URL("https://discord.com/api/oauth2/authorize");
   authUrl.searchParams.set("response_type", "code");
@@ -65,8 +66,8 @@ function buildDiscordOAuthUrl(
   return authUrl.toString();
 }
 
-function buildGithubOAuthUrl(codeChallenge: string, state: OAuthState): string {
-  const redirectUri = `${window.location.origin}/github/callback`;
+function buildGithubOAuthUrl(codeChallenge: string, state: OAuthState, redirectBaseOrigin: string): string {
+  const redirectUri = `${redirectBaseOrigin}/github/callback`;
 
   const authUrl = new URL("https://github.com/login/oauth/authorize");
   authUrl.searchParams.set("client_id", GITHUB_CLIENT_ID);
@@ -97,10 +98,15 @@ async function buildOAuthUrl(
     ...(mobileOsBrowser && { mobileOsBrowser }),
   };
 
+  // Mobile OS browser: redirect back to proxy web (targetOrigin), not attached
+  const redirectBaseOrigin = mobileOsBrowser
+    ? targetOrigin
+    : window.location.origin;
+
   if (provider === "google") {
     const nonce = generateNonce();
     appState.setNonce(hostOrigin, nonce);
-    return buildGoogleOAuthUrl(nonce, state);
+    return buildGoogleOAuthUrl(nonce, state, redirectBaseOrigin);
   }
 
   // X, Discord, GitHub use PKCE
@@ -109,11 +115,11 @@ async function buildOAuthUrl(
 
   switch (provider) {
     case "x":
-      return buildXOAuthUrl(codeChallenge, state);
+      return buildXOAuthUrl(codeChallenge, state, redirectBaseOrigin);
     case "discord":
-      return buildDiscordOAuthUrl(codeChallenge, state);
+      return buildDiscordOAuthUrl(codeChallenge, state, redirectBaseOrigin);
     case "github":
-      return buildGithubOAuthUrl(codeChallenge, state);
+      return buildGithubOAuthUrl(codeChallenge, state, redirectBaseOrigin);
     default:
       throw new Error(`Unsupported OAuth provider: ${provider}`);
   }
