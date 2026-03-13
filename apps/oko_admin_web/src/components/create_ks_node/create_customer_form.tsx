@@ -9,6 +9,7 @@ import type { FC } from "react";
 import type { SubmitHandler } from "react-hook-form";
 
 import styles from "./create_customer_form.module.scss";
+import type { CreateOrEditKSNodeProps } from "./types";
 import {
   type CreateKSNodeFormData,
   useCreateKSNodeForm,

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import type { FC } from "react";
 
 import styles from "./create_ks_node_header.module.scss";
+import type { CreateOrEditKSNodeProps } from "./types";
 
 // TODO: move to common ui
 const BackArrowIcon: FC = () => {
