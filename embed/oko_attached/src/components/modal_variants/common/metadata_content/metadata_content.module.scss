@@ -80,3 +80,7 @@
   width: 24px;
   height: 24px;
 }
+
+:global(html[data-mobile]) .wrapper .signInfoColumn .chainInfoRow {
+  row-gap: 8px;
+}
