@@ -1,7 +1,7 @@
 "use client";
 
-import { type FC, type ReactNode } from "react";
 import cn from "classnames";
+import type { FC, ReactNode } from "react";
 
 import styles from "./sidebar_account_info.module.scss";
 import { Typography } from "@oko-wallet-common-ui/typography/typography";
@@ -37,8 +37,18 @@ export const SidebarAccountInfo: FC<SidebarAccountInfoProps> = ({
       )}
 
       <div className={styles.detailInfo}>
-        {TopRightIcon && <span className={styles.topRightIcon}>{TopRightIcon}</span>}
-        <Typography size="sm" weight="semibold" color="primary" className={cn(styles.label, TopRightIcon ? styles.labelWithIcon : undefined)}>
+        {TopRightIcon && (
+          <span className={styles.topRightIcon}>{TopRightIcon}</span>
+        )}
+        <Typography
+          size="sm"
+          weight="semibold"
+          color="primary"
+          className={cn(
+            styles.label,
+            TopRightIcon ? styles.labelWithIcon : undefined,
+          )}
+        >
           {label}
         </Typography>
         <Typography size="sm" color="tertiary" className={styles.userEmail}>
