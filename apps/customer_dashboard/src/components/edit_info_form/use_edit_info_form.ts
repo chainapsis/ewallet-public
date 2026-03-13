@@ -1,12 +1,12 @@
-import { useState, useRef, type ChangeEvent, type DragEvent } from "react";
-import { useForm, type SubmitHandler } from "react-hook-form";
-import { useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
 import type { Customer, CustomerTheme } from "@oko-wallet/oko-types/customers";
+import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { type ChangeEvent, type DragEvent, useRef, useState } from "react";
+import { type SubmitHandler, useForm } from "react-hook-form";
 
+import { requestUpdateCustomerInfo } from "@oko-wallet-ct-dashboard/fetch/customers";
 import { useCustomerInfo } from "@oko-wallet-ct-dashboard/hooks/use_customer_info";
 import { useAppState } from "@oko-wallet-ct-dashboard/state";
-import { requestUpdateCustomerInfo } from "@oko-wallet-ct-dashboard/fetch/customers";
 
 const ONE_MB = 1 * 1024 * 1024;
 
@@ -249,7 +249,7 @@ export function useEditInfoForm() {
           message: result.msg ?? "Failed to update information.",
         });
       }
-    } catch (err: any) {
+    } catch (_err: any) {
       setError("root", { message: "An error occurred while updating." });
     } finally {
       setIsLoading(false);

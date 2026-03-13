@@ -82,7 +82,7 @@ export default function ForgotPasswordPage() {
       } else {
         setError(res.msg || "Failed to send code");
       }
-    } catch (err) {
+    } catch (_err) {
       setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);
@@ -105,7 +105,7 @@ export default function ForgotPasswordPage() {
       } else {
         setError(res.msg || "Invalid verification code");
       }
-    } catch (err) {
+    } catch (_err) {
       setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);
@@ -154,7 +154,7 @@ export default function ForgotPasswordPage() {
           setError(res.msg || "Failed to reset password");
         }
       }
-    } catch (err) {
+    } catch (_err) {
       setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);
@@ -182,7 +182,7 @@ export default function ForgotPasswordPage() {
       } else {
         setError(res.msg || "Failed to send code");
       }
-    } catch (err) {
+    } catch (_err) {
       setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);
@@ -204,7 +204,7 @@ export default function ForgotPasswordPage() {
       } else {
         setError(res.msg || "Failed to resend code");
       }
-    } catch (err) {
+    } catch (_err) {
       setError("An unexpected error occurred");
     } finally {
       setIsResending(false);
@@ -310,7 +310,10 @@ export default function ForgotPasswordPage() {
             )}
           </div>
 
-          <ExpiryTimer duration={EMAIL_VERIFICATION_TIMER_SECONDS} startedAt={timerStartedAt}>
+          <ExpiryTimer
+            duration={EMAIL_VERIFICATION_TIMER_SECONDS}
+            startedAt={timerStartedAt}
+          >
             {({ timeDisplay, isExpired, resetTimer }) => (
               <div className={styles.resendRow}>
                 <Typography size="sm" weight="medium" color="primary">
