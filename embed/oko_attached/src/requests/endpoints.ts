@@ -16,6 +16,7 @@ export function isDemoOrSandboxOrigin(hostOrigin: string): boolean {
     return true;
   }
   if (
+    hostOrigin !== "" &&
     !hostOrigin.startsWith("http://") &&
     !hostOrigin.startsWith("https://")
   ) {
