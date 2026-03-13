@@ -1,22 +1,21 @@
-import { useState } from "react";
-import { type DirectSignResponse } from "@cosmjs/proto-signing";
-import { type AminoSignResponse } from "@cosmjs/amino";
-import { useMutation } from "@tanstack/react-query";
-
+import type { AminoSignResponse } from "@cosmjs/amino";
+import type { DirectSignResponse } from "@cosmjs/proto-signing";
 import { TxRaw } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
+import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 
 import { SignWidget } from "@/components/widgets/sign_widget/sign_widget";
-import styles from "./cosmos_onchain_sign_widget.module.scss";
+import {
+  TEST_COSMOS_CHAIN_ENDPOINT,
+  TEST_COSMOS_CHAIN_ID,
+  TEST_COSMOS_CHAIN_REST,
+} from "@/constants";
+import { useOko } from "@/hooks/use_oko";
 import {
   makeMockSendTokenAminoSignDoc,
   makeMockSendTokenProtoSignDoc,
 } from "@/utils/cosmos";
-import { useOko } from "@/hooks/use_oko";
-import {
-  TEST_COSMOS_CHAIN_ID,
-  TEST_COSMOS_CHAIN_REST,
-  TEST_COSMOS_CHAIN_ENDPOINT,
-} from "@/constants";
+import styles from "./cosmos_onchain_sign_widget.module.scss";
 
 export const CosmosOnchainSignWidget = () => {
   const { okoCosmos } = useOko();
@@ -81,12 +80,14 @@ export const CosmosOnchainSignWidget = () => {
     <div className={styles.container}>
       <div className={styles.switch}>
         <button
+          type="button"
           className={signType === "direct" ? styles.active : ""}
           onClick={() => setSignType("direct")}
         >
           Direct
         </button>
         <button
+          type="button"
           className={signType === "amino" ? styles.active : ""}
           onClick={() => setSignType("amino")}
         >
@@ -210,6 +211,7 @@ const SendTxButton = ({
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
       <button
+        type="button"
         className={className}
         onClick={() => sendTxMutation.mutate()}
         disabled={sendTxMutation.isPending}

@@ -13,7 +13,9 @@ export const DocsWidget: FC = () => {
       <div className={styles.container}>
         <p>Build with Oko</p>
         <p>Explore the SDK, APIs, and integration guides to start building.</p>
-        <button onClick={handleOpenDocs}>Open Docs</button>
+        <button type="button" onClick={handleOpenDocs}>
+          Open Docs
+        </button>
       </div>
     </Widget>
   );

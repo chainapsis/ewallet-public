@@ -1,20 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
 import {
+  LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
   Transaction,
   TransactionMessage,
   VersionedTransaction,
-  LAMPORTS_PER_SOL,
 } from "@solana/web3.js";
 import bs58 from "bs58";
+import Link from "next/link";
+import { useState } from "react";
 
+import { DEVNET_CONNECTION } from "@/lib/connection";
 import { useSdkStore } from "@/store/sdk";
 import Button from "./Button";
-import { DEVNET_CONNECTION } from "@/lib/connection";
 
 export function SignTransactionWidget() {
   const { okoSvmWallet, publicKey } = useSdkStore();

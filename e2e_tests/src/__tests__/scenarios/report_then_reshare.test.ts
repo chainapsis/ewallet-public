@@ -1,18 +1,17 @@
-import request from "supertest";
-import type { AuthType } from "@oko-wallet/oko-types/auth";
 import {
-  runKeygenCentralizedEd25519,
-  extractKeyPackageSharesEd25519,
-  sssSplitEd25519,
-} from "@oko-wallet/teddsa-addon/src/server";
-
-import { createTestContext, type TestContext } from "@e2e/utils/test_context";
-import {
-  generateSessionId,
-  generateClientKeypair,
   computeIdTokenHash,
   createRevealSignature,
+  generateClientKeypair,
+  generateSessionId,
 } from "@e2e/utils/signature";
+import { createTestContext, type TestContext } from "@e2e/utils/test_context";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
+import {
+  extractKeyPackageSharesEd25519,
+  runKeygenCentralizedEd25519,
+  sssSplitEd25519,
+} from "@oko-wallet/teddsa-addon/src/server";
+import request from "supertest";
 
 describe("e2e_test_report_then_reshare", () => {
   let ctx: TestContext;

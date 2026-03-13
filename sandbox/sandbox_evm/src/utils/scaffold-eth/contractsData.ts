@@ -1,7 +1,7 @@
 import { useTargetNetwork } from "@oko-wallet-sandbox-evm/hooks/scaffold-eth";
 import {
-  GenericContractsDeclaration,
   contracts,
+  type GenericContractsDeclaration,
 } from "@oko-wallet-sandbox-evm/utils/scaffold-eth/contract";
 
 const DEFAULT_ALL_CONTRACTS: GenericContractsDeclaration[number] = {};

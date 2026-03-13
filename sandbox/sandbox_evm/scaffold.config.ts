@@ -1,19 +1,19 @@
 import { defineChain } from "viem";
-import * as chains from "viem/chains";
+import type * as chains from "viem/chains";
 import {
   arbitrum,
   avalanche,
   base,
+  baseSepolia,
   berachain,
   blast,
   forma,
   mainnet,
   optimism,
   polygon,
-  unichain,
-  story,
   sepolia,
-  baseSepolia,
+  story,
+  unichain,
 } from "viem/chains";
 
 const bnbSmartChain = defineChain({

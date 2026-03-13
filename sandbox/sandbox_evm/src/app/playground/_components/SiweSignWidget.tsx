@@ -1,8 +1,8 @@
 "use client";
 
-import { useAccount, useChainId, useWalletClient } from "wagmi";
-import { createSiweMessage, generateSiweNonce } from "viem/siwe";
 import { useState } from "react";
+import { createSiweMessage, generateSiweNonce } from "viem/siwe";
+import { useAccount, useChainId, useWalletClient } from "wagmi";
 
 import { useSignMessage } from "@oko-wallet-sandbox-evm/hooks/scaffold-eth";
 
@@ -44,14 +44,18 @@ export function SiweSignWidget() {
   };
 
   const copySignature = async () => {
-    if (!signature) return;
+    if (!signature) {
+      return;
+    }
     try {
       await navigator.clipboard.writeText(signature);
     } catch {}
   };
 
   const copyMessage = async () => {
-    if (!signedMessage) return;
+    if (!signedMessage) {
+      return;
+    }
     try {
       await navigator.clipboard.writeText(signedMessage);
     } catch {}
@@ -72,6 +76,7 @@ export function SiweSignWidget() {
         </p>
 
         <button
+          type="button"
           onClick={() => handleSiweSign(false)}
           disabled={!walletClient || !address || !chainId || isLoading}
           className="btn btn-primary w-full mt-4"
@@ -80,6 +85,7 @@ export function SiweSignWidget() {
         </button>
 
         <button
+          type="button"
           onClick={() => handleSiweSign(true)}
           disabled={!walletClient || !address || !chainId || isLoading}
           className="btn btn-primary w-full mt-4"
@@ -111,15 +117,24 @@ export function SiweSignWidget() {
             </div>
             <div className="flex gap-2">
               <button
+                type="button"
                 onClick={copySignature}
                 className="btn btn-xs btn-outline"
               >
                 Copy Signature
               </button>
-              <button onClick={copyMessage} className="btn btn-xs btn-outline">
+              <button
+                type="button"
+                onClick={copyMessage}
+                className="btn btn-xs btn-outline"
+              >
                 Copy Message
               </button>
-              <button onClick={resetSiweSign} className="btn btn-xs btn-ghost">
+              <button
+                type="button"
+                onClick={resetSiweSign}
+                className="btn btn-xs btn-ghost"
+              >
                 Reset
               </button>
             </div>

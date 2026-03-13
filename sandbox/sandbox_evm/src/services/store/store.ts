@@ -2,7 +2,7 @@ import { create } from "zustand";
 
 import scaffoldConfig from "@oko-wallet-sandbox-evm/../scaffold.config";
 import {
-  ChainWithAttributes,
+  type ChainWithAttributes,
   NETWORKS_EXTRA_DATA,
 } from "@oko-wallet-sandbox-evm/utils/scaffold-eth";
 

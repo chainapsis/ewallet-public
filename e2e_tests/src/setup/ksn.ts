@@ -1,19 +1,19 @@
+import type { Bytes } from "@oko-wallet/bytes";
+import { Bytes as BytesLib } from "@oko-wallet/bytes";
+import dayjs from "dayjs";
 import express from "express";
 import type { Pool } from "pg";
-import type { Bytes } from "@oko-wallet/bytes";
-import dayjs from "dayjs";
 
-import { commit } from "@oko-wallet-ksn-server/routes/key_share_v2/commit";
-import { commitRevealMiddleware } from "@oko-wallet-ksn-server/middlewares";
-import { keyshareV2Register } from "@oko-wallet-ksn-server/routes/key_share_v2/register";
-import { keyshareV2Check } from "@oko-wallet-ksn-server/routes/key_share_v2/check";
-import { getKeysharesV2 } from "@oko-wallet-ksn-server/routes/key_share_v2/get_key_shares";
-import { keyshareV2Reshare } from "@oko-wallet-ksn-server/routes/key_share_v2/reshare";
-import { registerKeyshareEd25519 } from "@oko-wallet-ksn-server/routes/key_share_v2/ed25519";
-import { registerKeyShare as registerKeyShareV1 } from "@oko-wallet-ksn-server/api/key_share";
-import { Bytes as BytesLib } from "@oko-wallet/bytes";
-import type { ServerState } from "@oko-wallet-ksn-server/state";
 import { mockOAuthMiddleware } from "./mock_oauth";
+import { registerKeyShare as registerKeyShareV1 } from "@oko-wallet-ksn-server/api/key_share";
+import { commitRevealMiddleware } from "@oko-wallet-ksn-server/middlewares";
+import { keyshareV2Check } from "@oko-wallet-ksn-server/routes/key_share_v2/check";
+import { commit } from "@oko-wallet-ksn-server/routes/key_share_v2/commit";
+import { registerKeyshareEd25519 } from "@oko-wallet-ksn-server/routes/key_share_v2/ed25519";
+import { getKeysharesV2 } from "@oko-wallet-ksn-server/routes/key_share_v2/get_key_shares";
+import { keyshareV2Register } from "@oko-wallet-ksn-server/routes/key_share_v2/register";
+import { keyshareV2Reshare } from "@oko-wallet-ksn-server/routes/key_share_v2/reshare";
+import type { ServerState } from "@oko-wallet-ksn-server/state";
 
 export interface KsnServerKeypair {
   privateKey: Bytes<32>;
@@ -117,7 +117,7 @@ export function createKsnApp(
   });
 
   // Minimal v1 check: always report exists true for requested curve
-  app.post("/keyshare/v1/check", (req, res) => {
+  app.post("/keyshare/v1/check", (_req, res) => {
     return res.status(200).json({
       success: true,
       data: { exists: true },

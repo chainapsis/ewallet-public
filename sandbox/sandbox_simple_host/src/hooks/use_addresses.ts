@@ -1,6 +1,7 @@
+import { useEffect, useState } from "react";
+
 import { useSDKState } from "@/state/sdk";
 import { useUserInfoState } from "@/state/user_info";
-import { useEffect, useState } from "react";
 
 export function useAddresses() {
   const okoCosmos = useSDKState((state) => state.oko_cosmos);

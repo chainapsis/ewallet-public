@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Hex, WalletClient } from "viem";
+import type { Hex, WalletClient } from "viem";
 
 export function useSignMessage() {
   const [signature, setSignature] = useState<Hex | null>(null);

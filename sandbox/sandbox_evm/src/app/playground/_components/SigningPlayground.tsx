@@ -1,12 +1,12 @@
 "use client";
 
-import { PersonalSignWidget } from "./PersonalSignWidget";
-import { PermitSignWidget } from "./PermitSignWidget";
-import { SiweSignWidget } from "./SiweSignWidget";
-import { SignatureVerificationWidget } from "./SignatureVerificationWidget";
-import { NativeTransferWidget } from "./NativeTransferWidget";
-import { ERC20TransferWidget } from "./ERC20TransferWidget";
 import { Eip712SignWidget } from "./EIP712SignWidget";
+import { ERC20TransferWidget } from "./ERC20TransferWidget";
+import { NativeTransferWidget } from "./NativeTransferWidget";
+import { PermitSignWidget } from "./PermitSignWidget";
+import { PersonalSignWidget } from "./PersonalSignWidget";
+import { SignatureVerificationWidget } from "./SignatureVerificationWidget";
+import { SiweSignWidget } from "./SiweSignWidget";
 
 export function SigningPlayground() {
   return (

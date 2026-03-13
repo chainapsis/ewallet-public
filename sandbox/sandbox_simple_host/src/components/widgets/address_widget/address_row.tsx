@@ -1,4 +1,4 @@
-import { type FC, type ReactElement } from "react";
+import type { FC, ReactElement } from "react";
 
 import styles from "./address_row.module.scss";
 
@@ -20,6 +20,7 @@ export const AddressRow: FC<AddressRowProps> = ({ icon, chain, address }) => {
           <>
             <p>{prefix}</p>
             {Array.from({ length: 8 }).map((_, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: display-only list
               <div key={i} className={styles.dot} />
             ))}
           </>

@@ -80,11 +80,11 @@ export const isValidInteger = (dataType: IntegerVariant, value: string) => {
   const isSigned = dataType.startsWith("i");
   const bitcount = Number(dataType.substring(isSigned ? 3 : 4));
 
-  let valueAsBigInt;
+  let valueAsBigInt: bigint | undefined;
   try {
     valueAsBigInt = BigInt(value);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (e) {}
+  } catch (_e) {}
   if (typeof valueAsBigInt !== "bigint") {
     if (!value || typeof value !== "string") {
       return true;

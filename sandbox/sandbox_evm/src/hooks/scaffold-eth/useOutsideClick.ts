@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+import type React from "react";
+import { useEffect } from "react";
 
 /**
  * Handles clicks outside of passed ref element
@@ -7,7 +8,7 @@ import React, { useEffect } from "react";
  */
 export const useOutsideClick = (
   ref: React.RefObject<HTMLElement | null>,
-  callback: { (): void },
+  callback: () => void,
 ) => {
   useEffect(() => {
     function handleOutsideClick(event: MouseEvent) {

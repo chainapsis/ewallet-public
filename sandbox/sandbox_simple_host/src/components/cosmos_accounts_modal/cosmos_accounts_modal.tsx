@@ -1,10 +1,10 @@
 import { type FC, useMemo, useState } from "react";
 
-import styles from "./cosmos_accounts_modal.module.scss";
 import {
-  useCosmosAccounts,
   type CosmosChainAccount,
+  useCosmosAccounts,
 } from "@/components/cosmos_accounts_modal/use_cosmos_accounts";
+import styles from "./cosmos_accounts_modal.module.scss";
 
 export interface CosmosAccountsModalProps {
   open: boolean;
@@ -23,7 +23,9 @@ export const CosmosAccountsModal: FC<CosmosAccountsModalProps> = ({
 
   const filtered = useMemo(() => {
     const loweredQuery = query.trim().toLowerCase();
-    if (!loweredQuery) return data;
+    if (!loweredQuery) {
+      return data;
+    }
     return data.filter((account) => {
       return (
         account.chainId.toLowerCase().includes(loweredQuery) ||
@@ -32,14 +34,20 @@ export const CosmosAccountsModal: FC<CosmosAccountsModalProps> = ({
     });
   }, [data, query]);
 
-  if (!open) return null;
+  if (!open) {
+    return null;
+  }
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
           <p>Cosmos Accounts</p>
-          <button className={styles.signOutButton} onClick={onClose}>
+          <button
+            type="button"
+            className={styles.signOutButton}
+            onClick={onClose}
+          >
             <p>Close</p>
           </button>
         </div>

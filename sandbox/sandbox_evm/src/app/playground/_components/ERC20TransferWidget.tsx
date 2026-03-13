@@ -1,24 +1,24 @@
 "use client";
 
 import { useState } from "react";
+import { encodeFunctionData, formatUnits, isAddress, parseUnits } from "viem";
 import {
   useAccount,
-  useWalletClient,
   usePublicClient,
   useReadContract,
+  useWalletClient,
 } from "wagmi";
-import { isAddress, encodeFunctionData, formatUnits, parseUnits } from "viem";
 
-import { useTransactor } from "@oko-wallet-sandbox-evm/hooks/scaffold-eth";
 import { AddressInput } from "@oko-wallet-sandbox-evm/components/scaffold-eth/Input";
 import { USDCAbi } from "@oko-wallet-sandbox-evm/contracts/abis/USDC";
+import { useTransactor } from "@oko-wallet-sandbox-evm/hooks/scaffold-eth";
 
 const ERC20_ABI = USDCAbi;
 
 export function ERC20TransferWidget() {
   const { address } = useAccount();
   const { data: walletClient } = useWalletClient();
-  const publicClient = usePublicClient();
+  const _publicClient = usePublicClient();
   const writeTxn = useTransactor();
 
   const [tokenAddress, setTokenAddress] = useState("");
@@ -114,7 +114,9 @@ export function ERC20TransferWidget() {
   };
 
   const copyTxHash = async () => {
-    if (!txHash) return;
+    if (!txHash) {
+      return;
+    }
     try {
       await navigator.clipboard.writeText(txHash);
     } catch {}
@@ -183,6 +185,7 @@ export function ERC20TransferWidget() {
         </div>
 
         <button
+          type="button"
           onClick={handleTransfer}
           disabled={
             !walletClient ||
@@ -212,10 +215,18 @@ export function ERC20TransferWidget() {
               </code>
             </div>
             <div className="flex gap-2">
-              <button onClick={copyTxHash} className="btn btn-xs btn-outline">
+              <button
+                type="button"
+                onClick={copyTxHash}
+                className="btn btn-xs btn-outline"
+              >
                 Copy Hash
               </button>
-              <button onClick={resetForm} className="btn btn-xs btn-ghost">
+              <button
+                type="button"
+                onClick={resetForm}
+                className="btn btn-xs btn-ghost"
+              >
                 New Transfer
               </button>
             </div>

@@ -1,26 +1,27 @@
 "use client";
 
-import { useState } from "react";
-import { useSdkStore } from "@/store/sdk";
 import {
-  OkoStandardWallet,
   buildSignInMessage,
+  OkoStandardWallet,
   type WalletStandardConfig,
 } from "@oko-wallet/oko-sdk-svm";
 import {
-  SolanaSignIn,
-  SolanaSignMessage,
-  SolanaSignTransaction,
-  SolanaSignAndSendTransaction,
-  type SolanaSignInFeature,
-} from "@solana/wallet-standard-features";
-import {
   SOLANA_CHAINS,
-  SOLANA_MAINNET_CHAIN,
   SOLANA_DEVNET_CHAIN,
+  SOLANA_MAINNET_CHAIN,
   SOLANA_TESTNET_CHAIN,
 } from "@solana/wallet-standard-chains";
+import {
+  SolanaSignAndSendTransaction,
+  SolanaSignIn,
+  type SolanaSignInFeature,
+  SolanaSignMessage,
+  SolanaSignTransaction,
+} from "@solana/wallet-standard-features";
 import bs58 from "bs58";
+import { useState } from "react";
+
+import { useSdkStore } from "@/store/sdk";
 
 // Config for wallet-standard features (used for SIWS testing)
 const SOLANA_CONFIG: WalletStandardConfig = {
@@ -37,6 +38,7 @@ const SOLANA_CONFIG: WalletStandardConfig = {
     [SOLANA_TESTNET_CHAIN]: "https://api.testnet.solana.com",
   },
 };
+
 import Button from "./Button";
 
 export function SiwsWidget() {
@@ -158,6 +160,7 @@ export function SiwsWidget() {
               Domain
             </label>
             <button
+              type="button"
               onClick={autoFillFromPage}
               className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
             >
@@ -208,6 +211,7 @@ export function SiwsWidget() {
               Nonce (optional)
             </label>
             <button
+              type="button"
               onClick={generateNonce}
               className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
             >
