@@ -38,7 +38,6 @@ export function useConnectedApps(): UseConnectedAppsResult {
   >({
     queryKey: ["connectedApps"],
     queryFn: async () => {
-      // biome-ignore lint/style/noNonNullAssertion: enabled flag guarantees cosmosSDK is defined
       const res = await cosmosSDK!.okoWallet.sendMsgToIframe({
         target: "oko_attached",
         msg_type: "__get_connected_apps__",
