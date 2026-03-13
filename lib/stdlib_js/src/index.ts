@@ -9,5 +9,3 @@ export interface ErrorResult<E> {
   success: false;
   err: E;
 }
-
-export {};

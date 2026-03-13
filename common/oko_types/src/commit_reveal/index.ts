@@ -5,11 +5,7 @@ export type OperationType =
   | "add_ed25519"
   | "add_ed25519_with_reshare";
 
-export type ApiName =
-  | "signin"
-  | "keygen"
-  | "reshare"
-  | "keygen_ed25519";
+export type ApiName = "signin" | "keygen" | "reshare" | "keygen_ed25519";
 
 export type SessionState = "COMMITTED" | "COMPLETED";
 

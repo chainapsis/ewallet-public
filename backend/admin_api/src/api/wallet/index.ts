@@ -1,14 +1,14 @@
 import {
-  getAllWallets,
-  getWalletsCount,
   getAllUsersWithWallets,
+  getAllWallets,
   getUsersWithWalletsCount,
+  getWalletsCount,
 } from "@oko-wallet/oko-pg-interface/oko_wallets";
 import type {
-  GetWalletListRequest,
-  GetWalletListResponse,
   GetUserListRequest,
   GetUserListResponse,
+  GetWalletListRequest,
+  GetWalletListResponse,
 } from "@oko-wallet/oko-types/admin";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type { Pool } from "pg";
@@ -118,7 +118,8 @@ export async function getUserList(
           user_id: user.user_id,
           auth_type: user.auth_type,
           email: user.email,
-          secp256k1_public_key: user.secp256k1_public_key?.toString("hex") ?? null,
+          secp256k1_public_key:
+            user.secp256k1_public_key?.toString("hex") ?? null,
           secp256k1_wallet_id: user.secp256k1_wallet_id,
           secp256k1_ks_nodes: user.secp256k1_ks_nodes ?? [],
           ed25519_public_key: user.ed25519_public_key?.toString("hex") ?? null,

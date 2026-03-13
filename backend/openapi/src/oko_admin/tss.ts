@@ -69,7 +69,8 @@ export const GetTssSessionListRequestSchema = registry.register(
       description: "Customer ID to filter by (optional)",
     }),
     curve_type: z.string().optional().openapi({
-      description: "Curve type to filter by (optional, e.g. secp256k1 or ed25519)",
+      description:
+        "Curve type to filter by (optional, e.g. secp256k1 or ed25519)",
     }),
   }),
 );
@@ -146,11 +147,6 @@ const TssActivationSettingDataSchema = registry.register(
   }),
 );
 
-// export const GetTssAllActivationSettingSuccessResponseSchema =
-//   makeSuccessResponseSchema(
-//     TssActivationSettingDataSchema,
-//     "GetTssAllActivationSettingSuccessResponse",
-//   );
 export const GetTssAllActivationSettingSuccessResponseSchema =
   registry.register(
     "GetTssAllActivationSettingSuccessResponse",
@@ -171,11 +167,6 @@ export const SetTssAllActivationSettingRequestSchema = registry.register(
   }),
 );
 
-// export const SetTssAllActivationSettingSuccessResponseSchema =
-//   makeSuccessResponseSchema(
-//     TssActivationSettingDataSchema,
-//     "SetTssAllActivationSettingSuccessResponse",
-//   );
 export const SetTssAllActivationSettingSuccessResponseSchema =
   registry.register(
     "SetTssAllActivationSettingSuccessResponse",

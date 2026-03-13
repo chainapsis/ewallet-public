@@ -1,4 +1,4 @@
-import { Pool } from "pg";
+import type { Pool } from "pg";
 
 export async function dropAllTablesIfExist(pool: Pool) {
   const tableNameRet = await pool.query<{ table_name: string }>(

@@ -1,8 +1,8 @@
 import type { WithTime } from "@oko-wallet-types/aux_types";
-import {
-  type KeyShareNode,
-  type KSNodeHealthCheck,
-  type KSNodeWithHealthCheck,
+import type {
+  KeyShareNode,
+  KSNodeHealthCheck,
+  KSNodeWithHealthCheck,
 } from "@oko-wallet-types/tss";
 
 export interface GetAllKSNodeResponse {

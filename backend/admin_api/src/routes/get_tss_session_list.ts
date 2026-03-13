@@ -7,11 +7,6 @@ import {
 import {
   GetTssSessionListRequestSchema,
   GetTssSessionListSuccessResponseSchema,
-  LoginRequestSchema,
-  ResendCustomerUserPasswordRequestSchema,
-  ResendCustomerUserPasswordSuccessResponseSchema,
-  SetTssAllActivationSettingRequestSchema,
-  SetTssAllActivationSettingSuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/oko_admin";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type { Response } from "express";

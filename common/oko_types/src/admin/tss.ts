@@ -1,5 +1,5 @@
-import { type TssSessionWithCustomerAndUser } from "@oko-wallet-types/tss";
-import { type TssActivationSetting } from "@oko-wallet-types/tss_activate";
+import type { TssSessionWithCustomerAndUser } from "@oko-wallet-types/tss";
+import type { TssActivationSetting } from "@oko-wallet-types/tss_activate";
 
 export interface GetTssSessionListRequest {
   limit: number;

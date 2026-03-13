@@ -4,8 +4,8 @@ import type {
   UserWithWallets,
   Wallet,
   WalletStatus,
-  WalletWithEmail,
   WalletWithAuthInfo,
+  WalletWithEmail,
   WalletWithEmailAndKSNodes,
 } from "@oko-wallet/oko-types/wallets";
 import type { Result } from "@oko-wallet/stdlib-js";
@@ -274,7 +274,7 @@ SELECT COUNT(*) FROM oko_wallets
 
     return {
       success: true,
-      data: parseInt(result.rows[0].count),
+      data: parseInt(result.rows[0].count, 10),
     };
   } catch (error) {
     return {
@@ -389,7 +389,7 @@ WHERE w_secp.wallet_id IS NOT NULL OR w_ed.wallet_id IS NOT NULL
 
     return {
       success: true,
-      data: parseInt(result.rows[0].count),
+      data: parseInt(result.rows[0].count, 10),
     };
   } catch (error) {
     return {

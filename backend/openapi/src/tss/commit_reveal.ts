@@ -1,5 +1,5 @@
-import { z } from "zod";
 import { registry } from "@oko-wallet/oko-api-openapi";
+import { z } from "zod";
 
 export const OperationTypeSchema = z
   .enum([

@@ -33,16 +33,10 @@ const SendVerificationResponseSchema = registry.register(
       description: "Success message indicating verification code was sent",
     }),
     expires_at: z.string().openapi({
-      description:
-        "ISO 8601 expiration timestamp of the verification code",
+      description: "ISO 8601 expiration timestamp of the verification code",
     }),
   }),
 );
-
-// export const SendVerificationSuccessResponseSchema = makeSuccessResponseSchema(
-//   SendVerificationResponseSchema,
-//   "CustomerDashboardSendVerificationSuccessResponse",
-// );
 
 export const SendVerificationSuccessResponseSchema = registry.register(
   "CustomerDashboardSendVerificationSuccessResponse",
@@ -102,10 +96,6 @@ const LoginResponseSchema = registry.register(
   }),
 );
 
-// export const LoginSuccessResponseSchema = makeSuccessResponseSchema(
-//   LoginResponseSchema,
-//   "CustomerDashboardLoginSuccessResponse",
-// );
 export const LoginSuccessResponseSchema = registry.register(
   "CustomerDashboardLoginSuccessResponse",
   z.object({
@@ -146,11 +136,6 @@ const ChangePasswordResponseSchema = registry.register(
   }),
 );
 
-// export const ChangePasswordSuccessResponseSchema = makeSuccessResponseSchema(
-//   ChangePasswordResponseSchema,
-//   "CustomerDashboardChangePasswordSuccessResponse",
-// );
-
 export const ChangePasswordSuccessResponseSchema = registry.register(
   "CustomerDashboardChangePasswordSuccessResponse",
   z.object({
@@ -177,8 +162,7 @@ const ForgotPasswordResponseSchema = registry.register(
       description: "Success message indicating reset code was sent",
     }),
     expires_at: z.string().openapi({
-      description:
-        "ISO 8601 expiration timestamp of the reset code",
+      description: "ISO 8601 expiration timestamp of the reset code",
     }),
   }),
 );

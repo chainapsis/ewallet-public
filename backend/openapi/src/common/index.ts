@@ -1,5 +1,5 @@
-import { z } from "zod";
 import { registry } from "@oko-wallet/oko-api-openapi";
+import { z } from "zod";
 
 export const SuccessResponseSchema = registry.register(
   "SuccessResponse",
@@ -101,18 +101,3 @@ export const PaginationSchema = registry.register(
     }),
   }),
 );
-
-// export function makeSuccessResponseSchema<T extends z.ZodTypeAny>(
-//   dataSchema: T,
-//   name: string,
-// ) {
-//   return registry.register(
-//     name,
-//     z.object({
-//       success: z.literal(true).openapi({
-//         description: "Indicates the request succeeded",
-//       }),
-//       data: dataSchema,
-//     }),
-//   );
-// }
