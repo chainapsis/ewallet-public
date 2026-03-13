@@ -1,7 +1,7 @@
-import type { FC } from "react";
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import { Button } from "@oko-wallet/oko-common-ui/button";
 import { WarningIcon } from "@oko-wallet/oko-common-ui/icons/warning_icon";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import type { FC } from "react";
 
 import styles from "./login_popup_error_view.module.scss";
 import type { AppError } from "@oko-wallet-attached/errors";

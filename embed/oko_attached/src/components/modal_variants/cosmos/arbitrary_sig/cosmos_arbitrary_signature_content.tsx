@@ -1,8 +1,8 @@
-import { useState, type FC } from "react";
-import type { CosmosArbitrarySignPayload } from "@oko-wallet/oko-sdk-core";
+import { ChevronRightIcon } from "@oko-wallet/oko-common-ui/icons/chevron_right";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import { ChevronRightIcon } from "@oko-wallet/oko-common-ui/icons/chevron_right";
+import type { CosmosArbitrarySignPayload } from "@oko-wallet/oko-sdk-core";
+import { type FC, useState } from "react";
 
 import styles from "./cosmos_arbitrary_signature_content.module.scss";
 import { MakeSignatureRawCodeBlock } from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_sig_modal_code_block";

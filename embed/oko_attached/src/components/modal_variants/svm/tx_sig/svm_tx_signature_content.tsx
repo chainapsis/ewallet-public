@@ -1,18 +1,18 @@
-import type { FC } from "react";
-import type { SvmTxSignPayload } from "@oko-wallet/oko-sdk-core";
-import type { ParsedTransaction } from "@oko-wallet-attached/tx-parsers/svm/types";
+import { EmptyStateIcon } from "@oko-wallet/oko-common-ui/icons/empty_state_icon";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import type { SvmTxSignPayload } from "@oko-wallet/oko-sdk-core";
 import { useQuery } from "@tanstack/react-query";
+import type { FC } from "react";
 import { useMemo } from "react";
-import { EmptyStateIcon } from "@oko-wallet/oko-common-ui/icons/empty_state_icon";
 
 import styles from "../common/signature_content.module.scss";
+import { SvmTxSummary } from "./svm_tx_summary";
 import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
 import { SignerAddressOrEmail } from "@oko-wallet-attached/components/modal_variants/common/metadata_content/signer_address_or_email/signer_address_or_email";
-import { SvmTxSummary } from "./svm_tx_summary";
-import { getFaviconUrl } from "@oko-wallet-attached/utils/favicon";
 import { getChainByChainId } from "@oko-wallet-attached/requests/chain_infos";
+import type { ParsedTransaction } from "@oko-wallet-attached/tx-parsers/svm/types";
+import { getFaviconUrl } from "@oko-wallet-attached/utils/favicon";
 
 interface SvmTxSignatureContentProps {
   payload: SvmTxSignPayload;

@@ -60,12 +60,12 @@ export function parseSiwsMessage(message: string): Partial<SiwsMessage> {
   }
 
   // Second line: address
-  if (lines[1] && lines[1].trim()) {
+  if (lines[1]?.trim()) {
     result.address = lines[1].trim();
   }
 
   // Find the separator between header and fields
-  let statementLines: string[] = [];
+  const statementLines: string[] = [];
   let fieldStartIndex = -1;
 
   for (let i = 2; i < lines.length; i++) {
@@ -129,7 +129,9 @@ export function parseSiwsMessage(message: string): Partial<SiwsMessage> {
       }
 
       const colonIndex = line.indexOf(":");
-      if (colonIndex === -1) continue;
+      if (colonIndex === -1) {
+        continue;
+      }
 
       const key = line.slice(0, colonIndex).trim();
       const value = line.slice(colonIndex + 1).trim();

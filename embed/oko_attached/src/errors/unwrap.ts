@@ -1,5 +1,5 @@
-import { useEffect } from "react";
 import type { Result } from "@oko-wallet/stdlib-js";
+import { useEffect } from "react";
 
 import type { AppError } from ".";
 import { useMemoryState } from "@oko-wallet-attached/store/memory";

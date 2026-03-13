@@ -1,11 +1,11 @@
-import type { FC } from "react";
-import type { EthereumArbitrarySignPayload } from "@oko-wallet/oko-sdk-core";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import type { EthereumArbitrarySignPayload } from "@oko-wallet/oko-sdk-core";
+import type { FC } from "react";
 import { bytesToString, hexToString } from "viem";
 
-import { MetadataContent } from "@oko-wallet-attached/components/modal_variants/common/metadata_content/metadata_content";
 import styles from "./ethereum_arbitrary_signature_content.module.scss";
+import { MetadataContent } from "@oko-wallet-attached/components/modal_variants/common/metadata_content/metadata_content";
 
 interface EthereumArbitrarySignatureContentProps {
   payload: EthereumArbitrarySignPayload;

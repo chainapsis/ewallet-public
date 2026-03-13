@@ -1,5 +1,5 @@
-import { type FC } from "react";
 import type { MakeCosmosSigData } from "@oko-wallet/oko-sdk-core";
+import type { FC } from "react";
 
 import { MakeArbitrarySigModal } from "./arbitrary_sig/make_arbitrary_sig_modal";
 import { MakeTxSigModal } from "./tx_sig/make_tx_sig_modal";

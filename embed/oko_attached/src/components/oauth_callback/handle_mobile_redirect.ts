@@ -26,7 +26,9 @@ export function handleMobileRedirect(params: {
   code?: string | null;
 }): boolean {
   // Web popup flow — not mobile
-  if (window.opener) return false;
+  if (window.opener) {
+    return false;
+  }
 
   const { provider, authType, oauthState } = params;
 

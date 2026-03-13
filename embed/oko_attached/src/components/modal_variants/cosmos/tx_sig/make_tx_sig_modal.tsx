@@ -1,18 +1,18 @@
-import { type FC } from "react";
-import type { CosmosTxSigData } from "@oko-wallet/oko-sdk-core";
+import { Button } from "@oko-wallet/oko-common-ui/button";
 import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
-import { Button } from "@oko-wallet/oko-common-ui/button";
+import type { CosmosTxSigData } from "@oko-wallet/oko-sdk-core";
+import type { FC } from "react";
 
-import styles from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_signature_modal.module.scss";
+import { CosmosTxFee } from "./cosmos_tx_fee";
+import { CosmosTxSignatureContent } from "./cosmos_tx_signature_content";
+import { useTxSigModal } from "./use_tx_sig_modal";
+import { trackTxButtonEvent } from "@oko-wallet-attached/analytics/events";
 import { CommonModal } from "@oko-wallet-attached/components/modal_variants/common/common_modal";
 import { DemoView } from "@oko-wallet-attached/components/modal_variants/common/make_signature/demo_view";
-import { useTxSigModal } from "./use_tx_sig_modal";
-import { CosmosTxSignatureContent } from "./cosmos_tx_signature_content";
-import { CosmosTxFee } from "./cosmos_tx_fee";
-import { extractMsgsFromSignDoc } from "@oko-wallet-attached/web3/cosmos/sign_doc";
-import { trackTxButtonEvent } from "@oko-wallet-attached/analytics/events";
+import styles from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_signature_modal.module.scss";
 import { SignWithOkoBox } from "@oko-wallet-attached/components/sign_with_oko_box/sign_with_oko_box";
+import { extractMsgsFromSignDoc } from "@oko-wallet-attached/web3/cosmos/sign_doc";
 
 export const MakeTxSigModal: FC<MakeTxSigModalProps> = ({
   getIsAborted,
@@ -82,7 +82,10 @@ export const MakeTxSigModal: FC<MakeTxSigModalProps> = ({
           <XCloseIcon size={20} color="var(--fg-quaternary)" />
         </div>
 
-        <div data-scroll-container className={styles.modalInnerContentContainer}>
+        <div
+          data-scroll-container
+          className={styles.modalInnerContentContainer}
+        >
           <CosmosTxSignatureContent
             payload={sigData.payload}
             signDocJson={signDocJson}

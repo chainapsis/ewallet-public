@@ -1,7 +1,7 @@
-import { type FC, type ReactNode, useState, useMemo } from "react";
-import type { SvmMessageSignPayload } from "@oko-wallet/oko-sdk-core";
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import { ChevronRightIcon } from "@oko-wallet/oko-common-ui/icons/chevron_right";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import type { SvmMessageSignPayload } from "@oko-wallet/oko-sdk-core";
+import { type FC, type ReactNode, useMemo, useState } from "react";
 
 import styles from "../common/summary.module.scss";
 import { MakeSignatureRawCodeBlock } from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_sig_modal_code_block";
@@ -11,9 +11,7 @@ export interface SvmMessageSummaryProps {
   payload: SvmMessageSignPayload;
 }
 
-export const SvmMessageSummary: FC<SvmMessageSummaryProps> = ({
-  payload,
-}) => {
+export const SvmMessageSummary: FC<SvmMessageSummaryProps> = ({ payload }) => {
   const [isRawView, setIsRawView] = useState(false);
 
   const { rawData, smartViewContent } = useMemo(() => {
@@ -88,7 +86,10 @@ export const SvmMessageSummary: FC<SvmMessageSummaryProps> = ({
           <Typography color="tertiary" size="xs" weight="medium">
             {isRawView ? "Smart View" : "Raw View"}
           </Typography>
-          <ChevronRightIcon className={styles.summaryHeaderRightIcon} color="var(--fg-tertiary)" />
+          <ChevronRightIcon
+            className={styles.summaryHeaderRightIcon}
+            color="var(--fg-tertiary)"
+          />
         </div>
       </div>
       {content}

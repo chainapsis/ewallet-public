@@ -1,8 +1,8 @@
+import { KEPLR_API_ENDPOINT } from "./endpoints";
 import type {
   AssetMeta,
   AssetMetaParams,
 } from "@oko-wallet-attached/types/asset_meta";
-import { KEPLR_API_ENDPOINT } from "./endpoints";
 
 // const KEPLR_API_ENDPOINT = import.meta.env.NEXT_PUBLIC_KEPLR_API_ENDPOINT;
 

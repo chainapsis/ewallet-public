@@ -1,17 +1,17 @@
-import type { Result } from "@oko-wallet/stdlib-js";
 import type {
-  OkoWalletMsg,
-  OkoWalletMsgOAuthInfoPass,
   OAuthPayload,
   OAuthTokenRequestPayload,
+  OkoWalletMsg,
+  OkoWalletMsgOAuthInfoPass,
 } from "@oko-wallet/oko-sdk-core";
+import type { Result } from "@oko-wallet/stdlib-js";
 
-import { sendMsgToWindow } from "@oko-wallet-attached/window_msgs/send";
-import { OAUTH_BROADCAST_CHANNEL } from "@oko-wallet-attached/window_msgs/target";
 import type {
   HandleCallbackError,
   SendMsgToEmbeddedWindowError,
 } from "@oko-wallet-attached/components/google_callback/types";
+import { sendMsgToWindow } from "@oko-wallet-attached/window_msgs/send";
+import { OAUTH_BROADCAST_CHANNEL } from "@oko-wallet-attached/window_msgs/target";
 
 export async function sendOAuthPayloadToEmbeddedWindow(
   payload: OAuthPayload | OAuthTokenRequestPayload,
@@ -73,7 +73,7 @@ async function sendMsgToEmbeddedWindow(
           };
         }
       }
-    } catch (err: any) {
+    } catch (_err: any) {
       console.log(`parent window's iframe not ours, idx: ${idx}`);
     }
   }

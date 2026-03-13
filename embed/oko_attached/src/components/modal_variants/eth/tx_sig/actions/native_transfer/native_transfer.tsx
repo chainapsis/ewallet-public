@@ -1,10 +1,10 @@
-import { type FC } from "react";
+import type { FC } from "react";
 
-import { TxContainer } from "../common/tx_container";
-import { TokenInfo } from "../common/token_info";
 import { AddressInfo } from "../common/address_info";
+import { TokenInfo } from "../common/token_info";
+import { TxContainer } from "../common/tx_container";
+import type { NativeTransferTxAction, RenderContext } from "../types";
 import { TxRow } from "@oko-wallet-attached/components/modal_variants/common/tx_row";
-import type { RenderContext, NativeTransferTxAction } from "../types";
 
 export const NativeTransfer: FC<NativeTransferProps> = ({ action, ctx }) => {
   return (

@@ -1,10 +1,10 @@
+import { Bytes } from "@oko-wallet/bytes";
+import * as wasmModule from "@oko-wallet/cait-sith-keplr-wasm/pkg/cait_sith_keplr_wasm";
 import type {
   PointNumArr,
   UserKeySharePointByNode,
 } from "@oko-wallet/oko-types/user_key_share";
 import type { Result } from "@oko-wallet/stdlib-js";
-import * as wasmModule from "@oko-wallet/cait-sith-keplr-wasm/pkg/cait_sith_keplr_wasm";
-import { Bytes } from "@oko-wallet/bytes";
 
 export async function combineUserShares(
   userKeySharePoints: UserKeySharePointByNode[],

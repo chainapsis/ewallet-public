@@ -1,10 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
-import type { ChainInfoForAttachedModal } from "@oko-wallet/oko-sdk-core";
 import type { ChainInfo } from "@keplr-wallet/types";
+import type { ChainInfoForAttachedModal } from "@oko-wallet/oko-sdk-core";
+import { useQuery } from "@tanstack/react-query";
 import type { Chain } from "viem";
 
-import { toEthereumChain } from "@oko-wallet-attached/web3/ethereum/utils";
 import { allChainsQuery } from "@oko-wallet-attached/requests/chain_infos";
+import { toEthereumChain } from "@oko-wallet-attached/web3/ethereum/utils";
 
 export interface UseSupportedEthChainResult {
   isSupportedChain: boolean;

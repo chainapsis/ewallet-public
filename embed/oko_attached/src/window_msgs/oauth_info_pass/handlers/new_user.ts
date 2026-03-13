@@ -1,35 +1,35 @@
+import { reqKeygenV2 } from "@oko-wallet/api-lib";
+import { runKeygen } from "@oko-wallet/cait-sith-keplr-hooks";
+import type { OAuthSignInError } from "@oko-wallet/oko-sdk-core";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { KeyShareNodeMetaWithNodeStatusInfo } from "@oko-wallet/oko-types/tss";
 import { teddsaKeyShareToHex } from "@oko-wallet/oko-types/user_key_share";
 import type { Result } from "@oko-wallet/stdlib-js";
-import { type OAuthSignInError } from "@oko-wallet/oko-sdk-core";
-import { runKeygen } from "@oko-wallet/cait-sith-keplr-hooks";
 import {
   serializeKeyPackage,
   serializePublicKeyPackage,
 } from "@oko-wallet/teddsa-hooks";
-import { reqKeygenV2 } from "@oko-wallet/api-lib";
 
-import { splitUserKeyShares } from "@oko-wallet-attached/crypto/keygen";
-import {
-  TSS_V2_ENDPOINT,
-  saveReferralV2,
-} from "@oko-wallet-attached/requests/oko_api";
-import type { UserSignInResultV2 } from "@oko-wallet-attached/window_msgs/types";
-import { registerKeySharesV2 } from "@oko-wallet-attached/requests/ks_node_v2";
 import {
   commitAll,
-  createOkoApiCommitRevealParams,
   createKsnCommitRevealParams,
+  createOkoApiCommitRevealParams,
   type KsnCommitTarget,
 } from "@oko-wallet-attached/crypto/commit_reveal";
 import { encodePoint256ToKeyShareString } from "@oko-wallet-attached/crypto/key_share_utils";
-import type { ReferralInfo } from "@oko-wallet-attached/store/memory/types";
+import { splitUserKeyShares } from "@oko-wallet-attached/crypto/keygen";
 import {
-  teddsaKeygenToHex,
   runEd25519KeygenAndSplit,
   seedShareToHex,
+  teddsaKeygenToHex,
 } from "@oko-wallet-attached/crypto/keygen_ed25519";
+import { registerKeySharesV2 } from "@oko-wallet-attached/requests/ks_node_v2";
+import {
+  saveReferralV2,
+  TSS_V2_ENDPOINT,
+} from "@oko-wallet-attached/requests/oko_api";
+import type { ReferralInfo } from "@oko-wallet-attached/store/memory/types";
+import type { UserSignInResultV2 } from "@oko-wallet-attached/window_msgs/types";
 
 /**
  * Handle new user who needs both secp256k1 and ed25519 keygen.

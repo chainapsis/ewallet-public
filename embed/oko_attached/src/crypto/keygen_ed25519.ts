@@ -1,21 +1,22 @@
-import {
-  runTeddsaKeygenSeed,
-  type TeddsaKeygenOutputBytes,
-} from "@oko-wallet/teddsa-hooks";
+import { Bytes, type Bytes32 } from "@oko-wallet/bytes";
+import * as secp256k1Wasm from "@oko-wallet/cait-sith-keplr-wasm/pkg/cait_sith_keplr_wasm";
 import type {
   KeyPackageRaw,
   PublicKeyPackageRaw,
 } from "@oko-wallet/oko-types/teddsa";
-import type { Result } from "@oko-wallet/stdlib-js";
-import { Bytes, type Bytes32 } from "@oko-wallet/bytes";
 import type { KeyShareNodeMetaWithNodeStatusInfo } from "@oko-wallet/oko-types/tss";
 import type {
   PointNumArr,
   TeddsaKeyShareByNode,
 } from "@oko-wallet/oko-types/user_key_share";
-import * as secp256k1Wasm from "@oko-wallet/cait-sith-keplr-wasm/pkg/cait_sith_keplr_wasm";
-import { extractSigningShare, splitTeddsaSigningShare } from "./sss_ed25519";
+import type { Result } from "@oko-wallet/stdlib-js";
+import {
+  runTeddsaKeygenSeed,
+  type TeddsaKeygenOutputBytes,
+} from "@oko-wallet/teddsa-hooks";
+
 import { hashKeyshareNodeNames } from "./hash";
+import { extractSigningShare, splitTeddsaSigningShare } from "./sss_ed25519";
 
 export interface KeyPackageEd25519Hex {
   keyPackage: string;

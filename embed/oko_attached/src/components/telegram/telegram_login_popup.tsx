@@ -1,12 +1,12 @@
 "use client";
 
-import { useContext, useEffect, type FC } from "react";
-import { RedirectUriSearchParamsKey } from "@oko-wallet/oko-sdk-core";
 import { Logo } from "@oko-wallet/oko-common-ui/logo";
 import { ThemeContext } from "@oko-wallet/oko-common-ui/theme";
+import { RedirectUriSearchParamsKey } from "@oko-wallet/oko-sdk-core";
+import { type FC, useContext, useEffect } from "react";
 
-import { TELEGRAM_BOT_NAME } from "@oko-wallet-attached/config/telegram";
 import telegramStyles from "./telegram_login_popup.module.scss";
+import { TELEGRAM_BOT_NAME } from "@oko-wallet-attached/config/telegram";
 
 export const TelegramLoginPopup: FC = () => {
   const theme = useContext(ThemeContext);
@@ -24,7 +24,7 @@ export const TelegramLoginPopup: FC = () => {
 
     try {
       JSON.parse(stateParam);
-    } catch (err) {
+    } catch (_err) {
       return;
     }
 
@@ -54,7 +54,7 @@ export const TelegramLoginPopup: FC = () => {
     }
 
     return () => {
-      if (container && container.contains(script)) {
+      if (container?.contains(script)) {
         container.removeChild(script);
       }
     };

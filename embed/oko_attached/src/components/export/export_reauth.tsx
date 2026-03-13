@@ -1,13 +1,12 @@
-import { useEffect, useLayoutEffect, useState } from "react";
-
 import { ThemeProvider } from "@oko-wallet/oko-common-ui/theme";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
+import { useEffect, useLayoutEffect, useState } from "react";
 
-import { setColorScheme } from "@oko-wallet-attached/components/attached_initialized/color_scheme";
-import { getSystemTheme } from "@oko-wallet-attached/components/google_callback/theme";
 import { EmailReauth } from "./email_reauth";
 import { TelegramReauth } from "./telegram_reauth";
 import { useExportReauth } from "./use_export_reauth";
+import { setColorScheme } from "@oko-wallet-attached/components/attached_initialized/color_scheme";
+import { getSystemTheme } from "@oko-wallet-attached/components/google_callback/theme";
 
 type ReauthStatus = "loading" | "redirecting" | "error";
 
@@ -45,9 +44,13 @@ export const ExportReauth = () => {
   })();
 
   return <ThemeProvider theme={theme}>{content}</ThemeProvider>;
-}
+};
 
-const OAuthRedirect = ({ authType }: { authType: "google" | "x" | "discord" | "github" }) => {
+const OAuthRedirect = ({
+  authType,
+}: {
+  authType: "google" | "x" | "discord" | "github";
+}) => {
   const [status, setStatus] = useState<ReauthStatus>("loading");
   const [error, setError] = useState<string | null>(null);
 
@@ -83,4 +86,4 @@ const OAuthRedirect = ({ authType }: { authType: "google" | "x" | "discord" | "g
   }
 
   return null;
-}
+};

@@ -1,5 +1,4 @@
-import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
-import { concat, keccak256, pad, parseUnits, toHex } from "viem";
+import { type UseQueryOptions, useQuery } from "@tanstack/react-query";
 import type {
   Address,
   Chain,
@@ -9,14 +8,15 @@ import type {
   RpcTransactionRequest,
   StateOverride,
 } from "viem";
+import { concat, keccak256, pad, parseUnits, toHex } from "viem";
 
-import { classifyViemErrorDetailed } from "@oko-wallet-attached/web3/ethereum/error";
 import {
   DEFAULT_MULTIPLIER,
   DEFAULT_RETRY_COUNT,
   type StructuredRpcError,
 } from "./types";
 import { DEMO_WEB_ORIGIN } from "@oko-wallet-attached/requests/endpoints";
+import { classifyViemErrorDetailed } from "@oko-wallet-attached/web3/ethereum/error";
 
 export interface UseGetGasEstimationProps {
   simulationKey: string;

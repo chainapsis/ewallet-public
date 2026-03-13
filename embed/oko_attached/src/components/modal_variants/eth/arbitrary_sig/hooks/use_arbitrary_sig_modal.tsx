@@ -1,16 +1,16 @@
-import { useEffect, useState } from "react";
 import type {
   MakeArbitrarySigData,
   MakeSigModalErrorAckPayload,
   OpenModalAckPayload,
 } from "@oko-wallet/oko-sdk-core";
+import { useEffect, useState } from "react";
 
-import { makeEthereumArbitraryMessageSignature } from "@oko-wallet-attached/web3/ethereum/sig";
+import { hasOnChainSchema } from "@oko-wallet-attached/components/modal_variants/eth/arbitrary_sig/on_chain";
+import { DEMO_WEB_ORIGIN } from "@oko-wallet-attached/requests/endpoints";
 import { useAppState } from "@oko-wallet-attached/store/app";
 import { useMemoryState } from "@oko-wallet-attached/store/memory";
-import { DEMO_WEB_ORIGIN } from "@oko-wallet-attached/requests/endpoints";
 import { useSupportedEthChain } from "@oko-wallet-attached/web3/ethereum/hooks/use_supported_eth_chain";
-import { hasOnChainSchema } from "@oko-wallet-attached/components/modal_variants/eth/arbitrary_sig/on_chain";
+import { makeEthereumArbitraryMessageSignature } from "@oko-wallet-attached/web3/ethereum/sig";
 
 export interface UseEthereumSigModalArgs {
   modalId: string;

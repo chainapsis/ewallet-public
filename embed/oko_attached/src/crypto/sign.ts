@@ -1,12 +1,12 @@
+import { reqAbortTssSession } from "@oko-wallet/api-lib";
 import {
   runPresign,
   runSign,
   runTriples,
 } from "@oko-wallet/cait-sith-keplr-hooks";
-import type { SignOutput } from "@oko-wallet/tecdsa-interface";
-import { reqAbortTssSession } from "@oko-wallet/api-lib";
-import type { Result } from "@oko-wallet/stdlib-js";
 import type { MakeSignOutputError } from "@oko-wallet/oko-sdk-core";
+import type { Result } from "@oko-wallet/stdlib-js";
+import type { SignOutput } from "@oko-wallet/tecdsa-interface";
 
 import { TSS_V2_ENDPOINT } from "@oko-wallet-attached/requests/oko_api";
 

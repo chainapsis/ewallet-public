@@ -1,7 +1,7 @@
-import { useState, type FC } from "react";
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import { ChevronDownIcon } from "@oko-wallet/oko-common-ui/icons/chevron_down";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import cn from "classnames";
+import { type FC, useState } from "react";
 
 import styles from "./collapsible.module.scss";
 

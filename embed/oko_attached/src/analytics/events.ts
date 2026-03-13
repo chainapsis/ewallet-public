@@ -1,19 +1,19 @@
 import { useEffect, useRef } from "react";
-import type { ParsedInstruction } from "@oko-wallet-attached/tx-parsers/svm";
 
-import type { EthTxAction } from "@oko-wallet-attached/components/modal_variants/eth/tx_sig/actions/types";
 import { trackEvent } from "./amplitude";
 import type {
   CosmosMsgs,
   TrackTxButtonEventArgs,
   UseTrackTxSummaryViewArgs,
 } from "./types";
+import type { EthTxAction } from "@oko-wallet-attached/components/modal_variants/eth/tx_sig/actions/types";
+import type { ParsedInstruction } from "@oko-wallet-attached/tx-parsers/svm";
 
 export function useTrackTxSummaryView(args: UseTrackTxSummaryViewArgs) {
   const { hostOrigin, chainType, chainId } = args;
   const hasTrackedRef = useRef(false);
 
-  let txTypes;
+  let txTypes: string[];
   switch (chainType) {
     case "cosmos": {
       const { messages } = args;

@@ -1,16 +1,16 @@
 "use client";
 
-import { type FC } from "react";
+import { ErrorIcon } from "@oko-wallet/oko-common-ui/icons/error_icon";
+import { ExternalLinkOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/external_link_outlined";
 import { LoadingIcon } from "@oko-wallet/oko-common-ui/icons/loading";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import { OkoLogoIcon } from "@oko-wallet-common-ui/icons/oko_logo_icon";
-import { ErrorIcon } from "@oko-wallet/oko-common-ui/icons/error_icon";
-import { ExternalLinkOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/external_link_outlined";
+import type { FC } from "react";
 
 import styles from "@oko-wallet-attached/components/google_callback/google_callback.module.scss";
 import { useXCallback } from "@oko-wallet-attached/components/x_callback/use_callback";
 import { useSetThemeInCallback } from "@oko-wallet-attached/hooks/theme";
+import { OkoLogoIcon } from "@oko-wallet-common-ui/icons/oko_logo_icon";
 
 export const XCallback: FC = () => {
   const theme = useSetThemeInCallback("x");

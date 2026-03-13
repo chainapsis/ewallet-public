@@ -1,8 +1,8 @@
-import type {
-  ApiName as OkoApiName,
-  CommitRevealParams,
-} from "@oko-wallet/oko-types/commit_reveal";
 import type { ApiName as KsnApiName } from "@oko-wallet/ksn-interface/commit_reveal";
+import type {
+  CommitRevealParams,
+  ApiName as OkoApiName,
+} from "@oko-wallet/oko-types/commit_reveal";
 import type { Result } from "@oko-wallet/stdlib-js";
 
 import type { ClientCommitRevealSession } from "./types";

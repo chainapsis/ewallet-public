@@ -1,9 +1,10 @@
 import type { MakeSvmTxSignData } from "@oko-wallet/oko-sdk-core";
-import { base64ToUint8Array } from "@oko-wallet-attached/utils/base64";
+
 import {
-  useSvmSignatureBase,
   signMessageToHex,
+  useSvmSignatureBase,
 } from "../use_svm_signature_base";
+import { base64ToUint8Array } from "@oko-wallet-attached/utils/base64";
 
 export interface UseTxSigModalArgs {
   modalId: string;
@@ -18,10 +19,14 @@ export function useTxSigModal(args: UseTxSigModalArgs) {
   const base = useSvmSignatureBase({ modalId, hostOrigin, getIsAborted });
 
   async function onApprove() {
-    if (getIsAborted()) return;
+    if (getIsAborted()) {
+      return;
+    }
 
     const ctx = base.prepareSigningContext();
-    if (!ctx) return;
+    if (!ctx) {
+      return;
+    }
 
     base.setIsLoading(true);
 

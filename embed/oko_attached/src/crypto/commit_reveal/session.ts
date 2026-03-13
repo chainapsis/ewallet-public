@@ -1,22 +1,22 @@
+import type { OperationType as KsnOperationType } from "@oko-wallet/ksn-interface/commit_reveal";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { OperationType } from "@oko-wallet/oko-types/commit_reveal";
-import type { OperationType as KsnOperationType } from "@oko-wallet/ksn-interface/commit_reveal";
 import type { Result } from "@oko-wallet/stdlib-js";
 
 import type {
   ClientCommitRevealSession,
-  KsnCommitTarget,
-  KsnCommitResult,
   CommitAllResult,
+  KsnCommitResult,
+  KsnCommitTarget,
 } from "./types";
 import {
-  generateSessionId,
-  generateClientKeypair,
   computeIdTokenHash,
+  generateClientKeypair,
+  generateSessionId,
   SESSION_TIMEOUT_MS,
 } from "./utils";
-import { commitToOkoApi } from "@oko-wallet-attached/requests/oko_api";
 import { commitToKsNode } from "@oko-wallet-attached/requests/ks_node_v2";
+import { commitToOkoApi } from "@oko-wallet-attached/requests/oko_api";
 
 export function createCommitRevealSession(
   operationType: OperationType,

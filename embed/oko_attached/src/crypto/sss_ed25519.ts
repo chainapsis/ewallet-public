@@ -1,14 +1,14 @@
-import type { KeyShareNodeMetaWithNodeStatusInfo } from "@oko-wallet/oko-types/tss";
-import type { NodeNameAndEndpoint } from "@oko-wallet/oko-types/user";
-import { wasmModule } from "@oko-wallet/frost-ed25519-keplr-wasm";
 import { Bytes, type Bytes32 } from "@oko-wallet/bytes";
-import type { TeddsaKeyShareByNode } from "@oko-wallet/oko-types/user_key_share";
-import type { Result } from "@oko-wallet/stdlib-js";
-import type { KeyPackage } from "@oko-wallet/teddsa-interface";
+import { wasmModule } from "@oko-wallet/frost-ed25519-keplr-wasm";
 import type {
   KeyPackageRaw,
   PublicKeyPackageRaw,
 } from "@oko-wallet/oko-types/teddsa";
+import type { KeyShareNodeMetaWithNodeStatusInfo } from "@oko-wallet/oko-types/tss";
+import type { NodeNameAndEndpoint } from "@oko-wallet/oko-types/user";
+import type { TeddsaKeyShareByNode } from "@oko-wallet/oko-types/user_key_share";
+import type { Result } from "@oko-wallet/stdlib-js";
+import type { KeyPackage } from "@oko-wallet/teddsa-interface";
 
 import { hashKeyshareNodeNamesEd25519 } from "./hash";
 import { computeVerifyingShare } from "./scalar";

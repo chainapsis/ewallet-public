@@ -1,15 +1,15 @@
-import { type FC } from "react";
 import { Skeleton } from "@oko-wallet/oko-common-ui/skeleton";
+import type { FC } from "react";
 
 import styles from "./actions.module.scss";
-import type { RenderContext, EthTxAction } from "./types";
-import { NativeTransfer } from "./native_transfer/native_transfer";
-import { ERC20Transfer } from "./erc20_transfer/erc20_transfer";
 import { ERC20Approve } from "./erc20_approve/erc20_approve";
-import { ERC20TransferFrom } from "./erc20_transfer_from/erc20_transfer_from";
 import { ERC20Permit } from "./erc20_permit/erc20_permit";
-import { Unknown } from "./unknown/unknown";
+import { ERC20Transfer } from "./erc20_transfer/erc20_transfer";
+import { ERC20TransferFrom } from "./erc20_transfer_from/erc20_transfer_from";
 import { FallbackAction } from "./fallback/fallback_action";
+import { NativeTransfer } from "./native_transfer/native_transfer";
+import type { EthTxAction, RenderContext } from "./types";
+import { Unknown } from "./unknown/unknown";
 
 type TxRendererProps = {
   actions: EthTxAction[] | null;

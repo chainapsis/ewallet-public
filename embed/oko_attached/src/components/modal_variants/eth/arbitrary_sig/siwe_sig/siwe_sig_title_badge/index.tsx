@@ -1,9 +1,9 @@
-import type { FC } from "react";
-import type { Theme } from "@oko-wallet/oko-common-ui/theme";
 import { ImageWithAlt } from "@oko-wallet/oko-common-ui/image_with_alt";
+import type { Theme } from "@oko-wallet/oko-common-ui/theme";
+import type { FC } from "react";
 
-import { OKO_PUBLIC_S3_BUCKET_URL } from "@oko-wallet-attached/requests/endpoints";
 import styles from "./styles.module.scss";
+import { OKO_PUBLIC_S3_BUCKET_URL } from "@oko-wallet-attached/requests/endpoints";
 
 interface SiweSigTitleBadgeProps {
   theme: Theme | null;

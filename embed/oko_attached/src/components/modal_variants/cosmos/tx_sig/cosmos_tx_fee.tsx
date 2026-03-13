@@ -1,13 +1,13 @@
-import type { FC } from "react";
+import type { StdSignDoc } from "@keplr-wallet/types";
+import { Skeleton } from "@oko-wallet/oko-common-ui/skeleton";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import type { ChainInfoForAttachedModal } from "@oko-wallet/oko-sdk-core";
-import { Skeleton } from "@oko-wallet/oko-common-ui/skeleton";
 import cn from "classnames";
-import type { StdSignDoc } from "@keplr-wallet/types";
+import type { FC } from "react";
 
 import styles from "./cosmos_tx_fee.module.scss";
-import { useGetFee } from "@oko-wallet-attached/web3/cosmos/use_get_fee";
 import type { InsufficientBalanceFee } from "./types";
+import { useGetFee } from "@oko-wallet-attached/web3/cosmos/use_get_fee";
 
 export const CosmosTxFee: FC<CosmosTxFeeProps> = ({
   chainInfo,

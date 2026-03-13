@@ -8,7 +8,7 @@ export function getFaviconUrl(origin: string): string {
     return `https://www.google.com/s2/favicons?domain_url=${encodeURIComponent(
       parsed.origin,
     )}`;
-  } catch (error) {
+  } catch (_error) {
     return "";
   }
 }

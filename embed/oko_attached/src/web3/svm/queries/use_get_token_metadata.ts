@@ -1,4 +1,4 @@
-import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
+import { type UseQueryOptions, useQuery } from "@tanstack/react-query";
 
 import { useAssetMetaStore } from "@oko-wallet-attached/store/asset_meta";
 import type { AssetMetaInput } from "@oko-wallet-attached/types/asset_meta";

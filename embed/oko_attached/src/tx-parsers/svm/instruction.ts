@@ -1,17 +1,19 @@
 import {
-  SolanaFMParser,
-  ParserType,
   type InstructionParserInterface,
+  ParserType,
+  SolanaFMParser,
 } from "@solanafm/explorer-kit";
 import { getProgramIdl } from "@solanafm/explorer-kit-idls";
-import type { ParsedInstruction, ParsedAccount, ParseResult } from "./types";
+
+import type { ParsedAccount, ParsedInstruction, ParseResult } from "./types";
 
 const parserCache = new Map<string, InstructionParserInterface | null>();
 
 // Well-known Solana program IDs
 export const SYSTEM_PROGRAM_ID = "11111111111111111111111111111111";
 export const TOKEN_PROGRAM_ID = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
-export const TOKEN_2022_PROGRAM_ID = "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
+export const TOKEN_2022_PROGRAM_ID =
+  "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
 
 const KNOWN_PROGRAMS: Record<string, string> = {
   [SYSTEM_PROGRAM_ID]: "System Program",
