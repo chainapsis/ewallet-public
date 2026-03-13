@@ -1,11 +1,9 @@
 "use client";
 
-import React from "react";
-
 const ALL_LOGIN_METHODS = ["email", "sms", "google", "apple", "twitter"];
 
 export const SettingPanel = () => {
-  const handleCheckboxChange = (method: string) => {};
+  const handleCheckboxChange = (_method: string) => {};
 
   return (
     <>

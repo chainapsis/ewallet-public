@@ -70,6 +70,7 @@ export const ChainItem: FC<ChainItemProps> = memo(
               </Typography>
               {hasTokens && (
                 <button
+                  type="button"
                   className={styles.tokensButton}
                   onClick={handleTokensClick}
                 >

@@ -1,11 +1,10 @@
-import React from "react";
-import { HomeOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/home_outlined";
 import { ChartOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/chart_outlined";
+import { HomeOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/home_outlined";
 import { UsersIcon } from "@oko-wallet/oko-common-ui/icons/users";
 
-import { paths } from "@oko-wallet-admin/paths";
-import { type NavigationItem } from "./navigation";
+import type { NavigationItem } from "./navigation";
 import styles from "./navigation.module.scss";
+import { paths } from "@oko-wallet-admin/paths";
 
 export const navigationItems: NavigationItem[] = [
   {

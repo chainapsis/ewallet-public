@@ -1,17 +1,17 @@
 "use client";
 
-import { useRef, type FC } from "react";
-import { useRouter } from "next/navigation";
-import { type SubmitHandler } from "react-hook-form";
-import { Input } from "@oko-wallet/oko-common-ui/input";
 import { Button } from "@oko-wallet/oko-common-ui/button";
 import { PlusIcon } from "@oko-wallet/oko-common-ui/icons/plus";
 import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
-import { type CreateCustomerWithDashboardUserRequest } from "@oko-wallet/oko-types/admin";
+import { Input } from "@oko-wallet/oko-common-ui/input";
+import type { CreateCustomerWithDashboardUserRequest } from "@oko-wallet/oko-types/admin";
+import { useRouter } from "next/navigation";
+import { type FC, useRef } from "react";
+import type { SubmitHandler } from "react-hook-form";
 
+import { useToast } from "../toast/use_toast";
 import styles from "./create_customer_form.module.scss";
 import { useCreateCustomerForm } from "./use_create_customer_form";
-import { useToast } from "../toast/use_toast";
 
 export const CreateCustomerForm: FC = () => {
   const router = useRouter();

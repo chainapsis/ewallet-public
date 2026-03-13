@@ -1,10 +1,10 @@
-import { type CSSProperties } from "react";
+import type { CSSProperties } from "react";
 
-import { EmailLayout } from "@oko-wallet-email-template-2/components/EmailLayout";
-import { EmailHeader } from "@oko-wallet-email-template-2/components/EmailHeader";
-import { EmailCard } from "@oko-wallet-email-template-2/components/EmailCard";
-import { EmailText } from "@oko-wallet-email-template-2/components/EmailText";
 import { EmailButton } from "@oko-wallet-email-template-2/components/EmailButton";
+import { EmailCard } from "@oko-wallet-email-template-2/components/EmailCard";
+import { EmailHeader } from "@oko-wallet-email-template-2/components/EmailHeader";
+import { EmailLayout } from "@oko-wallet-email-template-2/components/EmailLayout";
+import { EmailText } from "@oko-wallet-email-template-2/components/EmailText";
 
 const containerStyle: CSSProperties = { padding: "2px" };
 const bodyWrapperStyle: CSSProperties = {
@@ -141,7 +141,12 @@ export default function RemindUnverifiedPage() {
                               <tr>
                                 <td>
                                   <EmailText>
-                                    Hi {"${customerName}"},
+                                    Hi{" "}
+                                    {
+                                      // biome-ignore lint/suspicious/noTemplateCurlyInString: email template placeholder
+                                      "${customerName}"
+                                    }
+                                    ,
                                     <br />
                                     <br />
                                     You're just one step away from unlocking
@@ -204,7 +209,10 @@ export default function RemindUnverifiedPage() {
                                               variant="heading"
                                               align="center"
                                             >
-                                              {"${temporaryPassword}"}
+                                              {
+                                                // biome-ignore lint/suspicious/noTemplateCurlyInString: email template placeholder
+                                                "${temporaryPassword}"
+                                              }
                                             </EmailText>
                                           </td>
                                         </tr>

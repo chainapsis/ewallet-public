@@ -1,4 +1,4 @@
-import { type CSSProperties, type FC, type ReactNode } from "react";
+import type { CSSProperties, FC, ReactNode } from "react";
 
 interface EmailCodeProps {
   code: string;

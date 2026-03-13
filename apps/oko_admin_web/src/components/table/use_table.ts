@@ -1,12 +1,12 @@
-import { useState } from "react";
 import {
   type ColumnDef,
-  type PaginationState,
-  type OnChangeFn,
   getCoreRowModel,
   getPaginationRowModel,
+  type OnChangeFn,
+  type PaginationState,
   useReactTable,
 } from "@tanstack/react-table";
+import { useState } from "react";
 
 export interface UseTableOptions<T> {
   columns: ColumnDef<T, any>[];

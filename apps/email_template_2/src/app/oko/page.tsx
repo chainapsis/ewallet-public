@@ -1,11 +1,11 @@
-import { type CSSProperties } from "react";
+import type { CSSProperties } from "react";
 
-import { EmailLayout } from "@oko-wallet-email-template-2/components/EmailLayout";
-import { EmailHeader } from "@oko-wallet-email-template-2/components/EmailHeader";
-import { EmailCard } from "@oko-wallet-email-template-2/components/EmailCard";
-import { EmailText } from "@oko-wallet-email-template-2/components/EmailText";
 import { EmailButton } from "@oko-wallet-email-template-2/components/EmailButton";
+import { EmailCard } from "@oko-wallet-email-template-2/components/EmailCard";
 import { EmailFooter } from "@oko-wallet-email-template-2/components/EmailFooter";
+import { EmailHeader } from "@oko-wallet-email-template-2/components/EmailHeader";
+import { EmailLayout } from "@oko-wallet-email-template-2/components/EmailLayout";
+import { EmailText } from "@oko-wallet-email-template-2/components/EmailText";
 
 const containerStyle: CSSProperties = { padding: "2px" };
 const bodyWrapperStyle: CSSProperties = { height: "972px", width: "100%" };
@@ -164,7 +164,10 @@ export default function OkoPage() {
                                               variant="heading"
                                               align="center"
                                             >
-                                              {"${escapedPassword}"}
+                                              {
+                                                // biome-ignore lint/suspicious/noTemplateCurlyInString: email template placeholder
+                                                "${escapedPassword}"
+                                              }
                                             </EmailText>
                                           </td>
                                         </tr>

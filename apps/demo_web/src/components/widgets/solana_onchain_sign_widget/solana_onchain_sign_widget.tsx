@@ -1,13 +1,13 @@
-import { useCallback } from "react";
+import { SolanaIcon } from "@oko-wallet/oko-common-ui/icons/solana_icon";
 import {
   Connection,
+  LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
   TransactionMessage,
   VersionedTransaction,
-  LAMPORTS_PER_SOL,
 } from "@solana/web3.js";
-import { SolanaIcon } from "@oko-wallet/oko-common-ui/icons/solana_icon";
+import { useCallback } from "react";
 
 // import signStyles from "../sign_widget/sign_widget.module.scss";
 import { SignWidget } from "@oko-wallet-demo-web/components/widgets/sign_widget/sign_widget";
@@ -60,7 +60,7 @@ export const SolanaOnchainSignWidget = () => {
       "Solana v0 signed transaction:",
       Buffer.from(signedTransaction.signatures[0]).toString("hex"),
     );
-    }, [okoSvm]);
+  }, [okoSvm]);
 
   return (
     <SignWidget

@@ -1,10 +1,11 @@
-import { useState, type FC } from "react";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
+import { type FC, useState } from "react";
+
+import { LoginWidget } from "../login_widget/login_widget";
+import { AccountInfoWidget } from "./account_info_widget";
+import { AuthProgressWidget } from "./auth_progress_widget";
 import { useSDKState } from "@oko-wallet-demo-web/state/sdk";
 import { useUserInfoState } from "@oko-wallet-demo-web/state/user_info";
-import { AuthProgressWidget } from "./auth_progress_widget";
-import { AccountInfoWidget } from "./account_info_widget";
-import { LoginWidget } from "../login_widget/login_widget";
 import type { LoginMethod } from "@oko-wallet-demo-web/types/login";
 
 type SigningInState =
@@ -133,4 +134,5 @@ export const AccountWidget: FC<AccountWidgetProps> = () => {
   return <LoginWidget onSignIn={handleSignIn} />;
 };
 
-export interface AccountWidgetProps {}
+// biome-ignore lint/complexity/noBannedTypes: empty props type used as component interface
+export type AccountWidgetProps = {};

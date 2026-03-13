@@ -7,8 +7,8 @@ import "@oko-wallet/oko-common-ui/styles/typography.scss";
 import "@oko-wallet/oko-common-ui/styles/shadow.scss";
 
 import { Auth } from "@oko-wallet-admin/components/auth";
-import { MainFrame } from "@oko-wallet-admin/components/main_frame/main_frame";
 import { GlobalHeader } from "@oko-wallet-admin/components/global_header/global_header";
+import { MainFrame } from "@oko-wallet-admin/components/main_frame/main_frame";
 import { TopProvider } from "@oko-wallet-admin/components/top_provider/top_provider";
 
 const geistSans = Geist({

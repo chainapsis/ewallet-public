@@ -1,7 +1,7 @@
-import { type FC, useState } from "react";
 import { Badge } from "@oko-wallet/oko-common-ui/badge";
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import { CopyOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/copy_outlined";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import { type FC, useState } from "react";
 
 import styles from "./api_key_cell.module.scss";
 
@@ -49,6 +49,7 @@ export const APIKeyCell: FC<APIKeyCellProps> = ({ apiKeys }) => {
             </Typography>
           ) : (
             <button
+              type="button"
               onClick={() => handleCopy(apiKey.api_key)}
               className={styles.buttonIcon}
             >

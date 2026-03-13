@@ -1,7 +1,7 @@
-import React from "react";
+import type React from "react";
 
-import styles from "@oko-wallet-admin/styles/layout_with_side_bar.module.scss";
 import { SideBar } from "@oko-wallet-admin/components/side_bar/side_bar";
+import styles from "@oko-wallet-admin/styles/layout_with_side_bar.module.scss";
 
 export default function UserListLayout({
   children,

@@ -1,12 +1,12 @@
-import { useState, type FC } from "react";
 import type { ChainInfo } from "@keplr-wallet/types";
 import { SearchIcon } from "@oko-wallet/oko-common-ui/icons/search";
 import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import cn from "classnames";
+import { type FC, useState } from "react";
 
-import styles from "./view_chains_modal.module.scss";
 import { ChainsRow } from "./chains_row";
+import styles from "./view_chains_modal.module.scss";
 
 export const ViewChainsModal: FC<ViewChainsModalProps> = ({
   onClose,
@@ -53,7 +53,11 @@ export const ViewChainsModal: FC<ViewChainsModalProps> = ({
           >
             View Supported Chains
           </Typography>
-          <button className={styles.closeButton} onClick={onClose}>
+          <button
+            type="button"
+            className={styles.closeButton}
+            onClick={onClose}
+          >
             <XCloseIcon />
           </button>
         </div>

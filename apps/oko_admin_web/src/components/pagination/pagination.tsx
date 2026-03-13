@@ -1,4 +1,5 @@
-import { type FC } from "react";
+import type { FC } from "react";
+
 import styles from "./pagination.module.scss";
 
 export interface PaginationProps {
@@ -44,6 +45,7 @@ export const Pagination: FC<PaginationProps> = ({
         {pages.map((page, idx) => {
           if (page === "...") {
             return (
+              // biome-ignore lint/suspicious/noArrayIndexKey: display-only list
               <div key={`ellipsis-${idx}`} className={styles.ellipsisWrapper}>
                 <span className={styles.ellipsis}>...</span>
               </div>
@@ -51,6 +53,7 @@ export const Pagination: FC<PaginationProps> = ({
           }
           return (
             <button
+              type="button"
               key={page}
               className={`${styles.page} ${page === currentPage ? styles.active : ""}`}
               onClick={() =>

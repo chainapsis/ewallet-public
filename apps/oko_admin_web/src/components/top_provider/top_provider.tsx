@@ -6,7 +6,7 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-import { type FC, type PropsWithChildren } from "react";
+import type { FC, PropsWithChildren } from "react";
 import { IntlProvider } from "react-intl";
 
 import { ToastProvider } from "@oko-wallet-admin/components/toast/toastProvider";

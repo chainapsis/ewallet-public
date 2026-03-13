@@ -104,8 +104,9 @@ export function useCosmosAddress(chainId: string | undefined) {
 export function useChainAddress(chainInfo: ModularChainInfo | undefined) {
   const { address: ethAddress, isLoading: ethLoading } = useEthAddress();
   const { address: svmAddress, isLoading: svmLoading } = useSVMAddress();
-  const { address: cosmosAddress, isLoading: cosmosLoading } =
-    useCosmosAddress(chainInfo?.cosmos ? chainInfo.chainId : undefined);
+  const { address: cosmosAddress, isLoading: cosmosLoading } = useCosmosAddress(
+    chainInfo?.cosmos ? chainInfo.chainId : undefined,
+  );
 
   if (!chainInfo) {
     return { address: undefined, isLoading: false };

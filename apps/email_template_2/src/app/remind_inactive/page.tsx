@@ -1,7 +1,7 @@
-import { type CSSProperties } from "react";
+import type { CSSProperties } from "react";
 
-import { EmailLayout } from "@oko-wallet-email-template-2/components/EmailLayout";
 import { EmailHeader } from "@oko-wallet-email-template-2/components/EmailHeader";
+import { EmailLayout } from "@oko-wallet-email-template-2/components/EmailLayout";
 import { EmailText } from "@oko-wallet-email-template-2/components/EmailText";
 
 const containerStyle: CSSProperties = { padding: "2px" };
@@ -101,7 +101,12 @@ export default function RemindInactivePage() {
                       <tr>
                         <td valign="top">
                           <EmailText style={mainTextStyle}>
-                            Hi {"${customerName}"},
+                            Hi{" "}
+                            {
+                              // biome-ignore lint/suspicious/noTemplateCurlyInString: email template placeholder
+                              "${customerName}"
+                            }
+                            ,
                             <br />
                             <br />
                             Congrats on getting your Oko integration set up!

@@ -1,18 +1,18 @@
-import type { FC } from "react";
-import cn from "classnames";
+import { AppleIcon } from "@oko-wallet/oko-common-ui/icons/apple_icon";
+import { GithubIcon } from "@oko-wallet/oko-common-ui/icons/github_icon";
 import { GoogleIcon } from "@oko-wallet/oko-common-ui/icons/google_icon";
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
+import { MailboxIcon } from "@oko-wallet/oko-common-ui/icons/mailbox";
 import { TelegramIcon } from "@oko-wallet/oko-common-ui/icons/telegram_icon";
 import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
-import { AppleIcon } from "@oko-wallet/oko-common-ui/icons/apple_icon";
-import { MailboxIcon } from "@oko-wallet/oko-common-ui/icons/mailbox";
-import { DiscordIcon } from "@oko-wallet-common-ui/icons/discord_icon";
-import { GithubIcon } from "@oko-wallet/oko-common-ui/icons/github_icon";
+import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import cn from "classnames";
+import type { FC } from "react";
 
 import { Widget } from "../widget_components";
 import styles from "./auth_progress_widget.module.scss";
 import { Spinner } from "./spinner";
+import { DiscordIcon } from "@oko-wallet-common-ui/icons/discord_icon";
 import type { LoginMethod } from "@oko-wallet-demo-web/types/login";
 
 type AuthProgressWidgetProps = {

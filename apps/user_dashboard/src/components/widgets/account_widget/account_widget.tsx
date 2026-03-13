@@ -105,4 +105,5 @@ export const AccountWidget: FC<AccountWidgetProps> = () => {
   return <LoginWidget onSignIn={handleSignIn} />;
 };
 
+// biome-ignore lint/complexity/noBannedTypes: empty props type used as component interface
 export type AccountWidgetProps = {};

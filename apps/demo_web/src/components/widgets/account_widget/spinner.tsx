@@ -14,7 +14,7 @@ export const Spinner: FC<SpinnerProps> = ({
   className,
   status = "loading",
 }) => {
-  const theme = useThemeState((state) => state.theme);
+  const _theme = useThemeState((state) => state.theme);
   const isFailed = status === "failed";
 
   return (

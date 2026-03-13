@@ -44,11 +44,14 @@ export async function fetchFactoryTokenMeta(
     coinMinimalDenom: denom,
   }));
 
-  const response = await fetch(`${CHAINAPSIS_FACTORY_API}/yacar/token-factory/tokens`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  const response = await fetch(
+    `${CHAINAPSIS_FACTORY_API}/yacar/token-factory/tokens`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    },
+  );
 
   if (!response.ok) {
     throw new Error(`Factory token meta fetch failed: ${response.statusText}`);

@@ -1,6 +1,6 @@
 import { Tooltip } from "@oko-wallet/oko-common-ui/tooltip";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import { type FC, type ReactElement } from "react";
+import type { FC, ReactElement } from "react";
 
 import styles from "./address_row.module.scss";
 
@@ -52,6 +52,7 @@ export const AddressRow: FC<AddressRowProps> = ({ icon, chain, address }) => {
             {prefix}
           </Typography>
           {Array.from({ length: 7 }).map((_, i) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: display-only list
             <div key={i} className={styles.dot} />
           ))}
         </div>

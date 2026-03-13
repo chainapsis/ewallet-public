@@ -1,10 +1,10 @@
 import { Button } from "@oko-wallet/oko-common-ui/button";
-import { SunIcon } from "@oko-wallet/oko-common-ui/icons/sun_icon";
 import { MoonIcon } from "@oko-wallet/oko-common-ui/icons/moon_icon";
+import { SunIcon } from "@oko-wallet/oko-common-ui/icons/sun_icon";
 import { Tooltip } from "@oko-wallet/oko-common-ui/tooltip";
 
-import { useThemeState } from "@oko-wallet-demo-web/state/theme";
 import styles from "./theme_button.module.scss";
+import { useThemeState } from "@oko-wallet-demo-web/state/theme";
 
 export const ThemeButton = () => {
   const theme = useThemeState((state) => state.theme);

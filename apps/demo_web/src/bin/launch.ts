@@ -1,10 +1,10 @@
 // Executing this before any other statement
 loadEnv(ENV_FILE_NAME);
 
-import { createServer } from "http";
-import { parse } from "url";
-import next from "next";
 import { loadEnv, verifyEnv } from "@oko-wallet/dotenv";
+import { createServer } from "http";
+import next from "next";
+import { parse } from "url";
 
 import { ENV_FILE_NAME, envSchema } from "@oko-wallet-demo-web/envs";
 
