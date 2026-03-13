@@ -223,11 +223,23 @@ function CosmosSection({ wallet }: { wallet: OkoWalletRN }) {
     setLoading("signDirect");
     setResult(null);
     try {
-      const { makeSignDoc: makeProtoSignDoc } = require("@cosmjs/proto-signing");
-      const { AuthInfo, Fee, TxBody } = require("@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx");
-      const { MsgSend } = require("@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx");
-      const { PubKey } = require("@keplr-wallet/proto-types/cosmos/crypto/secp256k1/keys");
-      const { SignMode } = require("@keplr-wallet/proto-types/cosmos/tx/signing/v1beta1/signing");
+      const {
+        makeSignDoc: makeProtoSignDoc,
+      } = require("@cosmjs/proto-signing");
+      const {
+        AuthInfo,
+        Fee,
+        TxBody,
+      } = require("@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx");
+      const {
+        MsgSend,
+      } = require("@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx");
+      const {
+        PubKey,
+      } = require("@keplr-wallet/proto-types/cosmos/crypto/secp256k1/keys");
+      const {
+        SignMode,
+      } = require("@keplr-wallet/proto-types/cosmos/tx/signing/v1beta1/signing");
 
       const account = await cosmos.getKey(COSMOS_CHAIN_ID);
       const address = account.bech32Address;
@@ -535,9 +547,7 @@ function SolanaSection({ wallet }: { wallet: OkoWalletRN }) {
     setResult(null);
     try {
       const svm = await ensureConnected();
-      const message = new TextEncoder().encode(
-        "Hello from Oko RN Sandbox!",
-      );
+      const message = new TextEncoder().encode("Hello from Oko RN Sandbox!");
       const signature = await svm.signMessage(message);
       setResult(
         `Signature: ${Buffer.from(signature).toString("hex").slice(0, 30)}...`,

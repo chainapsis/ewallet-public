@@ -5,10 +5,12 @@ import type {
 } from "@oko-wallet/oko-sdk-core";
 import { useEffect, useState } from "react";
 
-import { DEMO_WEB_ORIGIN } from "@oko-wallet-attached/requests/endpoints";
+import {
+  DEMO_WEB_ORIGIN,
+  isDemoOrSandboxOrigin,
+} from "@oko-wallet-attached/requests/endpoints";
 import { useAppState } from "@oko-wallet-attached/store/app";
 import { useMemoryState } from "@oko-wallet-attached/store/memory";
-import { isDemoOrSandboxOrigin } from "@oko-wallet-attached/requests/endpoints";
 import { useSupportedEthChain } from "@oko-wallet-attached/web3/ethereum/hooks/use_supported_eth_chain";
 import { makeEthereumEip712Signature } from "@oko-wallet-attached/web3/ethereum/sig";
 

@@ -43,9 +43,7 @@ function encodeBase64Url(bytes: Uint8Array): string {
 function decodeBase64Url(value: string): Uint8Array {
   const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
   const padding =
-    normalized.length % 4 === 0
-      ? ""
-      : "=".repeat(4 - (normalized.length % 4));
+    normalized.length % 4 === 0 ? "" : "=".repeat(4 - (normalized.length % 4));
   return Uint8Array.from(Buffer.from(normalized + padding, "base64"));
 }
 

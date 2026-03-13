@@ -6,24 +6,19 @@ import { useState } from "react";
 
 import {
   extractKeyPackageHex,
+  extractKeyPackageHex,
+  teddsaKeygenFromHex,
   teddsaKeygenFromHex,
 } from "@oko-wallet-attached/crypto/keygen_ed25519";
 import {
   type KeyPackageEd25519,
+  type KeyPackageEd25519,
+  makeSignOutputEd25519,
   makeSignOutputEd25519,
 } from "@oko-wallet-attached/crypto/sign_ed25519";
-import { DEMO_WEB_ORIGIN } from "@oko-wallet-attached/requests/endpoints";
+import { DEMO_WEB_ORIGIN, isDemoOrSandboxOrigin } from "@oko-wallet-attached/requests/endpoints";
 import { useAppState } from "@oko-wallet-attached/store/app";
 import { useMemoryState } from "@oko-wallet-attached/store/memory";
-import { isDemoOrSandboxOrigin } from "@oko-wallet-attached/requests/endpoints";
-import {
-  makeSignOutputEd25519,
-  type KeyPackageEd25519,
-} from "@oko-wallet-attached/crypto/sign_ed25519";
-import {
-  teddsaKeygenFromHex,
-  extractKeyPackageHex,
-} from "@oko-wallet-attached/crypto/keygen_ed25519";
 
 export interface UseSvmSignatureBaseArgs {
   modalId: string;

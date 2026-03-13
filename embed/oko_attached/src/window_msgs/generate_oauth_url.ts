@@ -17,7 +17,11 @@ import {
 } from "@oko-wallet-attached/config/oauth";
 import { useAppState } from "@oko-wallet-attached/store/app";
 
-function buildGoogleOAuthUrl(nonce: string, state: OAuthState, redirectBaseOrigin: string): string {
+function buildGoogleOAuthUrl(
+  nonce: string,
+  state: OAuthState,
+  redirectBaseOrigin: string,
+): string {
   const redirectUri = `${redirectBaseOrigin}/google/callback`;
 
   const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
@@ -32,7 +36,11 @@ function buildGoogleOAuthUrl(nonce: string, state: OAuthState, redirectBaseOrigi
   return authUrl.toString();
 }
 
-function buildXOAuthUrl(codeChallenge: string, state: OAuthState, redirectBaseOrigin: string): string {
+function buildXOAuthUrl(
+  codeChallenge: string,
+  state: OAuthState,
+  redirectBaseOrigin: string,
+): string {
   const redirectUri = `${redirectBaseOrigin}/x/callback`;
 
   const authUrl = new URL("https://twitter.com/i/oauth2/authorize");
@@ -66,7 +74,11 @@ function buildDiscordOAuthUrl(
   return authUrl.toString();
 }
 
-function buildGithubOAuthUrl(codeChallenge: string, state: OAuthState, redirectBaseOrigin: string): string {
+function buildGithubOAuthUrl(
+  codeChallenge: string,
+  state: OAuthState,
+  redirectBaseOrigin: string,
+): string {
   const redirectUri = `${redirectBaseOrigin}/github/callback`;
 
   const authUrl = new URL("https://github.com/login/oauth/authorize");

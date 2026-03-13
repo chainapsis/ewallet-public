@@ -1,4 +1,4 @@
-import type { OpenModalError, SignInType } from "@oko-wallet/oko-sdk-core";
+import type { OpenModalError, OpenModalError, SignInType, SignInType } from "@oko-wallet/oko-sdk-core";
 import {
   EventEmitter3,
   type OkoWalletCoreEvent2,
@@ -10,15 +10,14 @@ import {
   type OpenModalAckPayload,
   type WalletInfo,
 } from "@oko-wallet/oko-sdk-core";
-import type { OpenModalError } from "@oko-wallet/oko-sdk-core";
-import type { SignInType } from "@oko-wallet/oko-sdk-core";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { openModalRN } from "./methods/open_modal";
-import { signInRN, type SignInOptions } from "./methods/sign_in";
-import { signOutRN } from "./methods/sign_out";
-import type { LoginWalletInfo } from "./methods/login_url_codec";
-import { getEthChainInfo, getCosmosChainInfo } from "./chain_info";
+
+import { getCosmosChainInfo, getEthChainInfo } from "./chain_info";
 import { callRpc } from "./methods/call_rpc";
+import type { LoginWalletInfo } from "./methods/login_url_codec";
+import { openModalRN } from "./methods/open_modal";
+import { type SignInOptions, signInRN } from "./methods/sign_in";
+import { signOutRN } from "./methods/sign_out";
 
 const WALLET_INFO_STORE_KEY = "oko_rn_wallet_info";
 const BROWSER_SESSION_MISSING_ERROR_TYPES = new Set([

@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
 import type {
-  OkoWalletMsgOAuthInfoPassAck,
   OkoWalletMsgGetWalletInfoAck,
+  OkoWalletMsgOAuthInfoPassAck,
 } from "@oko-wallet/oko-sdk-core";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { ATTACHED_ORIGIN } from "../../_shared/build_iframe_src";
 import {

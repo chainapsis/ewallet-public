@@ -7,8 +7,8 @@ import { isEthereumCompatible } from "@oko-wallet/oko-sdk-cosmos";
 import { useState } from "react";
 
 import { makeCosmosSignature } from "../cosmos_sig";
-import { useMemoryState } from "@oko-wallet-attached/store/memory";
 import { isDemoOrSandboxOrigin } from "@oko-wallet-attached/requests/endpoints";
+import { useMemoryState } from "@oko-wallet-attached/store/memory";
 
 export function useArbitrarySigModal(args: UseCosmosArbitrarySigModalArgs) {
   const { data, modalId, getIsAborted } = args;

@@ -5,14 +5,11 @@ import type {
 } from "@oko-wallet/oko-sdk-core";
 import type { Result } from "@oko-wallet/stdlib-js";
 
+import { buildRpcUrl, parseRpcResultFromCallbackUrl } from "../codec/rpc_codec";
 import {
   getServerRedirectScheme,
   openAuthSession,
 } from "../native/OkoAuthBrowser";
-import {
-  buildRpcUrl,
-  parseRpcResultFromCallbackUrl,
-} from "../codec/rpc_codec";
 
 export async function openModalRN(
   sdkEndpoint: string,

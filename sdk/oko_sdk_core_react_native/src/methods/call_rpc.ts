@@ -1,11 +1,8 @@
+import { buildRpcUrl, parseRpcResultFromCallbackUrl } from "../codec/rpc_codec";
 import {
   getServerRedirectScheme,
   openAuthSession,
 } from "../native/OkoAuthBrowser";
-import {
-  buildRpcUrl,
-  parseRpcResultFromCallbackUrl,
-} from "../codec/rpc_codec";
 
 /**
  * Generic RPC call via OS browser.

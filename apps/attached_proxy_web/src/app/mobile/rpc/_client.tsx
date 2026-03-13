@@ -10,15 +10,12 @@ import {
 } from "../_shared/rpc_codec";
 import { sendToAttached } from "../_shared/send_to_attached";
 import {
-  useAttachedInit,
   type AttachedInitPayload,
+  useAttachedInit,
 } from "../_shared/use_attached_init";
 
 /** Methods that show the iframe (user-facing UI). */
-const VISIBLE_METHODS = new Set([
-  "open_modal",
-  "__export_private_key__",
-]);
+const VISIBLE_METHODS = new Set(["open_modal", "__export_private_key__"]);
 
 export function RpcClient({
   iframeSrc,
