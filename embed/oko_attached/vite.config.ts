@@ -7,10 +7,12 @@ import { tanstackRouter } from "@tanstack/router-plugin/vite";
 
 // const dev = process.env.NODE_ENV !== "production";
 const port = process.env.SERVER_PORT;
+const allowedHosts = process.env.VITE_ALLOWED_HOSTS?.split(",").filter(Boolean);
 
 export default defineConfig({
   server: {
     port: Number(port),
+    ...(allowedHosts && { allowedHosts }),
   },
   css: {
     modules: {

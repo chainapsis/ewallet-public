@@ -5,6 +5,7 @@ import type {
 } from "@oko-wallet/oko-sdk-core";
 
 import { useAppState } from "@oko-wallet-attached/store/app";
+import { useMemoryState } from "@oko-wallet-attached/store/memory";
 
 import { handleExportPrivateKey } from "./export_private_key";
 import { handleGenerateOAuthUrl } from "./generate_oauth_url";
@@ -40,7 +41,12 @@ export function makeMsgHandler() {
       data?.msg_type === "set_reauth_params"
     ) {
       // set_reauth_params is sent from the re-auth popup (same attached origin)
-      if (event.origin !== window.location.origin) {
+      // or from the host parent window (cross-origin iframe, e.g. mobile proxy web)
+      const registeredHostOrigin = useMemoryState.getState().hostOrigin;
+      if (
+        event.origin !== window.location.origin &&
+        event.origin !== registeredHostOrigin
+      ) {
         console.warn(
           "[attached] set_reauth_params rejected from origin:",
           event.origin,
@@ -48,14 +54,17 @@ export function makeMsgHandler() {
         return;
       }
       const appState = useAppState.getState();
+      // Use registeredHostOrigin as storage key when sent from the parent window,
+      // so that the nonce is found by oauth_info_pass (which looks up by hostOrigin).
+      const storageOrigin = registeredHostOrigin ?? event.origin;
       const payload = data.payload as
         | { nonce?: string; code_verifier?: string }
         | undefined;
       if (payload?.nonce) {
-        appState.setNonce(event.origin, payload.nonce);
+        appState.setNonce(storageOrigin, payload.nonce);
       }
       if (payload?.code_verifier) {
-        appState.setCodeVerifier(event.origin, payload.code_verifier);
+        appState.setCodeVerifier(storageOrigin, payload.code_verifier);
       }
       console.debug("[attached] set_reauth_params received", event.origin);
       return;
