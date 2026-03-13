@@ -1,7 +1,7 @@
+import { initializeOkoCosmosWallet } from "./init";
 import { OkoWallet } from "./oko-wallet";
 import { okoWalletInfo } from "./registry";
 import type { OkoWalletOptions } from "./types";
-import { initializeOkoCosmosWallet } from "./init";
 
 export const makeOkoWallet = (options: OkoWalletOptions): OkoWallet => {
   if (typeof window === "undefined") {

@@ -1,18 +1,18 @@
-import { deleteAsync } from "del";
 import path from "node:path";
-import typescript from "@rollup/plugin-typescript";
-import { nodeResolve } from "@rollup/plugin-node-resolve";
+import { fileURLToPath } from "node:url";
+import commonjs from "@rollup/plugin-commonjs";
 import json from "@rollup/plugin-json";
+import { nodeResolve } from "@rollup/plugin-node-resolve";
+import typescript from "@rollup/plugin-typescript";
 import chalk from "chalk";
+import { deleteAsync } from "del";
 import {
-  rollup,
   type InputOptions,
   type OutputOptions,
   type RollupBuild,
+  rollup,
 } from "rollup";
-import { fileURLToPath } from "node:url";
 import { replaceTscAliasPaths } from "tsc-alias";
-import commonjs from "@rollup/plugin-commonjs";
 
 import tsConfigJson from "../tsconfig.json";
 
