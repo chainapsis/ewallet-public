@@ -362,6 +362,12 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
 
   // check if the balance is sufficient for the transaction
   useEffect(() => {
+    if (isDemo) {
+      setHasSufficientBalanceForTotal(true);
+      setHasSufficientBalanceForValue(true);
+      return;
+    }
+
     if (estimatedFee === null) {
       return;
     }
@@ -379,10 +385,15 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
 
     setHasSufficientBalanceForTotal(feeCurrencyBalance.amount >= totalValue);
     setHasSufficientBalanceForValue(feeCurrencyBalance.amount >= txValue);
-  }, [estimatedFee, feeCurrencyBalance, originalTransaction]);
+  }, [isDemo, estimatedFee, feeCurrencyBalance, originalTransaction]);
 
   // set the primary error message
   useEffect(() => {
+    if (isDemo) {
+      setPrimaryErrorMessage("");
+      return;
+    }
+
     if (isSimulating) {
       setPrimaryErrorMessage("");
       return;
@@ -466,6 +477,7 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
 
     setPrimaryErrorMessage("");
   }, [
+    isDemo,
     isSimulating,
     getNonceError,
     getFeeDataError,
