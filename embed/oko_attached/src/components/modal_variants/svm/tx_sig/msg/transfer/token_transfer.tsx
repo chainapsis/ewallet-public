@@ -1,13 +1,13 @@
-import type { FC } from "react";
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import { Skeleton } from "@oko-wallet/oko-common-ui/skeleton";
 import { CopyOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/copy_outlined";
 import { EmptyStateIcon } from "@oko-wallet/oko-common-ui/icons/empty_state_icon";
+import { Skeleton } from "@oko-wallet/oko-common-ui/skeleton";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import type { FC } from "react";
 
+import styles from "../instructions.module.scss";
 import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
 import { TxRow } from "@oko-wallet-attached/components/modal_variants/common/tx_row";
 import { useGetSvmTokenMetadata } from "@oko-wallet-attached/web3/svm/queries";
-import styles from "../instructions.module.scss";
 
 function formatTokenAmount(amount: bigint | number, decimals: number): string {
   if (decimals === 0) {
@@ -116,11 +116,7 @@ export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
             className={styles.tokenAddressRow}
             onClick={() => navigator.clipboard.writeText(mint)}
           >
-            <Typography
-              size="sm"
-              weight="medium"
-              className={styles.address}
-            >
+            <Typography size="sm" weight="medium" className={styles.address}>
               {mint}
             </Typography>
             <CopyOutlinedIcon size={16} color="currentColor" />

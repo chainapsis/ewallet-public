@@ -1,15 +1,15 @@
-import { useState, type FC, type ReactNode } from "react";
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import { DiscordIcon } from "@oko-wallet/oko-common-ui/icons/discord_icon";
 import { EyeIcon } from "@oko-wallet/oko-common-ui/icons/eye";
 import { GoogleIcon } from "@oko-wallet/oko-common-ui/icons/google_icon";
-import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
 import { TelegramIcon } from "@oko-wallet/oko-common-ui/icons/telegram_icon";
-import { DiscordIcon } from "@oko-wallet/oko-common-ui/icons/discord_icon";
+import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
+import { type FC, type ReactNode, useState } from "react";
 
-import { useAppState } from "@oko-wallet-attached/store/app";
-import { useMobileMode } from "@oko-wallet-attached/hooks/mobile_mode";
 import styles from "./signer_address_or_email.module.scss";
+import { useMobileMode } from "@oko-wallet-attached/hooks/mobile_mode";
+import { useAppState } from "@oko-wallet-attached/store/app";
 
 function renderAuthIcon(
   authType: AuthType | undefined,

@@ -1,8 +1,4 @@
-import type {
-  MakeSigError,
-  MakeSignOutputError,
-  SignOutput,
-} from "@oko-wallet/oko-sdk-core";
+import type { MakeSigError, SignOutput } from "@oko-wallet/oko-sdk-core";
 import type { Result } from "@oko-wallet/stdlib-js";
 
 import { makeSignOutput } from "@oko-wallet-attached/crypto/sign";

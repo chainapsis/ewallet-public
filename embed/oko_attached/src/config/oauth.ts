@@ -20,7 +20,7 @@ function generateRandomString(length = 64): string {
   }
 
   const base64 = btoa(binary);
-  return base64.replace(/[+\/]|(=+)$/g, (match) => {
+  return base64.replace(/[+/]|(=+)$/g, (match) => {
     if (match === "+") {
       return "-";
     }
@@ -44,7 +44,7 @@ function base64UrlEncode(buffer: ArrayBuffer): string {
     binary += String.fromCharCode(bytes[i]);
   }
   const base64 = btoa(binary);
-  return base64.replace(/[+\/]|(=+)$/g, (match) => {
+  return base64.replace(/[+/]|(=+)$/g, (match) => {
     if (match === "+") {
       return "-";
     }

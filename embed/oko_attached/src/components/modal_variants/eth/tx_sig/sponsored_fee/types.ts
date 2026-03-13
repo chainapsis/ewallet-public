@@ -10,7 +10,9 @@ export interface SponsoredFeeInfo {
 
 export type SponsoredFeeVariant = "normal" | "loading" | "timer" | "error";
 
-export function getSponsoredFeeVariant(state: SponsorshipState): SponsoredFeeVariant {
+export function getSponsoredFeeVariant(
+  state: SponsorshipState,
+): SponsoredFeeVariant {
   switch (state) {
     case "requesting":
     case "waiting_confirmation":

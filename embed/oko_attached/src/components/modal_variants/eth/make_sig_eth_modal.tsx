@@ -1,9 +1,9 @@
-import { type FC } from "react";
 import type { MakeEthereumSigData } from "@oko-wallet/oko-sdk-core";
+import type { FC } from "react";
 
 import { MakeArbitrarySigModal } from "@oko-wallet-attached/components/modal_variants/eth/arbitrary_sig/make_arbitrary_sig_modal";
-import { MakeTxSigModal } from "@oko-wallet-attached/components/modal_variants/eth/tx_sig/make_tx_sig_modal";
 import { MakeEIP712SigModal } from "@oko-wallet-attached/components/modal_variants/eth/eip712_sig/make_eip712_sig_modal";
+import { MakeTxSigModal } from "@oko-wallet-attached/components/modal_variants/eth/tx_sig/make_tx_sig_modal";
 
 export const MakeSignatureEthModal: FC<MakeSignatureEthModalProps> = ({
   getIsAborted,

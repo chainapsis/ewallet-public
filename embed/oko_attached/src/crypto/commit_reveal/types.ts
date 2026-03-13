@@ -1,7 +1,7 @@
+import type { Bytes } from "@oko-wallet/bytes";
+import type { OperationType as KsnOperationType } from "@oko-wallet/ksn-interface/commit_reveal";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { OperationType } from "@oko-wallet/oko-types/commit_reveal";
-import type { OperationType as KsnOperationType } from "@oko-wallet/ksn-interface/commit_reveal";
-import type { Bytes } from "@oko-wallet/bytes";
 
 export interface ClientCommitRevealSession {
   session_id: string;

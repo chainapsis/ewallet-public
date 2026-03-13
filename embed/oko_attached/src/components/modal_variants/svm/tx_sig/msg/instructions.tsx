@@ -1,13 +1,6 @@
-import type { FC, ReactNode } from "react";
-import {
-  type ParsedInstruction,
-  SYSTEM_PROGRAM_ID,
-  TOKEN_2022_PROGRAM_ID,
-  TOKEN_PROGRAM_ID,
-} from "@oko-wallet-attached/tx-parsers/svm";
 import { Skeleton } from "@oko-wallet/oko-common-ui/skeleton";
+import type { FC, ReactNode } from "react";
 
-import { Collapsible } from "@oko-wallet-attached/components/collapsible/collapsible";
 import styles from "./instructions.module.scss";
 import { isStakingProgram } from "./staking/constants";
 import {
@@ -15,12 +8,19 @@ import {
   StakingInstruction,
 } from "./staking/staking_instruction";
 import {
-  StakingOperationInstruction,
   getStakingOperationLabel,
+  StakingOperationInstruction,
 } from "./staking/staking_operation_instruction";
 import { TokenTransferPretty } from "./transfer/token_transfer";
 import { SvmTransferPretty } from "./transfer/transfer";
 import { UnknownInstruction } from "./unknown/unknown";
+import { Collapsible } from "@oko-wallet-attached/components/collapsible/collapsible";
+import {
+  type ParsedInstruction,
+  SYSTEM_PROGRAM_ID,
+  TOKEN_2022_PROGRAM_ID,
+  TOKEN_PROGRAM_ID,
+} from "@oko-wallet-attached/tx-parsers/svm";
 
 function isTokenProgram(programId: string): boolean {
   return programId === TOKEN_PROGRAM_ID || programId === TOKEN_2022_PROGRAM_ID;
@@ -67,7 +67,9 @@ function renderInstruction(
 
   // Staking Programs without amount data -> show operation details
   if (isStakingProgram(programId)) {
-    return <StakingOperationInstruction key={index} instruction={instruction} />;
+    return (
+      <StakingOperationInstruction key={index} instruction={instruction} />
+    );
   }
 
   // System Program - SOL Transfer
@@ -172,6 +174,7 @@ export const Instructions: FC<InstructionsProps> = ({
     <div className={styles.instructionsContainer}>
       {validInstructions.map((instruction, index) => (
         <Collapsible
+          // biome-ignore lint/suspicious/noArrayIndexKey: instruction list display only
           key={index}
           title={getInstructionTitle(instruction)}
           defaultExpanded={index === 0}

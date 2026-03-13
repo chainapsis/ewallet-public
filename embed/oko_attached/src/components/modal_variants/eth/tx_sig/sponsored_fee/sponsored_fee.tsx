@@ -1,14 +1,14 @@
-import type { FC } from "react";
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import { Skeleton } from "@oko-wallet/oko-common-ui/skeleton";
 import { InfoCircleIcon } from "@oko-wallet/oko-common-ui/icons/info_circle";
 import { WarningIcon } from "@oko-wallet/oko-common-ui/icons/warning_icon";
+import { Skeleton } from "@oko-wallet/oko-common-ui/skeleton";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import cn from "classnames";
+import type { FC } from "react";
 
-import type { SponsoredFeeInfo } from "./types";
-import { getSponsoredFeeVariant } from "./types";
 import styles from "./sponsored_fee.module.scss";
 import { SponsoredFeeTooltip } from "./sponsored_fee_tooltip";
+import type { SponsoredFeeInfo } from "./types";
+import { getSponsoredFeeVariant } from "./types";
 
 /**
  * Format ETH fee to a reasonable number of decimal places
@@ -17,12 +17,16 @@ import { SponsoredFeeTooltip } from "./sponsored_fee_tooltip";
 function formatFeeDisplay(fee: string): string {
   // Extract number and symbol (e.g., "0.000123 ETH" -> ["0.000123", "ETH"])
   const match = fee.match(/^([\d.]+)\s*(.*)$/);
-  if (!match) return fee;
+  if (!match) {
+    return fee;
+  }
 
   const [, numStr, symbol] = match;
   const num = parseFloat(numStr);
 
-  if (isNaN(num)) return fee;
+  if (Number.isNaN(num)) {
+    return fee;
+  }
 
   // Format to max 8 significant decimal places for small numbers
   let formatted: string;

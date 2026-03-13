@@ -1,15 +1,15 @@
-import { type FC } from "react";
-import type { CosmosTxSignPayload } from "@oko-wallet/oko-sdk-core";
 import type { StdSignDoc } from "@keplr-wallet/types";
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import { ChevronRightIcon } from "@oko-wallet/oko-common-ui/icons/chevron_right";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import type { CosmosTxSignPayload } from "@oko-wallet/oko-sdk-core";
+import type { FC } from "react";
 
 import styles from "./cosmos_tx_summary.module.scss";
 import { Messages } from "./msg/messages";
-import { MakeSignatureRawCodeBlock } from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_sig_modal_code_block";
-import { MakeSignatureRawCodeBlockContainer } from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_sig_modal_code_block_container";
 import { useCosmosTxSummary } from "./use_tx_summary";
 import { useTrackTxSummaryView } from "@oko-wallet-attached/analytics/events";
+import { MakeSignatureRawCodeBlock } from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_sig_modal_code_block";
+import { MakeSignatureRawCodeBlockContainer } from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_sig_modal_code_block_container";
 
 export interface CosmosTxSummaryProps {
   payload: CosmosTxSignPayload;
@@ -28,6 +28,7 @@ export const CosmosTxSummary: FC<CosmosTxSummaryProps> = ({
     const { handleToggleView, msgs, isRawView, signDocString, isLoading } =
       useCosmosTxSummaryRes.data;
 
+    // biome-ignore lint/correctness/useHookAtTopLevel: hook is called inside conditional block
     useTrackTxSummaryView({
       hostOrigin: payload.origin,
       chainType: "cosmos",
@@ -56,7 +57,10 @@ export const CosmosTxSummary: FC<CosmosTxSummaryProps> = ({
             <Typography color="tertiary" size="xs" weight="medium">
               {isRawView ? "Smart View" : "Raw View"}
             </Typography>
-            <ChevronRightIcon className={styles.txSummaryHeaderRightIcon} color="var(--fg-tertiary)" />
+            <ChevronRightIcon
+              className={styles.txSummaryHeaderRightIcon}
+              color="var(--fg-tertiary)"
+            />
           </div>
         </div>
         {isRawView ? (

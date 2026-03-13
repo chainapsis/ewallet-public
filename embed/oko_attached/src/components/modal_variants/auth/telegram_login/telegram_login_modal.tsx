@@ -1,6 +1,6 @@
 "use client";
 
-import { type FC } from "react";
+import type { FC } from "react";
 
 export const TelegramLoginModal: FC<TelegramLoginModalProps> = () => {
   return null;

@@ -1,13 +1,13 @@
-import { useEffect, useState, useCallback } from "react";
 import type {
   MakeSigModalErrorAckPayload,
   MakeTxSignSigData,
   OpenModalAckPayload,
 } from "@oko-wallet/oko-sdk-core";
 import {
-  toTransactionSerializable,
   isSignableTransaction,
+  toTransactionSerializable,
 } from "@oko-wallet/oko-sdk-eth";
+import { useCallback, useEffect, useState } from "react";
 import {
   createPublicClient,
   formatEther,
@@ -16,26 +16,26 @@ import {
   type RpcTransactionRequest,
 } from "viem";
 
-import { makeEthereumTxSignature } from "@oko-wallet-attached/web3/ethereum/sig";
-import { useAppState } from "@oko-wallet-attached/store/app";
-import {
-  useGetNonce,
-  useGetFeeData,
-  useGetGasEstimation,
-  useGetL1GasEstimation,
-  useGetFeeCurrencyBalance,
-  useBaseSponsorshipFlow,
-} from "@oko-wallet-attached/web3/ethereum/queries";
-import { useMemoryState } from "@oko-wallet-attached/store/memory";
+import type { SponsoredFeeInfo } from "../sponsored_fee/types";
 import { DEMO_WEB_ORIGIN } from "@oko-wallet-attached/requests/endpoints";
-import { DEFAULT_GAS_ESTIMATION } from "@oko-wallet-attached/web3/ethereum/queries/types";
+import { isSponsorshipSupportedChain } from "@oko-wallet-attached/requests/fee_sponsorship";
+import { useAppState } from "@oko-wallet-attached/store/app";
+import { useMemoryState } from "@oko-wallet-attached/store/memory";
 import {
   DEFAULT_ETH_FEE_TYPE,
   OP_STACK_L1_DATA_FEE_FEATURE,
 } from "@oko-wallet-attached/web3/ethereum/constants";
 import { useSupportedEthChain } from "@oko-wallet-attached/web3/ethereum/hooks/use_supported_eth_chain";
-import { isSponsorshipSupportedChain } from "@oko-wallet-attached/requests/fee_sponsorship";
-import type { SponsoredFeeInfo } from "../sponsored_fee/types";
+import {
+  useBaseSponsorshipFlow,
+  useGetFeeCurrencyBalance,
+  useGetFeeData,
+  useGetGasEstimation,
+  useGetL1GasEstimation,
+  useGetNonce,
+} from "@oko-wallet-attached/web3/ethereum/queries";
+import { DEFAULT_GAS_ESTIMATION } from "@oko-wallet-attached/web3/ethereum/queries/types";
+import { makeEthereumTxSignature } from "@oko-wallet-attached/web3/ethereum/sig";
 
 export interface UseEthereumSigModalArgs {
   modalId: string;
@@ -214,11 +214,9 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
     isSponsorshipAvailable,
     isRateLimited,
     needsSponsorship,
-    statusData: sponsorshipStatusData,
     remainingTimeMs: sponsorshipRemainingTimeMs,
     formattedRemainingTime: sponsorshipFormattedTime,
     requestSponsorship,
-    error: sponsorshipError,
     errorMessage: sponsorshipErrorMessage,
     isCheckingStatus: isSponsorshipChecking,
     isRequestingTopUp: isSponsorshipRequesting,
@@ -442,7 +440,10 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
 
     if (isSponsorshipSupported) {
       // Fee insufficient: value is covered but total (value + fee) is not
-      if (hasSufficientBalanceForValue === true && hasSufficientBalanceForTotal === false) {
+      if (
+        hasSufficientBalanceForValue === true &&
+        hasSufficientBalanceForTotal === false
+      ) {
         const canSuppressInsufficientError =
           isSponsorshipAvailable ||
           isSponsored ||
@@ -470,7 +471,10 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
     }
 
     // Non-sponsorship-supported chains
-    if (hasSufficientBalanceForValue === false || hasSufficientBalanceForTotal === false) {
+    if (
+      hasSufficientBalanceForValue === false ||
+      hasSufficientBalanceForTotal === false
+    ) {
       setPrimaryErrorMessage("Insufficient balance to cover the transaction");
       return;
     }

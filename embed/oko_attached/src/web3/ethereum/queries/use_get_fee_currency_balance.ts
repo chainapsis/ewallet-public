@@ -1,12 +1,12 @@
-import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
+import { type UseQueryOptions, useQuery } from "@tanstack/react-query";
 import type { Address, Chain, PublicClient } from "viem";
 
-import { classifyViemErrorDetailed } from "@oko-wallet-attached/web3/ethereum/error";
 import {
   DEFAULT_RETRY_COUNT,
   type FeeCurrencyBalanceValue,
   type StructuredRpcError,
 } from "./types";
+import { classifyViemErrorDetailed } from "@oko-wallet-attached/web3/ethereum/error";
 
 export interface UseGetFeeCurrencyBalanceProps {
   simulationKey: string;

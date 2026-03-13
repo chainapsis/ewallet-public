@@ -1,7 +1,7 @@
+import type { AppCurrency } from "@keplr-wallet/types";
 import type { ChainInfoForAttachedModal } from "@oko-wallet/oko-sdk-core";
 import { parseChainId } from "@oko-wallet/oko-sdk-eth";
-import type { AppCurrency } from "@keplr-wallet/types";
-import { defineChain, formatUnits, type Chain } from "viem";
+import { type Chain, defineChain, formatUnits } from "viem";
 
 import {
   evmExplorers,

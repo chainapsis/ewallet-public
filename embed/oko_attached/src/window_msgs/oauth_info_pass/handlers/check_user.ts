@@ -1,10 +1,10 @@
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type {
   CheckEmailRequest,
   CheckEmailResponseV2,
 } from "@oko-wallet/oko-types/user";
-import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { Result } from "@oko-wallet/stdlib-js";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 
 import {
   makeOkoApiRequest,

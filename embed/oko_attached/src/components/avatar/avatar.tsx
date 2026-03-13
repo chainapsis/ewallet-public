@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, type FC } from "react";
+import { type FC, useEffect, useRef, useState } from "react";
 
 import styles from "./avatar.module.scss";
 import { AvatarInitial } from "./avatar_initial";

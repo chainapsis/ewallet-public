@@ -1,21 +1,21 @@
-import { useMemo, useState, type FC } from "react";
-import type { MakeSvmMessageSignData } from "@oko-wallet/oko-sdk-core";
+import { Button } from "@oko-wallet/oko-common-ui/button";
 import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
-import { Button } from "@oko-wallet/oko-common-ui/button";
+import type { MakeSvmMessageSignData } from "@oko-wallet/oko-sdk-core";
+import { type FC, useMemo, useState } from "react";
 
-import styles from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_signature_modal.module.scss";
+import { SvmMessageSignatureContent } from "./svm_message_signature_content";
+import { useMessageSigModal } from "./use_message_sig_modal";
 import { CommonModal } from "@oko-wallet-attached/components/modal_variants/common/common_modal";
 import { DemoView } from "@oko-wallet-attached/components/modal_variants/common/make_signature/demo_view";
-import { SignWithOkoBox } from "@oko-wallet-attached/components/sign_with_oko_box/sign_with_oko_box";
-import { useMessageSigModal } from "./use_message_sig_modal";
-import { SvmMessageSignatureContent } from "./svm_message_signature_content";
+import styles from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_signature_modal.module.scss";
+import { RiskWarningCheckBox } from "@oko-wallet-attached/components/modal_variants/common/risk_warning/risk_warning";
+import { SvmSiwsSignatureContent } from "@oko-wallet-attached/components/modal_variants/svm/message_sig/siws_sig/make_siws_signature_content";
 import {
   getSiwsMessage,
   verifySiwsMessage,
 } from "@oko-wallet-attached/components/modal_variants/svm/siws_message";
-import { SvmSiwsSignatureContent } from "@oko-wallet-attached/components/modal_variants/svm/message_sig/siws_sig/make_siws_signature_content";
-import { RiskWarningCheckBox } from "@oko-wallet-attached/components/modal_variants/common/risk_warning/risk_warning";
+import { SignWithOkoBox } from "@oko-wallet-attached/components/sign_with_oko_box/sign_with_oko_box";
 import { hexToUint8Array } from "@oko-wallet-attached/crypto/keygen_ed25519";
 
 export interface MakeMessageSigModalProps {
@@ -79,8 +79,11 @@ export const MakeMessageSigModal: FC<MakeMessageSigModalProps> = ({
           <XCloseIcon size={20} color="var(--fg-quaternary)" />
         </div>
 
-        <div data-scroll-container className={styles.modalInnerContentContainer}>
-          {!!siwsMessage ? (
+        <div
+          data-scroll-container
+          className={styles.modalInnerContentContainer}
+        >
+          {siwsMessage ? (
             <SvmSiwsSignatureContent payload={data.payload} theme={theme} />
           ) : (
             <SvmMessageSignatureContent payload={data.payload} />

@@ -1,15 +1,15 @@
-import { useEffect, useState } from "react";
-import type { Result } from "@oko-wallet/stdlib-js";
 import {
-  RedirectUriSearchParamsKey,
   type OAuthTokenRequestPayload,
+  RedirectUriSearchParamsKey,
 } from "@oko-wallet/oko-sdk-core";
+import type { Result } from "@oko-wallet/stdlib-js";
+import { useEffect, useState } from "react";
 
 import type { HandleXCallbackError } from "./types";
-import { postLog } from "@oko-wallet-attached/requests/logging";
-import { errorToLog } from "@oko-wallet-attached/logging/error";
-import { sendOAuthPayloadToEmbeddedWindow } from "@oko-wallet-attached/components/oauth_callback/send_oauth_payload";
 import { handleMobileRedirect } from "@oko-wallet-attached/components/oauth_callback/handle_mobile_redirect";
+import { sendOAuthPayloadToEmbeddedWindow } from "@oko-wallet-attached/components/oauth_callback/send_oauth_payload";
+import { errorToLog } from "@oko-wallet-attached/logging/error";
+import { postLog } from "@oko-wallet-attached/requests/logging";
 
 export function useXCallback() {
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +20,9 @@ export function useXCallback() {
         const cbRes = await handleXCallback();
 
         if (cbRes.success) {
-          const stateParam = new URLSearchParams(window.location.search).get("state");
+          const stateParam = new URLSearchParams(window.location.search).get(
+            "state",
+          );
           if (stateParam) {
             try {
               const oauthState = JSON.parse(atob(stateParam));
@@ -28,7 +30,9 @@ export function useXCallback() {
                 window.close();
                 return;
               }
-            } catch { /* ignore parse errors */ }
+            } catch {
+              /* ignore parse errors */
+            }
           }
           window.close();
         } else {
@@ -71,8 +75,12 @@ export async function handleXCallback(): Promise<
         oauthState,
         code,
       });
-      if (mobileRedirected) return { success: true, data: void 0 };
-    } catch { /* fall through to web flow */ }
+      if (mobileRedirected) {
+        return { success: true, data: void 0 };
+      }
+    } catch {
+      /* fall through to web flow */
+    }
   }
 
   if (!code) {

@@ -1,15 +1,15 @@
-import type { FC } from "react";
-import type { MakeSvmAllTxSignData } from "@oko-wallet/oko-sdk-core";
+import { Button } from "@oko-wallet/oko-common-ui/button";
 import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
-import { Button } from "@oko-wallet/oko-common-ui/button";
+import type { MakeSvmAllTxSignData } from "@oko-wallet/oko-sdk-core";
+import type { FC } from "react";
 
-import styles from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_signature_modal.module.scss";
+import { SvmAllTxSignatureContent } from "./svm_all_tx_signature_content";
+import { useAllTxSigModal } from "./use_all_tx_sig_modal";
 import { CommonModal } from "@oko-wallet-attached/components/modal_variants/common/common_modal";
 import { DemoView } from "@oko-wallet-attached/components/modal_variants/common/make_signature/demo_view";
+import styles from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_signature_modal.module.scss";
 import { SignWithOkoBox } from "@oko-wallet-attached/components/sign_with_oko_box/sign_with_oko_box";
-import { useAllTxSigModal } from "./use_all_tx_sig_modal";
-import { SvmAllTxSignatureContent } from "./svm_all_tx_signature_content";
 
 export interface MakeAllTxSigModalProps {
   getIsAborted: () => boolean;
@@ -56,7 +56,10 @@ export const MakeAllTxSigModal: FC<MakeAllTxSigModalProps> = ({
           <XCloseIcon size={20} color="var(--fg-quaternary)" />
         </div>
 
-        <div data-scroll-container className={styles.modalInnerContentContainer}>
+        <div
+          data-scroll-container
+          className={styles.modalInnerContentContainer}
+        >
           <SvmAllTxSignatureContent payload={data.payload} />
         </div>
 

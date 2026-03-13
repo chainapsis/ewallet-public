@@ -1,11 +1,11 @@
-import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
-import { isAddressEqual, zeroAddress, decodeFunctionData } from "viem";
-import type { PublicClient, Address, Hex } from "viem";
+import { type UseQueryOptions, useQuery } from "@tanstack/react-query";
+import type { Address, Hex, PublicClient } from "viem";
+import { decodeFunctionData, isAddressEqual, zeroAddress } from "viem";
 
 import {
-  ERC165_ABI,
   ERC20_INTERFACE_ID,
   ERC20_WRITE_FUNCTIONS_ABI,
+  ERC165_ABI,
 } from "@oko-wallet-attached/web3/ethereum/decoder";
 
 export interface UseSupportsERC20InterfaceProps {

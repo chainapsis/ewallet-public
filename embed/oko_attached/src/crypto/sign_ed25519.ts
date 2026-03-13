@@ -1,10 +1,10 @@
-import { runTeddsaSign } from "@oko-wallet/teddsa-hooks";
+import type { MakeSignOutputError } from "@oko-wallet/oko-sdk-core";
 import type {
   KeyPackageRaw,
   PublicKeyPackageRaw,
 } from "@oko-wallet/oko-types/teddsa";
 import type { Result } from "@oko-wallet/stdlib-js";
-import type { MakeSignOutputError } from "@oko-wallet/oko-sdk-core";
+import { runTeddsaSign } from "@oko-wallet/teddsa-hooks";
 
 import { TSS_V2_ENDPOINT } from "@oko-wallet-attached/requests/oko_api";
 

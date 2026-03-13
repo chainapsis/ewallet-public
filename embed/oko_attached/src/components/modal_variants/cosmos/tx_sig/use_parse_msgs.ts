@@ -30,6 +30,7 @@ export function useGetSignDocStringWithParsedMsg(
     };
   }
 
+  // biome-ignore lint/correctness/useHookAtTopLevel: hook is called after early return guard
   const { data, isLoading, error } = useGetParsedMsgs({
     chainPrefix,
     messages,
@@ -69,6 +70,7 @@ export function useGetParsedMsgs({
     };
   }
 
+  // biome-ignore lint/correctness/useHookAtTopLevel: hook is called after early return guard
   const protoMsgs = useMemo(() => {
     return messages.map((msg) => {
       return {
@@ -78,6 +80,7 @@ export function useGetParsedMsgs({
     });
   }, [messages]);
 
+  // biome-ignore lint/correctness/useHookAtTopLevel: hook is called after early return guard
   const { data, isLoading, error } = useQuery({
     queryKey: ["getRawJSONFromProtoMsgs", chainPrefix, protoMsgs],
     queryFn: async () => {

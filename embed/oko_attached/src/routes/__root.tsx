@@ -1,6 +1,7 @@
-import { Outlet, createRootRoute } from "@tanstack/react-router";
-import { QueryProvider } from "@oko-wallet-attached/components/query_provider/query_provider";
+import { createRootRoute, Outlet } from "@tanstack/react-router";
 import { Suspense } from "react";
+
+import { QueryProvider } from "@oko-wallet-attached/components/query_provider/query_provider";
 // import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 export const Route = createRootRoute({

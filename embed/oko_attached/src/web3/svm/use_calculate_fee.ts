@@ -1,9 +1,9 @@
-import { useMemo } from "react";
 import {
-  VersionedTransaction,
-  Transaction,
   ComputeBudgetProgram,
+  Transaction,
+  VersionedTransaction,
 } from "@solana/web3.js";
+import { useMemo } from "react";
 
 import { base64ToUint8Array } from "@oko-wallet-attached/utils/base64";
 
@@ -23,10 +23,14 @@ function parsePriorityFee(
   let microLamportsPerUnit = 0;
 
   for (const ix of instructions) {
-    if (ix.programId !== COMPUTE_BUDGET_PROGRAM_ID) continue;
+    if (ix.programId !== COMPUTE_BUDGET_PROGRAM_ID) {
+      continue;
+    }
 
     const data = ix.data;
-    if (data.length === 0) continue;
+    if (data.length === 0) {
+      continue;
+    }
 
     const instructionType = data[0];
 

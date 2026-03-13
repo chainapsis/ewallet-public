@@ -1,8 +1,8 @@
-import type { FC } from "react";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import type { FC } from "react";
 
-import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
 import styles from "../instructions.module.scss";
+import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
 import { TxRow } from "@oko-wallet-attached/components/modal_variants/common/tx_row";
 import { SOLANA_LOGO_URL } from "@oko-wallet-attached/constants/urls";
 

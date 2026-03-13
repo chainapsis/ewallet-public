@@ -1,22 +1,22 @@
-import { useMemo, useState, type FC } from "react";
-import type { MakeArbitrarySigData } from "@oko-wallet/oko-sdk-core";
+import { Button } from "@oko-wallet/oko-common-ui/button";
 import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
-import { Button } from "@oko-wallet/oko-common-ui/button";
+import type { MakeArbitrarySigData } from "@oko-wallet/oko-sdk-core";
+import { type FC, useMemo, useState } from "react";
 
-import styles from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_signature_modal.module.scss";
-import { CommonModal } from "@oko-wallet-attached/components/modal_variants/common/common_modal";
-import { DemoView } from "@oko-wallet-attached/components/modal_variants/common/make_signature/demo_view";
+import { EthereumArbitrarySignatureContent } from "./ethereum_arbitrary_signature_content";
 import { useArbitrarySigModal } from "./hooks/use_arbitrary_sig_modal";
 import { ArbitrarySignatureDesc } from "@oko-wallet-attached/components/modal_variants/common/arbitrary_sig_desc/arbitrary_signature_desc";
-import { EthereumArbitrarySignatureContent } from "./ethereum_arbitrary_signature_content";
-import { SignWithOkoBox } from "@oko-wallet-attached/components/sign_with_oko_box/sign_with_oko_box";
+import { CommonModal } from "@oko-wallet-attached/components/modal_variants/common/common_modal";
+import { DemoView } from "@oko-wallet-attached/components/modal_variants/common/make_signature/demo_view";
+import styles from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_signature_modal.module.scss";
+import { RiskWarningCheckBox } from "@oko-wallet-attached/components/modal_variants/common/risk_warning/risk_warning";
+import { EthereumSiweSignatureContent } from "@oko-wallet-attached/components/modal_variants/eth/arbitrary_sig/siwe_sig/make_siwe_signature_content";
 import {
   getSiweMessage,
   verifySiweMessage,
 } from "@oko-wallet-attached/components/modal_variants/eth/siwe_message";
-import { EthereumSiweSignatureContent } from "@oko-wallet-attached/components/modal_variants/eth/arbitrary_sig/siwe_sig/make_siwe_signature_content";
-import { RiskWarningCheckBox } from "@oko-wallet-attached/components/modal_variants/common/risk_warning/risk_warning";
+import { SignWithOkoBox } from "@oko-wallet-attached/components/sign_with_oko_box/sign_with_oko_box";
 
 export const MakeArbitrarySigModal: FC<MakeArbitrarySigModalProps> = ({
   getIsAborted,
@@ -63,8 +63,11 @@ export const MakeArbitrarySigModal: FC<MakeArbitrarySigModalProps> = ({
           <XCloseIcon size={20} color="var(--fg-quaternary)" />
         </div>
 
-        <div data-scroll-container className={styles.modalInnerContentContainer}>
-          {!!siweMessage ? (
+        <div
+          data-scroll-container
+          className={styles.modalInnerContentContainer}
+        >
+          {siweMessage ? (
             <EthereumSiweSignatureContent
               payload={data.payload}
               theme={theme}

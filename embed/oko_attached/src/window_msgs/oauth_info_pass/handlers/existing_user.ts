@@ -1,31 +1,31 @@
+import { Bytes } from "@oko-wallet/bytes";
+import * as secp256k1Wasm from "@oko-wallet/cait-sith-keplr-wasm/pkg/cait_sith_keplr_wasm";
+import type { OAuthSignInError } from "@oko-wallet/oko-sdk-core";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { KeyShareNodeMetaWithNodeStatusInfo } from "@oko-wallet/oko-types/tss";
 import type { Result } from "@oko-wallet/stdlib-js";
-import { type OAuthSignInError } from "@oko-wallet/oko-sdk-core";
-import { Bytes } from "@oko-wallet/bytes";
-import * as secp256k1Wasm from "@oko-wallet/cait-sith-keplr-wasm/pkg/cait_sith_keplr_wasm";
 
-import {
-  signInV2,
-  reportKeyShareNotFound,
-} from "@oko-wallet-attached/requests/oko_api";
 import { combineUserShares } from "@oko-wallet-attached/crypto/combine";
-import type { UserSignInResultV2 } from "@oko-wallet-attached/window_msgs/types";
-import {
-  buildKeyPackageResult,
-  convertSeedShares,
-} from "@oko-wallet-attached/crypto/reshare_v2";
-import { requestKeySharesWithBackup } from "@oko-wallet-attached/requests/ks_node_v2";
 import {
   commitAll,
   createOkoApiCommitRevealParams,
   type KsnCommitTarget,
 } from "@oko-wallet-attached/crypto/commit_reveal";
 import {
-  decodeSecp256k1SharesByNode,
   decodeEd25519SharesByNode,
+  decodeSecp256k1SharesByNode,
 } from "@oko-wallet-attached/crypto/key_share_utils";
+import {
+  buildKeyPackageResult,
+  convertSeedShares,
+} from "@oko-wallet-attached/crypto/reshare_v2";
 import { combineTeddsaShares } from "@oko-wallet-attached/crypto/sss_ed25519";
+import { requestKeySharesWithBackup } from "@oko-wallet-attached/requests/ks_node_v2";
+import {
+  reportKeyShareNotFound,
+  signInV2,
+} from "@oko-wallet-attached/requests/oko_api";
+import type { UserSignInResultV2 } from "@oko-wallet-attached/window_msgs/types";
 
 /**
  * Handle existing user who has both secp256k1 and ed25519 wallets.

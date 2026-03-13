@@ -1,16 +1,16 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { useState, useEffect, useCallback } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useCallback, useEffect, useState } from "react";
 import type { Hex, PublicClient } from "viem";
 
 import {
-  checkFeeSponsorshipStatus,
-  requestFeeTopUp,
-  isSponsorshipSupportedChain,
   BASE_CHAIN_ID,
+  checkFeeSponsorshipStatus,
   FEE_SPONSORSHIP_API_KEY,
+  type FeeSponsorshipError,
   type FeeSponsorshipStatusResponse,
   type FeeTopUpResponse,
-  type FeeSponsorshipError,
+  isSponsorshipSupportedChain,
+  requestFeeTopUp,
 } from "@oko-wallet-attached/requests/fee_sponsorship";
 
 export type SponsorshipState =
@@ -239,7 +239,7 @@ export function useBaseSponsorshipFlow({
   simulationKey,
   chainId,
   recipientAddress,
-  hostOrigin,
+  hostOrigin: _hostOrigin,
   estimatedFeeWei,
   hasSufficientBalance,
   publicClient,

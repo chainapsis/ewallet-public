@@ -1,7 +1,7 @@
 import type { Theme } from "@oko-wallet/oko-common-ui/theme";
 
-import { getThemeByHostOrigin } from "@oko-wallet-attached/requests/theme";
 import { getSystemTheme } from "@oko-wallet-attached/components/google_callback/theme";
+import { getThemeByHostOrigin } from "@oko-wallet-attached/requests/theme";
 
 export function setColorScheme(theme: Theme) {
   const root = window.document.documentElement;

@@ -1,9 +1,9 @@
+import { Bytes } from "@oko-wallet/bytes";
 import type {
   Point256,
-  UserKeySharePointByNode,
   TeddsaKeyShareByNode,
+  UserKeySharePointByNode,
 } from "@oko-wallet/oko-types/user_key_share";
-import { Bytes } from "@oko-wallet/bytes";
 import { hexToTeddsaKeyShare } from "@oko-wallet/oko-types/user_key_share";
 import type { Result } from "@oko-wallet/stdlib-js";
 

@@ -1,10 +1,9 @@
-import { useMemo } from "react";
-import type { ChainInfoForAttachedModal } from "@oko-wallet/oko-sdk-core";
-import type { StdSignDoc } from "@keplr-wallet/types";
-import type { Any } from "@keplr-wallet/proto-types/google/protobuf/any";
-import type { Coin } from "@keplr-wallet/types";
-import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import type { Any } from "@keplr-wallet/proto-types/google/protobuf/any";
+import type { Coin, StdSignDoc } from "@keplr-wallet/types";
+import { CoinPretty, Dec } from "@keplr-wallet/unit";
+import type { ChainInfoForAttachedModal } from "@oko-wallet/oko-sdk-core";
+import { useMemo } from "react";
 
 import { useGetAssetMeta } from "@oko-wallet-attached/web3/cosmos/use_get_asset_meta";
 
@@ -74,7 +73,9 @@ export function useGetFee({ signDocJson, chainInfo }: UseGetFeeParams) {
   }, [signDocJson]);
 
   const localCurrency = useMemo(() => {
-    if (!feeCoin) return undefined;
+    if (!feeCoin) {
+      return undefined;
+    }
 
     return (
       chainInfo?.fee_currencies?.find(
@@ -91,10 +92,14 @@ export function useGetFee({ signDocJson, chainInfo }: UseGetFeeParams) {
   });
 
   const feePretty = useMemo(() => {
-    if (!feeCoin) return undefined;
+    if (!feeCoin) {
+      return undefined;
+    }
 
     const currency = localCurrency || fetchedCurrency;
-    if (!currency) return undefined;
+    if (!currency) {
+      return undefined;
+    }
 
     return new CoinPretty(currency, new Dec(feeCoin.amount));
   }, [feeCoin, localCurrency, fetchedCurrency]);

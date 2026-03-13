@@ -1,8 +1,8 @@
-import { type FC } from "react";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import type { FC } from "react";
 
-import type { RenderContext, EthTxAction } from "../types";
 import { TxContainer } from "../common/tx_container";
+import type { EthTxAction, RenderContext } from "../types";
 
 export const FallbackAction: FC<FallbackActionProps> = ({ action }) => {
   return (

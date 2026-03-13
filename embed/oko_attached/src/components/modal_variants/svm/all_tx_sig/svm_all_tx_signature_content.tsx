@@ -1,22 +1,22 @@
-import type { FC } from "react";
-import type { SvmAllTxSignPayload } from "@oko-wallet/oko-sdk-core";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import type { SvmAllTxSignPayload } from "@oko-wallet/oko-sdk-core";
 import { useQuery } from "@tanstack/react-query";
+import type { FC } from "react";
 import { useMemo } from "react";
 
 import styles from "../common/signature_content.module.scss";
 import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
-import { getFaviconUrl } from "@oko-wallet-attached/utils/favicon";
 import { getChainByChainId } from "@oko-wallet-attached/requests/chain_infos";
+import { getFaviconUrl } from "@oko-wallet-attached/utils/favicon";
 
 interface SvmAllTxSignatureContentProps {
   payload: SvmAllTxSignPayload;
 }
 
-export const SvmAllTxSignatureContent: FC<
-  SvmAllTxSignatureContentProps
-> = ({ payload }) => {
+export const SvmAllTxSignatureContent: FC<SvmAllTxSignatureContentProps> = ({
+  payload,
+}) => {
   const { origin, chain_id, data } = payload;
   const faviconUrl = getFaviconUrl(origin);
   const txCount = data.serialized_transactions.length;

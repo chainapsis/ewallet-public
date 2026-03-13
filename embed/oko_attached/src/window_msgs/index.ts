@@ -4,8 +4,6 @@ import type {
   OkoWalletMsgGetConnectedApps,
 } from "@oko-wallet/oko-sdk-core";
 
-import { useAppState } from "@oko-wallet-attached/store/app";
-
 import { handleExportPrivateKey } from "./export_private_key";
 import { handleGenerateOAuthUrl } from "./generate_oauth_url";
 import { handleGetAuthType } from "./get_auth_type";
@@ -24,6 +22,7 @@ import { handleSetOAuthNonce } from "./set_oauth_nonce";
 import { handleSignOut } from "./sign_out";
 import { OKO_SDK_TARGET } from "./target";
 import type { MsgEventContext } from "./types";
+import { useAppState } from "@oko-wallet-attached/store/app";
 
 // NOTE: Some types are used only within certain apps, such as "user_dashboard"
 type ExtendedOkoWalletMsg =

@@ -1,8 +1,8 @@
-import { type FC } from "react";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import type { FC } from "react";
 
-import styles from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_signature_modal.module.scss";
 import { CommonModal } from "@oko-wallet-attached/components/modal_variants/common/common_modal";
+import styles from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_signature_modal.module.scss";
 
 export const DemoView: FC = () => {
   return (

@@ -1,12 +1,12 @@
-import { useEffect, useMemo, type FC } from "react";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import type { EmailLoginModalPayload } from "@oko-wallet/oko-sdk-core";
+import { type FC, useEffect, useMemo } from "react";
 
-import { AttachedInitialized } from "@oko-wallet-attached/components/attached_initialized/attached_initialized";
-import { useMemoryState } from "@oko-wallet-attached/store/memory";
-import { EmailLoginPopup } from "./email_login_popup";
 import { LoginPopupErrorView } from "../login_popup/login_popup_error_view";
 import styles from "./email_login.module.scss";
+import { EmailLoginPopup } from "./email_login_popup";
+import { AttachedInitialized } from "@oko-wallet-attached/components/attached_initialized/attached_initialized";
+import { useMemoryState } from "@oko-wallet-attached/store/memory";
 
 /**
  * Build email modal data from URL query params (mobile mode).
@@ -18,12 +18,16 @@ function useRnEmailModalPayload(): {
   data: EmailLoginModalPayload["data"];
 } | null {
   return useMemo(() => {
-    if (typeof window === "undefined") return null;
+    if (typeof window === "undefined") {
+      return null;
+    }
     const params = new URLSearchParams(window.location.search);
     const rnNonce = params.get("rn_nonce");
     const rnState = params.get("rn_state");
     const modalId = params.get("modal_id");
-    if (!rnNonce || !rnState || !modalId) return null;
+    if (!rnNonce || !rnState || !modalId) {
+      return null;
+    }
     return {
       modalId,
       data: {

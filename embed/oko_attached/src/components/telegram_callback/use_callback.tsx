@@ -1,16 +1,16 @@
-import { useEffect, useState } from "react";
-import type { Result } from "@oko-wallet/stdlib-js";
 import {
+  type OAuthState,
   RedirectUriSearchParamsKey,
   type TelegramLoginModalApproveAckPayload,
   type TelegramLoginModalErrorAckPayload,
-  type OAuthState,
 } from "@oko-wallet/oko-sdk-core";
+import type { Result } from "@oko-wallet/stdlib-js";
+import { useEffect, useState } from "react";
 
 import type { HandleTelegramCallbackError } from "./types";
-import { postLog } from "@oko-wallet-attached/requests/logging";
-import { errorToLog } from "@oko-wallet-attached/logging/error";
 import { sendOAuthPayloadToEmbeddedWindow } from "@oko-wallet-attached/components/oauth_callback/send_oauth_payload";
+import { errorToLog } from "@oko-wallet-attached/logging/error";
+import { postLog } from "@oko-wallet-attached/requests/logging";
 
 export function useTelegramCallback() {
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +21,9 @@ export function useTelegramCallback() {
         const cbRes = await handleTelegramCallback();
 
         if (cbRes.success) {
-          const stateParam = new URLSearchParams(window.location.search).get(RedirectUriSearchParamsKey.STATE);
+          const stateParam = new URLSearchParams(window.location.search).get(
+            RedirectUriSearchParamsKey.STATE,
+          );
           if (stateParam) {
             try {
               const oauthState = JSON.parse(stateParam);
@@ -29,7 +31,9 @@ export function useTelegramCallback() {
                 window.close();
                 return;
               }
-            } catch { /* ignore parse errors */ }
+            } catch {
+              /* ignore parse errors */
+            }
           }
           window.close();
         } else {
@@ -70,7 +74,7 @@ export async function handleTelegramCallback(): Promise<
   let oauthState: OAuthState;
   try {
     oauthState = JSON.parse(stateParam) as OAuthState;
-  } catch (err) {
+  } catch (_err) {
     return {
       success: false,
       err: { type: "params_not_sufficient" },

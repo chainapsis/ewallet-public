@@ -1,19 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { Result } from "@oko-wallet/stdlib-js";
 import type {
   EmailLoginModalApproveAckPayload,
   EmailLoginModalErrorAckPayload,
   OAuthPayload,
   OAuthState,
 } from "@oko-wallet/oko-sdk-core";
+import type { Result } from "@oko-wallet/stdlib-js";
 import type { Auth0DecodedHash } from "auth0-js";
+import { useEffect, useState } from "react";
 
-import { getAuth0WebAuth } from "@oko-wallet-attached/config/auth0";
 import type { HandleCallbackError } from "@oko-wallet-attached/components/google_callback/types";
-import { sendOAuthPayloadToEmbeddedWindow } from "@oko-wallet-attached/components/oauth_callback/send_oauth_payload";
 import { handleMobileRedirect } from "@oko-wallet-attached/components/oauth_callback/handle_mobile_redirect";
+import { sendOAuthPayloadToEmbeddedWindow } from "@oko-wallet-attached/components/oauth_callback/send_oauth_payload";
+import { getAuth0WebAuth } from "@oko-wallet-attached/config/auth0";
 
 const EMAIL_STORAGE_KEY = "oko_email_login_pending_email";
 
@@ -36,7 +36,9 @@ export function useEmailCallback(): { error: string | null } {
                 isReauth = true;
               }
             }
-          } catch { /* ignore parse errors */ }
+          } catch {
+            /* ignore parse errors */
+          }
         }
 
         const cbRes = await handleEmailCallback();
@@ -80,10 +82,17 @@ export async function handleEmailCallback(): Promise<
           access_token: accessToken,
           id_token: idToken,
         });
-        if (mobileRedirected) return { success: true, data: void 0 };
+        if (mobileRedirected) {
+          return { success: true, data: void 0 };
+        }
 
         // 2. Safari iOS web: send via BroadcastChannel fallback
-        if (accessToken && idToken && oauthState.apiKey && oauthState.targetOrigin) {
+        if (
+          accessToken &&
+          idToken &&
+          oauthState.apiKey &&
+          oauthState.targetOrigin
+        ) {
           const payload: OAuthPayload = {
             access_token: accessToken,
             id_token: idToken,
@@ -98,7 +107,9 @@ export async function handleEmailCallback(): Promise<
           }
           return { success: true, data: void 0 };
         }
-      } catch { /* fall through */ }
+      } catch {
+        /* fall through */
+      }
     }
 
     // Fallback with no parsed state: try sessionStorage from /mobile/login page
@@ -110,7 +121,9 @@ export async function handleEmailCallback(): Promise<
       access_token: at,
       id_token: it,
     });
-    if (mobileRedirected) return { success: true, data: void 0 };
+    if (mobileRedirected) {
+      return { success: true, data: void 0 };
+    }
 
     return {
       success: false,

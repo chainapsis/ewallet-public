@@ -1,9 +1,10 @@
 import type { MakeSvmMessageSignData } from "@oko-wallet/oko-sdk-core";
-import { hexToUint8Array } from "@oko-wallet-attached/crypto/keygen_ed25519";
+
 import {
-  useSvmSignatureBase,
   signMessageToHex,
+  useSvmSignatureBase,
 } from "../use_svm_signature_base";
+import { hexToUint8Array } from "@oko-wallet-attached/crypto/keygen_ed25519";
 
 export interface UseMessageSigModalArgs {
   modalId: string;
@@ -18,10 +19,14 @@ export function useMessageSigModal(args: UseMessageSigModalArgs) {
   const base = useSvmSignatureBase({ modalId, hostOrigin, getIsAborted });
 
   async function onApprove() {
-    if (getIsAborted()) return;
+    if (getIsAborted()) {
+      return;
+    }
 
     const ctx = base.prepareSigningContext();
-    if (!ctx) return;
+    if (!ctx) {
+      return;
+    }
 
     base.setIsLoading(true);
 

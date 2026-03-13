@@ -1,7 +1,7 @@
-import type { EthereumTxSignPayload } from "@oko-wallet/oko-sdk-core";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
+import type { EthereumTxSignPayload } from "@oko-wallet/oko-sdk-core";
+import { type FC, Fragment } from "react";
 import type { RpcTransactionRequest } from "viem";
-import { Fragment, type FC } from "react";
 
 import { EthereumTxSummary } from "./ethereum_tx_summary";
 import { MetadataContent } from "@oko-wallet-attached/components/modal_variants/common/metadata_content/metadata_content";

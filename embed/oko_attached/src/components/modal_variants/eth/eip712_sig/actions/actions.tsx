@@ -1,8 +1,8 @@
-import { type FC } from "react";
-import { maxUint256, type Chain } from "viem";
+import type { FC } from "react";
+import { type Chain, maxUint256 } from "viem";
 
-import type { EIP712Action } from "./types";
 import { PermitAction } from "./permit/permit_action";
+import type { EIP712Action } from "./types";
 import { UnknownAction } from "./unknown/unknown";
 
 export type EIP712ActionsProps = {

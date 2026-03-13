@@ -1,10 +1,11 @@
-import { useState } from "react";
 import type { MakeSvmAllTxSignData } from "@oko-wallet/oko-sdk-core";
-import { base64ToUint8Array } from "@oko-wallet-attached/utils/base64";
+import { useState } from "react";
+
 import {
-  useSvmSignatureBase,
   signMessageToHex,
+  useSvmSignatureBase,
 } from "../use_svm_signature_base";
+import { base64ToUint8Array } from "@oko-wallet-attached/utils/base64";
 
 export interface UseAllTxSigModalArgs {
   modalId: string;
@@ -22,10 +23,14 @@ export function useAllTxSigModal(args: UseAllTxSigModalArgs) {
   const txCount = data.payload.data.serialized_transactions.length;
 
   async function onApprove() {
-    if (getIsAborted()) return;
+    if (getIsAborted()) {
+      return;
+    }
 
     const ctx = base.prepareSigningContext();
-    if (!ctx) return;
+    if (!ctx) {
+      return;
+    }
 
     base.setIsLoading(true);
     setSigningProgress(0);
@@ -35,7 +40,9 @@ export function useAllTxSigModal(args: UseAllTxSigModalArgs) {
       const messagesToSign = data.payload.data.messages_to_sign;
 
       for (let i = 0; i < messagesToSign.length; i++) {
-        if (getIsAborted()) return;
+        if (getIsAborted()) {
+          return;
+        }
 
         const message = base64ToUint8Array(messagesToSign[i]);
         const result = await signMessageToHex(message, ctx);

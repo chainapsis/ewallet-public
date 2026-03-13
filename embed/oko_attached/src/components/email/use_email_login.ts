@@ -1,15 +1,15 @@
-import { useEffect, useMemo, useState } from "react";
 import type {
   EmailLoginModalPayload,
   OAuthState,
 } from "@oko-wallet/oko-sdk-core";
+import { useEffect, useMemo, useState } from "react";
 
-import { useMemoryState } from "@oko-wallet-attached/store/memory";
 import { getAuth0WebAuth } from "@oko-wallet-attached/config/auth0";
 import {
   sendEmailOTPCode,
   verifyEmailOTPCode,
 } from "@oko-wallet-attached/lib/auth0";
+import { useMemoryState } from "@oko-wallet-attached/store/memory";
 
 const CODE_LENGTH = 6;
 const RESEND_COOLDOWN_SECONDS = 180; // 3 minutes
@@ -57,8 +57,12 @@ export function useEmailLogin({
   // In mobile mode (system browser), MemoryState is empty.
   // Fall back to host_origin from URL query params.
   const hostOrigin = useMemo(() => {
-    if (memoryHostOrigin) return memoryHostOrigin;
-    if (typeof window === "undefined") return null;
+    if (memoryHostOrigin) {
+      return memoryHostOrigin;
+    }
+    if (typeof window === "undefined") {
+      return null;
+    }
     return new URLSearchParams(window.location.search).get("host_origin");
   }, [memoryHostOrigin]);
 

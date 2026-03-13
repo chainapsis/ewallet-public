@@ -1,6 +1,7 @@
 // dynamic-erc2612.ts
-import { z, ZodError } from "zod";
-import { isAddress, getAddress } from "viem";
+
+import { getAddress, isAddress } from "viem";
+import { type ZodError, z } from "zod";
 
 export type UintOutput = "bigint" | "string";
 export interface BuildOptions {

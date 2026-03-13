@@ -1,5 +1,5 @@
-import type { Result } from "@oko-wallet/stdlib-js";
 import type { CustomerTheme } from "@oko-wallet/oko-types/customers";
+import type { Result } from "@oko-wallet/stdlib-js";
 
 import { OKO_API_ENDPOINT } from "./endpoints";
 import type { FetchError } from "./types";

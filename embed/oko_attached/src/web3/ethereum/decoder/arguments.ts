@@ -1,4 +1,4 @@
-import { isAddress, type Address, type Hex } from "viem";
+import { type Address, type Hex, isAddress } from "viem";
 
 type ArgType =
   | "address"
@@ -64,7 +64,9 @@ export function validateArgsForFunction(
   args: unknown[],
 ): boolean {
   const signatures = expectedArgTypes[fnName];
-  if (!signatures) return false;
+  if (!signatures) {
+    return false;
+  }
 
   return signatures.some((expected) => {
     return (

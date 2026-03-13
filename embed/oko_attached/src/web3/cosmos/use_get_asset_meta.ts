@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
 import type { Currency } from "@keplr-wallet/types";
+import { useQuery } from "@tanstack/react-query";
 
 import { useAssetMetaStore } from "@oko-wallet-attached/store/asset_meta";
 import type { AssetMetaInput } from "@oko-wallet-attached/types/asset_meta";

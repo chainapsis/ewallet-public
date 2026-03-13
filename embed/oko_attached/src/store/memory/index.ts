@@ -5,9 +5,9 @@ import type {
 import { create } from "zustand";
 import { combine } from "zustand/middleware";
 
-import { OKO_SDK_TARGET } from "@oko-wallet-attached/window_msgs/target";
 import type { MemoryActions, MemoryState, ReferralInfo } from "./types";
-import { type AppError } from "@oko-wallet-attached/errors";
+import type { AppError } from "@oko-wallet-attached/errors";
+import { OKO_SDK_TARGET } from "@oko-wallet-attached/window_msgs/target";
 
 const initialState: MemoryState = {
   hostOrigin: null,

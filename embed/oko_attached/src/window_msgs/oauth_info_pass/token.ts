@@ -1,18 +1,18 @@
-import type { Result } from "@oko-wallet/stdlib-js";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
+import type { Result } from "@oko-wallet/stdlib-js";
 
-import type {
-  GoogleTokenInfo,
-  Auth0TokenInfo,
-  TokenInfo,
-} from "@oko-wallet-attached/window_msgs/types";
+import { verifyIdTokenOfDiscord } from "./discord";
+import { verifyIdTokenOfGithub } from "./github";
+import { verifyIdTokenOfX } from "./x";
 import {
   AUTH0_CLIENT_ID,
   AUTH0_DOMAIN,
 } from "@oko-wallet-attached/config/auth0";
-import { verifyIdTokenOfDiscord } from "./discord";
-import { verifyIdTokenOfGithub } from "./github";
-import { verifyIdTokenOfX } from "./x";
+import type {
+  Auth0TokenInfo,
+  GoogleTokenInfo,
+  TokenInfo,
+} from "@oko-wallet-attached/window_msgs/types";
 
 export async function verifyIdToken(
   authType: AuthType,

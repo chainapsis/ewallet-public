@@ -1,5 +1,5 @@
+import { type UseQueryOptions, useQuery } from "@tanstack/react-query";
 import type { DecodeFunctionDataReturnType, Hex } from "viem";
-import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 
 import { decodeCalldata } from "@oko-wallet-attached/web3/ethereum/decoder";
 
@@ -15,7 +15,9 @@ export function useDecodedCalldata({
   return useQuery({
     queryKey: ["get-decoded-ethereum-tx-calldata", calldata],
     queryFn: async () => {
-      if (!calldata) return null;
+      if (!calldata) {
+        return null;
+      }
       return await decodeCalldata({ calldata });
     },
     ...options,

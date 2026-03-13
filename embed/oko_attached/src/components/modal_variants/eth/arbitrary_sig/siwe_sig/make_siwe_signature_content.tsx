@@ -1,20 +1,20 @@
-import type { EthereumArbitrarySignPayload } from "@oko-wallet/oko-sdk-core";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import type { Theme } from "@oko-wallet/oko-common-ui/theme";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import type { EthereumArbitrarySignPayload } from "@oko-wallet/oko-sdk-core";
 import type { FC } from "react";
 
+import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
+import { MakeSignatureRawCodeBlock } from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_sig_modal_code_block";
+import { MakeSignatureRawCodeBlockContainer } from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_sig_modal_code_block_container";
+import { RiskWarningBox } from "@oko-wallet-attached/components/modal_variants/common/risk_warning/risk_warning";
 import styles from "@oko-wallet-attached/components/modal_variants/common/sign_in_content/sign_in_content.module.scss";
+import { SignerInfo } from "@oko-wallet-attached/components/modal_variants/common/signer_info";
+import { SiweSigTitleBadge } from "@oko-wallet-attached/components/modal_variants/eth/arbitrary_sig/siwe_sig/siwe_sig_title_badge";
 import {
   getSiweMessage,
   verifySiweMessage,
 } from "@oko-wallet-attached/components/modal_variants/eth/siwe_message";
-import { SiweSigTitleBadge } from "@oko-wallet-attached/components/modal_variants/eth/arbitrary_sig/siwe_sig/siwe_sig_title_badge";
-import { SignerInfo } from "@oko-wallet-attached/components/modal_variants/common/signer_info";
-import { MakeSignatureRawCodeBlockContainer } from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_sig_modal_code_block_container";
-import { MakeSignatureRawCodeBlock } from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_sig_modal_code_block";
-import { RiskWarningBox } from "@oko-wallet-attached/components/modal_variants/common/risk_warning/risk_warning";
-import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
 
 interface EthereumSiweSignatureContentProps {
   payload: EthereumArbitrarySignPayload;

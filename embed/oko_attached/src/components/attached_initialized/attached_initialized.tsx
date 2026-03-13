@@ -1,7 +1,7 @@
 "use client";
 
-import { type FC, type PropsWithChildren } from "react";
 import { ThemeProvider } from "@oko-wallet/oko-common-ui/theme";
+import type { FC, PropsWithChildren } from "react";
 
 import { useInitializeApp } from "./use_initialize_app";
 import { MobileModeProvider } from "@oko-wallet-attached/hooks/mobile_mode";
@@ -17,7 +17,5 @@ export const AttachedInitialized: FC<PropsWithChildren> = ({ children }) => {
     <MobileModeProvider enabled={isMobile}>
       <ThemeProvider theme={theme}>{children}</ThemeProvider>
     </MobileModeProvider>
-  ) : (
-    null
-  );
+  ) : null;
 };
