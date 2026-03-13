@@ -1,5 +1,5 @@
-import { useContext } from "react";
 import { Connection, clusterApiUrl } from "@solana/web3.js";
+import { useContext } from "react";
 
 import { OkoContext } from "./OkoProvider";
 

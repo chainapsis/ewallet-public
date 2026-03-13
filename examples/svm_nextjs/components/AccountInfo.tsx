@@ -1,13 +1,13 @@
 "use client";
 
+import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
 import Link from "next/link";
-import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { useState } from "react";
 
-import Button from "./Button";
-import useOkoSvm from "@/hooks/useOkoSvm";
 import useConnection from "@/hooks/useConnection";
+import useOkoSvm from "@/hooks/useOkoSvm";
+import Button from "./Button";
 
 interface AccountInfoProps {
   className?: string;
@@ -79,7 +79,9 @@ function CopyableAddress({
       <button
         type="button"
         onClick={async () => {
-          if (!value) return;
+          if (!value) {
+            return;
+          }
           await navigator.clipboard.writeText(value);
           setCopied(true);
           setTimeout(() => setCopied(false), 1200);

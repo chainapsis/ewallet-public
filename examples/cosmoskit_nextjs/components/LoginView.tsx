@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
-import { useChain } from "@cosmos-kit/react";
 import { WalletStatus } from "@cosmos-kit/core";
+import { useChain } from "@cosmos-kit/react";
+import Image from "next/image";
 
 import Button from "./Button";
 

@@ -1,7 +1,7 @@
 "use client";
 
-import Providers from "@/components/Providers";
 import App from "@/components/App";
+import Providers from "@/components/Providers";
 
 export default function Home() {
   return (

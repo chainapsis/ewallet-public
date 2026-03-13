@@ -1,8 +1,8 @@
-import { createContext, useEffect, useState } from "react";
 import {
   OkoSvmWallet,
   type OkoSvmWalletInterface,
 } from "@oko-wallet/oko-sdk-svm";
+import { createContext, useEffect, useState } from "react";
 
 interface OkoSvmProviderValues {
   isReady: boolean;

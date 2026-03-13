@@ -1,16 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import Link from "next/link";
-import { SigningStargateClient, StargateClient } from "@cosmjs/stargate";
 import { fromBech32 } from "@cosmjs/encoding";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { SigningStargateClient, StargateClient } from "@cosmjs/stargate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
+import { useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
-import Button from "./Button";
 import useOkoCosmos from "@/hooks/useOkoCosmos";
+import Button from "./Button";
 
 interface TransactionFormProps {
   className?: string;
@@ -139,7 +139,7 @@ export default function TransactionForm({ className }: TransactionFormProps) {
             exact: true,
           });
         }
-      } catch (err) {
+      } catch (_err) {
         // keep polling
       }
     }, 2000);
