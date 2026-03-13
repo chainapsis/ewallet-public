@@ -1,23 +1,23 @@
-import type { Result } from "@oko-wallet/stdlib-js";
-import type { AuthType } from "@oko-wallet/oko-types/auth";
+import type { OpenModalError, SignInType } from "@oko-wallet/oko-sdk-core";
 import {
   EventEmitter3,
+  type OkoWalletCoreEvent2,
+  type OkoWalletCoreEventHandler2,
   type OkoWalletInterface,
   type OkoWalletMsg,
   type OkoWalletMsgOpenModal,
   type OkoWalletState,
-  type WalletInfo,
-  type OkoWalletCoreEvent2,
-  type OkoWalletCoreEventHandler2,
   type OpenModalAckPayload,
+  type WalletInfo,
 } from "@oko-wallet/oko-sdk-core";
-import type { OpenModalError } from "@oko-wallet/oko-sdk-core";
-import type { SignInType } from "@oko-wallet/oko-sdk-core";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
+import type { Result } from "@oko-wallet/stdlib-js";
 import * as SecureStore from "expo-secure-store";
-import { openModalRN } from "./methods/open_modal";
-import { signInRN, type SignInOptions } from "./methods/sign_in";
+
+import { getCosmosChainInfo, getEthChainInfo } from "./chain_info";
 import type { LoginWalletInfo } from "./methods/login_url_codec";
-import { getEthChainInfo, getCosmosChainInfo } from "./chain_info";
+import { openModalRN } from "./methods/open_modal";
+import { type SignInOptions, signInRN } from "./methods/sign_in";
 
 const WALLET_INFO_STORE_KEY = "oko_rn_wallet_info";
 
@@ -71,7 +71,9 @@ export class OkoWalletRN implements OkoWalletInterface {
   }
 
   private async _initialize(): Promise<void> {
-    if (this._initResolved) return;
+    if (this._initResolved) {
+      return;
+    }
     this._initResolved = true;
 
     await this._restoreWalletInfo();
@@ -222,7 +224,9 @@ export class OkoWalletRN implements OkoWalletInterface {
 
   async getWalletInfo(): Promise<WalletInfo | null> {
     await this.waitUntilInitialized;
-    if (!this.state.publicKey || !this.state.authType) return null;
+    if (!this.state.publicKey || !this.state.authType) {
+      return null;
+    }
     return {
       authType: this.state.authType,
       publicKey: this.state.publicKey,
@@ -281,7 +285,9 @@ export class OkoWalletRN implements OkoWalletInterface {
   private async _restoreWalletInfo(): Promise<void> {
     try {
       const raw = await SecureStore.getItemAsync(WALLET_INFO_STORE_KEY);
-      if (!raw) return;
+      if (!raw) {
+        return;
+      }
       const parsed = JSON.parse(raw) as PersistedWalletInfo;
       if (parsed.publicKey) {
         this.state = {

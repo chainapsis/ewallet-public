@@ -56,14 +56,18 @@ export async function getEthChainInfo(
   const allChains = await getAllChains();
   const ethChains = filterEthChains(allChains);
 
-  if (!chainId) return ethChains;
+  if (!chainId) {
+    return ethChains;
+  }
 
   const formattedChainId = chainId.startsWith("eip155:")
     ? chainId
-    : `eip155:${parseInt(chainId)}`;
+    : `eip155:${parseInt(chainId, 10)}`;
 
   const found = ethChains.find((c) => c.chainId === formattedChainId);
-  if (!found) throw new Error(`Chain not found: ${formattedChainId}`);
+  if (!found) {
+    throw new Error(`Chain not found: ${formattedChainId}`);
+  }
   return [found];
 }
 
@@ -73,12 +77,16 @@ export async function getCosmosChainInfo(
   const allChains = await getAllChains();
   const cosmosChains = filterCosmosChains(allChains);
 
-  if (!chainId) return cosmosChains;
+  if (!chainId) {
+    return cosmosChains;
+  }
 
   const identifier = parseChainIdentifier(chainId);
   const found = cosmosChains.find(
     (c) => parseChainIdentifier(c.chainId) === identifier,
   );
-  if (!found) throw new Error(`Chain not found: ${identifier}`);
+  if (!found) {
+    throw new Error(`Chain not found: ${identifier}`);
+  }
   return [found];
 }

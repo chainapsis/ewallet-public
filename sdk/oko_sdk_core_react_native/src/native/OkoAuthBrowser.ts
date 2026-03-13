@@ -1,5 +1,5 @@
-import { Platform } from "react-native";
 import * as WebBrowser from "expo-web-browser";
+import { Platform } from "react-native";
 
 /**
  * SDK-internal callback scheme used by OkoAuthCallbackActivity on Android.
