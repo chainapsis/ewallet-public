@@ -36,7 +36,10 @@ function metaToCurrency(meta: AssetMeta): Currency {
   };
 }
 
-function createFallbackCurrency(denom: string, fallbackDecimals?: number): Currency {
+function createFallbackCurrency(
+  denom: string,
+  fallbackDecimals?: number,
+): Currency {
   if (denom.startsWith("0x")) {
     const addr = denom.toLowerCase();
     return {
@@ -46,9 +49,7 @@ function createFallbackCurrency(denom: string, fallbackDecimals?: number): Curre
     };
   }
   const display =
-    denom.length > 16
-      ? `${denom.slice(0, 10)}...${denom.slice(-4)}`
-      : denom;
+    denom.length > 16 ? `${denom.slice(0, 10)}...${denom.slice(-4)}` : denom;
   return {
     coinDenom: display,
     coinMinimalDenom: denom,

@@ -1,6 +1,6 @@
-import { type FC } from "react";
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import { CloseButtonIcon } from "@oko-wallet/oko-common-ui/icons/close_button_icon";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import type { FC } from "react";
 
 import styles from "./integration_card.module.scss";
 
@@ -39,6 +39,7 @@ export const IntegrationCard: FC<IntegrationCardProps> = ({ onClose }) => {
       <img
         src={`${process.env.NEXT_PUBLIC_S3_BUCKET_URL}/assets/oko-demo-intergrate-officially.png`}
         className={styles.image}
+        alt=""
       />
 
       <div className={styles.getStartedButton}>

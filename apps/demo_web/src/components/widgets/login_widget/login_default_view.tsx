@@ -1,21 +1,21 @@
-import { type FC, Fragment } from "react";
 import { Button } from "@oko-wallet/oko-common-ui/button";
-import { GoogleIcon } from "@oko-wallet/oko-common-ui/icons/google_icon";
-import { OkoLogoIcon } from "@oko-wallet/oko-common-ui/icons/oko_logo_icon";
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import { ExternalLinkOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/external_link_outlined";
 import { ChevronRightIcon } from "@oko-wallet/oko-common-ui/icons/chevron_right";
-import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
-import { TelegramIcon } from "@oko-wallet/oko-common-ui/icons/telegram_icon";
-import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
 import { DiscordIcon } from "@oko-wallet/oko-common-ui/icons/discord_icon";
+import { ExternalLinkOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/external_link_outlined";
 import { GithubIcon } from "@oko-wallet/oko-common-ui/icons/github_icon";
+import { GoogleIcon } from "@oko-wallet/oko-common-ui/icons/google_icon";
 import { MailboxIcon } from "@oko-wallet/oko-common-ui/icons/mailbox";
 import { OkoLogoColorIcon } from "@oko-wallet/oko-common-ui/icons/oko_logo_color_icon";
+import { OkoLogoIcon } from "@oko-wallet/oko-common-ui/icons/oko_logo_icon";
+import { TelegramIcon } from "@oko-wallet/oko-common-ui/icons/telegram_icon";
+import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
+import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import { type FC, Fragment } from "react";
 
 import styles from "./login_widget.module.scss";
-import type { LoginMethod } from "@oko-wallet-demo-web/types/login";
 import { useThemeState } from "@oko-wallet-demo-web/state/theme";
+import type { LoginMethod } from "@oko-wallet-demo-web/types/login";
 
 export interface LoginDefaultViewProps {
   onSignIn: (method: LoginMethod) => void;
@@ -93,7 +93,12 @@ export const LoginDefaultView: FC<LoginDefaultViewProps> = ({
           rel="noopener noreferrer"
           className={styles.supportLink}
         >
-          <Typography tagType="span" size="xs" weight="medium" color="secondary">
+          <Typography
+            tagType="span"
+            size="xs"
+            weight="medium"
+            color="secondary"
+          >
             Get support
           </Typography>
           <ExternalLinkOutlinedIcon className={styles.supportIcon} />

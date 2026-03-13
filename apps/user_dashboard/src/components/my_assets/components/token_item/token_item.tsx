@@ -16,7 +16,10 @@ import styles from "./token_item.module.scss";
 import { AddressQrModal } from "@oko-wallet-user-dashboard/components/address_qr_modal/address_qr_modal";
 import { useCopyToClipboard } from "@oko-wallet-user-dashboard/hooks/use_copy_to_clipboard";
 import type { TokenBalance } from "@oko-wallet-user-dashboard/types/token";
-import { calculateUsdValue, formatDisplayBalance } from "@oko-wallet-user-dashboard/utils/format_token_amount";
+import {
+  calculateUsdValue,
+  formatDisplayBalance,
+} from "@oko-wallet-user-dashboard/utils/format_token_amount";
 
 interface TokenItemProps {
   tokenBalance: TokenBalance;
@@ -166,7 +169,11 @@ export const TokenItem: FC<TokenItemProps> = ({
 
             <AddressQrModal
               renderTrigger={({ onOpen }) => (
-                <button className={`${styles.copyButton}`} onClick={onOpen}>
+                <button
+                  type="button"
+                  className={`${styles.copyButton}`}
+                  onClick={onOpen}
+                >
                   <QrCodeIcon size={16} color="var(--fg-tertiary)" />
                 </button>
               )}

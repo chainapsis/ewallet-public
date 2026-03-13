@@ -137,7 +137,10 @@ export async function fetchCw20TokenBalances(
       if (contract.metadata.symbol && contract.metadata.decimals != null) {
         currency = contractInfoToCurrency(contract);
       } else {
-        currency = await queryCw20TokenInfo(restEndpoint, contract.contractAddress);
+        currency = await queryCw20TokenInfo(
+          restEndpoint,
+          contract.contractAddress,
+        );
       }
 
       return {

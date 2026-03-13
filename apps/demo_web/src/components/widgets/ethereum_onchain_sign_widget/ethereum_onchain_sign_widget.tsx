@@ -1,13 +1,13 @@
 import { EthereumBlueIcon } from "@oko-wallet/oko-common-ui/icons/ethereum_blue_icon";
 import {
-  parseTransaction,
-  isAddressEqual,
-  serializeTransaction,
-  type Signature,
-  parseUnits,
-  parseAbi,
   encodeFunctionData,
+  isAddressEqual,
+  parseAbi,
+  parseTransaction,
+  parseUnits,
   recoverTransactionAddress,
+  type Signature,
+  serializeTransaction,
 } from "viem";
 
 import { SignWidget } from "@oko-wallet-demo-web/components/widgets/sign_widget/sign_widget";

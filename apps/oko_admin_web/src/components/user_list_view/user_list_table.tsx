@@ -1,6 +1,5 @@
 "use client";
 
-import type { FC } from "react";
 import {
   Table,
   TableBody,
@@ -10,10 +9,11 @@ import {
   TableRow,
 } from "@oko-wallet/oko-common-ui/table";
 import { flexRender } from "@tanstack/react-table";
+import type { FC } from "react";
 
-import styles from "./user_list_table.module.scss";
 import { Pagination } from "../pagination/pagination";
 import { useUserListTable } from "./use_user_list_table";
+import styles from "./user_list_table.module.scss";
 
 export const UserListTable: FC = () => {
   const { table, totalPageCount, currentPage, handlePageChange } =

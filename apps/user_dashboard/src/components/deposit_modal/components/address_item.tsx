@@ -84,7 +84,11 @@ export const AddressItem: FC<AddressItemProps> = ({
 
             <AddressQrModal
               renderTrigger={({ onOpen }) => (
-                <button className={styles.actionButton} onClick={onOpen}>
+                <button
+                  type="button"
+                  className={styles.actionButton}
+                  onClick={onOpen}
+                >
                   <QrCodeIcon size={16} color="var(--fg-tertiary)" />
                 </button>
               )}

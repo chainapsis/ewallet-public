@@ -1,7 +1,6 @@
-import { type FC } from "react";
 import { Badge } from "@oko-wallet/oko-common-ui/badge";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import type { CustomerDashboardUserStatus } from "@oko-wallet/oko-types/ct_dashboard";
+import type { FC } from "react";
 
 import styles from "./user_email_verified_cell.module.scss";
 
@@ -33,6 +32,7 @@ export const UserEmailVerifiedCell: FC<UserEmailVerifiedCellProps> = ({
   return (
     <div className={styles.wrapper}>
       {users.map((user, index) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: display-only list
         <div key={index} className={styles.userItem}>
           <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
             <Badge

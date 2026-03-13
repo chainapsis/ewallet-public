@@ -4,7 +4,7 @@ import { HomeOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/home_outlined"
 import { MenuItem } from "@oko-wallet/oko-common-ui/menu";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import cn from "classnames";
-import { type FC } from "react";
+import type { FC } from "react";
 
 import { IntegrationCard } from "./integration_card/integration_card";
 import styles from "./left_bar.module.scss";

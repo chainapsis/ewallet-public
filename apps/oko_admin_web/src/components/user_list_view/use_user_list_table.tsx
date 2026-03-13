@@ -1,15 +1,14 @@
-import React from "react";
-import { createColumnHelper } from "@tanstack/react-table";
 import type { UserWithWalletsResponse } from "@oko-wallet/oko-types/admin";
 import type { KSNodeWithHealthCheck } from "@oko-wallet/oko-types/tss";
+import { createColumnHelper } from "@tanstack/react-table";
+import cn from "classnames";
 
+import { useGetUsers } from "./use_get_users";
+import styles from "./user_list_table.module.scss";
 import {
   useTable,
   useTablePagination,
 } from "@oko-wallet-admin/components/table/use_table";
-import { useGetUsers } from "./use_get_users";
-import styles from "./user_list_table.module.scss";
-import cn from "classnames";
 import { useAllKeyShareNodes } from "@oko-wallet-admin/fetch/ks_node/use_all_ks_nodes";
 
 const columnHelper = createColumnHelper<UserWithWalletsResponse>();
@@ -117,8 +116,7 @@ function createColumns(
     columnHelper.display({
       id: "wallets",
       header: "Wallets",
-      cell: ({ row }) =>
-        renderWalletsCell(row.original, allKeyShareNodesData),
+      cell: ({ row }) => renderWalletsCell(row.original, allKeyShareNodesData),
     }),
   ];
 }

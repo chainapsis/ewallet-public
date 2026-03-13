@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
 import type { OkoSvmWalletInterface } from "@oko-wallet/oko-sdk-svm";
 import type { Result } from "@oko-wallet/stdlib-js";
+import { useEffect, useRef, useState } from "react";
 
 import { COSMOS_CHAIN_ID } from "@oko-wallet-demo-web/constants/cosmos";
 import { useSDKState } from "@oko-wallet-demo-web/state/sdk";

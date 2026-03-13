@@ -1,12 +1,12 @@
 "use client";
 
-import type { FC } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import type { FC } from "react";
 
-import styles from "./navigation.module.scss";
 import { NavItem } from "./nav_item";
-import { NavMenu } from "./nav_menu";
 import { navigationItems } from "./nav_items";
+import { NavMenu } from "./nav_menu";
+import styles from "./navigation.module.scss";
 
 export interface NavigationItem {
   label: string;
@@ -15,7 +15,8 @@ export interface NavigationItem {
   subItems?: Array<{ label: string; route: string }>;
 }
 
-export interface NavigationProps {}
+// biome-ignore lint/complexity/noBannedTypes: empty props type used as component interface
+export type NavigationProps = {};
 
 export const Navigation: FC<NavigationProps> = () => {
   const router = useRouter();

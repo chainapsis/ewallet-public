@@ -1,5 +1,5 @@
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import type { TssSessionWithCustomerAndUser } from "@oko-wallet/oko-types/tss";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import { getTSSSessionsList } from "@oko-wallet-admin/fetch/tss";
 import { useAppState } from "@oko-wallet-admin/state";

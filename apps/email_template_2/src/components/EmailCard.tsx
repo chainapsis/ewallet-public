@@ -1,4 +1,4 @@
-import { type CSSProperties, type FC } from "react";
+import type { CSSProperties, FC } from "react";
 
 interface EmailCardProps {
   children: React.ReactNode;

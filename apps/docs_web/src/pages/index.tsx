@@ -1,5 +1,5 @@
-import { JSX, useEffect } from "react";
 import { useHistory } from "@docusaurus/router";
+import { type JSX, useEffect } from "react";
 
 export default function Home(): JSX.Element {
   const history = useHistory();

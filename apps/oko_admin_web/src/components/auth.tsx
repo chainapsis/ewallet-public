@@ -3,8 +3,8 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { useAppState } from "@oko-wallet-admin/state";
 import { paths } from "@oko-wallet-admin/paths";
+import { useAppState } from "@oko-wallet-admin/state";
 
 export const Auth = ({ children }: { children: React.ReactNode }) => {
   const { token } = useAppState();
