@@ -1,10 +1,10 @@
 import {
-  TxBody,
   AuthInfo,
+  TxBody,
 } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 
-import { sortObjectByKey } from "@oko-wallet-sdk-cosmos/utils/json";
 import type { SignDoc } from "@oko-wallet-sdk-cosmos/types/sign";
+import { sortObjectByKey } from "@oko-wallet-sdk-cosmos/utils/json";
 
 export function extractAuthInfoFromSignDoc(signDoc: SignDoc): AuthInfo | null {
   const authInfoBytes = (signDoc as any).authInfoBytes;

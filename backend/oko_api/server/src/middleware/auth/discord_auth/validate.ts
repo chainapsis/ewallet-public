@@ -1,4 +1,4 @@
-import { type DiscordTokenInfo } from "@oko-wallet/ksn-interface/auth";
+import type { DiscordTokenInfo } from "@oko-wallet/ksn-interface/auth";
 import type { Result } from "@oko-wallet/stdlib-js";
 
 export async function validateDiscordOAuthToken(

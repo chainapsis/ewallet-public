@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
 import { StargateClient } from "@cosmjs/stargate";
 import { CoinPretty } from "@keplr-wallet/unit";
+import { useQuery } from "@tanstack/react-query";
 
 import useCosmos from "@/oko/useCosmos";
 

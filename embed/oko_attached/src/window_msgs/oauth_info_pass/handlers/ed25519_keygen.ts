@@ -1,45 +1,45 @@
+import type { OAuthSignInError } from "@oko-wallet/oko-sdk-core";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { KeyShareNodeMetaWithNodeStatusInfo } from "@oko-wallet/oko-types/tss";
+import type { ReshareRequestV2 } from "@oko-wallet/oko-types/user";
 import { teddsaKeyShareToHex } from "@oko-wallet/oko-types/user_key_share";
 import type { Result } from "@oko-wallet/stdlib-js";
-import { type OAuthSignInError } from "@oko-wallet/oko-sdk-core";
+import { reqKeygenEd25519 } from "@oko-wallet/teddsa-api-lib";
 import {
   serializeKeyPackage,
   serializePublicKeyPackage,
 } from "@oko-wallet/teddsa-hooks";
-import { reqKeygenEd25519 } from "@oko-wallet/teddsa-api-lib";
 
-import {
-  makeAuthorizedOkoApiRequest,
-  signInV2,
-  TSS_V2_ENDPOINT,
-  reportKeyShareNotFound,
-} from "@oko-wallet-attached/requests/oko_api";
 import { combineUserShares } from "@oko-wallet-attached/crypto/combine";
-import type { UserSignInResultV2 } from "@oko-wallet-attached/window_msgs/types";
-import { runExpandShares } from "@oko-wallet-attached/crypto/reshare";
-import {
-  requestKeySharesWithBackup,
-  requestKeyShares,
-  registerKeyShareEd25519V2,
-  reshareKeySharesV2,
-} from "@oko-wallet-attached/requests/ks_node_v2";
 import {
   commitAll,
-  createOkoApiCommitRevealParams,
   createKsnCommitRevealParams,
+  createOkoApiCommitRevealParams,
   type KsnCommitTarget,
 } from "@oko-wallet-attached/crypto/commit_reveal";
-import type { ReshareRequestV2 } from "@oko-wallet/oko-types/user";
 import {
   decodeSecp256k1SharesByNode,
   encodePoint256ToKeyShareString,
 } from "@oko-wallet-attached/crypto/key_share_utils";
 import {
-  teddsaKeygenToHex,
   runEd25519KeygenAndSplit,
   seedShareToHex,
+  teddsaKeygenToHex,
 } from "@oko-wallet-attached/crypto/keygen_ed25519";
+import { runExpandShares } from "@oko-wallet-attached/crypto/reshare";
+import {
+  registerKeyShareEd25519V2,
+  requestKeyShares,
+  requestKeySharesWithBackup,
+  reshareKeySharesV2,
+} from "@oko-wallet-attached/requests/ks_node_v2";
+import {
+  makeAuthorizedOkoApiRequest,
+  reportKeyShareNotFound,
+  signInV2,
+  TSS_V2_ENDPOINT,
+} from "@oko-wallet-attached/requests/oko_api";
+import type { UserSignInResultV2 } from "@oko-wallet-attached/window_msgs/types";
 
 /**
  * Handle existing user who has secp256k1 wallet but needs ed25519 keygen.

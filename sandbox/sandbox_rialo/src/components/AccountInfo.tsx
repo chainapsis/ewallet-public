@@ -149,6 +149,7 @@ function AvailableBalance({
       <div className="flex items-center justify-between">
         <FieldLabel>Available Balance</FieldLabel>
         <button
+          type="button"
           onClick={onRefresh}
           disabled={isLoading}
           className="text-gray-400 hover:text-white transition-colors disabled:opacity-50"

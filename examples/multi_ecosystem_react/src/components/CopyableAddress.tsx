@@ -10,7 +10,9 @@ export default function CopyableAddress({
   const [copied, setCopied] = useState(false);
 
   async function copy() {
-    if (!value) return;
+    if (!value) {
+      return;
+    }
     try {
       await navigator.clipboard.writeText(value);
       setCopied(true);

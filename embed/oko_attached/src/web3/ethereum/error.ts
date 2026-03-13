@@ -1,22 +1,23 @@
 import {
-  RpcRequestError,
-  HttpRequestError,
-  WebSocketRequestError,
-  TimeoutError,
+  ChainDisconnectedError,
   EstimateGasExecutionError,
+  HttpRequestError,
   InsufficientFundsError,
   InvalidInputRpcError,
   InvalidParamsRpcError,
+  LimitExceededRpcError,
   MethodNotFoundRpcError,
   MethodNotSupportedRpcError,
+  ProviderDisconnectedError,
+  RpcRequestError,
+  TimeoutError,
   TransactionExecutionError,
   TransactionRejectedRpcError,
-  UserRejectedRequestError,
-  ProviderDisconnectedError,
-  ChainDisconnectedError,
-  LimitExceededRpcError,
   UnknownRpcError,
+  UserRejectedRequestError,
+  WebSocketRequestError,
 } from "viem";
+
 import type { StructuredRpcError } from "./queries/types";
 
 function extractRpcErrorCode(
@@ -32,7 +33,9 @@ function extractRpcErrorCode(
   // viem has nested error structure, so we need to traverse the error chain to find the code
   let cur: any = anyErr;
   for (let i = 0; i < maxDepth; i++) {
-    if (!cur) break;
+    if (!cur) {
+      break;
+    }
 
     if (typeof cur.code === "number" || typeof cur.code === "string") {
       return cur.code;

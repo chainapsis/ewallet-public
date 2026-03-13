@@ -1,5 +1,5 @@
-import type { Result } from "@oko-wallet/stdlib-js";
 import type { SocialLoginXVerifyUserResponse } from "@oko-wallet/oko-types/social_login";
+import type { Result } from "@oko-wallet/stdlib-js";
 
 export const X_SOCIAL_LOGIN_TOKEN_URL = "https://api.x.com/2/oauth2/token";
 export const X_USER_INFO_URL = "https://api.x.com/2/users/me";

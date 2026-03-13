@@ -1,8 +1,8 @@
 "use client";
 
-import { useOkoSvm } from "@/hooks/use_oko_svm";
-import LoginView from "@/components/LoginView";
 import ConnectedView from "@/components/ConnectedView";
+import LoginView from "@/components/LoginView";
+import { useOkoSvm } from "@/hooks/use_oko_svm";
 
 export default function Home() {
   const {

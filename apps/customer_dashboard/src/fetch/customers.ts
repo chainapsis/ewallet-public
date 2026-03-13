@@ -50,11 +50,7 @@ export async function requestGetCustomerAPIKeys({
   );
 }
 
-export async function requestCreateAPIKey({
-  token,
-}: {
-  token: string;
-}) {
+export async function requestCreateAPIKey({ token }: { token: string }) {
   return errorHandle<APIKey>(() =>
     fetch(`${CUSTOMER_V1_ENDPOINT}/customer/api_keys/create`, {
       method: "POST",

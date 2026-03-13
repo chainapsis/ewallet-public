@@ -1,5 +1,5 @@
-import type { FC } from "react";
 import { Logo } from "@oko-wallet/oko-common-ui/logo";
+import type { FC } from "react";
 
 import styles from "./login_header.module.scss";
 

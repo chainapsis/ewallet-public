@@ -38,6 +38,7 @@ export const InfoModal: FC<InfoModalProps> = ({
                     {title}
                   </Typography>
                   <button
+                    type="button"
                     className={styles.closeButton}
                     onClick={onClose}
                     aria-label="Close modal"

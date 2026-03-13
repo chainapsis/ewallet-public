@@ -1,17 +1,17 @@
+import { Bytes } from "@oko-wallet/bytes";
+import type { OAuthSignInError } from "@oko-wallet/oko-sdk-core";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { KeyShareNodeMetaWithNodeStatusInfo } from "@oko-wallet/oko-types/tss";
 import type { Result } from "@oko-wallet/stdlib-js";
-import { type OAuthSignInError } from "@oko-wallet/oko-sdk-core";
-import { Bytes } from "@oko-wallet/bytes";
 
-import { signInV2 } from "@oko-wallet-attached/requests/oko_api";
-import type { UserSignInResultV2 } from "@oko-wallet-attached/window_msgs/types";
-import { reshareUserKeySharesV2 } from "@oko-wallet-attached/crypto/reshare_v2";
 import {
   commitAll,
   createOkoApiCommitRevealParams,
   type KsnCommitTarget,
 } from "@oko-wallet-attached/crypto/commit_reveal";
+import { reshareUserKeySharesV2 } from "@oko-wallet-attached/crypto/reshare_v2";
+import { signInV2 } from "@oko-wallet-attached/requests/oko_api";
+import type { UserSignInResultV2 } from "@oko-wallet-attached/window_msgs/types";
 
 /**
  * Handle reshare for existing user with both secp256k1 and ed25519 wallets.

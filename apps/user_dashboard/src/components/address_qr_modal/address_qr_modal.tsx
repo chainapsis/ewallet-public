@@ -70,7 +70,11 @@ export const AddressQrModal: FC<AddressQrModalProps> = ({
               <Typography size="md" weight="semibold" color="primary">
                 Copy Address
               </Typography>
-              <button className={styles.closeButton} onClick={onClose}>
+              <button
+                type="button"
+                className={styles.closeButton}
+                onClick={onClose}
+              >
                 <XCloseIcon size={20} />
               </button>
             </div>

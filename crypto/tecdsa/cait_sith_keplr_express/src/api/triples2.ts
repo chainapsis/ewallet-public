@@ -1,10 +1,19 @@
-import { Router } from "express";
+import { runTriplesServerStep1 } from "@oko-wallet/cait-sith-keplr-addon/src/server";
+import {
+  runTriples2ServerStep1,
+  runTriples2ServerStep2,
+  runTriples2ServerStep3,
+  runTriples2ServerStep4,
+  runTriples2ServerStep5,
+  runTriples2ServerStep6,
+  runTriples2ServerStep7,
+  runTriples2ServerStep8,
+  runTriples2ServerStep9,
+  runTriples2ServerStep10,
+  runTriples2ServerStep11,
+} from "@oko-wallet/cait-sith-keplr-addon/src/server/triples";
 import type {
   TriplePub,
-  Triples2Step10Response,
-  Triples2Step10V2Request,
-  Triples2Step11Response,
-  Triples2Step11V2Request,
   Triples2Step1Response,
   Triples2Step1V2Request,
   Triples2Step2Response,
@@ -23,24 +32,15 @@ import type {
   Triples2Step8V2Request,
   Triples2Step9Response,
   Triples2Step9V2Request,
+  Triples2Step10Response,
+  Triples2Step10V2Request,
+  Triples2Step11Response,
+  Triples2Step11V2Request,
   TriplesStep1Response,
   TriplesStep1V2Request,
 } from "@oko-wallet/tecdsa-interface";
 import { Participant } from "@oko-wallet/tecdsa-interface";
-import { runTriplesServerStep1 } from "@oko-wallet/cait-sith-keplr-addon/src/server";
-import {
-  runTriples2ServerStep1,
-  runTriples2ServerStep10,
-  runTriples2ServerStep11,
-  runTriples2ServerStep2,
-  runTriples2ServerStep3,
-  runTriples2ServerStep4,
-  runTriples2ServerStep5,
-  runTriples2ServerStep6,
-  runTriples2ServerStep7,
-  runTriples2ServerStep8,
-  runTriples2ServerStep9,
-} from "@oko-wallet/cait-sith-keplr-addon/src/server/triples";
+import type { Router } from "express";
 
 import { appServerState } from "../state";
 
@@ -437,7 +437,9 @@ export function setTriplesRoutes2(router: Router) {
 }
 
 function isPubVEqual(a: TriplePub[], b: TriplePub[]): boolean {
-  if (a.length !== b.length) return false;
+  if (a.length !== b.length) {
+    return false;
+  }
 
   for (let i = 0; i < a.length; i++) {
     const pubA = a[i];

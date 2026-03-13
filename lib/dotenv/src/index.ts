@@ -1,9 +1,9 @@
+import fs from "node:fs";
+import os from "node:os";
+import type { Result } from "@oko-wallet/stdlib-js";
 import * as dotenv from "dotenv";
 import path from "path";
-import { z, type ZodObject } from "zod";
-import os from "node:os";
-import fs from "node:fs";
-import { type Result } from "@oko-wallet/stdlib-js";
+import { type ZodObject, z } from "zod";
 
 const CONFIG_DIR_NAME = ".oko";
 

@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { useToast } from "@oko-wallet-admin/components/toast/use_toast";
 import { setTssAllActivationSetting } from "@oko-wallet-admin/fetch/tss";
 import { useAppState } from "@oko-wallet-admin/state";
-import { useToast } from "@oko-wallet-admin/components/toast/use_toast";
 
 export function useToggleTssAllActivation() {
   const { token } = useAppState();

@@ -1,11 +1,11 @@
 import type { Result } from "@oko-wallet/stdlib-js";
 import { PublicKey } from "@solana/web3.js";
 
+import type { LazyInitError } from "@oko-wallet-sdk-svm/errors";
 import type {
   OkoSvmWalletInternal,
   OkoSvmWalletState,
 } from "@oko-wallet-sdk-svm/types";
-import type { LazyInitError } from "@oko-wallet-sdk-svm/errors";
 
 export async function lazyInit(
   wallet: OkoSvmWalletInternal,

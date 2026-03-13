@@ -1,7 +1,7 @@
 import type { Result } from "@oko-wallet/stdlib-js";
 
-import type { XUserInfo } from "@oko-wallet-attached/window_msgs/types";
 import { OKO_API_ENDPOINT } from "@oko-wallet-attached/requests/endpoints";
+import type { XUserInfo } from "@oko-wallet-attached/window_msgs/types";
 
 export async function getAccessTokenOfX(
   code: string,

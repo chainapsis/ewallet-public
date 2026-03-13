@@ -1,15 +1,14 @@
-import type { Result } from "@oko-wallet/stdlib-js";
-import type { AuthType } from "@oko-wallet/oko-types/auth";
+import type { OpenModalError, SignInType } from "@oko-wallet/oko-sdk-core";
 import {
   EventEmitter3,
+  type OkoWalletCoreEvent2,
+  type OkoWalletCoreEventHandler2,
   type OkoWalletInterface,
   type OkoWalletMsg,
   type OkoWalletMsgOpenModal,
   type OkoWalletState,
-  type WalletInfo,
-  type OkoWalletCoreEvent2,
-  type OkoWalletCoreEventHandler2,
   type OpenModalAckPayload,
+  type WalletInfo,
 } from "@oko-wallet/oko-sdk-core";
 import type { OpenModalError } from "@oko-wallet/oko-sdk-core";
 import type { SignInType } from "@oko-wallet/oko-sdk-core";
@@ -80,7 +79,9 @@ export class OkoWalletRN implements OkoWalletInterface {
   }
 
   private async _initialize(): Promise<void> {
-    if (this._initResolved) return;
+    if (this._initResolved) {
+      return;
+    }
     this._initResolved = true;
 
     await this._restoreWalletInfo();
@@ -253,7 +254,9 @@ export class OkoWalletRN implements OkoWalletInterface {
 
   async getWalletInfo(): Promise<WalletInfo | null> {
     await this.waitUntilInitialized;
-    if (!this.state.publicKey || !this.state.authType) return null;
+    if (!this.state.publicKey || !this.state.authType) {
+      return null;
+    }
     return {
       authType: this.state.authType,
       publicKey: this.state.publicKey,

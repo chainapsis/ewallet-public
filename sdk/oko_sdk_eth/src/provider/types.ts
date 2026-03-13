@@ -1,13 +1,13 @@
-import type { Address, AddEthereumChainParameter, RpcError } from "viem";
 import type { AppCurrency, BIP44, EVMInfo } from "@keplr-wallet/types";
+import type { AddEthereumChainParameter, Address, RpcError } from "viem";
 
+import type { ProviderEventEmitter } from "./emitter";
 import type {
   RpcMethod,
   RpcRequestArgs,
   RpcResponseData,
 } from "@oko-wallet-sdk-eth/rpc";
 import type { OkoEthSigner } from "@oko-wallet-sdk-eth/types";
-import type { ProviderEventEmitter } from "./emitter";
 
 export interface ProviderConnectInfo {
   chainId: string;

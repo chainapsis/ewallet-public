@@ -1,21 +1,21 @@
-import request from "supertest";
-import express from "express";
-import type { Pool } from "pg";
-import { Bytes } from "@oko-wallet/bytes";
 import { randomBytes } from "node:crypto";
-import { v4 as uuidv4 } from "uuid";
-import { createPgConn } from "@oko-wallet/postgres-lib";
-import winston from "winston";
+import { Bytes } from "@oko-wallet/bytes";
 import { sha256 } from "@oko-wallet/crypto-js";
 import {
+  convertEddsaSignatureToBytes,
   generateEddsaKeypair,
   signMessage,
-  convertEddsaSignatureToBytes,
 } from "@oko-wallet/crypto-js/node/ecdhe";
+import { createPgConn } from "@oko-wallet/postgres-lib";
+import express from "express";
+import type { Pool } from "pg";
+import request from "supertest";
+import { v4 as uuidv4 } from "uuid";
+import winston from "winston";
 
+import { commitRevealMiddleware } from "./commit_reveal";
 import { testPgConfig } from "@oko-wallet-api/database/test_config";
 import { resetPgDatabase } from "@oko-wallet-api/testing/database";
-import { commitRevealMiddleware } from "./commit_reveal";
 
 // Mock keypair for testing
 const privateKeyRes = Bytes.fromHexString(
@@ -467,13 +467,13 @@ describe("commit_reveal_middleware_test", () => {
       const wrongMessage = "wrong_message";
       const signRes = signMessage(wrongMessage, clientKeypair.privateKey);
       if (!signRes.success) {
-      throw new Error("Failed to sign message");
-    }
+        throw new Error("Failed to sign message");
+      }
 
       const sigBytesRes = convertEddsaSignatureToBytes(signRes.data);
       if (!sigBytesRes.success) {
-      throw new Error("Failed to convert signature");
-    }
+        throw new Error("Failed to convert signature");
+      }
 
       const response = await request(app)
         .post("/test/keygen")
@@ -521,13 +521,13 @@ describe("commit_reveal_middleware_test", () => {
       const message = `${nodePubkeyHex}${sessionId}${authType}${idToken}sign_upkeygen`;
       const signRes = signMessage(message, wrongKeypair.privateKey);
       if (!signRes.success) {
-      throw new Error("Failed to sign message");
-    }
+        throw new Error("Failed to sign message");
+      }
 
       const sigBytesRes = convertEddsaSignatureToBytes(signRes.data);
       if (!sigBytesRes.success) {
-      throw new Error("Failed to convert signature");
-    }
+        throw new Error("Failed to convert signature");
+      }
 
       const response = await request(app)
         .post("/test/keygen")
@@ -574,13 +574,13 @@ describe("commit_reveal_middleware_test", () => {
       const message = `${nodePubkeyHex}${sessionId}google${idToken}sign_upkeygen`;
       const signRes = signMessage(message, clientKeypair.privateKey);
       if (!signRes.success) {
-      throw new Error("Failed to sign message");
-    }
+        throw new Error("Failed to sign message");
+      }
 
       const sigBytesRes = convertEddsaSignatureToBytes(signRes.data);
       if (!sigBytesRes.success) {
-      throw new Error("Failed to convert signature");
-    }
+        throw new Error("Failed to convert signature");
+      }
 
       // Send without auth_type - should default to google
       const response = await request(app)
@@ -654,13 +654,11 @@ describe("commit_reveal_middleware_replay_and_session_test", () => {
       "/test/keygen_fail",
       commitRevealMiddleware("keygen"),
       (_req, res) => {
-        res
-          .status(500)
-          .json({
-            success: false,
-            code: "INTERNAL_ERROR",
-            msg: "Simulated failure",
-          });
+        res.status(500).json({
+          success: false,
+          code: "INTERNAL_ERROR",
+          msg: "Simulated failure",
+        });
       },
     );
 

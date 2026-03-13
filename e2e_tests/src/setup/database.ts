@@ -1,6 +1,6 @@
-import { Pool } from "pg";
 import { createPgConn } from "@oko-wallet/postgres-lib";
 import type { Result } from "@oko-wallet/stdlib-js";
+import { Pool } from "pg";
 
 export interface PgDatabaseConfig {
   database: string;

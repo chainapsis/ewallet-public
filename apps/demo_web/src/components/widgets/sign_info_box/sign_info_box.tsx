@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, type FC } from "react";
 import { ChevronDownIcon } from "@oko-wallet/oko-common-ui/icons/chevron_down";
 import { ChevronUpIcon } from "@oko-wallet/oko-common-ui/icons/chevron_up";
 import { InfoCircleIcon } from "@oko-wallet/oko-common-ui/icons/info_circle";
 import cn from "classnames";
+import { type FC, useState } from "react";
 
 import styles from "./sign_info_box.module.scss";
 

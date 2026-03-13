@@ -1,13 +1,13 @@
-import { join } from "node:path";
-import os from "node:os";
-import { Pool } from "pg";
 import fs from "node:fs/promises";
+import os from "node:os";
+import { join } from "node:path";
 import { getAllPgDumps } from "@oko-wallet/ksn-pg-interface";
+import type { Pool } from "pg";
 
 import { connectPG, resetPgDatabase } from "@oko-wallet-ksn-server/database";
 import { testPgConfig } from "@oko-wallet-ksn-server/database/test_config";
-import { startPgDumpRuntime } from "@oko-wallet-ksn-server/pg_dump/runtime";
 import { processPgDump } from "@oko-wallet-ksn-server/pg_dump/dump";
+import { startPgDumpRuntime } from "@oko-wallet-ksn-server/pg_dump/runtime";
 
 describe("pg_dump_runtime_test", () => {
   const dumpDir = join(os.homedir(), "oko_data");

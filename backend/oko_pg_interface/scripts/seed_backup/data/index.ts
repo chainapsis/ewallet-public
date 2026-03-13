@@ -1,15 +1,15 @@
-import type { Customer } from "@oko-wallet/oko-types/customers";
+import type { OkoAdminUser } from "@oko-wallet/oko-types/admin";
 import type {
   CustomerDashboardUser,
   PasswordHash,
 } from "@oko-wallet/oko-types/ct_dashboard";
-import type { OkoAdminUser } from "@oko-wallet/oko-types/admin";
+import type { Customer } from "@oko-wallet/oko-types/customers";
 
 import {
   createAdmin,
+  createApiKeys,
   createCustomer,
   createCustomerDashboardUser,
-  createApiKeys,
   createKeyShareNodeMeta,
   createTssActivationSettings,
 } from "./common";

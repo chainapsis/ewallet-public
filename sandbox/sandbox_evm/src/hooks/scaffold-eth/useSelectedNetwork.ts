@@ -1,8 +1,8 @@
 import scaffoldConfig from "@oko-wallet-sandbox-evm/../scaffold.config";
 import { useGlobalState } from "@oko-wallet-sandbox-evm/services/store/store";
-import { AllowedChainIds } from "@oko-wallet-sandbox-evm/utils/scaffold-eth";
+import type { AllowedChainIds } from "@oko-wallet-sandbox-evm/utils/scaffold-eth";
 import {
-  ChainWithAttributes,
+  type ChainWithAttributes,
   NETWORKS_EXTRA_DATA,
 } from "@oko-wallet-sandbox-evm/utils/scaffold-eth/networks";
 

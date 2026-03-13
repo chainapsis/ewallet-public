@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Address, Hex } from "viem";
-import { useAccount, useWalletClient, useChainId } from "wagmi";
+import type { Address, Hex } from "viem";
+import { useAccount, useChainId, useWalletClient } from "wagmi";
 
-import { usePermit } from "@oko-wallet-sandbox-evm/hooks/scaffold-eth/usePermit";
 import {
   AddressInput,
   IntegerInput,
 } from "@oko-wallet-sandbox-evm/components/scaffold-eth/Input";
+import { usePermit } from "@oko-wallet-sandbox-evm/hooks/scaffold-eth/usePermit";
 
 export function PermitSignWidget() {
   const { address } = useAccount();
@@ -39,7 +39,9 @@ export function PermitSignWidget() {
   });
 
   const handlePermitSign = async () => {
-    if (!walletClient || !address) return;
+    if (!walletClient || !address) {
+      return;
+    }
     try {
       setIsPermitSigning(true);
       const deadlineSeconds = permitDeadline.trim()
@@ -56,14 +58,18 @@ export function PermitSignWidget() {
   };
 
   const copyPermitSignature = async () => {
-    if (!permitSignature) return;
+    if (!permitSignature) {
+      return;
+    }
     try {
       await navigator.clipboard.writeText(permitSignature);
     } catch {}
   };
 
   const copyPermitTypedData = async () => {
-    if (!signedTypedData) return;
+    if (!signedTypedData) {
+      return;
+    }
     try {
       await navigator.clipboard.writeText(signedTypedData);
     } catch {}
@@ -168,6 +174,7 @@ export function PermitSignWidget() {
         </div>
 
         <button
+          type="button"
           onClick={handlePermitSign}
           disabled={disabled}
           className="btn btn-success w-full mt-4"
@@ -199,18 +206,21 @@ export function PermitSignWidget() {
             </div>
             <div className="flex gap-2">
               <button
+                type="button"
                 onClick={copyPermitSignature}
                 className="btn btn-xs btn-outline"
               >
                 Copy Signature
               </button>
               <button
+                type="button"
                 onClick={copyPermitTypedData}
                 className="btn btn-xs btn-outline"
               >
                 Copy Typed Data
               </button>
               <button
+                type="button"
                 onClick={resetPermitSign}
                 className="btn btn-xs btn-ghost"
               >

@@ -1,15 +1,15 @@
-import { type FunctionComponent as FC } from "preact";
+import type { FunctionComponent as FC } from "preact";
 
-import type { SignInType } from "@oko-wallet-sdk-core/types/oauth";
-import { ProviderButton } from "./provider_button";
 import {
-  XIcon,
-  TelegramIcon,
-  DiscordIcon,
-  GithubIcon,
   AppleIcon,
   ChevronLeftIcon,
+  DiscordIcon,
+  GithubIcon,
+  TelegramIcon,
+  XIcon,
 } from "./icons";
+import { ProviderButton } from "./provider_button";
+import type { SignInType } from "@oko-wallet-sdk-core/types/oauth";
 
 export interface SocialsViewProps {
   onSelect: (provider: SignInType) => void;

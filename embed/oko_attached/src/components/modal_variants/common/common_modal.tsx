@@ -1,5 +1,5 @@
-import { type FC, type PropsWithChildren } from "react";
 import cn from "classnames";
+import type { FC, PropsWithChildren } from "react";
 
 import styles from "./common_modal.module.scss";
 

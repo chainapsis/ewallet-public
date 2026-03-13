@@ -6,20 +6,20 @@ import { parseTypedDataDefinition } from "@oko-wallet/oko-sdk-eth";
 import type { Chain, TypedDataDefinition } from "viem";
 
 import type {
+  DAIPermitAction,
   EIP712Action,
   ERC2612PermitAction,
-  DAIPermitAction,
   UniswapPermitSingleAction,
 } from "../actions/types";
+import { useSupportedEthChain } from "@oko-wallet-attached/web3/ethereum/hooks/use_supported_eth_chain";
 import {
+  type EIP712Domain,
+  validateDAIPermit,
   validateEip712Domain,
   validateErc2612Permit,
-  validateDAIPermit,
   validateUniswapPermitSingle,
-  type EIP712Domain,
 } from "@oko-wallet-attached/web3/ethereum/schema";
 import { findCurrencyByErc20Address } from "@oko-wallet-attached/web3/ethereum/utils";
-import { useSupportedEthChain } from "@oko-wallet-attached/web3/ethereum/hooks/use_supported_eth_chain";
 
 export type UseEIP712ActionResult =
   | {

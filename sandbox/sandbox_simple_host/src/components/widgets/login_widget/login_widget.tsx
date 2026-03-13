@@ -191,4 +191,5 @@ export const LoginWidget: FC<LoginWidgetProps> = () => {
   );
 };
 
+// biome-ignore lint/complexity/noBannedTypes: empty props type
 export type LoginWidgetProps = {};

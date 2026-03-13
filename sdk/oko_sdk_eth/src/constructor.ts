@@ -1,10 +1,10 @@
 import type { OkoWalletInterface } from "@oko-wallet/oko-sdk-core";
 
+import { lazyInit } from "./private/lazy_init";
 import type {
   OkoEthWalletInterface,
   OkoEthWalletStaticInterface,
 } from "./types";
-import { lazyInit } from "./private/lazy_init";
 
 export const OkoEthWallet = function (
   this: OkoEthWalletInterface,

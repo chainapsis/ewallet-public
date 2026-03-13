@@ -53,6 +53,7 @@ export default function RootLayout({
     // The reason is that even when using LayoutEffect in React, it executes after hydration.
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* biome-ignore lint/security/noDangerouslySetInnerHtml: injecting theme init script */}
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body

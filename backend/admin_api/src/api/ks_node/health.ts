@@ -3,10 +3,7 @@ import {
   getAllKSNodes,
   selectKSNodeHealthChecks,
 } from "@oko-wallet/oko-pg-interface/ks_nodes";
-import type {
-  KSNodeHealthCheck,
-  KSNodeHealthCheckStatus,
-} from "@oko-wallet/oko-types/tss";
+import type { KSNodeHealthCheck } from "@oko-wallet/oko-types/tss";
 import type { Result } from "@oko-wallet/stdlib-js";
 import type { Pool, PoolClient } from "pg";
 import { v4 as uuidv4 } from "uuid";

@@ -15,10 +15,10 @@
  *   npx tsx e2e_tests/src/scripts/test_seed_export.ts
  */
 
-import { readFileSync } from "node:fs";
-import { resolve, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
 import { createHash, randomBytes } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -111,9 +111,7 @@ const ksnSplitPoints: Point[] = wasm.seed_sss_split(
 
 console.log("\n4. User seed Y → 2-of-3 KSN split:");
 for (let i = 0; i < ksnSplitPoints.length; i++) {
-  console.log(
-    `   KSN[${i}] ${ksnNames[i]} (y): ${toHex(ksnSplitPoints[i].y)}`,
-  );
+  console.log(`   KSN[${i}] ${ksnNames[i]} (y): ${toHex(ksnSplitPoints[i].y)}`);
 }
 
 // 5. Combine 2 of 3 KSN shares → recover user Y
@@ -178,7 +176,5 @@ console.log("========================================");
 
 // Overall result
 const allPassed = userYMatches && seedMatches && pkMatches;
-console.log(
-  `\n${allPassed ? "All checks passed!" : "Some checks FAILED!"}`,
-);
+console.log(`\n${allPassed ? "All checks passed!" : "Some checks FAILED!"}`);
 process.exit(allPassed ? 0 : 1);

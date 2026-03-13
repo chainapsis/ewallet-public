@@ -1,12 +1,12 @@
-import type { SignDoc } from "cosmjs-types/cosmos/tx/v1beta1/tx";
-import { serializeSignDoc, type StdSignDoc } from "@cosmjs/amino";
+import { type StdSignDoc, serializeSignDoc } from "@cosmjs/amino";
 import { makeSignBytes } from "@cosmjs/proto-signing";
+import type { StdSignature } from "@keplr-wallet/types";
 import { sha256 } from "@noble/hashes/sha2";
 import { keccak_256 } from "@noble/hashes/sha3";
+import type { MakeSigError } from "@oko-wallet/oko-sdk-core";
 import { encodeCosmosSignature } from "@oko-wallet/oko-sdk-cosmos";
 import type { Result } from "@oko-wallet/stdlib-js";
-import type { StdSignature } from "@keplr-wallet/types";
-import type { MakeSigError } from "@oko-wallet/oko-sdk-core";
+import type { SignDoc } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 
 import { useAppState } from "@oko-wallet-attached/store/app";
 import { makeSignature } from "@oko-wallet-attached/web3/sig";

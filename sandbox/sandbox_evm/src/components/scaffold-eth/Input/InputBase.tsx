@@ -1,13 +1,13 @@
 import {
-  ChangeEvent,
-  FocusEvent,
-  ReactNode,
+  type ChangeEvent,
+  type FocusEvent,
+  type ReactNode,
   useCallback,
   useEffect,
   useRef,
 } from "react";
 
-import { CommonInputProps } from "@oko-wallet-sandbox-evm/components/scaffold-eth";
+import type { CommonInputProps } from "@oko-wallet-sandbox-evm/components/scaffold-eth";
 
 type InputBaseProps<T> = CommonInputProps<T> & {
   error?: boolean;
@@ -56,7 +56,9 @@ export const InputBase = <
     }
   };
   useEffect(() => {
-    if (reFocus !== undefined && reFocus === true) inputReft.current?.focus();
+    if (reFocus !== undefined && reFocus === true) {
+      inputReft.current?.focus();
+    }
   }, [reFocus]);
 
   return (

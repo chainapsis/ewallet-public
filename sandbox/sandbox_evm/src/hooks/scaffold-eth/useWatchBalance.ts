@@ -1,6 +1,6 @@
-import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { UseBalanceParameters, useBalance, useBlockNumber } from "wagmi";
+import { useEffect } from "react";
+import { type UseBalanceParameters, useBalance, useBlockNumber } from "wagmi";
 
 import { useTargetNetwork } from "./useTargetNetwork";
 

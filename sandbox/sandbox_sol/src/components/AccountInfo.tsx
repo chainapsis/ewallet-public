@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import Link from "next/link";
-import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
-import Button from "./Button";
+import { useCallback, useEffect, useState } from "react";
+
 import { DEVNET_CONNECTION } from "@/lib/connection";
+import Button from "./Button";
 
 interface AccountInfoProps {
   publicKey: string;
@@ -101,7 +102,9 @@ function CopyableAddress({
       <button
         type="button"
         onClick={async () => {
-          if (!value) return;
+          if (!value) {
+            return;
+          }
           await navigator.clipboard.writeText(value);
           setCopied(true);
           setTimeout(() => setCopied(false), 1200);
@@ -171,6 +174,7 @@ function AvailableBalance({
       <div className="flex items-center justify-between">
         <FieldLabel>Available Balance</FieldLabel>
         <button
+          type="button"
           onClick={onRefresh}
           disabled={isLoading}
           className="text-gray-400 hover:text-white transition-colors disabled:opacity-50"

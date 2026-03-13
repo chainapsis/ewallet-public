@@ -1,9 +1,9 @@
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import type {
+  Customer,
   CustomerWithAPIKeys,
   GetCustomerRequest,
 } from "@oko-wallet/oko-types/customers";
-import { type Customer } from "@oko-wallet/oko-types/customers";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import {
   getCustomer,

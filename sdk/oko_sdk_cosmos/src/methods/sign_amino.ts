@@ -1,4 +1,4 @@
-import { type AminoSignResponse, type StdSignDoc } from "@cosmjs/amino";
+import type { AminoSignResponse, StdSignDoc } from "@cosmjs/amino";
 import type { KeplrSignOptions } from "@keplr-wallet/types";
 import type { MakeCosmosSigData } from "@oko-wallet/oko-sdk-core";
 

@@ -36,17 +36,22 @@ function getContractDataFromDeployments() {
   const output: Record<string, any> = {};
   for (const chainDir of getChainDirectories(DEPLOYMENTS_DIR)) {
     const chainId = chainDir.split("-")[1];
-    if (!chainId) continue;
+    if (!chainId) {
+      continue;
+    }
     const chainPath = `${DEPLOYMENTS_DIR}/${chainDir}`;
     const artifactsPath = `${chainPath}/artifacts`;
     const addressesPath = `${chainPath}/deployed_addresses.json`;
-    if (!fs.existsSync(addressesPath) || !fs.existsSync(artifactsPath))
+    if (!fs.existsSync(addressesPath) || !fs.existsSync(artifactsPath)) {
       continue;
+    }
     const addresses = JSON.parse(fs.readFileSync(addressesPath, "utf-8"));
     const contracts: Record<string, any> = {};
     for (const artifactId of Object.keys(addresses)) {
       const artifactFile = `${artifactsPath}/${artifactId}.json`;
-      if (!fs.existsSync(artifactFile)) continue;
+      if (!fs.existsSync(artifactFile)) {
+        continue;
+      }
       const artifact = JSON.parse(fs.readFileSync(artifactFile, "utf-8"));
       contracts[artifact.contractName] = {
         address: addresses[artifactId],
@@ -68,7 +73,7 @@ const generateTsAbis = async () => {
 
   const fileContent = Object.entries(allContractsData).reduce(
     (content, [chainId, chainConfig]) => {
-      return `${content}${parseInt(chainId).toFixed(0)}:${JSON.stringify(chainConfig, null, 2)},`;
+      return `${content}${parseInt(chainId, 10).toFixed(0)}:${JSON.stringify(chainConfig, null, 2)},`;
     },
     "",
   );

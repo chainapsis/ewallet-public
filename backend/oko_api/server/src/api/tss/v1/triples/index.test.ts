@@ -1,7 +1,27 @@
-import { Pool } from "pg";
+import {
+  napiRunKeygenClientCentralized,
+  napiRunTriples2ClientStep1,
+  napiRunTriples2ClientStep2,
+  napiRunTriples2ClientStep3,
+  napiRunTriples2ClientStep4,
+  napiRunTriples2ClientStep5,
+  napiRunTriples2ClientStep6,
+  napiRunTriples2ClientStep7,
+  napiRunTriples2ClientStep8,
+  napiRunTriples2ClientStep9,
+  napiRunTriples2ClientStep10,
+  napiRunTriples2ClientStep11,
+} from "@oko-wallet/cait-sith-keplr-addon/addon";
+import { insertCustomer } from "@oko-wallet/oko-pg-interface/customers";
+import { insertKeyShareNodeMeta } from "@oko-wallet/oko-pg-interface/key_share_node_meta";
+import { createUser } from "@oko-wallet/oko-pg-interface/oko_users";
+import { createWallet } from "@oko-wallet/oko-pg-interface/oko_wallets";
+import {
+  createTssSession,
+  createTssStage,
+  getTssStageWithSessionData,
+} from "@oko-wallet/oko-pg-interface/tss";
 import type {
-  TriplesStep10Request,
-  TriplesStep11Request,
   TriplesStep1Request,
   TriplesStep2Request,
   TriplesStep3Request,
@@ -11,48 +31,24 @@ import type {
   TriplesStep7Request,
   TriplesStep8Request,
   TriplesStep9Request,
+  TriplesStep10Request,
+  TriplesStep11Request,
 } from "@oko-wallet/oko-types/tss";
 import {
   TriplesStageStatus,
   TssSessionState,
   TssStageType,
 } from "@oko-wallet/oko-types/tss";
+import type { WalletStatus } from "@oko-wallet/oko-types/wallets";
+import { createPgConn } from "@oko-wallet/postgres-lib";
 import {
   Participant,
   type TECDSATriplesState,
 } from "@oko-wallet/tecdsa-interface";
-import {
-  napiRunKeygenClientCentralized,
-  napiRunTriples2ClientStep1,
-  napiRunTriples2ClientStep10,
-  napiRunTriples2ClientStep11,
-  napiRunTriples2ClientStep2,
-  napiRunTriples2ClientStep3,
-  napiRunTriples2ClientStep4,
-  napiRunTriples2ClientStep5,
-  napiRunTriples2ClientStep6,
-  napiRunTriples2ClientStep7,
-  napiRunTriples2ClientStep8,
-  napiRunTriples2ClientStep9,
-} from "@oko-wallet/cait-sith-keplr-addon/addon";
-import {
-  createTssSession,
-  createTssStage,
-  getTssStageWithSessionData,
-} from "@oko-wallet/oko-pg-interface/tss";
-import { createPgConn } from "@oko-wallet/postgres-lib";
-import type { WalletStatus } from "@oko-wallet/oko-types/wallets";
-import { createWallet } from "@oko-wallet/oko-pg-interface/oko_wallets";
-import { createUser } from "@oko-wallet/oko-pg-interface/oko_users";
-import { insertCustomer } from "@oko-wallet/oko-pg-interface/customers";
-import { insertKeyShareNodeMeta } from "@oko-wallet/oko-pg-interface/key_share_node_meta";
+import type { Pool } from "pg";
 
-import { resetPgDatabase } from "@oko-wallet-api/testing/database";
-import { testPgConfig } from "@oko-wallet-api/database/test_config";
 import {
   runTriplesStep1,
-  runTriplesStep10,
-  runTriplesStep11,
   runTriplesStep2,
   runTriplesStep3,
   runTriplesStep4,
@@ -61,8 +57,12 @@ import {
   runTriplesStep7,
   runTriplesStep8,
   runTriplesStep9,
+  runTriplesStep10,
+  runTriplesStep11,
 } from ".";
 import { TEST_CUSTOMER } from "@oko-wallet-api/api/tss/tests";
+import { testPgConfig } from "@oko-wallet-api/database/test_config";
+import { resetPgDatabase } from "@oko-wallet-api/testing/database";
 
 const SSS_THRESHOLD = 2;
 

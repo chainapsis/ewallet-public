@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 import { registry } from "../registry";
-import { PaginationSchema } from "../common";
 
 const CustomerSchema = registry.register(
   "Customer",
@@ -273,10 +272,6 @@ const CustomerListDataSchema = registry.register(
   }),
 );
 
-// export const CreateCustomerSuccessResponseSchema = makeSuccessResponseSchema(
-//   CreateCustomerResponseSchema,
-//   "CreateCustomerSuccessResponse",
-// );
 export const CreateCustomerSuccessResponseSchema = registry.register(
   "CreateCustomerSuccessResponse",
   z.object({
@@ -287,10 +282,6 @@ export const CreateCustomerSuccessResponseSchema = registry.register(
   }),
 );
 
-// export const GetCustomerListSuccessResponseSchema = makeSuccessResponseSchema(
-//   CustomerListDataSchema,
-//   "GetCustomerListSuccessResponse",
-// );
 export const GetCustomerListSuccessResponseSchema = registry.register(
   "GetCustomerListSuccessResponse",
   z.object({
@@ -301,10 +292,6 @@ export const GetCustomerListSuccessResponseSchema = registry.register(
   }),
 );
 
-// export const GetCustomerSuccessResponseSchema = makeSuccessResponseSchema(
-//   CustomerSchema,
-//   "GetCustomerSuccessResponse",
-// );
 export const GetCustomerSuccessResponseSchema = registry.register(
   "CreateCustomerSuccessResponse",
   z.object({
@@ -315,10 +302,6 @@ export const GetCustomerSuccessResponseSchema = registry.register(
   }),
 );
 
-// export const DeleteCustomerSuccessResponseSchema = makeSuccessResponseSchema(
-//   DeleteCustomerAndCustomerDashboardUsersResponseSchema,
-//   "DeleteCustomerSuccessResponse",
-// );
 export const DeleteCustomerSuccessResponseSchema = registry.register(
   "DeleteCustomerSuccessResponse",
   z.object({

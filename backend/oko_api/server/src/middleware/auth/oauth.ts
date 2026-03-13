@@ -1,35 +1,36 @@
-import type { Request, Response, NextFunction } from "express";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
+import type { NextFunction, Request, Response } from "express";
 
-import {
-  type GoogleAuthenticatedRequest,
-  googleAuthMiddleware,
-} from "@oko-wallet-api/middleware/auth/google_auth";
 import {
   type Auth0AuthenticatedRequest,
   auth0AuthMiddleware,
 } from "@oko-wallet-api/middleware/auth/auth0_auth";
 import {
-  type XAuthenticatedRequest,
-  xAuthMiddleware,
-} from "@oko-wallet-api/middleware/auth/x_auth";
+  type DiscordAuthenticatedRequest,
+  discordAuthMiddleware,
+} from "@oko-wallet-api/middleware/auth/discord_auth";
+import {
+  type GithubAuthenticatedRequest,
+  githubAuthMiddleware,
+} from "@oko-wallet-api/middleware/auth/github_auth";
+import {
+  type GoogleAuthenticatedRequest,
+  googleAuthMiddleware,
+} from "@oko-wallet-api/middleware/auth/google_auth";
 import {
   type TelegramAuthenticatedRequest,
   telegramAuthMiddleware,
 } from "@oko-wallet-api/middleware/auth/telegram_auth";
-import {
-  discordAuthMiddleware,
-  type DiscordAuthenticatedRequest,
-} from "@oko-wallet-api/middleware/auth/discord_auth";
-import {
-  githubAuthMiddleware,
-  type GithubAuthenticatedRequest,
-} from "@oko-wallet-api/middleware/auth/github_auth";
 import type {
   OAuthBody,
   OAuthLocals,
 } from "@oko-wallet-api/middleware/auth/types";
+import {
+  type XAuthenticatedRequest,
+  xAuthMiddleware,
+} from "@oko-wallet-api/middleware/auth/x_auth";
 
+// biome-ignore lint/complexity/noBannedTypes: default generic param
 export type OAuthAuthenticatedRequest<T = {}> = Request<
   any,
   any,
@@ -64,11 +65,7 @@ export async function oauthMiddleware(
         next,
       );
     case "github":
-      return githubAuthMiddleware(
-        req as GithubAuthenticatedRequest,
-        res,
-        next,
-      );
+      return githubAuthMiddleware(req as GithubAuthenticatedRequest, res, next);
     default:
       res.status(400).json({
         error: `Invalid auth_type: ${authType}. Must be 'google', 'auth0', 'x', 'telegram', 'discord', or 'github'`,

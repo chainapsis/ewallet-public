@@ -1,7 +1,7 @@
+import os from "node:os";
 import * as dotenv from "dotenv";
 import path from "path";
 import { z } from "zod";
-import os from "node:os";
 
 import type { PgDatabaseConfig } from "./utils";
 

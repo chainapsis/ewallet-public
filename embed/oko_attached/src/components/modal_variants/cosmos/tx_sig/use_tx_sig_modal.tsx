@@ -1,26 +1,27 @@
-import { useState } from "react";
+import { AuthInfo } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
+import type { ChainInfo, StdSignDoc } from "@keplr-wallet/types";
+import type { Theme } from "@oko-wallet/oko-common-ui/theme";
 import type {
   CosmosTxSigData,
   MakeCosmosSigError,
   MakeSigModalErrorAckPayload,
   OpenModalAckPayload,
 } from "@oko-wallet/oko-sdk-core";
-import type { ChainInfo, StdSignDoc } from "@keplr-wallet/types";
-import type { Result } from "@oko-wallet/stdlib-js";
 import {
+  extractAuthInfoFromSignDoc,
   isEthereumCompatible,
   type SignDoc,
-  extractAuthInfoFromSignDoc,
 } from "@oko-wallet/oko-sdk-cosmos";
-import { AuthInfo } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
-import type { Theme } from "@oko-wallet/oko-common-ui/theme";
-import type { AminoMsg } from "@cosmjs/amino";
-import type { Any } from "cosmjs-types/google/protobuf/any";
+import type { Result } from "@oko-wallet/stdlib-js";
+import { useState } from "react";
 
+import type { FeeCalculated, InsufficientBalanceFee } from "./types";
 import { useCosmosSignFee } from "./use_sign_fee";
-import { normalizeIBCDenom } from "@oko-wallet-attached/web3/cosmos/normalize_denom";
 import { makeCosmosSignature } from "@oko-wallet-attached/components/modal_variants/cosmos/cosmos_sig";
+import { DEMO_WEB_ORIGIN } from "@oko-wallet-attached/requests/endpoints";
 import { useAppState } from "@oko-wallet-attached/store/app";
+import { useMemoryState } from "@oko-wallet-attached/store/memory";
+import { normalizeIBCDenom } from "@oko-wallet-attached/web3/cosmos/normalize_denom";
 import {
   extractMsgsFromSignDoc,
   signDocToJson,
@@ -47,7 +48,6 @@ export function useTxSigModal(
 
   const msgsRes = extractMsgsFromSignDoc(payload.signDoc);
 
-  let msgs: Any[] | readonly AminoMsg[];
   if (!msgsRes.success) {
     const err: MakeSigModalErrorAckPayload = {
       modal_type: "cosmos/make_signature",
@@ -67,8 +67,9 @@ export function useTxSigModal(
       err: msgsRes.err,
     };
   }
-  msgs = msgsRes.data;
+  const msgs = msgsRes.data;
 
+  // biome-ignore lint/correctness/useHookAtTopLevel: hook is called after early return guard
   const signFee = useCosmosSignFee({
     preferNoSetFee: !!data.payload.signOptions?.preferNoSetFee,
     disableBalanceCheck: !!data.payload.signOptions?.disableBalanceCheck,
@@ -279,7 +280,7 @@ function extractFeeFromSignDoc(
     if (signDoc.fee.amount.length === 0) {
       return {
         fee: undefined,
-        gas: parseInt(signDoc.fee.gas),
+        gas: parseInt(signDoc.fee.gas, 10),
       };
     }
     return {
@@ -287,7 +288,7 @@ function extractFeeFromSignDoc(
         amount: signDoc.fee.amount[0].amount,
         denom: signDoc.fee.amount[0].denom,
       },
-      gas: parseInt(signDoc.fee.gas),
+      gas: parseInt(signDoc.fee.gas, 10),
     };
   }
 
@@ -298,7 +299,7 @@ function extractFeeFromSignDoc(
   if (authInfo.fee.amount.length === 0) {
     return {
       fee: undefined,
-      gas: parseInt(authInfo.fee.gasLimit),
+      gas: parseInt(authInfo.fee.gasLimit, 10),
     };
   }
   return {
@@ -306,7 +307,7 @@ function extractFeeFromSignDoc(
       amount: authInfo.fee.amount[0].amount,
       denom: authInfo.fee.amount[0].denom,
     },
-    gas: parseInt(authInfo.fee.gasLimit),
+    gas: parseInt(authInfo.fee.gasLimit, 10),
   };
 }
 

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-import { registry } from "../registry";
 import { ApiKeyHeaderSchema, UserAuthHeaderSchema } from "../common";
+import { registry } from "../registry";
 
 const stringArraySchema = z.array(z.string());
 const stringPairSchema = z.tuple([z.string(), z.string()]);
@@ -144,10 +144,6 @@ const TriplesStep1ResponseSchema = registry.register(
   }),
 );
 
-// export const TriplesStep1SuccessResponseSchema = makeSuccessResponseSchema(
-//   TriplesStep1ResponseSchema,
-//   "TssTriplesStep1SuccessResponse",
-// );
 export const TriplesStep1SuccessResponseSchema = registry.register(
   "TssTriplesStep1SuccessResponse",
   z.object({
@@ -179,10 +175,6 @@ export const TriplesStep2RequestSchema = registry.register(
   }),
 );
 
-// export const TriplesStep2SuccessResponseSchema = makeSuccessResponseSchema(
-//   TriplesStep2ResponseSchema,
-//   "TssTriplesStep2SuccessResponse",
-// );
 export const TriplesStep2SuccessResponseSchema = registry.register(
   "TssTriplesStep2SuccessResponse",
   z.object({
@@ -219,10 +211,6 @@ const TriplesStep3ResponseSchema = registry.register(
   }),
 );
 
-// export const TriplesStep3SuccessResponseSchema = makeSuccessResponseSchema(
-//   TriplesStep3ResponseSchema,
-//   "TssTriplesStep3SuccessResponse",
-// );
 export const TriplesStep3SuccessResponseSchema = registry.register(
   "TssTriplesStep3SuccessResponse",
   z.object({
@@ -259,10 +247,6 @@ const TriplesStep4ResponseSchema = registry.register(
   }),
 );
 
-// export const TriplesStep4SuccessResponseSchema = makeSuccessResponseSchema(
-//   TriplesStep4ResponseSchema,
-//   "TssTriplesStep4SuccessResponse",
-// );
 export const TriplesStep4SuccessResponseSchema = registry.register(
   "TssTriplesStep4SuccessResponse",
   z.object({
@@ -299,10 +283,6 @@ const TriplesStep5ResponseSchema = registry.register(
   }),
 );
 
-// export const TriplesStep5SuccessResponseSchema = makeSuccessResponseSchema(
-//   TriplesStep5ResponseSchema,
-//   "TssTriplesStep5SuccessResponse",
-// );
 export const TriplesStep5SuccessResponseSchema = registry.register(
   "TssTriplesStep5SuccessResponse",
   z.object({
@@ -339,10 +319,6 @@ const TriplesStep6ResponseSchema = registry.register(
   }),
 );
 
-// export const TriplesStep6SuccessResponseSchema = makeSuccessResponseSchema(
-//   TriplesStep6ResponseSchema,
-//   "TssTriplesStep6SuccessResponse",
-// );
 export const TriplesStep6SuccessResponseSchema = registry.register(
   "TssTriplesStep6SuccessResponse",
   z.object({
@@ -374,10 +350,6 @@ const TriplesStep7ResponseSchema = registry.register(
   }),
 );
 
-// export const TriplesStep7SuccessResponseSchema = makeSuccessResponseSchema(
-//   TriplesStep7ResponseSchema,
-//   "TssTriplesStep7SuccessResponse",
-// );
 export const TriplesStep7SuccessResponseSchema = registry.register(
   "TssTriplesStep7SuccessResponse",
   z.object({
@@ -432,10 +404,6 @@ const TriplesStep8ResponseSchema = registry.register(
   }),
 );
 
-// export const TriplesStep8SuccessResponseSchema = makeSuccessResponseSchema(
-//   TriplesStep8ResponseSchema,
-//   "TssTriplesStep8SuccessResponse",
-// );
 export const TriplesStep8SuccessResponseSchema = registry.register(
   "TssTriplesStep8SuccessResponse",
   z.object({
@@ -478,10 +446,6 @@ const TriplesStep9ResponseSchema = registry.register(
   }),
 );
 
-// export const TriplesStep9SuccessResponseSchema = makeSuccessResponseSchema(
-//   TriplesStep9ResponseSchema,
-//   "TssTriplesStep9SuccessResponse",
-// );
 export const TriplesStep9SuccessResponseSchema = registry.register(
   "TssTriplesStep9SuccessResponse",
   z.object({
@@ -529,10 +493,6 @@ const TriplesStep10ResponseSchema = registry.register(
   }),
 );
 
-// export const TriplesStep10SuccessResponseSchema = makeSuccessResponseSchema(
-//   TriplesStep10ResponseSchema,
-//   "TssTriplesStep10SuccessResponse",
-// );
 export const TriplesStep10SuccessResponseSchema = registry.register(
   "TssTriplesStep10SuccessResponse",
   z.object({
@@ -579,10 +539,6 @@ const TriplesStep11ResponseSchema = registry.register(
   }),
 );
 
-// export const TriplesStep11SuccessResponseSchema = makeSuccessResponseSchema(
-//   TriplesStep11ResponseSchema,
-//   "TssTriplesStep11SuccessResponse",
-// );
 export const TriplesStep11SuccessResponseSchema = registry.register(
   "TssTriplesStep11SuccessResponse",
   z.object({

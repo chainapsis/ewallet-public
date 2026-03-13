@@ -1,16 +1,16 @@
-import type {
-  TECDSAServerState,
-  KeygenEntity,
-  TriplesEntity,
-  PresignEntity,
-  SignEntity,
-} from "@oko-wallet/tecdsa-interface";
 import {
   makeServerState,
   makeServerState2,
   type SessionId,
   type UserId,
 } from "@oko-wallet/cait-sith-keplr-addon/src/state";
+import type {
+  KeygenEntity,
+  PresignEntity,
+  SignEntity,
+  TECDSAServerState,
+  TriplesEntity,
+} from "@oko-wallet/tecdsa-interface";
 
 // dangerous - for PoC purpose
 export const appServerState: AppServerState = (() => {

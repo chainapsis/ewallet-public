@@ -3,32 +3,32 @@ import {
   hashMessage,
   hashTypedData,
   isAddressEqual,
+  parseEther,
   recoverAddress,
   recoverTransactionAddress,
   toHex,
-  parseEther,
 } from "viem";
-import { mainnet, hardhat } from "viem/chains";
+import { hardhat, mainnet } from "viem/chains";
 
 import { hardhatAccounts } from "./hardhat";
 import {
+  createMockRpcServer,
+  createMockSigner,
+  type MockRpcServer,
+  mockMainnetRpc,
+} from "./mock";
+import {
   createChainParam,
+  createEthSigner,
   createProviderOptions,
   createTypedData,
-  createEthSigner,
 } from "./utils";
-import {
-  MockRpcServer,
-  createMockRpcServer,
-  mockMainnetRpc,
-  createMockSigner,
-} from "./mock";
-import type { OkoEthSigner } from "@oko-wallet-sdk-eth/types";
 import {
   OkoEIP1193Provider,
   ProviderRpcErrorCode,
   RpcErrorCode,
 } from "@oko-wallet-sdk-eth/provider";
+import type { OkoEthSigner } from "@oko-wallet-sdk-eth/types";
 
 describe("Oko Provider - Mock RPC Testing", () => {
   let mockServer: MockRpcServer;

@@ -1,9 +1,9 @@
-import type { FC } from "react";
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import { CodeIcon } from "@oko-wallet/oko-common-ui/icons/code";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import type { FC } from "react";
 
-import { Widget } from "@oko-wallet-demo-web/components/widgets/widget_components";
 import styles from "./user_data_widget.module.scss";
+import { Widget } from "@oko-wallet-demo-web/components/widgets/widget_components";
 
 export const UserDataWidget: FC<UserDataWidgetProps> = ({ userData }) => {
   const isLoggedIn = !!userData;
@@ -33,6 +33,7 @@ export const UserDataWidget: FC<UserDataWidgetProps> = ({ userData }) => {
             <img
               src={`${process.env.NEXT_PUBLIC_S3_BUCKET_URL}/assets/user-data-example.png`}
               width="100%"
+              alt=""
             />
             <Typography
               size="sm"

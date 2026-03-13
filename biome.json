@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.3.11/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.13/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -14,6 +14,8 @@
       "!**/*.d.ts",
       "!**/routeTree.gen.ts",
       "!**/cait_sith_keplr_addon/addon/index.js",
+      "!**/teddsa_addon/addon/index.js",
+      "!**/plugin/build",
       "sandbox/sandbox_react_native"
     ]
   },
@@ -40,6 +42,9 @@
       "complexity": {
         "useArrowFunction": "off"
       },
+      "correctness": {
+        "useExhaustiveDependencies": "off"
+      },
       "suspicious": {
         "noExplicitAny": "off",
         "noPrototypeBuiltins": "off"
@@ -50,7 +55,13 @@
       "a11y": {
         "useKeyWithClickEvents": "off",
         "noLabelWithoutControl": "off",
-        "useSemanticElements": "off"
+        "useSemanticElements": "off",
+        "noSvgWithoutTitle": "off",
+        "noStaticElementInteractions": "off",
+        "useFocusableInteractive": "off",
+        "useAriaPropsSupportedByRole": "off",
+        "noNoninteractiveElementToInteractiveRole": "off",
+        "useValidAnchor": "off"
       }
     }
   },

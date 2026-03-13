@@ -1,20 +1,20 @@
 "use client";
 
-import React, { useState, useCallback, type ReactNode, type FC } from "react";
 import {
-  useFloating,
-  useDismiss,
-  useRole,
-  useClick,
-  useInteractions,
-  useId,
+  autoUpdate,
   FloatingPortal,
   offset,
   type Placement,
-  autoUpdate,
+  useClick,
+  useDismiss,
+  useFloating,
+  useId,
+  useInteractions,
+  useRole,
 } from "@floating-ui/react";
-import cn from "classnames";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import cn from "classnames";
+import { type FC, type ReactNode, useCallback, useState } from "react";
 
 import styles from "./anchored_menu.module.scss";
 

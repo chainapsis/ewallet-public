@@ -1,21 +1,21 @@
 "use client";
 
-import {
+import type {
   Hash,
   SendTransactionParameters,
   TransactionReceipt,
   WalletClient,
 } from "viem";
-import { Config, useConfig, useWalletClient } from "wagmi";
+import { type Config, useConfig, useWalletClient } from "wagmi";
 import { getPublicClient } from "wagmi/actions";
-import { SendTransactionMutate } from "wagmi/query";
+import type { SendTransactionMutate } from "wagmi/query";
 
 import {
   getBlockExplorerTxLink,
   getParsedError,
   notification,
 } from "@oko-wallet-sandbox-evm/utils/scaffold-eth";
-import { TransactorFuncOptions } from "@oko-wallet-sandbox-evm/utils/scaffold-eth/contract";
+import type { TransactorFuncOptions } from "@oko-wallet-sandbox-evm/utils/scaffold-eth/contract";
 
 type TransactionFunc = (
   tx:
@@ -75,7 +75,7 @@ export const useTransactor = (
     }
 
     let notificationId = null;
-    let transactionHash: Hash | undefined = undefined;
+    let transactionHash: Hash | undefined;
     let transactionReceipt: TransactionReceipt | undefined;
     let blockExplorerTxURL = "";
     try {
@@ -116,8 +116,9 @@ export const useTransactor = (
       });
       notification.remove(notificationId);
 
-      if (transactionReceipt?.status === "reverted")
+      if (transactionReceipt?.status === "reverted") {
         throw new Error("Transaction reverted");
+      }
 
       notification.success(
         <TxnNotification
@@ -129,8 +130,9 @@ export const useTransactor = (
         },
       );
 
-      if (transactionReceipt && options?.onBlockConfirmation)
+      if (transactionReceipt && options?.onBlockConfirmation) {
         options.onBlockConfirmation(transactionReceipt);
+      }
     } catch (error: any) {
       if (notificationId) {
         notification.remove(notificationId);

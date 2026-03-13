@@ -6,7 +6,7 @@ const upload = multer({
     files: 1,
     fields: 5,
   },
-  fileFilter: (req, file, cb) => {
+  fileFilter: (_req, file, cb) => {
     const allowedMimeTypes = [
       "image/png",
       "image/jpeg",

@@ -1,37 +1,37 @@
-import { Pool } from "pg";
-import type { Logger } from "winston";
+import { Bytes, type Bytes33 } from "@oko-wallet/bytes";
+import { encryptDataAsync } from "@oko-wallet/crypto-js/node";
+import { getKeyShareNodeMeta } from "@oko-wallet/oko-pg-interface/key_share_node_meta";
+import {
+  createWalletKSNodes,
+  getActiveKSNodes,
+  getKSNodesByIds,
+  getWalletKSNodesByWalletId,
+} from "@oko-wallet/oko-pg-interface/ks_nodes";
 import {
   createUser,
   getUserByEmailAndAuthType,
   updateUserMetadata,
 } from "@oko-wallet/oko-pg-interface/oko_users";
-import type { Result } from "@oko-wallet/stdlib-js";
-import { encryptDataAsync } from "@oko-wallet/crypto-js/node";
-import { Bytes, type Bytes33 } from "@oko-wallet/bytes";
-import { type WalletStatus, type Wallet } from "@oko-wallet/oko-types/wallets";
-import type {
-  KeygenRequestV2,
-  KeygenEd25519Request,
-} from "@oko-wallet/oko-types/tss";
-import type { SignInResponseV2, User } from "@oko-wallet/oko-types/user";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import {
   createWallet,
   getActiveWalletByUserIdAndCurveType,
   getWalletByPublicKey,
 } from "@oko-wallet/oko-pg-interface/oko_wallets";
-import {
-  createWalletKSNodes,
-  getActiveKSNodes,
-  getWalletKSNodesByWalletId,
-  getKSNodesByIds,
-} from "@oko-wallet/oko-pg-interface/ks_nodes";
-import { getKeyShareNodeMeta } from "@oko-wallet/oko-pg-interface/key_share_node_meta";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type {
+  KeygenEd25519Request,
+  KeygenRequestV2,
+} from "@oko-wallet/oko-types/tss";
+import type { SignInResponseV2, User } from "@oko-wallet/oko-types/user";
+import type { Wallet, WalletStatus } from "@oko-wallet/oko-types/wallets";
+import type { Result } from "@oko-wallet/stdlib-js";
+import { extractKeyPackageSharesEd25519 } from "@oko-wallet/teddsa-addon/src/server";
+import type { Pool } from "pg";
+import type { Logger } from "winston";
 
+import { saveUserCustomerConnection } from "../../connection";
 import { generateUserTokenV2 } from "@oko-wallet-api/api/tss/keplr_auth";
 import { checkKeyShareFromKSNodesV2 } from "@oko-wallet-api/api/tss/ks_node";
-import { extractKeyPackageSharesEd25519 } from "@oko-wallet/teddsa-addon/src/server";
-import { saveUserCustomerConnection } from "../../connection";
 
 export async function runKeygenV2(
   db: Pool,
@@ -394,15 +394,13 @@ export async function runKeygenV2(
     }
 
     if (customerId) {
-      saveUserCustomerConnection(
-        db,
-        logger,
-        user.user_id,
-        customerId,
-      )
-        .catch((err) => {
-          logger.error(`runKeygenV2 error inserting user-customer connection: ${err}`);
-        });
+      saveUserCustomerConnection(db, logger, user.user_id, customerId).catch(
+        (err) => {
+          logger.error(
+            `runKeygenV2 error inserting user-customer connection: ${err}`,
+          );
+        },
+      );
     }
 
     return {

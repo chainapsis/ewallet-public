@@ -1,5 +1,6 @@
-import type { OkoWalletWebInterface } from "@oko-wallet-sdk-core/types";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
+
+import type { OkoWalletWebInterface } from "@oko-wallet-sdk-core/types";
 import { OKO_ATTACHED_TARGET } from "@oko-wallet-sdk-core/window_msg/target";
 
 export async function getAuthType(

@@ -4,8 +4,8 @@ import type {
 } from "@oko-wallet/oko-sdk-core";
 
 import { OKO_SDK_TARGET } from "./target";
-import { useAppState } from "@oko-wallet-attached/store/app";
 import type { MsgEventContext } from "./types";
+import { useAppState } from "@oko-wallet-attached/store/app";
 
 export function handleSetCodeVerifier(
   ctx: MsgEventContext,

@@ -1,5 +1,5 @@
-import { encodeSecp256k1Signature } from "@cosmjs/amino";
 import type { StdSignature } from "@cosmjs/amino";
+import { encodeSecp256k1Signature } from "@cosmjs/amino";
 import type { SignOutput } from "@oko-wallet/oko-sdk-core";
 
 export const encodeCosmosSignature = (

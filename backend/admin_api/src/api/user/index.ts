@@ -94,7 +94,7 @@ export async function login(
 }
 
 export async function logout(
-  db: Pool,
+  _db: Pool,
   token?: string,
 ): Promise<OkoApiResponse<AdminLogoutResponse>> {
   try {

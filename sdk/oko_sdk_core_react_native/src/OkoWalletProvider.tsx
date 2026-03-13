@@ -1,4 +1,6 @@
-import React, { createContext, useMemo } from "react";
+import type React from "react";
+import { createContext, useMemo } from "react";
+
 import { OkoWalletRN, type OkoWalletRNConfig } from "./OkoWalletRN";
 
 export const OkoWalletContext = createContext<OkoWalletRN | null>(null);

@@ -1,8 +1,8 @@
 import {
+  EventEmitter3,
   type OkoWalletInterface,
   type OpenModalAckPayload,
   type OpenModalError,
-  EventEmitter3,
 } from "@oko-wallet/oko-sdk-core";
 import type { Result } from "@oko-wallet/stdlib-js";
 
@@ -131,7 +131,7 @@ export function createMockOkoWallet(
 
     completeEmailSignIn: async () => {},
 
-    on: (handlerDef) => {
+    on: (_handlerDef) => {
       // No-op for tests
     },
 

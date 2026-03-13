@@ -29,10 +29,7 @@ export async function fetchSplTokenBalances(
     }),
   ]);
 
-  const allAccounts = [
-    ...standardAccounts.value,
-    ...token2022Accounts.value,
-  ];
+  const allAccounts = [...standardAccounts.value, ...token2022Accounts.value];
 
   const balances: SplTokenBalance[] = [];
 

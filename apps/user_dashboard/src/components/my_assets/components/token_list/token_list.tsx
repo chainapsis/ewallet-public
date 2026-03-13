@@ -62,7 +62,6 @@ export const TokenList: FC = () => {
     });
   }, [searchedTokens, isHideLowBalance]);
 
-
   return (
     <>
       <div className={styles.searchBar}>
@@ -81,7 +80,11 @@ export const TokenList: FC = () => {
         className={styles.hideLowBalance}
         onClick={() => setIsHideLowBalance(!isHideLowBalance)}
       >
-        <span role="checkbox" className={styles.hideLowBalanceCheckbox}>
+        <span
+          role="checkbox"
+          aria-checked={isHideLowBalance}
+          className={styles.hideLowBalanceCheckbox}
+        >
           <CheckCircleOutlinedIcon
             size={16}
             color={isHideLowBalance ? "#5BCCF1" : "var(--fg-quaternary)"}

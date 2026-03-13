@@ -1,10 +1,10 @@
 "use client";
 
-import { useChain } from "@interchain-kit/react";
 import { WalletState } from "@interchain-kit/core";
+import { useChain } from "@interchain-kit/react";
 
-import LoginView from "./LoginView";
 import ConnectedView from "./ConnectedView";
+import LoginView from "./LoginView";
 
 export default function App() {
   const { status } = useChain("osmosis");

@@ -1,13 +1,13 @@
 "use client";
 
-import type { FC } from "react";
 import { Button } from "@oko-wallet/oko-common-ui/button";
 import { PlusIcon } from "@oko-wallet/oko-common-ui/icons/plus";
 import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
 import { Input } from "@oko-wallet/oko-common-ui/input";
+import type { FC } from "react";
 
-import { useEditInfoForm } from "./use_edit_info_form";
 import styles from "./edit_info_form.module.scss";
+import { useEditInfoForm } from "./use_edit_info_form";
 
 export const EditInfoForm: FC = () => {
   const {

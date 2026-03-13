@@ -254,7 +254,13 @@ const Step1Content = ({
         </div>
       </div>
 
-      <Button size="lg" fullWidth isLoading={isLoading} disabled={isLoading} onClick={onContinue}>
+      <Button
+        size="lg"
+        fullWidth
+        isLoading={isLoading}
+        disabled={isLoading}
+        onClick={onContinue}
+      >
         Continue
       </Button>
     </>

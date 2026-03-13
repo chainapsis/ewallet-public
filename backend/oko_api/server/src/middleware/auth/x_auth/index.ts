@@ -1,8 +1,8 @@
-import type { Request, Response, NextFunction } from "express";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
+import type { NextFunction, Request, Response } from "express";
 
-import { validateAccessTokenOfX } from "@oko-wallet-api/middleware/auth/x_auth/validate";
 import type { OAuthLocals } from "@oko-wallet-api/middleware/auth/types";
+import { validateAccessTokenOfX } from "@oko-wallet-api/middleware/auth/x_auth/validate";
 
 export interface XAuthenticatedRequest<T = any> extends Request {
   body: T;

@@ -1,15 +1,15 @@
-import { type GetKeyShareResponse } from "@oko-wallet/ksn-interface/key_share";
-import type { NodeStatusInfo } from "@oko-wallet/oko-types/tss";
+import type { Bytes33 } from "@oko-wallet/bytes";
+import type { GetKeyShareResponse } from "@oko-wallet/ksn-interface/key_share";
+import type { KSNodeApiResponse } from "@oko-wallet/ksn-interface/response";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
+import type { NodeStatusInfo } from "@oko-wallet/oko-types/tss";
 import type {
   Point256,
   UserKeySharePointByNode,
 } from "@oko-wallet/oko-types/user_key_share";
 import type { Result } from "@oko-wallet/stdlib-js";
-import type { KSNodeApiResponse } from "@oko-wallet/ksn-interface/response";
 
 import type { RequestSplitSharesError } from "../types/ks_node_request";
-import type { Bytes33 } from "@oko-wallet/bytes";
 import {
   decodeKeyShareStringToPoint256,
   encodePoint256ToKeyShareString,
@@ -30,7 +30,7 @@ export async function requestSplitShares(
 
   const succeeded: UserKeySharePointByNode[] = [];
   let nodesToTry = shuffledNodes.slice(0, threshold);
-  let backupNodes = shuffledNodes.slice(threshold);
+  const backupNodes = shuffledNodes.slice(threshold);
 
   while (succeeded.length < threshold && nodesToTry.length > 0) {
     const results = await Promise.allSettled(

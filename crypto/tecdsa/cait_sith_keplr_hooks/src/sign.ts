@@ -1,13 +1,13 @@
-import type {
-  ClientSignStep1Output,
-  SignOutput,
-  PresignOutput,
-  TECDSASignState,
-} from "@oko-wallet/tecdsa-interface";
 import { reqSignStep1, reqSignStep2 } from "@oko-wallet/api-lib";
 import { wasmModule } from "@oko-wallet/cait-sith-keplr-wasm";
 import type { SignStep1Body, SignStep2Body } from "@oko-wallet/oko-types/tss";
 import type { Result } from "@oko-wallet/stdlib-js";
+import type {
+  ClientSignStep1Output,
+  PresignOutput,
+  SignOutput,
+  TECDSASignState,
+} from "@oko-wallet/tecdsa-interface";
 
 export type RunSignError = { type: "aborted" } | { type: "error"; msg: string };
 
@@ -19,7 +19,7 @@ export async function runSign(
   authToken: string,
   getIsAborted: () => boolean,
 ): Promise<Result<SignOutput, RunSignError>> {
-  let currentAuthToken = authToken;
+  const currentAuthToken = authToken;
 
   const signState: TECDSASignState = {
     signState: null,

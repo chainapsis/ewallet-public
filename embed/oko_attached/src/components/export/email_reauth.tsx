@@ -11,8 +11,8 @@ import {
   findEmbeddedIframe,
   sendReauthParamsToIframe,
 } from "./use_export_reauth";
-import { generateNonce } from "@oko-wallet-attached/config/oauth";
 import { getAuth0WebAuth } from "@oko-wallet-attached/config/auth0";
+import { generateNonce } from "@oko-wallet-attached/config/oauth";
 import {
   sendEmailOTPCode,
   verifyEmailOTPCode,
@@ -137,7 +137,6 @@ export const EmailReauth = () => {
   }, [resendTimer]);
 
   // Auto-verify when OTP is complete
-  // biome-ignore lint/correctness/useExhaustiveDependencies: rendering infinite loop
   useEffect(() => {
     if (isOtpComplete && !isSubmitting && !errorMessage) {
       void handleVerifyCode();

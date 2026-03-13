@@ -1,4 +1,4 @@
-import { type GoogleTokenInfo } from "@oko-wallet/ksn-interface/auth";
+import type { GoogleTokenInfo } from "@oko-wallet/ksn-interface/auth";
 import type { Result } from "@oko-wallet/stdlib-js";
 
 export async function validateOAuthToken(

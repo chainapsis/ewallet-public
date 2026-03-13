@@ -1,13 +1,12 @@
-import request from "supertest";
-import type { AuthType } from "@oko-wallet/oko-types/auth";
-
-import { createTestContext, type TestContext } from "@e2e/utils/test_context";
 import {
-  generateSessionId,
-  generateClientKeypair,
   computeIdTokenHash,
   createRevealSignature,
+  generateClientKeypair,
+  generateSessionId,
 } from "@e2e/utils/signature";
+import { createTestContext, type TestContext } from "@e2e/utils/test_context";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
+import request from "supertest";
 
 describe("e2e_test_front_running_sign_up", () => {
   let ctx: TestContext;
@@ -66,7 +65,11 @@ describe("e2e_test_front_running_sign_up", () => {
             public_key: "03" + "a".repeat(64),
             share: "aa".repeat(64),
           },
-          ed25519: { public_key: "b".repeat(64), share: "bb".repeat(64), seed_share: TEST_SEED_SHARE },
+          ed25519: {
+            public_key: "b".repeat(64),
+            share: "bb".repeat(64),
+            seed_share: TEST_SEED_SHARE,
+          },
         },
         cr_session_id: sessionId,
         cr_signature: sig,
@@ -215,7 +218,11 @@ describe("e2e_test_front_running_sign_up", () => {
             public_key: "03" + "a".repeat(64),
             share: "aa".repeat(64),
           },
-          ed25519: { public_key: "b".repeat(64), share: "bb".repeat(64), seed_share: TEST_SEED_SHARE },
+          ed25519: {
+            public_key: "b".repeat(64),
+            share: "bb".repeat(64),
+            seed_share: TEST_SEED_SHARE,
+          },
         },
         cr_session_id: sessionId,
         cr_signature: sigA,

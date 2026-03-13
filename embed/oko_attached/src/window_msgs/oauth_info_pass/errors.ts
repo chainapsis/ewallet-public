@@ -1,7 +1,7 @@
 import type {
+  OAuthSignInError,
   OkoWalletMsgOAuthInfoPass,
   OkoWalletMsgOAuthSignInUpdate,
-  OAuthSignInError,
 } from "@oko-wallet/oko-sdk-core";
 
 import { postLog } from "@oko-wallet-attached/requests/logging";

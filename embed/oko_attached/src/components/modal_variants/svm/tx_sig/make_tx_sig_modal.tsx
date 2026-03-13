@@ -1,18 +1,18 @@
-import type { FC } from "react";
-import type { MakeSvmTxSignData } from "@oko-wallet/oko-sdk-core";
+import { Button } from "@oko-wallet/oko-common-ui/button";
 import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
-import { Button } from "@oko-wallet/oko-common-ui/button";
+import type { MakeSvmTxSignData } from "@oko-wallet/oko-sdk-core";
+import type { FC } from "react";
 
-import styles from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_signature_modal.module.scss";
+import { SvmTxFee } from "./svm_tx_fee";
+import { SvmTxSignatureContent } from "./svm_tx_signature_content";
+import { useParseTx } from "./use_parse_tx";
+import { useTxSigModal } from "./use_tx_sig_modal";
+import { trackTxButtonEvent } from "@oko-wallet-attached/analytics/events";
 import { CommonModal } from "@oko-wallet-attached/components/modal_variants/common/common_modal";
 import { DemoView } from "@oko-wallet-attached/components/modal_variants/common/make_signature/demo_view";
+import styles from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_signature_modal.module.scss";
 import { SignWithOkoBox } from "@oko-wallet-attached/components/sign_with_oko_box/sign_with_oko_box";
-import { trackTxButtonEvent } from "@oko-wallet-attached/analytics/events";
-import { useTxSigModal } from "./use_tx_sig_modal";
-import { SvmTxSignatureContent } from "./svm_tx_signature_content";
-import { SvmTxFee } from "./svm_tx_fee";
-import { useParseTx } from "./use_parse_tx";
 
 export interface MakeTxSigModalProps {
   getIsAborted: () => boolean;
@@ -67,7 +67,10 @@ export const MakeTxSigModal: FC<MakeTxSigModalProps> = ({
           <XCloseIcon size={20} color="var(--fg-quaternary)" />
         </div>
 
-        <div data-scroll-container className={styles.modalInnerContentContainer}>
+        <div
+          data-scroll-container
+          className={styles.modalInnerContentContainer}
+        >
           <SvmTxSignatureContent
             payload={data.payload}
             parsedTx={parsedTx}

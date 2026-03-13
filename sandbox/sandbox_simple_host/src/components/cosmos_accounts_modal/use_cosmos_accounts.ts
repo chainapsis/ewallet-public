@@ -50,7 +50,9 @@ export function useCosmosAccounts() {
         for (const account of accountList) {
           const addressPrefix = account.address.split("1")[0] ?? "";
           const chainInfo = byPrefix.get(addressPrefix);
-          if (!chainInfo) continue;
+          if (!chainInfo) {
+            continue;
+          }
 
           merged.push({
             chainId: chainInfo.chainId,

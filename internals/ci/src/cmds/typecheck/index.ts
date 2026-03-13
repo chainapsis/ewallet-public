@@ -1,9 +1,9 @@
 import { spawn } from "node:child_process";
 import chalk from "chalk";
 
+import { runWithConcurrency } from "@oko-wallet-ci/concurrency";
 import { paths } from "@oko-wallet-ci/paths";
 import { getPkgName } from "@oko-wallet-ci/pkg_name";
-import { runWithConcurrency } from "@oko-wallet-ci/concurrency";
 
 const DEFAULT_CONCURRENCY = 4;
 
@@ -26,6 +26,7 @@ export async function typeCheck(..._args: any[]) {
     paths.oko_admin_web,
     paths.ct_dashboard_web,
     paths.user_dashboard,
+    paths.attached_proxy_web,
   ];
 
   // NOTE: Currently not used

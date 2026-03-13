@@ -1,4 +1,4 @@
-import { type FC } from "react";
+import type { FC } from "react";
 
 import { s3BucketURL } from "./paths";
 

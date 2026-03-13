@@ -1,5 +1,5 @@
-import crypto from "crypto";
 import type { Result } from "@oko-wallet/stdlib-js";
+import crypto from "crypto";
 
 export interface TelegramUserData {
   id: string;
@@ -73,7 +73,7 @@ export function validateTelegramHash(
   }
 
   const authDate = parseInt(userData.auth_date, 10);
-  if (isNaN(authDate)) {
+  if (Number.isNaN(authDate)) {
     return {
       success: false,
       err: "Invalid auth_date format",

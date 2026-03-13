@@ -37,7 +37,7 @@ describe("Email Service Integration Tests", () => {
     it("should verify SMTP connection", async () => {
       const isConnected = await testEmailConnection(
         process.env.SMTP_HOST || "",
-        parseInt(process.env.SMTP_PORT || "587"),
+        parseInt(process.env.SMTP_PORT || "587", 10),
         process.env.SMTP_USER || "",
         process.env.SMTP_PASS || "",
       );
@@ -64,7 +64,7 @@ describe("Email Service Integration Tests", () => {
 
       const transporter = getTransporter(
         process.env.SMTP_HOST || "",
-        parseInt(process.env.SMTP_PORT || "587"),
+        parseInt(process.env.SMTP_PORT || "587", 10),
         process.env.SMTP_USER || "",
         process.env.SMTP_PASS || "",
       );
@@ -93,7 +93,7 @@ describe("Email Service Integration Tests", () => {
 
       const result: EmailResult = await sendEmail(emailOptions, {
         smtp_host: process.env.SMTP_HOST || "",
-        smtp_port: parseInt(process.env.SMTP_PORT || "587"),
+        smtp_port: parseInt(process.env.SMTP_PORT || "587", 10),
         smtp_user: process.env.SMTP_USER || "",
         smtp_pass: process.env.SMTP_PASS || "",
       });

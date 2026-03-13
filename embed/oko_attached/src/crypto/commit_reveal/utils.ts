@@ -1,13 +1,13 @@
-import { v4 as uuidv4 } from "uuid";
-import { sha256, buildRevealMessage } from "@oko-wallet/crypto-js";
+import type { Bytes } from "@oko-wallet/bytes";
+import { buildRevealMessage, sha256 } from "@oko-wallet/crypto-js";
 import {
+  convertEddsaSignatureToBytes,
   generateEddsaKeypair,
   signMessage,
-  convertEddsaSignatureToBytes,
 } from "@oko-wallet/crypto-js/browser";
-import type { Bytes } from "@oko-wallet/bytes";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { Result } from "@oko-wallet/stdlib-js";
+import { v4 as uuidv4 } from "uuid";
 
 export const SESSION_TIMEOUT_MS = 5 * 60 * 1000;
 

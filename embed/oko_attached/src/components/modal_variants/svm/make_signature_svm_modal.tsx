@@ -1,9 +1,9 @@
-import type { FC } from "react";
 import type { MakeSvmSigData } from "@oko-wallet/oko-sdk-core";
+import type { FC } from "react";
 
-import { MakeTxSigModal } from "./tx_sig/make_tx_sig_modal";
 import { MakeAllTxSigModal } from "./all_tx_sig/make_all_tx_sig_modal";
 import { MakeMessageSigModal } from "./message_sig/make_message_sig_modal";
+import { MakeTxSigModal } from "./tx_sig/make_tx_sig_modal";
 
 export interface MakeSignatureSvmModalProps {
   getIsAborted: () => boolean;

@@ -1,19 +1,18 @@
-import { useState } from "react";
+import type { ChainInfo } from "@keplr-wallet/types";
 import type {
   CosmosArbitrarySigData,
   OpenModalAckPayload,
 } from "@oko-wallet/oko-sdk-core";
-import type { ChainInfo } from "@keplr-wallet/types";
 import { isEthereumCompatible } from "@oko-wallet/oko-sdk-cosmos";
+import { useState } from "react";
 
-import { useAppState } from "@oko-wallet-attached/store/app";
 import { makeCosmosSignature } from "../cosmos_sig";
 import { useMemoryState } from "@oko-wallet-attached/store/memory";
 import { isDemoOrSandboxOrigin } from "@oko-wallet-attached/requests/endpoints";
 
 export function useArbitrarySigModal(args: UseCosmosArbitrarySigModalArgs) {
   const { data, modalId, getIsAborted } = args;
-  const { closeModal, setError } = useMemoryState();
+  const { closeModal } = useMemoryState();
 
   const hostOrigin = data.payload.origin;
   const theme = useAppState().getTheme(hostOrigin);

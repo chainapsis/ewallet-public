@@ -7,8 +7,8 @@ import type { OkoSvmWalletInterface } from "@oko-wallet-sdk-svm/types";
 import {
   buildSignInMessage,
   OKO_WALLET_NAME,
-  OkoSvmWalletAccount,
   OkoStandardWallet,
+  OkoSvmWalletAccount,
   type WalletStandardConfig,
 } from "@oko-wallet-sdk-svm/wallet-standard";
 

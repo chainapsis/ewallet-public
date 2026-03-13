@@ -1,27 +1,27 @@
 import type {
-  GetKeyShareV2Response,
-  GetKeyShareV2WithCRRequestBody,
-  RegisterKeyShareV2WithCRRequestBody,
-  RegisterEd25519V2WithCRRequestBody,
-  ReshareKeyShareV2WithCRRequestBody,
-} from "@oko-wallet/ksn-interface/key_share";
-import type {
   CommitRequestBody,
   CommitResponseData,
+  OperationType,
 } from "@oko-wallet/ksn-interface/commit_reveal";
-import type { OperationType } from "@oko-wallet/ksn-interface/commit_reveal";
-import type { NodeStatusInfo } from "@oko-wallet/oko-types/tss";
+import type {
+  GetKeyShareV2Response,
+  GetKeyShareV2WithCRRequestBody,
+  RegisterEd25519V2WithCRRequestBody,
+  RegisterKeyShareV2WithCRRequestBody,
+  ReshareKeyShareV2WithCRRequestBody,
+} from "@oko-wallet/ksn-interface/key_share";
+import type { KSNodeApiResponse } from "@oko-wallet/ksn-interface/response";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { CommitRevealParams } from "@oko-wallet/oko-types/commit_reveal";
+import type { NodeStatusInfo } from "@oko-wallet/oko-types/tss";
 import type { Result } from "@oko-wallet/stdlib-js";
-import type { KSNodeApiResponse } from "@oko-wallet/ksn-interface/response";
 
+import { setKsnNodePubkey } from "@oko-wallet-attached/crypto/commit_reveal/session";
+import { createKsnCommitRevealParams } from "@oko-wallet-attached/crypto/commit_reveal/signature";
 import type {
   ClientCommitRevealSession,
   KsnCommitResult,
 } from "@oko-wallet-attached/crypto/commit_reveal/types";
-import { createKsnCommitRevealParams } from "@oko-wallet-attached/crypto/commit_reveal/signature";
-import { setKsnNodePubkey } from "@oko-wallet-attached/crypto/commit_reveal/session";
 
 export interface KeySharesByNode {
   node: { name: string; endpoint: string };
@@ -121,10 +121,7 @@ export async function requestKeySharesWithBackup(params: {
         );
         endpointsToTry.push(backupEndpoint);
         return;
-      } catch {
-        // Backup commit failed, try next
-        continue;
-      }
+      } catch {}
     }
   }
 

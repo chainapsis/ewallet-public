@@ -7,8 +7,6 @@ import type {
 
 import {
   napiRunTriples2ServerStep1,
-  napiRunTriples2ServerStep10,
-  napiRunTriples2ServerStep11,
   napiRunTriples2ServerStep2,
   napiRunTriples2ServerStep3,
   napiRunTriples2ServerStep4,
@@ -17,6 +15,8 @@ import {
   napiRunTriples2ServerStep7,
   napiRunTriples2ServerStep8,
   napiRunTriples2ServerStep9,
+  napiRunTriples2ServerStep10,
+  napiRunTriples2ServerStep11,
 } from "../../addon/index.js";
 
 export function runTriples2ServerStep1(): SrvTriplesStepOutput {

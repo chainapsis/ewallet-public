@@ -1,21 +1,20 @@
-import type { Response, Request } from "express";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import { registry } from "@oko-wallet/oko-api-openapi";
 import {
   ErrorResponseSchema,
   UserAuthHeaderSchema,
 } from "@oko-wallet/oko-api-openapi/common";
-import { registry } from "@oko-wallet/oko-api-openapi";
 import {
   SaveReferralRequestSchema,
   SaveReferralSuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/social_login";
-import { createReferral } from "@oko-wallet/oko-pg-interface/referrals";
-
 import { getWalletById } from "@oko-wallet/oko-pg-interface/oko_wallets";
+import { createReferral } from "@oko-wallet/oko-pg-interface/referrals";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type {
   SaveReferralRequest,
   SaveReferralResponse,
 } from "@oko-wallet/oko-types/referral";
+import type { Request, Response } from "express";
 
 registry.registerPath({
   method: "post",

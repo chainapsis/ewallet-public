@@ -1,6 +1,6 @@
 "use client";
 
-import { type FC, useState, useLayoutEffect } from "react";
+import { type FC, useLayoutEffect, useState } from "react";
 
 export const ToggleColorScheme: FC = () => {
   const [colorScheme, setColorScheme] = useState<"light" | "dark">("light");

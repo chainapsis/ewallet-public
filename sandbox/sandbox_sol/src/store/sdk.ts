@@ -1,6 +1,6 @@
-import { create } from "zustand";
 import type { OkoWalletInterface } from "@oko-wallet/oko-sdk-core";
 import type { OkoSvmWalletInterface } from "@oko-wallet/oko-sdk-svm";
+import { create } from "zustand";
 
 interface SdkState {
   okoWallet: OkoWalletInterface | null;

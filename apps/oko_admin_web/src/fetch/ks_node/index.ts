@@ -5,14 +5,13 @@ import type {
   DeactivateKSNodeResponse,
   DeleteKSNodeRequest,
   DeleteKSNodeResponse,
-  GetAllKSNodeResponse,
   GetKSNodeByIdResponse,
   UpdateKSNodeRequest,
   UpdateKSNodeResponse,
 } from "@oko-wallet/oko-types/admin";
 
-import { doFetch } from "@oko-wallet-admin/fetch/fetcher";
 import { OKO_ADMIN_API_ENDPOINT_V1 } from "@oko-wallet-admin/fetch";
+import { doFetch } from "@oko-wallet-admin/fetch/fetcher";
 
 export type GetKSNodesParams = {
   token: string;

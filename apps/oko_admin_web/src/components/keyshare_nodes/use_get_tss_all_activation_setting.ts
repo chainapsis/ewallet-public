@@ -9,7 +9,9 @@ export function useGetTssAllActivationSetting() {
   const query = useQuery({
     queryKey: ["tss-activation-setting"],
     queryFn: async () => {
-      if (!token) return null;
+      if (!token) {
+        return null;
+      }
       const response = await getTssAllActivationSetting({ token });
       if (!response.success) {
         return null;

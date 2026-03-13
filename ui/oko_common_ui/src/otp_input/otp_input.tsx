@@ -155,6 +155,7 @@ export const OtpInput: FC<OtpInputProps> = ({
     <div className={styles.otpContainer}>
       {Array.from({ length }, (_, index) => (
         <input
+          // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length OTP input slots
           key={index}
           ref={(el) => {
             if (el) {

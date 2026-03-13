@@ -35,14 +35,14 @@ export function convertIpfsUrl(url: string): string {
 
   if (url.includes("ipfs.io/ipfs/")) {
     const match = url.match(/ipfs\.io\/ipfs\/(.+)/);
-    if (match && match[1]) {
+    if (match?.[1]) {
       return `${cleanGatewayUrl}/ipfs/${match[1]}`;
     }
   }
 
   if (url.includes("/ipfs/")) {
     const match = url.match(/\/ipfs\/(.+)/);
-    if (match && match[1]) {
+    if (match?.[1]) {
       return `${cleanGatewayUrl}/ipfs/${match[1]}`;
     }
   }

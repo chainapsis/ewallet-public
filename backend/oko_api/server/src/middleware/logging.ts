@@ -1,5 +1,5 @@
-import { type Request, type Response, type NextFunction } from "express";
-import { type OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { NextFunction, Request, Response } from "express";
 
 export function loggingMiddleware() {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -21,17 +21,17 @@ export function loggingMiddleware() {
     const originalSend = res.send;
 
     res.send = function (data) {
-      const duration = Date.now() - startTime;
+      const _duration = Date.now() - startTime;
 
-      let responseData: OkoApiResponse<any> | null = null;
+      let _responseData: OkoApiResponse<any> | null = null;
       try {
         if (typeof data === "string") {
-          responseData = JSON.parse(data);
+          _responseData = JSON.parse(data);
         } else {
-          responseData = data;
+          _responseData = data;
         }
-      } catch (e) {
-        responseData = null;
+      } catch (_e) {
+        _responseData = null;
       }
 
       // if (responseData && responseData.success === false) {

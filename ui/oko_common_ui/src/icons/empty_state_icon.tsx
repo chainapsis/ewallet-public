@@ -27,7 +27,12 @@ export const EmptyStateIcon: FC<BasicIconProps> = ({
           width="28"
           height="28"
         >
-          <rect width="28" height="28" rx="14" fill="var(--bg-secondary-hover)" />
+          <rect
+            width="28"
+            height="28"
+            rx="14"
+            fill="var(--bg-secondary-hover)"
+          />
         </mask>
         <g mask="url(#mask0_239_3873)">
           <line

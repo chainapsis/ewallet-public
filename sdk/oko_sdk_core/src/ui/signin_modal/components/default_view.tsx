@@ -1,18 +1,18 @@
-import { type FunctionComponent as FC } from "preact";
+import type { FunctionComponent as FC } from "preact";
 
-import type { SignInType } from "@oko-wallet-sdk-core/types/oauth";
-import type { ResolvedTheme } from "../types";
 import { S3_LOGO_URL, S3_LOGO_WITH_NAME_URL } from "../icons";
-import { ProviderButton } from "./provider_button";
+import type { ResolvedTheme } from "../types";
 import {
-  EmailIcon,
-  GoogleIcon,
-  XSmallIcon,
-  TelegramSmallIcon,
   AppleSmallIcon,
   ChevronRightIcon,
+  EmailIcon,
   ExternalLinkIcon,
+  GoogleIcon,
+  TelegramSmallIcon,
+  XSmallIcon,
 } from "./icons";
+import { ProviderButton } from "./provider_button";
+import type { SignInType } from "@oko-wallet-sdk-core/types/oauth";
 
 export interface DefaultViewProps {
   theme: ResolvedTheme;

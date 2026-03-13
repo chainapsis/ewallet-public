@@ -1,7 +1,7 @@
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { PostLogBody, PostLogResponse } from "@oko-wallet/oko-types/log";
 import type { Logger } from "winston";
 import { z } from "zod";
-import type { PostLogBody, PostLogResponse } from "@oko-wallet/oko-types/log";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 
 export function ingestLog(
   log: PostLogBody,

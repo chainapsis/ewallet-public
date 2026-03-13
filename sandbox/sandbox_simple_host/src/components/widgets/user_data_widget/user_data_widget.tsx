@@ -1,4 +1,4 @@
-import { type FC } from "react";
+import type { FC } from "react";
 
 import styles from "./user_data_widget.module.scss";
 

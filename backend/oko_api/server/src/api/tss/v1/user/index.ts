@@ -1,39 +1,39 @@
-import { Pool } from "pg";
-import type { Logger } from "winston";
+import type { Bytes33 } from "@oko-wallet/bytes";
+import { getKeyShareNodeMeta } from "@oko-wallet/oko-pg-interface/key_share_node_meta";
+import {
+  getActiveKSNodes,
+  getKSNodesByServerUrl,
+  getWalletKSNodesByWalletId,
+  upsertWalletKSNodes,
+} from "@oko-wallet/oko-pg-interface/ks_nodes";
+import {
+  getUserByEmailAndAuthType,
+  updateUserMetadata,
+} from "@oko-wallet/oko-pg-interface/oko_users";
 import {
   getActiveWalletByUserIdAndCurveType,
   getWalletByPublicKey,
 } from "@oko-wallet/oko-pg-interface/oko_wallets";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
+import type {
+  WalletKSNodeStatus,
+  WalletKSNodeWithNodeNameAndServerUrl,
+} from "@oko-wallet/oko-types/tss";
 import type {
   CheckEmailResponse,
   ReshareReason,
   SignInResponse,
   User,
 } from "@oko-wallet/oko-types/user";
-import type { AuthType } from "@oko-wallet/oko-types/auth";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
-import {
-  getUserByEmailAndAuthType,
-  updateUserMetadata,
-} from "@oko-wallet/oko-pg-interface/oko_users";
-import {
-  getActiveKSNodes,
-  getWalletKSNodesByWalletId,
-  getKSNodesByServerUrl,
-  upsertWalletKSNodes,
-} from "@oko-wallet/oko-pg-interface/ks_nodes";
-import type {
-  WalletKSNodeWithNodeNameAndServerUrl,
-  WalletKSNodeStatus,
-} from "@oko-wallet/oko-types/tss";
-import { getKeyShareNodeMeta } from "@oko-wallet/oko-pg-interface/key_share_node_meta";
-import type { Wallet } from "@oko-wallet/oko-types/wallets";
 import type { NodeNameAndEndpoint } from "@oko-wallet/oko-types/user_key_share";
-import type { Bytes33 } from "@oko-wallet/bytes";
+import type { Wallet } from "@oko-wallet/oko-types/wallets";
+import type { Pool } from "pg";
+import type { Logger } from "winston";
 
+import { saveUserCustomerConnection } from "@oko-wallet-api/api/tss/connection";
 import { generateUserToken } from "@oko-wallet-api/api/tss/keplr_auth";
 import { checkKeyShareFromKSNodes } from "@oko-wallet-api/api/tss/ks_node";
-import { saveUserCustomerConnection } from "@oko-wallet-api/api/tss/connection";
 
 export async function signIn(
   db: Pool,
@@ -124,10 +124,9 @@ export async function signIn(
         logger,
         getUserRes.data.user_id,
         customerId,
-      )
-        .catch((err) => {
-          logger.error(`signIn error inserting user-customer connection: ${err}`);
-        });
+      ).catch((err) => {
+        logger.error(`signIn error inserting user-customer connection: ${err}`);
+      });
     }
 
     return {

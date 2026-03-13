@@ -1,9 +1,9 @@
-import { createContext, useEffect, useState } from "react";
 import {
   OkoEthWallet,
   type OkoEthWalletInterface,
 } from "@oko-wallet/oko-sdk-eth";
-import { Address } from "viem";
+import { createContext, useEffect, useState } from "react";
+import type { Address } from "viem";
 
 interface OkoEvmProviderValues {
   isReady: boolean;

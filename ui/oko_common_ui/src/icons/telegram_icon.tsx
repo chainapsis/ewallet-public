@@ -1,4 +1,4 @@
-import { type FC } from "react";
+import type { FC } from "react";
 
 export const TelegramIcon: FC<TelegramIconProps> = ({ size = 20 }) => {
   return (

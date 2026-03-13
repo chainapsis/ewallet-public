@@ -4,11 +4,11 @@ import { usePublicClient } from "wagmi";
 
 import { useSelectedNetwork } from "@oko-wallet-sandbox-evm/hooks/scaffold-eth";
 import {
-  Contract,
+  type Contract,
   ContractCodeStatus,
-  ContractName,
-  UseDeployedContractConfig,
+  type ContractName,
   contracts,
+  type UseDeployedContractConfig,
 } from "@oko-wallet-sandbox-evm/utils/scaffold-eth/contract";
 
 type DeployedContractData<TContractName extends ContractName> = {
@@ -60,7 +60,9 @@ export function useDeployedContractInfo<TContractName extends ContractName>(
   useEffect(() => {
     const checkContractDeployment = async () => {
       try {
-        if (!isMounted() || !publicClient) return;
+        if (!isMounted() || !publicClient) {
+          return;
+        }
 
         if (!deployedContract) {
           setStatus(ContractCodeStatus.NOT_FOUND);

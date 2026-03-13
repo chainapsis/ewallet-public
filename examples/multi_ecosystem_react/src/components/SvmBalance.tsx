@@ -1,5 +1,5 @@
+import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { useQuery } from "@tanstack/react-query";
-import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 import useSvm from "@/oko/useSvm";
 

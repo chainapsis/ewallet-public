@@ -27,7 +27,7 @@ export const AccountInfoWidget: FC<AccountInfoWidgetProps> = ({
   type,
   email,
   publicKeySecp256k1,
-  publicKeyEd25519,
+  publicKeyEd25519: _publicKeyEd25519,
   name,
   onSignOut,
 }) => {
@@ -75,7 +75,11 @@ export const AccountInfoWidget: FC<AccountInfoWidgetProps> = ({
         <Spacing height={8} />
 
         <div className={styles.signOutRow}>
-          <button type="button" className={styles.signOutButton} onClick={onSignOut}>
+          <button
+            type="button"
+            className={styles.signOutButton}
+            onClick={onSignOut}
+          >
             <Typography
               tagType="span"
               size="sm"

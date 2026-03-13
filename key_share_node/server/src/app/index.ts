@@ -1,13 +1,13 @@
+import cors from "cors";
 import express from "express";
 import helmet from "helmet";
-import cors from "cors";
 import morgan from "morgan";
 
+import { rateLimitMiddleware } from "@oko-wallet-ksn-server/middlewares";
 import { installSwaggerDocs } from "@oko-wallet-ksn-server/openapi";
 import { registry } from "@oko-wallet-ksn-server/openapi/doc";
 import { OkResponseSchema } from "@oko-wallet-ksn-server/openapi/schema";
 import { setRoutes } from "@oko-wallet-ksn-server/routes";
-import { rateLimitMiddleware } from "@oko-wallet-ksn-server/middlewares";
 
 export function makeApp() {
   const app = express();
@@ -49,7 +49,8 @@ export function makeApp() {
       },
     },
   });
-  app.get<{}, string>("/", async (req, res) => {
+  // biome-ignore lint/complexity/noBannedTypes: Express standard generic pattern
+  app.get<{}, string>("/", async (_req, res) => {
     res.send("Ok");
   });
 

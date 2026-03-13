@@ -1,8 +1,8 @@
 import { render } from "preact";
 
+import { resolveTheme } from "./hooks/use_theme";
 import { SignInModal } from "./signin_modal";
 import { modalStyles } from "./styles";
-import { resolveTheme } from "./hooks/use_theme";
 import type { SignInModalOptions } from "./types";
 
 const SIGNIN_MODAL_CONTAINER_ID = "oko-signin-modal-root";

@@ -1,8 +1,8 @@
 import type { OkoWalletMsgGetPublicKeyEd25519Ack } from "@oko-wallet/oko-sdk-core";
 
 import { OKO_SDK_TARGET } from "./target";
-import { useAppState } from "@oko-wallet-attached/store/app";
 import type { MsgEventContext } from "./types";
+import { useAppState } from "@oko-wallet-attached/store/app";
 
 export async function handleGetPublicKeyEd25519(ctx: MsgEventContext) {
   const { port, hostOrigin } = ctx;

@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
-import type { Result } from "@oko-wallet/stdlib-js";
 import type { OAuthPayload } from "@oko-wallet/oko-sdk-core";
 import { RedirectUriSearchParamsKey } from "@oko-wallet/oko-sdk-core";
+import type { Result } from "@oko-wallet/stdlib-js";
+import { useEffect, useState } from "react";
 
 import type { HandleCallbackError } from "./types";
-import { postLog } from "@oko-wallet-attached/requests/logging";
-import { errorToLog } from "@oko-wallet-attached/logging/error";
-import { sendOAuthPayloadToEmbeddedWindow } from "@oko-wallet-attached/components/oauth_callback/send_oauth_payload";
 import { handleMobileRedirect } from "@oko-wallet-attached/components/oauth_callback/handle_mobile_redirect";
+import { sendOAuthPayloadToEmbeddedWindow } from "@oko-wallet-attached/components/oauth_callback/send_oauth_payload";
+import { errorToLog } from "@oko-wallet-attached/logging/error";
+import { postLog } from "@oko-wallet-attached/requests/logging";
 
 export function useGoogleCallback() {
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +61,9 @@ export async function handleGoogleCallback(): Promise<
     access_token: accessToken,
     id_token: idToken,
   });
-  if (mobileRedirected) return { success: true, data: void 0 };
+  if (mobileRedirected) {
+    return { success: true, data: void 0 };
+  }
 
   const apiKey: string = oauthState.apiKey;
   const targetOrigin: string = oauthState.targetOrigin;

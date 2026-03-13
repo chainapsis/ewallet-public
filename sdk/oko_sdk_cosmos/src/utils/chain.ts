@@ -1,9 +1,9 @@
+import type { ChainInfo } from "@keplr-wallet/types";
 import type {
-  OkoWalletMsgGetCosmosChainInfo,
   OkoWalletInterface,
+  OkoWalletMsgGetCosmosChainInfo,
 } from "@oko-wallet/oko-sdk-core";
 import type { Result } from "@oko-wallet/stdlib-js";
-import type { ChainInfo } from "@keplr-wallet/types";
 
 type SendGetCosmosChainInfoError =
   | { type: "wrong_ack_message_type" }

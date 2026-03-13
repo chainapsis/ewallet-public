@@ -1,5 +1,5 @@
-import { type FC } from "react";
 import cn from "classnames";
+import type { FC } from "react";
 
 import styles from "./table.module.scss";
 

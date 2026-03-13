@@ -1,17 +1,17 @@
-import type { FC } from "react";
+import { Button } from "@oko-wallet/oko-common-ui/button";
 import { ErrorIcon } from "@oko-wallet/oko-common-ui/icons/error_icon";
+import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
-import { Button } from "@oko-wallet/oko-common-ui/button";
+import type { FC } from "react";
 
 import styles from "./unsupported_chain_modal.module.scss";
-import { CommonModal } from "@oko-wallet-attached/components/modal_variants/common/common_modal";
 import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
+import { CommonModal } from "@oko-wallet-attached/components/modal_variants/common/common_modal";
+import { SignWithOkoBox } from "@oko-wallet-attached/components/sign_with_oko_box/sign_with_oko_box";
+import type { AppError } from "@oko-wallet-attached/errors";
 import { useAppState } from "@oko-wallet-attached/store/app";
 import { useMemoryState } from "@oko-wallet-attached/store/memory";
-import type { AppError } from "@oko-wallet-attached/errors";
-import { SignWithOkoBox } from "@oko-wallet-attached/components/sign_with_oko_box/sign_with_oko_box";
 
 export const UnsupportedChainModal: FC<ErrorModalProps> = ({
   chainName,
@@ -35,7 +35,10 @@ export const UnsupportedChainModal: FC<ErrorModalProps> = ({
         <div className={styles.closeButton} onClick={handleClickClose}>
           <XCloseIcon size={20} color="var(--fg-quaternary)" />
         </div>
-        <div data-scroll-container className={styles.modalInnerContentContainer}>
+        <div
+          data-scroll-container
+          className={styles.modalInnerContentContainer}
+        >
           <div className={styles.errorIconContainer}>
             <ErrorIcon size={23} color="var(--fg-warning-primary)" />
             <div className={styles.ring1} />

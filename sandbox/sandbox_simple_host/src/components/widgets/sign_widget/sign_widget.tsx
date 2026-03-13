@@ -1,4 +1,4 @@
-import { type ReactElement, useState, type FC } from "react";
+import { type FC, type ReactElement, useState } from "react";
 
 import { MockDappModal } from "@/components/widgets/sign_widget/mock_dapp_modal/mock_dapp_modal";
 import styles from "@/components/widgets/sign_widget/sign_widget.module.scss";
@@ -40,9 +40,11 @@ export const SignWidgetContent: FC<SignWidgetInnerProps> = ({
           <Description signType={signType} />
         )}
 
-        <button onClick={signButtonOnClick}>Sign</button>
+        <button type="button" onClick={signButtonOnClick}>
+          Sign
+        </button>
         {!hideDappModalButton && (
-          <button onClick={onOpenModal ?? signButtonOnClick}>
+          <button type="button" onClick={onOpenModal ?? signButtonOnClick}>
             Sign with dapp modal
           </button>
         )}

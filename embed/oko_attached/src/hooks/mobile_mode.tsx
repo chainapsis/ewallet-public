@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect } from "react";
 import type { FC, PropsWithChildren } from "react";
+import { createContext, useContext, useEffect } from "react";
 
 const MobileModeContext = createContext(false);
 

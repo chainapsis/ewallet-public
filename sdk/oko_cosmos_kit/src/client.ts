@@ -1,13 +1,13 @@
 import type {
+  AminoSignResponse,
   OfflineAminoSigner,
   StdSignature,
   StdSignDoc,
-  AminoSignResponse,
 } from "@cosmjs/amino";
 import type {
   Algo,
-  OfflineDirectSigner,
   DirectSignResponse,
+  OfflineDirectSigner,
 } from "@cosmjs/proto-signing";
 import type {
   ChainRecord,
@@ -18,7 +18,7 @@ import type {
   WalletAccount,
   WalletClient,
 } from "@cosmos-kit/core";
-import { BroadcastMode } from "@keplr-wallet/types";
+import type { BroadcastMode } from "@keplr-wallet/types";
 import type { OkoCosmosWalletInterface } from "@oko-wallet/oko-sdk-cosmos";
 
 export class OkoWalletClient implements WalletClient {

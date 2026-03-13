@@ -1,14 +1,14 @@
 import {
+  convertChainInfoToRpcChain,
+  DEFAULT_CHAIN_ID,
+  sendGetEthChainInfo,
+} from "@oko-wallet-sdk-eth/chains";
+import {
   OkoEIP1193Provider,
   type OkoEthRpcChain,
 } from "@oko-wallet-sdk-eth/provider";
-import {
-  DEFAULT_CHAIN_ID,
-  sendGetEthChainInfo,
-  convertChainInfoToRpcChain,
-} from "@oko-wallet-sdk-eth/chains";
-import { parseChainId } from "@oko-wallet-sdk-eth/utils";
 import type { OkoEthWalletInterface } from "@oko-wallet-sdk-eth/types";
+import { parseChainId } from "@oko-wallet-sdk-eth/utils";
 
 export async function getEthereumProvider(
   this: OkoEthWalletInterface,

@@ -1,14 +1,13 @@
-import request from "supertest";
-import type { AuthType } from "@oko-wallet/oko-types/auth";
-import { runKeygenCentralizedEd25519 } from "@oko-wallet/teddsa-addon/src/server";
-
-import { createTestContext, type TestContext } from "@e2e/utils/test_context";
 import {
-  generateSessionId,
-  generateClientKeypair,
   computeIdTokenHash,
   createRevealSignature,
+  generateClientKeypair,
+  generateSessionId,
 } from "@e2e/utils/signature";
+import { createTestContext, type TestContext } from "@e2e/utils/test_context";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
+import { runKeygenCentralizedEd25519 } from "@oko-wallet/teddsa-addon/src/server";
+import request from "supertest";
 
 describe("e2e_test_add_ed25519", () => {
   let ctx: TestContext;
@@ -432,7 +431,7 @@ describe("e2e_test_add_ed25519", () => {
 
     // First success: register ed25519 on KSNs + keygen_ed25519
     const edKeygen = runKeygenCentralizedEd25519();
-    const edKeygen1 = edKeygen.keygen_outputs[0];
+    const _edKeygen1 = edKeygen.keygen_outputs[0];
     const edKeygen2 = edKeygen.keygen_outputs[1];
     const edPkHex = Buffer.from(edKeygen.public_key).toString("hex");
 

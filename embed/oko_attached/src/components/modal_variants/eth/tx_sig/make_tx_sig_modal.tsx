@@ -1,21 +1,21 @@
-import { type FC } from "react";
-import type { MakeTxSignSigData } from "@oko-wallet/oko-sdk-core";
+import { Button } from "@oko-wallet/oko-common-ui/button";
 import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
-import { Button } from "@oko-wallet/oko-common-ui/button";
+import type { MakeTxSignSigData } from "@oko-wallet/oko-sdk-core";
 import cn from "classnames";
+import type { FC } from "react";
 
-import styles from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_signature_modal.module.scss";
-import { CommonModal } from "@oko-wallet-attached/components/modal_variants/common/common_modal";
-import { DemoView } from "@oko-wallet-attached/components/modal_variants/common/make_signature/demo_view";
-import { useTxSigModal } from "./hooks/use_tx_sig_modal";
 import { EthereumTxFee } from "./eth_tx_fee";
 import { EthereumTxSignatureContent } from "./ethereum_tx_signature_content";
 import { useEthereumTxActions } from "./hooks/use_ethereum_tx_actions";
-import { trackTxButtonEvent } from "@oko-wallet-attached/analytics/events";
-import { SignWithOkoBox } from "@oko-wallet-attached/components/sign_with_oko_box/sign_with_oko_box";
-import { SponsoredFee, BaseSponsorshipBackground } from "./sponsored_fee";
+import { useTxSigModal } from "./hooks/use_tx_sig_modal";
+import { BaseSponsorshipBackground, SponsoredFee } from "./sponsored_fee";
 import sponsoredStyles from "./sponsored_fee/sponsored_modal.module.scss";
+import { trackTxButtonEvent } from "@oko-wallet-attached/analytics/events";
+import { CommonModal } from "@oko-wallet-attached/components/modal_variants/common/common_modal";
+import { DemoView } from "@oko-wallet-attached/components/modal_variants/common/make_signature/demo_view";
+import styles from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_signature_modal.module.scss";
+import { SignWithOkoBox } from "@oko-wallet-attached/components/sign_with_oko_box/sign_with_oko_box";
 
 export const MakeTxSigModal: FC<MakeTxSigModalProps> = ({
   getIsAborted,
@@ -89,12 +89,20 @@ export const MakeTxSigModal: FC<MakeTxSigModalProps> = ({
           <BaseSponsorshipBackground isError={isError} theme={theme} />
         )}
 
-        <div className={cn(styles.modalContent, showSponsorship && sponsoredStyles.content)}>
+        <div
+          className={cn(
+            styles.modalContent,
+            showSponsorship && sponsoredStyles.content,
+          )}
+        >
           <div className={styles.closeButton} onClick={handleRejectClick}>
             <XCloseIcon size={20} color="var(--fg-quaternary)" />
           </div>
 
-          <div data-scroll-container className={styles.modalInnerContentContainer}>
+          <div
+            data-scroll-container
+            className={styles.modalInnerContentContainer}
+          >
             <EthereumTxSignatureContent
               payload={data.payload}
               simulatedTransaction={simulatedTransaction}

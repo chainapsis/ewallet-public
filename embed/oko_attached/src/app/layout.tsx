@@ -1,6 +1,6 @@
-import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Suspense } from "react";
 
 import "@oko-wallet/oko-common-ui/styles/colors.scss";
 import "@oko-wallet/oko-common-ui/styles/typography.scss";

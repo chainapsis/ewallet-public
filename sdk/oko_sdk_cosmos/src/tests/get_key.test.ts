@@ -1,16 +1,16 @@
-import { describe, it, expect, jest, beforeEach } from "@jest/globals";
+import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import type { ChainInfo } from "@keplr-wallet/types";
 
 import { getKey } from "@oko-wallet-sdk-cosmos/methods/get_key";
 import {
+  cosmosAddress,
+  cosmosHubChainInfo,
   cosmosPublicKey,
-  initiaPublicKey,
   expectedCosmosBech32Address,
   expectedInitiaBech32Address,
-  cosmosHubChainInfo,
-  initiaChainInfo,
-  cosmosAddress,
   initiaAddress,
+  initiaChainInfo,
+  initiaPublicKey,
 } from "@oko-wallet-sdk-cosmos/tests/test-data";
 import type { OkoCosmosWalletInterface } from "@oko-wallet-sdk-cosmos/types";
 
@@ -152,7 +152,7 @@ describe("getKey", () => {
   it("should verify key structure for ethereum-compatible chain", async () => {
     mockGetPublicKey.mockResolvedValue(initiaPublicKey);
 
-    const result = await getKey.call(mockOkoCosmos, "interwoven-1");
+    const _result = await getKey.call(mockOkoCosmos, "interwoven-1");
 
     // Verify ethereum-specific properties
     // expect(result.algo).toBe("ethsecp256k1");

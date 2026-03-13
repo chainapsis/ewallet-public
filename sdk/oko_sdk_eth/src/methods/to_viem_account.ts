@@ -1,8 +1,8 @@
 import { serializeTypedData } from "viem";
 
 import type {
-  OkoEthWalletInterface,
   EthSignParams,
+  OkoEthWalletInterface,
   OkoViemAccount,
 } from "@oko-wallet-sdk-eth/types";
 import { toRpcTransactionRequest } from "@oko-wallet-sdk-eth/utils";

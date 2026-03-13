@@ -1,22 +1,22 @@
-import { Participant } from "@oko-wallet/tecdsa-interface";
-import type {
-  SignOutput,
-  TECDSAClientState,
-  TECDSAServerState,
-} from "@oko-wallet/tecdsa-interface";
-import {
-  arrayify,
-  computePublicKey,
-  keccak256,
-  hexZeroPad,
-} from "ethers/lib/utils";
 import {
   computeAddress,
   recoverAddress,
   serialize,
   type UnsignedTransaction,
 } from "@ethersproject/transactions";
+import type {
+  SignOutput,
+  TECDSAClientState,
+  TECDSAServerState,
+} from "@oko-wallet/tecdsa-interface";
+import { Participant } from "@oko-wallet/tecdsa-interface";
 import { BigNumber } from "ethers";
+import {
+  arrayify,
+  computePublicKey,
+  hexZeroPad,
+  keccak256,
+} from "ethers/lib/utils";
 
 import {
   runKeygenClientCentralized,

@@ -24,7 +24,9 @@ export function tryMobileOsBrowserRedirect(params: {
     const redirectScheme = sessionStorage.getItem("oko_mobile_redirect_scheme");
     const apiKey = sessionStorage.getItem("oko_mobile_api_key");
 
-    if (!redirectScheme) return false;
+    if (!redirectScheme) {
+      return false;
+    }
 
     redirectToMobileLoginComplete({
       provider: params.provider,

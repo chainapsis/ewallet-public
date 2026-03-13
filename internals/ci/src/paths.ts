@@ -89,6 +89,11 @@ export const paths = (function () {
     "../../../backend/oko_pg_interface",
   );
 
+  const attached_proxy_web = path.join(
+    __dirname,
+    "../../../apps/attached_proxy_web",
+  );
+
   const oko_attached = path.join(__dirname, "../../../embed/oko_attached");
 
   const oko_admin_web = path.join(__dirname, "../../../apps/oko_admin_web/");
@@ -188,6 +193,7 @@ export const paths = (function () {
     oko_api_server,
     admin_api,
     ct_dashboard_api,
+    attached_proxy_web,
     dockerfiles,
     dockerfiles_oko,
   };

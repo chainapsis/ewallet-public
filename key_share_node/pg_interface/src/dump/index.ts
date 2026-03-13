@@ -1,5 +1,4 @@
 import { spawnSync } from "node:child_process";
-import chalk from "chalk";
 import fs from "node:fs";
 import { join } from "node:path";
 import type { Result } from "@oko-wallet/stdlib-js";

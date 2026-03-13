@@ -1,23 +1,23 @@
 import { jest } from "@jest/globals";
-import { Pool } from "pg";
-import type { Logger } from "winston";
-import { createPgConn } from "@oko-wallet/postgres-lib";
-import { createUser } from "@oko-wallet/oko-pg-interface/oko_users";
-import type { WalletStatus } from "@oko-wallet/oko-types/wallets";
-import { type KeyShareNode } from "@oko-wallet/oko-types/tss";
+import { insertKeyShareNodeMeta } from "@oko-wallet/oko-pg-interface/key_share_node_meta";
 import {
-  insertKSNode,
   createWalletKSNodes,
+  insertKSNode,
 } from "@oko-wallet/oko-pg-interface/ks_nodes";
+import { createUser } from "@oko-wallet/oko-pg-interface/oko_users";
 import {
   createWallet,
   updateWalletStatus,
 } from "@oko-wallet/oko-pg-interface/oko_wallets";
-import { insertKeyShareNodeMeta } from "@oko-wallet/oko-pg-interface/key_share_node_meta";
+import type { KeyShareNode } from "@oko-wallet/oko-types/tss";
+import type { WalletStatus } from "@oko-wallet/oko-types/wallets";
+import { createPgConn } from "@oko-wallet/postgres-lib";
+import type { Pool } from "pg";
+import type { Logger } from "winston";
 
-import { resetPgDatabase } from "@oko-wallet-api/testing/database";
-import { testPgConfig } from "@oko-wallet-api/database/test_config";
 import { checkEmail, signIn } from "@oko-wallet-api/api/tss/v1/user";
+import { testPgConfig } from "@oko-wallet-api/database/test_config";
+import { resetPgDatabase } from "@oko-wallet-api/testing/database";
 
 const mockLogger = {
   error: jest.fn(),
@@ -96,7 +96,9 @@ describe("user_test", () => {
 
       expect(signInRes.success).toBe(false);
       expect(signInRes.code).toBe("USER_NOT_FOUND");
-      expect(signInRes.msg).toBe(`User not found: ${email} (auth_type: google)`);
+      expect(signInRes.msg).toBe(
+        `User not found: ${email} (auth_type: google)`,
+      );
     });
 
     it("should return WALLET_NOT_FOUND when user exists but wallet does not", async () => {

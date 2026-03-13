@@ -1,4 +1,4 @@
-import { Pool } from "pg";
+import { Bytes, type Bytes33, type Bytes64 } from "@oko-wallet/bytes";
 import {
   createKeyShare,
   createUser,
@@ -7,15 +7,15 @@ import {
   getUserByAuthTypeAndUserAuthId,
   getWalletByPublicKey,
 } from "@oko-wallet/ksn-pg-interface";
-import { Bytes, type Bytes33, type Bytes64 } from "@oko-wallet/bytes";
+import type { Pool } from "pg";
 
-import { connectPG, resetPgDatabase } from "@oko-wallet-ksn-server/database";
-import { testPgConfig } from "@oko-wallet-ksn-server/database/test_config";
 import {
   checkKeyShare,
   getKeyShare,
   registerKeyShare,
 } from "@oko-wallet-ksn-server/api/key_share";
+import { connectPG, resetPgDatabase } from "@oko-wallet-ksn-server/database";
+import { testPgConfig } from "@oko-wallet-ksn-server/database/test_config";
 import { decryptDataAsync } from "@oko-wallet-ksn-server/encrypt";
 
 const TEST_ENC_SECRET = "test_enc_secret";
@@ -123,7 +123,7 @@ describe("key_share_v1_test", () => {
       }
 
       const decryptedShare = await decryptDataAsync(
-        getKeyShareRes.data?.enc_share.toString("utf-8")!,
+        getKeyShareRes.data!.enc_share.toString("utf-8"),
         TEST_ENC_SECRET,
       );
 

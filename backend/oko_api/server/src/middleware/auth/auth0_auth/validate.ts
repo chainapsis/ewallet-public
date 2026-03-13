@@ -1,6 +1,6 @@
+import type { Result } from "@oko-wallet/stdlib-js";
 import { createPublicKey, type JsonWebKey } from "crypto";
 import jwt, { type JwtHeader, type JwtPayload } from "jsonwebtoken";
-import type { Result } from "@oko-wallet/stdlib-js";
 
 interface Auth0IdTokenPayload extends JwtPayload {
   email?: string;

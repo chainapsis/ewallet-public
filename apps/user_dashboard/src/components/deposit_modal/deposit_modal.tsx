@@ -133,7 +133,6 @@ export const DepositModal: FC<DepositModalProps> = ({ renderTrigger }) => {
       {renderTrigger({ onOpen })}
 
       {isOpen && (
-        /* biome-ignore lint/a11y/noStaticElementInteractions: for mouse user convenience */
         <div
           className={cn(styles.modalBackground, {
             [styles.hidden]: isHidden,

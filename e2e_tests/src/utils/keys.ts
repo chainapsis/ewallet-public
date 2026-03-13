@@ -1,5 +1,5 @@
-import { Bytes } from "@oko-wallet/bytes";
 import type { Bytes as BytesType } from "@oko-wallet/bytes";
+import { Bytes } from "@oko-wallet/bytes";
 
 export interface ServerKeypair {
   privateKey: BytesType<32>;

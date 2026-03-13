@@ -1,30 +1,30 @@
-import { useState, useEffect } from "react";
+import type { Theme } from "@oko-wallet/oko-common-ui/theme";
+import type { OkoWalletMsgInit } from "@oko-wallet/oko-sdk-core";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
+import { UTM_CAMPAIGN, UTM_SOURCE } from "@oko-wallet/oko-types/referral";
 // import { useSearchParams } from "next/navigation";
 import type { SignInSilentlyResponse } from "@oko-wallet/oko-types/user";
-import type { AuthType } from "@oko-wallet/oko-types/auth";
-import type { OkoWalletMsgInit } from "@oko-wallet/oko-sdk-core";
-import type { Theme } from "@oko-wallet/oko-common-ui/theme";
-import { UTM_SOURCE, UTM_CAMPAIGN } from "@oko-wallet/oko-types/referral";
+import { useEffect, useState } from "react";
 
-import { initKeplrWasm } from "@oko-wallet-attached/wasm";
-import { useMemoryState } from "@oko-wallet-attached/store/memory";
-import { useAppState } from "@oko-wallet-attached/store/app";
-import {
-  makeAuthorizedOkoApiRequest,
-  TSS_V2_ENDPOINT,
-} from "@oko-wallet-attached/requests/oko_api";
 import { determineTheme, setColorScheme } from "./color_scheme";
-import { makeMsgHandler } from "@oko-wallet-attached/window_msgs";
-import { handleOAuthInfoPassV2 } from "@oko-wallet-attached/window_msgs/oauth_info_pass";
-import { OAUTH_BROADCAST_CHANNEL } from "@oko-wallet-attached/window_msgs/target";
-import type { MsgEventContext } from "@oko-wallet-attached/window_msgs/types";
+import { setUserId } from "@oko-wallet-attached/analytics/amplitude";
 import {
   errorToLog,
   initErrorLogging,
 } from "@oko-wallet-attached/logging/error";
 import { postLog } from "@oko-wallet-attached/requests/logging";
+import {
+  makeAuthorizedOkoApiRequest,
+  TSS_V2_ENDPOINT,
+} from "@oko-wallet-attached/requests/oko_api";
+import { useAppState } from "@oko-wallet-attached/store/app";
+import { useMemoryState } from "@oko-wallet-attached/store/memory";
+import { initKeplrWasm } from "@oko-wallet-attached/wasm";
+import { makeMsgHandler } from "@oko-wallet-attached/window_msgs";
+import { handleOAuthInfoPassV2 } from "@oko-wallet-attached/window_msgs/oauth_info_pass";
 import { sendMsgToWindow } from "@oko-wallet-attached/window_msgs/send";
-import { setUserId } from "@oko-wallet-attached/analytics/amplitude";
+import { OAUTH_BROADCAST_CHANNEL } from "@oko-wallet-attached/window_msgs/target";
+import type { MsgEventContext } from "@oko-wallet-attached/window_msgs/types";
 
 export function useInitializeApp() {
   const { setHostOrigin, setReferralInfo } = useMemoryState();
@@ -139,7 +139,7 @@ export function useInitializeApp() {
 
         const oldTheme = getTheme(hostOrigin);
         const themeResult = await determineTheme(hostOrigin, oldTheme);
-        let determinedThemeByCustomer = themeResult.theme;
+        const determinedThemeByCustomer = themeResult.theme;
 
         const isMobileParam = searchParams.get("mobile") === "true";
 

@@ -1,6 +1,6 @@
 import type { Bytes32, Bytes33 } from "@oko-wallet/bytes";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type { CheckKeyShareResponse } from "@oko-wallet/ksn-interface/key_share";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { CurveType } from "@oko-wallet/oko-types/crypto";
 

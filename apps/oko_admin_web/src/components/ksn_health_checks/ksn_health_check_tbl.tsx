@@ -1,9 +1,5 @@
 "use client";
 
-import { type FC } from "react";
-import { createColumnHelper, flexRender } from "@tanstack/react-table";
-import type { KSNodeHealthCheck } from "@oko-wallet/oko-types/tss";
-import type { WithTime } from "@oko-wallet/oko-types/aux_types";
 import {
   Table,
   TableBody,
@@ -12,6 +8,10 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@oko-wallet/oko-common-ui/table";
+import type { WithTime } from "@oko-wallet/oko-types/aux_types";
+import type { KSNodeHealthCheck } from "@oko-wallet/oko-types/tss";
+import { createColumnHelper, flexRender } from "@tanstack/react-table";
+import type { FC } from "react";
 
 import styles from "./ksn_health_check_tbl.module.scss";
 import {
@@ -35,14 +35,10 @@ const columns = [
 ];
 
 export const KSNHealthCheckTable: FC = () => {
-  const {
-    currentPage,
-    handlePageChange,
-    pagination,
-    onPaginationChange,
-  } = useTablePagination({
-    initialPageSize: 20,
-  });
+  const { currentPage, handlePageChange, pagination, onPaginationChange } =
+    useTablePagination({
+      initialPageSize: 20,
+    });
 
   const { data } = useKSNHealthChecks(pagination);
 
@@ -92,6 +88,7 @@ export const KSNHealthCheckTable: FC = () => {
       </div>
       <div className={styles.paginationWrapper}>
         <button
+          type="button"
           className={styles.navButton}
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={!hasPrev}
@@ -100,6 +97,7 @@ export const KSNHealthCheckTable: FC = () => {
         </button>
         <span className={styles.pageInfo}>Page {currentPage}</span>
         <button
+          type="button"
           className={styles.navButton}
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={!hasNext}

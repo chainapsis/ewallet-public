@@ -14,7 +14,7 @@ import { ViewChainsModal } from "./view_chains_modal";
 import { useGetChainInfos } from "@oko-wallet-demo-web/hooks/use_get_chain_infos";
 import { useAddresses } from "@oko-wallet-demo-web/hooks/wallet";
 
-export const AddressWidget: FC<AddressWidgetProps> = ({}) => {
+export const AddressWidget: FC<AddressWidgetProps> = () => {
   const [showModal, setShowModal] = useState(false);
   const { cosmosAddress, ethAddress, solanaAddress } = useAddresses();
 
@@ -78,4 +78,5 @@ export const AddressWidget: FC<AddressWidgetProps> = ({}) => {
   );
 };
 
-export interface AddressWidgetProps {}
+// biome-ignore lint/complexity/noBannedTypes: empty props type used as component interface
+export type AddressWidgetProps = {};

@@ -1,8 +1,8 @@
-import type { FC } from "react";
 import { Button } from "@oko-wallet/oko-common-ui/button";
 import { ArrowRightOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/arrow_right_outlined";
 import { BookOpenIcon } from "@oko-wallet/oko-common-ui/icons/book_open";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import type { FC } from "react";
 
 import { Widget } from "../widget_components";
 import styles from "./docs_widget.module.scss";

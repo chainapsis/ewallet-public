@@ -1,4 +1,4 @@
-type CreateOrEditKSNodeProps =
+export type CreateOrEditKSNodeProps =
   | {
       mode?: "create";
       nodeId?: undefined;

@@ -1,10 +1,10 @@
-import { type FC } from "react";
-import type { EthereumEip712SignPayload } from "@oko-wallet/oko-sdk-core";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
+import type { EthereumEip712SignPayload } from "@oko-wallet/oko-sdk-core";
+import type { FC } from "react";
 
-import { MetadataContent } from "@oko-wallet-attached/components/modal_variants/common/metadata_content/metadata_content";
-import { useEIP712Action } from "./hooks/use_eip712_action";
 import { EIP712Actions } from "./actions/actions";
+import { useEIP712Action } from "./hooks/use_eip712_action";
+import { MetadataContent } from "@oko-wallet-attached/components/modal_variants/common/metadata_content/metadata_content";
 
 interface EthereumEip712SignatureContentProps {
   payload: EthereumEip712SignPayload;

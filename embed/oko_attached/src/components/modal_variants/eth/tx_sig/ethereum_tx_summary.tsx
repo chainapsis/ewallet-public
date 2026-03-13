@@ -1,16 +1,16 @@
-import { type FC, type ReactNode, useState } from "react";
-import type { EthereumTxSignPayload } from "@oko-wallet/oko-sdk-core";
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import { ChevronRightIcon } from "@oko-wallet/oko-common-ui/icons/chevron_right";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import type { EthereumTxSignPayload } from "@oko-wallet/oko-sdk-core";
+import { type FC, type ReactNode, useState } from "react";
 import type { RpcTransactionRequest } from "viem";
 
-import styles from "./ethereum_tx_summary.module.scss";
+import { Actions } from "./actions/actions";
 import type { RenderContext } from "./actions/types";
+import styles from "./ethereum_tx_summary.module.scss";
 import { useEthereumTxActions } from "./hooks/use_ethereum_tx_actions";
+import { useTrackTxSummaryView } from "@oko-wallet-attached/analytics/events";
 import { MakeSignatureRawCodeBlock } from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_sig_modal_code_block";
 import { MakeSignatureRawCodeBlockContainer } from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_sig_modal_code_block_container";
-import { Actions } from "./actions/actions";
-import { useTrackTxSummaryView } from "@oko-wallet-attached/analytics/events";
 
 export interface EthereumTxSummaryProps {
   payload: EthereumTxSignPayload;
@@ -69,7 +69,10 @@ export const EthereumTxSummary: FC<EthereumTxSummaryProps> = ({
           <Typography color="tertiary" size="xs" weight="medium">
             {isRawView ? "Smart View" : "Raw View"}
           </Typography>
-          <ChevronRightIcon className={styles.txSummaryHeaderRightIcon} color="var(--fg-tertiary)" />
+          <ChevronRightIcon
+            className={styles.txSummaryHeaderRightIcon}
+            color="var(--fg-tertiary)"
+          />
         </div>
       </div>
       {content}

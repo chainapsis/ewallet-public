@@ -203,11 +203,18 @@ async function getCosmosBalances(
             const normalizedDenom = normalizeIBCDenom(bal.denom);
             const currency = assetMetaMap.get(normalizedDenom);
             const osmosisAsset = osmosisAssets.byDenom.get(bal.denom);
-            if (currency && osmosisAsset && osmosisAsset.symbol !== currency.coinDenom) {
+            if (
+              currency &&
+              osmosisAsset &&
+              osmosisAsset.symbol !== currency.coinDenom
+            ) {
               assetMetaMap.set(normalizedDenom, {
                 ...currency,
                 coinDenom: osmosisAsset.symbol,
-                coinImageUrl: currency.coinImageUrl ?? osmosisAsset.logoURIs?.svg ?? osmosisAsset.logoURIs?.png,
+                coinImageUrl:
+                  currency.coinImageUrl ??
+                  osmosisAsset.logoURIs?.svg ??
+                  osmosisAsset.logoURIs?.png,
               });
             }
           }
@@ -221,13 +228,19 @@ async function getCosmosBalances(
     const missingPriceIds: string[] = [];
     for (const bal of factoryBalances) {
       const currency = factoryMap.get(bal.denom);
-      if (currency?.coinGeckoId && priceMap[currency.coinGeckoId] === undefined) {
+      if (
+        currency?.coinGeckoId &&
+        priceMap[currency.coinGeckoId] === undefined
+      ) {
         missingPriceIds.push(currency.coinGeckoId);
       }
     }
     for (const bal of otherUnknowns) {
       const currency = assetMetaMap.get(normalizeIBCDenom(bal.denom));
-      if (currency?.coinGeckoId && priceMap[currency.coinGeckoId] === undefined) {
+      if (
+        currency?.coinGeckoId &&
+        priceMap[currency.coinGeckoId] === undefined
+      ) {
         missingPriceIds.push(currency.coinGeckoId);
       }
     }
@@ -253,7 +266,13 @@ async function getCosmosBalances(
       const currency = factoryMap.get(bal.denom);
       if (currency) {
         results.push(
-          buildTokenBalance(chain, currency, bal.amount, cosmosAddress, mergedPriceMap),
+          buildTokenBalance(
+            chain,
+            currency,
+            bal.amount,
+            cosmosAddress,
+            mergedPriceMap,
+          ),
         );
       }
     }
@@ -261,7 +280,13 @@ async function getCosmosBalances(
       const currency = assetMetaMap.get(normalizeIBCDenom(bal.denom));
       if (currency) {
         results.push(
-          buildTokenBalance(chain, currency, bal.amount, cosmosAddress, mergedPriceMap),
+          buildTokenBalance(
+            chain,
+            currency,
+            bal.amount,
+            cosmosAddress,
+            mergedPriceMap,
+          ),
         );
       }
     }
@@ -320,10 +345,7 @@ async function getCw20Balances(
         cw20PriceMap[coinId] = data.usd;
       }
     } catch (error) {
-      console.error(
-        `Failed to fetch CW20 prices for ${chain.chainId}:`,
-        error,
-      );
+      console.error(`Failed to fetch CW20 prices for ${chain.chainId}:`, error);
     }
   }
 
@@ -601,7 +623,12 @@ async function fetchChainBalances(
 
   if (chain.cosmos && addresses.cosmos) {
     tasks.push(
-      getCosmosBalances(chain, addresses.cosmos, priceMap, resolveTokenMetadata).catch((error) => {
+      getCosmosBalances(
+        chain,
+        addresses.cosmos,
+        priceMap,
+        resolveTokenMetadata,
+      ).catch((error) => {
         console.error(
           `Failed to fetch Cosmos balances for ${chain.chainId}:`,
           error,

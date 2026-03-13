@@ -4,11 +4,11 @@ import type {
   ReshareKeyShareV2RequestBody,
 } from "@oko-wallet/ksn-interface/key_share";
 import type { KSNodeApiResponse } from "@oko-wallet/ksn-interface/response";
-import { type Response } from "express";
+import type { Response } from "express";
 
 import { reshareKeyShareV2 } from "@oko-wallet-ksn-server/api/key_share";
 import { ErrorCodeMap } from "@oko-wallet-ksn-server/error";
-import { type AuthenticatedRequest } from "@oko-wallet-ksn-server/middlewares";
+import type { AuthenticatedRequest } from "@oko-wallet-ksn-server/middlewares";
 import { registry } from "@oko-wallet-ksn-server/openapi/doc";
 import {
   ErrorResponseSchema,

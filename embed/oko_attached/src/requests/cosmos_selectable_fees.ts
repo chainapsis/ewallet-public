@@ -1,15 +1,14 @@
-import type { ChainInfo, Currency } from "@keplr-wallet/types";
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import type { ChainInfo, Currency, Msg } from "@keplr-wallet/types";
 import { CoinPretty, Dec } from "@keplr-wallet/unit";
 import { isEthereumCompatible } from "@oko-wallet/oko-sdk-cosmos";
-import type { Msg } from "@keplr-wallet/types";
 
-import { removeLastSlashIfIs } from "@oko-wallet-attached/utils/url";
-import { normalizeIBCDenom } from "@oko-wallet-attached/web3/cosmos/normalize_denom";
-import type { AssetMetaParams } from "@oko-wallet-attached/types/asset_meta";
 import { KEPLR_API_ENDPOINT } from "./endpoints";
 import { computeAmountInMsgs } from "@oko-wallet-attached/components/modal_variants/cosmos/tx_sig/compute_amout_in_msgs";
+import type { AssetMetaParams } from "@oko-wallet-attached/types/asset_meta";
 import type { UnpackedMsgForView } from "@oko-wallet-attached/types/cosmos_msg";
+import { removeLastSlashIfIs } from "@oko-wallet-attached/utils/url";
+import { normalizeIBCDenom } from "@oko-wallet-attached/web3/cosmos/normalize_denom";
 
 /**
  * Get selectable fees for Cosmos chains by features of chainInfo
@@ -388,6 +387,7 @@ export async function getAvailableSelectableFees(
 
         return isSufficientBalance;
       }
+      return false;
     });
 
     const insufficientBalanceFee =

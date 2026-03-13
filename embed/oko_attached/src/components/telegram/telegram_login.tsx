@@ -1,11 +1,11 @@
-import { useEffect, useMemo, type FC } from "react";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import { type FC, useEffect, useMemo } from "react";
 
-import { AttachedInitialized } from "@oko-wallet-attached/components/attached_initialized/attached_initialized";
-import { useMemoryState } from "@oko-wallet-attached/store/memory";
-import { TelegramLoginPopup } from "@oko-wallet-attached/components/telegram/telegram_login_popup";
-import { LoginPopupErrorView } from "@oko-wallet-attached/components/login_popup/login_popup_error_view";
 import styles from "./telegram_login.module.scss";
+import { AttachedInitialized } from "@oko-wallet-attached/components/attached_initialized/attached_initialized";
+import { LoginPopupErrorView } from "@oko-wallet-attached/components/login_popup/login_popup_error_view";
+import { TelegramLoginPopup } from "@oko-wallet-attached/components/telegram/telegram_login_popup";
+import { useMemoryState } from "@oko-wallet-attached/store/memory";
 
 export const TelegramLogin: FC = () => {
   useNotifyPopupReady();

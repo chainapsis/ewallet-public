@@ -1,6 +1,6 @@
 import type { KSNodeApiErrorResponse } from "@oko-wallet/ksn-interface/response";
-import type { Request, Response, NextFunction } from "express";
 import { pbkdf2, timingSafeEqual } from "crypto";
+import type { NextFunction, Request, Response } from "express";
 import { promisify } from "util";
 
 import { ErrorCodeMap } from "@oko-wallet-ksn-server/error";

@@ -1,6 +1,6 @@
 import type {
-  OperationType,
   ApiName,
+  OperationType,
 } from "@oko-wallet/ksn-interface/commit_reveal";
 
 export const ALLOWED_APIS: Record<OperationType, ApiName[]> = {

@@ -1,15 +1,15 @@
+import type { ChainInfo } from "@keplr-wallet/types";
 import type {
   OkoWalletMsgGetEthChainInfo,
   OkoWalletMsgGetEthChainInfoAck,
 } from "@oko-wallet/oko-sdk-core";
-import type { ChainInfo } from "@keplr-wallet/types";
 
-import {
-  getAllChainsCached,
-  filterEthChains,
-} from "@oko-wallet-attached/requests/chain_infos";
 import { OKO_SDK_TARGET } from "./target";
 import type { MsgEventContext } from "./types";
+import {
+  filterEthChains,
+  getAllChainsCached,
+} from "@oko-wallet-attached/requests/chain_infos";
 
 export async function handleGetEthChain(
   ctx: MsgEventContext,
@@ -35,7 +35,7 @@ export async function handleGetEthChain(
     if (chainId) {
       formattedChainId = chainId.startsWith("eip155:")
         ? chainId
-        : `eip155:${parseInt(chainId)}`;
+        : `eip155:${parseInt(chainId, 10)}`;
     }
 
     if (formattedChainId) {

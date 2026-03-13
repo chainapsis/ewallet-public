@@ -1,15 +1,15 @@
-import request from "supertest";
+import { randomBytes } from "node:crypto";
+import { Bytes } from "@oko-wallet/bytes";
+import { createPgConn } from "@oko-wallet/postgres-lib";
 import express from "express";
 import type { Pool } from "pg";
-import { Bytes } from "@oko-wallet/bytes";
-import { randomBytes } from "node:crypto";
+import request from "supertest";
 import { v4 as uuidv4 } from "uuid";
-import { createPgConn } from "@oko-wallet/postgres-lib";
 import winston from "winston";
 
+import { commitRevealCommit } from "./commit";
 import { testPgConfig } from "@oko-wallet-api/database/test_config";
 import { resetPgDatabase } from "@oko-wallet-api/testing/database";
-import { commitRevealCommit } from "./commit";
 
 // Mock keypair for testing
 const privateKeyRes = Bytes.fromHexString(

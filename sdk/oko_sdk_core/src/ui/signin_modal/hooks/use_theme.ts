@@ -1,6 +1,6 @@
-import { useState, useEffect } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 
-import type { SignInModalTheme, ResolvedTheme } from "../types";
+import type { ResolvedTheme, SignInModalTheme } from "../types";
 
 function getSystemTheme(): ResolvedTheme {
   if (

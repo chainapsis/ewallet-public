@@ -1,6 +1,6 @@
 import type {
-  OkoCosmosWalletInterface,
   OkoCosmosWalletEventHandler2,
+  OkoCosmosWalletInterface,
 } from "@oko-wallet-sdk-cosmos/types";
 
 export function on(

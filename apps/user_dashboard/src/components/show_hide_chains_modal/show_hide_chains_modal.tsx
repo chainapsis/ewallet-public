@@ -203,7 +203,6 @@ export const ShowHideChainsModal: FC<ShowHideChainsModalProps> = ({
       {renderTrigger({ onOpen })}
 
       {isOpen && (
-        /* biome-ignore lint/a11y/noStaticElementInteractions: for mouse user convenience */
         <div className={styles.modalBackground} onClick={onClose}>
           <div
             className={styles.modal}

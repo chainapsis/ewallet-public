@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-import { authTypeSchema, publicKeySchema, shareSchema } from "./key_share_v1";
-import { commitRevealRequestFieldsSchema } from "./commit_reveal";
 import { registry } from "../doc";
+import { commitRevealRequestFieldsSchema } from "./commit_reveal";
+import { authTypeSchema, publicKeySchema, shareSchema } from "./key_share_v1";
 
 // ============================================================================
 // Shared Schemas
@@ -247,4 +247,3 @@ export const ReshareKeyShareV2SuccessResponseSchema = registry.register(
       description: "Success response for key share reshare.",
     }),
 );
-

@@ -1,19 +1,18 @@
-import { Fragment, type FC } from "react";
-import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
-import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import { Skeleton } from "@oko-wallet/oko-common-ui/skeleton";
 import { ArrowUpRightIcon } from "@oko-wallet/oko-common-ui/icons/arrow_up_right";
+import { Skeleton } from "@oko-wallet/oko-common-ui/skeleton";
+import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import { Tooltip } from "@oko-wallet/oko-common-ui/tooltip";
+import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import { type FC, Fragment } from "react";
+import type { Address, Chain, TypedDataDefinition } from "viem";
 import { createPublicClient, getAddress, http, stringify } from "viem";
-import type { TypedDataDefinition, Address, Chain } from "viem";
 
 import styles from "./permit_action.module.scss";
-import { Collapsible } from "@oko-wallet-attached/components/collapsible/collapsible";
 import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
-import { CodeBlock } from "@oko-wallet-attached/components/code_block/code_block";
+import { Collapsible } from "@oko-wallet-attached/components/collapsible/collapsible";
+import { MakeSignatureRawCodeBlock } from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_sig_modal_code_block";
 import { useGetTokenMetadata } from "@oko-wallet-attached/web3/ethereum/queries";
 import { formatTokenAmount } from "@oko-wallet-attached/web3/ethereum/utils";
-import { MakeSignatureRawCodeBlock } from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_sig_modal_code_block";
 
 export interface PermitActionProps {
   spender: Address;

@@ -1,13 +1,13 @@
-import { type FunctionComponent as FC, type JSX } from "preact";
-import { useState, useEffect, useMemo } from "preact/hooks";
+import type { FunctionComponent as FC, JSX } from "preact";
+import { useEffect, useMemo, useState } from "preact/hooks";
 
-import type { SignInType } from "@oko-wallet-sdk-core/types/oauth";
-import type { SignInModalTheme, ProgressState } from "./types";
-import { useTheme } from "./hooks/use_theme";
 import { DefaultView } from "./components/default_view";
-import { SocialsView } from "./components/socials_view";
-import { ProgressView } from "./components/progress_view";
 import { CloseIcon } from "./components/icons";
+import { ProgressView } from "./components/progress_view";
+import { SocialsView } from "./components/socials_view";
+import { useTheme } from "./hooks/use_theme";
+import type { ProgressState, SignInModalTheme } from "./types";
+import type { SignInType } from "@oko-wallet-sdk-core/types/oauth";
 
 export interface SignInModalProps {
   onSelect: (provider: SignInType) => Promise<void>;

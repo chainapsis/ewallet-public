@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { isAddress, parseEther } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
-import { parseEther, isAddress } from "viem";
 
-import { useTransactor } from "@oko-wallet-sandbox-evm/hooks/scaffold-eth";
 import {
   AddressInput,
   EtherInput,
 } from "@oko-wallet-sandbox-evm/components/scaffold-eth/Input";
+import { useTransactor } from "@oko-wallet-sandbox-evm/hooks/scaffold-eth";
 
 export function NativeTransferWidget() {
   const { address } = useAccount();
@@ -67,7 +67,9 @@ export function NativeTransferWidget() {
   };
 
   const copyTxHash = async () => {
-    if (!txHash) return;
+    if (!txHash) {
+      return;
+    }
     try {
       await navigator.clipboard.writeText(txHash);
     } catch {}
@@ -110,6 +112,7 @@ export function NativeTransferWidget() {
         </div>
 
         <button
+          type="button"
           onClick={handleTransfer}
           disabled={
             !walletClient || !address || isLoading || !toAddress || !amount
@@ -134,10 +137,18 @@ export function NativeTransferWidget() {
               </code>
             </div>
             <div className="flex gap-2">
-              <button onClick={copyTxHash} className="btn btn-xs btn-outline">
+              <button
+                type="button"
+                onClick={copyTxHash}
+                className="btn btn-xs btn-outline"
+              >
                 Copy Hash
               </button>
-              <button onClick={resetForm} className="btn btn-xs btn-ghost">
+              <button
+                type="button"
+                onClick={resetForm}
+                className="btn btn-xs btn-ghost"
+              >
                 New Transfer
               </button>
             </div>

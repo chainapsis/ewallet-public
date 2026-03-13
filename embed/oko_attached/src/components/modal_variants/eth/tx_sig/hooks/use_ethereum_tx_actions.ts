@@ -1,28 +1,28 @@
+import type { EthereumTxSignPayload } from "@oko-wallet/oko-sdk-core";
 import { useEffect, useState } from "react";
 import {
   type Address,
+  createPublicClient,
   type DecodeFunctionDataReturnType,
   type Hex,
-  createPublicClient,
   hexToBigInt,
   http,
   isAddressEqual,
   maxUint256,
   zeroAddress,
 } from "viem";
-import type { EthereumTxSignPayload } from "@oko-wallet/oko-sdk-core";
 
+import type { EthTxAction } from "@oko-wallet-attached/components/modal_variants/eth/tx_sig/actions/types";
+import { validateArgsForFunction } from "@oko-wallet-attached/web3/ethereum/decoder";
+import { useSupportedEthChain } from "@oko-wallet-attached/web3/ethereum/hooks/use_supported_eth_chain";
 import {
   useDecodedCalldata,
   useSupportsERC20Interface,
 } from "@oko-wallet-attached/web3/ethereum/queries";
-import { validateArgsForFunction } from "@oko-wallet-attached/web3/ethereum/decoder";
-import type { EthTxAction } from "@oko-wallet-attached/components/modal_variants/eth/tx_sig/actions/types";
 import {
   findCurrencyByErc20Address,
   findNativeCurrencyWithFallback,
 } from "@oko-wallet-attached/web3/ethereum/utils";
-import { useSupportedEthChain } from "@oko-wallet-attached/web3/ethereum/hooks/use_supported_eth_chain";
 
 export function useEthereumTxActions(payload: EthereumTxSignPayload) {
   const rpcTxRequest = payload.data.transaction;

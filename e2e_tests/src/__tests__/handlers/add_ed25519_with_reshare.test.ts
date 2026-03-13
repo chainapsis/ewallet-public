@@ -1,14 +1,13 @@
-import request from "supertest";
-import type { AuthType } from "@oko-wallet/oko-types/auth";
-import { runKeygenCentralizedEd25519 } from "@oko-wallet/teddsa-addon/src/server";
-
-import { createTestContext, type TestContext } from "@e2e/utils/test_context";
 import {
-  generateSessionId,
-  generateClientKeypair,
   computeIdTokenHash,
   createRevealSignature,
+  generateClientKeypair,
+  generateSessionId,
 } from "@e2e/utils/signature";
+import { createTestContext, type TestContext } from "@e2e/utils/test_context";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
+import { runKeygenCentralizedEd25519 } from "@oko-wallet/teddsa-addon/src/server";
+import request from "supertest";
 
 describe("e2e_test_add_ed25519_with_reshare", () => {
   let ctx: TestContext;
@@ -77,7 +76,7 @@ describe("e2e_test_add_ed25519_with_reshare", () => {
 
     // ed25519 keygen
     const edKeygen = runKeygenCentralizedEd25519();
-    const edKeygen1 = edKeygen.keygen_outputs[0];
+    const _edKeygen1 = edKeygen.keygen_outputs[0];
     const edKeygen2 = edKeygen.keygen_outputs[1];
     const edPkHex = Buffer.from(edKeygen.public_key).toString("hex");
 
@@ -418,7 +417,11 @@ describe("e2e_test_add_ed25519_with_reshare", () => {
         auth_type: AUTH_TYPE,
         wallets: {
           secp256k1: { public_key: secp256k1PublicKey, share: "ff".repeat(64) },
-          ed25519: { public_key: edPkHex, share: "aa".repeat(64), seed_share: TEST_SEED_SHARE },
+          ed25519: {
+            public_key: edPkHex,
+            share: "aa".repeat(64),
+            seed_share: TEST_SEED_SHARE,
+          },
         },
         cr_session_id: sessionId,
         cr_signature: sig0,
@@ -448,7 +451,11 @@ describe("e2e_test_add_ed25519_with_reshare", () => {
             public_key: secp256k1PublicKey,
             share: generateSecp256k1Share(0),
           },
-          ed25519: { public_key: edPkHex, share: "aa".repeat(64), seed_share: TEST_SEED_SHARE },
+          ed25519: {
+            public_key: edPkHex,
+            share: "aa".repeat(64),
+            seed_share: TEST_SEED_SHARE,
+          },
         },
         cr_session_id: sessionId,
         cr_signature: badSig,
