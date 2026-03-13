@@ -2,20 +2,20 @@ import type { Metadata } from "next";
 
 import { buildIframeSrc } from "../_shared/build_iframe_src";
 import { ProxyThemeStyle } from "../_shared/theme_style";
-import { SignClient } from "./_client";
+import { RpcClient } from "./_client";
 
 export const metadata: Metadata = {
   title: "Oko Wallet",
 };
 
 /**
- * OS-browser signing page.
+ * Generic RPC page for mobile SDK.
  *
- * Opened via expo-web-browser's openAuthSessionAsync for every signing request.
- * Loads the attached iframe, reads a signing request from the URL,
- * displays the signing modal, and deep-links the result back to the app.
+ * Receives a method name and encoded payload via URL,
+ * loads the attached iframe, forwards the request via postMessage,
+ * and deep-links the result back to the app.
  */
-export default async function MobileSignPage({
+export default async function MobileRpcPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
@@ -46,9 +46,11 @@ export default async function MobileSignPage({
           fontFamily: "-apple-system, sans-serif",
         }}
       >
-        <SignClient
+        <RpcClient
           iframeSrc={iframeSrc}
+          method={params.method ?? ""}
           redirectScheme={params.redirect_scheme ?? ""}
+          expectedPublicKey={params.expected_pk ?? null}
         />
       </body>
     </html>

@@ -39,7 +39,7 @@
   "peerDependencies": {
     "expo": ">=52",
     "expo-linking": ">=7",
-    "expo-secure-store": ">=14",
+    "@react-native-async-storage/async-storage": ">=1.17",
     "expo-web-browser": ">=14",
     "react": ">=18",
     "react-native": ">=0.70",
