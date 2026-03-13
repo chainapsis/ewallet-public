@@ -23,7 +23,8 @@ registry.registerPath({
   path: "/oko_admin/v1/wallet/get_user_list",
   tags: ["Admin"],
   summary: "Get user list with wallets by curve type",
-  description: "Retrieves a list of users with their wallets grouped by curve type (secp256k1/ed25519)",
+  description:
+    "Retrieves a list of users with their wallets grouped by curve type (secp256k1/ed25519)",
   security: [{ adminAuth: [] }],
   request: {
     headers: AdminAuthHeaderSchema,

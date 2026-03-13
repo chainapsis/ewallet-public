@@ -34,7 +34,9 @@ export function extractTypeformData(
   }
 
   for (const answer of body.form_response.answers) {
-    if (!answer.field) continue;
+    if (!answer.field) {
+      continue;
+    }
 
     if (answer.field.id === "sxcPQKI2Q7mJ" && answer.type === "email") {
       result.email = answer.email;

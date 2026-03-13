@@ -101,10 +101,10 @@ export async function createCustomer(
 
     let logo_url: string | null = null;
     if (opts.logo) {
-      let metadata;
+      let metadata: sharp.Metadata;
       try {
         metadata = await sharp(opts.logo.buffer).metadata();
-      } catch (err) {
+      } catch (_err) {
         return {
           success: false,
           code: "IMAGE_UPLOAD_FAILED",
@@ -134,7 +134,7 @@ export async function createCustomer(
           .resize(128, 128, { fit: "cover" })
           .png({ quality: 90 })
           .toBuffer();
-      } catch (err) {
+      } catch (_err) {
         return {
           success: false,
           code: "IMAGE_UPLOAD_FAILED",
@@ -312,7 +312,9 @@ export async function getCustomerList(
 
     const allUserIds: string[] = [];
     ctdUsersByCustomerIdsMapRes.data.forEach((users) => {
-      users.forEach((u) => allUserIds.push(u.user_id));
+      users.forEach((u) => {
+        allUserIds.push(u.user_id);
+      });
     });
 
     const emailSentLogsMapRes = await getEmailSentLogsByUserIdsMap(

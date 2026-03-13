@@ -1,5 +1,5 @@
-import winston from "winston";
 import { Client } from "@elastic/elasticsearch";
+import winston from "winston";
 import { ElasticsearchTransport } from "winston-elasticsearch";
 
 const DEFAULT_LEVEL = "info";

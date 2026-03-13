@@ -40,10 +40,6 @@ export const SignInResponseSchema = registry.register(
   }),
 );
 
-// export const SignInSuccessResponseSchema = makeSuccessResponseSchema(
-//   SignInResponseSchema,
-//   "TssUserSignInSuccessResponse",
-// );
 export const SignInSuccessResponseSchema = registry.register(
   "TssUserSignInSuccessResponse",
   z.object({
@@ -106,7 +102,14 @@ export const SignInSuccessResponseV2Schema = registry.register(
   }),
 );
 
-const AuthTypeEnum = z.enum(["google", "auth0", "x", "telegram", "discord", "github"]);
+const AuthTypeEnum = z.enum([
+  "google",
+  "auth0",
+  "x",
+  "telegram",
+  "discord",
+  "github",
+]);
 
 export const CheckEmailRequestSchema = registry.register(
   "TssUserCheckEmailRequest",
@@ -166,10 +169,6 @@ const CheckEmailDataSchema = registry.register(
   }),
 );
 
-// export const CheckEmailSuccessResponseSchema = makeSuccessResponseSchema(
-//   CheckEmailDataSchema,
-//   "TssUserCheckEmailSuccessResponse",
-// );
 export const CheckEmailSuccessResponseSchema = registry.register(
   "TssUserCheckEmailSuccessResponse",
   z.object({
@@ -335,10 +334,6 @@ const SignInSilentlyDataSchema = registry.register(
   }),
 );
 
-// export const SignInSilentlySuccessResponseSchema = makeSuccessResponseSchema(
-//   SignInSilentlyDataSchema,
-//   "TssUserSignInSilentlySuccessResponse",
-// );
 export const SignInSilentlySuccessResponseSchema = registry.register(
   "TssUserSignInSilentlySuccessResponse",
   z.object({

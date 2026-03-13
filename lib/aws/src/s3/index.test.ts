@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 
-import { uploadToS3 } from "@oko-wallet-aws/s3";
 import type { UploadToS3Args } from "@oko-wallet-aws/s3";
+import { uploadToS3 } from "@oko-wallet-aws/s3";
 
 dotenv.config();
 

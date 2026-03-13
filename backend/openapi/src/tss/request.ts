@@ -3,10 +3,12 @@ import { z } from "zod";
 import { registry } from "../registry";
 import { CommitRevealRequestFieldsSchema } from "./commit_reveal";
 
-const OAuthTypeSchema = z.enum(["google", "auth0", "x", "telegram", "discord", "github"]).openapi({
-  description: "OAuth provider type",
-  example: "google",
-});
+const OAuthTypeSchema = z
+  .enum(["google", "auth0", "x", "telegram", "discord", "github"])
+  .openapi({
+    description: "OAuth provider type",
+    example: "google",
+  });
 
 export const SignInRequestSchema = registry.register(
   "TssUserSignInRequest",
@@ -112,7 +114,9 @@ export const ReshareRequestV2Schema = registry.register(
         .array(
           z.object({
             name: z.string().openapi({ description: "Key share node name" }),
-            endpoint: z.string().openapi({ description: "Key share node endpoint" }),
+            endpoint: z
+              .string()
+              .openapi({ description: "Key share node endpoint" }),
           }),
         )
         .openapi({ description: "Nodes where reshare was completed" }),

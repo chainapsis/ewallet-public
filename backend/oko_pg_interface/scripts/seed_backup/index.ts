@@ -1,14 +1,14 @@
-import { createAdmin } from "@oko-wallet-oko-pg-interface/admin_users";
-import { insertCustomer } from "@oko-wallet-oko-pg-interface/customers";
-import { insertCustomerDashboardUser } from "@oko-wallet-oko-pg-interface/customer_dashboard_users";
-import { insertAPIKey } from "@oko-wallet-oko-pg-interface/api_keys";
-import { insertKSNode } from "@oko-wallet-oko-pg-interface/ks_nodes";
 import { loadEnv, verifyEnv } from "@oko-wallet/dotenv";
 import { createPgConn, type PgDatabaseConfig } from "@oko-wallet/postgres-lib";
 
 import { ENV_FILE_NAME, envSchema } from "../envs";
 import { createSeedData } from "./data";
+import { createAdmin } from "@oko-wallet-oko-pg-interface/admin_users";
+import { insertAPIKey } from "@oko-wallet-oko-pg-interface/api_keys";
+import { insertCustomerDashboardUser } from "@oko-wallet-oko-pg-interface/customer_dashboard_users";
+import { insertCustomer } from "@oko-wallet-oko-pg-interface/customers";
 import { insertKeyShareNodeMeta } from "@oko-wallet-oko-pg-interface/key_share_node_meta";
+import { insertKSNode } from "@oko-wallet-oko-pg-interface/ks_nodes";
 import { insertTssActivationSetting } from "@oko-wallet-oko-pg-interface/tss_activate";
 
 async function main() {

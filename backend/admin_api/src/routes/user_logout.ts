@@ -57,10 +57,9 @@ export async function user_logout(
   const state = req.app.locals;
 
   const authHeader = req.headers.authorization;
-  const token =
-    authHeader && authHeader.startsWith("Bearer ")
-      ? authHeader.substring(7)
-      : undefined;
+  const token = authHeader?.startsWith("Bearer ")
+    ? authHeader.substring(7)
+    : undefined;
 
   const result = await logout(state.db, token);
   if (result.success === false) {
