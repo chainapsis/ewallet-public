@@ -69,12 +69,14 @@ export function RpcClient({
         ? decodeRpcPayload<unknown>(encodedPayload)
         : null;
 
-      // Patch origin for methods that use it
+      // Patch origin for methods that use it.
+      // Must use this page's origin (the host that loaded the iframe),
+      // not ATTACHED_ORIGIN, because the wallet is stored under host_origin.
       if (payload && typeof payload === "object" && "data" in payload) {
         const data = (payload as { data?: { payload?: { origin?: string } } })
           .data;
         if (data?.payload && "origin" in data.payload) {
-          data.payload.origin = ATTACHED_ORIGIN;
+          data.payload.origin = window.location.origin;
         }
       }
 
