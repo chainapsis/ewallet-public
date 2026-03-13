@@ -16,6 +16,8 @@ import {
 // ─── Config ───
 
 const COSMOS_CHAIN_ID = "cosmoshub-4";
+const TOKEN_MINIMAL_DENOM = "uatom";
+const SOLANA_RPC_URL = "https://api.devnet.solana.com";
 
 // ─── Main Screen ───
 
@@ -59,6 +61,7 @@ export default function Index() {
       <LoginSection wallet={okoWallet} />
       <CosmosSection wallet={okoWallet} />
       <EthSection wallet={okoWallet} />
+      <SolanaSection wallet={okoWallet} />
     </ScrollView>
   );
 }
@@ -216,9 +219,89 @@ function CosmosSection({ wallet }: { wallet: OkoWalletRN }) {
     }
   }, [cosmos]);
 
+  const handleSignDirect = useCallback(async () => {
+    setLoading("signDirect");
+    setResult(null);
+    try {
+      const {
+        makeSignDoc: makeProtoSignDoc,
+      } = require("@cosmjs/proto-signing");
+      const {
+        AuthInfo,
+        Fee,
+        TxBody,
+      } = require("@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx");
+      const {
+        MsgSend,
+      } = require("@keplr-wallet/proto-types/cosmos/bank/v1beta1/tx");
+      const {
+        PubKey,
+      } = require("@keplr-wallet/proto-types/cosmos/crypto/secp256k1/keys");
+      const {
+        SignMode,
+      } = require("@keplr-wallet/proto-types/cosmos/tx/signing/v1beta1/signing");
+
+      const account = await cosmos.getKey(COSMOS_CHAIN_ID);
+      const address = account.bech32Address;
+
+      const bodyBytes = TxBody.encode(
+        TxBody.fromPartial({
+          messages: [
+            {
+              typeUrl: "/cosmos.bank.v1beta1.MsgSend",
+              value: MsgSend.encode({
+                fromAddress: address,
+                toAddress: address,
+                amount: [{ denom: TOKEN_MINIMAL_DENOM, amount: "10" }],
+              }).finish(),
+            },
+          ],
+          memo: "",
+        }),
+      ).finish();
+
+      const authInfoBytes = AuthInfo.encode({
+        signerInfos: [
+          {
+            publicKey: {
+              typeUrl: "/cosmos.crypto.secp256k1.PubKey",
+              value: PubKey.encode({ key: account.pubKey }).finish(),
+            },
+            modeInfo: {
+              single: { mode: SignMode.SIGN_MODE_DIRECT },
+              multi: undefined,
+            },
+            sequence: "0",
+          },
+        ],
+        fee: Fee.fromPartial({
+          amount: [{ denom: TOKEN_MINIMAL_DENOM, amount: "1000" }],
+          gasLimit: "200000",
+        }),
+      }).finish();
+
+      const signDoc = makeProtoSignDoc(
+        bodyBytes,
+        authInfoBytes,
+        COSMOS_CHAIN_ID,
+        1288582,
+      );
+      const res = await cosmos.signDirect(COSMOS_CHAIN_ID, address, signDoc, {
+        preferNoSetFee: true,
+        disableBalanceCheck: true,
+      });
+      setResult(`SignDirect OK: ${res.signature.signature.slice(0, 30)}...`);
+    } catch (err) {
+      setResult(`Error: ${err}`);
+    } finally {
+      setLoading(null);
+    }
+  }, [cosmos]);
+
   return (
     <View style={styles.section}>
       <Text style={styles.h2}>Cosmos ({COSMOS_CHAIN_ID})</Text>
+      <Text style={styles.label}>Offchain</Text>
       <View style={styles.btnRow}>
         <Btn
           title="getKey"
@@ -229,6 +312,14 @@ function CosmosSection({ wallet }: { wallet: OkoWalletRN }) {
           title="signArbitrary"
           onPress={handleSignArbitrary}
           loading={loading === "signArb"}
+        />
+      </View>
+      <Text style={styles.label}>Onchain</Text>
+      <View style={styles.btnRow}>
+        <Btn
+          title="signDirect"
+          onPress={handleSignDirect}
+          loading={loading === "signDirect"}
         />
       </View>
       {result && <Text style={styles.result}>{result}</Text>}
@@ -272,9 +363,112 @@ function EthSection({ wallet }: { wallet: OkoWalletRN }) {
     }
   }, [eth]);
 
+  const handleSignTransaction = useCallback(async () => {
+    setLoading("signTx");
+    setResult(null);
+    try {
+      const { parseUnits, parseAbi, encodeFunctionData } = require("viem");
+
+      const provider = await eth.getEthereumProvider();
+      const address = await eth.getAddress();
+
+      const toAddress = "0xbb6B34131210C091cb2890b81fCe7103816324a5";
+      const usdcAddress = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
+      const transferAmount = parseUnits("0", 6);
+
+      const abi = parseAbi([
+        "function transfer(address to, uint256 amount) public returns (bool)",
+      ]);
+      const data = encodeFunctionData({
+        abi,
+        functionName: "transfer",
+        args: [toAddress, transferAmount],
+      });
+
+      const signedTx = await provider.request({
+        method: "eth_signTransaction",
+        params: [
+          {
+            type: "0x2",
+            from: address,
+            to: usdcAddress,
+            data,
+            value: "0x0",
+          },
+        ],
+      });
+
+      setResult(`SignTx OK: ${signedTx.slice(0, 30)}...`);
+    } catch (err) {
+      setResult(`Error: ${err}`);
+    } finally {
+      setLoading(null);
+    }
+  }, [eth]);
+
+  const handleSignTypedData = useCallback(async () => {
+    setLoading("signTyped");
+    setResult(null);
+    try {
+      const provider = await eth.getEthereumProvider();
+      const address = await eth.getAddress();
+
+      const typedData = {
+        domain: {
+          name: "Ether Mail",
+          version: "1",
+          chainId: 1,
+          verifyingContract:
+            "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC" as const,
+        },
+        primaryType: "Mail" as const,
+        types: {
+          EIP712Domain: [
+            { name: "name", type: "string" },
+            { name: "version", type: "string" },
+            { name: "chainId", type: "uint256" },
+            { name: "verifyingContract", type: "address" },
+          ],
+          Person: [
+            { name: "name", type: "string" },
+            { name: "wallet", type: "address" },
+          ],
+          Mail: [
+            { name: "from", type: "Person" },
+            { name: "to", type: "Person" },
+            { name: "contents", type: "string" },
+          ],
+        },
+        message: {
+          from: {
+            name: "Alice",
+            wallet: "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826",
+          },
+          to: {
+            name: "Bob",
+            wallet: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB",
+          },
+          contents: "Hello from Oko RN Sandbox!",
+        },
+      };
+
+      const sig = await provider.request({
+        method: "eth_signTypedData_v4",
+        params: [address, typedData],
+      });
+
+      setResult(`TypedData sig: ${sig.slice(0, 30)}...`);
+    } catch (err) {
+      setResult(`Error: ${err}`);
+    } finally {
+      setLoading(null);
+    }
+  }, [eth]);
+
   return (
     <View style={styles.section}>
       <Text style={styles.h2}>Ethereum</Text>
+      <Text style={styles.label}>Offchain</Text>
       <View style={styles.btnRow}>
         <Btn
           title="getAddress"
@@ -285,6 +479,205 @@ function EthSection({ wallet }: { wallet: OkoWalletRN }) {
           title="personal_sign"
           onPress={handlePersonalSign}
           loading={loading === "sign"}
+        />
+        <Btn
+          title="signTypedData"
+          onPress={handleSignTypedData}
+          loading={loading === "signTyped"}
+        />
+      </View>
+      <Text style={styles.label}>Onchain</Text>
+      <View style={styles.btnRow}>
+        <Btn
+          title="signTransaction"
+          onPress={handleSignTransaction}
+          loading={loading === "signTx"}
+        />
+      </View>
+      {result && <Text style={styles.result}>{result}</Text>}
+    </View>
+  );
+}
+
+// ─── Solana ───
+
+function SolanaSection({ wallet }: { wallet: OkoWalletRN }) {
+  const svmRef = useMemo<{ current: any }>(() => ({ current: null }), []);
+  const [loading, setLoading] = useState<string | null>(null);
+  const [result, setResult] = useState<string | null>(null);
+
+  const getSvm = useCallback(() => {
+    if (!svmRef.current) {
+      require("react-native-get-random-values");
+      const { OkoSvmWallet } = require("@oko-wallet/oko-sdk-svm");
+      svmRef.current = new OkoSvmWallet(
+        wallet as unknown as OkoWalletInterface,
+        { chain_id: "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1" },
+      );
+    }
+    return svmRef.current;
+  }, [wallet, svmRef]);
+
+  const ensureConnected = useCallback(async () => {
+    const svm = getSvm();
+    if (!svm.connected) {
+      await svm.connect();
+    }
+    if (!svm.publicKey) {
+      throw new Error("No Solana public key available");
+    }
+    return svm;
+  }, [getSvm]);
+
+  const handleGetAddress = useCallback(async () => {
+    setLoading("getAddr");
+    setResult(null);
+    try {
+      const svm = await ensureConnected();
+      setResult(`Address: ${svm.publicKey!.toBase58()}`);
+    } catch (err) {
+      setResult(`Error: ${err}`);
+    } finally {
+      setLoading(null);
+    }
+  }, [ensureConnected]);
+
+  const handleSignMessage = useCallback(async () => {
+    setLoading("signMsg");
+    setResult(null);
+    try {
+      const svm = await ensureConnected();
+      const message = new TextEncoder().encode("Hello from Oko RN Sandbox!");
+      const signature = await svm.signMessage(message);
+      setResult(
+        `Signature: ${Buffer.from(signature).toString("hex").slice(0, 30)}...`,
+      );
+    } catch (err) {
+      setResult(`Error: ${err}`);
+    } finally {
+      setLoading(null);
+    }
+  }, [ensureConnected]);
+
+  const handleSignTransaction = useCallback(async () => {
+    setLoading("signTx");
+    setResult(null);
+    try {
+      const svm = await ensureConnected();
+      const {
+        Connection,
+        PublicKey,
+        SystemProgram,
+        TransactionMessage,
+        VersionedTransaction,
+        LAMPORTS_PER_SOL,
+      } = require("@solana/web3.js");
+
+      const connection = new Connection(SOLANA_RPC_URL);
+      const toAddress = new PublicKey("11111111111111111111111111111111");
+      const { blockhash } = await connection.getLatestBlockhash();
+
+      const instructions = [
+        SystemProgram.transfer({
+          fromPubkey: svm.publicKey!,
+          toPubkey: toAddress,
+          lamports: 0.001 * LAMPORTS_PER_SOL,
+        }),
+      ];
+
+      const messageV0 = new TransactionMessage({
+        payerKey: svm.publicKey!,
+        recentBlockhash: blockhash,
+        instructions,
+      }).compileToV0Message();
+
+      const tx = new VersionedTransaction(messageV0);
+      const signed = await svm.signTransaction(tx);
+      setResult(
+        `SignTx OK: ${Buffer.from(signed.signatures[0]).toString("hex").slice(0, 30)}...`,
+      );
+    } catch (err) {
+      setResult(`Error: ${err}`);
+    } finally {
+      setLoading(null);
+    }
+  }, [ensureConnected]);
+
+  const handleSignAllTransactions = useCallback(async () => {
+    setLoading("signAll");
+    setResult(null);
+    try {
+      const svm = await ensureConnected();
+      const {
+        Connection,
+        PublicKey,
+        SystemProgram,
+        TransactionMessage,
+        VersionedTransaction,
+        LAMPORTS_PER_SOL,
+      } = require("@solana/web3.js");
+
+      const connection = new Connection(SOLANA_RPC_URL);
+      const toAddress = new PublicKey("11111111111111111111111111111111");
+      const { blockhash } = await connection.getLatestBlockhash();
+
+      const transactions: any[] = [];
+      for (let i = 0; i < 3; i++) {
+        const instructions = [
+          SystemProgram.transfer({
+            fromPubkey: svm.publicKey!,
+            toPubkey: toAddress,
+            lamports: (i + 1) * 0.001 * LAMPORTS_PER_SOL,
+          }),
+        ];
+
+        const messageV0 = new TransactionMessage({
+          payerKey: svm.publicKey!,
+          recentBlockhash: blockhash,
+          instructions,
+        }).compileToV0Message();
+
+        transactions.push(new VersionedTransaction(messageV0));
+      }
+
+      const signed = await svm.signAllTransactions(transactions);
+      setResult(`SignAll OK (${signed.length} txs signed)`);
+    } catch (err) {
+      setResult(`Error: ${err}`);
+    } finally {
+      setLoading(null);
+    }
+  }, [ensureConnected]);
+
+  return (
+    <View style={styles.section}>
+      <Text style={styles.h2}>Solana (devnet)</Text>
+      <View style={styles.btnRow}>
+        <Btn
+          title="getAddress"
+          onPress={handleGetAddress}
+          loading={loading === "getAddr"}
+        />
+      </View>
+      <Text style={styles.label}>Offchain</Text>
+      <View style={styles.btnRow}>
+        <Btn
+          title="signMessage"
+          onPress={handleSignMessage}
+          loading={loading === "signMsg"}
+        />
+      </View>
+      <Text style={styles.label}>Onchain</Text>
+      <View style={styles.btnRow}>
+        <Btn
+          title="signTransaction"
+          onPress={handleSignTransaction}
+          loading={loading === "signTx"}
+        />
+        <Btn
+          title="signAllTransactions"
+          onPress={handleSignAllTransactions}
+          loading={loading === "signAll"}
         />
       </View>
       {result && <Text style={styles.result}>{result}</Text>}
@@ -333,6 +726,13 @@ const styles = StyleSheet.create({
   scrollContent: { padding: 20, paddingTop: 60, paddingBottom: 40 },
   h1: { fontSize: 22, fontWeight: "bold", marginBottom: 16 },
   h2: { fontSize: 17, fontWeight: "600", marginBottom: 10 },
+  label: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: "#888",
+    marginBottom: 4,
+    marginTop: 8,
+  },
   muted: { color: "#888", marginTop: 8 },
   error: { color: "#cc3333", marginTop: 8 },
   section: {

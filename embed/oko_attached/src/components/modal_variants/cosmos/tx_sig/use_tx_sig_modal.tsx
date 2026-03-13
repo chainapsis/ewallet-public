@@ -18,7 +18,7 @@ import { useState } from "react";
 import type { FeeCalculated, InsufficientBalanceFee } from "./types";
 import { useCosmosSignFee } from "./use_sign_fee";
 import { makeCosmosSignature } from "@oko-wallet-attached/components/modal_variants/cosmos/cosmos_sig";
-import { DEMO_WEB_ORIGIN } from "@oko-wallet-attached/requests/endpoints";
+import { isDemoOrSandboxOrigin } from "@oko-wallet-attached/requests/endpoints";
 import { useAppState } from "@oko-wallet-attached/store/app";
 import { useMemoryState } from "@oko-wallet-attached/store/memory";
 import { normalizeIBCDenom } from "@oko-wallet-attached/web3/cosmos/normalize_denom";
@@ -39,7 +39,7 @@ export function useTxSigModal(
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const isDemo = !!hostOrigin && hostOrigin === DEMO_WEB_ORIGIN;
+  const isDemo = isDemoOrSandboxOrigin(hostOrigin);
 
   const feeFromSignDoc = extractFeeFromSignDoc(payload.signDoc);
 

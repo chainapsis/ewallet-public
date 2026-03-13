@@ -1,22 +1,19 @@
 "use client";
 
-import type {
-  OpenModalAckPayload,
-  OpenModalPayload,
-} from "@oko-wallet/oko-sdk-core";
 import { Buffer } from "buffer";
 import pako from "pako";
 
-export const SIGN_URL_CODEC_VERSION = "1";
-export const SIGN_URL_REQUEST_PARAM = "p";
-export const SIGN_URL_RESULT_PARAM = "r";
-export const SIGN_URL_VERSION_PARAM = "v";
+/**
+ * Generic RPC codec for app ↔ attached_proxy_web communication.
+ * Mirror of sdk/oko_sdk_core_react_native/src/codec/rpc_codec.ts
+ */
 
-export interface SignUrlEncodingStats {
-  jsonBytes: number;
-  compressedBytes: number;
-  encodedChars: number;
-}
+export const RPC_CODEC_VERSION = "1";
+export const RPC_PAYLOAD_PARAM = "p";
+export const RPC_RESULT_PARAM = "r";
+export const RPC_VERSION_PARAM = "v";
+
+// ─── Tagged value types ───
 
 type EncodedValue =
   | null
@@ -27,14 +24,10 @@ type EncodedValue =
   | { [key: string]: EncodedValue };
 
 type TaggedValue =
-  | {
-      __oko_t: "bigint";
-      value: string;
-    }
-  | {
-      __oko_t: "u8";
-      value: string;
-    };
+  | { __oko_t: "bigint"; value: string }
+  | { __oko_t: "u8"; value: string };
+
+// ─── Base64url ───
 
 function encodeBase64Url(bytes: Uint8Array): string {
   return Buffer.from(bytes)
@@ -51,20 +44,15 @@ function decodeBase64Url(value: string): Uint8Array {
   return Uint8Array.from(Buffer.from(normalized + padding, "base64"));
 }
 
-function getUtf8ByteLength(value: string): number {
-  return Buffer.byteLength(value, "utf8");
-}
+// ─── Tag / untag ───
 
 function toEncodedValue(value: unknown): EncodedValue {
-  if (value === null) {
+  if (value === null || value === undefined) {
     return null;
   }
 
   if (typeof value === "bigint") {
-    const tagged: TaggedValue = {
-      __oko_t: "bigint",
-      value: value.toString(),
-    };
+    const tagged: TaggedValue = { __oko_t: "bigint", value: value.toString() };
     return tagged as EncodedValue;
   }
 
@@ -85,8 +73,6 @@ function toEncodedValue(value: unknown): EncodedValue {
     case "number":
     case "string":
       return value;
-    case "undefined":
-      return null;
     case "object": {
       const out: Record<string, EncodedValue> = {};
       for (const [key, nested] of Object.entries(value)) {
@@ -132,13 +118,21 @@ function fromEncodedValue(value: EncodedValue): unknown {
   return out;
 }
 
-function encodeValue<T>(value: T): string {
-  return encodeValueWithStats(value).encoded;
+// ─── Public API ───
+
+export interface RpcEncodingStats {
+  jsonBytes: number;
+  compressedBytes: number;
+  encodedChars: number;
 }
 
-function encodeValueWithStats<T>(value: T): {
+export function encodeRpcPayload<T>(value: T): string {
+  return encodeRpcPayloadWithStats(value).encoded;
+}
+
+export function encodeRpcPayloadWithStats<T>(value: T): {
   encoded: string;
-  stats: SignUrlEncodingStats;
+  stats: RpcEncodingStats;
 } {
   const normalized = toEncodedValue(value);
   const json = JSON.stringify(normalized);
@@ -147,42 +141,53 @@ function encodeValueWithStats<T>(value: T): {
   return {
     encoded,
     stats: {
-      jsonBytes: getUtf8ByteLength(json),
+      jsonBytes: Buffer.byteLength(json, "utf8"),
       compressedBytes: compressed.length,
       encodedChars: encoded.length,
     },
   };
 }
 
-function decodeValue<T>(encoded: string): T {
+export function decodeRpcPayload<T>(encoded: string): T {
   const compressed = decodeBase64Url(encoded);
   const json = Buffer.from(pako.inflateRaw(compressed)).toString("utf8");
   const parsed = JSON.parse(json) as EncodedValue;
   return fromEncodedValue(parsed) as T;
 }
 
-export function getEncodedSignRequestFromLocation(): string | null {
+// ─── URL helpers (proxy web side) ───
+
+/**
+ * Parse RPC method and encoded payload from the current page URL.
+ */
+export function parseRpcRequestFromLocation(): {
+  method: string;
+  encodedPayload: string | null;
+} {
+  const params = new URLSearchParams(window.location.search);
+  const method = params.get("method") ?? "";
+
   const hashParams = new URLSearchParams(
     window.location.hash.startsWith("#")
       ? window.location.hash.slice(1)
       : window.location.hash,
   );
-  return (
-    hashParams.get(SIGN_URL_REQUEST_PARAM) ??
-    new URLSearchParams(window.location.search).get(SIGN_URL_REQUEST_PARAM)
-  );
+  const encodedPayload =
+    hashParams.get(RPC_PAYLOAD_PARAM) ?? params.get(RPC_PAYLOAD_PARAM);
+
+  return { method, encodedPayload };
 }
 
-export function decodeSignRequestPayload(encoded: string): OpenModalPayload {
-  return decodeValue<OpenModalPayload>(encoded);
-}
-
-export function encodeSignResultPayload(payload: OpenModalAckPayload): string {
-  return encodeValue(payload);
-}
-
-export function encodeSignResultPayloadWithStats(
-  payload: OpenModalAckPayload,
-): { encoded: string; stats: SignUrlEncodingStats } {
-  return encodeValueWithStats(payload);
+/**
+ * Build a callback URL with the encoded result for scheme redirect.
+ */
+export function buildRpcCallbackUrl(
+  redirectScheme: string,
+  result: unknown,
+): { url: string; stats: RpcEncodingStats } {
+  const query = new URLSearchParams();
+  query.set(RPC_VERSION_PARAM, RPC_CODEC_VERSION);
+  const { encoded, stats } = encodeRpcPayloadWithStats(result);
+  query.set(RPC_RESULT_PARAM, encoded);
+  return { url: `${redirectScheme}://?${query.toString()}`, stats };
 }

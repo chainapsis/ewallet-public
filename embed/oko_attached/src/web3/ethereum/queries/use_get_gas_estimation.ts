@@ -15,7 +15,7 @@ import {
   DEFAULT_RETRY_COUNT,
   type StructuredRpcError,
 } from "./types";
-import { DEMO_WEB_ORIGIN } from "@oko-wallet-attached/requests/endpoints";
+import { isDemoOrSandboxOrigin } from "@oko-wallet-attached/requests/endpoints";
 import { classifyViemErrorDetailed } from "@oko-wallet-attached/web3/ethereum/error";
 
 export interface UseGetGasEstimationProps {
@@ -42,7 +42,7 @@ export function useGetGasEstimation({
   options,
 }: UseGetGasEstimationProps) {
   // TODO: Why necessary?
-  const isDemo = !!hostOrigin && hostOrigin === DEMO_WEB_ORIGIN;
+  const isDemo = !!hostOrigin && isDemoOrSandboxOrigin(hostOrigin);
   const clampedMultiplier = Math.max(1, Math.min(3, multiplier));
 
   return useQuery({

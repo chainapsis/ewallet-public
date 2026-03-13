@@ -7,7 +7,7 @@ import { isEthereumCompatible } from "@oko-wallet/oko-sdk-cosmos";
 import { useState } from "react";
 
 import { makeCosmosSignature } from "../cosmos_sig";
-import { DEMO_WEB_ORIGIN } from "@oko-wallet-attached/requests/endpoints";
+import { isDemoOrSandboxOrigin } from "@oko-wallet-attached/requests/endpoints";
 import { useAppState } from "@oko-wallet-attached/store/app";
 import { useMemoryState } from "@oko-wallet-attached/store/memory";
 
@@ -20,7 +20,7 @@ export function useArbitrarySigModal(args: UseCosmosArbitrarySigModalArgs) {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const isDemo = !!hostOrigin && hostOrigin === DEMO_WEB_ORIGIN;
+  const isDemo = isDemoOrSandboxOrigin(hostOrigin);
 
   function onReject() {
     const ack: OpenModalAckPayload = {

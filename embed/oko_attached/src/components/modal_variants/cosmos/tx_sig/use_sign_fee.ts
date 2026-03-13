@@ -13,7 +13,7 @@ import {
   getSelectableFees,
   sortSelectableFees,
 } from "@oko-wallet-attached/requests/cosmos_selectable_fees";
-import { DEMO_WEB_ORIGIN } from "@oko-wallet-attached/requests/endpoints";
+import { isDemoOrSandboxOrigin } from "@oko-wallet-attached/requests/endpoints";
 import { useAssetMetaStore } from "@oko-wallet-attached/store/asset_meta";
 
 export interface UseCosmosSignFeeArgs {
@@ -76,7 +76,7 @@ export function useCosmosSignFee(
     (s) => s.findOrUpdateAssetMeta,
   );
 
-  const isDemo = !!hostOrigin && hostOrigin === DEMO_WEB_ORIGIN;
+  const isDemo = isDemoOrSandboxOrigin(hostOrigin);
 
   const chainInfo = toChainInfo(modalChainInfo);
   const { data: parsedMsgs } = useGetParsedMsgs({
