@@ -14,6 +14,7 @@
       "!**/*.d.ts",
       "!**/routeTree.gen.ts",
       "!**/cait_sith_keplr_addon/addon/index.js",
+      "!**/plugin/build",
       "sandbox/sandbox_react_native"
     ]
   },

@@ -1,9 +1,10 @@
-import type { Result } from "@oko-wallet/stdlib-js";
 import type {
   OkoWalletMsgOpenModal,
   OpenModalAckPayload,
+  OpenModalError,
 } from "@oko-wallet/oko-sdk-core";
-import type { OpenModalError } from "@oko-wallet/oko-sdk-core";
+import type { Result } from "@oko-wallet/stdlib-js";
+
 import {
   getServerRedirectScheme,
   openAuthSession,

@@ -1,7 +1,7 @@
 import {
+  AndroidConfig,
   type ConfigPlugin,
   withAndroidManifest,
-  AndroidConfig,
 } from "@expo/config-plugins";
 
 const CALLBACK_ACTIVITY_CLASS = "com.okowallet.auth.OkoAuthCallbackActivity";
