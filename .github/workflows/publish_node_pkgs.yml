@@ -15,16 +15,25 @@ jobs:
           ref: ${{ inputs.git_tag }}
           token: ${{ secrets.GH_PAT }}
 
+      - name: Enable Corepack
+        run: corepack enable
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22"
 
-      - name: Check Node version
-        run: node -v
-      
-      - name: Enable Corepack
-        run: corepack enable
+      - name: Get Yarn cache directory
+        id: yarn-cache
+        run: echo "dir=$(yarn config get cacheFolder)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Yarn
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: yarn-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            yarn-${{ runner.os }}-
 
       - name: Yarn version
         run: yarn -v
