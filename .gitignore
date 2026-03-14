@@ -413,6 +413,7 @@ $RECYCLE.BIN/
 # AI Agent plan
 .plan
 .docs
+.omc/
 
 # Postgres
 pg_data/
