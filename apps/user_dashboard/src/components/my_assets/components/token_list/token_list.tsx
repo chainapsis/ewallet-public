@@ -2,13 +2,21 @@ import { CheckCircleOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/check_c
 import { SearchIcon } from "@oko-wallet/oko-common-ui/icons/search";
 import { ImageWithAlt } from "@oko-wallet/oko-common-ui/image_with_alt";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import { type ChangeEvent, type FC, useMemo, useState } from "react";
+import {
+  type ChangeEvent,
+  type FC,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 
 import { TokenItem } from "../token_item/token_item";
 import styles from "./token_list.module.scss";
+import { SendModal } from "@oko-wallet-user-dashboard/components/send_modal/send_modal";
 import { ShowHideChainsModal } from "@oko-wallet-user-dashboard/components/show_hide_chains_modal/show_hide_chains_modal";
 import { S3_BUCKET_URL } from "@oko-wallet-user-dashboard/fetch";
 import { useAllBalances } from "@oko-wallet-user-dashboard/hooks/queries";
+import type { TokenBalance } from "@oko-wallet-user-dashboard/types/token";
 import { calculateUsdValue } from "@oko-wallet-user-dashboard/utils/format_token_amount";
 
 // Minimum USD value to show (for hide low balance filter)
@@ -19,6 +27,11 @@ export const TokenList: FC = () => {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isHideLowBalance, setIsHideLowBalance] = useState(false);
+  const [sendToken, setSendToken] = useState<TokenBalance | null>(null);
+
+  const handleOpenSend = useCallback((token: TokenBalance) => {
+    setSendToken(token);
+  }, []);
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -107,10 +120,21 @@ export const TokenList: FC = () => {
             key={`${asset.chainInfo.chainId}-${asset.token.currency.coinMinimalDenom}`}
             tokenBalance={asset}
             address={asset.address}
+            onSend={() => handleOpenSend(asset)}
           />
         ))}
         {filteredTokens.length === 0 && !isLoading && <EmptyState />}
       </div>
+
+      {sendToken && (
+        <SendModal
+          key={`${sendToken.chainInfo.chainId}-${sendToken.token.currency.coinMinimalDenom}`}
+          initialToken={sendToken}
+          renderTrigger={() => null}
+          autoOpen
+          onClose={() => setSendToken(null)}
+        />
+      )}
     </>
   );
 };

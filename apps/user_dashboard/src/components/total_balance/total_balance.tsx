@@ -7,6 +7,7 @@ import type { FC } from "react";
 
 import styles from "./total_balance.module.scss";
 import { DepositModal } from "@oko-wallet-user-dashboard/components/deposit_modal/deposit_modal";
+import { SendModal } from "@oko-wallet-user-dashboard/components/send_modal/send_modal";
 import { useTotalBalance } from "@oko-wallet-user-dashboard/hooks/queries";
 
 export const TotalBalance: FC = () => {
@@ -27,18 +28,32 @@ export const TotalBalance: FC = () => {
         {isLoading ? "..." : formattedTotal}
       </Typography>
 
-      <DepositModal
-        renderTrigger={({ onOpen }) => (
-          <Button
-            variant="primary"
-            size="md"
-            fullWidth={false}
-            onClick={onOpen}
-          >
-            Deposit
-          </Button>
-        )}
-      />
+      <div className={styles.buttonGroup}>
+        <DepositModal
+          renderTrigger={({ onOpen }) => (
+            <Button
+              variant="primary"
+              size="md"
+              fullWidth={false}
+              onClick={onOpen}
+            >
+              Deposit
+            </Button>
+          )}
+        />
+        <SendModal
+          renderTrigger={({ onOpen }) => (
+            <Button
+              variant="secondary"
+              size="md"
+              fullWidth={false}
+              onClick={onOpen}
+            >
+              Send
+            </Button>
+          )}
+        />
+      </div>
     </div>
   );
 };

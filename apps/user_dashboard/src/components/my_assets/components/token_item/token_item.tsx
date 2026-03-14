@@ -4,6 +4,7 @@ import { PricePretty } from "@keplr-wallet/unit";
 import { Badge } from "@oko-wallet/oko-common-ui/badge";
 import { IconTransition } from "@oko-wallet/oko-common-ui/icon_transition";
 import { AlertTriangleIcon } from "@oko-wallet/oko-common-ui/icons/alert_triangle_icon";
+import { ArrowUpRightIcon } from "@oko-wallet/oko-common-ui/icons/arrow_up_right";
 import { CheckThinIcon } from "@oko-wallet/oko-common-ui/icons/check_thin_icon";
 import { CopyOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/copy_outlined";
 import { EmptyStateIcon } from "@oko-wallet/oko-common-ui/icons/empty_state_icon";
@@ -27,6 +28,7 @@ interface TokenItemProps {
   tokenBalance: TokenBalance;
   address?: string;
   onClick?: () => void;
+  onSend?: () => void;
   disabled?: boolean;
   isNotReady?: boolean;
 }
@@ -35,6 +37,7 @@ export const TokenItem: FC<TokenItemProps> = ({
   tokenBalance,
   address,
   onClick,
+  onSend,
   disabled,
   isNotReady,
 }) => {
@@ -164,6 +167,22 @@ export const TokenItem: FC<TokenItemProps> = ({
             )}
           </div>
         }
+
+        {/* Send Button */}
+        {onSend &&
+          !isNotReady &&
+          BigInt(tokenBalance.token.amount) > BigInt(0) && (
+            <button
+              type="button"
+              className={`${styles.copyButton}`}
+              onClick={(e: MouseEvent) => {
+                e.stopPropagation();
+                onSend();
+              }}
+            >
+              <ArrowUpRightIcon size={16} color="var(--fg-tertiary)" />
+            </button>
+          )}
 
         {/* Copy Address and QR Code Buttons */}
         {address && !isNotReady && (

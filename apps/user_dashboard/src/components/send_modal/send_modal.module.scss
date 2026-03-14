@@ -1,0 +1,366 @@
+@use "../../styles/viewport.module.scss" as *;
+
+.modalBackground {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.modal {
+  position: relative;
+  width: 100%;
+  max-width: 90vw;
+  max-height: 90vh;
+
+  @media (min-width: $desktop_min_width) {
+    width: auto;
+  }
+}
+
+.modalCard {
+  background: var(--bg-primary);
+  border-radius: 20px;
+  border: 1px solid var(--border-primary);
+  box-shadow: var(--shadow-xl);
+  width: 100%;
+  max-width: 420px;
+  box-sizing: border-box;
+  padding: 20px;
+
+  @media (min-width: $desktop_min_width) {
+    width: 420px;
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.backButton,
+.closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--fg-quaternary);
+
+  &:hover {
+    background: var(--bg-secondary);
+  }
+}
+
+// Select Token Step
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md, 8px);
+  border-radius: var(--radius-md, 8px);
+  border: 1px solid var(--border-tertiary);
+  background: var(--bg-secondary);
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.searchInput {
+  width: 100%;
+  color: var(--text-primary);
+  font-family: Inter;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--font-line-height-md);
+  background: transparent;
+  white-space: nowrap;
+  border: none;
+  outline: none;
+  padding: 0;
+}
+
+.searchInput::placeholder {
+  color: var(--text-placeholder);
+}
+
+.tokenList {
+  width: 100%;
+  max-height: 340px;
+  overflow: auto;
+}
+
+.tokenSelectItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: var(--bg-secondary);
+  }
+}
+
+.tokenSelectLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tokenImage {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.tokenNameInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tokenBalanceInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+// Enter Details Step
+.selectedTokenInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.selectedTokenDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.inputLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.inputWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--border-tertiary);
+  border-radius: 10px;
+  background: var(--bg-primary);
+  transition: border-color 0.15s;
+
+  &:focus-within {
+    border-color: var(--brand-primary, #5bccf1);
+  }
+
+  &.error {
+    border-color: var(--error-primary, #ef4444);
+  }
+}
+
+.textInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: Inter;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--font-line-height-md);
+  padding: 0;
+}
+
+.textInput::placeholder {
+  color: var(--text-placeholder);
+}
+
+.maxButton {
+  padding: 4px 10px;
+  border: 1px solid var(--border-tertiary);
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  color: var(--brand-primary, #5bccf1);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover {
+    background: var(--bg-tertiary);
+  }
+}
+
+.errorText {
+  color: var(--error-primary, #ef4444);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.usdValue {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+.feeDisplay {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+// Review Step
+.reviewSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.reviewRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 8px 0;
+}
+
+.reviewLabel {
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+
+.reviewValue {
+  text-align: right;
+  max-width: 250px;
+  word-break: break-all;
+}
+
+.reviewDivider {
+  height: 1px;
+  background: var(--border-tertiary);
+}
+
+.reviewAmountLarge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 20px 0;
+}
+
+// Status Step
+.statusContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 32px 0;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid var(--border-tertiary);
+  border-top-color: var(--brand-primary, #5bccf1);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.successIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #22c55e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+}
+
+.errorIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+}
+
+.txHashLink {
+  color: var(--brand-primary, #5bccf1);
+  text-decoration: none;
+  font-size: 13px;
+  word-break: break-all;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+  gap: 8px;
+}

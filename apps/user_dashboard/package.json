@@ -11,9 +11,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@cosmjs/amino": "^0.38.1",
+    "@cosmjs/proto-signing": "^0.38.1",
+    "@cosmjs/stargate": "^0.38.1",
     "@floating-ui/dom": "^1.7.4",
     "@floating-ui/react": "^0.27.16",
     "@keplr-wallet/cosmos": "0.12.297",
+    "@keplr-wallet/proto-types": "^0.13.12",
     "@keplr-wallet/unit": "0.12.297",
     "@oko-wallet/dotenv": "^0.0.2-alpha.29",
     "@oko-wallet/oko-common-ui": "workspace:*",
@@ -23,6 +27,7 @@
     "@oko-wallet/oko-sdk-svm": "workspace:*",
     "@oko-wallet/oko-types": "^0.1.2-alpha.2",
     "@oko-wallet/stdlib-js": "0.0.2-rc.41",
+    "@solana/spl-token": "^0.4.14",
     "@solana/web3.js": "^1.98.0",
     "@tanstack/query-sync-storage-persister": "^5.90.24",
     "@tanstack/react-query": "^5.90.21",
@@ -37,6 +42,7 @@
     "react-hook-form": "^7.65.0",
     "sonner": "^2.0.7",
     "utility-types": "^3.11.0",
+    "viem": "^2.47.2",
     "zustand": "^5.0.6"
   },
   "devDependencies": {
