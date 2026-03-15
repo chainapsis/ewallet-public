@@ -2,6 +2,7 @@
 
 import { PricePretty } from "@keplr-wallet/unit";
 import { Badge } from "@oko-wallet/oko-common-ui/badge";
+import { AlertTriangleIcon } from "@oko-wallet/oko-common-ui/icons/alert_triangle_icon";
 import { CheckCircleOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/check_circle_outlined";
 import { CopyOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/copy_outlined";
 import { EmptyStateIcon } from "@oko-wallet/oko-common-ui/icons/empty_state_icon";
@@ -103,8 +104,9 @@ export const TokenItem: FC<TokenItemProps> = ({
             {tokenBalance.error && !isNotReady && (
               <Tooltip
                 content={tokenBalance.error.message || "Error loading token"}
+                placement="bottom"
               >
-                <div className={styles.errorIndicator}>!</div>
+                <AlertTriangleIcon size={16} />
               </Tooltip>
             )}
           </div>
