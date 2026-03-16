@@ -10,17 +10,28 @@ export const DEMO_WEB_ORIGIN = import.meta.env.VITE_DEMO_WEB_ORIGIN;
  * - Matches the configured DEMO_WEB_ORIGIN
  * - Treats non-http(s) origins (e.g. native app custom schemes like `myapp://`)
  *   as sandbox contexts where balance checks should be skipped.
+ *
+ * When the request flows through attached_proxy_web, the original app origin
+ * (e.g. `myapp://`) is replaced with the proxy's https origin for wallet
+ * storage purposes.  The original is preserved as `appOrigin` so we can still
+ * detect native-app sandbox contexts here.
  */
-export function isDemoOrSandboxOrigin(hostOrigin: string): boolean {
-  if (hostOrigin === DEMO_WEB_ORIGIN) {
-    return true;
-  }
-  if (
-    hostOrigin !== "" &&
-    !hostOrigin.startsWith("http://") &&
-    !hostOrigin.startsWith("https://")
-  ) {
-    return true;
+export function isDemoOrSandboxOrigin(
+  hostOrigin: string,
+  appOrigin?: string,
+): boolean {
+  const origins = appOrigin ? [appOrigin, hostOrigin] : [hostOrigin];
+  for (const origin of origins) {
+    if (origin === DEMO_WEB_ORIGIN) {
+      return true;
+    }
+    if (
+      origin !== "" &&
+      !origin.startsWith("http://") &&
+      !origin.startsWith("https://")
+    ) {
+      return true;
+    }
   }
   return false;
 }
