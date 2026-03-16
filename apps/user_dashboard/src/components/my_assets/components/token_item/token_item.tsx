@@ -100,7 +100,9 @@ export const TokenItem: FC<TokenItemProps> = ({
                 <Typography size="sm" weight="medium" color="warning-primary">
                   {coinDenom}
                 </Typography>
-                {isIBC && <Badge type="pill" size="sm" color="gray" label="IBC" />}
+                {isIBC && (
+                  <Badge type="pill" size="sm" color="gray" label="IBC" />
+                )}
               </Tooltip>
             ) : isNotReady ? (
               <Skeleton width={60} height={16} />
@@ -109,7 +111,9 @@ export const TokenItem: FC<TokenItemProps> = ({
                 <Typography size="sm" weight="medium" color="secondary">
                   {coinDenom}
                 </Typography>
-                {isIBC && <Badge type="pill" size="sm" color="gray" label="IBC" />}
+                {isIBC && (
+                  <Badge type="pill" size="sm" color="gray" label="IBC" />
+                )}
               </>
             )}
             {tokenBalance.isFetching && !isNotReady && (
