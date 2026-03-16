@@ -1,8 +1,10 @@
 import {
   arrow,
+  flip,
   FloatingArrow,
   offset,
   type Placement,
+  shift,
   useFloating,
   useHover,
   useInteractions,
@@ -59,6 +61,8 @@ export const Tooltip: FC<TooltipProps> = ({
     onOpenChange: setIsOpen,
     middleware: [
       offset(hideFloatingArrow ? 4 : 10),
+      flip(),
+      shift({ padding: 8 }),
       arrow({
         element: arrowRef,
         padding: {
