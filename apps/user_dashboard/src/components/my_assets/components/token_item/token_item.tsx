@@ -137,24 +137,20 @@ export const TokenItem: FC<TokenItemProps> = ({
             ) : (
               <>
                 <Typography size="sm" weight="medium" color="secondary">
-                  {tokenBalance.isFetching
-                    ? "-"
-                    : formatDisplayBalance(tokenBalance.token.amount, currency)}
+                  {formatDisplayBalance(tokenBalance.token.amount, currency)}
                 </Typography>
                 <Typography size="xs" weight="medium" color="tertiary">
-                  {tokenBalance.isFetching
-                    ? "-"
-                    : valueUsd !== undefined
-                      ? new PricePretty(
-                          {
-                            currency: "usd",
-                            symbol: "$",
-                            maxDecimals: 2,
-                            locale: "en-US",
-                          },
-                          valueUsd,
-                        ).toString()
-                      : "-"}
+                  {valueUsd !== undefined
+                    ? new PricePretty(
+                        {
+                          currency: "usd",
+                          symbol: "$",
+                          maxDecimals: 2,
+                          locale: "en-US",
+                        },
+                        valueUsd,
+                      ).toString()
+                    : "-"}
                 </Typography>
               </>
             )}

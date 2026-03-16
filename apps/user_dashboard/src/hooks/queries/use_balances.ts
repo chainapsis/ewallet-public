@@ -762,7 +762,6 @@ export function useAllBalances() {
     .flatMap((query) =>
       (query.data ?? []).map((b) => ({
         ...b,
-        isFetching: query.isLoading,
         error: query.error instanceof Error ? query.error : undefined,
       })),
     )
