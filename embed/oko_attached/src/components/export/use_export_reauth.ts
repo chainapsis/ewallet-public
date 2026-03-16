@@ -32,7 +32,7 @@ export function findEmbeddedIframe(): Window | null {
   return null;
 }
 
-function getHostOrigin(): string {
+export function getHostOrigin(): string {
   const params = new URLSearchParams(window.location.search);
   const hostOrigin = params.get("host_origin");
   if (hostOrigin) {
