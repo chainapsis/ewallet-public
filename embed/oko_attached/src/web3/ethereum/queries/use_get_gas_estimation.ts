@@ -27,7 +27,6 @@ export interface UseGetGasEstimationProps {
   multiplier?: number;
   client?: PublicClient;
   hostOrigin?: string;
-  appOrigin?: string;
   options?: Partial<UseQueryOptions<bigint, StructuredRpcError>>;
 }
 
@@ -40,10 +39,9 @@ export function useGetGasEstimation({
   multiplier = DEFAULT_MULTIPLIER,
   client,
   hostOrigin,
-  appOrigin,
   options,
 }: UseGetGasEstimationProps) {
-  const isDemo = !!hostOrigin && isDemoOrSandboxOrigin(hostOrigin, appOrigin);
+  const isDemo = !!hostOrigin && isDemoOrSandboxOrigin(hostOrigin);
   const clampedMultiplier = Math.max(1, Math.min(3, multiplier));
 
   return useQuery({

@@ -48,9 +48,6 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
   const { closeModal, setError } = useMemoryState();
 
   const hostOrigin = data.payload.origin;
-  const appOrigin = (data.payload as Record<string, unknown>).app_origin as
-    | string
-    | undefined;
   const theme = useAppState().getTheme(hostOrigin);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -162,7 +159,6 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
     nonce: nonce,
     client: publicClient,
     hostOrigin: payload.origin,
-    appOrigin,
     options: {
       enabled: isSupportedChain,
     },
@@ -209,7 +205,7 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
     getL1GasEstimationError !== null ||
     getFeeCurrencyBalanceError !== null;
 
-  const isDemo = !!hostOrigin && isDemoOrSandboxOrigin(hostOrigin, appOrigin);
+  const isDemo = !!hostOrigin && isDemoOrSandboxOrigin(hostOrigin);
 
   // Fee sponsorship flow for Base chain
   const {

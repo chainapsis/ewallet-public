@@ -11,6 +11,7 @@ import { OKO_SDK_TARGET } from "@oko-wallet-attached/window_msgs/target";
 
 const initialState: MemoryState = {
   hostOrigin: null,
+  isMobileNative: false,
   modalRequest: null,
   error: null,
   referralInfo: null,
@@ -20,6 +21,9 @@ export const useMemoryState = create(
   combine<MemoryState, MemoryActions>(initialState, (set, get) => ({
     setHostOrigin: (hostOrigin: string) => {
       set({ hostOrigin });
+    },
+    setIsMobileNative: (value: boolean) => {
+      set({ isMobileNative: value });
     },
     openModal: ({ port, msg }) => {
       if (msg.msg_type !== "open_modal") {

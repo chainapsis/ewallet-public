@@ -22,6 +22,7 @@ import { handleSetOAuthNonce } from "./set_oauth_nonce";
 import { handleSignOut } from "./sign_out";
 import { OKO_SDK_TARGET } from "./target";
 import type { MsgEventContext } from "./types";
+import { MOBILE_NATIVE_ORIGIN } from "@oko-wallet-attached/requests/endpoints";
 import { useAppState } from "@oko-wallet-attached/store/app";
 import { useMemoryState } from "@oko-wallet-attached/store/memory";
 
@@ -90,6 +91,28 @@ export function makeMsgHandler() {
       port,
       hostOrigin: event.origin,
     };
+
+    // Mobile native (attached_proxy_web) 경유 시,
+    // open_modal의 nested payload origin을 storage-compatible origin으로 정규화.
+    // event.origin이 허용된 프록시 origin일 때만 수행.
+    if (message.msg_type === "open_modal") {
+      const memState = useMemoryState.getState();
+      if (
+        memState.isMobileNative &&
+        memState.hostOrigin &&
+        MOBILE_NATIVE_ORIGIN &&
+        event.origin === MOBILE_NATIVE_ORIGIN
+      ) {
+        const nested = (message as any).payload?.data?.payload;
+        if (
+          nested &&
+          "origin" in nested &&
+          nested.origin !== memState.hostOrigin
+        ) {
+          nested.origin = memState.hostOrigin;
+        }
+      }
+    }
 
     switch (message.msg_type) {
       case "set_oauth_nonce": {

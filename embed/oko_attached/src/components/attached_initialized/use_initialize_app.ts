@@ -27,7 +27,8 @@ import { OAUTH_BROADCAST_CHANNEL } from "@oko-wallet-attached/window_msgs/target
 import type { MsgEventContext } from "@oko-wallet-attached/window_msgs/types";
 
 export function useInitializeApp() {
-  const { setHostOrigin, setReferralInfo } = useMemoryState();
+  const { setHostOrigin, setIsMobileNative, setReferralInfo } =
+    useMemoryState();
   const { getAuthToken, getWallet, setAuthToken, setTheme, getTheme } =
     useAppState();
   const [isHydrated, setIsHydrated] = useState(false);
@@ -122,6 +123,9 @@ export function useInitializeApp() {
 
         setHostOrigin(hostOrigin);
 
+        const isMobileNative = searchParams.get("mobile_native") === "true";
+        setIsMobileNative(isMobileNative);
+
         setReferralInfo({
           origin: hostOrigin,
           utmSource,
@@ -141,11 +145,9 @@ export function useInitializeApp() {
         const themeResult = await determineTheme(hostOrigin, oldTheme);
         const determinedThemeByCustomer = themeResult.theme;
 
-        const isMobileParam = searchParams.get("mobile") === "true";
-
         // Mobile: watch for system theme settling
         // (Chrome Custom Tab may report "light" initially then switch to "dark")
-        if (isMobileParam && themeResult.usesSystemPreference) {
+        if (isMobileNative && themeResult.usesSystemPreference) {
           const mq = window.matchMedia("(prefers-color-scheme: dark)");
           mq.addEventListener("change", () => {
             const t: typeof determinedThemeByCustomer = mq.matches

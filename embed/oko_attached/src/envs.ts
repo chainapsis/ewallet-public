@@ -15,6 +15,11 @@ export const envSchema = z.object({
   VITE_TELEGRAM_BOT_NAME: z.string(),
   VITE_USER_DASHBOARD_ORIGINS: z.string(),
 
+  VITE_MOBILE_NATIVE_ORIGIN: z
+    .string()
+    .optional()
+    .default("http://localhost:3207"),
+
   // Fee sponsorship (Base chain)
   VITE_FEE_SPONSORSHIP_ENDPOINT: z
     .string()

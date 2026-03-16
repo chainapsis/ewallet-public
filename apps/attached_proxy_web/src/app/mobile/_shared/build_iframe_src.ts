@@ -14,7 +14,7 @@ export function buildIframeSrc(hostOrigin: string, apiKey: string): string {
   if (apiKey) {
     url.searchParams.set("api_key", apiKey);
   }
-  url.searchParams.set("mobile", "true");
+  url.searchParams.set("mobile_native", "true");
   return url.toString();
 }
 
