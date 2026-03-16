@@ -608,8 +608,8 @@ function SolanaSection({ wallet }: { wallet: OkoWalletRN }) {
     }
   }, [ensureConnected]);
 
-  const handleSignAllTransactions = useCallback(async () => {
-    setLoading("signAll");
+  const handleMultiSolTransfer = useCallback(async () => {
+    setLoading("multiSol");
     setResult(null);
     try {
       const svm = await ensureConnected();
@@ -617,36 +617,95 @@ function SolanaSection({ wallet }: { wallet: OkoWalletRN }) {
         Connection,
         PublicKey,
         SystemProgram,
-        TransactionMessage,
-        VersionedTransaction,
+        Transaction,
         LAMPORTS_PER_SOL,
       } = require("@solana/web3.js");
 
       const connection = new Connection(SOLANA_RPC_URL);
-      const toAddress = new PublicKey("11111111111111111111111111111111");
       const { blockhash } = await connection.getLatestBlockhash();
 
-      const transactions: any[] = [];
+      const tx = new Transaction({
+        recentBlockhash: blockhash,
+        feePayer: svm.publicKey!,
+      });
+
       for (let i = 0; i < 3; i++) {
-        const instructions = [
+        tx.add(
           SystemProgram.transfer({
             fromPubkey: svm.publicKey!,
-            toPubkey: toAddress,
-            lamports: (i + 1) * 0.001 * LAMPORTS_PER_SOL,
+            toPubkey: new PublicKey(`1111111111111111111111111111111${i + 2}`),
+            lamports: (0.0001 + i * 0.0001) * LAMPORTS_PER_SOL,
           }),
-        ];
-
-        const messageV0 = new TransactionMessage({
-          payerKey: svm.publicKey!,
-          recentBlockhash: blockhash,
-          instructions,
-        }).compileToV0Message();
-
-        transactions.push(new VersionedTransaction(messageV0));
+        );
       }
 
-      const signed = await svm.signAllTransactions(transactions);
-      setResult(`SignAll OK (${signed.length} txs signed)`);
+      const signed = await svm.signTransaction(tx);
+      setResult(
+        `Multi SOL Transfer OK: ${Buffer.from(signed.signatures[0]).toString("hex").slice(0, 30)}...`,
+      );
+    } catch (err) {
+      setResult(`Error: ${err}`);
+    } finally {
+      setLoading(null);
+    }
+  }, [ensureConnected]);
+
+  const handleNativeStake = useCallback(async () => {
+    setLoading("stake");
+    setResult(null);
+    try {
+      const svm = await ensureConnected();
+      const {
+        Connection,
+        PublicKey,
+        Keypair,
+        Transaction,
+        StakeProgram,
+        Authorized,
+        Lockup,
+        LAMPORTS_PER_SOL,
+      } = require("@solana/web3.js");
+
+      const connection = new Connection(SOLANA_RPC_URL);
+      const { blockhash } = await connection.getLatestBlockhash();
+
+      const stakeAccount = Keypair.generate();
+      const validatorVoteAccount = new PublicKey(
+        "CertusDeBmqN8ZawdkxK5kFGMwBXdudvWHYwtNgNhvLu",
+      );
+
+      const stakeAmount = 1 * LAMPORTS_PER_SOL;
+      const rentExemptAmount = 2282880;
+
+      const tx = new Transaction({
+        recentBlockhash: blockhash,
+        feePayer: svm.publicKey!,
+      });
+
+      tx.add(
+        StakeProgram.createAccount({
+          fromPubkey: svm.publicKey!,
+          stakePubkey: stakeAccount.publicKey,
+          authorized: new Authorized(svm.publicKey!, svm.publicKey!),
+          lockup: new Lockup(0, 0, svm.publicKey!),
+          lamports: stakeAmount + rentExemptAmount,
+        }),
+      );
+
+      tx.add(
+        StakeProgram.delegate({
+          stakePubkey: stakeAccount.publicKey,
+          authorizedPubkey: svm.publicKey!,
+          votePubkey: validatorVoteAccount,
+        }),
+      );
+
+      tx.partialSign(stakeAccount);
+
+      const signed = await svm.signTransaction(tx);
+      setResult(
+        `Stake OK: ${Buffer.from(signed.signatures[0]).toString("hex").slice(0, 30)}...`,
+      );
     } catch (err) {
       setResult(`Error: ${err}`);
     } finally {
@@ -680,9 +739,16 @@ function SolanaSection({ wallet }: { wallet: OkoWalletRN }) {
           loading={loading === "signTx"}
         />
         <Btn
-          title="signAllTransactions"
-          onPress={handleSignAllTransactions}
-          loading={loading === "signAll"}
+          title="multiSolTransfer"
+          onPress={handleMultiSolTransfer}
+          loading={loading === "multiSol"}
+        />
+      </View>
+      <View style={styles.btnRow}>
+        <Btn
+          title="nativeStake"
+          onPress={handleNativeStake}
+          loading={loading === "stake"}
         />
       </View>
       {result && <Text style={styles.result}>{result}</Text>}
