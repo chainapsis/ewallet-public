@@ -10,7 +10,9 @@ export function buildSignInMessage(
 ): string {
   const lines: string[] = [];
 
-  const domain = input.domain ?? window.location.host;
+  const domain =
+    input.domain ??
+    (typeof window !== "undefined" ? window.location.host : "");
   lines.push(`${domain} wants you to sign in with your Solana account:`);
   lines.push(input.address ?? address);
 

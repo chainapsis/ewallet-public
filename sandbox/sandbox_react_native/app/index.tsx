@@ -3,6 +3,10 @@ import type { OkoWalletRN } from "@oko-wallet/oko-sdk-core-react-native";
 import { useOkoWallet } from "@oko-wallet/oko-sdk-core-react-native";
 import { OkoCosmosWallet } from "@oko-wallet/oko-sdk-cosmos";
 import { OkoEthWallet } from "@oko-wallet/oko-sdk-eth";
+import {
+  OkoSvmWallet,
+  type OkoSvmWalletInterface,
+} from "@oko-wallet/oko-sdk-svm";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
@@ -502,18 +506,19 @@ function EthSection({ wallet }: { wallet: OkoWalletRN }) {
 // ─── Solana ───
 
 function SolanaSection({ wallet }: { wallet: OkoWalletRN }) {
-  const svmRef = useMemo<{ current: any }>(() => ({ current: null }), []);
+  const svmRef = useMemo<{ current: OkoSvmWalletInterface | null }>(
+    () => ({ current: null }),
+    [],
+  );
   const [loading, setLoading] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
 
   const getSvm = useCallback(() => {
     if (!svmRef.current) {
-      require("react-native-get-random-values");
-      const { OkoSvmWallet } = require("@oko-wallet/oko-sdk-svm");
       svmRef.current = new OkoSvmWallet(
         wallet as unknown as OkoWalletInterface,
         { chain_id: "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1" },
-      );
+      ) as unknown as OkoSvmWalletInterface;
     }
     return svmRef.current;
   }, [wallet, svmRef]);
