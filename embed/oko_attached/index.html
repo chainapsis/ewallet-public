@@ -5,6 +5,16 @@
     <link rel="icon" type="image/svg+xml" href="/oko_favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Oko Attached" />
+    <meta
+      name="theme-color"
+      content="#ffffff"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#0c0e12"
+      media="(prefers-color-scheme: dark)"
+    />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://attached.oko.app" />
     <meta property="og:title" content="Oko Attached" />
@@ -15,6 +25,29 @@
       content="https://oko-wallet.s3.ap-northeast-2.amazonaws.com/assets/oko-og-image.png"
     />
     <title>Login - Oko Wallet</title>
+    <script>
+      // Apply system theme before first paint to prevent light-to-dark flash
+      (function () {
+        var isDark =
+          window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches;
+        var isPopup = window.parent === window;
+        if (isDark) {
+          document.documentElement.setAttribute("data-theme", "dark");
+          document.documentElement.style.backgroundColor = "#0c0e12";
+        } else {
+          document.documentElement.style.backgroundColor = "#ffffff";
+        }
+        // Set color-scheme for popup/standalone contexts so iOS Safari
+        // renders browser chrome (status bar, toolbar) in the correct theme.
+        // Skipped in iframe context to avoid the known black-background bug.
+        if (isPopup) {
+          document.documentElement.style.colorScheme = isDark
+            ? "dark"
+            : "light";
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

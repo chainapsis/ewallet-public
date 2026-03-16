@@ -17,6 +17,10 @@ export function useSetThemeInCallback(providerType: AuthType) {
   const [_theme, _setTheme] = useState<Theme>(initialTheme);
 
   useLayoutEffect(() => {
+    // Apply system theme synchronously before the async API call
+    // to prevent the white flash on dark-mode devices.
+    setColorScheme(initialTheme);
+
     async function fn() {
       let hostOrigin: string | null = null;
       if (providerType === "google") {
