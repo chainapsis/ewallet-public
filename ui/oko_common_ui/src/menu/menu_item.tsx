@@ -12,6 +12,7 @@ export type MenuItemProps = {
   active: boolean;
   label: string;
   href: string;
+  onClick?: () => void;
 };
 
 export const MenuItem: FC<MenuItemProps> = ({
@@ -19,9 +20,10 @@ export const MenuItem: FC<MenuItemProps> = ({
   Icon,
   active = false,
   href,
+  onClick,
 }) => {
   return (
-    <Link href={href}>
+    <Link href={href} onClick={onClick}>
       <li className={cn(styles.wrapper, { [styles.active]: active })}>
         {Icon}
         <Typography
