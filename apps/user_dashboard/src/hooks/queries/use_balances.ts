@@ -21,6 +21,7 @@ import { fetchFactoryTokenMeta } from "@oko-wallet-user-dashboard/fetch/factory_
 import { fetchOsmosisAssetList } from "@oko-wallet-user-dashboard/fetch/osmosis_asset_list";
 import { fetchSplTokenBalances } from "@oko-wallet-user-dashboard/fetch/spl_token_balances";
 import { DEFAULT_ENABLED_CHAINS } from "@oko-wallet-user-dashboard/state/chains";
+import { useUserInfoState } from "@oko-wallet-user-dashboard/state/user_info";
 import { useAssetMetaStore } from "@oko-wallet-user-dashboard/store/asset_meta";
 import type {
   Currency,
@@ -715,6 +716,7 @@ export function useAllBalances() {
   const { address: svmAddress, isLoading: svmLoading } = useSVMAddress();
   const { addresses: cosmosAddresses, isLoading: addressesLoading } =
     useCosmosAddresses();
+  const publicKey = useUserInfoState((state) => state.publicKey);
 
   const balanceQueries = useQueries({
     queries: enabledChains.map((chain) => {
@@ -728,6 +730,7 @@ export function useAllBalances() {
       return {
         queryKey: [
           "balances",
+          publicKey,
           chain.chainId,
           cosmosAddress,
           ethAddress,
@@ -750,12 +753,19 @@ export function useAllBalances() {
           (isSVM && !!svmAddress),
         staleTime: 30 * 1000,
         refetchInterval: 60 * 1000,
+        gcTime: Infinity,
       };
     }),
   });
 
   const allBalances = balanceQueries
-    .flatMap((query) => query.data ?? [])
+    .flatMap((query) =>
+      (query.data ?? []).map((b) => ({
+        ...b,
+        isFetching: query.isLoading,
+        error: new Error("Test error"), // TODO: 테스트 후 원복 → query.error instanceof Error ? query.error : undefined,
+      })),
+    )
     .map((balance) => ({
       ...balance,
       priceUsd: balance.token.currency.coinGeckoId
