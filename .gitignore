@@ -414,6 +414,7 @@ $RECYCLE.BIN/
 .plan
 .docs
 .omc/
+.omx/
 
 # Postgres
 pg_data/

@@ -68,10 +68,17 @@ export function RpcClient({
       // Patch origin for methods that use it.
       // Must use this page's origin (the host that loaded the iframe),
       // not ATTACHED_ORIGIN, because the wallet is stored under host_origin.
+      // Preserve the original origin as app_origin so the attached modal
+      // can still detect demo/sandbox contexts (e.g. custom-scheme origins
+      // like "myapp://" from native apps).
       if (payload && typeof payload === "object" && "data" in payload) {
-        const data = (payload as { data?: { payload?: { origin?: string } } })
-          .data;
+        const data = (
+          payload as {
+            data?: { payload?: { origin?: string; app_origin?: string } };
+          }
+        ).data;
         if (data?.payload && "origin" in data.payload) {
+          data.payload.app_origin = data.payload.origin;
           data.payload.origin = window.location.origin;
         }
       }

@@ -3,6 +3,10 @@ import type { OkoWalletRN } from "@oko-wallet/oko-sdk-core-react-native";
 import { useOkoWallet } from "@oko-wallet/oko-sdk-core-react-native";
 import { OkoCosmosWallet } from "@oko-wallet/oko-sdk-cosmos";
 import { OkoEthWallet } from "@oko-wallet/oko-sdk-eth";
+import {
+  OkoSvmWallet,
+  type OkoSvmWalletInterface,
+} from "@oko-wallet/oko-sdk-svm";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
@@ -502,18 +506,19 @@ function EthSection({ wallet }: { wallet: OkoWalletRN }) {
 // ─── Solana ───
 
 function SolanaSection({ wallet }: { wallet: OkoWalletRN }) {
-  const svmRef = useMemo<{ current: any }>(() => ({ current: null }), []);
+  const svmRef = useMemo<{ current: OkoSvmWalletInterface | null }>(
+    () => ({ current: null }),
+    [],
+  );
   const [loading, setLoading] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
 
   const getSvm = useCallback(() => {
     if (!svmRef.current) {
-      require("react-native-get-random-values");
-      const { OkoSvmWallet } = require("@oko-wallet/oko-sdk-svm");
       svmRef.current = new OkoSvmWallet(
         wallet as unknown as OkoWalletInterface,
         { chain_id: "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1" },
-      );
+      ) as unknown as OkoSvmWalletInterface;
     }
     return svmRef.current;
   }, [wallet, svmRef]);
@@ -603,8 +608,8 @@ function SolanaSection({ wallet }: { wallet: OkoWalletRN }) {
     }
   }, [ensureConnected]);
 
-  const handleSignAllTransactions = useCallback(async () => {
-    setLoading("signAll");
+  const handleMultiSolTransfer = useCallback(async () => {
+    setLoading("multiSol");
     setResult(null);
     try {
       const svm = await ensureConnected();
@@ -612,36 +617,189 @@ function SolanaSection({ wallet }: { wallet: OkoWalletRN }) {
         Connection,
         PublicKey,
         SystemProgram,
-        TransactionMessage,
-        VersionedTransaction,
+        Transaction,
         LAMPORTS_PER_SOL,
       } = require("@solana/web3.js");
 
       const connection = new Connection(SOLANA_RPC_URL);
-      const toAddress = new PublicKey("11111111111111111111111111111111");
       const { blockhash } = await connection.getLatestBlockhash();
 
-      const transactions: any[] = [];
+      const tx = new Transaction({
+        recentBlockhash: blockhash,
+        feePayer: svm.publicKey!,
+      });
+
       for (let i = 0; i < 3; i++) {
-        const instructions = [
+        tx.add(
           SystemProgram.transfer({
             fromPubkey: svm.publicKey!,
-            toPubkey: toAddress,
-            lamports: (i + 1) * 0.001 * LAMPORTS_PER_SOL,
+            toPubkey: new PublicKey(`1111111111111111111111111111111${i + 2}`),
+            lamports: (0.0001 + i * 0.0001) * LAMPORTS_PER_SOL,
           }),
-        ];
-
-        const messageV0 = new TransactionMessage({
-          payerKey: svm.publicKey!,
-          recentBlockhash: blockhash,
-          instructions,
-        }).compileToV0Message();
-
-        transactions.push(new VersionedTransaction(messageV0));
+        );
       }
 
-      const signed = await svm.signAllTransactions(transactions);
-      setResult(`SignAll OK (${signed.length} txs signed)`);
+      const signed = await svm.signTransaction(tx);
+      setResult(
+        `Multi SOL Transfer OK: ${Buffer.from(signed.signature!).toString("hex").slice(0, 30)}...`,
+      );
+    } catch (err) {
+      setResult(`Error: ${err}`);
+    } finally {
+      setLoading(null);
+    }
+  }, [ensureConnected]);
+
+  const handleNativeStake = useCallback(async () => {
+    setLoading("stake");
+    setResult(null);
+    try {
+      const svm = await ensureConnected();
+      const {
+        Connection,
+        PublicKey,
+        Keypair,
+        Transaction,
+        StakeProgram,
+        Authorized,
+        Lockup,
+        LAMPORTS_PER_SOL,
+      } = require("@solana/web3.js");
+
+      const connection = new Connection(SOLANA_RPC_URL);
+      const { blockhash } = await connection.getLatestBlockhash();
+
+      const stakeAccount = Keypair.generate();
+      const validatorVoteAccount = new PublicKey(
+        "CertusDeBmqN8ZawdkxK5kFGMwBXdudvWHYwtNgNhvLu",
+      );
+
+      const stakeAmount = 1 * LAMPORTS_PER_SOL;
+      const rentExemptAmount = 2282880;
+
+      const tx = new Transaction({
+        recentBlockhash: blockhash,
+        feePayer: svm.publicKey!,
+      });
+
+      tx.add(
+        StakeProgram.createAccount({
+          fromPubkey: svm.publicKey!,
+          stakePubkey: stakeAccount.publicKey,
+          authorized: new Authorized(svm.publicKey!, svm.publicKey!),
+          lockup: new Lockup(0, 0, svm.publicKey!),
+          lamports: stakeAmount + rentExemptAmount,
+        }),
+      );
+
+      tx.add(
+        StakeProgram.delegate({
+          stakePubkey: stakeAccount.publicKey,
+          authorizedPubkey: svm.publicKey!,
+          votePubkey: validatorVoteAccount,
+        }),
+      );
+
+      tx.partialSign(stakeAccount);
+
+      const signed = await svm.signTransaction(tx);
+      setResult(
+        `Stake OK: ${Buffer.from(signed.signature!).toString("hex").slice(0, 30)}...`,
+      );
+    } catch (err) {
+      setResult(`Error: ${err}`);
+    } finally {
+      setLoading(null);
+    }
+  }, [ensureConnected]);
+
+  const handleSwapDemo = useCallback(async () => {
+    setLoading("swap");
+    setResult(null);
+    try {
+      const svm = await ensureConnected();
+      const {
+        Connection,
+        PublicKey,
+        ComputeBudgetProgram,
+        Transaction,
+        TransactionInstruction,
+      } = require("@solana/web3.js");
+
+      const TOKEN_PROGRAM_ID = new PublicKey(
+        "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      );
+
+      const connection = new Connection(SOLANA_RPC_URL);
+      const { blockhash } = await connection.getLatestBlockhash();
+
+      const tx = new Transaction({
+        recentBlockhash: blockhash,
+        feePayer: svm.publicKey!,
+      });
+
+      // Compute Budget instructions
+      tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 }));
+      tx.add(
+        ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 1_000 }),
+      );
+
+      // Token Approve instruction
+      const mockTokenAccount = PublicKey.findProgramAddressSync(
+        [
+          svm.publicKey!.toBuffer(),
+          TOKEN_PROGRAM_ID.toBuffer(),
+          new PublicKey(
+            "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
+          ).toBuffer(),
+        ],
+        new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"),
+      )[0];
+
+      const approveData = Buffer.alloc(9);
+      approveData.writeUInt8(4, 0);
+      approveData.writeBigUInt64LE(BigInt(1_000_000), 1);
+
+      tx.add(
+        new TransactionInstruction({
+          keys: [
+            { pubkey: mockTokenAccount, isSigner: false, isWritable: true },
+            {
+              pubkey: new PublicKey("11111111111111111111111111111112"),
+              isSigner: false,
+              isWritable: false,
+            },
+            { pubkey: svm.publicKey!, isSigner: true, isWritable: false },
+          ],
+          programId: TOKEN_PROGRAM_ID,
+          data: approveData,
+        }),
+      );
+
+      // Transfer instructions simulating swap internals
+      for (let i = 0; i < 3; i++) {
+        tx.add(
+          new TransactionInstruction({
+            keys: [
+              { pubkey: svm.publicKey!, isSigner: true, isWritable: true },
+              {
+                pubkey: new PublicKey(
+                  `1111111111111111111111111111111${i + 2}`,
+                ),
+                isSigner: false,
+                isWritable: true,
+              },
+            ],
+            programId: TOKEN_PROGRAM_ID,
+            data: Buffer.from([3, ...new Array(8).fill(0)]),
+          }),
+        );
+      }
+
+      const signed = await svm.signTransaction(tx);
+      setResult(
+        `Swap Demo OK: ${Buffer.from(signed.signature!).toString("hex").slice(0, 30)}...`,
+      );
     } catch (err) {
       setResult(`Error: ${err}`);
     } finally {
@@ -675,9 +833,21 @@ function SolanaSection({ wallet }: { wallet: OkoWalletRN }) {
           loading={loading === "signTx"}
         />
         <Btn
-          title="signAllTransactions"
-          onPress={handleSignAllTransactions}
-          loading={loading === "signAll"}
+          title="multiSolTransfer"
+          onPress={handleMultiSolTransfer}
+          loading={loading === "multiSol"}
+        />
+      </View>
+      <View style={styles.btnRow}>
+        <Btn
+          title="nativeStake"
+          onPress={handleNativeStake}
+          loading={loading === "stake"}
+        />
+        <Btn
+          title="swapDemo"
+          onPress={handleSwapDemo}
+          loading={loading === "swap"}
         />
       </View>
       {result && <Text style={styles.result}>{result}</Text>}
