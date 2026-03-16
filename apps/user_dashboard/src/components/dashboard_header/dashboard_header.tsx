@@ -8,6 +8,7 @@ import { ExternalLinkOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/extern
 import { GithubIcon } from "@oko-wallet/oko-common-ui/icons/github_icon";
 import { GoogleIcon } from "@oko-wallet/oko-common-ui/icons/google_icon";
 import { LogoutIcon } from "@oko-wallet/oko-common-ui/icons/logout";
+import { MailboxIcon } from "@oko-wallet/oko-common-ui/icons/mailbox";
 import { MenuIcon } from "@oko-wallet/oko-common-ui/icons/menu";
 import { TelegramIcon } from "@oko-wallet/oko-common-ui/icons/telegram_icon";
 import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
@@ -44,6 +45,25 @@ function getAuthProviderIcon(authType: AuthType | null, size = 16): ReactNode {
       return <XIcon size={size} />;
     case "github":
       return <GithubIcon size={size} />;
+    default:
+      return null;
+  }
+}
+
+function getMobileTriggerIcon(authType: AuthType | null): ReactNode {
+  switch (authType) {
+    case "google":
+      return <GoogleIcon width={24} height={24} />;
+    case "discord":
+      return <DiscordIcon size={20} />;
+    case "telegram":
+      return <TelegramIcon size={24} />;
+    case "x":
+      return <XIcon size={24} />;
+    case "github":
+      return <GithubIcon size={24} />;
+    case "auth0":
+      return <MailboxIcon size={20} color="var(--fg-tertiary)" />;
     default:
       return null;
   }
@@ -129,14 +149,23 @@ export const DashboardHeader: FC<{
 
   return (
     <div className={styles.wrapper} style={{ position }}>
-      <img
-        src={logoVariant === "white" ? OKO_LOGO_WHITE_URL : OKO_LOGO_URL}
-        alt="Oko"
-        width={72}
-        height={28}
-        className={styles.logo}
-        onClick={() => router.push(paths.home)}
-      />
+      <div className={styles.leftSection}>
+        <span className={styles.menuIconWrapper} onClick={toggleLeftBarOpen}>
+          {isLeftBarOpen ? (
+            <XCloseIcon color="var(--fg-primary)" size={24} />
+          ) : (
+            <MenuIcon color="var(--fg-primary)" size={24} />
+          )}
+        </span>
+        <img
+          src={logoVariant === "white" ? OKO_LOGO_WHITE_URL : OKO_LOGO_URL}
+          alt="Oko"
+          width={72}
+          height={28}
+          className={styles.logo}
+          onClick={() => router.push(paths.home)}
+        />
+      </div>
 
       <div className={styles.rightSection}>
         {isSignedIn && (
@@ -158,11 +187,9 @@ export const DashboardHeader: FC<{
               placement="bottom-end"
               TriggerComponent={
                 <>
-                  {authType !== "auth0" && (
-                    <span className={styles.mobileMenuTrigger}>
-                      {getAuthProviderIcon(authType, 24)}
-                    </span>
-                  )}
+                  <span className={styles.mobileMenuTrigger}>
+                    {getMobileTriggerIcon(authType)}
+                  </span>
                   <span className={styles.desktopMenuTrigger}>
                     <IconButton
                       hierarchy="tertiary"
@@ -257,14 +284,6 @@ export const DashboardHeader: FC<{
             />
           </div>
         )}
-
-        <span className={styles.menuIconWrapper} onClick={toggleLeftBarOpen}>
-          {isLeftBarOpen ? (
-            <XCloseIcon color="var(--fg-primary)" size={24} />
-          ) : (
-            <MenuIcon color="var(--fg-primary)" size={24} />
-          )}
-        </span>
       </div>
     </div>
   );

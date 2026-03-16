@@ -15,6 +15,12 @@
   }
 }
 
+.leftSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .logo {
   flex-shrink: 0;
   cursor: pointer;
@@ -29,7 +35,9 @@
 .menuIconWrapper {
   display: flex;
   align-items: center;
-  height: 100%;
+  justify-content: center;
+  padding: 8px;
+  cursor: pointer;
 
   @media (min-width: $desktop_min_width) {
     display: none;
@@ -62,15 +70,21 @@
   }
 }
 
-// Mobile menu trigger: auth icon in circle
+// Mobile menu trigger: auth icon in circle (32px visual, 40px touch area)
 .mobileMenuTrigger {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--bg-tertiary);
-  border-radius: 50%;
+  width: 32px;
+  height: 32px;
   padding: 4px;
+  box-sizing: content-box;
+  background-color: var(--bg-tertiary);
+  background-clip: content-box;
+  border-radius: 50%;
+  overflow: hidden;
   cursor: pointer;
+  flex-shrink: 0;
 
   @media (min-width: $desktop_min_width) {
     display: none;
