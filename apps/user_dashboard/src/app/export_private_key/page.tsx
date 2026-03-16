@@ -607,10 +607,12 @@ const Page = () => {
         const errorType = !resAny.payload.success
           ? resAny.payload.error.type
           : "unknown";
+        const isMobile = window.innerWidth < 769;
         displayToast({
           variant: "confirm",
           title: "Login Failed!",
           description: getExportErrorDescription(errorType),
+          toastOptions: isMobile ? { position: "bottom-center" } : undefined,
         });
       }
     } catch (error) {
@@ -623,10 +625,12 @@ const Page = () => {
         error instanceof Error && error.message === "EXPORT_TIMEOUT"
           ? "Export timed out. Please try again."
           : "Please try again.";
+      const isMobile = window.innerWidth < 769;
       displayToast({
         variant: "confirm",
         title: "Login Failed!",
         description,
+        toastOptions: isMobile ? { position: "bottom-center" } : undefined,
       });
     } finally {
       if (reauthHandler) {

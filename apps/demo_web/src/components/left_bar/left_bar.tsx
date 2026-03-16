@@ -8,8 +8,8 @@ import type { FC } from "react";
 
 import { IntegrationCard } from "./integration_card/integration_card";
 import styles from "./left_bar.module.scss";
+import { ThemeButton } from "@oko-wallet-demo-web/components/theme/theme_button";
 import { useViewState } from "@oko-wallet-demo-web/state/view";
-// import { ThemeButton } from "@oko-wallet-demo-web/components/theme/theme_button";
 
 export const LeftBar: FC = () => {
   const isLeftBarOpen = useViewState((state) => state.isLeftBarOpen);
@@ -44,7 +44,7 @@ export const LeftBar: FC = () => {
             </>
           )}
 
-          {/* <ThemeButton /> */}
+          <ThemeButton />
         </div>
       </ul>
     </>
