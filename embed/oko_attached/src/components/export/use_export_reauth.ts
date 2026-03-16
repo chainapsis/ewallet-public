@@ -32,6 +32,15 @@ export function findEmbeddedIframe(): Window | null {
   return null;
 }
 
+function getHostOrigin(): string {
+  const params = new URLSearchParams(window.location.search);
+  const hostOrigin = params.get("host_origin");
+  if (hostOrigin) {
+    return hostOrigin;
+  }
+  return window.location.origin;
+}
+
 export function sendReauthParamsToIframe(
   iframe: Window,
   params: { nonce?: string; code_verifier?: string },
@@ -55,7 +64,7 @@ function buildGoogleOAuthUrl(nonce: string): string {
 
   const oauthState: OAuthState = {
     apiKey: "export_key_reauth",
-    targetOrigin: window.location.origin,
+    targetOrigin: getHostOrigin(),
     provider: "google",
   };
 
@@ -76,7 +85,7 @@ function buildXOAuthUrl(codeChallenge: string): string {
 
   const oauthState: OAuthState = {
     apiKey: "export_key_reauth",
-    targetOrigin: window.location.origin,
+    targetOrigin: getHostOrigin(),
     provider: "x",
   };
   const oauthStateString = btoa(JSON.stringify(oauthState));
@@ -98,7 +107,7 @@ function buildDiscordOAuthUrl(codeChallenge: string): string {
 
   const oauthState: OAuthState = {
     apiKey: "export_key_reauth",
-    targetOrigin: window.location.origin,
+    targetOrigin: getHostOrigin(),
     provider: "discord",
   };
   const oauthStateString = btoa(JSON.stringify(oauthState));
@@ -120,7 +129,7 @@ function buildGithubOAuthUrl(codeChallenge: string): string {
 
   const oauthState: OAuthState = {
     apiKey: "export_key_reauth",
-    targetOrigin: window.location.origin,
+    targetOrigin: getHostOrigin(),
     provider: "github",
   };
   const oauthStateString = btoa(JSON.stringify(oauthState));
