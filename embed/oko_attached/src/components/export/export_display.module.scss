@@ -1,4 +1,4 @@
-:root {
+:global(:root) {
   --bg-secondary: #fafafa;
   --bg-secondary-hover: #f5f5f5;
   --text-primary: #181d27;
@@ -6,7 +6,7 @@
   --fg-primary: #181d27;
 }
 
-html {
+:global(html) {
   margin: 0;
   padding: 0;
   scrollbar-width: none;
@@ -16,7 +16,7 @@ html {
   }
 }
 
-body {
+:global(body) {
   margin: 0;
   padding: 0;
 }
