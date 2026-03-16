@@ -69,6 +69,11 @@
 
 // ── Mobile app mode overrides ──
 
+:global(html[data-mobile]) .originFavicon {
+  width: 24px;
+  height: 24px;
+}
+
 :global(html[data-mobile]) .chainInfoRow {
   row-gap: 8px;
 }
