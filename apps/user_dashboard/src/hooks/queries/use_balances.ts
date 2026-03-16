@@ -763,7 +763,7 @@ export function useAllBalances() {
       (query.data ?? []).map((b) => ({
         ...b,
         isFetching: query.isLoading,
-        error: new Error("Test error"), // TODO: 테스트 후 원복 → query.error instanceof Error ? query.error : undefined,
+        error: query.error instanceof Error ? query.error : undefined,
       })),
     )
     .map((balance) => ({
