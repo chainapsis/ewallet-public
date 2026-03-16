@@ -641,7 +641,7 @@ function SolanaSection({ wallet }: { wallet: OkoWalletRN }) {
 
       const signed = await svm.signTransaction(tx);
       setResult(
-        `Multi SOL Transfer OK: ${Buffer.from(signed.signatures[0]).toString("hex").slice(0, 30)}...`,
+        `Multi SOL Transfer OK: ${Buffer.from(signed.signature!).toString("hex").slice(0, 30)}...`,
       );
     } catch (err) {
       setResult(`Error: ${err}`);
@@ -704,7 +704,7 @@ function SolanaSection({ wallet }: { wallet: OkoWalletRN }) {
 
       const signed = await svm.signTransaction(tx);
       setResult(
-        `Stake OK: ${Buffer.from(signed.signatures[0]).toString("hex").slice(0, 30)}...`,
+        `Stake OK: ${Buffer.from(signed.signature!).toString("hex").slice(0, 30)}...`,
       );
     } catch (err) {
       setResult(`Error: ${err}`);
