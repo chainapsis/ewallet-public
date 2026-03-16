@@ -7,3 +7,9 @@
   overflow: hidden;
   box-sizing: border-box;
 }
+
+// Mobile: overlay scrollbar doesn't reserve gutter space,
+// so increase right padding to compensate (12px + 4px code padding = 16px)
+:global(html[data-mobile]) .codeBlockContainer {
+  padding-right: 12px;
+}
