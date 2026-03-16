@@ -1,12 +1,12 @@
 "use client";
 
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
 } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
-import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import type { FC, PropsWithChildren } from "react";
 
 import { OkoProvider } from "@oko-wallet-user-dashboard/components/oko_provider/oko_provider";
@@ -35,8 +35,7 @@ export const Providers: FC<PropsWithChildren> = ({ children }) => {
       persistOptions={{
         persister,
         dehydrateOptions: {
-          shouldDehydrateQuery: (query) =>
-            query.queryKey[0] === "balances",
+          shouldDehydrateQuery: (query) => query.queryKey[0] === "balances",
         },
       }}
     >
