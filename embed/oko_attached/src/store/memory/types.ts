@@ -21,6 +21,7 @@ export interface MemoryState {
   modalRequest: ModalRequest | null;
   error: AppError | null;
   referralInfo: ReferralInfo | null;
+  resolvedTheme: "light" | "dark" | null;
 }
 
 export interface MemoryActions {
@@ -31,4 +32,5 @@ export interface MemoryActions {
   clearError: () => void;
   setReferralInfo: (info: ReferralInfo) => void;
   clearReferralInfo: () => void;
+  setResolvedTheme: (theme: "light" | "dark") => void;
 }

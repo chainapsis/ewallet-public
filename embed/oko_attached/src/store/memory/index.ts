@@ -14,6 +14,7 @@ const initialState: MemoryState = {
   modalRequest: null,
   error: null,
   referralInfo: null,
+  resolvedTheme: null,
 };
 
 export const useMemoryState = create(
@@ -62,6 +63,9 @@ export const useMemoryState = create(
     },
     clearReferralInfo: () => {
       set({ referralInfo: null });
+    },
+    setResolvedTheme: (theme: "light" | "dark") => {
+      set({ resolvedTheme: theme });
     },
   })),
 );
