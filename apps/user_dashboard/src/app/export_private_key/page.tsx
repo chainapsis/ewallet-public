@@ -539,7 +539,7 @@ const Page = () => {
         `width=${popupWidth},height=${popupHeight},left=${popupLeft},top=${popupTop},resizable=yes`,
       );
       if (popup) {
-        popup.location.href = `${attachedOrigin}/export/reauth?auth_type=${authType}&email=${encodeURIComponent(email ?? "")}`;
+        popup.location.href = `${attachedOrigin}/export/reauth?auth_type=${authType}&email=${encodeURIComponent(email ?? "")}&host_origin=${encodeURIComponent(window.location.origin)}`;
       }
 
       // 2. Send export request to attached iframe
