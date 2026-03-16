@@ -44,10 +44,12 @@ export function displayToast({
   );
 }
 
-export const ToastContainer: FC = () => {
+export const ToastContainer: FC<{ stacked?: boolean }> = ({
+  stacked = true,
+}) => {
   return (
     <ReactToastifyToastContainer
-      stacked
+      stacked={stacked}
       transition={Bounce}
       toastClassName="custom-toast"
       closeButton={(props) => (

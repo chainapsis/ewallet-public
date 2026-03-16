@@ -3,9 +3,13 @@
 .container {
   display: flex;
   flex-wrap: wrap;
-  gap: 64px;
+  gap: 32px;
   align-items: flex-start;
   max-width: 1280px;
+
+  @media (min-width: $desktop_min_width) {
+    gap: 64px;
+  }
 }
 
 .heading {
@@ -13,7 +17,13 @@
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
-  min-width: 300px;
+  min-width: 0;
+  width: 100%;
+
+  @media (min-width: $desktop_min_width) {
+    min-width: 300px;
+    width: auto;
+  }
 }
 
 .headingIcon {
@@ -37,9 +47,13 @@
 
 .content {
   flex: 1 0 0;
-  min-width: 0;
-  max-width: 360px;
+  min-width: 300px;
+  max-width: none;
   padding: 2px 0;
+
+  @media (min-width: $desktop_min_width) {
+    max-width: 360px;
+  }
 }
 
 /* Step 1 styles */

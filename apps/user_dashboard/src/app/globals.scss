@@ -54,3 +54,12 @@ a {
     display: none;
   }
 }
+
+.Toastify__toast-container--bottom-center {
+  bottom: 16px;
+  left: 8px;
+  right: 8px;
+  width: auto;
+  transform: none;
+  padding: 0;
+}
