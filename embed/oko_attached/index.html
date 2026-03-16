@@ -31,11 +31,20 @@
         var isDark =
           window.matchMedia &&
           window.matchMedia("(prefers-color-scheme: dark)").matches;
+        var isPopup = window.parent === window;
         if (isDark) {
           document.documentElement.setAttribute("data-theme", "dark");
           document.documentElement.style.backgroundColor = "#0c0e12";
         } else {
           document.documentElement.style.backgroundColor = "#ffffff";
+        }
+        // Set color-scheme for popup/standalone contexts so iOS Safari
+        // renders browser chrome (status bar, toolbar) in the correct theme.
+        // Skipped in iframe context to avoid the known black-background bug.
+        if (isPopup) {
+          document.documentElement.style.colorScheme = isDark
+            ? "dark"
+            : "light";
         }
       })();
     </script>

@@ -21,11 +21,15 @@ export function setColorScheme(theme: Theme) {
     meta.setAttribute("content", themeColor);
   }
 
-  // NOTE - Applying a color-scheme to the body of an iframe causes a bug where,
+  // Set color-scheme for popup/standalone contexts so iOS Safari
+  // renders browser chrome (status bar, toolbar) in the correct theme.
+  // NOTE - Applying color-scheme in an iframe causes a bug where,
   // if the host site doesn't have a color-scheme and the browser's default is dark,
-  // the background changes to black.
-  // Therefore, we force a light mode in the iframe(in sdk_core not here) @retto
-  // root.style.colorScheme = "light dark";
+  // the background changes to black. Only apply in popup context. @retto
+  const isPopup = window.parent === window;
+  if (isPopup) {
+    root.style.colorScheme = theme;
+  }
 }
 
 function resolveTheme(theme: Theme): Theme | null {
