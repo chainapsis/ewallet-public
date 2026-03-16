@@ -1,6 +1,9 @@
-import type { FC } from "react";
+import { type FC, useId } from "react";
 
-export const XIcon: FC<TelegramIconProps> = ({ size = 24 }) => {
+export const XIcon: FC<XIconProps> = ({ size = 24 }) => {
+  const patternId = useId();
+  const imageId = useId();
+
   return (
     <svg
       width={size}
@@ -11,27 +14,21 @@ export const XIcon: FC<TelegramIconProps> = ({ size = 24 }) => {
       xmlnsXlink="http://www.w3.org/1999/xlink"
     >
       <rect x="2" y="2" width="20" height="20" rx="10" fill="#283544" />
-      <rect
-        x="7"
-        y="7"
-        width="10"
-        height="10"
-        fill="url(#pattern0_1385_14849)"
-      />
+      <rect x="7" y="7" width="10" height="10" fill={`url(#${patternId})`} />
       <defs>
         <pattern
-          id="pattern0_1385_14849"
+          id={patternId}
           patternContentUnits="objectBoundingBox"
           width="1"
           height="1"
         >
           <use
-            xlinkHref="#image0_1385_14849"
+            xlinkHref={`#${imageId}`}
             transform="translate(0 -0.0110417) scale(0.000416667)"
           />
         </pattern>
         <image
-          id="image0_1385_14849"
+          id={imageId}
           width="2400"
           height="2453"
           preserveAspectRatio="none"
@@ -42,6 +39,6 @@ export const XIcon: FC<TelegramIconProps> = ({ size = 24 }) => {
   );
 };
 
-export interface TelegramIconProps {
+export interface XIconProps {
   size?: number;
 }

@@ -6,11 +6,15 @@ interface ViewState {
 
 interface ViewAction {
   toggleLeftBarOpen: () => void;
+  setLeftBarOpen: (value: boolean) => void;
 }
 
 export const useViewState = create<ViewState & ViewAction>((set) => ({
   isLeftBarOpen: false,
   toggleLeftBarOpen: () => {
     set((state) => ({ isLeftBarOpen: !state.isLeftBarOpen }));
+  },
+  setLeftBarOpen: (value: boolean) => {
+    set({ isLeftBarOpen: value });
   },
 }));
