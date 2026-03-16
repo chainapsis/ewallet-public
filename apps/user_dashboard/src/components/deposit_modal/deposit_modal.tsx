@@ -55,7 +55,31 @@ export const DepositModal: FC<DepositModalProps> = ({ renderTrigger }) => {
     setSearchQuery(e.target.value);
   };
 
-  const searchFields = ["chainName"];
+  const searchFields = useMemo(
+    () => [
+      "chainName",
+      {
+        key: "currency",
+        function: (chain: ModularChainInfo) => {
+          if (chain.cosmos) {
+            return (
+              chain.cosmos.stakeCurrency?.coinDenom ||
+              chain.cosmos.currencies[0]?.coinDenom ||
+              ""
+            );
+          }
+          if (chain.evm) {
+            return chain.evm.currencies[0]?.coinDenom || "";
+          }
+          if (chain.svm) {
+            return chain.svm.currencies[0]?.coinDenom || "";
+          }
+          return "";
+        },
+      },
+    ],
+    [],
+  );
 
   const visibleChains = useMemo(() => {
     return enabledChains.filter(
@@ -169,7 +193,7 @@ export const DepositModal: FC<DepositModalProps> = ({ renderTrigger }) => {
                   <input
                     type="text"
                     className={styles.searchInput}
-                    placeholder="Search Chains"
+                    placeholder="Search Assets or Chains"
                     value={searchQuery}
                     onChange={handleSearchChange}
                     name="search-chains"
