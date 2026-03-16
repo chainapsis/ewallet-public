@@ -10,6 +10,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import styles from "./telegram_reauth.module.scss";
 import {
   findEmbeddedIframe,
+  getHostOrigin,
   sendReauthParamsToIframe,
 } from "./use_export_reauth";
 import { TELEGRAM_BOT_NAME } from "@oko-wallet-attached/config/telegram";
@@ -24,7 +25,7 @@ export const TelegramReauth = () => {
   const oauthState = useMemo<OAuthState>(
     () => ({
       apiKey: "export_key_reauth",
-      targetOrigin: window.location.origin,
+      targetOrigin: getHostOrigin(),
       provider: "telegram",
       modalId: "export_key_reauth",
     }),

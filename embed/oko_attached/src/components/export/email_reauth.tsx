@@ -9,6 +9,7 @@ import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./email_reauth.module.scss";
 import {
   findEmbeddedIframe,
+  getHostOrigin,
   sendReauthParamsToIframe,
 } from "./use_export_reauth";
 import { getAuth0WebAuth } from "@oko-wallet-attached/config/auth0";
@@ -62,7 +63,7 @@ export const EmailReauth = () => {
   const oauthState = useMemo<OAuthState>(
     () => ({
       apiKey: "export_key_reauth",
-      targetOrigin: window.location.origin,
+      targetOrigin: getHostOrigin(),
       provider: "auth0",
       modalId: "export_key_reauth",
     }),

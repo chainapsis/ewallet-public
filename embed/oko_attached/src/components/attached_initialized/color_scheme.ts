@@ -8,15 +8,28 @@ export function setColorScheme(theme: Theme) {
 
   root.setAttribute("data-theme", theme);
 
-  // Set color-scheme to support both light and dark
-  // Browser will automatically match parent dApp's color-scheme
-  // This prevents browser from adding opaque background
+  // Clear the inline backgroundColor set by the index.html pre-paint script,
+  // so the CSS variable from global.scss takes over.
+  root.style.backgroundColor = "";
 
-  // NOTE - Applying a color-scheme to the body of an iframe causes a bug where,
+  // Update <meta name="theme-color"> so iOS Safari browser chrome matches.
+  const themeColor = theme === "dark" ? "#0c0e12" : "#ffffff";
+  const metaTags = document.querySelectorAll<HTMLMetaElement>(
+    'meta[name="theme-color"]',
+  );
+  for (const meta of metaTags) {
+    meta.setAttribute("content", themeColor);
+  }
+
+  // Set color-scheme for popup/standalone contexts so iOS Safari
+  // renders browser chrome (status bar, toolbar) in the correct theme.
+  // NOTE - Applying color-scheme in an iframe causes a bug where,
   // if the host site doesn't have a color-scheme and the browser's default is dark,
-  // the background changes to black.
-  // Therefore, we force a light mode in the iframe(in sdk_core not here) @retto
-  // root.style.colorScheme = "light dark";
+  // the background changes to black. Only apply in popup context. @retto
+  const isPopup = window.parent === window;
+  if (isPopup) {
+    root.style.colorScheme = theme;
+  }
 }
 
 function resolveTheme(theme: Theme): Theme | null {
