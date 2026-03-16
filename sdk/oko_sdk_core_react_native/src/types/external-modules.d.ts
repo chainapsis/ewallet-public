@@ -1,7 +1,3 @@
-declare module "expo-modules-core" {
-  export function requireNativeModule<T = unknown>(moduleName: string): T;
-}
-
 declare module "@react-native-async-storage/async-storage" {
   const AsyncStorage: {
     setItem(key: string, value: string): Promise<void>;
@@ -22,8 +18,20 @@ declare module "expo-web-browser" {
   ): Promise<WebBrowserAuthSessionResult>;
 }
 
+declare module "react-native-inappbrowser-reborn" {
+  export interface InAppBrowserClassType {
+    openAuth(
+      url: string,
+      redirectUrl: string,
+      options?: { ephemeralWebSession?: boolean },
+    ): Promise<{ type: "success" | "cancel" | "dismiss"; url?: string }>;
+  }
+  export const InAppBrowser: InAppBrowserClassType;
+}
+
 declare module "react-native" {
   export const Platform: {
     OS: string;
   };
+  export const NativeModules: Record<string, any>;
 }

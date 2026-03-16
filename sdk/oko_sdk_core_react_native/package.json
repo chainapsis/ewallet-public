@@ -1,6 +1,6 @@
 {
   "name": "@oko-wallet/oko-sdk-core-react-native",
-  "version": "0.1.2-alpha.8",
+  "version": "0.2.0-alpha.0",
   "type": "module",
   "scripts": {
     "build": "tsx ./scripts/build.ts",
@@ -38,12 +38,17 @@
   },
   "peerDependencies": {
     "@react-native-async-storage/async-storage": ">=1.17",
-    "expo": ">=52",
-    "expo-linking": ">=7",
-    "expo-web-browser": ">=14",
     "react": ">=18",
     "react-native": ">=0.70",
     "react-native-get-random-values": ">=1"
+  },
+  "peerDependenciesMeta": {
+    "expo-web-browser": {
+      "optional": true
+    },
+    "react-native-inappbrowser-reborn": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@expo/config-plugins": "^55.0.6",

@@ -1,2 +1,21 @@
-<manifest>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <application>
+    <activity
+      android:name=".OkoAuthCallbackActivity"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="oko.auth.callback" />
+      </intent-filter>
+    </activity>
+
+    <activity
+      android:name=".OkoAuthManagementActivity"
+      android:exported="false"
+      android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+  </application>
+
 </manifest>
