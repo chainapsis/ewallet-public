@@ -45,16 +45,20 @@ export const useThemeSyncToIframe = () => {
     }
 
     // iframe not yet in DOM — watch for SDK to create it
+    let detach: (() => void) | undefined;
     const observer = new MutationObserver(() => {
       const el = document.getElementById(
         OKO_IFRAME_ID,
       ) as HTMLIFrameElement | null;
       if (el) {
         observer.disconnect();
-        attach(el);
+        detach = attach(el);
       }
     });
     observer.observe(document.body, { childList: true, subtree: true });
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      detach?.();
+    };
   }, [theme]);
 };
