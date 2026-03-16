@@ -5,6 +5,7 @@ import { SignMessageWidget } from "./sign_message_widget";
 import { SignTransactionWidget } from "./sign_transaction_widget";
 import { SiwsWidget } from "./siws_widget";
 import { SplTokenTransferWidget } from "./spl_token_transfer_widget";
+import { SwapDemoWidget } from "./swap_demo_widget";
 import {
   StakingWidget,
   TestTransactionsWidget,
@@ -30,6 +31,7 @@ export default function ConnectedView({
           <SignMessageWidget />
           <SignTransactionWidget />
           <SplTokenTransferWidget />
+          <SwapDemoWidget />
           <StakingWidget />
           <TestTransactionsWidget />
         </div>

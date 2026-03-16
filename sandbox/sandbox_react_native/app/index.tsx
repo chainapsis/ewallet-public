@@ -713,6 +713,100 @@ function SolanaSection({ wallet }: { wallet: OkoWalletRN }) {
     }
   }, [ensureConnected]);
 
+  const handleSwapDemo = useCallback(async () => {
+    setLoading("swap");
+    setResult(null);
+    try {
+      const svm = await ensureConnected();
+      const {
+        Connection,
+        PublicKey,
+        ComputeBudgetProgram,
+        Transaction,
+        TransactionInstruction,
+      } = require("@solana/web3.js");
+
+      const TOKEN_PROGRAM_ID = new PublicKey(
+        "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      );
+
+      const connection = new Connection(SOLANA_RPC_URL);
+      const { blockhash } = await connection.getLatestBlockhash();
+
+      const tx = new Transaction({
+        recentBlockhash: blockhash,
+        feePayer: svm.publicKey!,
+      });
+
+      // Compute Budget instructions
+      tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 }));
+      tx.add(
+        ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 1_000 }),
+      );
+
+      // Token Approve instruction
+      const mockTokenAccount = PublicKey.findProgramAddressSync(
+        [
+          svm.publicKey!.toBuffer(),
+          TOKEN_PROGRAM_ID.toBuffer(),
+          new PublicKey(
+            "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
+          ).toBuffer(),
+        ],
+        new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"),
+      )[0];
+
+      const approveData = Buffer.alloc(9);
+      approveData.writeUInt8(4, 0);
+      approveData.writeBigUInt64LE(BigInt(1_000_000), 1);
+
+      tx.add(
+        new TransactionInstruction({
+          keys: [
+            { pubkey: mockTokenAccount, isSigner: false, isWritable: true },
+            {
+              pubkey: new PublicKey("11111111111111111111111111111112"),
+              isSigner: false,
+              isWritable: false,
+            },
+            { pubkey: svm.publicKey!, isSigner: true, isWritable: false },
+          ],
+          programId: TOKEN_PROGRAM_ID,
+          data: approveData,
+        }),
+      );
+
+      // Transfer instructions simulating swap internals
+      for (let i = 0; i < 3; i++) {
+        tx.add(
+          new TransactionInstruction({
+            keys: [
+              { pubkey: svm.publicKey!, isSigner: true, isWritable: true },
+              {
+                pubkey: new PublicKey(
+                  `1111111111111111111111111111111${i + 2}`,
+                ),
+                isSigner: false,
+                isWritable: true,
+              },
+            ],
+            programId: TOKEN_PROGRAM_ID,
+            data: Buffer.from([3, ...new Array(8).fill(0)]),
+          }),
+        );
+      }
+
+      const signed = await svm.signTransaction(tx);
+      setResult(
+        `Swap Demo OK: ${Buffer.from(signed.signature!).toString("hex").slice(0, 30)}...`,
+      );
+    } catch (err) {
+      setResult(`Error: ${err}`);
+    } finally {
+      setLoading(null);
+    }
+  }, [ensureConnected]);
+
   return (
     <View style={styles.section}>
       <Text style={styles.h2}>Solana (devnet)</Text>
@@ -749,6 +843,11 @@ function SolanaSection({ wallet }: { wallet: OkoWalletRN }) {
           title="nativeStake"
           onPress={handleNativeStake}
           loading={loading === "stake"}
+        />
+        <Btn
+          title="swapDemo"
+          onPress={handleSwapDemo}
+          loading={loading === "swap"}
         />
       </View>
       {result && <Text style={styles.result}>{result}</Text>}
