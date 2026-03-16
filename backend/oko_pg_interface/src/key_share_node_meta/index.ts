@@ -12,14 +12,17 @@ export async function insertKeyShareNodeMeta(
   try {
     const insertKeyShareNodeMetaQuery = `
 INSERT INTO key_share_node_meta (
-  sss_threshold
+  sss_threshold,
+  registration_threshold
 ) VALUES (
-  $1
+  $1,
+  $2
 )
 `;
 
     await db.query(insertKeyShareNodeMetaQuery, [
       keyShareNodeMetaData.sss_threshold,
+      keyShareNodeMetaData.registration_threshold ?? null,
     ]);
 
     return {
