@@ -16,16 +16,8 @@ export const useThemeSyncToIframe = () => {
   const theme = useThemeState((s) => s.theme);
 
   useEffect(() => {
-    const iframe = document.getElementById(
-      OKO_IFRAME_ID,
-    ) as HTMLIFrameElement | null;
-
-    if (!iframe) {
-      return;
-    }
-
-    const sendTheme = () => {
-      iframe.contentWindow?.postMessage(
+    const sendTheme = (target: HTMLIFrameElement) => {
+      target.contentWindow?.postMessage(
         {
           target: "oko_attached",
           msg_type: "set_theme",
@@ -35,13 +27,34 @@ export const useThemeSyncToIframe = () => {
       );
     };
 
-    // Send immediately for runtime theme changes (iframe already loaded)
-    if (iframe.contentWindow) {
-      sendTheme();
+    const attach = (iframe: HTMLIFrameElement) => {
+      if (iframe.contentWindow) {
+        sendTheme(iframe);
+      }
+      const onLoad = () => sendTheme(iframe);
+      iframe.addEventListener("load", onLoad);
+      return () => iframe.removeEventListener("load", onLoad);
+    };
+
+    const iframe = document.getElementById(
+      OKO_IFRAME_ID,
+    ) as HTMLIFrameElement | null;
+
+    if (iframe) {
+      return attach(iframe);
     }
 
-    // Also send on iframe load for initial page load timing
-    iframe.addEventListener("load", sendTheme);
-    return () => iframe.removeEventListener("load", sendTheme);
+    // iframe not yet in DOM — watch for SDK to create it
+    const observer = new MutationObserver(() => {
+      const el = document.getElementById(
+        OKO_IFRAME_ID,
+      ) as HTMLIFrameElement | null;
+      if (el) {
+        observer.disconnect();
+        attach(el);
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
   }, [theme]);
 };
