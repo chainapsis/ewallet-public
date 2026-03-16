@@ -157,11 +157,20 @@ export const DashboardHeader: FC<{
             <AnchoredMenu
               placement="bottom-end"
               TriggerComponent={
-                <IconButton
-                  hierarchy="tertiary"
-                  size="sm"
-                  icon={<DotsHorizontalIcon size={20} />}
-                />
+                <>
+                  {authType !== "auth0" && (
+                    <span className={styles.mobileMenuTrigger}>
+                      {getAuthProviderIcon(authType, 24)}
+                    </span>
+                  )}
+                  <span className={styles.desktopMenuTrigger}>
+                    <IconButton
+                      hierarchy="tertiary"
+                      size="sm"
+                      icon={<DotsHorizontalIcon size={20} />}
+                    />
+                  </span>
+                </>
               }
               HeaderComponent={
                 <div className={styles.menuHeader}>

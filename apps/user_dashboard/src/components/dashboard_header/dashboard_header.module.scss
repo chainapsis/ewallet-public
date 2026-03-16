@@ -44,9 +44,13 @@
 }
 
 .authProviderIcon {
-  display: flex;
+  display: none;
   align-items: center;
   flex-shrink: 0;
+
+  @media (min-width: $desktop_min_width) {
+    display: flex;
+  }
 }
 
 .accountEmail {
@@ -55,6 +59,35 @@
 
   @media (min-width: $desktop_min_width) {
     display: block;
+  }
+}
+
+// Mobile menu trigger: auth icon in circle
+.mobileMenuTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-tertiary);
+  border-radius: 50%;
+  padding: 4px;
+  cursor: pointer;
+
+  @media (min-width: $desktop_min_width) {
+    display: none;
+  }
+}
+
+// Dropdown open state: change mobile trigger bg
+:global([aria-expanded="true"]) > .mobileMenuTrigger {
+  background-color: var(--bg-quaternary);
+}
+
+// Desktop menu trigger: dots icon
+.desktopMenuTrigger {
+  display: none;
+
+  @media (min-width: $desktop_min_width) {
+    display: flex;
   }
 }
 
@@ -81,4 +114,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  @media (max-width: ($desktop_min_width - 1)) {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
 }
