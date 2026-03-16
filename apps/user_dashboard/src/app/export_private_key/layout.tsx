@@ -27,7 +27,7 @@ export default function ExportPrivateKeyLayout({
           </DashboardBody>
         </div>
       </div>
-      <ToastContainer />
+      <ToastContainer stacked={false} />
     </Authorized>
   );
 }
