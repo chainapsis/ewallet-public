@@ -254,6 +254,19 @@ export type OkoWalletMsgGenerateOAuthUrlAck = {
   payload: Result<{ url: string }, string>;
 };
 
+/**
+ * Portless fire-and-forget message sent from the host window to change
+ * the attached iframe's color theme at runtime.
+ * Only accepted from demo / sandbox origins.
+ */
+export type OkoWalletMsgSetTheme = {
+  target: "oko_attached";
+  msg_type: "set_theme";
+  payload: {
+    theme: "light" | "dark";
+  };
+};
+
 export type OkoWalletMsg =
   | OkoWalletMsgInit
   | OkoWalletMsgInitAck
@@ -291,6 +304,7 @@ export type OkoWalletMsg =
   | OkoWalletMsgImportPrivateKeyAck
   | OkoWalletMsgGenerateOAuthUrl
   | OkoWalletMsgGenerateOAuthUrlAck
+  | OkoWalletMsgSetTheme
   | {
       target: "oko_sdk";
       msg_type: "unknown_msg_type";
