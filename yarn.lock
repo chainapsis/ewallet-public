@@ -11949,7 +11949,9 @@ __metadata:
     "@oko-wallet/oko-types": "npm:^0.1.2-alpha.2"
     "@oko-wallet/stdlib-js": "npm:0.0.2-rc.41"
     "@solana/web3.js": "npm:^1.98.0"
+    "@tanstack/query-sync-storage-persister": "npm:^5.90.24"
     "@tanstack/react-query": "npm:^5.90.12"
+    "@tanstack/react-query-persist-client": "npm:^5.90.24"
     "@tanstack/react-table": "npm:^8.21.3"
     "@types/lodash.throttle": "npm:^4"
     "@types/node": "npm:^24.10.1"
@@ -17744,6 +17746,37 @@ __metadata:
   version: 5.90.20
   resolution: "@tanstack/query-core@npm:5.90.20"
   checksum: 10c0/70637dfcecd5ed9d810629aa27f1632af8a4bcd083e75cf29408d058c32f8234704a3231ec280e2c4016ea0485b16124fdf70ab97793b5a7b670f43f7659e9fe
+  languageName: node
+  linkType: hard
+
+"@tanstack/query-persist-client-core@npm:5.92.1":
+  version: 5.92.1
+  resolution: "@tanstack/query-persist-client-core@npm:5.92.1"
+  dependencies:
+    "@tanstack/query-core": "npm:5.90.20"
+  checksum: 10c0/6fa0be7a61beb6cb3c62246f3fbab0761b36ab2fa66a8bce6e0af0a6b8c66eb7d612c417c98c5d0487e6f6c37ef115b6e772c95072bf7b1b46d61810ee2c1485
+  languageName: node
+  linkType: hard
+
+"@tanstack/query-sync-storage-persister@npm:^5.90.24":
+  version: 5.90.24
+  resolution: "@tanstack/query-sync-storage-persister@npm:5.90.24"
+  dependencies:
+    "@tanstack/query-core": "npm:5.90.20"
+    "@tanstack/query-persist-client-core": "npm:5.92.1"
+  checksum: 10c0/3d18a422efa977231150882c15690c8663e3723af994f43cf8a29d60e62e763d9a3ac3d67e7b27ccf36b99136598533c16aab5c29e3f747b8480ec1c4d7f92f4
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query-persist-client@npm:^5.90.24":
+  version: 5.90.24
+  resolution: "@tanstack/react-query-persist-client@npm:5.90.24"
+  dependencies:
+    "@tanstack/query-persist-client-core": "npm:5.92.1"
+  peerDependencies:
+    "@tanstack/react-query": ^5.90.21
+    react: ^18 || ^19
+  checksum: 10c0/0f01aca9867a8bb90ddc1912ea82451706f5394f353881e0fad7a0f3a847840f6f7784bda07d90fce98f021ce55b59e7107c278f32fff8e533ba38ef69adddb7
   languageName: node
   linkType: hard
 

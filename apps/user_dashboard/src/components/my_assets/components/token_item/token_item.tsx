@@ -90,7 +90,18 @@ export const TokenItem: FC<TokenItemProps> = ({
         {/* Token Info */}
         <div className={styles.tokenInfo}>
           <div className={styles.tokenNameRow}>
-            {isNotReady ? (
+            {tokenBalance.error && !isNotReady ? (
+              <Tooltip
+                content="NetworkError when attempting to fetch resource"
+                placement="bottom"
+                className={styles.errorTooltip}
+              >
+                <AlertTriangleIcon size={16} />
+                <Typography size="sm" weight="medium" color="warning-primary">
+                  {coinDenom}
+                </Typography>
+              </Tooltip>
+            ) : isNotReady ? (
               <Skeleton width={60} height={16} />
             ) : (
               <Typography size="sm" weight="medium" color="secondary">
@@ -100,14 +111,6 @@ export const TokenItem: FC<TokenItemProps> = ({
             {isIBC && <Badge type="pill" size="sm" color="gray" label="IBC" />}
             {tokenBalance.isFetching && !isNotReady && (
               <div className={styles.loadingIndicator} />
-            )}
-            {tokenBalance.error && !isNotReady && (
-              <Tooltip
-                content={tokenBalance.error.message || "Error loading token"}
-                placement="bottom"
-              >
-                <AlertTriangleIcon size={16} />
-              </Tooltip>
             )}
           </div>
           <div className={styles.chainNameRow}>
@@ -134,20 +137,24 @@ export const TokenItem: FC<TokenItemProps> = ({
             ) : (
               <>
                 <Typography size="sm" weight="medium" color="secondary">
-                  {formatDisplayBalance(tokenBalance.token.amount, currency)}
+                  {tokenBalance.isFetching
+                    ? "-"
+                    : formatDisplayBalance(tokenBalance.token.amount, currency)}
                 </Typography>
                 <Typography size="xs" weight="medium" color="tertiary">
-                  {valueUsd !== undefined
-                    ? new PricePretty(
-                        {
-                          currency: "usd",
-                          symbol: "$",
-                          maxDecimals: 2,
-                          locale: "en-US",
-                        },
-                        valueUsd,
-                      ).toString()
-                    : "-"}
+                  {tokenBalance.isFetching
+                    ? "-"
+                    : valueUsd !== undefined
+                      ? new PricePretty(
+                          {
+                            currency: "usd",
+                            symbol: "$",
+                            maxDecimals: 2,
+                            locale: "en-US",
+                          },
+                          valueUsd,
+                        ).toString()
+                      : "-"}
                 </Typography>
               </>
             )}
