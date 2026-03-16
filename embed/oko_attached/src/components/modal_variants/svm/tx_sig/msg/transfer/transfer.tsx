@@ -5,6 +5,7 @@ import styles from "../instructions.module.scss";
 import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
 import { TxRow } from "@oko-wallet-attached/components/modal_variants/common/tx_row";
 import { SOLANA_LOGO_URL } from "@oko-wallet-attached/constants/urls";
+import { useMobileMode } from "@oko-wallet-attached/hooks/mobile_mode";
 
 function formatLamports(lamports: bigint | number): string {
   // Use scientific notation to avoid floating-point precision issues
@@ -25,11 +26,12 @@ export const SvmTransferPretty: FC<SvmTransferPrettyProps> = ({
   lamports,
   to,
 }) => {
+  const isMobile = useMobileMode();
   return (
     <div className={styles.container}>
       <TxRow label="Send">
         <div className={styles.tokenInfo}>
-          <Avatar src={SOLANA_LOGO_URL} alt="SOL" size="sm" variant="rounded" />
+          <Avatar src={SOLANA_LOGO_URL} alt="SOL" size={isMobile ? "md" : "sm"} variant="rounded" />
           <Typography
             color="secondary"
             size="lg"
@@ -44,7 +46,7 @@ export const SvmTransferPretty: FC<SvmTransferPrettyProps> = ({
         <TxRow label="to">
           <Typography
             color="secondary"
-            size="sm"
+            size={isMobile ? "md" : "sm"}
             weight="medium"
             className={styles.address}
           >
