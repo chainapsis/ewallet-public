@@ -118,7 +118,11 @@ export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
             className={styles.tokenAddressRow}
             onClick={() => navigator.clipboard.writeText(mint)}
           >
-            <Typography size={isMobile ? "md" : "sm"} weight="medium" className={styles.address}>
+            <Typography
+              size={isMobile ? "md" : "sm"}
+              weight="medium"
+              className={styles.address}
+            >
               {mint}
             </Typography>
             <CopyOutlinedIcon size={16} color="currentColor" />

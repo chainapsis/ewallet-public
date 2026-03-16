@@ -31,7 +31,12 @@ export const SvmTransferPretty: FC<SvmTransferPrettyProps> = ({
     <div className={styles.container}>
       <TxRow label="Send">
         <div className={styles.tokenInfo}>
-          <Avatar src={SOLANA_LOGO_URL} alt="SOL" size={isMobile ? "md" : "sm"} variant="rounded" />
+          <Avatar
+            src={SOLANA_LOGO_URL}
+            alt="SOL"
+            size={isMobile ? "md" : "sm"}
+            variant="rounded"
+          />
           <Typography
             color="secondary"
             size="lg"

@@ -81,7 +81,11 @@ export const SvmMessageSignatureContent: FC<
               ) : (
                 <EmptyStateIcon size={isMobile ? 24 : 16} />
               )}
-              <Typography size={headingSize} color="secondary" weight="semibold">
+              <Typography
+                size={headingSize}
+                color="secondary"
+                weight="semibold"
+              >
                 {chainName ? `${chainName} signature` : "Network signature"}
               </Typography>
             </div>

@@ -77,7 +77,11 @@ export const SvmAllTxSignatureContent: FC<SvmAllTxSignatureContentProps> = ({
                   variant="rounded"
                 />
               )}
-              <Typography size={headingSize} color="secondary" weight="semibold">
+              <Typography
+                size={headingSize}
+                color="secondary"
+                weight="semibold"
+              >
                 {chainName ? `${chainName} signatures` : "signatures"}
               </Typography>
             </div>
