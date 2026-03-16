@@ -8,9 +8,18 @@ export function setColorScheme(theme: Theme) {
 
   root.setAttribute("data-theme", theme);
 
-  // Set color-scheme to support both light and dark
-  // Browser will automatically match parent dApp's color-scheme
-  // This prevents browser from adding opaque background
+  // Clear the inline backgroundColor set by the index.html pre-paint script,
+  // so the CSS variable from global.scss takes over.
+  root.style.backgroundColor = "";
+
+  // Update <meta name="theme-color"> so iOS Safari browser chrome matches.
+  const themeColor = theme === "dark" ? "#0c0e12" : "#ffffff";
+  const metaTags = document.querySelectorAll<HTMLMetaElement>(
+    'meta[name="theme-color"]',
+  );
+  for (const meta of metaTags) {
+    meta.setAttribute("content", themeColor);
+  }
 
   // NOTE - Applying a color-scheme to the body of an iframe causes a bug where,
   // if the host site doesn't have a color-scheme and the browser's default is dark,
