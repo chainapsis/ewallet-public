@@ -42,6 +42,10 @@ export const ShowHideChainsModal: FC<ShowHideChainsModalProps> = ({
   const isChainEnabled = useChainStore((state) => state.isChainEnabled);
   const enableChains = useChainStore((state) => state.enableChains);
   const disableChains = useChainStore((state) => state.disableChains);
+  const activeUserKey = useChainStore((state) => state.activeUserKey);
+  const enabledChainsByUser = useChainStore(
+    (state) => state.enabledChainsByUser,
+  );
   const { balancesByChainIdentifier } = useAllBalances();
 
   // Track pending toggle overrides as state (chainId → enabled)
@@ -127,14 +131,24 @@ export const ShowHideChainsModal: FC<ShowHideChainsModalProps> = ({
 
   const searchedChains = useSearch(visibleChains, searchQuery, searchFields);
 
+  // Sort using committed store state (not pending overrides) so toggling
+  // inside the modal does not cause chains to jump. Raw state values
+  // (activeUserKey, enabledChainsByUser) are reactive — memo recalculates
+  // after Save updates the store.
   const sortedSearchedChains = useMemo(() => {
+    const userChainIds = activeUserKey
+      ? enabledChainsByUser[activeUserKey]
+      : undefined;
+    const enabledChainIds = userChainIds ?? [...DEFAULT_ENABLED_CHAINS];
+    const enabledSet = new Set(enabledChainIds);
+
     const defaultChainOrder = new Map<string, number>(
       DEFAULT_ENABLED_CHAINS.map((id, index) => [id, index]),
     );
 
     return [...searchedChains].sort((a, b) => {
-      const aIsEnabled = getEffectiveEnabled(a.chainId);
-      const bIsEnabled = getEffectiveEnabled(b.chainId);
+      const aIsEnabled = enabledSet.has(getChainIdentifier(a.chainId));
+      const bIsEnabled = enabledSet.has(getChainIdentifier(b.chainId));
       if (aIsEnabled && !bIsEnabled) {
         return -1;
       }
@@ -173,7 +187,7 @@ export const ShowHideChainsModal: FC<ShowHideChainsModalProps> = ({
 
       return a.chainName.localeCompare(b.chainName);
     });
-  }, [searchedChains, getEffectiveEnabled]);
+  }, [searchedChains, activeUserKey, enabledChainsByUser]);
 
   const getTokenBalances = useCallback(
     (chainId: string): TokenBalance[] => {
