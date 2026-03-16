@@ -24,7 +24,7 @@
     "@oko-wallet/stdlib-js": "0.0.2-rc.41",
     "@solana/web3.js": "^1.98.0",
     "@tanstack/query-sync-storage-persister": "^5.90.24",
-    "@tanstack/react-query": "^5.90.12",
+    "@tanstack/react-query": "^5.90.21",
     "@tanstack/react-query-persist-client": "^5.90.24",
     "@tanstack/react-table": "^8.21.3",
     "classnames": "^2.5.1",
