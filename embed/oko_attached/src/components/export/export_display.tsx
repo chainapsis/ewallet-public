@@ -76,6 +76,20 @@ const VALID_KEY_TYPES: ReadonlySet<string> = new Set(["secp256k1", "ed25519"]);
 const MAX_KEY_REQUEST_ATTEMPTS = 3;
 
 export const ExportDisplay: FC = () => {
+  // Force light theme — this route is only used inside user_dashboard which has no dark mode
+  useEffect(() => {
+    const root = document.documentElement;
+    const prevTheme = root.getAttribute("data-theme");
+    root.setAttribute("data-theme", "light");
+    return () => {
+      if (prevTheme) {
+        root.setAttribute("data-theme", prevTheme);
+      } else {
+        root.removeAttribute("data-theme");
+      }
+    };
+  }, []);
+
   const keyType = useMemo(() => {
     const raw = new URLSearchParams(window.location.search).get("key_type");
     const parsed = raw && VALID_KEY_TYPES.has(raw) ? (raw as CurveType) : null;
