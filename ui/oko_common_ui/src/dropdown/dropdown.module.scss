@@ -37,7 +37,7 @@ $z-index: 1000;
   max-width: $dropdown-max-width;
   max-height: $dropdown-max-height;
   overflow-y: auto;
-  pointer-events: auto;
+  pointer-events: none;
 
   &.hidden {
     display: none;
@@ -52,6 +52,7 @@ $z-index: 1000;
   &.open {
     opacity: 1;
     transform: scale(1);
+    pointer-events: auto;
   }
 
 }
