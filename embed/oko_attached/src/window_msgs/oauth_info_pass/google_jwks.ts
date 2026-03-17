@@ -44,10 +44,7 @@ function base64UrlToUint8Array(base64Url: string): Uint8Array {
   return bytes;
 }
 
-async function verifyWithJwk(
-  jwk: JwksKey,
-  segments: string[],
-): Promise<void> {
+async function verifyWithJwk(jwk: JwksKey, segments: string[]): Promise<void> {
   const cryptoKey = await crypto.subtle.importKey(
     "jwk",
     { kty: jwk.kty, n: jwk.n, e: jwk.e, alg: "RS256", ext: true },
