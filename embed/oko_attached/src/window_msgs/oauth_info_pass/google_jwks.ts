@@ -13,10 +13,12 @@ interface JwksResponse {
   keys: JwksKey[];
 }
 
+const JWKS_TTL_MS = 10 * 60 * 1000;
 let cachedJwks: JwksResponse | null = null;
+let cachedAt = 0;
 
 async function fetchGoogleJwks(): Promise<JwksResponse> {
-  if (cachedJwks) {
+  if (cachedJwks && Date.now() - cachedAt < JWKS_TTL_MS) {
     return cachedJwks;
   }
   const res = await fetch(GOOGLE_JWKS_URL);
@@ -24,6 +26,7 @@ async function fetchGoogleJwks(): Promise<JwksResponse> {
     throw new Error(`Failed to fetch Google JWKS: ${res.status}`);
   }
   cachedJwks = (await res.json()) as JwksResponse;
+  cachedAt = Date.now();
   return cachedJwks;
 }
 
@@ -91,6 +94,7 @@ export async function verifyGoogleSignature(idToken: string): Promise<void> {
   if (!jwk) {
     // Key not found — clear cache and retry once (key rotation)
     cachedJwks = null;
+    cachedAt = 0;
     const refreshedJwks = await fetchGoogleJwks();
     const retryJwk = refreshedJwks.keys.find((k) => k.kid === header.kid);
     if (!retryJwk) {
