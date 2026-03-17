@@ -13,10 +13,12 @@ interface JwksResponse {
   keys: JwksKey[];
 }
 
+const JWKS_TTL_MS = 10 * 60 * 1000;
 let cachedJwks: JwksResponse | null = null;
+let cachedAt = 0;
 
 async function fetchAuth0Jwks(): Promise<JwksResponse> {
-  if (cachedJwks) {
+  if (cachedJwks && Date.now() - cachedAt < JWKS_TTL_MS) {
     return cachedJwks;
   }
   const res = await fetch(
@@ -26,6 +28,7 @@ async function fetchAuth0Jwks(): Promise<JwksResponse> {
     throw new Error(`Failed to fetch Auth0 JWKS: ${res.status}`);
   }
   cachedJwks = (await res.json()) as JwksResponse;
+  cachedAt = Date.now();
   return cachedJwks;
 }
 
@@ -93,6 +96,7 @@ export async function verifyAuth0Signature(idToken: string): Promise<void> {
   if (!jwk) {
     // Key not found — clear cache and retry once (key rotation)
     cachedJwks = null;
+    cachedAt = 0;
     const refreshedJwks = await fetchAuth0Jwks();
     const retryJwk = refreshedJwks.keys.find((k) => k.kid === header.kid);
     if (!retryJwk) {
