@@ -1,8 +1,10 @@
 import type { Result } from "@oko-wallet/stdlib-js";
-import { createPublicKey, type JsonWebKey } from "crypto";
 import jwt, { type JwtHeader, type JwtPayload } from "jsonwebtoken";
 
-const GOOGLE_JWKS_URL = "https://www.googleapis.com/oauth2/v3/certs";
+import {
+  createJwksCache,
+  jwkToPem,
+} from "@oko-wallet-api/middleware/auth/jwks_cache";
 
 interface GoogleIdTokenPayload extends JwtPayload {
   email?: string;
@@ -16,15 +18,10 @@ export interface GoogleUserInfo {
   name?: string;
 }
 
-interface GoogleJwk extends JsonWebKey {
-  kid: string;
-}
-
-const JWKS_CACHE_TTL_MS = 10 * 60 * 1000;
-const jwksCache = {
-  fetchedAt: 0,
-  keys: [] as GoogleJwk[],
-};
+const googleJwks = createJwksCache(
+  "https://www.googleapis.com/oauth2/v3/certs",
+  "Google",
+);
 
 export async function validateOAuthToken(
   idToken: string,
@@ -47,7 +44,7 @@ export async function validateOAuthToken(
       };
     }
 
-    const jwk = await getSigningKey(header.kid);
+    const jwk = await googleJwks.getSigningKey(header.kid);
     if (!jwk) {
       return {
         success: false,
@@ -55,15 +52,7 @@ export async function validateOAuthToken(
       };
     }
 
-    const publicKey = createPublicKey({
-      key: jwk,
-      format: "jwk",
-    });
-
-    const pem = publicKey.export({
-      type: "spki",
-      format: "pem",
-    }) as string;
+    const pem = jwkToPem(jwk);
 
     const payload = jwt.verify(idToken, pem, {
       algorithms: ["RS256"],
@@ -113,49 +102,4 @@ export async function validateOAuthToken(
       err: `Token validation failed: ${error instanceof Error ? error.message : String(error)}`,
     };
   }
-}
-
-async function getSigningKey(kid: string): Promise<GoogleJwk | null> {
-  const keys = await getJwks();
-  const match = keys.find((key) => key.kid === kid);
-
-  if (match) {
-    return match;
-  }
-
-  const freshKeys = await getJwks({ forceRefresh: true });
-  return freshKeys.find((key) => key.kid === kid) ?? null;
-}
-
-async function getJwks(
-  options: { forceRefresh?: boolean } = {},
-): Promise<GoogleJwk[]> {
-  const now = Date.now();
-
-  if (
-    !options.forceRefresh &&
-    jwksCache &&
-    now - jwksCache.fetchedAt < JWKS_CACHE_TTL_MS
-  ) {
-    return jwksCache.keys;
-  }
-
-  const response = await fetch(GOOGLE_JWKS_URL);
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch Google JWKS: ${response.status} ${response.statusText}`,
-    );
-  }
-
-  const body = (await response.json()) as { keys?: GoogleJwk[] };
-
-  if (!body.keys || !Array.isArray(body.keys) || body.keys.length === 0) {
-    throw new Error("Google JWKS response missing keys");
-  }
-
-  jwksCache.fetchedAt = now;
-  jwksCache.keys = body.keys;
-
-  return body.keys;
 }
