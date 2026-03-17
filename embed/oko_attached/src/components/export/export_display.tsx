@@ -7,7 +7,7 @@ import styles from "./export_display.module.scss";
 import { postLog } from "@oko-wallet-attached/requests/logging";
 import {
   clearExportedKeys,
-  getExportedKey,
+  consumeExportedKey,
   requestExportedKey,
 } from "@oko-wallet-attached/window_msgs/export_key_store";
 
@@ -97,7 +97,7 @@ export const ExportDisplay: FC = () => {
     let cancelled = false;
 
     const loadKey = async () => {
-      let key = getExportedKey(keyType);
+      let key = consumeExportedKey(keyType);
 
       if (!key) {
         // Retry up to 3 times (2s each) to handle timing variance across devices
@@ -151,6 +151,7 @@ export const ExportDisplay: FC = () => {
 
     return () => {
       cancelled = true;
+      setKeyValue(null);
       clearExportedKeys();
     };
   }, [keyType]);
