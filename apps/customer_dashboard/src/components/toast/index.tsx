@@ -2,58 +2,54 @@
 
 import {
   Toast,
-  ToastCloseButton,
   type ToastVariant,
 } from "@oko-wallet/oko-common-ui/toast";
 import type { FC } from "react";
-import {
-  Bounce,
-  ToastContainer as ReactToastifyToastContainer,
-  type ToastOptions,
-  toast,
-} from "react-toastify";
+import { Toaster, toast } from "sonner";
 
 interface DisplayToastProps {
   variant: ToastVariant;
   title: string;
   description?: string;
-  toastOptions?: Partial<ToastOptions>;
 }
+
 export function displayToast({
   variant,
   title,
   description,
-  toastOptions,
 }: DisplayToastProps) {
-  toastOptions = {
-    ...{
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: true,
-      closeOnClick: false,
-      pauseOnHover: true,
-      draggable: false,
-      progress: undefined,
-      pauseOnFocusLoss: false,
+  toast.custom(
+    (id) => (
+      <Toast
+        title={title}
+        description={description}
+        variant={variant}
+        onClose={() => toast.dismiss(id)}
+      />
+    ),
+    {
+      duration: 5000,
     },
-    ...(toastOptions ?? {}),
-  };
-
-  toast(
-    <Toast title={title} description={description} variant={variant} />,
-    toastOptions,
   );
 }
 
 export const ToastContainer: FC = () => {
   return (
-    <ReactToastifyToastContainer
-      stacked
-      transition={Bounce}
-      toastClassName="custom-toast"
-      closeButton={(props) => (
-        <ToastCloseButton closeToast={props.closeToast} />
-      )}
+    <Toaster
+      position="top-right"
+      expand={false}
+      visibleToasts={5}
+      style={{ "--width": "320px" } as React.CSSProperties}
+      toastOptions={{
+        style: {
+          padding: 0,
+          margin: 0,
+          background: "transparent",
+          border: "none",
+          boxShadow: "none",
+          width: "var(--width)",
+        },
+      }}
     />
   );
 };
