@@ -87,20 +87,28 @@ export class OkoWalletRN implements OkoWalletInterface {
     }
     this._initResolved = true;
 
-    this._clientRandom = await this._getOrCreateClientRandom();
-    await this._restoreWalletInfo();
+    try {
+      this._clientRandom = await this._getOrCreateClientRandom();
+      await this._restoreWalletInfo();
 
-    if (this.state.email && this.state.publicKey) {
-      this.eventEmitter.emit({
-        type: "CORE__accountsChanged",
-        authType: this.state.authType,
-        publicKey: this.state.publicKey,
-        email: this.state.email,
-        name: this.state.name,
+      if (this.state.email && this.state.publicKey) {
+        this.eventEmitter.emit({
+          type: "CORE__accountsChanged",
+          authType: this.state.authType,
+          publicKey: this.state.publicKey,
+          email: this.state.email,
+          name: this.state.name,
+        });
+      }
+
+      this._resolveInit({ success: true, data: this.state });
+    } catch (e) {
+      console.error("[oko-rn] initialization failed:", e);
+      this._resolveInit({
+        success: false,
+        err: e instanceof Error ? e.message : String(e),
       });
     }
-
-    this._resolveInit({ success: true, data: this.state });
   }
 
   async sendMsgToIframe(msg: OkoWalletMsg): Promise<OkoWalletMsg> {
@@ -324,7 +332,9 @@ export class OkoWalletRN implements OkoWalletInterface {
         sdkEndpoint: this.sdkEndpoint,
       };
       await AsyncStorage.setItem(WALLET_INFO_STORE_KEY, JSON.stringify(data));
-    } catch {}
+    } catch (e) {
+      console.warn("[oko-rn] failed to persist wallet info:", e);
+    }
   }
 
   private async _restoreWalletInfo(): Promise<void> {
@@ -347,13 +357,17 @@ export class OkoWalletRN implements OkoWalletInterface {
         };
         this._cachedPublicKeyEd25519 = parsed.publicKeyEd25519 ?? null;
       }
-    } catch {}
+    } catch (e) {
+      console.warn("[oko-rn] failed to restore wallet info:", e);
+    }
   }
 
   private async _clearPersistedWalletInfo(): Promise<void> {
     try {
       await AsyncStorage.removeItem(WALLET_INFO_STORE_KEY);
-    } catch {}
+    } catch (e) {
+      console.warn("[oko-rn] failed to clear persisted wallet info:", e);
+    }
   }
 
   private async _resetPersistedSession(logMessage?: string): Promise<void> {
