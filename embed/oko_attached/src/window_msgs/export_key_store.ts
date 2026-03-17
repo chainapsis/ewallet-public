@@ -8,12 +8,20 @@ export interface ExportedKeys {
 }
 
 const CLEANUP_TIMEOUT_MS = 30 * 1000; // 30 seconds (must exceed dashboard's 20s iframe load timeout)
+const IN_FLIGHT_TIMEOUT_MS = 5 * 1000; // unlock key after 5s if ACK never arrives
 const REQUEST_KEY_MSG = "oko_export_request_key";
 const RESPONSE_KEY_MSG = "oko_export_key";
+const ACK_KEY_MSG = "oko_export_ack_key";
 const CLEAR_KEYS_MSG = "oko_export_clear_keys";
 
 let storedKeys: ExportedKeys | null = null;
 let cleanupTimer: ReturnType<typeof setTimeout> | null = null;
+
+// Per-key in-flight lock: key is sent but not yet ACK'd
+const inFlight: Record<string, ReturnType<typeof setTimeout> | null> = {
+  secp256k1: null,
+  ed25519: null,
+};
 
 function clearCleanupTimer(): void {
   if (cleanupTimer !== null) {
@@ -34,10 +42,39 @@ function startCleanupTimer(): void {
   cleanupTimer = setTimeout(() => {
     storedKeys = null;
     cleanupTimer = null;
+    // Clear any in-flight locks
+    for (const kt of Object.keys(inFlight)) {
+      if (inFlight[kt]) {
+        clearTimeout(inFlight[kt]);
+        inFlight[kt] = null;
+      }
+    }
   }, CLEANUP_TIMEOUT_MS);
 }
 
-// Respond to key requests and clear signals from other same-origin contexts (visible iframe)
+function lockKey(keyType: CurveType): void {
+  inFlight[keyType] = setTimeout(() => {
+    // ACK never arrived — unlock so retries can succeed
+    inFlight[keyType] = null;
+  }, IN_FLIGHT_TIMEOUT_MS);
+}
+
+function isKeyLocked(keyType: CurveType): boolean {
+  return inFlight[keyType] !== null;
+}
+
+function confirmKey(keyType: CurveType): void {
+  if (inFlight[keyType]) {
+    clearTimeout(inFlight[keyType]);
+    inFlight[keyType] = null;
+  }
+  if (storedKeys) {
+    storedKeys[keyType] = "";
+    clearIfEmpty();
+  }
+}
+
+// Respond to key requests, ACKs, and clear signals from other same-origin contexts
 function handleWindowMessage(event: MessageEvent): void {
   if (event.origin !== window.location.origin) {
     return;
@@ -48,25 +85,31 @@ function handleWindowMessage(event: MessageEvent): void {
   }
   if (data.type === REQUEST_KEY_MSG) {
     const keyType = data.key_type as CurveType;
-    if (storedKeys && keyType in storedKeys && storedKeys[keyType]) {
-      const value = storedKeys[keyType];
-      storedKeys[keyType] = "";
-      clearIfEmpty();
+    if (
+      storedKeys &&
+      keyType in storedKeys &&
+      storedKeys[keyType] &&
+      !isKeyLocked(keyType)
+    ) {
+      lockKey(keyType);
       const responder = event.source as Window | null;
       responder?.postMessage(
-        { type: RESPONSE_KEY_MSG, key_type: keyType, key: value },
+        { type: RESPONSE_KEY_MSG, key_type: keyType, key: storedKeys[keyType] },
         event.origin,
       );
     } else if (window.location.pathname === "/") {
       postLog({
         level: "error",
-        message: `export_key_store: REQUEST received but no key for ${keyType}`,
+        message: `export_key_store: REQUEST received but no key for ${keyType} (locked=${isKeyLocked(keyType)})`,
         error: {
           name: "ExportKeyStoreError",
-          message: `storedKeys missing key_type=${keyType}`,
+          message: `storedKeys missing or locked key_type=${keyType}`,
         },
       });
     }
+  } else if (data.type === ACK_KEY_MSG) {
+    const keyType = data.key_type as CurveType;
+    confirmKey(keyType);
   } else if (data.type === CLEAR_KEYS_MSG) {
     storedKeys = null;
     clearCleanupTimer();
@@ -91,8 +134,34 @@ export function getExportedKey(keyType: CurveType): string | null {
 }
 
 /**
+ * Send an ACK to all sibling frames so the holder clears the key.
+ */
+function sendAck(keyType: CurveType): void {
+  const selfOrigin = window.location.origin;
+  try {
+    const parentWin = window.parent;
+    if (parentWin && parentWin !== window) {
+      const frames = parentWin.frames;
+      for (let i = 0; i < frames.length; i += 1) {
+        try {
+          frames[i].postMessage(
+            { type: ACK_KEY_MSG, key_type: keyType },
+            selfOrigin,
+          );
+        } catch {
+          // cross-origin frame, skip
+        }
+      }
+    }
+  } catch {
+    // frame iteration failed
+  }
+}
+
+/**
  * Request a single key from another same-origin context via postMessage.
  * Used by the visible iframe to fetch a key stored in the hidden iframe.
+ * Sends an ACK on successful receipt so the holder can clear the key.
  */
 export function requestExportedKey(keyType: CurveType): Promise<string | null> {
   const local = getExportedKey(keyType);
@@ -110,7 +179,11 @@ export function requestExportedKey(keyType: CurveType): Promise<string | null> {
       const data = event.data;
       if (data?.type === RESPONSE_KEY_MSG && data.key_type === keyType) {
         cleanup();
-        resolve(data.key ?? null);
+        const key = data.key ?? null;
+        if (key) {
+          sendAck(keyType);
+        }
+        resolve(key);
       }
     };
 
