@@ -7,7 +7,7 @@ export interface ExportedKeys {
   ed25519: string;
 }
 
-const CLEANUP_TIMEOUT_MS = 15 * 1000; // 15 seconds (safety net; keys are cleared on first read)
+const CLEANUP_TIMEOUT_MS = 30 * 1000; // 30 seconds (must exceed dashboard's 20s iframe load timeout)
 const REQUEST_KEY_MSG = "oko_export_request_key";
 const RESPONSE_KEY_MSG = "oko_export_key";
 const CLEAR_KEYS_MSG = "oko_export_clear_keys";
