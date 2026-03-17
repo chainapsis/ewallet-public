@@ -164,10 +164,7 @@ async function verifyGoogleIdToken(
     throw new Error("Google token has expired");
   }
 
-  if (
-    (payload.email_verified as unknown) !== true &&
-    payload.email_verified !== "true"
-  ) {
+  if (!payload.email_verified) {
     throw new Error("Google token email not verified");
   }
 
