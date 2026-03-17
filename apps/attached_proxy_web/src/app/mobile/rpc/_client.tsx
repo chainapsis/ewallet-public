@@ -1,12 +1,13 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import {
   buildRpcCallbackUrl,
   decodeRpcPayload,
   parseRpcRequestFromLocation,
 } from "../_shared/rpc_codec";
+import { parseClientRandomFromHash } from "../_shared/parse_client_random";
 import { sendToAttached } from "../_shared/send_to_attached";
 import {
   type AttachedInitPayload,
@@ -30,6 +31,15 @@ export function RpcClient({
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [status, setStatus] = useState("Preparing...");
   const [showIframe, setShowIframe] = useState(false);
+
+  // Read clientRandom from URL fragment and inject into iframe src
+  const resolvedIframeSrc = useMemo(() => {
+    const clientRandom = parseClientRandomFromHash();
+    if (!clientRandom) return iframeSrc;
+    const url = new URL(iframeSrc);
+    url.searchParams.set("client_random", clientRandom);
+    return url.toString();
+  }, [iframeSrc]);
 
   useAttachedInit((initPayload) => {
     void executeRpc(initPayload);
@@ -129,7 +139,7 @@ export function RpcClient({
         id="oko-attached"
         title="Oko Wallet"
         ref={iframeRef}
-        src={iframeSrc}
+        src={resolvedIframeSrc}
         style={
           showIframe
             ? { flex: 1, width: "100%", border: "none" }

@@ -21,11 +21,11 @@ export default async function MobileRpcPage({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const params = await searchParams;
-  const clientRandom = params.client_random ?? "";
+  // clientRandom is passed via URL fragment (not query param) to avoid
+  // server-side exposure. The client component reads it from the hash.
   const iframeSrc = buildIframeSrc(
     params.host_origin ?? "",
     params.api_key ?? "",
-    clientRandom,
   );
 
   return (

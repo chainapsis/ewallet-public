@@ -63,7 +63,7 @@ function buildLoginUrl(
   url.searchParams.set("redirect_scheme", redirectScheme);
   url.searchParams.set("host_origin", sdkEndpoint);
   if (clientRandom) {
-    url.searchParams.set("client_random", clientRandom);
+    url.hash = `client_random=${encodeURIComponent(clientRandom)}`;
   }
   return url.toString();
 }
