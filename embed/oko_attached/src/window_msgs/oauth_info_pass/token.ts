@@ -166,8 +166,18 @@ async function verifyGoogleIdToken(
   }
 
   const exp = Number(payload.exp);
-  if (exp && Math.floor(Date.now() / 1000) >= exp) {
+  if (!Number.isFinite(exp) || exp <= 0) {
+    throw new Error("Google token missing or invalid exp claim");
+  }
+  if (Math.floor(Date.now() / 1000) >= exp) {
     throw new Error("Google token has expired");
+  }
+
+  if (
+    payload.nbf != null &&
+    Math.floor(Date.now() / 1000) < Number(payload.nbf)
+  ) {
+    throw new Error("Google token is not yet valid");
   }
 
   if (!payload.email_verified) {
@@ -203,7 +213,10 @@ async function verifyAuth0IdToken(
   }
 
   const exp = Number(payload.exp);
-  if (exp && Math.floor(Date.now() / 1000) >= exp) {
+  if (!Number.isFinite(exp) || exp <= 0) {
+    throw new Error("Auth0 token missing or invalid exp claim");
+  }
+  if (Math.floor(Date.now() / 1000) >= exp) {
     throw new Error("Auth0 token has expired");
   }
 
