@@ -5,6 +5,7 @@ import {
   AUTH0_CLIENT_ID,
   AUTH0_DOMAIN,
 } from "@oko-wallet-attached/config/auth0";
+import { GOOGLE_CLIENT_ID } from "@oko-wallet-attached/config/oauth";
 import type {
   Auth0TokenInfo,
   GoogleTokenInfo,
@@ -12,6 +13,7 @@ import type {
 } from "@oko-wallet-attached/window_msgs/types";
 import { verifyIdTokenOfDiscord } from "./discord";
 import { verifyIdTokenOfGithub } from "./github";
+import { verifyGoogleSignature } from "./google_jwks";
 import { verifyAuth0Signature } from "./jwks";
 import { verifyIdTokenOfX } from "./x";
 
@@ -140,25 +142,62 @@ async function verifyGoogleIdToken(
   idToken: string,
   nonce: string,
 ): Promise<GoogleTokenInfo> {
-  const response = await fetch(
-    `https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`,
-  );
+  // 1. Verify signature via JWKS before trusting any claims
+  await verifyGoogleSignature(idToken);
 
-  if (!response.ok) {
-    throw new Error(`Google authentication is invalid. Please sign in again.`);
+  // 2. Decode payload after signature is verified
+  const payload = decodeGoogleIdToken(idToken);
+
+  if (
+    payload.iss !== "https://accounts.google.com" &&
+    payload.iss !== "accounts.google.com"
+  ) {
+    throw new Error("Invalid Google token issuer");
   }
 
-  const googleTokenInfo = (await response.json()) as GoogleTokenInfo;
+  if (payload.aud !== GOOGLE_CLIENT_ID) {
+    throw new Error("Invalid Google token audience");
+  }
 
-  if (googleTokenInfo.nonce !== nonce) {
+  const exp = Number(payload.exp);
+  if (exp && Math.floor(Date.now() / 1000) >= exp) {
+    throw new Error("Google token has expired");
+  }
+
+  if (payload.nonce !== nonce) {
     throw new Error("Google token nonce mismatch");
   }
 
-  if (!googleTokenInfo.sub) {
+  if (!payload.sub) {
     throw new Error("Google token sub not found");
   }
 
-  return googleTokenInfo;
+  return payload;
+}
+
+function decodeGoogleIdToken(idToken: string): GoogleTokenInfo {
+  const segments = idToken.split(".");
+  if (segments.length < 2) {
+    throw new Error("Invalid Google id_token");
+  }
+
+  try {
+    let base64 = segments[1].replace(/-/g, "+").replace(/_/g, "/");
+    const pad = base64.length % 4;
+    if (pad) {
+      base64 += "=".repeat(4 - pad);
+    }
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i += 1) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+
+    const payloadJson = new TextDecoder().decode(bytes);
+    return JSON.parse(payloadJson) as GoogleTokenInfo;
+  } catch (error) {
+    throw new Error(`Failed to decode Google id_token: ${error}`);
+  }
 }
 
 async function verifyAuth0IdToken(
