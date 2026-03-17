@@ -1,7 +1,6 @@
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { NextFunction, Request, Response } from "express";
 
-import { GOOGLE_CLIENT_ID } from "@oko-wallet-api/middleware/auth/google_auth/client_id";
 import { validateOAuthToken } from "@oko-wallet-api/middleware/auth/google_auth/validate";
 import type { OAuthLocals } from "@oko-wallet-api/middleware/auth/types";
 
@@ -26,7 +25,7 @@ export async function googleAuthMiddleware(
   const idToken = authHeader.substring(7); // skip "Bearer "
 
   try {
-    const result = await validateOAuthToken(idToken, GOOGLE_CLIENT_ID);
+    const result = await validateOAuthToken(idToken);
 
     if (!result.success) {
       res.status(401).json({ error: result.err });
