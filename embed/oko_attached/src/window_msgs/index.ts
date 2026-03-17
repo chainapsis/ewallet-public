@@ -91,8 +91,16 @@ export function makeMsgHandler() {
     }
 
     const memState = useMemoryState.getState();
-    const appName = event.origin.replace(/^https?:\/\//, "");
-    memState.setAppName(appName);
+    // When the message comes from attached_proxy_web (mobile native proxy),
+    // keep the appName set during initialization (e.g. apiKey-derived name).
+    const isFromProxy =
+      MOBILE_NATIVE_ORIGIN && event.origin === MOBILE_NATIVE_ORIGIN;
+    const appName = isFromProxy && memState.appName
+      ? memState.appName
+      : event.origin.replace(/^https?:\/\//, "");
+    if (!isFromProxy) {
+      memState.setAppName(appName);
+    }
     const storageKey = memState.storageKey || event.origin;
 
     const ctx: MsgEventContext = {
