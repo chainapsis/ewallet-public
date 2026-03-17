@@ -5,7 +5,7 @@ export interface ExportedKeys {
   ed25519: string;
 }
 
-const CLEANUP_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+const CLEANUP_TIMEOUT_MS = 15 * 1000; // 15 seconds (safety net; keys are cleared on first read)
 const REQUEST_KEYS_MSG = "oko_export_request_keys";
 const RESPONSE_KEYS_MSG = "oko_export_keys";
 const CLEAR_KEYS_MSG = "oko_export_clear_keys";
@@ -39,11 +39,11 @@ function handleWindowMessage(event: MessageEvent): void {
   }
   if (data.type === REQUEST_KEYS_MSG) {
     if (storedKeys) {
+      const keys = storedKeys;
+      storedKeys = null;
+      clearCleanupTimer();
       const responder = event.source as Window | null;
-      responder?.postMessage(
-        { type: RESPONSE_KEYS_MSG, keys: storedKeys },
-        event.origin,
-      );
+      responder?.postMessage({ type: RESPONSE_KEYS_MSG, keys }, event.origin);
     } else if (window.location.pathname === "/") {
       // Only log in the hidden iframe context — display iframes receiving
       // sibling requests without keys is expected behavior
@@ -70,7 +70,10 @@ export function setExportedKeys(keys: ExportedKeys): void {
 }
 
 export function getExportedKeys(): ExportedKeys | null {
-  return storedKeys;
+  const keys = storedKeys;
+  storedKeys = null;
+  clearCleanupTimer();
+  return keys;
 }
 
 /**

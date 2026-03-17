@@ -7,6 +7,7 @@ import styles from "./export_display.module.scss";
 import { postLog } from "@oko-wallet-attached/requests/logging";
 import {
   type ExportedKeys,
+  clearExportedKeys,
   getExportedKeys,
   requestExportedKeys,
 } from "@oko-wallet-attached/window_msgs/export_key_store";
@@ -166,6 +167,7 @@ export const ExportDisplay: FC = () => {
 
     return () => {
       cancelled = true;
+      clearExportedKeys();
     };
   }, [keyType]);
 
