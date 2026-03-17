@@ -8,6 +8,7 @@ import { useMemo } from "react";
 import styles from "../common/signature_content.module.scss";
 import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
 import { getChainByChainId } from "@oko-wallet-attached/requests/chain_infos";
+import { useMemoryState } from "@oko-wallet-attached/store/memory";
 import { getFaviconUrl } from "@oko-wallet-attached/utils/favicon";
 
 interface SvmAllTxSignatureContentProps {
@@ -18,6 +19,7 @@ export const SvmAllTxSignatureContent: FC<SvmAllTxSignatureContentProps> = ({
   payload,
 }) => {
   const { origin, chain_id, data } = payload;
+  const appName = useMemoryState((state) => state.appName);
   const faviconUrl = getFaviconUrl(origin);
   const txCount = data.serialized_transactions.length;
 
@@ -54,7 +56,7 @@ export const SvmAllTxSignatureContent: FC<SvmAllTxSignatureContentProps> = ({
             />
           )}
           <Typography size="lg" color="primary" weight="semibold">
-            {origin.replace(/^https?:\/\//, "")}
+            {appName}
           </Typography>
         </div>
 

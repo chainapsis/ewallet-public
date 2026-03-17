@@ -87,9 +87,13 @@ export function makeMsgHandler() {
       return;
     }
 
+    const appName = event.origin.replace(/^https?:\/\//, "");
+    useMemoryState.getState().setAppName(appName);
+
     const ctx: MsgEventContext = {
       port,
       hostOrigin: event.origin,
+      appName,
     };
 
     // Mobile native (attached_proxy_web) 경유 시,

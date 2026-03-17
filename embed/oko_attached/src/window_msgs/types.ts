@@ -3,6 +3,7 @@ import type { AuthType } from "@oko-wallet/oko-types/auth";
 export interface MsgEventContext {
   port: MessagePort;
   hostOrigin: string;
+  appName: string;
 }
 
 export interface GoogleTokenInfo {

@@ -11,6 +11,7 @@ import { SvmMessageSummary } from "./svm_message_summary";
 import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
 import { SignerAddressOrEmail } from "@oko-wallet-attached/components/modal_variants/common/metadata_content/signer_address_or_email/signer_address_or_email";
 import { getChainByChainId } from "@oko-wallet-attached/requests/chain_infos";
+import { useMemoryState } from "@oko-wallet-attached/store/memory";
 import { getFaviconUrl } from "@oko-wallet-attached/utils/favicon";
 
 interface SvmMessageSignatureContentProps {
@@ -21,6 +22,7 @@ export const SvmMessageSignatureContent: FC<
   SvmMessageSignatureContentProps
 > = ({ payload }) => {
   const { origin, signer, chain_id } = payload;
+  const appName = useMemoryState((state) => state.appName);
   const faviconUrl = getFaviconUrl(origin);
 
   const { data: chainInfo } = useQuery({
@@ -56,7 +58,7 @@ export const SvmMessageSignatureContent: FC<
             />
           )}
           <Typography size="lg" color="primary" weight="semibold">
-            {origin.replace(/^https?:\/\//, "")}
+            {appName}
           </Typography>
         </div>
 

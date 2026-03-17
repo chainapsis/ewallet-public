@@ -27,7 +27,7 @@ import { OAUTH_BROADCAST_CHANNEL } from "@oko-wallet-attached/window_msgs/target
 import type { MsgEventContext } from "@oko-wallet-attached/window_msgs/types";
 
 export function useInitializeApp() {
-  const { setHostOrigin, setIsMobileNative, setReferralInfo } =
+  const { setHostOrigin, setAppName, setIsMobileNative, setReferralInfo } =
     useMemoryState();
   const { getAuthToken, getWallet, setAuthToken, setTheme, getTheme } =
     useAppState();
@@ -67,9 +67,11 @@ export function useInitializeApp() {
           postMessage: (msg: unknown) => bc.postMessage(msg),
         };
 
+        const targetOrigin = message.payload.target_origin;
         const ctx: MsgEventContext = {
           port: port as MessagePort,
-          hostOrigin: message.payload.target_origin,
+          hostOrigin: targetOrigin,
+          appName: targetOrigin.replace(/^https?:\/\//, ""),
         };
 
         await handleOAuthInfoPassV2(ctx, message);
@@ -122,6 +124,7 @@ export function useInitializeApp() {
         }
 
         setHostOrigin(hostOrigin);
+        setAppName(hostOrigin.replace(/^https?:\/\//, ""));
 
         const isMobileNative = searchParams.get("mobile_native") === "true";
         setIsMobileNative(isMobileNative);

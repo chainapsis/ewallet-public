@@ -11,6 +11,7 @@ import { OKO_SDK_TARGET } from "@oko-wallet-attached/window_msgs/target";
 
 const initialState: MemoryState = {
   hostOrigin: null,
+  appName: "",
   isMobileNative: false,
   modalRequest: null,
   error: null,
@@ -21,6 +22,9 @@ export const useMemoryState = create(
   combine<MemoryState, MemoryActions>(initialState, (set, get) => ({
     setHostOrigin: (hostOrigin: string) => {
       set({ hostOrigin });
+    },
+    setAppName: (appName: string) => {
+      set({ appName });
     },
     setIsMobileNative: (value: boolean) => {
       set({ isMobileNative: value });
