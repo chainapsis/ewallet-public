@@ -84,11 +84,12 @@ function handleWindowMessage(event: MessageEvent): void {
     return;
   }
   if (data.type === REQUEST_KEY_MSG) {
-    const keyType = data.key_type as CurveType;
+    const keyType = data.key_type as string;
+    if (keyType !== "secp256k1" && keyType !== "ed25519") {
+      return;
+    }
     if (
-      storedKeys &&
-      keyType in storedKeys &&
-      storedKeys[keyType] &&
+      storedKeys?.[keyType] &&
       !isKeyLocked(keyType)
     ) {
       lockKey(keyType);
@@ -108,7 +109,10 @@ function handleWindowMessage(event: MessageEvent): void {
       });
     }
   } else if (data.type === ACK_KEY_MSG) {
-    const keyType = data.key_type as CurveType;
+    const keyType = data.key_type as string;
+    if (keyType !== "secp256k1" && keyType !== "ed25519") {
+      return;
+    }
     confirmKey(keyType);
   } else if (data.type === CLEAR_KEYS_MSG) {
     storedKeys = null;
