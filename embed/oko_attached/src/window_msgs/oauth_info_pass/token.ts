@@ -164,6 +164,10 @@ async function verifyGoogleIdToken(
     throw new Error("Google token has expired");
   }
 
+  if (payload.email_verified !== "true") {
+    throw new Error("Google token email not verified");
+  }
+
   if (payload.nonce !== nonce) {
     throw new Error("Google token nonce mismatch");
   }
