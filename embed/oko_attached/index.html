@@ -29,8 +29,7 @@
       // Apply system theme before first paint to prevent light-to-dark flash
       (function () {
         var isDark =
-          window.matchMedia &&
-          window.matchMedia("(prefers-color-scheme: dark)").matches;
+          window.matchMedia?.("(prefers-color-scheme: dark)").matches;
         var isPopup = window.parent === window;
         if (isDark) {
           document.documentElement.setAttribute("data-theme", "dark");

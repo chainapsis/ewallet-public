@@ -1,10 +1,10 @@
-import * as WebBrowser from "expo-web-browser";
-import { Platform } from "react-native";
+import { NativeModules, Platform } from "react-native";
 
 /**
  * SDK-internal callback scheme used by OkoAuthCallbackActivity on Android.
- * The Expo config plugin registers this scheme on the CallbackActivity,
- * so Android routes the redirect there without a disambiguation popup.
+ * The library's AndroidManifest.xml registers this scheme on the
+ * CallbackActivity, so Android routes the redirect there without a
+ * disambiguation popup. (Expo users can also override via config plugin.)
  */
 export const ANDROID_CALLBACK_SCHEME = "oko.auth.callback";
 
@@ -17,17 +17,68 @@ let nativeModule: OkoAuthBrowserNative | null = null;
 
 if (Platform.OS === "android") {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { requireNativeModule } = require("expo-modules-core");
-    nativeModule = requireNativeModule("OkoAuthBrowser");
+    nativeModule = NativeModules.OkoAuthBrowser ?? null;
   } catch {
-    // Native module not available — fall back to expo-web-browser
+    // Native module not available — fall back to web browser library
   }
 }
 
 export type AuthSessionResult =
   | { type: "success"; url: string }
   | { type: "cancel" };
+
+type AuthOpener = (
+  url: string,
+  redirectUrl: string,
+) => Promise<AuthSessionResult>;
+
+/**
+ * Detects which auth browser library is available at runtime.
+ * Tries expo-web-browser first (backward compat for Expo users),
+ * then react-native-inappbrowser-reborn (bare RN users).
+ */
+function resolveAuthOpener(): AuthOpener {
+  // Try expo-web-browser first (backward compat for existing Expo users)
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const WebBrowser = require("expo-web-browser");
+    return async (url: string, redirectUrl: string) => {
+      const result = await WebBrowser.openAuthSessionAsync(url, redirectUrl);
+      if (result.type === "success" && result.url) {
+        return { type: "success", url: result.url };
+      }
+      return { type: "cancel" };
+    };
+  } catch {
+    // expo-web-browser not available
+  }
+
+  // Fall back to react-native-inappbrowser-reborn (bare RN users)
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { InAppBrowser } = require("react-native-inappbrowser-reborn");
+    return async (url: string, redirectUrl: string) => {
+      const result = await InAppBrowser.openAuth(url, redirectUrl, {
+        ephemeralWebSession: false,
+      });
+      if (result.type === "success" && result.url) {
+        return { type: "success", url: result.url };
+      }
+      return { type: "cancel" };
+    };
+  } catch {
+    // react-native-inappbrowser-reborn not available
+  }
+
+  // Neither available
+  return async () => {
+    throw new Error(
+      "[oko-rn] OkoAuthBrowser: Install either expo-web-browser or react-native-inappbrowser-reborn",
+    );
+  };
+}
+
+const openAuthViaWebBrowser = resolveAuthOpener();
 
 /**
  * Returns the redirect scheme to pass to the server.
@@ -44,12 +95,13 @@ export function getServerRedirectScheme(appScheme: string): string {
 /**
  * Open an auth session in the system browser.
  *
- * - iOS: ASWebAuthenticationSession via expo-web-browser
- * - Android: Chrome Custom Tab via native OkoAuthBrowserModule.
+ * - Android (primary): Chrome Custom Tab via native OkoAuthBrowserModule.
  *   ManagementActivity keeps the Custom Tab in the same task as the app.
  *   CallbackActivity receives the redirect and uses CLEAR_TOP to pop
  *   the Custom Tab — no "Open in app?" popup.
- *   (Falls back to expo-web-browser if the native module is unavailable.)
+ * - iOS: ASWebAuthenticationSession via detected library
+ *   (expo-web-browser or react-native-inappbrowser-reborn).
+ * - Android (fallback): same as iOS if native module unavailable.
  */
 export async function openAuthSession(
   url: string,
@@ -60,18 +112,11 @@ export async function openAuthSession(
       const callbackUrl = await nativeModule.openAuthSessionAsync(url);
       return { type: "success", url: callbackUrl };
     } catch {
-      // CompletableDeferred was cancelled (user pressed back)
+      // Promise was rejected (user pressed back)
       return { type: "cancel" };
     }
   }
 
-  // iOS (or Android fallback)
-  const result = await WebBrowser.openAuthSessionAsync(
-    url,
-    `${callbackScheme}://`,
-  );
-  if (result.type === "success" && result.url) {
-    return { type: "success", url: result.url };
-  }
-  return { type: "cancel" };
+  // iOS (or Android fallback): use detected library
+  return openAuthViaWebBrowser(url, `${callbackScheme}://`);
 }
