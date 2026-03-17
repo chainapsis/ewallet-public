@@ -1,6 +1,7 @@
 import type { Result } from "@oko-wallet/stdlib-js";
 import jwt, { type JwtHeader, type JwtPayload } from "jsonwebtoken";
 
+import { GOOGLE_CLIENT_ID } from "@oko-wallet-api/middleware/auth/google_auth/client_id";
 import {
   createJwksCache,
   jwkToPem,
@@ -25,7 +26,6 @@ const googleJwks = createJwksCache(
 
 export async function validateOAuthToken(
   idToken: string,
-  googleClientId: string,
 ): Promise<Result<GoogleUserInfo, string>> {
   try {
     const decoded = jwt.decode(idToken, { complete: true });
@@ -56,7 +56,7 @@ export async function validateOAuthToken(
 
     const payload = jwt.verify(idToken, pem, {
       algorithms: ["RS256"],
-      audience: googleClientId,
+      audience: GOOGLE_CLIENT_ID,
       issuer: ["https://accounts.google.com", "accounts.google.com"],
     }) as GoogleIdTokenPayload;
 

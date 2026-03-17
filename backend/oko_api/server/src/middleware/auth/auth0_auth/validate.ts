@@ -1,7 +1,10 @@
 import type { Result } from "@oko-wallet/stdlib-js";
 import jwt, { type JwtHeader, type JwtPayload } from "jsonwebtoken";
 
-import { AUTH0_DOMAIN } from "@oko-wallet-api/middleware/auth/auth0_auth/client_id";
+import {
+  AUTH0_CLIENT_ID,
+  AUTH0_DOMAIN,
+} from "@oko-wallet-api/middleware/auth/auth0_auth/client_id";
 import {
   createJwksCache,
   jwkToPem,
@@ -16,8 +19,6 @@ interface Auth0IdTokenPayload extends JwtPayload {
 
 interface ValidateAuth0IdTokenArgs {
   idToken: string;
-  clientId: string;
-  domain: string;
   expectedEmail?: string;
   expectedNonce?: string;
 }
@@ -66,8 +67,8 @@ export async function validateAuth0IdToken(
 
     const payload = jwt.verify(args.idToken, pem, {
       algorithms: ["RS256"],
-      audience: args.clientId,
-      issuer: `https://${args.domain}/`,
+      audience: AUTH0_CLIENT_ID,
+      issuer: `https://${AUTH0_DOMAIN}/`,
     }) as Auth0IdTokenPayload;
 
     if (!payload.sub) {

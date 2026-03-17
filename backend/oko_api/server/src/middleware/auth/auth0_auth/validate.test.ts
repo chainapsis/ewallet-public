@@ -1,7 +1,3 @@
-import {
-  AUTH0_CLIENT_ID,
-  AUTH0_DOMAIN,
-} from "@oko-wallet-api/middleware/auth/auth0_auth/client_id";
 import { validateAuth0IdToken } from "@oko-wallet-api/middleware/auth/auth0_auth/validate";
 
 describe("validateAuth0IdToken", () => {
@@ -10,8 +6,6 @@ describe("validateAuth0IdToken", () => {
 
     const result = await validateAuth0IdToken({
       idToken,
-      clientId: AUTH0_CLIENT_ID,
-      domain: AUTH0_DOMAIN,
     });
 
     expect(result.success).toBe(true);

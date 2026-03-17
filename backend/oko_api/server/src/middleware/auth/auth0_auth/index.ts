@@ -1,10 +1,6 @@
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { NextFunction, Request, Response } from "express";
 
-import {
-  AUTH0_CLIENT_ID,
-  AUTH0_DOMAIN,
-} from "@oko-wallet-api/middleware/auth/auth0_auth/client_id";
 import { validateAuth0IdToken } from "@oko-wallet-api/middleware/auth/auth0_auth/validate";
 import type { OAuthLocals } from "@oko-wallet-api/middleware/auth/types";
 
@@ -31,8 +27,6 @@ export async function auth0AuthMiddleware(
   try {
     const result = await validateAuth0IdToken({
       idToken,
-      clientId: AUTH0_CLIENT_ID,
-      domain: AUTH0_DOMAIN,
     });
 
     if (!result.success) {
