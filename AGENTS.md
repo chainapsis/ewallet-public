@@ -129,7 +129,7 @@ Uses `@asteasolutions/zod-to-openapi`. When modifying routes, update both:
 ### Commit Messages
 
 Follow the `<scope>: <description>` format. Scope is the package or area being
-changed. Use lowercase, imperative mood.
+changed. Use lowercase, imperative mood. Always write in English.
 
 ```
 demo_web: fix load listener leak in useThemeSyncToIframe
@@ -139,7 +139,8 @@ project: fix biome lint and format errors
 
 ### Pull Requests
 
-Use the template in `.github/pull_request_template.md`:
+Use the template in `.github/pull_request_template.md`. Always write in English.
+PR title follows the same `<scope>: <description>` format as commit messages.
 
 - Check the `CONTRIBUTING.md` acknowledgement
 - Write a **Summary** explaining what changed, why, and the impact

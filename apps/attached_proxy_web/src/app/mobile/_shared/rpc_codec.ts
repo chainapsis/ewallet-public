@@ -5,7 +5,7 @@ import pako from "pako";
 
 /**
  * Generic RPC codec for app ↔ attached_proxy_web communication.
- * Mirror of sdk/oko_sdk_core_react_native/src/codec/rpc_codec.ts
+ * Mirror of the mobile SDK RPC codec (e.g. oko_sdk_core_react_native/src/codec/rpc_codec.ts)
  */
 
 export const RPC_CODEC_VERSION = "1";
