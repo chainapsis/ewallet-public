@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect } from "react";
+import { useEffect } from "react";
 
 import { useThemeState } from "@oko-wallet-demo-web/state/theme";
 
@@ -6,8 +6,14 @@ export const useThemeSync = () => {
   const { initialize, setTheme } = useThemeState();
   const preference = useThemeState((s) => s.preference);
 
-  useLayoutEffect(() => {
-    initialize();
+  useEffect(() => {
+    if (useThemeState.persist.hasHydrated()) {
+      initialize();
+      return;
+    }
+    return useThemeState.persist.onFinishHydration(() => {
+      initialize();
+    });
   }, [initialize]);
 
   useEffect(() => {
