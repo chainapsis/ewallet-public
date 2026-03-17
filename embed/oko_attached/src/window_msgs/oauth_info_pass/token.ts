@@ -3,8 +3,7 @@ import type { Result } from "@oko-wallet/stdlib-js";
 
 import { verifyIdTokenOfDiscord } from "./discord";
 import { verifyIdTokenOfGithub } from "./github";
-import { verifyGoogleSignature } from "./google_jwks";
-import { verifyAuth0Signature } from "./jwks";
+import { createJwksVerifier, decodeJwtPayload } from "./jwks_verify";
 import { verifyIdTokenOfX } from "./x";
 import {
   AUTH0_CLIENT_ID,
@@ -16,6 +15,15 @@ import type {
   GoogleTokenInfo,
   TokenInfo,
 } from "@oko-wallet-attached/window_msgs/types";
+
+const googleJwks = createJwksVerifier(
+  "https://www.googleapis.com/oauth2/v3/certs",
+  "Google",
+);
+const auth0Jwks = createJwksVerifier(
+  `https://${AUTH0_DOMAIN}/.well-known/jwks.json`,
+  "Auth0",
+);
 
 export async function verifyIdToken(
   authType: AuthType,
@@ -142,11 +150,9 @@ async function verifyGoogleIdToken(
   idToken: string,
   nonce: string,
 ): Promise<GoogleTokenInfo> {
-  // 1. Verify signature via JWKS before trusting any claims
-  await verifyGoogleSignature(idToken);
+  await googleJwks.verifySignature(idToken);
 
-  // 2. Decode payload after signature is verified
-  const payload = decodeGoogleIdToken(idToken);
+  const payload = decodeJwtPayload<GoogleTokenInfo>(idToken, "Google");
 
   if (
     payload.iss !== "https://accounts.google.com" &&
@@ -179,40 +185,13 @@ async function verifyGoogleIdToken(
   return payload;
 }
 
-function decodeGoogleIdToken(idToken: string): GoogleTokenInfo {
-  const segments = idToken.split(".");
-  if (segments.length < 2) {
-    throw new Error("Invalid Google id_token");
-  }
-
-  try {
-    let base64 = segments[1].replace(/-/g, "+").replace(/_/g, "/");
-    const pad = base64.length % 4;
-    if (pad) {
-      base64 += "=".repeat(4 - pad);
-    }
-    const binary = atob(base64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i += 1) {
-      bytes[i] = binary.charCodeAt(i);
-    }
-
-    const payloadJson = new TextDecoder().decode(bytes);
-    return JSON.parse(payloadJson) as GoogleTokenInfo;
-  } catch (error) {
-    throw new Error(`Failed to decode Google id_token: ${error}`);
-  }
-}
-
 async function verifyAuth0IdToken(
   idToken: string,
   nonce: string,
 ): Promise<Auth0TokenInfo> {
-  // 1. Verify signature via JWKS before trusting any claims
-  await verifyAuth0Signature(idToken);
+  await auth0Jwks.verifySignature(idToken);
 
-  // 2. Decode payload after signature is verified
-  const payload = decodeAuth0IdToken(idToken);
+  const payload = decodeJwtPayload<Auth0TokenInfo>(idToken, "Auth0");
 
   if (payload.iss !== `https://${AUTH0_DOMAIN}/`) {
     throw new Error("Invalid Auth0 token issuer");
@@ -241,31 +220,4 @@ async function verifyAuth0IdToken(
   }
 
   return payload;
-}
-
-function decodeAuth0IdToken(idToken: string): Auth0TokenInfo {
-  const segments = idToken.split(".");
-  if (segments.length < 2) {
-    throw new Error("Invalid Auth0 id_token");
-  }
-
-  const textDecoder = new TextDecoder();
-
-  try {
-    let base64 = segments[1].replace(/-/g, "+").replace(/_/g, "/");
-    const pad = base64.length % 4;
-    if (pad) {
-      base64 += "=".repeat(4 - pad);
-    }
-    const binary = atob(base64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i += 1) {
-      bytes[i] = binary.charCodeAt(i);
-    }
-
-    const payloadJson = textDecoder.decode(bytes);
-    return JSON.parse(payloadJson) as Auth0TokenInfo;
-  } catch (error) {
-    throw new Error(`Failed to decode Auth0 id_token: ${error}`);
-  }
 }
