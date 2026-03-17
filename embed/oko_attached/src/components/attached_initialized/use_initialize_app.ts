@@ -137,9 +137,17 @@ export function useInitializeApp() {
         const clientRandom = searchParams.get("client_random");
 
         if (isMobileNative && (!clientRandom || clientRandom.length < 16)) {
-          console.error(
-            "[attached] mobile_native requires client_random (>= 16 chars)",
-          );
+          const errMsg =
+            "mobile_native requires client_random (>= 16 chars)";
+          console.error("[attached]", errMsg);
+          if (canNotifyParent) {
+            const msg: OkoWalletMsgInit = {
+              target: "oko_sdk",
+              msg_type: "init",
+              payload: { success: false, err: errMsg },
+            };
+            await sendMsgToWindow(window.parent, msg, "*");
+          }
           return;
         }
 
