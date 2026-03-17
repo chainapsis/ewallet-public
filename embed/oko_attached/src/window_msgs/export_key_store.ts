@@ -140,27 +140,16 @@ export function consumeExportedKey(keyType: CurveType): string | null {
 }
 
 /**
- * Send an ACK to all sibling frames so the holder clears the key.
+ * Send an ACK directly to the frame that delivered the key.
  */
-function sendAck(keyType: CurveType): void {
-  const selfOrigin = window.location.origin;
+function sendAck(source: MessageEventSource | null, keyType: CurveType): void {
   try {
-    const parentWin = window.parent;
-    if (parentWin && parentWin !== window) {
-      const frames = parentWin.frames;
-      for (let i = 0; i < frames.length; i += 1) {
-        try {
-          frames[i].postMessage(
-            { type: ACK_KEY_MSG, key_type: keyType },
-            selfOrigin,
-          );
-        } catch {
-          // cross-origin frame, skip
-        }
-      }
-    }
+    (source as Window)?.postMessage(
+      { type: ACK_KEY_MSG, key_type: keyType },
+      window.location.origin,
+    );
   } catch {
-    // frame iteration failed
+    // cross-origin or unavailable source, skip
   }
 }
 
@@ -187,7 +176,7 @@ export function requestExportedKey(keyType: CurveType): Promise<string | null> {
         cleanup();
         const key = data.key ?? null;
         if (key) {
-          sendAck(keyType);
+          sendAck(event.source, keyType);
         }
         resolve(key);
       }
