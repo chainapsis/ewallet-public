@@ -213,6 +213,7 @@ export async function checkEmail(
           exists: false,
           keyshare_node_meta: {
             threshold,
+            registration_threshold: null,
             nodes: activeKSNodes.map((ksNode) => ({
               name: ksNode.node_name,
               endpoint: ksNode.server_url,
@@ -284,6 +285,7 @@ export async function checkEmail(
         exists: true,
         keyshare_node_meta: {
           threshold: wallet.sss_threshold,
+          registration_threshold: null,
           nodes: activeKSNodes.map((ksNode) => ({
             name: ksNode.node_name,
             endpoint: ksNode.server_url,

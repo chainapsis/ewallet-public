@@ -112,6 +112,7 @@ describe("keygen_v2_test", () => {
     await resetPgDatabase(pool);
     await insertKeyShareNodeMeta(pool, {
       sss_threshold: sssThreshold,
+      registration_threshold: null,
     });
     jest.clearAllMocks();
   });

@@ -81,8 +81,9 @@ export async function handleNewUserV2(
   } = ed25519KeygenSplitRes.data;
 
   // 4. Commit to oko_api and ks nodes
-  // For sign_up, all nodes must succeed since we register to all of them
   const { nodes } = keyshareNodeMeta;
+  const registrationThreshold =
+    keyshareNodeMeta.registration_threshold ?? nodes.length;
   const ksnCommitTargets: KsnCommitTarget[] = nodes.map((node) => ({
     nodeUrl: node.endpoint,
     operationType: "sign_up",
@@ -92,7 +93,7 @@ export async function handleNewUserV2(
     authType,
     idToken,
     ksnCommitTargets,
-    nodes.length, // All nodes must commit for sign_up
+    registrationThreshold,
   );
   if (!commitRes.success) {
     return {
@@ -150,10 +151,13 @@ export async function handleNewUserV2(
       );
     }),
   );
-  const registerErrResults = registerKeySharesResults.filter(
-    (result) => result.success === false,
-  );
-  if (registerErrResults.length > 0) {
+  const registerSuccessCount = registerKeySharesResults.filter(
+    (result) => result.success === true,
+  ).length;
+  if (registerSuccessCount < registrationThreshold) {
+    const registerErrResults = registerKeySharesResults.filter(
+      (result) => result.success === false,
+    );
     return {
       success: false,
       err: {

@@ -119,6 +119,7 @@ describe("user_route_test", () => {
     jest.clearAllMocks();
     await insertKeyShareNodeMeta(pool, {
       sss_threshold: SSS_THRESHOLD,
+      registration_threshold: null,
     });
   });
 
