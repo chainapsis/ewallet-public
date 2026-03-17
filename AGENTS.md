@@ -177,6 +177,31 @@ Uses `@asteasolutions/zod-to-openapi`. When modifying routes, update both:
    `key_share_node/server/src/openapi/schema/`
 2. **Route** — `registry.registerPath()` alongside the Express handler
 
+### Commit Messages
+
+Follow the `<scope>: <description>` format. Scope is the package or area being
+changed. Use lowercase, imperative mood.
+
+```
+demo_web: fix load listener leak in useThemeSyncToIframe
+sdk: polyfill Event for RN wallet-standard compatibility
+project: fix biome lint and format errors
+```
+
+### Pull Requests
+
+Use the template in `.github/pull_request_template.md`:
+
+- Check the `CONTRIBUTING.md` acknowledgement
+- Write a **Summary** explaining what changed, why, and the impact
+- Add **Links** to related issues or PRs (e.g., `Closes #123`)
+
+### Git Operations
+
+Do not commit, push, or create PRs unless the user explicitly asks. Always
+wait for confirmation before performing any git operation that affects the
+repository history or remote.
+
 ### Common Contribution Patterns
 
 1. **Adding chain support** — Extend `oko_sdk_core`, create chain-specific SDK
