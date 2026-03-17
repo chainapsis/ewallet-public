@@ -125,6 +125,7 @@ export async function checkKeyShareFromKSNodesV2(
   },
   targetKSNodes: KeyShareNode[],
   auth_type: AuthType,
+  registrationThreshold?: number | null,
 ): Promise<OkoApiResponse<CheckKeyShareV2Result>> {
   try {
     const nodeServerUrls: string[] = [];
@@ -161,12 +162,14 @@ export async function checkKeyShareFromKSNodesV2(
       }),
     );
 
-    // Check all nodes have keyshares for requested curve types
+    const secp256k1SuccessNodeIds: string[] = [];
+    const ed25519SuccessNodeIds: string[] = [];
     const secp256k1Errors: string[] = [];
     const ed25519Errors: string[] = [];
 
     results.forEach((result, index) => {
       const nodeName = targetKSNodes[index].node_name;
+      const nodeId = nodeIds[index];
 
       if (result.status === "rejected") {
         if (wallets.secp256k1) {
@@ -189,41 +192,79 @@ export async function checkKeyShareFromKSNodesV2(
       }
 
       const data = result.value.data;
-      if (wallets.secp256k1 && !data.secp256k1?.exists) {
-        secp256k1Errors.push(
-          `name: ${nodeName}, err: secp256k1 keyshare does not exist`,
-        );
+      if (wallets.secp256k1) {
+        if (data.secp256k1?.exists) {
+          secp256k1SuccessNodeIds.push(nodeId);
+        } else {
+          secp256k1Errors.push(
+            `name: ${nodeName}, err: secp256k1 keyshare does not exist`,
+          );
+        }
       }
-      if (wallets.ed25519 && !data.ed25519?.exists) {
-        ed25519Errors.push(
-          `name: ${nodeName}, err: ed25519 keyshare does not exist`,
-        );
+      if (wallets.ed25519) {
+        if (data.ed25519?.exists) {
+          ed25519SuccessNodeIds.push(nodeId);
+        } else {
+          ed25519Errors.push(
+            `name: ${nodeName}, err: ed25519 keyshare does not exist`,
+          );
+        }
       }
     });
 
-    // All nodes must have keyshares for requested curve types
-    if (wallets.secp256k1 && secp256k1Errors.length > 0) {
-      return {
-        success: false,
-        code: "KEYSHARE_NODE_INSUFFICIENT",
-        msg: secp256k1Errors.join("\n"),
-      };
-    }
+    // When registrationThreshold is set, allow partial success
+    const usePartialSuccess =
+      registrationThreshold != null && registrationThreshold > 0;
 
-    if (wallets.ed25519 && ed25519Errors.length > 0) {
-      return {
-        success: false,
-        code: "KEYSHARE_NODE_INSUFFICIENT",
-        msg: ed25519Errors.join("\n"),
-      };
+    if (usePartialSuccess) {
+      if (
+        wallets.secp256k1 &&
+        secp256k1SuccessNodeIds.length < registrationThreshold
+      ) {
+        return {
+          success: false,
+          code: "KEYSHARE_NODE_INSUFFICIENT",
+          msg: `secp256k1: ${secp256k1SuccessNodeIds.length}/${targetKSNodes.length} nodes succeeded (need ${registrationThreshold})\n${secp256k1Errors.join("\n")}`,
+        };
+      }
+      if (
+        wallets.ed25519 &&
+        ed25519SuccessNodeIds.length < registrationThreshold
+      ) {
+        return {
+          success: false,
+          code: "KEYSHARE_NODE_INSUFFICIENT",
+          msg: `ed25519: ${ed25519SuccessNodeIds.length}/${targetKSNodes.length} nodes succeeded (need ${registrationThreshold})\n${ed25519Errors.join("\n")}`,
+        };
+      }
+    } else {
+      // All nodes must have keyshares (original behavior)
+      if (wallets.secp256k1 && secp256k1Errors.length > 0) {
+        return {
+          success: false,
+          code: "KEYSHARE_NODE_INSUFFICIENT",
+          msg: secp256k1Errors.join("\n"),
+        };
+      }
+      if (wallets.ed25519 && ed25519Errors.length > 0) {
+        return {
+          success: false,
+          code: "KEYSHARE_NODE_INSUFFICIENT",
+          msg: ed25519Errors.join("\n"),
+        };
+      }
     }
 
     const responseData: CheckKeyShareV2Result = {};
     if (wallets.secp256k1) {
-      responseData.secp256k1 = { nodeIds };
+      responseData.secp256k1 = {
+        nodeIds: usePartialSuccess ? secp256k1SuccessNodeIds : nodeIds,
+      };
     }
     if (wallets.ed25519) {
-      responseData.ed25519 = { nodeIds };
+      responseData.ed25519 = {
+        nodeIds: usePartialSuccess ? ed25519SuccessNodeIds : nodeIds,
+      };
     }
 
     return {

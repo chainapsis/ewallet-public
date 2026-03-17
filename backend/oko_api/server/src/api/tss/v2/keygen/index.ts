@@ -227,7 +227,20 @@ export async function runKeygenV2(
     }
     const activeKSNodes = getActiveKSNodesRes.data;
 
-    // 5. Check keyshare from KS nodes for both curve types
+    // 5. Get key share node meta (SSS threshold + registration threshold)
+    const getKeyshareNodeMetaRes = await getKeyShareNodeMeta(db);
+    if (getKeyshareNodeMetaRes.success === false) {
+      return {
+        success: false,
+        code: "UNKNOWN_ERROR",
+        msg: `getKeyShareNodeMeta error: ${getKeyshareNodeMetaRes.err}`,
+      };
+    }
+    const globalSSSThreshold = getKeyshareNodeMetaRes.data.sss_threshold;
+    const registrationThreshold =
+      getKeyshareNodeMetaRes.data.registration_threshold;
+
+    // 6. Check keyshare from KS nodes for both curve types
     const checkKeyshareV2Res = await checkKeyShareFromKSNodesV2(
       user_identifier,
       {
@@ -236,6 +249,7 @@ export async function runKeygenV2(
       },
       activeKSNodes,
       auth_type,
+      registrationThreshold,
     );
     if (checkKeyshareV2Res.success === false) {
       return checkKeyshareV2Res;
@@ -293,18 +307,7 @@ export async function runKeygenV2(
       ed25519KeyPackageShares.verifying_share,
     ).toString("hex");
 
-    // 8. Get SSS threshold
-    const getKeyshareNodeMetaRes = await getKeyShareNodeMeta(db);
-    if (getKeyshareNodeMetaRes.success === false) {
-      return {
-        success: false,
-        code: "UNKNOWN_ERROR",
-        msg: `getKeyShareNodeMeta error: ${getKeyshareNodeMetaRes.err}`,
-      };
-    }
-    const globalSSSThreshold = getKeyshareNodeMetaRes.data.sss_threshold;
-
-    // 9. Create both wallets in a transaction
+    // 8. Create both wallets in a transaction
     let secp256k1Wallet: Wallet;
     let ed25519Wallet: Wallet;
     const client = await db.connect();
