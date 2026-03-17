@@ -6,10 +6,9 @@ import { type FC, useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./export_display.module.scss";
 import { postLog } from "@oko-wallet-attached/requests/logging";
 import {
-  type ExportedKeys,
   clearExportedKeys,
-  getExportedKeys,
-  requestExportedKeys,
+  getExportedKey,
+  requestExportedKey,
 } from "@oko-wallet-attached/window_msgs/export_key_store";
 
 const LOG = "[attached][export_display]";
@@ -98,46 +97,51 @@ export const ExportDisplay: FC = () => {
   }, []);
 
   const [revealed, setRevealed] = useState(false);
-  const [keys, setKeys] = useState<ExportedKeys | null>(null);
+  const [keyValue, setKeyValue] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [containerEl, setContainerEl] = useState<HTMLDivElement | null>(null);
 
-  // Read keys: try local first, then request from hidden iframe via postMessage
+  // Read key: try local first, then request from hidden iframe via postMessage
   useEffect(() => {
+    if (!keyType) {
+      setError("Invalid key_type");
+      return;
+    }
+
     let cancelled = false;
 
-    const loadKeys = async () => {
-      let stored = getExportedKeys();
+    const loadKey = async () => {
+      let key = getExportedKey(keyType);
 
-      if (!stored) {
+      if (!key) {
         // Retry up to 3 times (2s each) to handle timing variance across devices
         for (
           let attempt = 0;
-          attempt < MAX_KEY_REQUEST_ATTEMPTS && !stored && !cancelled;
+          attempt < MAX_KEY_REQUEST_ATTEMPTS && !key && !cancelled;
           attempt += 1
         ) {
-          stored = await requestExportedKeys();
+          key = await requestExportedKey(keyType);
         }
       }
       if (cancelled) {
         return;
       }
 
-      const framesCount = (() => {
-        try {
-          return window.parent?.frames?.length ?? -1;
-        } catch {
-          return -1;
-        }
-      })();
+      if (!key) {
+        const framesCount = (() => {
+          try {
+            return window.parent?.frames?.length ?? -1;
+          } catch {
+            return -1;
+          }
+        })();
 
-      if (!stored) {
         postLog({
           level: "error",
           message: "export_display: key load failed after retries",
           error: {
             name: "ExportDisplayError",
-            message: "No keys received from hidden iframe",
+            message: `No key received for ${keyType}`,
           },
           meta: {
             keyType,
@@ -154,30 +158,10 @@ export const ExportDisplay: FC = () => {
         setError("No exported keys found.");
         return;
       }
-      if (!keyType || !(keyType in stored)) {
-        postLog({
-          level: "error",
-          message: "export_display: invalid key type",
-          error: {
-            name: "ExportDisplayError",
-            message: `key_type=${keyType} not found in exported keys`,
-          },
-          meta: { keyType, availableKeys: Object.keys(stored) },
-        });
-
-        postToParent({
-          target: "oko_user_dashboard",
-          msg_type: "__export_display_error__",
-          payload: { key_type: keyType },
-        });
-
-        setError(`Invalid key_type: ${keyType}`);
-        return;
-      }
-      setKeys(stored);
+      setKeyValue(key);
     };
 
-    loadKeys();
+    loadKey();
 
     return () => {
       cancelled = true;
@@ -221,11 +205,9 @@ export const ExportDisplay: FC = () => {
   }, []);
 
   const handleCopy = useCallback(async () => {
-    if (!keys || !keyType) {
+    if (!keyValue || !keyType) {
       return;
     }
-
-    const keyValue = keys[keyType];
 
     try {
       await navigator.clipboard.writeText(keyValue);
@@ -241,17 +223,15 @@ export const ExportDisplay: FC = () => {
         payload: { key_type: keyType },
       });
     }
-  }, [keys, keyType]);
+  }, [keyValue, keyType]);
 
   if (error) {
     return <div className={styles.error}>{error}</div>;
   }
 
-  if (!keys || !keyType) {
+  if (!keyValue || !keyType) {
     return null;
   }
-
-  const keyValue = keys[keyType];
 
   return (
     <div ref={setContainerEl} className={styles.container}>
