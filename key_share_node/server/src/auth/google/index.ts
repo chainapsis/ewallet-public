@@ -4,6 +4,8 @@ import type { Result } from "@oko-wallet/stdlib-js";
 import type { OAuthValidationFail } from "../types";
 import { GOOGLE_CLIENT_ID } from "./client_id";
 
+// @TODO: Replace tokeninfo endpoint with JWKS signature verification (RS256).
+// oko_attached and oko_api already use JWKS for both Google and Auth0.
 export async function validateGoogleOAuthToken(
   idToken: string,
 ): Promise<Result<GoogleTokenInfo, OAuthValidationFail>> {
