@@ -19,85 +19,34 @@ lib/ (stdlib_js, dotenv, aws, postgres_lib)
           └─ embed/oko_attached (embeddable wallet iframe)
 ```
 
-### `lib/` — Foundation
-
-Utilities shared across the entire monorepo.
-
-- `stdlib_js` — Core JS helpers (used by 25+ packages)
-- `dotenv` — Environment config loader
-- `aws` — S3 client wrapper
-- `postgres_lib` — PostgreSQL connection pooling and Express middleware
-
-### `common/oko_types` — Shared Types
-
-Centralized TypeScript type definitions with fine-grained exports
-(`./admin`, `./auth`, `./crypto`, `./wallets`, `./tss`, etc.). Used by nearly
-every package.
-
 ### `crypto/` — Threshold Signatures
 
-Rust implementations compiled to WASM (browser) and Node.js addons (server).
-
-- `tecdsa/` — Threshold ECDSA via Cait-Sith (EVM, Cosmos)
-- `teddsa/` — Threshold EdDSA via FROST (Solana)
-
-Each has: `*_wasm` (browser), `*_addon` (Node.js), `*_hooks` (React),
-`*_interface` (TypeScript types), `api_lib` (API client).
-
-Also includes: `bytes` (byte utilities), `crypto_js` (Node/browser crypto with
-ECDHE support).
+Rust → WASM (browser) and Node.js addon (server) builds. `tecdsa/` for
+EVM/Cosmos (Cait-Sith), `teddsa/` for Solana (FROST). Also includes shared
+crypto utilities (`bytes`, `crypto_js`).
 
 ### `sdk/` — Client SDKs
 
-Layered SDK architecture — core provides chain-agnostic wallet logic,
-chain-specific SDKs extend it with signing and provider implementations.
+Core provides chain-agnostic wallet logic (auth, iframe communication, events).
+Chain-specific SDKs extend it:
 
-#### `oko_sdk_core` — Base SDK
-
-Chain-agnostic wallet: modal management, auth (sign in/out), iframe
-communication, event system, public key retrieval.
-
-#### `oko_sdk_eth` — EVM
-
-Extends core with EVM provider, `viem` account, message/transaction signing,
-chain switching. Exposes `getEthereumProvider()` for dApp integration.
-
-#### `oko_sdk_cosmos` — Cosmos
-
-Extends core with Keplr-compatible interface: Amino/Direct signing,
-`getOfflineSigner*()`, `sendTx()`, `experimentalSuggestChain()`. Uses
-`@cosmjs` and `@keplr-wallet` packages.
-
-#### `oko_sdk_svm` — Solana
-
-Extends core with Wallet Standard implementation: `connect()`/`disconnect()`,
-transaction signing, `registerWalletStandard()`. Uses `@solana/web3.js`.
-
-#### `oko_sdk_core_react_native` — React Native
-
-Native adaptation of core with `OkoWalletProvider`, `useOkoWallet()` hook,
-AsyncStorage session persistence, deep link OAuth support.
-
-#### Ecosystem Adapters
-
-- `oko_cosmos_kit` — Adapter for `@cosmos-kit/core`
-- `oko_interchain_kit` — Adapter for `@interchain-kit/core`
+- `oko_sdk_core` — Base SDK (chain-agnostic)
+- `oko_sdk_eth` — EVM provider via `viem`
+- `oko_sdk_cosmos` — Keplr-compatible Cosmos interface via `@cosmjs`
+- `oko_sdk_svm` — Solana Wallet Standard via `@solana/web3.js`
+- `oko_sdk_core_react_native` — React Native adaptation
+- `oko_cosmos_kit`, `oko_interchain_kit` — Ecosystem adapters
 
 ### `backend/` — API Services
 
 Express.js servers with Zod + OpenAPI schema validation.
 
-- `oko_api/server` — Main API. Aggregates sub-APIs below, handles TSS
-  operations with crypto addons
-- `admin_api` — Admin management (users, KSN nodes, S3 uploads)
+- `oko_api/server` — Main API, aggregates sub-APIs and handles TSS operations
+- `admin_api` — Admin management
 - `ct_dashboard_api` — Customer/team dashboard API
 - `user_dashboard_api` — User-facing dashboard operations
-- `openapi` — Shared OpenAPI/Zod schema definitions (exported per domain:
-  `./tss`, `./ct_dashboard`, `./oko_admin`, etc.)
-- `oko_pg_interface` — PostgreSQL layer with Knex migrations (exports per
-  table: `./oko_users`, `./oko_wallets`, `./tss`, etc.)
-- `oko_api_server_state` — Shared server state and DB initialization
-- `oko_api_error_codes` — Centralized error codes
+- Shared modules: `openapi` (Zod schemas), `oko_pg_interface` (Knex
+  migrations), `oko_api_server_state`, `oko_api_error_codes`
 
 ### `key_share_node/` — Distributed Signing Nodes (KSN)
 
@@ -146,7 +95,7 @@ react-hook-form.
 ```bash
 node --version        # v22.x.x or higher
 corepack enable       # Yarn 4.x
-rustup default nightly
+rustup install       # uses rust-toolchain in repo root
 cargo install wasm-pack
 ```
 
