@@ -11,12 +11,32 @@ import {
   useId,
   useInteractions,
   useRole,
+  useTransitionStyles,
 } from "@floating-ui/react";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import cn from "classnames";
 import { type FC, type ReactNode, useCallback, useState } from "react";
 
 import styles from "./anchored_menu.module.scss";
+
+const TRANSFORM_ORIGINS: Record<string, string> = {
+  top: "bottom center",
+  "top-start": "bottom left",
+  "top-end": "bottom right",
+  bottom: "top center",
+  "bottom-start": "top left",
+  "bottom-end": "top right",
+  left: "center right",
+  "left-start": "top right",
+  "left-end": "bottom right",
+  right: "center left",
+  "right-start": "top left",
+  "right-end": "bottom left",
+};
+
+function getTransformOrigin(placement: Placement): string {
+  return TRANSFORM_ORIGINS[placement] ?? "top left";
+}
 
 const MenuItemRow: FC<{
   item: AnchoredMenuItem;
@@ -73,6 +93,21 @@ export const AnchoredMenu: FC<AnchoredMenuProps> = ({
     role,
   ]);
 
+  const { isMounted, styles: transitionStyles } = useTransitionStyles(
+    context,
+    {
+      duration: { open: 150, close: 80 },
+      initial: {
+        opacity: 0,
+        transform: "scale(0.97)",
+      },
+      common: ({ placement: currentPlacement }) => ({
+        transformOrigin: getTransformOrigin(currentPlacement),
+        transitionTimingFunction: "ease-out",
+      }),
+    },
+  );
+
   const headingId = useId();
 
   const handleMenuItemClick = useCallback((item: AnchoredMenuItem) => {
@@ -91,35 +126,52 @@ export const AnchoredMenu: FC<AnchoredMenuProps> = ({
       </div>
 
       <FloatingPortal>
-        {isOpen && (
+        {isMounted && (
           <div
             ref={refs.setFloating}
             style={floatingStyles}
-            aria-labelledby={headingId}
-            className={cn(styles.menu, className)}
             {...getFloatingProps()}
           >
-            {menuSections ? (
-              <div className={styles.menuInner}>
-                {HeaderComponent}
-                {menuSections.map((section) => (
-                  <ul
-                    key={section.id}
-                    className={styles.menuSection}
-                    role="menu"
-                  >
-                    {section.label && (
-                      <li className={styles.menuSectionLabel}>
-                        <Typography
-                          size="xs"
-                          weight="semibold"
-                          color="tertiary"
-                        >
-                          {section.label}
-                        </Typography>
-                      </li>
-                    )}
-                    {section.items.map((item) => (
+            <div
+              style={transitionStyles}
+              aria-labelledby={headingId}
+              className={cn(styles.menu, className)}
+            >
+              {menuSections ? (
+                <div className={styles.menuInner}>
+                  {HeaderComponent}
+                  {menuSections.map((section) => (
+                    <ul
+                      key={section.id}
+                      className={styles.menuSection}
+                      role="menu"
+                    >
+                      {section.label && (
+                        <li className={styles.menuSectionLabel}>
+                          <Typography
+                            size="xs"
+                            weight="semibold"
+                            color="tertiary"
+                          >
+                            {section.label}
+                          </Typography>
+                        </li>
+                      )}
+                      {section.items.map((item) => (
+                        <MenuItemRow
+                          key={item.id}
+                          item={item}
+                          onClick={handleMenuItemClick}
+                        />
+                      ))}
+                    </ul>
+                  ))}
+                </div>
+              ) : (
+                <>
+                  {HeaderComponent}
+                  <ul className={styles.menuList} role="menu">
+                    {menuItems?.map((item) => (
                       <MenuItemRow
                         key={item.id}
                         item={item}
@@ -127,13 +179,11 @@ export const AnchoredMenu: FC<AnchoredMenuProps> = ({
                       />
                     ))}
                   </ul>
-                ))}
-              </div>
-            ) : (
-              <>
-                {HeaderComponent}
-                <ul className={styles.menuList} role="menu">
-                  {menuItems?.map((item) => (
+                </>
+              )}
+              {footerSection && (
+                <ul className={styles.menuFooter} role="menu">
+                  {footerSection.items.map((item) => (
                     <MenuItemRow
                       key={item.id}
                       item={item}
@@ -141,19 +191,8 @@ export const AnchoredMenu: FC<AnchoredMenuProps> = ({
                     />
                   ))}
                 </ul>
-              </>
-            )}
-            {footerSection && (
-              <ul className={styles.menuFooter} role="menu">
-                {footerSection.items.map((item) => (
-                  <MenuItemRow
-                    key={item.id}
-                    item={item}
-                    onClick={handleMenuItemClick}
-                  />
-                ))}
-              </ul>
-            )}
+              )}
+            </div>
           </div>
         )}
       </FloatingPortal>
