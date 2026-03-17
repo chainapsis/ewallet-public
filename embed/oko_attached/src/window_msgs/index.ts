@@ -84,6 +84,10 @@ export function makeMsgHandler() {
       if (theme === "light" || theme === "dark") {
         setColorScheme(theme);
         useMemoryState.getState().setResolvedTheme(theme);
+        const hostOrigin = useMemoryState.getState().hostOrigin;
+        if (hostOrigin) {
+          useAppState.getState().setTheme(hostOrigin, theme);
+        }
         console.debug("[attached] set_theme applied:", theme);
       }
       return;
