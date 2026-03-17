@@ -46,7 +46,10 @@ export const SvmSiwsSignatureContent: FC<SvmSiwsSignatureContentProps> = ({
     throw new Error("unreachable");
   }
 
-  const isValidSiwsMessage = verifySiwsMessage(message, payload.origin);
+  const isMobileNative = useMemoryState((state) => state.isMobileNative);
+  const isValidSiwsMessage = verifySiwsMessage(message, payload.origin, {
+    skipOriginCheck: isMobileNative,
+  });
 
   return (
     <div>

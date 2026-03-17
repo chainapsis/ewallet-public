@@ -32,7 +32,10 @@ export const EthereumSiweSignatureContent: FC<
     throw new Error("unreachable");
   }
 
-  const isValidSiweMessage = verifySiweMessage(message, payload.origin);
+  const isMobileNative = useMemoryState((state) => state.isMobileNative);
+  const isValidSiweMessage = verifySiweMessage(message, payload.origin, {
+    skipOriginCheck: isMobileNative,
+  });
 
   return (
     <div>

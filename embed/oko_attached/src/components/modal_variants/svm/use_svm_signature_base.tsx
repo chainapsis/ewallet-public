@@ -68,6 +68,8 @@ export function useSvmSignatureBase(args: UseSvmSignatureBaseArgs) {
   const { closeModal, setError } = useMemoryState();
 
   const storageKey = useMemoryState((state) => state.storageKey) || hostOrigin;
+  const isMobileNative = useMemoryState((state) => state.isMobileNative);
+  const mobileApiKey = useMemoryState((state) => state.apiKey);
   const theme = useAppState().getTheme(storageKey);
   const apiKey = useAppState().getApiKey(storageKey);
   const authToken = useAppState().getAuthToken(storageKey);
@@ -76,7 +78,10 @@ export function useSvmSignatureBase(args: UseSvmSignatureBaseArgs) {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const isDemo = isDemoOrSandboxOrigin(hostOrigin);
+  const isDemo = isDemoOrSandboxOrigin(hostOrigin, {
+    isMobileNative,
+    apiKey: mobileApiKey,
+  });
   const isApproveEnabled =
     !!walletEd25519 && !!keyPackageEd25519 && !!apiKey && !!authToken;
 

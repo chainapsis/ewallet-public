@@ -14,6 +14,7 @@ const initialState: MemoryState = {
   appName: "",
   storageKey: "",
   isMobileNative: false,
+  apiKey: null,
   modalRequest: null,
   error: null,
   referralInfo: null,
@@ -32,6 +33,9 @@ export const useMemoryState = create(
     },
     setIsMobileNative: (value: boolean) => {
       set({ isMobileNative: value });
+    },
+    setApiKey: (apiKey: string | null) => {
+      set({ apiKey });
     },
     openModal: ({ port, msg }) => {
       if (msg.msg_type !== "open_modal") {

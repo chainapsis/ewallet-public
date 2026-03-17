@@ -12,20 +12,27 @@ export const MOBILE_NATIVE_ORIGIN = import.meta.env.VITE_MOBILE_NATIVE_ORIGIN;
  * - Matches the configured DEMO_WEB_ORIGIN
  * - Treats non-http(s) origins (e.g. native app custom schemes like `myapp://`)
  *   as sandbox contexts where balance checks should be skipped.
+ * - Mobile native with a valid apiKey is treated as sandbox
+ *   (will be replaced with backend apiKey verification later).
  */
-export function isDemoOrSandboxOrigin(hostOrigin: string): boolean {
-  const origins = [hostOrigin];
-  for (const origin of origins) {
-    if (origin === DEMO_WEB_ORIGIN) {
-      return true;
-    }
-    if (
-      origin !== "" &&
-      !origin.startsWith("http://") &&
-      !origin.startsWith("https://")
-    ) {
-      return true;
-    }
+export function isDemoOrSandboxOrigin(
+  hostOrigin: string,
+  opts?: { isMobileNative?: boolean; apiKey?: string | null },
+): boolean {
+  if (opts?.isMobileNative && opts?.apiKey) {
+    // TODO: verify apiKey against backend instead of unconditionally returning true
+    return true;
+  }
+
+  if (hostOrigin === DEMO_WEB_ORIGIN) {
+    return true;
+  }
+  if (
+    hostOrigin !== "" &&
+    !hostOrigin.startsWith("http://") &&
+    !hostOrigin.startsWith("https://")
+  ) {
+    return true;
   }
   return false;
 }

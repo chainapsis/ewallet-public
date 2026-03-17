@@ -21,6 +21,7 @@ export interface MemoryState {
   appName: string;
   storageKey: string;
   isMobileNative: boolean;
+  apiKey: string | null;
   modalRequest: ModalRequest | null;
   error: AppError | null;
   referralInfo: ReferralInfo | null;
@@ -31,6 +32,7 @@ export interface MemoryActions {
   setAppName: (appName: string) => void;
   setStorageKey: (storageKey: string) => void;
   setIsMobileNative: (value: boolean) => void;
+  setApiKey: (apiKey: string | null) => void;
   openModal: (req: ModalRequest) => void;
   closeModal: (payload: OpenModalAckPayload) => void;
   setError: (error: AppError) => void;

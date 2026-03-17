@@ -17,11 +17,16 @@ export function useArbitrarySigModal(args: UseCosmosArbitrarySigModalArgs) {
 
   const hostOrigin = data.payload.origin;
   const storageKey = useMemoryState((state) => state.storageKey) || hostOrigin;
+  const isMobileNative = useMemoryState((state) => state.isMobileNative);
+  const mobileApiKey = useMemoryState((state) => state.apiKey);
   const theme = useAppState().getTheme(storageKey);
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const isDemo = isDemoOrSandboxOrigin(hostOrigin);
+  const isDemo = isDemoOrSandboxOrigin(hostOrigin, {
+    isMobileNative,
+    apiKey: mobileApiKey,
+  });
 
   function onReject() {
     const ack: OpenModalAckPayload = {

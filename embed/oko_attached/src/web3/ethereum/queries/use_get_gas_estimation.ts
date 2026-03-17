@@ -16,6 +16,7 @@ import {
   type StructuredRpcError,
 } from "./types";
 import { isDemoOrSandboxOrigin } from "@oko-wallet-attached/requests/endpoints";
+import { useMemoryState } from "@oko-wallet-attached/store/memory";
 import { classifyViemErrorDetailed } from "@oko-wallet-attached/web3/ethereum/error";
 
 export interface UseGetGasEstimationProps {
@@ -41,7 +42,14 @@ export function useGetGasEstimation({
   hostOrigin,
   options,
 }: UseGetGasEstimationProps) {
-  const isDemo = !!hostOrigin && isDemoOrSandboxOrigin(hostOrigin);
+  const isMobileNative = useMemoryState((state) => state.isMobileNative);
+  const mobileApiKey = useMemoryState((state) => state.apiKey);
+  const isDemo =
+    !!hostOrigin &&
+    isDemoOrSandboxOrigin(hostOrigin, {
+      isMobileNative,
+      apiKey: mobileApiKey,
+    });
   const clampedMultiplier = Math.max(1, Math.min(3, multiplier));
 
   return useQuery({

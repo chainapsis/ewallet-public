@@ -32,6 +32,7 @@ export function useInitializeApp() {
     setAppName,
     setStorageKey,
     setIsMobileNative,
+    setApiKey,
     setReferralInfo,
   } = useMemoryState();
   const { getAuthToken, getWallet, setAuthToken, setTheme, getTheme } =
@@ -156,6 +157,9 @@ export function useInitializeApp() {
         }
 
         setIsMobileNative(isMobileNative);
+        if (apiKey) {
+          setApiKey(apiKey);
+        }
 
         setReferralInfo({
           origin: hostOrigin,

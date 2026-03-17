@@ -211,6 +211,10 @@ export function getSiwsMessage(
 export function verifySiwsMessage(
   message: SiwsMessage,
   origin: string,
+  opts?: { skipOriginCheck?: boolean },
 ): boolean {
+  if (opts?.skipOriginCheck) {
+    return true;
+  }
   return verifySignInOrigin(message.domain, message.uri, origin);
 }

@@ -49,6 +49,8 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
 
   const hostOrigin = data.payload.origin;
   const storageKey = useMemoryState((state) => state.storageKey) || hostOrigin;
+  const isMobileNative = useMemoryState((state) => state.isMobileNative);
+  const mobileApiKey = useMemoryState((state) => state.apiKey);
   const theme = useAppState().getTheme(storageKey);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -206,7 +208,12 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
     getL1GasEstimationError !== null ||
     getFeeCurrencyBalanceError !== null;
 
-  const isDemo = !!hostOrigin && isDemoOrSandboxOrigin(hostOrigin);
+  const isDemo =
+    !!hostOrigin &&
+    isDemoOrSandboxOrigin(hostOrigin, {
+      isMobileNative,
+      apiKey: mobileApiKey,
+    });
 
   // Fee sponsorship flow for Base chain
   const {
