@@ -81,11 +81,13 @@ export function OAuthLoginClient({
   provider,
   apiKey,
   redirectScheme,
+  clientRandom,
   iframeSrc,
 }: {
   provider: string;
   apiKey: string;
   redirectScheme: string;
+  clientRandom?: string;
   iframeSrc: string;
 }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -96,7 +98,10 @@ export function OAuthLoginClient({
       sessionStorage.setItem("oko_mobile_redirect_scheme", redirectScheme);
     }
     sessionStorage.setItem("oko_mobile_api_key", apiKey);
-  }, [apiKey, redirectScheme]);
+    if (clientRandom) {
+      sessionStorage.setItem("oko_mobile_client_random", clientRandom);
+    }
+  }, [apiKey, redirectScheme, clientRandom]);
 
   useAttachedInit((payload) => {
     if (payload && !payload.success) {

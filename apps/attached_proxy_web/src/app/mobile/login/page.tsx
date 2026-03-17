@@ -25,6 +25,7 @@ export default async function MobileLoginPage({
   const apiKey = params.api_key ?? "";
   const redirectScheme = params.redirect_scheme ?? "";
   const hostOrigin = params.host_origin ?? "";
+  const clientRandom = params.client_random ?? "";
   const isEmail = provider === "email";
 
   return (
@@ -55,7 +56,8 @@ export default async function MobileLoginPage({
             provider={provider}
             apiKey={apiKey}
             redirectScheme={redirectScheme}
-            iframeSrc={buildIframeSrc(hostOrigin, apiKey)}
+            clientRandom={clientRandom}
+            iframeSrc={buildIframeSrc(hostOrigin, apiKey, clientRandom)}
           />
         )}
       </body>

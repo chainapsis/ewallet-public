@@ -17,6 +17,7 @@ export async function callRpc<T = unknown>(
   apiKey: string,
   redirectScheme: string,
   expectedPublicKey?: string | null,
+  clientRandom?: string | null,
 ): Promise<T> {
   const serverScheme = getServerRedirectScheme(redirectScheme);
   const { url: rpcUrl } = buildRpcUrl(
@@ -26,6 +27,7 @@ export async function callRpc<T = unknown>(
     apiKey,
     serverScheme,
     expectedPublicKey,
+    clientRandom,
   );
 
   const result = await openAuthSession(rpcUrl, redirectScheme);

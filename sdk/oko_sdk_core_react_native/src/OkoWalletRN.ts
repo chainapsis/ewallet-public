@@ -22,6 +22,7 @@ import { type SignInOptions, signInRN } from "./methods/sign_in";
 import { signOutRN } from "./methods/sign_out";
 
 const WALLET_INFO_STORE_KEY = "oko_rn_wallet_info";
+const CLIENT_RANDOM_STORE_KEY = "oko_rn_client_random";
 const BROWSER_SESSION_MISSING_ERROR_TYPES = new Set([
   "api_key_not_found",
   "key_share_not_combined",
@@ -55,6 +56,7 @@ export class OkoWalletRN implements OkoWalletInterface {
   private _resolveInit!: (value: Result<OkoWalletState, string>) => void;
   private _initResolved = false;
   private _cachedPublicKeyEd25519: string | null = null;
+  private _clientRandom: string | null = null;
 
   constructor(config: OkoWalletRNConfig) {
     this.apiKey = config.apiKey;
@@ -85,6 +87,7 @@ export class OkoWalletRN implements OkoWalletInterface {
     }
     this._initResolved = true;
 
+    this._clientRandom = await this._getOrCreateClientRandom();
     await this._restoreWalletInfo();
 
     if (this.state.email && this.state.publicKey) {
@@ -150,6 +153,7 @@ export class OkoWalletRN implements OkoWalletInterface {
       this.apiKey,
       this.redirectScheme,
       this.state.publicKey,
+      this._clientRandom,
     );
 
     return {
@@ -170,6 +174,7 @@ export class OkoWalletRN implements OkoWalletInterface {
       this.redirectScheme,
       this.apiKey,
       this.state.publicKey,
+      this._clientRandom,
     );
 
     if (
@@ -197,6 +202,7 @@ export class OkoWalletRN implements OkoWalletInterface {
       type,
       this.apiKey,
       signInOptions,
+      this._clientRandom,
     );
 
     const info: LoginWalletInfo | null = result.walletInfo;
@@ -298,6 +304,16 @@ export class OkoWalletRN implements OkoWalletInterface {
 
   off(handlerDef: OkoWalletCoreEventHandler2): void {
     this.eventEmitter.off(handlerDef);
+  }
+
+  private async _getOrCreateClientRandom(): Promise<string> {
+    const stored = await AsyncStorage.getItem(CLIENT_RANDOM_STORE_KEY);
+    if (stored) {
+      return stored;
+    }
+    const random = crypto.randomUUID();
+    await AsyncStorage.setItem(CLIENT_RANDOM_STORE_KEY, random);
+    return random;
   }
 
   private async _persistWalletInfo(): Promise<void> {

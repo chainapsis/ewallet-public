@@ -21,9 +21,11 @@ export default async function MobileRpcPage({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const params = await searchParams;
+  const clientRandom = params.client_random ?? "";
   const iframeSrc = buildIframeSrc(
     params.host_origin ?? "",
     params.api_key ?? "",
+    clientRandom,
   );
 
   return (

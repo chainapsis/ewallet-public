@@ -33,6 +33,20 @@ export function LoginCompleteClient({
     oauthPayload: Record<string, string>;
   } | null>(null);
 
+  const clientRandom = sessionStorage.getItem("oko_mobile_client_random") || "";
+
+  // Rebuild iframe src with clientRandom from sessionStorage
+  const resolvedIframeSrc = (() => {
+    if (!clientRandom) {
+      return iframeSrc;
+    }
+    const url = new URL(iframeSrc);
+    if (!url.searchParams.has("client_random")) {
+      url.searchParams.set("client_random", clientRandom);
+    }
+    return url.toString();
+  })();
+
   // Read session data and validate OAuth payload on mount
   useEffect(() => {
     const redirectScheme =
@@ -210,7 +224,7 @@ export function LoginCompleteClient({
         id="oko-attached"
         title="Oko Wallet"
         ref={iframeRef}
-        src={iframeSrc}
+        src={resolvedIframeSrc}
         style={{ display: "none" }}
       />
     </>

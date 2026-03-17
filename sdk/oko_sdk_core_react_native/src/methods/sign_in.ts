@@ -24,11 +24,18 @@ export async function signInRN(
   type: SignInType,
   apiKey: string,
   options?: SignInOptions,
+  clientRandom?: string | null,
 ): Promise<SignInResult> {
   const redirectScheme = options?.redirectScheme ?? DEFAULT_REDIRECT_SCHEME;
 
   const serverScheme = getServerRedirectScheme(redirectScheme);
-  const loginUrl = buildLoginUrl(sdkEndpoint, type, apiKey, serverScheme);
+  const loginUrl = buildLoginUrl(
+    sdkEndpoint,
+    type,
+    apiKey,
+    serverScheme,
+    clientRandom,
+  );
 
   const result = await openAuthSession(loginUrl, redirectScheme);
 
@@ -48,11 +55,15 @@ function buildLoginUrl(
   provider: string,
   apiKey: string,
   redirectScheme: string,
+  clientRandom?: string | null,
 ): string {
   const url = new URL("/mobile/login", sdkEndpoint);
   url.searchParams.set("provider", provider);
   url.searchParams.set("api_key", apiKey);
   url.searchParams.set("redirect_scheme", redirectScheme);
   url.searchParams.set("host_origin", sdkEndpoint);
+  if (clientRandom) {
+    url.searchParams.set("client_random", clientRandom);
+  }
   return url.toString();
 }

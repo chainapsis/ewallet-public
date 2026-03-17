@@ -167,6 +167,7 @@ export function buildRpcUrl(
   apiKey: string,
   redirectScheme: string,
   expectedPublicKey?: string | null,
+  clientRandom?: string | null,
 ): { url: string; stats: RpcEncodingStats } {
   const url = new URL("/mobile/rpc", sdkEndpoint);
   url.searchParams.set("method", method);
@@ -175,6 +176,9 @@ export function buildRpcUrl(
   url.searchParams.set("redirect_scheme", redirectScheme);
   if (expectedPublicKey) {
     url.searchParams.set("expected_pk", expectedPublicKey);
+  }
+  if (clientRandom) {
+    url.searchParams.set("client_random", clientRandom);
   }
 
   const { encoded, stats } = encodeRpcPayloadWithStats(payload);

@@ -130,11 +130,31 @@ export function useInitializeApp() {
         }
 
         setHostOrigin(hostOrigin);
-        setAppName(hostOrigin.replace(/^https?:\/\//, ""));
-        const storageKey = hostOrigin;
-        setStorageKey(storageKey);
 
         const isMobileNative = searchParams.get("mobile_native") === "true";
+        const apiKey = searchParams.get("api_key");
+        const clientRandom = searchParams.get("client_random");
+
+        if (isMobileNative && (!clientRandom || clientRandom.length < 16)) {
+          console.error(
+            "[attached] mobile_native requires client_random (>= 16 chars)",
+          );
+          return;
+        }
+
+        const storageKey =
+          isMobileNative && apiKey && clientRandom
+            ? `oko-mobile://${apiKey}/${clientRandom}`
+            : hostOrigin;
+        setStorageKey(storageKey);
+
+        if (isMobileNative && apiKey) {
+          setAppName(apiKey.slice(0, 10));
+          resolveAppNameAsync(apiKey, setAppName);
+        } else {
+          setAppName(hostOrigin.replace(/^https?:\/\//, ""));
+        }
+
         setIsMobileNative(isMobileNative);
 
         setReferralInfo({
@@ -247,6 +267,13 @@ function sendInitMsg(hostOrigin: string, msg: OkoWalletMsgInit) {
   console.log(`[attached] sending init msg, payload: %o`, msg.payload);
 
   return sendMsgToWindow(window.parent, msg, hostOrigin);
+}
+
+async function resolveAppNameAsync(
+  _apiKey: string,
+  _setAppName: (name: string) => void,
+) {
+  // TODO: fetch app name from backend by apiKey
 }
 
 async function silentlyRefreshAuthToken(
