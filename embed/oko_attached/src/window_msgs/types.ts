@@ -4,6 +4,7 @@ export interface MsgEventContext {
   port: MessagePort;
   hostOrigin: string;
   appName: string;
+  storageKey: string;
 }
 
 export interface GoogleTokenInfo {

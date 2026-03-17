@@ -18,8 +18,8 @@ export const UnsupportedChainModal: FC<ErrorModalProps> = ({
   chainSymbolImageUrl,
   error,
 }) => {
-  const hostOrigin = useMemoryState((state) => state.hostOrigin);
-  const theme = useAppState().getTheme(hostOrigin || "");
+  const storageKey = useMemoryState((state) => state.storageKey);
+  const theme = useAppState().getTheme(storageKey || "");
   const { closeModal, clearError } = useMemoryState();
 
   function handleClickClose() {

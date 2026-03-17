@@ -56,7 +56,10 @@ export function makeMsgHandler() {
       const appState = useAppState.getState();
       // Use registeredHostOrigin as storage key when sent from the parent window,
       // so that the nonce is found by oauth_info_pass (which looks up by hostOrigin).
-      const storageOrigin = registeredHostOrigin ?? event.origin;
+      const storageOrigin =
+        useMemoryState.getState().storageKey ||
+        registeredHostOrigin ||
+        event.origin;
       const payload = data.payload as
         | { nonce?: string; code_verifier?: string }
         | undefined;
@@ -87,13 +90,16 @@ export function makeMsgHandler() {
       return;
     }
 
+    const memState = useMemoryState.getState();
     const appName = event.origin.replace(/^https?:\/\//, "");
-    useMemoryState.getState().setAppName(appName);
+    memState.setAppName(appName);
+    const storageKey = memState.storageKey || event.origin;
 
     const ctx: MsgEventContext = {
       port,
       hostOrigin: event.origin,
       appName,
+      storageKey,
     };
 
     // Mobile native (attached_proxy_web) 경유 시,

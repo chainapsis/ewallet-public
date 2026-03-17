@@ -67,11 +67,12 @@ export function useSvmSignatureBase(args: UseSvmSignatureBaseArgs) {
   const { modalId, hostOrigin, getIsAborted } = args;
   const { closeModal, setError } = useMemoryState();
 
-  const theme = useAppState().getTheme(hostOrigin);
-  const apiKey = useAppState().getApiKey(hostOrigin);
-  const authToken = useAppState().getAuthToken(hostOrigin);
-  const walletEd25519 = useAppState().getWalletEd25519(hostOrigin);
-  const keyPackageEd25519 = useAppState().getKeyPackageEd25519(hostOrigin);
+  const storageKey = useMemoryState((state) => state.storageKey) || hostOrigin;
+  const theme = useAppState().getTheme(storageKey);
+  const apiKey = useAppState().getApiKey(storageKey);
+  const authToken = useAppState().getAuthToken(storageKey);
+  const walletEd25519 = useAppState().getWalletEd25519(storageKey);
+  const keyPackageEd25519 = useAppState().getKeyPackageEd25519(storageKey);
 
   const [isLoading, setIsLoading] = useState(false);
 

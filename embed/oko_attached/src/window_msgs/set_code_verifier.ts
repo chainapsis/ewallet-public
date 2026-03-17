@@ -11,14 +11,14 @@ export function handleSetCodeVerifier(
   ctx: MsgEventContext,
   message: OkoWalletMsgSetCodeVerifier,
 ) {
-  const { port, hostOrigin } = ctx;
+  const { port, storageKey } = ctx;
 
   if (!message.payload) {
     throw new Error("Code verifier is empty");
   }
 
   const appState = useAppState.getState();
-  appState.setCodeVerifier(hostOrigin, message.payload);
+  appState.setCodeVerifier(storageKey, message.payload);
 
   const ack: OkoWalletMsgSetCodeVerifierAck = {
     target: OKO_SDK_TARGET,

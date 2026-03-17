@@ -48,7 +48,8 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
   const { closeModal, setError } = useMemoryState();
 
   const hostOrigin = data.payload.origin;
-  const theme = useAppState().getTheme(hostOrigin);
+  const storageKey = useMemoryState((state) => state.storageKey) || hostOrigin;
+  const theme = useAppState().getTheme(storageKey);
 
   const [isLoading, setIsLoading] = useState(false);
   const [simulatedTransaction, setSimulatedTransaction] =
@@ -158,7 +159,7 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
     rpcTxRequest: originalTransaction,
     nonce: nonce,
     client: publicClient,
-    hostOrigin: payload.origin,
+    hostOrigin: storageKey,
     options: {
       enabled: isSupportedChain,
     },
@@ -224,7 +225,7 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
     simulationKey,
     chainId: chainInfo.chain_id,
     recipientAddress: signer,
-    hostOrigin,
+    hostOrigin: storageKey,
     estimatedFeeWei: estimatedFee?.raw,
     hasSufficientBalance: hasSufficientBalanceForTotal,
     publicClient: publicClient ?? undefined,
@@ -555,7 +556,7 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
       });
 
       const signedTransactionRes = await makeEthereumTxSignature(
-        hostOrigin,
+        storageKey,
         txSerializable,
         getIsAborted,
       );

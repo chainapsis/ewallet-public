@@ -35,7 +35,8 @@ export function useTxSigModal(
   const { closeModal, setError } = useMemoryState();
 
   const hostOrigin = payload.origin;
-  const theme = useAppState().getTheme(hostOrigin);
+  const storageKey = useMemoryState((state) => state.storageKey) || hostOrigin;
+  const theme = useAppState().getTheme(storageKey);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -76,7 +77,7 @@ export function useTxSigModal(
     defaultFee: feeFromSignDoc?.fee,
     gas: feeFromSignDoc?.gas ?? 0,
     msgs,
-    hostOrigin,
+    hostOrigin: storageKey,
   });
 
   function mergeFeeToSignDoc<T extends SignDoc | StdSignDoc>(
@@ -201,7 +202,7 @@ export function useTxSigModal(
       );
 
       const signatureRes = await makeCosmosSignature(
-        hostOrigin,
+        storageKey,
         signDocAfterFee,
         isEthermintLike ? "keccak256" : "sha256",
         getIsAborted,

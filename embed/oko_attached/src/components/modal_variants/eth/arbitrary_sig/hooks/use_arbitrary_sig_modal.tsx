@@ -27,7 +27,8 @@ export function useArbitrarySigModal(args: UseEthereumSigModalArgs) {
   });
 
   const hostOrigin = data.payload.origin;
-  const theme = useAppState().getTheme(hostOrigin);
+  const storageKey = useMemoryState((state) => state.storageKey) || hostOrigin;
+  const theme = useAppState().getTheme(storageKey);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isApproveEnabled, setIsApproveEnabled] = useState(false);
@@ -79,7 +80,7 @@ export function useArbitrarySigModal(args: UseEthereumSigModalArgs) {
       setIsLoading(true);
 
       const signatureRes = await makeEthereumArbitraryMessageSignature(
-        hostOrigin,
+        storageKey,
         data.payload.data.message,
         getIsAborted,
       );

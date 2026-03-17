@@ -19,6 +19,7 @@ export interface ReferralInfo {
 export interface MemoryState {
   hostOrigin: string | null;
   appName: string;
+  storageKey: string;
   isMobileNative: boolean;
   modalRequest: ModalRequest | null;
   error: AppError | null;
@@ -28,6 +29,7 @@ export interface MemoryState {
 export interface MemoryActions {
   setHostOrigin: (hostOrigin: string) => void;
   setAppName: (appName: string) => void;
+  setStorageKey: (storageKey: string) => void;
   setIsMobileNative: (value: boolean) => void;
   openModal: (req: ModalRequest) => void;
   closeModal: (payload: OpenModalAckPayload) => void;

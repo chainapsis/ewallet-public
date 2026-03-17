@@ -27,8 +27,13 @@ import { OAUTH_BROADCAST_CHANNEL } from "@oko-wallet-attached/window_msgs/target
 import type { MsgEventContext } from "@oko-wallet-attached/window_msgs/types";
 
 export function useInitializeApp() {
-  const { setHostOrigin, setAppName, setIsMobileNative, setReferralInfo } =
-    useMemoryState();
+  const {
+    setHostOrigin,
+    setAppName,
+    setStorageKey,
+    setIsMobileNative,
+    setReferralInfo,
+  } = useMemoryState();
   const { getAuthToken, getWallet, setAuthToken, setTheme, getTheme } =
     useAppState();
   const [isHydrated, setIsHydrated] = useState(false);
@@ -72,6 +77,7 @@ export function useInitializeApp() {
           port: port as MessagePort,
           hostOrigin: targetOrigin,
           appName: targetOrigin.replace(/^https?:\/\//, ""),
+          storageKey: useMemoryState.getState().storageKey || targetOrigin,
         };
 
         await handleOAuthInfoPassV2(ctx, message);
@@ -125,6 +131,8 @@ export function useInitializeApp() {
 
         setHostOrigin(hostOrigin);
         setAppName(hostOrigin.replace(/^https?:\/\//, ""));
+        const storageKey = hostOrigin;
+        setStorageKey(storageKey);
 
         const isMobileNative = searchParams.get("mobile_native") === "true";
         setIsMobileNative(isMobileNative);
@@ -135,16 +143,16 @@ export function useInitializeApp() {
           utmCampaign,
         });
 
-        const authToken = getAuthToken(hostOrigin);
-        const walletForAuth = getWallet(hostOrigin);
+        const authToken = getAuthToken(storageKey);
+        const walletForAuth = getWallet(storageKey);
         await silentlyRefreshAuthToken(
           authToken,
-          hostOrigin,
+          storageKey,
           setAuthToken,
           walletForAuth?.authType,
         );
 
-        const oldTheme = getTheme(hostOrigin);
+        const oldTheme = getTheme(storageKey);
         const themeResult = await determineTheme(hostOrigin, oldTheme);
         const determinedThemeByCustomer = themeResult.theme;
 
@@ -157,17 +165,17 @@ export function useInitializeApp() {
               ? "dark"
               : "light";
             setColorScheme(t);
-            setTheme(hostOrigin, t);
+            setTheme(storageKey, t);
             setResolvedTheme(t);
           });
         }
 
-        setTheme(hostOrigin, determinedThemeByCustomer);
+        setTheme(storageKey, determinedThemeByCustomer);
         setColorScheme(determinedThemeByCustomer);
 
         setResolvedTheme(determinedThemeByCustomer);
 
-        const wallet = getWallet(hostOrigin);
+        const wallet = getWallet(storageKey);
         const authType = wallet?.authType;
         const email = wallet?.email;
         const publicKey = wallet?.publicKey;

@@ -16,7 +16,8 @@ export function useArbitrarySigModal(args: UseCosmosArbitrarySigModalArgs) {
   const { closeModal } = useMemoryState();
 
   const hostOrigin = data.payload.origin;
-  const theme = useAppState().getTheme(hostOrigin);
+  const storageKey = useMemoryState((state) => state.storageKey) || hostOrigin;
+  const theme = useAppState().getTheme(storageKey);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -48,7 +49,7 @@ export function useArbitrarySigModal(args: UseCosmosArbitrarySigModalArgs) {
       );
 
       const signatureRes = await makeCosmosSignature(
-        hostOrigin,
+        storageKey,
         signDoc,
         isEthermintLike ? "keccak256" : "sha256",
         getIsAborted,
