@@ -96,14 +96,15 @@ export const AnchoredMenu: FC<AnchoredMenuProps> = ({
   const { isMounted, styles: transitionStyles } = useTransitionStyles(
     context,
     {
-      duration: { open: 150, close: 80 },
+      duration: 150,
       initial: {
         opacity: 0,
         transform: "scale(0.97)",
       },
       common: ({ placement: currentPlacement }) => ({
         transformOrigin: getTransformOrigin(currentPlacement),
-        transitionTimingFunction: "ease-out",
+        // custom ease-out value
+        transitionTimingFunction: "cubic-bezier(0.86, 0, 0.07, 1)",
       }),
     },
   );
