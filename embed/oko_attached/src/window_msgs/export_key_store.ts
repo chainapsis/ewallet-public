@@ -123,7 +123,8 @@ export function setExportedKeys(keys: ExportedKeys): void {
   startCleanupTimer();
 }
 
-export function getExportedKey(keyType: CurveType): string | null {
+/** One-shot read: returns the key and removes it from the store. */
+export function consumeExportedKey(keyType: CurveType): string | null {
   if (!storedKeys || !storedKeys[keyType]) {
     return null;
   }
@@ -164,7 +165,7 @@ function sendAck(keyType: CurveType): void {
  * Sends an ACK on successful receipt so the holder can clear the key.
  */
 export function requestExportedKey(keyType: CurveType): Promise<string | null> {
-  const local = getExportedKey(keyType);
+  const local = consumeExportedKey(keyType);
   if (local) {
     return Promise.resolve(local);
   }
