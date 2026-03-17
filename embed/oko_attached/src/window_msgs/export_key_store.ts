@@ -8,7 +8,7 @@ export interface ExportedKeys {
 }
 
 const CLEANUP_TIMEOUT_MS = 30 * 1000; // 30 seconds (must exceed dashboard's 20s iframe load timeout)
-const IN_FLIGHT_TIMEOUT_MS = 5 * 1000; // unlock key after 5s if ACK never arrives
+const IN_FLIGHT_TIMEOUT_MS = 1500; // must be shorter than requestExportedKey's 2s timeout so retries see an unlocked key
 const REQUEST_KEY_MSG = "oko_export_request_key";
 const RESPONSE_KEY_MSG = "oko_export_key";
 const ACK_KEY_MSG = "oko_export_ack_key";
@@ -30,6 +30,15 @@ function clearCleanupTimer(): void {
   }
 }
 
+function clearAllInFlightLocks(): void {
+  for (const kt of Object.keys(inFlight)) {
+    if (inFlight[kt]) {
+      clearTimeout(inFlight[kt]);
+      inFlight[kt] = null;
+    }
+  }
+}
+
 function clearIfEmpty(): void {
   if (storedKeys && !storedKeys.secp256k1 && !storedKeys.ed25519) {
     storedKeys = null;
@@ -42,13 +51,7 @@ function startCleanupTimer(): void {
   cleanupTimer = setTimeout(() => {
     storedKeys = null;
     cleanupTimer = null;
-    // Clear any in-flight locks
-    for (const kt of Object.keys(inFlight)) {
-      if (inFlight[kt]) {
-        clearTimeout(inFlight[kt]);
-        inFlight[kt] = null;
-      }
-    }
+    clearAllInFlightLocks();
   }, CLEANUP_TIMEOUT_MS);
 }
 
@@ -88,10 +91,7 @@ function handleWindowMessage(event: MessageEvent): void {
     if (keyType !== "secp256k1" && keyType !== "ed25519") {
       return;
     }
-    if (
-      storedKeys?.[keyType] &&
-      !isKeyLocked(keyType)
-    ) {
+    if (storedKeys?.[keyType] && !isKeyLocked(keyType)) {
       lockKey(keyType);
       const responder = event.source as Window | null;
       responder?.postMessage(
@@ -117,6 +117,7 @@ function handleWindowMessage(event: MessageEvent): void {
   } else if (data.type === CLEAR_KEYS_MSG) {
     storedKeys = null;
     clearCleanupTimer();
+    clearAllInFlightLocks();
   }
 }
 
@@ -228,4 +229,5 @@ export function requestExportedKey(keyType: CurveType): Promise<string | null> {
 export function clearExportedKeys(): void {
   storedKeys = null;
   clearCleanupTimer();
+  clearAllInFlightLocks();
 }
