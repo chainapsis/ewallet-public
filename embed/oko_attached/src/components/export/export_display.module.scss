@@ -19,13 +19,13 @@
 :global(body) {
   margin: 0;
   padding: 0;
-  background-color: #ffffff;
 }
 
 .container {
   width: 100%;
   display: flex;
   flex-direction: column;
+  background-color: #ffffff;
 }
 
 .privateKeyField {
