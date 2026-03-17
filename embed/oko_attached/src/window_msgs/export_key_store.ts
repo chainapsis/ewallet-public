@@ -1,3 +1,5 @@
+import type { CurveType } from "@oko-wallet/oko-types/crypto";
+
 import { postLog } from "@oko-wallet-attached/requests/logging";
 
 export interface ExportedKeys {
@@ -6,8 +8,8 @@ export interface ExportedKeys {
 }
 
 const CLEANUP_TIMEOUT_MS = 15 * 1000; // 15 seconds (safety net; keys are cleared on first read)
-const REQUEST_KEYS_MSG = "oko_export_request_keys";
-const RESPONSE_KEYS_MSG = "oko_export_keys";
+const REQUEST_KEY_MSG = "oko_export_request_key";
+const RESPONSE_KEY_MSG = "oko_export_key";
 const CLEAR_KEYS_MSG = "oko_export_clear_keys";
 
 let storedKeys: ExportedKeys | null = null;
@@ -17,6 +19,13 @@ function clearCleanupTimer(): void {
   if (cleanupTimer !== null) {
     clearTimeout(cleanupTimer);
     cleanupTimer = null;
+  }
+}
+
+function clearIfEmpty(): void {
+  if (storedKeys && !storedKeys.secp256k1 && !storedKeys.ed25519) {
+    storedKeys = null;
+    clearCleanupTimer();
   }
 }
 
@@ -37,22 +46,24 @@ function handleWindowMessage(event: MessageEvent): void {
   if (!data || typeof data !== "object") {
     return;
   }
-  if (data.type === REQUEST_KEYS_MSG) {
-    if (storedKeys) {
-      const keys = storedKeys;
-      storedKeys = null;
-      clearCleanupTimer();
+  if (data.type === REQUEST_KEY_MSG) {
+    const keyType = data.key_type as CurveType;
+    if (storedKeys && keyType in storedKeys && storedKeys[keyType]) {
+      const value = storedKeys[keyType];
+      storedKeys[keyType] = "";
+      clearIfEmpty();
       const responder = event.source as Window | null;
-      responder?.postMessage({ type: RESPONSE_KEYS_MSG, keys }, event.origin);
+      responder?.postMessage(
+        { type: RESPONSE_KEY_MSG, key_type: keyType, key: value },
+        event.origin,
+      );
     } else if (window.location.pathname === "/") {
-      // Only log in the hidden iframe context — display iframes receiving
-      // sibling requests without keys is expected behavior
       postLog({
         level: "error",
-        message: "export_key_store: REQUEST received but no keys stored",
+        message: `export_key_store: REQUEST received but no key for ${keyType}`,
         error: {
           name: "ExportKeyStoreError",
-          message: "storedKeys is null when REQUEST_KEYS_MSG received",
+          message: `storedKeys missing key_type=${keyType}`,
         },
       });
     }
@@ -69,19 +80,22 @@ export function setExportedKeys(keys: ExportedKeys): void {
   startCleanupTimer();
 }
 
-export function getExportedKeys(): ExportedKeys | null {
-  const keys = storedKeys;
-  storedKeys = null;
-  clearCleanupTimer();
-  return keys;
+export function getExportedKey(keyType: CurveType): string | null {
+  if (!storedKeys || !storedKeys[keyType]) {
+    return null;
+  }
+  const value = storedKeys[keyType];
+  storedKeys[keyType] = "";
+  clearIfEmpty();
+  return value;
 }
 
 /**
- * Request keys from another same-origin context via postMessage.
- * Used by the visible iframe to fetch keys stored in the hidden iframe.
+ * Request a single key from another same-origin context via postMessage.
+ * Used by the visible iframe to fetch a key stored in the hidden iframe.
  */
-export function requestExportedKeys(): Promise<ExportedKeys | null> {
-  const local = getExportedKeys();
+export function requestExportedKey(keyType: CurveType): Promise<string | null> {
+  const local = getExportedKey(keyType);
   if (local) {
     return Promise.resolve(local);
   }
@@ -94,9 +108,9 @@ export function requestExportedKeys(): Promise<ExportedKeys | null> {
         return;
       }
       const data = event.data;
-      if (data?.type === RESPONSE_KEYS_MSG) {
+      if (data?.type === RESPONSE_KEY_MSG && data.key_type === keyType) {
         cleanup();
-        resolve(data.keys ?? null);
+        resolve(data.key ?? null);
       }
     };
 
@@ -118,7 +132,10 @@ export function requestExportedKeys(): Promise<ExportedKeys | null> {
         const frames = parentWin.frames;
         for (let i = 0; i < frames.length; i += 1) {
           try {
-            frames[i].postMessage({ type: REQUEST_KEYS_MSG }, selfOrigin);
+            frames[i].postMessage(
+              { type: REQUEST_KEY_MSG, key_type: keyType },
+              selfOrigin,
+            );
           } catch {
             // cross-origin frame, skip
           }
