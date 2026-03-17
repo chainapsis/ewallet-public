@@ -152,8 +152,8 @@ export function useInitializeApp() {
         }
 
         const storageKey =
-          isMobileNative && apiKey && clientRandom
-            ? `oko-mobile://${apiKey}/${clientRandom}`
+          isMobileNative && clientRandom
+            ? `oko-mobile://${clientRandom}`
             : hostOrigin;
         setStorageKey(storageKey);
 
