@@ -27,7 +27,7 @@ export interface OkoWalletStaticInterface {
 
 /**
  * Wallet interface consumed by chain SDKs (eth, cosmos, svm).
- * Both the web OkoWallet and React Native OkoWalletRN implement this.
+ * Platform-specific implementations (web, mobile) implement this.
  */
 export interface OkoWalletInterface {
   origin: string;

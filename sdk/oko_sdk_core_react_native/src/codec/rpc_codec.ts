@@ -158,7 +158,7 @@ export function decodeRpcPayload<T>(encoded: string): T {
   return fromEncodedValue(parsed) as T;
 }
 
-// ─── URL helpers (RN SDK side) ───
+// ─── URL helpers (mobile SDK side) ───
 
 export function buildRpcUrl(
   sdkEndpoint: string,

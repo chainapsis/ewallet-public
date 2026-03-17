@@ -4,7 +4,7 @@ import { NativeModules, Platform } from "react-native";
  * SDK-internal callback scheme used by OkoAuthCallbackActivity on Android.
  * The library's AndroidManifest.xml registers this scheme on the
  * CallbackActivity, so Android routes the redirect there without a
- * disambiguation popup. (Expo users can also override via config plugin.)
+ * disambiguation popup. (Overridable via config plugin.)
  */
 export const ANDROID_CALLBACK_SCHEME = "oko.auth.callback";
 
@@ -34,11 +34,10 @@ type AuthOpener = (
 
 /**
  * Detects which auth browser library is available at runtime.
- * Tries expo-web-browser first (backward compat for Expo users),
- * then react-native-inappbrowser-reborn (bare RN users).
+ * Tries expo-web-browser first, then react-native-inappbrowser-reborn.
  */
 function resolveAuthOpener(): AuthOpener {
-  // Try expo-web-browser first (backward compat for existing Expo users)
+  // Try expo-web-browser first
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const WebBrowser = require("expo-web-browser");
@@ -53,7 +52,7 @@ function resolveAuthOpener(): AuthOpener {
     // expo-web-browser not available
   }
 
-  // Fall back to react-native-inappbrowser-reborn (bare RN users)
+  // Fall back to react-native-inappbrowser-reborn
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { InAppBrowser } = require("react-native-inappbrowser-reborn");
@@ -99,8 +98,7 @@ export function getServerRedirectScheme(appScheme: string): string {
  *   ManagementActivity keeps the Custom Tab in the same task as the app.
  *   CallbackActivity receives the redirect and uses CLEAR_TOP to pop
  *   the Custom Tab — no "Open in app?" popup.
- * - iOS: ASWebAuthenticationSession via detected library
- *   (expo-web-browser or react-native-inappbrowser-reborn).
+ * - iOS: ASWebAuthenticationSession via detected auth browser library.
  * - Android (fallback): same as iOS if native module unavailable.
  */
 export async function openAuthSession(
