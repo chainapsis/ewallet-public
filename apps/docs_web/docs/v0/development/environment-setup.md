@@ -58,8 +58,8 @@ The project uses [Husky](https://typicode.github.io/husky/) and
 [lint-staged](https://github.com/lint-staged/lint-staged) to run Biome checks
 automatically on staged files before each commit.
 
-Husky is set up via the `prepare` script, which runs automatically after
-`yarn install`. If pre-commit hooks are not firing, run the setup manually:
+Yarn 4 does not run the `prepare` script automatically, so you need to set up
+Husky manually after installing dependencies:
 
 ```bash
 yarn prepare
