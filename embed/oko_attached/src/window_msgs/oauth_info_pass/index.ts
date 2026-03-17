@@ -56,7 +56,11 @@ export async function handleOAuthInfoPass(
   const { port } = ctx;
   const appState = useAppState.getState();
   const hostOrigin = message.payload.target_origin;
-  const storageKey = useMemoryState.getState().storageKey || hostOrigin;
+  const storageKey = useMemoryState.getState().storageKey;
+  if (!storageKey) {
+    await bail(message, { type: "wallet_not_initialized" });
+    return;
+  }
 
   let hasSignedIn = false;
   let isNewUser = false;
@@ -251,7 +255,11 @@ export async function handleOAuthInfoPassV2(
   const { port } = ctx;
   const appState = useAppState.getState();
   const hostOrigin = message.payload.target_origin;
-  const storageKey = useMemoryState.getState().storageKey || hostOrigin;
+  const storageKey = useMemoryState.getState().storageKey;
+  if (!storageKey) {
+    await bail(message, { type: "wallet_not_initialized" });
+    return;
+  }
 
   let hasSignedIn = false;
   let isNewUser = false;

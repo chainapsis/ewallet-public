@@ -56,10 +56,13 @@ export function makeMsgHandler() {
       const appState = useAppState.getState();
       // Use registeredHostOrigin as storage key when sent from the parent window,
       // so that the nonce is found by oauth_info_pass (which looks up by hostOrigin).
-      const storageOrigin =
-        useMemoryState.getState().storageKey ||
-        registeredHostOrigin ||
-        event.origin;
+      const storageOrigin = useMemoryState.getState().storageKey;
+      if (!storageOrigin) {
+        console.warn(
+          "[attached] storageKey not initialized, ignoring set_reauth_params",
+        );
+        return;
+      }
       const payload = data.payload as
         | { nonce?: string; code_verifier?: string }
         | undefined;
@@ -101,7 +104,22 @@ export function makeMsgHandler() {
     if (!isFromProxy) {
       memState.setAppName(appName);
     }
-    const storageKey = memState.storageKey || event.origin;
+    const storageKey = memState.storageKey;
+    if (!storageKey) {
+      console.warn(
+        "[attached] storageKey not initialized, rejecting message:",
+        message.msg_type,
+      );
+      port.postMessage({
+        target: OKO_SDK_TARGET,
+        msg_type: `${message.msg_type}_ack`,
+        payload: {
+          success: false,
+          err: "wallet not initialized",
+        },
+      });
+      return;
+    }
 
     const ctx: MsgEventContext = {
       port,

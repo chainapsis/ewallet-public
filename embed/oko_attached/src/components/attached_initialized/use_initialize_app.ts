@@ -74,11 +74,18 @@ export function useInitializeApp() {
         };
 
         const targetOrigin = message.payload.target_origin;
+        const storageKey = useMemoryState.getState().storageKey;
+        if (!storageKey) {
+          console.warn(
+            "[attached] storageKey not initialized, ignoring BroadcastChannel oauth_info_pass",
+          );
+          return;
+        }
         const ctx: MsgEventContext = {
           port: port as MessagePort,
           hostOrigin: targetOrigin,
           appName: targetOrigin.replace(/^https?:\/\//, ""),
-          storageKey: useMemoryState.getState().storageKey || targetOrigin,
+          storageKey,
         };
 
         await handleOAuthInfoPassV2(ctx, message);
