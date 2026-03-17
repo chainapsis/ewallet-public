@@ -8,12 +8,14 @@ import { type FC, useMemo } from "react";
 import styles from "../messages.module.scss";
 import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
 import { TxRow } from "@oko-wallet-attached/components/modal_variants/common/tx_row";
+import { useMobileMode } from "@oko-wallet-attached/hooks/mobile_mode";
 import { useGetMultipleAssetMeta } from "@oko-wallet-attached/web3/cosmos/use_get_asset_meta";
 
 const TokenInfo: FC<{
   chainId: string;
   amount: Coin[];
 }> = ({ chainId, amount }) => {
+  const isMobile = useMobileMode();
   const { data: currencies, isLoading } = useGetMultipleAssetMeta({
     assets: amount.map((coin) => ({
       minimal_denom: coin.denom,
@@ -51,7 +53,7 @@ const TokenInfo: FC<{
           <Avatar
             src={coin.currency?.coinImageUrl}
             alt={coin.currency?.coinMinimalDenom ?? "unknown"}
-            size="sm"
+            size={isMobile ? "md" : "sm"}
             variant="rounded"
           />
           <Typography
@@ -73,6 +75,7 @@ export const SendMessagePretty: FC<{
   amount: Coin[];
   toAddress: string;
 }> = ({ chainId, amount, toAddress }) => {
+  const isMobile = useMobileMode();
   return (
     <div className={styles.container}>
       <TxRow label="Send">
@@ -81,7 +84,7 @@ export const SendMessagePretty: FC<{
       <TxRow label="To">
         <Typography
           color="secondary"
-          size="sm"
+          size={isMobile ? "md" : "sm"}
           weight="medium"
           className={styles.address}
         >

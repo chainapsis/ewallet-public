@@ -7,6 +7,7 @@ import type { FC } from "react";
 import styles from "../instructions.module.scss";
 import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
 import { TxRow } from "@oko-wallet-attached/components/modal_variants/common/tx_row";
+import { useMobileMode } from "@oko-wallet-attached/hooks/mobile_mode";
 import { useGetSvmTokenMetadata } from "@oko-wallet-attached/web3/svm/queries";
 
 function formatTokenAmount(amount: bigint | number, decimals: number): string {
@@ -39,6 +40,7 @@ export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
   to,
   chainId,
 }) => {
+  const isMobile = useMobileMode();
   const { data: tokenMetadata, isLoading } = useGetSvmTokenMetadata({
     mintAddress: mint,
     chainId,
@@ -62,12 +64,12 @@ export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
             <Avatar
               src={icon}
               alt={symbol}
-              size="sm"
+              size={isMobile ? "md" : "sm"}
               variant="rounded"
               fallback={symbol.slice(0, 2)}
             />
           ) : (
-            <EmptyStateIcon size={16} />
+            <EmptyStateIcon size={isMobile ? 24 : 16} />
           )}
           {isLoading ? (
             <Skeleton width={80} height={20} />
@@ -116,7 +118,11 @@ export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
             className={styles.tokenAddressRow}
             onClick={() => navigator.clipboard.writeText(mint)}
           >
-            <Typography size="sm" weight="medium" className={styles.address}>
+            <Typography
+              size={isMobile ? "md" : "sm"}
+              weight="medium"
+              className={styles.address}
+            >
               {mint}
             </Typography>
             <CopyOutlinedIcon size={16} color="currentColor" />
@@ -127,7 +133,7 @@ export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
         <TxRow label="Token">
           <Typography
             color="secondary"
-            size="sm"
+            size={isMobile ? "md" : "sm"}
             weight="medium"
             className={styles.address}
           >
@@ -139,7 +145,7 @@ export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
         <TxRow label="to">
           <Typography
             color="secondary"
-            size="sm"
+            size={isMobile ? "md" : "sm"}
             weight="medium"
             className={styles.address}
           >

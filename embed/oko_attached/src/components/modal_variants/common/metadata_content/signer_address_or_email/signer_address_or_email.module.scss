@@ -31,9 +31,3 @@
 :global(html[data-mobile]) .wrapper {
   flex-wrap: wrap;
 }
-
-// Mobile app mode: enlarge toggle button text
-:global(html[data-mobile]) .changeViewTypeButton p {
-  font-size: var(--font-size-sm);
-  line-height: var(--font-line-height-sm);
-}

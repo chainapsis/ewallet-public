@@ -5,6 +5,7 @@ import type { Address } from "viem";
 
 import styles from "./address_info.module.scss";
 import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
+import { useMobileMode } from "@oko-wallet-attached/hooks/mobile_mode";
 import { convertIpfsUrl } from "@oko-wallet-attached/utils/url";
 import {
   useGetENSAvatar,
@@ -16,6 +17,7 @@ export interface AddressInfoProps {
 }
 
 export const AddressInfo: FC<AddressInfoProps> = ({ address }) => {
+  const isMobile = useMobileMode();
   const { data: ensName, isLoading: ensNameIsLoading } = useGetENSName({
     address,
   });
@@ -36,13 +38,13 @@ export const AddressInfo: FC<AddressInfoProps> = ({ address }) => {
         <Avatar
           src={ensAvatar ? convertIpfsUrl(ensAvatar) : undefined}
           alt={ensName ?? "unknown"}
-          size="sm"
+          size={isMobile ? "md" : "sm"}
           variant="rounded"
         />
       ) : null}
       <Typography
         color="secondary"
-        size="sm"
+        size={isMobile ? "md" : "sm"}
         weight="medium"
         className={styles.address}
       >

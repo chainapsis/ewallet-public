@@ -7,6 +7,7 @@ import { useMemo } from "react";
 
 import styles from "../common/signature_content.module.scss";
 import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
+import { useMobileMode } from "@oko-wallet-attached/hooks/mobile_mode";
 import { getChainByChainId } from "@oko-wallet-attached/requests/chain_infos";
 import { getFaviconUrl } from "@oko-wallet-attached/utils/favicon";
 
@@ -19,6 +20,8 @@ export const SvmAllTxSignatureContent: FC<SvmAllTxSignatureContentProps> = ({
 }) => {
   const { origin, chain_id, data } = payload;
   const faviconUrl = getFaviconUrl(origin);
+  const isMobile = useMobileMode();
+  const headingSize = isMobile ? "display-xs" : "lg";
   const txCount = data.serialized_transactions.length;
 
   const { data: chainInfo } = useQuery({
@@ -53,16 +56,16 @@ export const SvmAllTxSignatureContent: FC<SvmAllTxSignatureContentProps> = ({
               className={styles.originFavicon}
             />
           )}
-          <Typography size="lg" color="primary" weight="semibold">
+          <Typography size={headingSize} color="primary" weight="semibold">
             {origin.replace(/^https?:\/\//, "")}
           </Typography>
         </div>
 
-        <Spacing height={4} />
+        <Spacing height={isMobile ? 8 : 4} />
 
         <div className={styles.signInfoColumn}>
           <div className={styles.chainInfoRow}>
-            <Typography size="lg" color="secondary" weight="semibold">
+            <Typography size={headingSize} color="secondary" weight="semibold">
               requested your
             </Typography>
             <div className={styles.chainNameGroup}>
@@ -70,11 +73,15 @@ export const SvmAllTxSignatureContent: FC<SvmAllTxSignatureContentProps> = ({
                 <Avatar
                   src={chainLogoUrl}
                   alt={chainName ?? "chain"}
-                  size="sm"
+                  size={isMobile ? "md" : "sm"}
                   variant="rounded"
                 />
               )}
-              <Typography size="lg" color="secondary" weight="semibold">
+              <Typography
+                size={headingSize}
+                color="secondary"
+                weight="semibold"
+              >
                 {chainName ? `${chainName} signatures` : "signatures"}
               </Typography>
             </div>

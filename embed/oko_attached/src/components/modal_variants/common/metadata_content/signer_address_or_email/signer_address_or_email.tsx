@@ -58,7 +58,7 @@ export const SignerAddressOrEmailView: FC<ViewProps> = ({
 
   return (
     <>
-      {type === "email" && renderAuthIcon(authType, isMobile ? 20 : 16)}
+      {type === "email" && renderAuthIcon(authType, isMobile ? 24 : 16)}
       <Typography
         size={isMobile ? "md" : "sm"}
         color="brand-tertiary"

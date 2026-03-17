@@ -10,6 +10,7 @@ import styles from "../common/signature_content.module.scss";
 import { SvmMessageSummary } from "./svm_message_summary";
 import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
 import { SignerAddressOrEmail } from "@oko-wallet-attached/components/modal_variants/common/metadata_content/signer_address_or_email/signer_address_or_email";
+import { useMobileMode } from "@oko-wallet-attached/hooks/mobile_mode";
 import { getChainByChainId } from "@oko-wallet-attached/requests/chain_infos";
 import { getFaviconUrl } from "@oko-wallet-attached/utils/favicon";
 
@@ -22,6 +23,8 @@ export const SvmMessageSignatureContent: FC<
 > = ({ payload }) => {
   const { origin, signer, chain_id } = payload;
   const faviconUrl = getFaviconUrl(origin);
+  const isMobile = useMobileMode();
+  const headingSize = isMobile ? "display-xs" : "lg";
 
   const { data: chainInfo } = useQuery({
     queryKey: ["chain", chain_id],
@@ -55,16 +58,16 @@ export const SvmMessageSignatureContent: FC<
               className={styles.originFavicon}
             />
           )}
-          <Typography size="lg" color="primary" weight="semibold">
+          <Typography size={headingSize} color="primary" weight="semibold">
             {origin.replace(/^https?:\/\//, "")}
           </Typography>
         </div>
 
-        <Spacing height={4} />
+        <Spacing height={isMobile ? 8 : 4} />
 
         <div className={styles.signInfoColumn}>
           <div className={styles.chainInfoRow}>
-            <Typography size="lg" color="secondary" weight="semibold">
+            <Typography size={headingSize} color="secondary" weight="semibold">
               requested your
             </Typography>
             <div className={styles.chainNameGroup}>
@@ -72,13 +75,17 @@ export const SvmMessageSignatureContent: FC<
                 <Avatar
                   src={chainLogoUrl}
                   alt={chainName ?? "chain"}
-                  size="sm"
+                  size={isMobile ? "md" : "sm"}
                   variant="rounded"
                 />
               ) : (
-                <EmptyStateIcon size={16} />
+                <EmptyStateIcon size={isMobile ? 24 : 16} />
               )}
-              <Typography size="lg" color="secondary" weight="semibold">
+              <Typography
+                size={headingSize}
+                color="secondary"
+                weight="semibold"
+              >
                 {chainName ? `${chainName} signature` : "Network signature"}
               </Typography>
             </div>

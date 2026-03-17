@@ -7,6 +7,7 @@ import { type Address, type Chain, createPublicClient, http } from "viem";
 
 import styles from "./token_info.module.scss";
 import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
+import { useMobileMode } from "@oko-wallet-attached/hooks/mobile_mode";
 import { useGetTokenMetadata } from "@oko-wallet-attached/web3/ethereum/queries";
 import { formatTokenAmount } from "@oko-wallet-attached/web3/ethereum/utils";
 
@@ -40,6 +41,7 @@ export const TokenInfo: FC<TokenInfoProps> = ({
       },
     });
 
+  const isMobile = useMobileMode();
   const tokenImageURI = currency?.coinImageUrl ?? undefined;
 
   // NOTE: currency takes precedence over token metadata
@@ -62,7 +64,7 @@ export const TokenInfo: FC<TokenInfoProps> = ({
       <Avatar
         src={tokenImageURI}
         alt={tokenMetadata.name ?? "unknown"}
-        size="sm"
+        size={isMobile ? "md" : "sm"}
         variant="rounded"
       />
       {formatted.isTruncated ? (
