@@ -22,7 +22,7 @@ export function useEIP712SigModal(args: UseEthereumSigModalArgs) {
   const { closeModal, setError } = useMemoryState();
 
   const hostOrigin = data.payload.origin;
-  const storageKey = useMemoryState((state) => state.storageKey) || hostOrigin;
+  const storageKey = useMemoryState((state) => state.storageKey);
   const isMobileNative = useMemoryState((state) => state.isMobileNative);
   const mobileApiKey = useMemoryState((state) => state.apiKey);
   const theme = useAppState().getTheme(storageKey);

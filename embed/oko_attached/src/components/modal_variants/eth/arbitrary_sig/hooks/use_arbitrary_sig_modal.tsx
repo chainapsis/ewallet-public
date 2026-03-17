@@ -27,7 +27,7 @@ export function useArbitrarySigModal(args: UseEthereumSigModalArgs) {
   });
 
   const hostOrigin = data.payload.origin;
-  const storageKey = useMemoryState((state) => state.storageKey) || hostOrigin;
+  const storageKey = useMemoryState((state) => state.storageKey);
   const isMobileNative = useMemoryState((state) => state.isMobileNative);
   const mobileApiKey = useMemoryState((state) => state.apiKey);
   const theme = useAppState().getTheme(storageKey);

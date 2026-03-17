@@ -35,7 +35,7 @@ export function useTxSigModal(
   const { closeModal, setError } = useMemoryState();
 
   const hostOrigin = payload.origin;
-  const storageKey = useMemoryState((state) => state.storageKey) || hostOrigin;
+  const storageKey = useMemoryState((state) => state.storageKey);
   const isMobileNative = useMemoryState((state) => state.isMobileNative);
   const mobileApiKey = useMemoryState((state) => state.apiKey);
   const theme = useAppState().getTheme(storageKey);
@@ -82,7 +82,7 @@ export function useTxSigModal(
     defaultFee: feeFromSignDoc?.fee,
     gas: feeFromSignDoc?.gas ?? 0,
     msgs,
-    hostOrigin: storageKey,
+    hostOrigin,
   });
 
   function mergeFeeToSignDoc<T extends SignDoc | StdSignDoc>(

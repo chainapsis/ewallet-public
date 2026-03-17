@@ -48,7 +48,7 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
   const { closeModal, setError } = useMemoryState();
 
   const hostOrigin = data.payload.origin;
-  const storageKey = useMemoryState((state) => state.storageKey) || hostOrigin;
+  const storageKey = useMemoryState((state) => state.storageKey);
   const isMobileNative = useMemoryState((state) => state.isMobileNative);
   const mobileApiKey = useMemoryState((state) => state.apiKey);
   const theme = useAppState().getTheme(storageKey);
@@ -161,7 +161,7 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
     rpcTxRequest: originalTransaction,
     nonce: nonce,
     client: publicClient,
-    hostOrigin: storageKey,
+    hostOrigin,
     options: {
       enabled: isSupportedChain,
     },
@@ -232,7 +232,7 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
     simulationKey,
     chainId: chainInfo.chain_id,
     recipientAddress: signer,
-    hostOrigin: storageKey,
+    hostOrigin,
     estimatedFeeWei: estimatedFee?.raw,
     hasSufficientBalance: hasSufficientBalanceForTotal,
     publicClient: publicClient ?? undefined,

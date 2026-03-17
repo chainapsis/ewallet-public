@@ -282,8 +282,8 @@ async function resolveAppNameAsync(
 
 async function silentlyRefreshAuthToken(
   authToken: string | null,
-  hostOrigin: string,
-  setAuthToken: (hostOrigin: string, token: string | null) => void,
+  storageKey: string,
+  setAuthToken: (storageKey: string, token: string | null) => void,
   authType?: AuthType,
 ) {
   if (authToken) {
@@ -306,7 +306,7 @@ async function silentlyRefreshAuthToken(
       if (resp.data.token !== null) {
         console.log("[attached] refreshing auth token");
 
-        setAuthToken(hostOrigin, resp.data.token);
+        setAuthToken(storageKey, resp.data.token);
       }
     }
   }

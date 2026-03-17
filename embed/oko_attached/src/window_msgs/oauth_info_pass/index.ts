@@ -70,7 +70,7 @@ export async function handleOAuthInfoPass(
       return;
     }
 
-    if (!appState.getHostOriginList().includes(storageKey)) {
+    if (!appState.getStorageKeyList().includes(storageKey)) {
       await bail(message, { type: "origin_not_registered" });
       return;
     }
@@ -289,7 +289,7 @@ export async function handleOAuthInfoPassV2(
       return; // finally block handles ack + nonce cleanup
     }
 
-    if (!appState.getHostOriginList().includes(storageKey)) {
+    if (!appState.getStorageKeyList().includes(storageKey)) {
       await bail(message, { type: "origin_not_registered" });
       return;
     }

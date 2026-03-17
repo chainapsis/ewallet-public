@@ -67,7 +67,7 @@ export function useSvmSignatureBase(args: UseSvmSignatureBaseArgs) {
   const { modalId, hostOrigin, getIsAborted } = args;
   const { closeModal, setError } = useMemoryState();
 
-  const storageKey = useMemoryState((state) => state.storageKey) || hostOrigin;
+  const storageKey = useMemoryState((state) => state.storageKey);
   const isMobileNative = useMemoryState((state) => state.isMobileNative);
   const mobileApiKey = useMemoryState((state) => state.apiKey);
   const theme = useAppState().getTheme(storageKey);
