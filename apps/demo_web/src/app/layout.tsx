@@ -5,6 +5,7 @@ import "./globals.scss";
 import "@oko-wallet/oko-common-ui/styles/colors.scss";
 import "@oko-wallet/oko-common-ui/styles/typography.scss";
 import "@oko-wallet/oko-common-ui/styles/shadow.scss";
+import "@oko-wallet/oko-common-ui/styles/animation.scss";
 
 import { themeInitScript } from "@oko-wallet-demo-web/state/theme";
 
