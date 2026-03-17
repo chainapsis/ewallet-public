@@ -52,6 +52,19 @@ yarn ci build_cs
 
 This installs dependencies and builds core packages and Cait Sith.
 
+## Git hooks
+
+The project uses [Husky](https://typicode.github.io/husky/) and
+[lint-staged](https://github.com/lint-staged/lint-staged) to run Biome checks
+automatically on staged files before each commit.
+
+Yarn 4 does not run the `prepare` script automatically, so you need to set up
+Husky manually after installing dependencies:
+
+```bash
+yarn prepare
+```
+
 ## Docs-only changes
 
 If you are only editing documentation, you do not need to run all services.
