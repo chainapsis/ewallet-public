@@ -1366,5 +1366,63 @@ describe("keygen_v2_test", () => {
         }
       }
     });
+
+    it("run runKeygenEd25519 passes registrationThreshold to checkKeyShareFromKSNodesV2", async () => {
+      // Set registration_threshold = 2
+      await insertKeyShareNodeMeta(pool, {
+        sss_threshold: sssThreshold,
+        registration_threshold: 2,
+      });
+
+      const { ksNodeIds } = await setUpUserWithSecp256k1Wallet(pool);
+      (mockCheckKeyShareFromKSNodesV2 as any).mockResolvedValue({
+        success: true,
+        data: {
+          ed25519: { nodeIds: ksNodeIds },
+        },
+      });
+
+      const keygenResult = runKeygenCentralizedEd25519();
+      const request = generateKeygenRequest(keygenResult);
+
+      await runKeygenEd25519(
+        pool,
+        TEST_JWT_CONFIG_ED25519,
+        request,
+        TEMP_ENC_SECRET,
+        mockLogger,
+      );
+
+      // Verify registrationThreshold (5th arg) was passed as 2
+      expect(mockCheckKeyShareFromKSNodesV2).toHaveBeenCalledTimes(1);
+      const callArgs = mockCheckKeyShareFromKSNodesV2.mock.calls[0];
+      expect(callArgs[4]).toBe(2);
+    });
+
+    it("run runKeygenEd25519 passes null registrationThreshold when not set", async () => {
+      const { ksNodeIds } = await setUpUserWithSecp256k1Wallet(pool);
+      (mockCheckKeyShareFromKSNodesV2 as any).mockResolvedValue({
+        success: true,
+        data: {
+          ed25519: { nodeIds: ksNodeIds },
+        },
+      });
+
+      const keygenResult = runKeygenCentralizedEd25519();
+      const request = generateKeygenRequest(keygenResult);
+
+      await runKeygenEd25519(
+        pool,
+        TEST_JWT_CONFIG_ED25519,
+        request,
+        TEMP_ENC_SECRET,
+        mockLogger,
+      );
+
+      // Verify registrationThreshold (5th arg) is null (beforeEach sets registration_threshold: null)
+      expect(mockCheckKeyShareFromKSNodesV2).toHaveBeenCalledTimes(1);
+      const callArgs = mockCheckKeyShareFromKSNodesV2.mock.calls[0];
+      expect(callArgs[4]).toBeNull();
+    });
   });
 });
