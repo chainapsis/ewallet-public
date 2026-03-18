@@ -1,7 +1,14 @@
 import { Button } from "@oko-wallet/oko-common-ui/button";
 import type { OkoWalletProtectedMsgs } from "@oko-wallet/oko-sdk-core";
 import type { CurveType } from "@oko-wallet/oko-types/crypto";
-import { type FC, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  type FC,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import styles from "./export_display.module.scss";
 import { postLog } from "@oko-wallet-attached/requests/logging";
@@ -76,8 +83,11 @@ const VALID_KEY_TYPES: ReadonlySet<string> = new Set(["secp256k1", "ed25519"]);
 const MAX_KEY_REQUEST_ATTEMPTS = 3;
 
 export const ExportDisplay: FC = () => {
-  // Force light theme — this route is only used inside user_dashboard which has no dark mode
-  useEffect(() => {
+  // Force light theme — this route is only used inside user_dashboard which has no dark mode.
+  // useLayoutEffect ensures the theme is set before paint, preventing a flash
+  // where dark-mode CSS variables (e.g. --bg-brand-solid: #fafafa) are resolved
+  // from the index.html pre-paint script's data-theme="dark".
+  useLayoutEffect(() => {
     const root = document.documentElement;
     const prevTheme = root.getAttribute("data-theme");
     root.setAttribute("data-theme", "light");
