@@ -93,21 +93,18 @@ export const AnchoredMenu: FC<AnchoredMenuProps> = ({
     role,
   ]);
 
-  const { isMounted, styles: transitionStyles } = useTransitionStyles(
-    context,
-    {
-      duration: 150,
-      initial: {
-        opacity: 0,
-        transform: "scale(0.97)",
-      },
-      common: ({ placement: currentPlacement }) => ({
-        transformOrigin: getTransformOrigin(currentPlacement),
-        // custom ease-out value
-        transitionTimingFunction: "cubic-bezier(0.86, 0, 0.07, 1)",
-      }),
+  const { isMounted, styles: transitionStyles } = useTransitionStyles(context, {
+    duration: 150,
+    initial: {
+      opacity: 0,
+      transform: "scale(0.97)",
     },
-  );
+    common: ({ placement: currentPlacement }) => ({
+      transformOrigin: getTransformOrigin(currentPlacement),
+      // custom ease-out value
+      transitionTimingFunction: "cubic-bezier(0.86, 0, 0.07, 1)",
+    }),
+  });
 
   const headingId = useId();
 

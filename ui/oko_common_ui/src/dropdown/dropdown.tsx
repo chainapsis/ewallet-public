@@ -301,11 +301,7 @@ const DropdownContent: FC<DropdownContentProps> = ({
   const content = (
     <div
       ref={contentRef}
-      className={cn(
-        styles.content,
-        isVisible && styles.open,
-        className,
-      )}
+      className={cn(styles.content, isVisible && styles.open, className)}
       style={{
         position: "absolute",
         top: position.top,

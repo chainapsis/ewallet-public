@@ -1,5 +1,6 @@
 "use client";
 
+import cn from "classnames";
 import type { FC, ReactNode } from "react";
 
 import styles from "./toast.module.scss";
@@ -9,7 +10,6 @@ import { InfoCircleIcon } from "@oko-wallet-common-ui/icons/info_circle";
 import { WarningIcon } from "@oko-wallet-common-ui/icons/warning_icon";
 import { XCloseIcon } from "@oko-wallet-common-ui/icons/x_close";
 import { Typography } from "@oko-wallet-common-ui/typography/typography";
-import cn from "classnames";
 
 type ToastVariant = "success" | "error" | "warning" | "info" | "confirm";
 
@@ -47,7 +47,6 @@ const ToastIcon: FC<{ variant: ToastVariant }> = ({ variant }) => {
       return <InfoCircleIcon size={20} />;
   }
 };
-
 
 interface ToastContainerProps {
   children: ReactNode;
@@ -91,7 +90,6 @@ const ToastCloseButton: FC<ToastCloseButtonProps> = ({ onClose }) => {
     </button>
   );
 };
-
 
 interface ToastProps {
   title?: string;
