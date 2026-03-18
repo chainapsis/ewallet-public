@@ -160,6 +160,7 @@ export async function initializeOkoApiSchema(pool: Pool): Promise<void> {
     CREATE TABLE IF NOT EXISTS key_share_node_meta (
       meta_id uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
       sss_threshold int2 NOT NULL,
+      registration_threshold int2 NULL,
       created_at timestamptz DEFAULT now() NOT NULL,
       updated_at timestamptz DEFAULT now() NOT NULL
     );
@@ -186,6 +187,10 @@ export async function initializeOkoApiSchema(pool: Pool): Promise<void> {
     -- Ensure status column exists on oko_users
     ALTER TABLE oko_users
       ADD COLUMN IF NOT EXISTS status varchar(32) DEFAULT 'ACTIVE' NOT NULL;
+
+    -- Ensure registration_threshold column exists on key_share_node_meta
+    ALTER TABLE key_share_node_meta
+      ADD COLUMN IF NOT EXISTS registration_threshold int2 NULL;
   `);
 }
 
