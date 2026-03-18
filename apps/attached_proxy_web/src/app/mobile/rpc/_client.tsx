@@ -1,13 +1,10 @@
-"use client";
-
-import { useMemo, useRef, useState } from "react";
+import { type RefObject, useState } from "react";
 
 import {
   buildRpcCallbackUrl,
   decodeRpcPayload,
   parseRpcRequestFromLocation,
 } from "../_shared/rpc_codec";
-import { parseClientRandomFromHash } from "../_shared/parse_client_random";
 import { sendToAttached } from "../_shared/send_to_attached";
 import {
   type AttachedInitPayload,
@@ -18,28 +15,18 @@ import {
 const VISIBLE_METHODS = new Set(["open_modal", "__export_private_key__"]);
 
 export function RpcClient({
-  iframeSrc,
+  iframeRef,
   method,
   redirectScheme,
   expectedPublicKey,
 }: {
-  iframeSrc: string;
+  iframeRef: RefObject<HTMLIFrameElement | null>;
   method: string;
   redirectScheme: string;
   expectedPublicKey: string | null;
 }) {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [status, setStatus] = useState("Preparing...");
   const [showIframe, setShowIframe] = useState(false);
-
-  // Read clientRandom from URL fragment and inject into iframe src
-  const resolvedIframeSrc = useMemo(() => {
-    const clientRandom = parseClientRandomFromHash();
-    if (!clientRandom) return iframeSrc;
-    const url = new URL(iframeSrc);
-    url.searchParams.set("client_random", clientRandom);
-    return url.toString();
-  }, [iframeSrc]);
 
   useAttachedInit((initPayload) => {
     void executeRpc(initPayload);
@@ -69,7 +56,7 @@ export function RpcClient({
         }
       }
 
-      // Parse payload from URL
+      // Parse payload from URL hash
       const { encodedPayload } = parseRpcRequestFromLocation();
       const payload = encodedPayload
         ? decodeRpcPayload<unknown>(encodedPayload)
@@ -79,6 +66,12 @@ export function RpcClient({
       const isVisible = VISIBLE_METHODS.has(method);
       if (isVisible) {
         setShowIframe(true);
+        if (iframeRef.current) {
+          iframeRef.current.style.display = "";
+          iframeRef.current.style.flex = "1";
+          iframeRef.current.style.width = "100%";
+          iframeRef.current.style.border = "none";
+        }
       }
 
       // Forward to attached iframe
@@ -91,11 +84,11 @@ export function RpcClient({
         },
       );
 
-      setShowIframe(false);
+      hideIframe();
       returnToApp(ack.payload);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      setShowIframe(false);
+      hideIframe();
       setStatus(`Error: ${message}`);
       console.error("[oko-mobile-rpc] error:", err);
 
@@ -103,6 +96,13 @@ export function RpcClient({
         success: false,
         err: { type: "rpc_error", message },
       });
+    }
+  }
+
+  function hideIframe() {
+    setShowIframe(false);
+    if (iframeRef.current) {
+      iframeRef.current.style.display = "none";
     }
   }
 
@@ -135,17 +135,6 @@ export function RpcClient({
           {status}
         </div>
       )}
-      <iframe
-        id="oko-attached"
-        title="Oko Wallet"
-        ref={iframeRef}
-        src={resolvedIframeSrc}
-        style={
-          showIframe
-            ? { flex: 1, width: "100%", border: "none" }
-            : { display: "none" }
-        }
-      />
     </>
   );
 }

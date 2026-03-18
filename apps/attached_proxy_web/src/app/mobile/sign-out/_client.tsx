@@ -1,19 +1,16 @@
-"use client";
-
 import type { OkoWalletMsgSignOutAck } from "@oko-wallet/oko-sdk-core";
-import { useRef, useState } from "react";
+import { type RefObject, useState } from "react";
 
 import { sendToAttached } from "../_shared/send_to_attached";
 import { useAttachedInit } from "../_shared/use_attached_init";
 
 export function SignOutClient({
-  iframeSrc,
+  iframeRef,
   redirectScheme,
 }: {
-  iframeSrc: string;
+  iframeRef: RefObject<HTMLIFrameElement | null>;
   redirectScheme: string;
 }) {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [status, setStatus] = useState("Signing out...");
 
   useAttachedInit((payload) => {
@@ -58,23 +55,14 @@ export function SignOutClient({
   }
 
   return (
-    <>
-      <div
-        style={{
-          textAlign: "center",
-          fontSize: 16,
-          padding: 20,
-        }}
-      >
-        {status}
-      </div>
-      <iframe
-        id="oko-attached"
-        title="Oko Wallet"
-        ref={iframeRef}
-        src={iframeSrc}
-        style={{ display: "none" }}
-      />
-    </>
+    <div
+      style={{
+        textAlign: "center",
+        fontSize: 16,
+        padding: 20,
+      }}
+    >
+      {status}
+    </div>
   );
 }

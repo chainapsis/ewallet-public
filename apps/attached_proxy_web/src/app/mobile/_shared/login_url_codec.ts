@@ -1,5 +1,3 @@
-"use client";
-
 import type { WalletInfo } from "@oko-wallet/oko-sdk-core";
 import { Buffer } from "buffer";
 import pako from "pako";

@@ -1,10 +1,8 @@
-"use client";
-
 import type {
   OkoWalletMsgGetWalletInfoAck,
   OkoWalletMsgOAuthInfoPassAck,
 } from "@oko-wallet/oko-sdk-core";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { type RefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { ATTACHED_ORIGIN } from "../../_shared/build_iframe_src";
 import {
@@ -18,34 +16,26 @@ import { sendToAttached } from "../../_shared/send_to_attached";
 import { useAttachedInit } from "../../_shared/use_attached_init";
 
 export function LoginCompleteClient({
-  iframeSrc,
-  oauthParams,
+  iframeRef,
 }: {
-  iframeSrc: string;
-  oauthParams: Record<string, string>;
+  iframeRef: RefObject<HTMLIFrameElement | null>;
 }) {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [status, setStatus] = useState("Completing sign-in...");
+
+  // Parse OAuth params from query string
+  const oauthParams = useMemo(() => {
+    const params: Record<string, string> = {};
+    for (const [key, value] of new URLSearchParams(window.location.search)) {
+      params[key] = value;
+    }
+    return params;
+  }, []);
 
   // Session data read from sessionStorage on mount
   const sessionDataRef = useRef<{
     redirectScheme: string;
     oauthPayload: Record<string, string>;
   } | null>(null);
-
-  const clientRandom = sessionStorage.getItem("oko_mobile_client_random") || "";
-
-  // Rebuild iframe src with clientRandom from sessionStorage
-  const resolvedIframeSrc = (() => {
-    if (!clientRandom) {
-      return iframeSrc;
-    }
-    const url = new URL(iframeSrc);
-    if (!url.searchParams.has("client_random")) {
-      url.searchParams.set("client_random", clientRandom);
-    }
-    return url.toString();
-  })();
 
   // Read session data and validate OAuth payload on mount
   useEffect(() => {
@@ -110,16 +100,15 @@ export function LoginCompleteClient({
 
     setStatus("Processing sign-in...");
 
-    // Clear any stale session before starting a new sign-in
+    // NOTE: Do NOT call sign_out here to clear stale sessions.
+    // sign_out runs resetAll() which also clears the nonce/codeVerifier
+    // that was stored by generate_oauth_url on the /mobile/login page.
+    // oauth_info_pass needs these to verify the OAuth token.
+    // The new sign-in will overwrite stale wallet data anyway.
     if (payload?.data?.public_key) {
       console.info(
-        "[oko-mobile-login-complete] clearing stale session before sign-in",
+        "[oko-mobile-login-complete] existing session found, will be overwritten by new sign-in",
       );
-      await sendToAttached(iframeRef.current!, {
-        target: "oko_attached",
-        msg_type: "sign_out",
-        payload: null,
-      });
     }
 
     // Inject nonce for email login (generated in /mobile/login, not in attached)
@@ -181,7 +170,7 @@ export function LoginCompleteClient({
       setStatus(`Error: ${message}`);
       console.error("[oko-mobile-login-complete] error:", err);
     }
-  }, []);
+  }, [iframeRef]);
 
   // Listen for oauth_sign_in_update (keygen complete — separate from init)
   useEffect(() => {
@@ -210,31 +199,18 @@ export function LoginCompleteClient({
   }, [handleKeygenComplete]);
 
   return (
-    <>
-      <div
-        style={{
-          textAlign: "center",
-          fontSize: 16,
-          padding: 20,
-        }}
-      >
-        {status}
-      </div>
-      <iframe
-        id="oko-attached"
-        title="Oko Wallet"
-        ref={iframeRef}
-        src={resolvedIframeSrc}
-        style={{ display: "none" }}
-      />
-    </>
+    <div
+      style={{
+        textAlign: "center",
+        fontSize: 16,
+        padding: 20,
+      }}
+    >
+      {status}
+    </div>
   );
 }
 
-/**
- * Fetch wallet info from the attached iframe via get_wallet_info postMessage.
- * Replaces the previous same-origin localStorage read.
- */
 async function fetchWalletInfoFromAttached(
   iframe: HTMLIFrameElement,
 ): Promise<LoginWalletInfo | null> {
@@ -254,7 +230,6 @@ async function fetchWalletInfoFromAttached(
       return null;
     }
 
-    // Also request ed25519 public key
     let publicKeyEd25519: string | null = null;
     try {
       const ed25519Ack = await sendToAttached<{
@@ -303,14 +278,12 @@ function buildOAuthPayload(
     auth_type: params.auth_type || provider,
   };
 
-  // Token-based flow (Google, Email/Auth0)
   if (params.access_token || params.id_token) {
     base.access_token = params.access_token || "";
     base.id_token = params.id_token || "";
     return base;
   }
 
-  // Code-based flow (X, Discord, GitHub)
   if (params.code) {
     base.code = params.code;
     return base;

@@ -1,7 +1,5 @@
-"use client";
-
 import type { OkoWalletMsgGenerateOAuthUrlAck } from "@oko-wallet/oko-sdk-core";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type RefObject, useEffect, useState } from "react";
 
 import { parseClientRandomFromHash } from "../_shared/parse_client_random";
 import { sendToAttached } from "../_shared/send_to_attached";
@@ -79,38 +77,28 @@ export function EmailLoginClient({
 // ---------------------------------------------------------------------------
 
 export function OAuthLoginClient({
+  iframeRef,
   provider,
   apiKey,
   redirectScheme,
-  iframeSrc,
 }: {
+  iframeRef: RefObject<HTMLIFrameElement | null>;
   provider: string;
   apiKey: string;
   redirectScheme: string;
-  iframeSrc: string;
 }) {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [status, setStatus] = useState("Preparing sign-in...");
-
-  const clientRandom = useMemo(() => parseClientRandomFromHash(), []);
-
-  // Inject clientRandom from fragment into iframe src
-  const resolvedIframeSrc = useMemo(() => {
-    if (!clientRandom) return iframeSrc;
-    const url = new URL(iframeSrc);
-    url.searchParams.set("client_random", clientRandom);
-    return url.toString();
-  }, [iframeSrc, clientRandom]);
 
   useEffect(() => {
     if (redirectScheme) {
       sessionStorage.setItem("oko_mobile_redirect_scheme", redirectScheme);
     }
     sessionStorage.setItem("oko_mobile_api_key", apiKey);
+    const clientRandom = parseClientRandomFromHash();
     if (clientRandom) {
       sessionStorage.setItem("oko_mobile_client_random", clientRandom);
     }
-  }, [apiKey, redirectScheme, clientRandom]);
+  }, [apiKey, redirectScheme]);
 
   useAttachedInit((payload) => {
     if (payload && !payload.success) {
@@ -157,16 +145,5 @@ export function OAuthLoginClient({
     }
   }
 
-  return (
-    <>
-      <div style={statusStyle}>{status}</div>
-      <iframe
-        id="oko-attached"
-        title="Oko Wallet"
-        ref={iframeRef}
-        src={resolvedIframeSrc}
-        style={{ display: "none" }}
-      />
-    </>
-  );
+  return <div style={statusStyle}>{status}</div>;
 }
