@@ -148,7 +148,7 @@ export async function reshareUserKeySharesV2(
   secp256k1: ReshareWalletInfoSecp256k1,
   ed25519: ReshareWalletInfoEd25519,
   session: ClientCommitRevealSession,
-  committedNodeEndpoints?: string[],
+  committedNodeEndpoints: string[],
 ): Promise<Result<ReshareV2Result, string>> {
   const { threshold, nodes } = keyshareNodeMeta;
   const registrationThreshold =
@@ -237,9 +237,9 @@ export async function reshareUserKeySharesV2(
 
   // 5. Send new shares to committed nodes (partial success allowed)
   // Only send to nodes that successfully committed; skip unreachable nodes
-  const targetNodes = committedNodeEndpoints
-    ? nodes.filter((n) => committedNodeEndpoints.includes(n.endpoint))
-    : nodes;
+  const targetNodes = nodes.filter((n) =>
+    committedNodeEndpoints.includes(n.endpoint),
+  );
   const resharedNodes: NodeNameAndEndpoint[] = [];
 
   const sendResults = await Promise.all(
