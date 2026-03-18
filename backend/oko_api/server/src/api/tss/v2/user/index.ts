@@ -434,12 +434,25 @@ export async function updateWalletKSNodesForReshareV2(
     }
     const nodeIds = getKSNodesRes.data.map((n) => n.node_id);
 
+    // Get registration threshold for partial success
+    const getKeyshareNodeMetaRes = await getKeyShareNodeMeta(db);
+    if (getKeyshareNodeMetaRes.success === false) {
+      return {
+        success: false,
+        code: "UNKNOWN_ERROR",
+        msg: `getKeyShareNodeMeta error: ${getKeyshareNodeMetaRes.err}`,
+      };
+    }
+    const registrationThreshold =
+      getKeyshareNodeMetaRes.data.registration_threshold;
+
     // Check key shares exist on KS nodes
     const checkRes = await checkKeyShareFromKSNodesV2(
       email,
       { secp256k1: secp256k1PublicKey, ed25519: ed25519PublicKey },
       getKSNodesRes.data,
       auth_type,
+      registrationThreshold,
     );
     if (!checkRes.success) {
       return checkRes;

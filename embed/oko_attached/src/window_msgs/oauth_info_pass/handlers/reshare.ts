@@ -24,9 +24,11 @@ export async function handleReshareV2(
   apiKey?: string,
 ): Promise<Result<UserSignInResultV2, OAuthSignInError>> {
   const { nodes } = keyshareNodeMeta;
+  const registrationThreshold =
+    keyshareNodeMeta.registration_threshold ?? nodes.length;
 
   // 1. Prepare commit targets (all nodes) with "reshare" operation type
-  // For reshare, all nodes must commit since we send reshared shares to all of them
+  // Use registration_threshold to allow partial success when some nodes are down
   const ksnCommitTargets: KsnCommitTarget[] = nodes.map((node) => ({
     nodeUrl: node.endpoint,
     operationType: "reshare" as const,
@@ -36,7 +38,7 @@ export async function handleReshareV2(
     authType,
     idToken,
     ksnCommitTargets,
-    nodes.length, // All nodes must commit for reshare
+    registrationThreshold,
   );
   if (!commitRes.success) {
     return {
@@ -115,6 +117,10 @@ export async function handleReshareV2(
   }
 
   // 4. Call reshareUserKeySharesV2 with commit-reveal session
+  // Pass committed node endpoints so reshare only targets reachable nodes
+  const committedNodeEndpoints = commitRes.data.readyNodes.map(
+    (n) => n.nodeUrl,
+  );
   const reshareRes = await reshareUserKeySharesV2(
     idToken,
     authType,
@@ -125,6 +131,7 @@ export async function handleReshareV2(
       serverVerifyingShare: serverVerifyingShareRes.data,
     },
     session,
+    committedNodeEndpoints,
   );
   if (!reshareRes.success) {
     return {
