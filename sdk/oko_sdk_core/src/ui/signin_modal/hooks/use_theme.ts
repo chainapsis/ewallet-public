@@ -1,5 +1,3 @@
-import { useEffect, useState } from "preact/hooks";
-
 import type { ResolvedTheme, SignInModalTheme } from "../types";
 
 function getSystemTheme(): ResolvedTheme {
@@ -47,28 +45,23 @@ export function resolveTheme(theme: SignInModalTheme): ResolvedTheme {
   return getHostTheme() ?? getSystemTheme();
 }
 
-export function useTheme(theme: SignInModalTheme): ResolvedTheme {
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() =>
-    resolveTheme(theme),
-  );
+export function observeTheme(
+  theme: SignInModalTheme,
+  onChange: (resolved: ResolvedTheme) => void,
+): () => void {
+  onChange(resolveTheme(theme));
 
-  useEffect(() => {
-    if (theme !== "system") {
-      setResolvedTheme(theme);
-      return;
-    }
+  if (theme !== "system") {
+    return () => {};
+  }
 
-    const updateTheme = () => {
-      setResolvedTheme(getHostTheme() ?? getSystemTheme());
-    };
+  const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  const handler = () => {
+    onChange(getHostTheme() ?? getSystemTheme());
+  };
 
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    mediaQuery.addEventListener("change", updateTheme);
-
-    return () => {
-      mediaQuery.removeEventListener("change", updateTheme);
-    };
-  }, [theme]);
-
-  return resolvedTheme;
+  mediaQuery.addEventListener("change", handler);
+  return () => {
+    mediaQuery.removeEventListener("change", handler);
+  };
 }
