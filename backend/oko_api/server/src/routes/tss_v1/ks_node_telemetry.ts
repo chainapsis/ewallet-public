@@ -5,6 +5,7 @@ import {
 } from "@oko-wallet/oko-api-openapi/tss";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type { KSNodeTelemetryRequest } from "@oko-wallet/oko-types/tss";
+import { timingSafeEqual } from "crypto";
 import type { Response, Router } from "express";
 import { z } from "zod";
 
@@ -66,7 +67,12 @@ export function setKSNodeTelemetryRoutes(router: Router) {
       }
 
       const expectedPassword = req.app.locals.ks_node_report_password;
-      if (password !== expectedPassword) {
+      const passwordBuf = Buffer.from(password, "utf-8");
+      const expectedBuf = Buffer.from(expectedPassword, "utf-8");
+      if (
+        passwordBuf.length !== expectedBuf.length ||
+        !timingSafeEqual(passwordBuf, expectedBuf)
+      ) {
         res.status(401).json({
           success: false,
           code: "UNAUTHORIZED",
