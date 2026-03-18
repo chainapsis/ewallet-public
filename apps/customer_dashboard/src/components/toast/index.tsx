@@ -2,7 +2,7 @@
 
 import { Toast, type ToastVariant } from "@oko-wallet/oko-common-ui/toast";
 import type { FC } from "react";
-import { Toaster, toast, type ExternalToast } from "sonner";
+import { type ExternalToast, Toaster, toast } from "sonner";
 
 interface DisplayToastProps {
   variant: ToastVariant;
@@ -28,7 +28,7 @@ export function displayToast({
     ),
     {
       duration: 5000,
-      position: 'top-right',
+      position: "top-right",
       ...toastOptions,
     },
   );
