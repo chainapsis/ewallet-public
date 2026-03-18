@@ -110,6 +110,14 @@ yarn ci build_sdk      # SDK packages
 yarn ci typecheck
 ```
 
+## Typecheck & Lint Rules
+
+After modifying `.ts`, `.tsx`, `.js`, or `.jsx` files, always run:
+1. **`yarn ci typecheck`** — TypeScript type checking across all packages
+2. **`yarn exec biome check --write .`** — Auto-fix lint and formatting errors
+
+
+
 ## Development Workflow
 
 ### Code Style
