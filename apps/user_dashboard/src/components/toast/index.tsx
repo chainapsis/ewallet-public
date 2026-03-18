@@ -36,7 +36,6 @@ export const ToastContainer: FC<{ stacked?: boolean }> = ({
 }) => {
   return (
     <Toaster
-      position="top-right"
       expand={!stacked}
       visibleToasts={5}
       style={{ "--width": "320px" } as React.CSSProperties}

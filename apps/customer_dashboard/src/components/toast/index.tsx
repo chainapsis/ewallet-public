@@ -2,18 +2,20 @@
 
 import { Toast, type ToastVariant } from "@oko-wallet/oko-common-ui/toast";
 import type { FC } from "react";
-import { Toaster, toast } from "sonner";
+import { Toaster, toast, type ExternalToast } from "sonner";
 
 interface DisplayToastProps {
   variant: ToastVariant;
   title: string;
   description?: string;
+  toastOptions?: ExternalToast;
 }
 
 export function displayToast({
   variant,
   title,
   description,
+  toastOptions,
 }: DisplayToastProps) {
   toast.custom(
     (id) => (
@@ -26,6 +28,8 @@ export function displayToast({
     ),
     {
       duration: 5000,
+      position: 'top-right',
+      ...toastOptions,
     },
   );
 }
@@ -33,7 +37,6 @@ export function displayToast({
 export const ToastContainer: FC = () => {
   return (
     <Toaster
-      position="top-right"
       expand={false}
       visibleToasts={5}
       style={{ "--width": "320px" } as React.CSSProperties}
