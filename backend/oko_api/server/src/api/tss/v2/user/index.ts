@@ -432,8 +432,6 @@ export async function updateWalletKSNodesForReshareV2(
         msg: "Unknown server_urls detected",
       };
     }
-    const nodeIds = getKSNodesRes.data.map((n) => n.node_id);
-
     // Get registration threshold for partial success
     const getKeyshareNodeMetaRes = await getKeyShareNodeMeta(db);
     if (getKeyshareNodeMetaRes.success === false) {
@@ -512,7 +510,10 @@ export async function updateWalletKSNodesForReshareV2(
       };
     }
 
-    // Upsert wallet_ks_nodes for both wallets
+    // Upsert wallet_ks_nodes using only verified nodeIds from checkKeyShareFromKSNodesV2
+    const verifiedSecp256k1NodeIds = checkRes.data.secp256k1?.nodeIds ?? [];
+    const verifiedEd25519NodeIds = checkRes.data.ed25519?.nodeIds ?? [];
+
     const client = await db.connect();
     try {
       await client.query("BEGIN");
@@ -520,7 +521,7 @@ export async function updateWalletKSNodesForReshareV2(
       const secp256k1UpsertRes = await upsertWalletKSNodes(
         client,
         secp256k1WalletRes.data.wallet_id,
-        nodeIds,
+        verifiedSecp256k1NodeIds,
       );
       if (!secp256k1UpsertRes.success) {
         throw new Error(`(secp256k1) ${secp256k1UpsertRes.err}`);
@@ -529,7 +530,7 @@ export async function updateWalletKSNodesForReshareV2(
       const ed25519UpsertRes = await upsertWalletKSNodes(
         client,
         ed25519WalletRes.data.wallet_id,
-        nodeIds,
+        verifiedEd25519NodeIds,
       );
       if (!ed25519UpsertRes.success) {
         throw new Error(`(ed25519) ${ed25519UpsertRes.err}`);
