@@ -177,7 +177,7 @@ export const Instructions: FC<InstructionsProps> = ({
           // biome-ignore lint/suspicious/noArrayIndexKey: instruction list display only
           key={index}
           title={getInstructionTitle(instruction)}
-          defaultExpanded={index === 0}
+          defaultExpanded={false}
         >
           {renderInstruction(instruction, index, chainId)}
         </Collapsible>
