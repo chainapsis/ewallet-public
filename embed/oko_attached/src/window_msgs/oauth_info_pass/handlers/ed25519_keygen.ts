@@ -413,10 +413,13 @@ export async function handleReshareAndEd25519Keygen(
       );
     }),
   );
+  // ed25519 register targets activeNodes only, so threshold must match
+  const ed25519RegisterThreshold =
+    keyshareNodeMeta.registration_threshold ?? activeNodes.length;
   const registerEd25519SuccessCount = registerEd25519Results.filter(
     (r) => r.success,
   ).length;
-  if (registerEd25519SuccessCount < registrationThreshold) {
+  if (registerEd25519SuccessCount < ed25519RegisterThreshold) {
     const registerEd25519ErrResults = registerEd25519Results.filter(
       (r) => !r.success,
     );
