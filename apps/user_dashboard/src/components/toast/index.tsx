@@ -26,6 +26,7 @@ export function displayToast({
     ),
     {
       duration: 5000,
+      position: "top-right",
       ...toastOptions,
     },
   );
