@@ -1,6 +1,7 @@
 "use client";
 
-import type { FC, MouseEvent } from "react";
+import cn from "classnames";
+import type { FC, ReactNode } from "react";
 
 import styles from "./toast.module.scss";
 import { CheckCircleOutlinedIcon } from "@oko-wallet-common-ui/icons/check_circle_outlined";
@@ -10,12 +11,7 @@ import { WarningIcon } from "@oko-wallet-common-ui/icons/warning_icon";
 import { XCloseIcon } from "@oko-wallet-common-ui/icons/x_close";
 import { Typography } from "@oko-wallet-common-ui/typography/typography";
 
-export type ToastVariant = "success" | "error" | "warning" | "info" | "confirm";
-export type ToastItemProps = {
-  title?: string;
-  description?: string;
-  variant: ToastVariant;
-};
+type ToastVariant = "success" | "error" | "warning" | "info" | "confirm";
 
 const SuccessToastIcon: FC = () => {
   return (
@@ -37,10 +33,7 @@ const ConfirmToastIcon: FC = () => {
   );
 };
 
-interface ToastIconProps {
-  variant: ToastVariant;
-}
-const ToastIcon: FC<ToastIconProps> = ({ variant }) => {
+const ToastIcon: FC<{ variant: ToastVariant }> = ({ variant }) => {
   switch (variant) {
     case "success":
       return <SuccessToastIcon />;
@@ -55,7 +48,22 @@ const ToastIcon: FC<ToastIconProps> = ({ variant }) => {
   }
 };
 
-export const Toast: FC<ToastItemProps> = ({ title, variant }) => {
+interface ToastContainerProps {
+  children: ReactNode;
+  className?: string;
+}
+
+const ToastContainer: FC<ToastContainerProps> = ({ children, className }) => (
+  <div className={cn(styles.container, className)}>{children}</div>
+);
+
+interface ToastInnerProps {
+  title?: string;
+  description?: string;
+  variant: ToastVariant;
+}
+
+const ToastInner: FC<ToastInnerProps> = ({ title, variant }) => {
   return (
     <div
       className={styles.toastInner}
@@ -67,19 +75,42 @@ export const Toast: FC<ToastItemProps> = ({ title, variant }) => {
           {title}
         </Typography>
       )}
-      {/* TODO: add description, now there is no description in the design*/}
-      {/* {description && <div className={styles.description}>{description}</div>} */}
     </div>
   );
 };
 
 interface ToastCloseButtonProps {
-  closeToast: (e: MouseEvent<HTMLElement>) => void;
+  onClose: () => void;
 }
-export const ToastCloseButton: FC<ToastCloseButtonProps> = ({ closeToast }) => {
+
+const ToastCloseButton: FC<ToastCloseButtonProps> = ({ onClose }) => {
   return (
-    <button type="button" className={styles.closeButton} onClick={closeToast}>
+    <button type="button" className={styles.closeButton} onClick={onClose}>
       <XCloseIcon color="var(--fg-quaternary)" size={20} />
     </button>
   );
 };
+
+interface ToastProps {
+  title?: string;
+  description?: string;
+  variant: ToastVariant;
+  onClose?: () => void;
+  className?: string;
+}
+const Toast: FC<ToastProps> & {
+  Container: typeof ToastContainer;
+  Inner: typeof ToastInner;
+  CloseButton: typeof ToastCloseButton;
+} = ({ title, description, variant, onClose, className }) => (
+  <ToastContainer className={className}>
+    <ToastInner title={title} description={description} variant={variant} />
+    {onClose && <ToastCloseButton onClose={onClose} />}
+  </ToastContainer>
+);
+
+Toast.Container = ToastContainer;
+Toast.Inner = ToastInner;
+Toast.CloseButton = ToastCloseButton;
+
+export { Toast, type ToastVariant, type ToastProps };

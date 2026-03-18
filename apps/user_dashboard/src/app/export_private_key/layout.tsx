@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import "@oko-wallet/oko-common-ui/styles/colors.scss";
 import "@oko-wallet/oko-common-ui/styles/typography.scss";
 import "@oko-wallet/oko-common-ui/styles/shadow.scss";
+import "@oko-wallet/oko-common-ui/styles/animation.scss";
 
 import { Authorized } from "@oko-wallet-user-dashboard/components/authorized/authorized";
 import { DashboardBody } from "@oko-wallet-user-dashboard/components/dashboard_body/dashboard_body";

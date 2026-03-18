@@ -194,28 +194,58 @@ const DropdownTrigger: FC<DropdownTriggerProps> = ({
   );
 };
 
-const DropdownContent: FC<DropdownContentProps> = ({
-  children,
-  className,
-  defaultOffsetFromTrigger = 4,
-  align = "start",
-  style,
-}) => {
-  const { isOpen, contentRef, triggerRef } = useDropdownContext();
-  const [position, setPosition] = useState<{ top: number; left: number }>({
-    top: 0,
-    left: 0,
-  });
+const EXIT_DURATION = 150;
+function useTransition(isOpen: boolean, exitDuration: number) {
+  const [isMounted, setIsMounted] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    if (isOpen && triggerRef.current) {
+    let outerRaf: number;
+    let innerRaf: number;
+
+    if (isOpen) {
+      setIsMounted(true);
+      // Double rAF: 첫 프레임에서 초기 상태(opacity:0, scale:0.95)를 렌더한 뒤,
+      // 다음 프레임에서 .open을 적용해야 브라우저가 변화를 감지하고 transition이 발동된다.
+      // 단일 rAF로는 같은 paint 사이클에 마운트+.open이 적용되어 transition이 무시될 수 있다.
+      outerRaf = requestAnimationFrame(() => {
+        innerRaf = requestAnimationFrame(() => setIsVisible(true));
+      });
+    } else if (isMounted) {
+      setIsVisible(false);
+      const timer = setTimeout(() => setIsMounted(false), exitDuration);
+      return () => clearTimeout(timer);
+    }
+
+    return () => {
+      cancelAnimationFrame(outerRaf);
+      cancelAnimationFrame(innerRaf);
+    };
+  }, [isOpen]);
+
+  return { isMounted, isVisible };
+}
+
+function useDropdownPosition(
+  isOpen: boolean,
+  isMounted: boolean,
+  triggerRef: React.RefObject<HTMLElement | null>,
+  contentRef: React.RefObject<HTMLDivElement | null>,
+  align: "start" | "end",
+  offsetFromTrigger: number,
+) {
+  const [position, setPosition] = useState({ top: 0, left: 0 });
+  const [transformOrigin, setTransformOrigin] = useState("top left");
+
+  useEffect(() => {
+    if (isOpen && isMounted && triggerRef.current) {
       const triggerRect = triggerRef.current.getBoundingClientRect();
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
       const contentWidth = contentRef.current?.offsetWidth || 300;
       const contentHeight = contentRef.current?.offsetHeight || 500;
 
-      let top = triggerRect.bottom + window.scrollY + defaultOffsetFromTrigger;
+      let top = triggerRect.bottom + window.scrollY + offsetFromTrigger;
       let left =
         align === "end"
           ? triggerRect.right + window.scrollX - contentWidth
@@ -231,7 +261,7 @@ const DropdownContent: FC<DropdownContentProps> = ({
         top =
           triggerRect.top +
           window.scrollY -
-          (contentHeight + defaultOffsetFromTrigger);
+          (contentHeight + offsetFromTrigger);
       }
       if (isTopOverflow) {
         top = window.scrollY + DEFAULT_BOUNDARY_MARGIN;
@@ -243,22 +273,48 @@ const DropdownContent: FC<DropdownContentProps> = ({
         left = DEFAULT_BOUNDARY_MARGIN;
       }
 
+      const vertical = isBottomOverflow ? "bottom" : "top";
+      const horizontal = align === "end" ? "right" : "left";
+      setTransformOrigin(`${vertical} ${horizontal}`);
+
       setPosition({ top, left });
     }
-  }, [isOpen, align]);
+  }, [isOpen, isMounted, align]);
 
-  if (!isOpen) {
+  return { position, transformOrigin };
+}
+
+const DropdownContent: FC<DropdownContentProps> = ({
+  children,
+  className,
+  defaultOffsetFromTrigger = 4,
+  align = "start",
+  style,
+}) => {
+  const { isOpen, contentRef, triggerRef } = useDropdownContext();
+  const { isMounted, isVisible } = useTransition(isOpen, EXIT_DURATION);
+  const { position, transformOrigin } = useDropdownPosition(
+    isOpen,
+    isMounted,
+    triggerRef,
+    contentRef,
+    align,
+    defaultOffsetFromTrigger,
+  );
+
+  if (!isMounted) {
     return null;
   }
 
   const content = (
     <div
       ref={contentRef}
-      className={cn(styles.content, className)}
+      className={cn(styles.content, isVisible && styles.open, className)}
       style={{
         position: "absolute",
         top: position.top,
         left: position.left,
+        transformOrigin,
         ...style,
       }}
     >

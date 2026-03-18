@@ -1,4 +1,4 @@
-:global(.custom-toast) {
+.container {
   display: flex;
   border-radius: 12px;
   border: 1px solid var(--border-primary);
@@ -6,6 +6,7 @@
   box-shadow: var(--shadow-lg);
   min-height: fit-content;
   padding: 16px;
+  width: 100%;
 }
 
 .successIcon {

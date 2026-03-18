@@ -1,17 +1,8 @@
 "use client";
 
-import {
-  Toast,
-  ToastCloseButton,
-  type ToastVariant,
-} from "@oko-wallet/oko-common-ui/toast";
+import { Toast, type ToastVariant } from "@oko-wallet/oko-common-ui/toast";
 import type { FC } from "react";
-import {
-  Bounce,
-  ToastContainer as ReactToastifyToastContainer,
-  type ToastOptions,
-  toast,
-} from "react-toastify";
+import { type ExternalToast, Toaster, toast } from "sonner";
 
 export function displayToast({
   variant,
@@ -22,25 +13,22 @@ export function displayToast({
   variant: ToastVariant;
   title: string;
   description?: string;
-  toastOptions?: Partial<ToastOptions>;
+  toastOptions?: ExternalToast;
 }) {
-  toastOptions = {
-    ...{
+  toast.custom(
+    (id) => (
+      <Toast
+        title={title}
+        description={description}
+        variant={variant}
+        onClose={() => toast.dismiss(id)}
+      />
+    ),
+    {
+      duration: 5000,
       position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: true,
-      closeOnClick: false,
-      pauseOnHover: true,
-      draggable: false,
-      progress: undefined,
-      pauseOnFocusLoss: false,
+      ...toastOptions,
     },
-    ...(toastOptions ?? {}),
-  };
-
-  toast(
-    <Toast title={title} description={description} variant={variant} />,
-    toastOptions,
   );
 }
 
@@ -48,13 +36,20 @@ export const ToastContainer: FC<{ stacked?: boolean }> = ({
   stacked = true,
 }) => {
   return (
-    <ReactToastifyToastContainer
-      stacked={stacked}
-      transition={Bounce}
-      toastClassName="custom-toast"
-      closeButton={(props) => (
-        <ToastCloseButton closeToast={props.closeToast} />
-      )}
+    <Toaster
+      expand={!stacked}
+      visibleToasts={5}
+      style={{ "--width": "320px" } as React.CSSProperties}
+      toastOptions={{
+        style: {
+          padding: 0,
+          margin: 0,
+          background: "transparent",
+          border: "none",
+          boxShadow: "none",
+          width: "var(--width)",
+        },
+      }}
     />
   );
 };
