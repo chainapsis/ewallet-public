@@ -9,6 +9,17 @@ export async function insertKeyShareNodeMeta(
   db: Pool | PoolClient,
   keyShareNodeMetaData: InsertKeyShareNodeMetaRequest,
 ): Promise<Result<void, string>> {
+  if (
+    keyShareNodeMetaData.registration_threshold != null &&
+    keyShareNodeMetaData.registration_threshold <
+      keyShareNodeMetaData.sss_threshold
+  ) {
+    return {
+      success: false,
+      err: "registration_threshold must be >= sss_threshold",
+    };
+  }
+
   try {
     const insertKeyShareNodeMetaQuery = `
 INSERT INTO key_share_node_meta (
