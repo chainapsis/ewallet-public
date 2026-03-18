@@ -84,7 +84,7 @@ export const AddressItem: FC<AddressItemProps> = ({
                 activeIcon={
                   <CheckCircleOutlinedIcon
                     size={16}
-                    color="var(--fg-tertiary"
+                    color="var(--fg-tertiary)"
                   />
                 }
               />
