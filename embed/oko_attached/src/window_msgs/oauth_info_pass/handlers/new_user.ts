@@ -15,6 +15,7 @@ import {
   createKsnCommitRevealParams,
   createOkoApiCommitRevealParams,
   type KsnCommitTarget,
+  setKsnNodePubkey,
 } from "@oko-wallet-attached/crypto/commit_reveal";
 import { encodePoint256ToKeyShareString } from "@oko-wallet-attached/crypto/key_share_utils";
 import { splitUserKeyShares } from "@oko-wallet-attached/crypto/keygen";
@@ -101,7 +102,24 @@ export async function handleNewUserV2(
       err: { type: "sign_in_request_fail", error: commitRes.err },
     };
   }
-  const { session } = commitRes.data;
+  let { session } = commitRes.data;
+  const { pendingCommits } = commitRes.data;
+
+  // 4.1. Resolve remaining pending commits so all reachable nodes
+  // get their pubkey registered in the session for downstream register
+  for (const [, promise] of pendingCommits) {
+    try {
+      const result = await promise;
+      session = setKsnNodePubkey(
+        session,
+        result.nodeUrl,
+        result.nodePubkey,
+        result.operationType,
+      );
+    } catch {
+      // Node failed to commit (down) — skip
+    }
+  }
 
   // 5. Send key shares by both curves to ks nodes using registerKeySharesV2
   const registerKeySharesResults: Result<void, string>[] = await Promise.all(

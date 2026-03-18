@@ -91,8 +91,6 @@ export async function userSignInSilentlyV2(
   // Try V2 token first
   const v2Result = verifyUserTokenV2({ token, jwt_config: jwtConfig });
 
-  console.log("v2Result", v2Result);
-
   if (v2Result.success) {
     // V2 token is still valid
     res.status(200).json({ success: true, data: { token: null } });

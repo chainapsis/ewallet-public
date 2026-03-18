@@ -8,6 +8,7 @@ import {
   commitAll,
   createOkoApiCommitRevealParams,
   type KsnCommitTarget,
+  setKsnNodePubkey,
 } from "@oko-wallet-attached/crypto/commit_reveal";
 import { reshareUserKeySharesV2 } from "@oko-wallet-attached/crypto/reshare_v2";
 import { signInV2 } from "@oko-wallet-attached/requests/oko_api";
@@ -46,7 +47,24 @@ export async function handleReshareV2(
       err: { type: "reshare_fail", error: commitRes.err },
     };
   }
-  const { session } = commitRes.data;
+  let { session } = commitRes.data;
+  const { pendingCommits } = commitRes.data;
+
+  // 2.1. Resolve remaining pending commits so all reachable nodes
+  // get their pubkey registered in the session for downstream reshare
+  for (const [, promise] of pendingCommits) {
+    try {
+      const result = await promise;
+      session = setKsnNodePubkey(
+        session,
+        result.nodeUrl,
+        result.nodePubkey,
+        result.operationType,
+      );
+    } catch {
+      // Node failed to commit (down) — skip
+    }
+  }
 
   // 3. Sign in to Oko API
   const signInCommitRevealRes = createOkoApiCommitRevealParams(
@@ -117,10 +135,8 @@ export async function handleReshareV2(
   }
 
   // 4. Call reshareUserKeySharesV2 with commit-reveal session
-  // Pass committed node endpoints so reshare only targets reachable nodes
-  const committedNodeEndpoints = commitRes.data.readyNodes.map(
-    (n) => n.nodeUrl,
-  );
+  // Use session-based endpoints (includes both readyNodes and resolved pending nodes)
+  const committedNodeEndpoints = Object.keys(session.ksn_node_pubkeys);
   const reshareRes = await reshareUserKeySharesV2(
     idToken,
     authType,
