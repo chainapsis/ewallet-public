@@ -1,3 +1,4 @@
+import { IconTransition } from "@oko-wallet/oko-common-ui/icon_transition";
 import { CheckCircleOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/check_circle_outlined";
 import { CopyOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/copy_outlined";
 import { EmptyStateIcon } from "@oko-wallet/oko-common-ui/icons/empty_state_icon";
@@ -75,13 +76,19 @@ export const AddressItem: FC<AddressItemProps> = ({
               onClick={handleCopyAddress}
               type="button"
             >
-              {isCopied ? (
-                <CheckCircleOutlinedIcon size={16} color="var(--fg-tertiary)" />
-              ) : (
-                <CopyOutlinedIcon size={16} color="var(--fg-tertiary)" />
-              )}
+              <IconTransition
+                isActive={isCopied}
+                defaultIcon={
+                  <CopyOutlinedIcon size={16} color="var(--fg-tertiary)" />
+                }
+                activeIcon={
+                  <CheckCircleOutlinedIcon
+                    size={16}
+                    color="var(--fg-tertiary"
+                  />
+                }
+              />
             </button>
-
             <AddressQrModal
               renderTrigger={({ onOpen }) => (
                 <button
