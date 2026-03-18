@@ -345,7 +345,6 @@ describe("registration + reshare scenario e2e", () => {
       .expect(200);
 
     const walletIdSecp = keygenRes.body.data.user.wallet_id_secp256k1;
-    const walletIdEd = keygenRes.body.data.user.wallet_id_ed25519;
 
     // Verify: all 3 nodes after signup
     expect(await getWalletKSNodeIds(walletIdSecp)).toEqual(ksNodeIds.sort());
