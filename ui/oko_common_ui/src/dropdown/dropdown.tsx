@@ -200,19 +200,27 @@ function useTransition(isOpen: boolean, exitDuration: number) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    let outerRaf: number;
+    let innerRaf: number;
+
     if (isOpen) {
       setIsMounted(true);
       // Double rAF: 첫 프레임에서 초기 상태(opacity:0, scale:0.95)를 렌더한 뒤,
       // 다음 프레임에서 .open을 적용해야 브라우저가 변화를 감지하고 transition이 발동된다.
       // 단일 rAF로는 같은 paint 사이클에 마운트+.open이 적용되어 transition이 무시될 수 있다.
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => setIsVisible(true));
+      outerRaf = requestAnimationFrame(() => {
+        innerRaf = requestAnimationFrame(() => setIsVisible(true));
       });
     } else if (isMounted) {
       setIsVisible(false);
       const timer = setTimeout(() => setIsMounted(false), exitDuration);
       return () => clearTimeout(timer);
     }
+
+    return () => {
+      cancelAnimationFrame(outerRaf);
+      cancelAnimationFrame(innerRaf);
+    };
   }, [isOpen]);
 
   return { isMounted, isVisible };
