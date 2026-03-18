@@ -16,7 +16,7 @@ import {
   createKsnCommitRevealParams,
   createOkoApiCommitRevealParams,
   type KsnCommitTarget,
-  setKsnNodePubkey,
+  resolvePendingCommits,
 } from "@oko-wallet-attached/crypto/commit_reveal";
 import {
   decodeSecp256k1SharesByNode,
@@ -92,24 +92,11 @@ export async function handleExistingUserNeedsEd25519Keygen(
       err: { type: "sign_in_request_fail", error: commitRes.err },
     };
   }
-  let { session } = commitRes.data;
   const { readyNodes, pendingCommits } = commitRes.data;
-
-  // 2.1. Resolve remaining pending commits so all reachable nodes
-  // get their pubkey registered in the session
-  for (const [, promise] of pendingCommits) {
-    try {
-      const result = await promise;
-      session = setKsnNodePubkey(
-        session,
-        result.nodeUrl,
-        result.nodePubkey,
-        result.operationType,
-      );
-    } catch {
-      // Node failed to commit (down) — skip
-    }
-  }
+  const session = await resolvePendingCommits(
+    commitRes.data.session,
+    pendingCommits,
+  );
 
   // 3. Send ed25519 key shares to ks nodes using registerKeyShareEd25519V2
   const registerEd25519Results: Result<void, string>[] = await Promise.all(
@@ -354,23 +341,10 @@ export async function handleReshareAndEd25519Keygen(
       err: { type: "reshare_fail", error: commitRes.err },
     };
   }
-  let { session } = commitRes.data;
-  const { pendingCommits } = commitRes.data;
-
-  // 3.1. Resolve remaining pending commits
-  for (const [, promise] of pendingCommits) {
-    try {
-      const result = await promise;
-      session = setKsnNodePubkey(
-        session,
-        result.nodeUrl,
-        result.nodePubkey,
-        result.operationType,
-      );
-    } catch {
-      // Node failed to commit (down) — skip
-    }
-  }
+  const session = await resolvePendingCommits(
+    commitRes.data.session,
+    commitRes.data.pendingCommits,
+  );
 
   // 4. Register ed25519 to ACTIVE nodes first
   // Must happen before keygen_ed25519 API which verifies ed25519 on user's ACTIVE secp256k1 nodes

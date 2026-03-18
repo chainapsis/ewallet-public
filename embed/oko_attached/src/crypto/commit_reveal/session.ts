@@ -74,6 +74,48 @@ export function setKsnNodePubkey(
   };
 }
 
+const PENDING_COMMIT_TIMEOUT_MS = 5000;
+
+/**
+ * Resolve remaining pending commits with a timeout, updating the session
+ * with each successfully committed node's pubkey.
+ *
+ * Pending promises are already in-flight from commitAll. This function
+ * awaits them concurrently (bounded by the timeout) so that all reachable
+ * nodes get registered in the session for downstream register/reshare.
+ *
+ * Down nodes (ECONNREFUSED) fail instantly. Blackholed nodes are skipped
+ * after the timeout instead of blocking until browser TCP timeout.
+ */
+export async function resolvePendingCommits(
+  session: ClientCommitRevealSession,
+  pendingCommits: Map<string, Promise<KsnCommitResult>>,
+): Promise<ClientCommitRevealSession> {
+  let updated = session;
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(
+      () => reject(new Error("pending_commit_timeout")),
+      PENDING_COMMIT_TIMEOUT_MS,
+    ),
+  );
+
+  for (const [, promise] of pendingCommits) {
+    try {
+      const result = await Promise.race([promise, timeout]);
+      updated = setKsnNodePubkey(
+        updated,
+        result.nodeUrl,
+        result.nodePubkey,
+        result.operationType,
+      );
+    } catch {
+      // Node failed or timed out — skip
+    }
+  }
+
+  return updated;
+}
+
 /**
  * Commit to oko_api and ks nodes with threshold-based early return.
  *
