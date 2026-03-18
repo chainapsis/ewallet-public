@@ -602,6 +602,18 @@ export async function runKeygenEd25519(
     }
     const activeUserKSNodes = getNodesByIdsRes.data;
 
+    // Get registration threshold for partial success
+    const getKeyshareNodeMetaRes = await getKeyShareNodeMeta(db);
+    if (getKeyshareNodeMetaRes.success === false) {
+      return {
+        success: false,
+        code: "UNKNOWN_ERROR",
+        msg: `getKeyShareNodeMeta error: ${getKeyshareNodeMetaRes.err}`,
+      };
+    }
+    const registrationThreshold =
+      getKeyshareNodeMetaRes.data.registration_threshold;
+
     const checkKeyshareV2Res = await checkKeyShareFromKSNodesV2(
       user_identifier,
       {
@@ -609,6 +621,7 @@ export async function runKeygenEd25519(
       },
       activeUserKSNodes,
       auth_type,
+      registrationThreshold,
     );
     if (checkKeyshareV2Res.success === false) {
       return checkKeyshareV2Res;
@@ -645,14 +658,7 @@ export async function runKeygenEd25519(
       ed25519KeyPackageShares.verifying_share,
     ).toString("hex");
 
-    const getKeyshareNodeMetaRes = await getKeyShareNodeMeta(db);
-    if (getKeyshareNodeMetaRes.success === false) {
-      return {
-        success: false,
-        code: "UNKNOWN_ERROR",
-        msg: `getKeyShareNodeMeta error: ${getKeyshareNodeMetaRes.err}`,
-      };
-    }
+    // Reuse getKeyshareNodeMetaRes from above (already fetched for registrationThreshold)
     const globalSSSThreshold = getKeyshareNodeMetaRes.data.sss_threshold;
 
     let ed25519Wallet: Wallet;
