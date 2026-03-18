@@ -1,20 +1,19 @@
 "use client";
 
-import {
-  Toast,
-  type ToastVariant,
-} from "@oko-wallet/oko-common-ui/toast";
+import { Toast, type ToastVariant } from "@oko-wallet/oko-common-ui/toast";
 import type { FC } from "react";
-import { Toaster, toast } from "sonner";
+import { type ExternalToast, Toaster, toast } from "sonner";
 
 export function displayToast({
   variant,
   title,
   description,
+  toastOptions,
 }: {
   variant: ToastVariant;
   title: string;
   description?: string;
+  toastOptions?: ExternalToast;
 }) {
   toast.custom(
     (id) => (
@@ -27,6 +26,7 @@ export function displayToast({
     ),
     {
       duration: 5000,
+      ...toastOptions,
     },
   );
 }
