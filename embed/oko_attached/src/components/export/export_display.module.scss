@@ -84,9 +84,14 @@
   color: var(--text-primary);
 }
 
+.copyButton {
+  gap: 8px;
+}
+
 .copyButtonIcon {
   display: flex;
   align-items: center;
+  color: var(--brand-300);
 }
 
 .spacer16 {
