@@ -1,7 +1,5 @@
-import { render } from "preact";
-
-import { resolveTheme } from "./hooks/use_theme";
-import { SignInModal } from "./signin_modal";
+import { observeTheme, resolveTheme } from "./hooks/use_theme";
+import { createSignInModal } from "./signin_modal";
 import { modalStyles } from "./styles";
 import type { SignInModalOptions } from "./types";
 
@@ -24,16 +22,14 @@ export function renderSignInModal(options: SignInModalOptions) {
   styleSheet.replaceSync(modalStyles);
   shadow.adoptedStyleSheets = [styleSheet];
 
-  const preactRoot = document.createElement("div");
-  shadow.appendChild(preactRoot);
-
   const originalOverflow = document.body.style.overflow;
   document.body.appendChild(container);
   document.body.style.overflow = "hidden";
 
   const cleanup = () => {
     document.body.style.overflow = originalOverflow;
-    render(null, preactRoot);
+    modal.destroy();
+    cleanupTheme();
     container.remove();
   };
 
@@ -47,8 +43,16 @@ export function renderSignInModal(options: SignInModalOptions) {
     cleanup();
   };
 
-  render(
-    <SignInModal onSelect={handleSelect} onClose={handleClose} theme={theme} />,
-    preactRoot,
-  );
+  const modal = createSignInModal({
+    onSelect: handleSelect,
+    onClose: handleClose,
+    theme,
+  });
+
+  const cleanupTheme = observeTheme(theme, (resolved) => {
+    container.dataset.theme = resolved;
+    modal.updateTheme(resolved);
+  });
+
+  shadow.appendChild(modal.element);
 }
