@@ -19,10 +19,13 @@ export function useSignOut() {
       return;
     }
 
-    await okoWallet.signOut();
-    resetStates();
-    queryClient.clear();
-    clearUserInfo();
+    try {
+      await okoWallet.signOut();
+    } finally {
+      resetStates();
+      queryClient.clear();
+      clearUserInfo();
+    }
   }, [okoWallet, resetStates, queryClient, clearUserInfo]);
 
   return signOut;
