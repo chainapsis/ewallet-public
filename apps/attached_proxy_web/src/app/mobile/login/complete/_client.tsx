@@ -21,6 +21,7 @@ import {
   type LoginWalletInfo,
 } from "../../_shared/login_url_codec";
 import { sendToAttached } from "../../_shared/send_to_attached";
+import { StatusScreen } from "../../_shared/status_screen";
 import { useAttachedInit } from "../../_shared/use_attached_init";
 
 export function LoginCompleteClient({
@@ -219,15 +220,10 @@ export function LoginCompleteClient({
   }, [handleKeygenComplete]);
 
   return (
-    <div
-      style={{
-        textAlign: "center",
-        fontSize: 16,
-        padding: 20,
-      }}
-    >
-      {status}
-    </div>
+    <StatusScreen
+      title={status}
+      tone={status.startsWith("Error:") ? "error" : "default"}
+    />
   );
 }
 

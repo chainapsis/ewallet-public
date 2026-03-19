@@ -3,16 +3,12 @@ import { type RefObject, useEffect, useState } from "react";
 
 import { parseClientRandomFromHash } from "../_shared/parse_client_random";
 import { sendToAttached } from "../_shared/send_to_attached";
+import { StatusScreen } from "../_shared/status_screen";
 import { useAttachedInit } from "../_shared/use_attached_init";
 
 const AUTH0_DOMAIN = "auth0.oko.app";
 const AUTH0_CLIENT_ID = "GnPcFAjGKAcXZpAzQ8vGBmzfcfV2hu1Q";
 const AUTH0_CONNECTION = "email";
-
-const statusStyle = {
-  textAlign: "center" as const,
-  fontSize: 16,
-};
 
 // ---------------------------------------------------------------------------
 // Email login — no iframe, redirect straight to Auth0
@@ -73,7 +69,12 @@ export function EmailLoginClient({
     })();
   }, [apiKey, redirectScheme]);
 
-  return <div style={statusStyle}>{status}</div>;
+  return (
+    <StatusScreen
+      title={status}
+      tone={status.startsWith("Error:") ? "error" : "default"}
+    />
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -149,5 +150,10 @@ export function OAuthLoginClient({
     }
   }
 
-  return <div style={statusStyle}>{status}</div>;
+  return (
+    <StatusScreen
+      title={status}
+      tone={status.startsWith("Error:") ? "error" : "default"}
+    />
+  );
 }

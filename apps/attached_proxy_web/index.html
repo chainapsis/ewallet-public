@@ -5,19 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Oko Wallet</title>
     <style>
+      :root {
+        --proxy-bg: #f5f5f5;
+        --proxy-text-primary: #111827;
+        --proxy-text-secondary: #535862;
+        --proxy-text-tertiary: #6b7280;
+        --proxy-text-error: #b91c1c;
+        --proxy-text-error-secondary: #7f1d1d;
+        --proxy-spinner-track: #e5e7eb;
+        --proxy-spinner-head: #111827;
+      }
+
       body {
         margin: 0;
         padding: 0;
         width: 100%;
         height: 100%;
         font-family: -apple-system, sans-serif;
-        background: #f5f5f5;
-        color: #535862;
+        background: var(--proxy-bg);
+        color: var(--proxy-text-secondary);
       }
+
       @media (prefers-color-scheme: dark) {
-        body {
-          background: #0c0e12;
-          color: #94979c;
+        :root {
+          --proxy-bg: #0c0e12;
+          --proxy-text-primary: #f7f7f7;
+          --proxy-text-secondary: #cecfd2;
+          --proxy-text-tertiary: #94979c;
+          --proxy-text-error: #fca5a5;
+          --proxy-text-error-secondary: #fecaca;
+          --proxy-spinner-track: #373a41;
+          --proxy-spinner-head: #f7f7f7;
         }
       }
     </style>

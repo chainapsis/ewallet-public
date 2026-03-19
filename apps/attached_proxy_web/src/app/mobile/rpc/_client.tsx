@@ -6,6 +6,7 @@ import {
   parseRpcRequestFromLocation,
 } from "../_shared/rpc_codec";
 import { sendToAttached } from "../_shared/send_to_attached";
+import { StatusScreen } from "../_shared/status_screen";
 import {
   type AttachedInitPayload,
   useAttachedInit,
@@ -122,15 +123,10 @@ export function RpcClient({
   return (
     <>
       {!showIframe && (
-        <div
-          style={{
-            textAlign: "center",
-            fontSize: 16,
-            padding: 20,
-          }}
-        >
-          {status}
-        </div>
+        <StatusScreen
+          title={status}
+          tone={status.startsWith("Error:") ? "error" : "default"}
+        />
       )}
     </>
   );
