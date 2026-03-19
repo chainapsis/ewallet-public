@@ -15,7 +15,7 @@ import { createPgConn } from "@oko-wallet/postgres-lib";
 import type { Pool } from "pg";
 import request from "supertest";
 
-import { TEMP_ENC_SECRET } from "@oko-wallet-api/api/tss/utils";
+import { TEST_ENCRYPTION_SECRET } from "@oko-wallet-api/testing/app";
 import { testPgConfig } from "@oko-wallet-api/database/test_config";
 import { resetPgDatabase } from "@oko-wallet-api/testing/database";
 
@@ -109,7 +109,7 @@ describe("user_route_test", () => {
     app = makeApp({
       JWT_SECRET: "test-jwt-secret",
       JWT_EXPIRES_IN: "1h",
-      ENCRYPTION_SECRET: TEMP_ENC_SECRET,
+      ENCRYPTION_SECRET: TEST_ENCRYPTION_SECRET,
     });
     app.locals.db = pool;
   });

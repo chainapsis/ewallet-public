@@ -13,6 +13,8 @@ const testLogger = winston.createLogger({
   transports: [new winston.transports.Console()],
 });
 
+export const TEST_ENCRYPTION_SECRET = "temp_enc_secret";
+
 export interface TestEnvsTss {
   JWT_SECRET: string;
   JWT_EXPIRES_IN: string;

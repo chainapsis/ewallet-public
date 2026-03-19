@@ -175,6 +175,3 @@ export async function validateCustomer(
     data: getCustomerRes.data,
   };
 }
-
-// TODO remove temp secret
-export const TEMP_ENC_SECRET = "temp_enc_secret";
