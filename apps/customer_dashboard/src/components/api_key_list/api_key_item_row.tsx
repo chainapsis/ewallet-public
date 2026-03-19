@@ -3,7 +3,7 @@
 import { AnchoredMenu } from "@oko-wallet/oko-common-ui/anchored_menu";
 import { Badge } from "@oko-wallet/oko-common-ui/badge";
 import { IconTransition } from "@oko-wallet/oko-common-ui/icon_transition";
-import { CheckCircleOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/check_circle_outlined";
+import { CheckThinIcon } from "@oko-wallet/oko-common-ui/icons/check_thin_icon";
 import { CopyOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/copy_outlined";
 import { EyeIcon } from "@oko-wallet/oko-common-ui/icons/eye";
 import { EyeOffIcon } from "@oko-wallet/oko-common-ui/icons/eye_off";
@@ -109,10 +109,7 @@ export const APIKeyItemRow: FC<APIKeyItemRowProps> = ({
                 <CopyOutlinedIcon color="var(--fg-tertiary)" size={20} />
               }
               activeIcon={
-                <CheckCircleOutlinedIcon
-                  color="var(--fg-success-primary)"
-                  size={20}
-                />
+                <CheckThinIcon color="var(--fg-success-primary)" size={20} />
               }
             />
           </button>
