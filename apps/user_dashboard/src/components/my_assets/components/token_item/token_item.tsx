@@ -4,7 +4,7 @@ import { PricePretty } from "@keplr-wallet/unit";
 import { Badge } from "@oko-wallet/oko-common-ui/badge";
 import { IconTransition } from "@oko-wallet/oko-common-ui/icon_transition";
 import { AlertTriangleIcon } from "@oko-wallet/oko-common-ui/icons/alert_triangle_icon";
-import { CheckCircleOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/check_circle_outlined";
+import { CheckThinIcon } from "@oko-wallet/oko-common-ui/icons/check_thin_icon";
 import { CopyOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/copy_outlined";
 import { EmptyStateIcon } from "@oko-wallet/oko-common-ui/icons/empty_state_icon";
 import { QrCodeIcon } from "@oko-wallet/oko-common-ui/icons/qr_code_icon";
@@ -179,10 +179,7 @@ export const TokenItem: FC<TokenItemProps> = ({
                   <CopyOutlinedIcon size={16} color="var(--fg-tertiary)" />
                 }
                 activeIcon={
-                  <CheckCircleOutlinedIcon
-                    size={16}
-                    color="var(--fg-tertiary)"
-                  />
+                  <CheckThinIcon size={16} color="var(--fg-tertiary)" />
                 }
               />
             </button>
