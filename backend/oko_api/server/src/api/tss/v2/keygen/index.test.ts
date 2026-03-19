@@ -32,8 +32,8 @@ import type { Pool } from "pg";
 import type { Logger } from "winston";
 
 import { TEST_CUSTOMER } from "@oko-wallet-api/api/tss/tests";
-import { TEMP_ENC_SECRET } from "@oko-wallet-api/api/tss/utils";
 import { testPgConfig } from "@oko-wallet-api/database/test_config";
+import { TEST_ENCRYPTION_SECRET } from "@oko-wallet-api/testing/constants";
 import { resetPgDatabase } from "@oko-wallet-api/testing/database";
 
 const mockCheckKeyShareFromKSNodesV2 = jest.fn() as jest.Mock;
@@ -164,7 +164,7 @@ describe("keygen_v2_test", () => {
         pool,
         jwtConfig,
         keygenRequest,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
         customerId,
       );
@@ -199,7 +199,7 @@ describe("keygen_v2_test", () => {
       );
       const decryptedSecp256k1Share = decryptData(
         secp256k1Wallet.data?.enc_tss_share.toString("utf-8") as any,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
       );
       expect(decryptedSecp256k1Share).toEqual(keygen_2_secp256k1.private_share);
 
@@ -222,7 +222,7 @@ describe("keygen_v2_test", () => {
       );
       const decryptedEd25519Share = await decryptDataAsync(
         ed25519Wallet.data?.enc_tss_share.toString("utf-8") as any,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
       );
       const ed25519SharesData = JSON.parse(decryptedEd25519Share);
       expect(ed25519SharesData).toHaveProperty("signing_share");
@@ -312,7 +312,7 @@ describe("keygen_v2_test", () => {
         pool,
         jwtConfig,
         keygenRequest,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
         customerId,
       );
@@ -376,7 +376,7 @@ describe("keygen_v2_test", () => {
         pool,
         jwtConfig,
         keygenRequest,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
         customerId,
       );
@@ -437,7 +437,7 @@ describe("keygen_v2_test", () => {
         pool,
         jwtConfig,
         keygenRequest,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
         customerId,
       );
@@ -495,7 +495,7 @@ describe("keygen_v2_test", () => {
         pool,
         jwtConfig,
         keygenRequest,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
         customerId,
       );
@@ -551,7 +551,7 @@ describe("keygen_v2_test", () => {
         pool,
         jwtConfig,
         keygenRequest,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
         customerId,
       );
@@ -608,7 +608,7 @@ describe("keygen_v2_test", () => {
         pool,
         jwtConfig,
         keygenRequest,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
         customerId,
       );
@@ -663,7 +663,7 @@ describe("keygen_v2_test", () => {
         pool,
         jwtConfig,
         keygenRequest,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
         customerId,
       );
@@ -925,7 +925,7 @@ describe("keygen_v2_test", () => {
 
       const encryptedShare = await encryptDataAsync(
         secp256k1KeygenOutput.private_share,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
       );
       const encryptedShareBuffer = Buffer.from(encryptedShare, "utf-8");
 
@@ -987,7 +987,7 @@ describe("keygen_v2_test", () => {
         pool,
         TEST_JWT_CONFIG_ED25519,
         request,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
       );
 
@@ -1015,7 +1015,7 @@ describe("keygen_v2_test", () => {
         pool,
         TEST_JWT_CONFIG_ED25519,
         request,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
       );
 
@@ -1041,7 +1041,7 @@ describe("keygen_v2_test", () => {
         pool,
         TEST_JWT_CONFIG_ED25519,
         request,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
       );
 
@@ -1072,7 +1072,7 @@ describe("keygen_v2_test", () => {
         pool,
         TEST_JWT_CONFIG_ED25519,
         request1,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
       );
       expect(result1.success).toBe(true);
@@ -1084,7 +1084,7 @@ describe("keygen_v2_test", () => {
         pool,
         TEST_JWT_CONFIG_ED25519,
         request2,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
       );
 
@@ -1120,7 +1120,7 @@ describe("keygen_v2_test", () => {
         pool,
         TEST_JWT_CONFIG_ED25519,
         request1,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
       );
       expect(result1.success).toBe(true);
@@ -1131,7 +1131,7 @@ describe("keygen_v2_test", () => {
         pool,
         TEST_JWT_CONFIG_ED25519,
         request2,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
       );
 
@@ -1169,7 +1169,7 @@ describe("keygen_v2_test", () => {
         pool,
         TEST_JWT_CONFIG_ED25519,
         request,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
       );
 
@@ -1217,7 +1217,7 @@ describe("keygen_v2_test", () => {
           pool,
           TEST_JWT_CONFIG_ED25519,
           request,
-          TEMP_ENC_SECRET,
+          TEST_ENCRYPTION_SECRET,
           mockLogger,
         );
 
@@ -1250,7 +1250,7 @@ describe("keygen_v2_test", () => {
         pool,
         TEST_JWT_CONFIG_ED25519,
         request,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
       );
 
@@ -1280,7 +1280,7 @@ describe("keygen_v2_test", () => {
         pool,
         TEST_JWT_CONFIG_ED25519,
         request,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
       );
 
@@ -1313,7 +1313,7 @@ describe("keygen_v2_test", () => {
         pool,
         TEST_JWT_CONFIG_ED25519,
         request,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
       );
 
@@ -1338,7 +1338,7 @@ describe("keygen_v2_test", () => {
           const encryptedShare = ed25519Wallet.enc_tss_share.toString("utf-8");
           const decryptedShare = await decryptDataAsync(
             encryptedShare,
-            TEMP_ENC_SECRET,
+            TEST_ENCRYPTION_SECRET,
           );
           const storedShares = JSON.parse(decryptedShare) as {
             signing_share: number[];

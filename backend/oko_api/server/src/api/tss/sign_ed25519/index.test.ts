@@ -31,8 +31,8 @@ import {
   runSignEd25519Round1,
   runSignEd25519Round2,
 } from "@oko-wallet-api/api/tss/sign_ed25519";
-import { TEMP_ENC_SECRET } from "@oko-wallet-api/api/tss/utils";
 import { testPgConfig } from "@oko-wallet-api/database/test_config";
+import { TEST_ENCRYPTION_SECRET } from "@oko-wallet-api/testing/constants";
 import { resetPgDatabase } from "@oko-wallet-api/testing/database";
 
 const SSS_THRESHOLD = 2;
@@ -116,7 +116,7 @@ async function setUpEd25519Wallet(pool: Pool): Promise<TestSetupResult> {
 
   const encryptedShare = await encryptDataAsync(
     JSON.stringify(sharesData),
-    TEMP_ENC_SECRET,
+    TEST_ENCRYPTION_SECRET,
   );
 
   // Create Ed25519 wallet
@@ -184,7 +184,11 @@ describe("Ed25519 Signing", () => {
         msg: [...testMessage],
       };
 
-      const result = await runSignEd25519Round1(pool, TEMP_ENC_SECRET, request);
+      const result = await runSignEd25519Round1(
+        pool,
+        TEST_ENCRYPTION_SECRET,
+        request,
+      );
 
       expect(result.success).toBe(true);
       if (result.success) {
@@ -224,7 +228,11 @@ describe("Ed25519 Signing", () => {
         msg: [...testMessage],
       };
 
-      const result = await runSignEd25519Round1(pool, TEMP_ENC_SECRET, request);
+      const result = await runSignEd25519Round1(
+        pool,
+        TEST_ENCRYPTION_SECRET,
+        request,
+      );
 
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -243,7 +251,11 @@ describe("Ed25519 Signing", () => {
         msg: [...testMessage],
       };
 
-      const result = await runSignEd25519Round1(pool, TEMP_ENC_SECRET, request);
+      const result = await runSignEd25519Round1(
+        pool,
+        TEST_ENCRYPTION_SECRET,
+        request,
+      );
 
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -267,7 +279,7 @@ describe("Ed25519 Signing", () => {
       };
       const round1Result = await runSignEd25519Round1(
         pool,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         round1Request,
       );
       expect(round1Result.success).toBe(true);
@@ -292,7 +304,7 @@ describe("Ed25519 Signing", () => {
       };
       const round2Result = await runSignEd25519Round2(
         pool,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         round2Request,
       );
 
@@ -341,7 +353,7 @@ describe("Ed25519 Signing", () => {
       };
       const result = await runSignEd25519Round2(
         pool,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         round2Request,
       );
 
@@ -365,7 +377,7 @@ describe("Ed25519 Signing", () => {
       };
       const round1Result = await runSignEd25519Round1(
         pool,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         round1Request,
       );
       expect(round1Result.success).toBe(true);
@@ -389,7 +401,7 @@ describe("Ed25519 Signing", () => {
       };
       const round2Result = await runSignEd25519Round2(
         pool,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         round2Request,
       );
       expect(round2Result.success).toBe(true);
@@ -410,7 +422,7 @@ describe("Ed25519 Signing", () => {
       // Second Round 2 call with same session - should fail (already COMPLETED)
       const duplicateRound2Result = await runSignEd25519Round2(
         pool,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         round2Request,
       );
 
@@ -426,12 +438,16 @@ describe("Ed25519 Signing", () => {
       const testMessage = new TextEncoder().encode("Test message for signing");
 
       // Complete signing flow (round2 now completes the session)
-      const round1Res = await runSignEd25519Round1(pool, TEMP_ENC_SECRET, {
-        email: TEST_EMAIL,
-        wallet_id: walletId,
-        customer_id: customerId,
-        msg: [...testMessage],
-      });
+      const round1Res = await runSignEd25519Round1(
+        pool,
+        TEST_ENCRYPTION_SECRET,
+        {
+          email: TEST_EMAIL,
+          wallet_id: walletId,
+          customer_id: customerId,
+          msg: [...testMessage],
+        },
+      );
       expect(round1Res.success).toBe(true);
       if (!round1Res.success) {
         throw new Error("Round 1 failed");
@@ -441,15 +457,19 @@ describe("Ed25519 Signing", () => {
         new Uint8Array(clientKeygenOutput.key_package),
       );
 
-      const round2Res = await runSignEd25519Round2(pool, TEMP_ENC_SECRET, {
-        email: TEST_EMAIL,
-        wallet_id: walletId,
-        session_id: round1Res.data.session_id,
-        commitments_1: {
-          identifier: clientR1.identifier,
-          commitments: clientR1.commitments,
+      const round2Res = await runSignEd25519Round2(
+        pool,
+        TEST_ENCRYPTION_SECRET,
+        {
+          email: TEST_EMAIL,
+          wallet_id: walletId,
+          session_id: round1Res.data.session_id,
+          commitments_1: {
+            identifier: clientR1.identifier,
+            commitments: clientR1.commitments,
+          },
         },
-      });
+      );
       expect(round2Res.success).toBe(true);
       if (!round2Res.success) {
         throw new Error("Round 2 failed");
@@ -475,7 +495,7 @@ describe("Ed25519 Signing", () => {
       );
       const replayRound2Res = await runSignEd25519Round2(
         pool,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         {
           email: TEST_EMAIL,
           wallet_id: walletId,
@@ -508,12 +528,16 @@ describe("Ed25519 Signing", () => {
         const message = new TextEncoder().encode(msgStr);
 
         // Round 1
-        const round1Res = await runSignEd25519Round1(pool, TEMP_ENC_SECRET, {
-          email: TEST_EMAIL,
-          wallet_id: walletId,
-          customer_id: customerId,
-          msg: [...message],
-        });
+        const round1Res = await runSignEd25519Round1(
+          pool,
+          TEST_ENCRYPTION_SECRET,
+          {
+            email: TEST_EMAIL,
+            wallet_id: walletId,
+            customer_id: customerId,
+            msg: [...message],
+          },
+        );
         expect(round1Res.success).toBe(true);
         if (!round1Res.success) {
           continue;
@@ -535,15 +559,19 @@ describe("Ed25519 Signing", () => {
         ].sort((a, b) => (a.identifier[0] ?? 0) - (b.identifier[0] ?? 0));
 
         // Round 2 (now completes the session)
-        const round2Res = await runSignEd25519Round2(pool, TEMP_ENC_SECRET, {
-          email: TEST_EMAIL,
-          wallet_id: walletId,
-          session_id: round1Res.data.session_id,
-          commitments_1: {
-            identifier: clientR1.identifier,
-            commitments: clientR1.commitments,
+        const round2Res = await runSignEd25519Round2(
+          pool,
+          TEST_ENCRYPTION_SECRET,
+          {
+            email: TEST_EMAIL,
+            wallet_id: walletId,
+            session_id: round1Res.data.session_id,
+            commitments_1: {
+              identifier: clientR1.identifier,
+              commitments: clientR1.commitments,
+            },
           },
-        });
+        );
         expect(round2Res.success).toBe(true);
         if (!round2Res.success) {
           continue;

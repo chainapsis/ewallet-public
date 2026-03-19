@@ -4,8 +4,8 @@ import type { Pool } from "pg";
 import request from "supertest";
 
 import { generateUserToken } from "@oko-wallet-api/api/tss/keplr_auth";
-import { TEMP_ENC_SECRET } from "@oko-wallet-api/api/tss/utils";
 import { testPgConfig } from "@oko-wallet-api/database/test_config";
+import { TEST_ENCRYPTION_SECRET } from "@oko-wallet-api/testing/constants";
 import { resetPgDatabase } from "@oko-wallet-api/testing/database";
 
 const mockRunPresignStep1 = jest.fn() as jest.Mock;
@@ -56,7 +56,7 @@ describe("presign_route_test", () => {
     app = makeApp({
       JWT_SECRET: "test-jwt-secret",
       JWT_EXPIRES_IN: "1h",
-      ENCRYPTION_SECRET: TEMP_ENC_SECRET,
+      ENCRYPTION_SECRET: TEST_ENCRYPTION_SECRET,
     });
     app.locals.db = pool;
   });
@@ -141,7 +141,7 @@ describe("presign_route_test", () => {
           session_id: body.session_id,
           msgs_1: body.msgs_1,
         },
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
       );
     });
 
