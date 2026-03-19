@@ -35,8 +35,7 @@ export function useInitializeApp() {
     getAuthToken,
     getWallet,
     setAuthToken,
-    setWallet,
-    setWalletEd25519,
+    resetAll,
     setTheme,
     getTheme,
   } = useAppState();
@@ -148,8 +147,7 @@ export function useInitializeApp() {
         );
 
         if (wasInvalidated) {
-          setWallet(hostOrigin, null);
-          setWalletEd25519(hostOrigin, null);
+          resetAll(hostOrigin);
         }
 
         const rawTheme = searchParams.get("theme");
