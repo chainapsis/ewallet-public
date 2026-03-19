@@ -31,8 +31,15 @@ import type { MsgEventContext } from "@oko-wallet-attached/window_msgs/types";
 
 export function useInitializeApp() {
   const { setHostOrigin, setReferralInfo } = useMemoryState();
-  const { getAuthToken, getWallet, setAuthToken, setTheme, getTheme } =
-    useAppState();
+  const {
+    getAuthToken,
+    getWallet,
+    setAuthToken,
+    setWallet,
+    setWalletEd25519,
+    setTheme,
+    getTheme,
+  } = useAppState();
   const [isHydrated, setIsHydrated] = useState(false);
   const [resolvedTheme, setResolvedTheme] = useState<Theme | null>(null);
 
@@ -133,12 +140,17 @@ export function useInitializeApp() {
 
         const authToken = getAuthToken(hostOrigin);
         const walletForAuth = getWallet(hostOrigin);
-        await silentlyRefreshAuthToken(
+        const wasInvalidated = await silentlyRefreshAuthToken(
           authToken,
           hostOrigin,
           setAuthToken,
           walletForAuth?.authType,
         );
+
+        if (wasInvalidated) {
+          setWallet(hostOrigin, null);
+          setWalletEd25519(hostOrigin, null);
+        }
 
         const rawTheme = searchParams.get("theme");
         const sdkThemeParam: OkoWalletTheme | null =
@@ -252,29 +264,42 @@ async function silentlyRefreshAuthToken(
   hostOrigin: string,
   setAuthToken: (hostOrigin: string, token: string | null) => void,
   authType?: AuthType,
-) {
-  if (authToken) {
-    const res = await makeAuthorizedOkoApiRequest<any, SignInSilentlyResponse>(
-      "user/signin_silently",
-      authToken,
-      {
-        auth_type: authType,
-      },
-      TSS_V2_ENDPOINT,
-    );
+): Promise<boolean> {
+  if (!authToken) {
+    return false;
+  }
 
-    if (!res.success) {
-      console.error("Error logging in, err: %s", res.err);
-      return;
+  const res = await makeAuthorizedOkoApiRequest<any, SignInSilentlyResponse>(
+    "user/signin_silently",
+    authToken,
+    {
+      auth_type: authType,
+    },
+    TSS_V2_ENDPOINT,
+  );
+
+  if (!res.success) {
+    console.error("Error logging in, err: %s", res.err);
+
+    // Token rejected (e.g. expired beyond renewal window) — clear it
+    // so the init message reports unauthenticated state and the host
+    // app can prompt re-authentication.
+    if (res.err.type === "status_fail" && res.err.status === 401) {
+      setAuthToken(hostOrigin, null);
+      return true;
     }
 
-    const resp = res.data;
-    if (resp.success) {
-      if (resp.data.token !== null) {
-        console.log("[attached] refreshing auth token");
+    return false;
+  }
 
-        setAuthToken(hostOrigin, resp.data.token);
-      }
+  const resp = res.data;
+  if (resp.success) {
+    if (resp.data.token !== null) {
+      console.log("[attached] refreshing auth token");
+
+      setAuthToken(hostOrigin, resp.data.token);
     }
   }
+
+  return false;
 }
