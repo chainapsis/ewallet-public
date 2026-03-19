@@ -22,6 +22,7 @@ import { type SignInOptions, signInRN } from "./methods/sign_in";
 import { signOutRN } from "./methods/sign_out";
 
 const WALLET_INFO_STORE_KEY = "oko_rn_wallet_info";
+const CLIENT_RANDOM_STORE_KEY = "oko_rn_client_random";
 const BROWSER_SESSION_MISSING_ERROR_TYPES = new Set([
   "api_key_not_found",
   "key_share_not_combined",
@@ -55,6 +56,7 @@ export class OkoWalletRN implements OkoWalletInterface {
   private _resolveInit!: (value: Result<OkoWalletState, string>) => void;
   private _initResolved = false;
   private _cachedPublicKeyEd25519: string | null = null;
+  private _clientRandom: string | null = null;
 
   constructor(config: OkoWalletRNConfig) {
     this.apiKey = config.apiKey;
@@ -85,19 +87,28 @@ export class OkoWalletRN implements OkoWalletInterface {
     }
     this._initResolved = true;
 
-    await this._restoreWalletInfo();
+    try {
+      this._clientRandom = await this._getOrCreateClientRandom();
+      await this._restoreWalletInfo();
 
-    if (this.state.email && this.state.publicKey) {
-      this.eventEmitter.emit({
-        type: "CORE__accountsChanged",
-        authType: this.state.authType,
-        publicKey: this.state.publicKey,
-        email: this.state.email,
-        name: this.state.name,
+      if (this.state.email && this.state.publicKey) {
+        this.eventEmitter.emit({
+          type: "CORE__accountsChanged",
+          authType: this.state.authType,
+          publicKey: this.state.publicKey,
+          email: this.state.email,
+          name: this.state.name,
+        });
+      }
+
+      this._resolveInit({ success: true, data: this.state });
+    } catch (e) {
+      console.error("[oko-rn] initialization failed:", e);
+      this._resolveInit({
+        success: false,
+        err: e instanceof Error ? e.message : String(e),
       });
     }
-
-    this._resolveInit({ success: true, data: this.state });
   }
 
   async sendMsgToIframe(msg: OkoWalletMsg): Promise<OkoWalletMsg> {
@@ -150,6 +161,7 @@ export class OkoWalletRN implements OkoWalletInterface {
       this.apiKey,
       this.redirectScheme,
       this.state.publicKey,
+      this._clientRandom,
     );
 
     return {
@@ -170,6 +182,7 @@ export class OkoWalletRN implements OkoWalletInterface {
       this.redirectScheme,
       this.apiKey,
       this.state.publicKey,
+      this._clientRandom,
     );
 
     if (
@@ -197,6 +210,7 @@ export class OkoWalletRN implements OkoWalletInterface {
       type,
       this.apiKey,
       signInOptions,
+      this._clientRandom,
     );
 
     const info: LoginWalletInfo | null = result.walletInfo;
@@ -300,6 +314,16 @@ export class OkoWalletRN implements OkoWalletInterface {
     this.eventEmitter.off(handlerDef);
   }
 
+  private async _getOrCreateClientRandom(): Promise<string> {
+    const stored = await AsyncStorage.getItem(CLIENT_RANDOM_STORE_KEY);
+    if (stored) {
+      return stored;
+    }
+    const random = generateUUIDv4();
+    await AsyncStorage.setItem(CLIENT_RANDOM_STORE_KEY, random);
+    return random;
+  }
+
   private async _persistWalletInfo(): Promise<void> {
     try {
       const data: PersistedWalletInfo = {
@@ -308,7 +332,9 @@ export class OkoWalletRN implements OkoWalletInterface {
         sdkEndpoint: this.sdkEndpoint,
       };
       await AsyncStorage.setItem(WALLET_INFO_STORE_KEY, JSON.stringify(data));
-    } catch {}
+    } catch (e) {
+      console.warn("[oko-rn] failed to persist wallet info:", e);
+    }
   }
 
   private async _restoreWalletInfo(): Promise<void> {
@@ -331,13 +357,17 @@ export class OkoWalletRN implements OkoWalletInterface {
         };
         this._cachedPublicKeyEd25519 = parsed.publicKeyEd25519 ?? null;
       }
-    } catch {}
+    } catch (e) {
+      console.warn("[oko-rn] failed to restore wallet info:", e);
+    }
   }
 
   private async _clearPersistedWalletInfo(): Promise<void> {
     try {
       await AsyncStorage.removeItem(WALLET_INFO_STORE_KEY);
-    } catch {}
+    } catch (e) {
+      console.warn("[oko-rn] failed to clear persisted wallet info:", e);
+    }
   }
 
   private async _resetPersistedSession(logMessage?: string): Promise<void> {
@@ -373,4 +403,14 @@ export class OkoWalletRN implements OkoWalletInterface {
       name: null,
     });
   }
+}
+
+function generateUUIDv4(): string {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  // Set version (4) and variant (RFC 4122)
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }

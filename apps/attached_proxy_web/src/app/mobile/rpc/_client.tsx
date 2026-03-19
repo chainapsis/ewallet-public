@@ -1,6 +1,4 @@
-"use client";
-
-import { useRef, useState } from "react";
+import { type RefObject, useState } from "react";
 
 import {
   buildRpcCallbackUrl,
@@ -17,17 +15,16 @@ import {
 const VISIBLE_METHODS = new Set(["open_modal", "__export_private_key__"]);
 
 export function RpcClient({
-  iframeSrc,
+  iframeRef,
   method,
   redirectScheme,
   expectedPublicKey,
 }: {
-  iframeSrc: string;
+  iframeRef: RefObject<HTMLIFrameElement | null>;
   method: string;
   redirectScheme: string;
   expectedPublicKey: string | null;
 }) {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [status, setStatus] = useState("Preparing...");
   const [showIframe, setShowIframe] = useState(false);
 
@@ -59,34 +56,22 @@ export function RpcClient({
         }
       }
 
-      // Parse payload from URL
+      // Parse payload from URL hash
       const { encodedPayload } = parseRpcRequestFromLocation();
       const payload = encodedPayload
         ? decodeRpcPayload<unknown>(encodedPayload)
         : null;
 
-      // Patch origin for methods that use it.
-      // Must use this page's origin (the host that loaded the iframe),
-      // not ATTACHED_ORIGIN, because the wallet is stored under host_origin.
-      // Preserve the original origin as app_origin so the attached modal
-      // can still detect demo/sandbox contexts (e.g. custom-scheme origins
-      // like "myapp://" from native apps).
-      if (payload && typeof payload === "object" && "data" in payload) {
-        const data = (
-          payload as {
-            data?: { payload?: { origin?: string; app_origin?: string } };
-          }
-        ).data;
-        if (data?.payload && "origin" in data.payload) {
-          data.payload.app_origin = data.payload.origin;
-          data.payload.origin = window.location.origin;
-        }
-      }
-
       // Show iframe for user-facing methods
       const isVisible = VISIBLE_METHODS.has(method);
       if (isVisible) {
         setShowIframe(true);
+        if (iframeRef.current) {
+          iframeRef.current.style.display = "";
+          iframeRef.current.style.flex = "1";
+          iframeRef.current.style.width = "100%";
+          iframeRef.current.style.border = "none";
+        }
       }
 
       // Forward to attached iframe
@@ -99,11 +84,11 @@ export function RpcClient({
         },
       );
 
-      setShowIframe(false);
+      hideIframe();
       returnToApp(ack.payload);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      setShowIframe(false);
+      hideIframe();
       setStatus(`Error: ${message}`);
       console.error("[oko-mobile-rpc] error:", err);
 
@@ -111,6 +96,13 @@ export function RpcClient({
         success: false,
         err: { type: "rpc_error", message },
       });
+    }
+  }
+
+  function hideIframe() {
+    setShowIframe(false);
+    if (iframeRef.current) {
+      iframeRef.current.style.display = "none";
     }
   }
 
@@ -143,17 +135,6 @@ export function RpcClient({
           {status}
         </div>
       )}
-      <iframe
-        id="oko-attached"
-        title="Oko Wallet"
-        ref={iframeRef}
-        src={iframeSrc}
-        style={
-          showIframe
-            ? { flex: 1, width: "100%", border: "none" }
-            : { display: "none" }
-        }
-      />
     </>
   );
 }

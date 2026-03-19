@@ -16,11 +16,17 @@ export function useArbitrarySigModal(args: UseCosmosArbitrarySigModalArgs) {
   const { closeModal } = useMemoryState();
 
   const hostOrigin = data.payload.origin;
-  const theme = useAppState().getTheme(hostOrigin);
+  const storageKey = useMemoryState((state) => state.storageKey);
+  const isMobileNative = useMemoryState((state) => state.isMobileNative);
+  const mobileApiKey = useMemoryState((state) => state.apiKey);
+  const theme = useAppState().getTheme(storageKey);
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const isDemo = isDemoOrSandboxOrigin(hostOrigin);
+  const isDemo = isDemoOrSandboxOrigin(hostOrigin, {
+    isMobileNative,
+    apiKey: mobileApiKey,
+  });
 
   function onReject() {
     const ack: OpenModalAckPayload = {
@@ -48,7 +54,7 @@ export function useArbitrarySigModal(args: UseCosmosArbitrarySigModalArgs) {
       );
 
       const signatureRes = await makeCosmosSignature(
-        hostOrigin,
+        storageKey,
         signDoc,
         isEthermintLike ? "keccak256" : "sha256",
         getIsAborted,

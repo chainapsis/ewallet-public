@@ -1,8 +1,7 @@
-"use client";
-
 import type { OkoWalletMsgGenerateOAuthUrlAck } from "@oko-wallet/oko-sdk-core";
-import { useEffect, useRef, useState } from "react";
+import { type RefObject, useEffect, useState } from "react";
 
+import { parseClientRandomFromHash } from "../_shared/parse_client_random";
 import { sendToAttached } from "../_shared/send_to_attached";
 import { useAttachedInit } from "../_shared/use_attached_init";
 
@@ -78,17 +77,16 @@ export function EmailLoginClient({
 // ---------------------------------------------------------------------------
 
 export function OAuthLoginClient({
+  iframeRef,
   provider,
   apiKey,
   redirectScheme,
-  iframeSrc,
 }: {
+  iframeRef: RefObject<HTMLIFrameElement | null>;
   provider: string;
   apiKey: string;
   redirectScheme: string;
-  iframeSrc: string;
 }) {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [status, setStatus] = useState("Preparing sign-in...");
 
   useEffect(() => {
@@ -96,6 +94,10 @@ export function OAuthLoginClient({
       sessionStorage.setItem("oko_mobile_redirect_scheme", redirectScheme);
     }
     sessionStorage.setItem("oko_mobile_api_key", apiKey);
+    const clientRandom = parseClientRandomFromHash();
+    if (clientRandom) {
+      sessionStorage.setItem("oko_mobile_client_random", clientRandom);
+    }
   }, [apiKey, redirectScheme]);
 
   useAttachedInit((payload) => {
@@ -143,16 +145,5 @@ export function OAuthLoginClient({
     }
   }
 
-  return (
-    <>
-      <div style={statusStyle}>{status}</div>
-      <iframe
-        id="oko-attached"
-        title="Oko Wallet"
-        ref={iframeRef}
-        src={iframeSrc}
-        style={{ display: "none" }}
-      />
-    </>
-  );
+  return <div style={statusStyle}>{status}</div>;
 }

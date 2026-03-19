@@ -7,10 +7,10 @@ import { postLog } from "@oko-wallet-attached/requests/logging";
 import { useAppState } from "@oko-wallet-attached/store/app";
 
 export async function handleSignOut(ctx: MsgEventContext): Promise<void> {
-  const { port, hostOrigin } = ctx;
+  const { port, storageKey } = ctx;
 
   try {
-    useAppState.getState().resetAll(hostOrigin);
+    useAppState.getState().resetAll(storageKey);
     console.log("[attached] signed out");
 
     const ack: OkoWalletMsgSignOutAck = {

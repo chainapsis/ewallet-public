@@ -2,13 +2,11 @@
 loadEnv(ENV_FILE_NAME);
 
 import { loadEnv, verifyEnv } from "@oko-wallet/dotenv";
-import { createServer } from "http";
-import next from "next";
-import { parse } from "url";
+import { createServer as createViteServer } from "vite";
 
 import { ENV_FILE_NAME, envSchema } from "../envs";
 
-function main() {
+async function main() {
   console.log("NODE_ENV: %s", process.env.NODE_ENV);
 
   const envRes = verifyEnv(envSchema, process.env);
@@ -17,20 +15,14 @@ function main() {
     process.exit(1);
   }
 
-  const dev = process.env.NODE_ENV !== "production";
-  const app = next({ dev, quiet: true });
-  const handle = app.getRequestHandler();
+  const port = Number(process.env.SERVER_PORT || 3207);
 
-  const port = process.env.SERVER_PORT;
-
-  app.prepare().then(() => {
-    createServer((req, res) => {
-      const parsedUrl = parse(req.url!, true);
-      handle(req, res, parsedUrl);
-    }).listen(port);
-
-    console.info(`Server listening at http://localhost:${port}`);
+  const server = await createViteServer({
+    server: { port, strictPort: true },
   });
+
+  await server.listen();
+  console.info(`Server listening at http://localhost:${port}`);
 }
 
 main();

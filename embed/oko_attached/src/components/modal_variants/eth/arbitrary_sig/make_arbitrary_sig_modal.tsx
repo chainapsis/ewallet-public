@@ -17,15 +17,19 @@ import {
   verifySiweMessage,
 } from "@oko-wallet-attached/components/modal_variants/eth/siwe_message";
 import { SignWithOkoBox } from "@oko-wallet-attached/components/sign_with_oko_box/sign_with_oko_box";
+import { useMemoryState } from "@oko-wallet-attached/store/memory";
 
 export const MakeArbitrarySigModal: FC<MakeArbitrarySigModalProps> = ({
   getIsAborted,
   data,
   modalId,
 }) => {
+  const isMobileNative = useMemoryState((state) => state.isMobileNative);
   const siweMessage = getSiweMessage(data.payload.data.message);
   const isValidSiweMessage = siweMessage
-    ? verifySiweMessage(siweMessage, data.payload.origin)
+    ? verifySiweMessage(siweMessage, data.payload.origin, {
+        skipOriginCheck: isMobileNative,
+      })
     : false;
   const [isSiweRiskWarningChecked, setIsSiweRiskWarningChecked] =
     useState(false);

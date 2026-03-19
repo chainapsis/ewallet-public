@@ -35,11 +35,17 @@ export function useTxSigModal(
   const { closeModal, setError } = useMemoryState();
 
   const hostOrigin = payload.origin;
-  const theme = useAppState().getTheme(hostOrigin);
+  const storageKey = useMemoryState((state) => state.storageKey);
+  const isMobileNative = useMemoryState((state) => state.isMobileNative);
+  const mobileApiKey = useMemoryState((state) => state.apiKey);
+  const theme = useAppState().getTheme(storageKey);
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const isDemo = isDemoOrSandboxOrigin(hostOrigin);
+  const isDemo = isDemoOrSandboxOrigin(hostOrigin, {
+    isMobileNative,
+    apiKey: mobileApiKey,
+  });
 
   const feeFromSignDoc = extractFeeFromSignDoc(payload.signDoc);
 
@@ -201,7 +207,7 @@ export function useTxSigModal(
       );
 
       const signatureRes = await makeCosmosSignature(
-        hostOrigin,
+        storageKey,
         signDocAfterFee,
         isEthermintLike ? "keccak256" : "sha256",
         getIsAborted,

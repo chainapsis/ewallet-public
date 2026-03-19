@@ -10,6 +10,7 @@ import { type FC, type ReactNode, useState } from "react";
 import styles from "./signer_address_or_email.module.scss";
 import { useMobileMode } from "@oko-wallet-attached/hooks/mobile_mode";
 import { useAppState } from "@oko-wallet-attached/store/app";
+import { useMemoryState } from "@oko-wallet-attached/store/memory";
 
 function renderAuthIcon(
   authType: AuthType | undefined,
@@ -48,7 +49,8 @@ export const SignerAddressOrEmailView: FC<ViewProps> = ({
   origin,
   prefix,
 }) => {
-  const wallet = useAppState((state) => state.getWallet(origin));
+  const storageKey = useMemoryState((state) => state.storageKey);
+  const wallet = useAppState((state) => state.getWallet(storageKey));
   const email = wallet?.email;
   const authType = wallet?.authType;
   const isMobile = useMobileMode();

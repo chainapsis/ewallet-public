@@ -5,8 +5,8 @@ import type { MsgEventContext } from "./types";
 import { useAppState } from "@oko-wallet-attached/store/app";
 
 export async function handleGetWalletInfo(ctx: MsgEventContext) {
-  const { port, hostOrigin } = ctx;
-  const wallet = useAppState.getState().getWallet(hostOrigin);
+  const { port, storageKey } = ctx;
+  const wallet = useAppState.getState().getWallet(storageKey);
 
   let payload: OkoWalletMsgGetWalletInfoAck["payload"];
   if (wallet) {

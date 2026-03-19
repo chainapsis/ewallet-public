@@ -5,8 +5,8 @@ import type { MsgEventContext } from "./types";
 import { useAppState } from "@oko-wallet-attached/store/app";
 
 export async function handleGetPublicKeyEd25519(ctx: MsgEventContext) {
-  const { port, hostOrigin } = ctx;
-  const walletEd25519 = useAppState.getState().getWalletEd25519(hostOrigin);
+  const { port, storageKey } = ctx;
+  const walletEd25519 = useAppState.getState().getWalletEd25519(storageKey);
 
   let payload: OkoWalletMsgGetPublicKeyEd25519Ack["payload"];
   if (walletEd25519?.publicKey) {

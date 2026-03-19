@@ -1,5 +1,3 @@
-"use client";
-
 import { Buffer } from "buffer";
 import pako from "pako";
 

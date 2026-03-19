@@ -7,6 +7,7 @@ import styles from "./metadata_content.module.scss";
 import { SignerAddressOrEmail } from "./signer_address_or_email/signer_address_or_email";
 import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
 import { useMobileMode } from "@oko-wallet-attached/hooks/mobile_mode";
+import { useMemoryState } from "@oko-wallet-attached/store/memory";
 import { getFaviconUrl } from "@oko-wallet-attached/utils/favicon";
 
 interface MakeSignatureModalMetadataContentProps {
@@ -22,6 +23,7 @@ export const MetadataContent: FC<MakeSignatureModalMetadataContentProps> = ({
   signer,
   initialViewType = null,
 }) => {
+  const appName = useMemoryState((state) => state.appName);
   const faviconUrl = getFaviconUrl(origin);
   const isMobile = useMobileMode();
 
@@ -38,7 +40,7 @@ export const MetadataContent: FC<MakeSignatureModalMetadataContentProps> = ({
           />
         )}
         <Typography size={headingSize} color="primary" weight="semibold">
-          {origin.replace(/^https?:\/\//, "")}
+          {appName}
         </Typography>
       </div>
 

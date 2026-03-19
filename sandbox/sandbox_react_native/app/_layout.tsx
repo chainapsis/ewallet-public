@@ -8,7 +8,7 @@ export default function RootLayout() {
   return (
     <OkoWalletProvider
       apiKey={API_KEY}
-      sdkEndpoint="https://proxy.damn.it.com"
+      sdkEndpoint="http://localhost:3207"
       redirectScheme="sandboxreactnative"
     >
       <Stack screenOptions={{ headerShown: false }} />

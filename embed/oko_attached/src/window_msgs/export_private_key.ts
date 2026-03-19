@@ -34,7 +34,7 @@ export async function handleExportPrivateKey(
   ctx: MsgEventContext,
   payload?: { auth_type: AuthType } | null,
 ): Promise<void> {
-  const { port, hostOrigin } = ctx;
+  const { port, hostOrigin, storageKey } = ctx;
 
   function sendAck(ackPayload: ExportPrivateKeyAckPayload) {
     const ack: OkoWalletMsgExportPrivateKeyAck = {
@@ -56,7 +56,7 @@ export async function handleExportPrivateKey(
 
   // 2. Auth token validation (first login JWT — will be sent to export_shares as body param)
   const appState = useAppState.getState();
-  const firstLoginJwt = appState.getAuthToken(hostOrigin);
+  const firstLoginJwt = appState.getAuthToken(storageKey);
   if (!firstLoginJwt) {
     sendAck({ success: false, error: { type: "NOT_AUTHENTICATED" } });
     return;
@@ -72,9 +72,9 @@ export async function handleExportPrivateKey(
   }
 
   // 4. Get client shares from appState (stored during sign-in/keygen)
-  const keyshare1 = appState.getKeyshare_1(hostOrigin);
-  const seedEd25519Str = appState.getSeedEd25519(hostOrigin);
-  const ed25519Wallet = appState.getWalletEd25519(hostOrigin);
+  const keyshare1 = appState.getKeyshare_1(storageKey);
+  const seedEd25519Str = appState.getSeedEd25519(storageKey);
+  const ed25519Wallet = appState.getWalletEd25519(storageKey);
   if (!keyshare1 || !seedEd25519Str || !ed25519Wallet?.publicKey) {
     sendAck({ success: false, error: { type: "MISSING_KEY_SHARES" } });
     return;
