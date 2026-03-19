@@ -101,11 +101,7 @@ export const SvmTxSignatureContent: FC<SvmTxSignatureContentProps> = ({
             </div>
           </div>
 
-          <SignerAddressOrEmail
-            signer={signer}
-            origin={origin}
-            initialViewType="Login Info"
-          />
+          <SignerAddressOrEmail signer={signer} initialViewType="Login Info" />
         </div>
       </div>
 

@@ -2,7 +2,14 @@ import type {
   OkoWalletMsgGetWalletInfoAck,
   OkoWalletMsgOAuthInfoPassAck,
 } from "@oko-wallet/oko-sdk-core";
-import { type RefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type RefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { ATTACHED_ORIGIN } from "../../_shared/build_iframe_src";
 import {

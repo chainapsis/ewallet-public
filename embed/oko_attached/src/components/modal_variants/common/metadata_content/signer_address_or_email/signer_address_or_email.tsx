@@ -32,13 +32,11 @@ function renderAuthIcon(
 
 interface SignerAddressOrEmailProps {
   signer: string;
-  origin: string;
   initialViewType: "View Address" | "Login Info" | null;
 }
 
 interface ViewProps {
   value: string;
-  origin: string;
   type: "address" | "email";
   prefix?: string;
 }
@@ -46,7 +44,6 @@ interface ViewProps {
 export const SignerAddressOrEmailView: FC<ViewProps> = ({
   value,
   type,
-  origin,
   prefix,
 }) => {
   const storageKey = useMemoryState((state) => state.storageKey);
@@ -93,7 +90,6 @@ export const SignerAddressOrEmailChangeViewTypeButton: FC<
 
 export const SignerAddressOrEmail: FC<SignerAddressOrEmailProps> = ({
   signer,
-  origin,
   initialViewType,
 }) => {
   const [viewType, setViewType] = useState<
@@ -105,11 +101,7 @@ export const SignerAddressOrEmail: FC<SignerAddressOrEmailProps> = ({
     case "View Address":
       return (
         <div className={styles.wrapper}>
-          <SignerAddressOrEmailView
-            value={signer}
-            type="address"
-            origin={origin}
-          />
+          <SignerAddressOrEmailView value={signer} type="address" />
           <SignerAddressOrEmailChangeViewTypeButton
             viewType="Login Info"
             onClick={() => setViewType("Login Info")}
@@ -119,11 +111,7 @@ export const SignerAddressOrEmail: FC<SignerAddressOrEmailProps> = ({
     case "Login Info":
       return (
         <div className={styles.wrapper}>
-          <SignerAddressOrEmailView
-            value={signer}
-            type="email"
-            origin={origin}
-          />
+          <SignerAddressOrEmailView value={signer} type="email" />
           <SignerAddressOrEmailChangeViewTypeButton
             viewType="View Address"
             onClick={() => setViewType("View Address")}

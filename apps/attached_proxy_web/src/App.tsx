@@ -2,9 +2,9 @@ import { type RefObject, useMemo, useRef } from "react";
 
 import { buildIframeSrc } from "./app/mobile/_shared/build_iframe_src";
 import { parseClientRandomFromHash } from "./app/mobile/_shared/parse_client_random";
-import { RpcClient } from "./app/mobile/rpc/_client";
-import { OAuthLoginClient, EmailLoginClient } from "./app/mobile/login/_client";
+import { EmailLoginClient, OAuthLoginClient } from "./app/mobile/login/_client";
 import { LoginCompleteClient } from "./app/mobile/login/complete/_client";
+import { RpcClient } from "./app/mobile/rpc/_client";
 import { SignOutClient } from "./app/mobile/sign-out/_client";
 
 // ─── URL params helper ───
@@ -93,7 +93,5 @@ function Router({
     );
   }
 
-  return (
-    <div style={{ textAlign: "center", padding: 20 }}>Not found</div>
-  );
+  return <div style={{ textAlign: "center", padding: 20 }}>Not found</div>;
 }

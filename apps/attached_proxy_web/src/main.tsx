@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
 
-import { handleOAuthCallbackRedirect } from "./oauth_callback";
 import { App } from "./App";
+import { handleOAuthCallbackRedirect } from "./oauth_callback";
 
 // OAuth callback pages (/google/callback, /x/callback, etc.) are real-path
 // redirects from OAuth providers. Handle before mounting React — parse the

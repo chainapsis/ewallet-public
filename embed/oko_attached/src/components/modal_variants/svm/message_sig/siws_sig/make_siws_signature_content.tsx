@@ -73,11 +73,7 @@ export const SvmSiwsSignatureContent: FC<SvmSiwsSignatureContentProps> = ({
         </div>
 
         <Spacing height={8} />
-        <SignerInfo
-          origin={payload.origin}
-          signer={payload.signer}
-          initialViewType="Login Info"
-        />
+        <SignerInfo signer={payload.signer} initialViewType="Login Info" />
       </div>
 
       <Spacing height={20} />

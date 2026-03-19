@@ -62,11 +62,21 @@ export function handleOAuthCallbackRedirect(): boolean {
   params.set("api_key", apiKey);
   params.set("host_origin", targetOrigin);
   params.set("auth_type", provider);
-  if (redirectScheme) params.set("redirect_scheme", redirectScheme);
-  if (accessToken) params.set("access_token", accessToken);
-  if (idToken) params.set("id_token", idToken);
-  if (code) params.set("code", code);
+  if (redirectScheme) {
+    params.set("redirect_scheme", redirectScheme);
+  }
+  if (accessToken) {
+    params.set("access_token", accessToken);
+  }
+  if (idToken) {
+    params.set("id_token", idToken);
+  }
+  if (code) {
+    params.set("code", code);
+  }
 
-  window.location.replace(`${window.location.origin}/mobile/login/complete?${params.toString()}`);
+  window.location.replace(
+    `${window.location.origin}/mobile/login/complete?${params.toString()}`,
+  );
   return true;
 }

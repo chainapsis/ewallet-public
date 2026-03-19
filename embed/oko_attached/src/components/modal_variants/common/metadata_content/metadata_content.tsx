@@ -66,7 +66,6 @@ export const MetadataContent: FC<MakeSignatureModalMetadataContentProps> = ({
 
         <SignerAddressOrEmail
           signer={signer}
-          origin={origin}
           initialViewType={initialViewType}
         />
       </div>

@@ -93,11 +93,7 @@ export const SvmMessageSignatureContent: FC<
             </div>
           </div>
 
-          <SignerAddressOrEmail
-            signer={signer}
-            origin={origin}
-            initialViewType={null}
-          />
+          <SignerAddressOrEmail signer={signer} initialViewType={null} />
         </div>
       </div>
 
