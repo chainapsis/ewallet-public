@@ -290,6 +290,7 @@ export async function handleReshareAndEd25519Keygen(
   idToken: string,
   keyshareNodeMeta: KeyShareNodeMetaWithNodeStatusInfo,
   authType: AuthType,
+  apiKey?: string,
 ): Promise<Result<UserSignInResultV2, OAuthSignInError>> {
   const { threshold, nodes } = keyshareNodeMeta;
   const registrationThreshold =
@@ -457,6 +458,7 @@ export async function handleReshareAndEd25519Keygen(
     idToken,
     authType,
     signInCommitRevealRes.data,
+    apiKey,
   );
   if (!signInResult.success) {
     return { success: false, err: signInResult.err };

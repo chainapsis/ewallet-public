@@ -461,6 +461,7 @@ export async function handleUserSignInV2(
         idToken,
         keyshareNodeMeta,
         authType,
+        apiKey,
       );
       if (!signInRes.success) {
         return {
