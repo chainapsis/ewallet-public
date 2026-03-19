@@ -41,7 +41,7 @@ class OkoAuthBrowserModule(reactContext: ReactApplicationContext) :
 
     @ReactMethod
     fun openAuthSessionAsync(url: String, promise: Promise) {
-        val activity = currentActivity
+        val activity = reactApplicationContext.currentActivity
         if (activity == null) {
             promise.reject("NO_ACTIVITY", "Activity not available")
             return
