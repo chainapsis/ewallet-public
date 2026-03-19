@@ -3,10 +3,10 @@ import type { Pool } from "pg";
 import request from "supertest";
 
 import { generateUserToken } from "@oko-wallet-api/api/tss/keplr_auth";
-
 import { testPgConfig } from "@oko-wallet-api/database/test_config";
 import { userJwtMiddleware } from "@oko-wallet-api/middleware/auth/keplr_auth";
-import { makeApp, TEST_ENCRYPTION_SECRET } from "@oko-wallet-api/testing/app";
+import { makeApp } from "@oko-wallet-api/testing/app";
+import { TEST_ENCRYPTION_SECRET } from "@oko-wallet-api/testing/constants";
 import { resetPgDatabase } from "@oko-wallet-api/testing/database";
 
 describe("keplr_auth_test", () => {

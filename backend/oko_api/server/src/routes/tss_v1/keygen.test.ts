@@ -3,8 +3,8 @@ import { createPgConn } from "@oko-wallet/postgres-lib";
 import type { Pool } from "pg";
 import request from "supertest";
 
-import { TEST_ENCRYPTION_SECRET } from "@oko-wallet-api/testing/app";
 import { testPgConfig } from "@oko-wallet-api/database/test_config";
+import { TEST_ENCRYPTION_SECRET } from "@oko-wallet-api/testing/constants";
 import { resetPgDatabase } from "@oko-wallet-api/testing/database";
 
 const mockRunKeygen = jest.fn() as jest.Mock;
