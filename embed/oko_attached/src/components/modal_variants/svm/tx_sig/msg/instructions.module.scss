@@ -81,6 +81,12 @@
 }
 
 .multiInstructionRow {
+  > :first-child svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
   @media (hover: hover) and (pointer: fine) {
     &:hover {
       background: var(--bg-secondary-hover);
