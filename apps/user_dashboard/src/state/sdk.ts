@@ -57,6 +57,7 @@ interface SDKActions {
   initOkoCosmos: () => Promise<OkoCosmosWalletInterface | null>;
   initOkoSvm: () => Promise<OkoSvmWalletInterface | null>;
   refreshSvmEd25519Key: () => Promise<boolean>;
+  resetStates: () => void;
 }
 
 const createInitialSDKStatus = <T>(): SDKStatus<T> => ({
@@ -332,6 +333,27 @@ export const useSDKState = create(
       } catch (e) {
         console.warn("[SVM SDK] Failed to refresh Ed25519 key:", e);
         return false;
+      }
+    },
+    resetStates: () => {
+      const { eth, cosmos, svm } = get().sdks;
+
+      if (eth.instance) {
+        eth.instance.state.publicKey = null;
+        eth.instance.state.publicKeyRaw = null;
+        eth.instance.state.address = null;
+      }
+
+      if (cosmos.instance) {
+        cosmos.instance.state.publicKey = null;
+        cosmos.instance.state.publicKeyRaw = null;
+      }
+
+      if (svm.instance) {
+        svm.instance.state.publicKey = null;
+        svm.instance.state.publicKeyRaw = null;
+        svm.instance.publicKey = null;
+        svm.instance.connected = false;
       }
     },
   })),

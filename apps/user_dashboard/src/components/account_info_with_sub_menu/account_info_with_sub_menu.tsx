@@ -5,17 +5,13 @@ import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import cn from "classnames";
 
 import styles from "./account_info_with_sub_menu.module.scss";
-import {
-  selectCosmosSDK,
-  useSDKState,
-} from "@oko-wallet-user-dashboard/state/sdk";
+import { useSignOut } from "@oko-wallet-user-dashboard/hooks/use_sign_out";
 import { useUserInfoState } from "@oko-wallet-user-dashboard/state/user_info";
 
 export const AccountInfoWithSubMenu = () => {
-  const okoWallet = useSDKState(selectCosmosSDK)?.okoWallet;
+  const signOut = useSignOut();
 
   const email = useUserInfoState((state) => state.email);
-  const clearUserInfo = useUserInfoState((state) => state.clearUserInfo);
 
   return (
     <AnchoredMenu
@@ -42,15 +38,7 @@ export const AccountInfoWithSubMenu = () => {
           id: "sign-out",
           label: "Sign Out",
           icon: <LogoutIcon size={16} />,
-          onClick: async () => {
-            if (!okoWallet) {
-              console.error("okoWallet is not initialized");
-              return;
-            }
-
-            await okoWallet.signOut();
-            clearUserInfo();
-          },
+          onClick: signOut,
         },
       ]}
       className={styles.menu}
