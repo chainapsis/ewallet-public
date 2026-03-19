@@ -1,15 +1,25 @@
 .codeBlockContainer {
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  border-radius: 12px;
-  background: var(--bg-secondary);
-  padding: 16px;
-  padding-right: 8px; // scrollbar-to-container edge gap
+  min-width: 0;
   overflow: hidden;
   box-sizing: border-box;
 }
 
-// Mobile: overlay scrollbar doesn't reserve gutter space,
-// so increase right padding to compensate (12px + 4px code padding = 16px)
-:global(html[data-mobile]) .codeBlockContainer {
-  padding-right: 12px;
+.topLevel {
+  border-radius: 12px;
+  background: var(--bg-secondary);
+  padding: 16px 8px 16px 16px;
+}
+
+.embedded {
+  padding: 0 4px 0 0;
+}
+
+// App-only: avoid over-pushing the scrollbar lane left; keep the shell-side
+// right inset aligned with web while the shared 4px body gap provides the
+// remaining text-to-scroll separation.
+:global(html[data-mobile]) .topLevel {
+  padding-right: 8px;
 }

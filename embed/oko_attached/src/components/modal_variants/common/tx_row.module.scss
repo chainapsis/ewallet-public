@@ -3,8 +3,10 @@
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
+  width: 100%;
   gap: 4px;
   padding: 0 8px;
+  box-sizing: border-box;
 }
 
 // Mobile app mode: enlarge label text

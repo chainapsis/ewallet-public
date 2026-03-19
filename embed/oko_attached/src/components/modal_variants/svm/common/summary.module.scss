@@ -27,6 +27,10 @@
   aspect-ratio: 1/1;
 }
 
+.rawSurface {
+  max-height: 230px;
+}
+
 // Mobile app mode: enlarge toggle text
 :global(html[data-mobile]) .summaryHeaderRight p {
   font-size: var(--font-size-sm);

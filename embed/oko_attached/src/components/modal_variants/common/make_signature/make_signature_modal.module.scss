@@ -80,7 +80,7 @@
   margin-left: -16px;
   margin-right: -16px;
   padding-left: 16px;
-  padding-right: 12px; // 12px + 4px scrollbar = 16px visual distance
+  padding-right: 8px; // App host gutter matches web shell position; shared 4px body gap still supplies inner text-to-scroll spacing.
 }
 
 :global(html[data-mobile]) .container {
