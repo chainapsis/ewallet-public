@@ -79,7 +79,14 @@ function renderInstruction(
     const to = accounts[1]?.pubkey;
 
     if (lamports !== undefined) {
-      return <SvmTransferPretty key={index} lamports={lamports} to={to} />;
+      return (
+        <SvmTransferPretty
+          key={index}
+          lamports={lamports}
+          to={to}
+          embedded={embedded}
+        />
+      );
     }
   }
 
