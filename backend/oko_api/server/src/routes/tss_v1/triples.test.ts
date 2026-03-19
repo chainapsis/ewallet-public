@@ -8,8 +8,8 @@ import type { Pool } from "pg";
 import request from "supertest";
 
 import { generateUserToken } from "@oko-wallet-api/api/tss/keplr_auth";
-import { TEST_ENCRYPTION_SECRET } from "@oko-wallet-api/testing/app";
 import { testPgConfig } from "@oko-wallet-api/database/test_config";
+import { TEST_ENCRYPTION_SECRET } from "@oko-wallet-api/testing/constants";
 import { resetPgDatabase } from "@oko-wallet-api/testing/database";
 
 const mockFns = {

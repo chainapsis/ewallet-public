@@ -66,7 +66,6 @@ import type { Pool } from "pg";
 import type { Logger } from "winston";
 
 import { TEST_CUSTOMER } from "@oko-wallet-api/api/tss/tests";
-import { TEST_ENCRYPTION_SECRET } from "@oko-wallet-api/testing/app";
 import {
   runPresignStep1,
   runPresignStep2,
@@ -87,6 +86,7 @@ import {
   runTriplesStep11,
 } from "@oko-wallet-api/api/tss/v1/triples";
 import { testPgConfig } from "@oko-wallet-api/database/test_config";
+import { TEST_ENCRYPTION_SECRET } from "@oko-wallet-api/testing/constants";
 import { resetPgDatabase } from "@oko-wallet-api/testing/database";
 
 const mockCheckKeyShareFromKSNodes = jest.fn() as jest.Mock;
