@@ -689,41 +689,43 @@ describe("e2e_comprehensive_6node", () => {
         expect(await getWalletKSNodeCount(wallets.ed25519WalletId!)).toBe(6);
       });
 
-      it("C-4: signup(6/6) → reshare(4, 2 existing down) → wallet_ks_nodes preserved", async () => {
+      it("C-4: signup(4/6) → 1 more down (3 alive) → reshare fail (3 < 4)", async () => {
         await ctx.resetAllDatabases();
         await setRegistrationThreshold(4);
         const userId = nextUserId();
 
-        const signUp = await signUpV2(userId, [0, 1, 2, 3, 4, 5]);
+        const signUp = await signUpV2(userId, [0, 1, 2, 3]);
         expect(signUp.status).toBe(200);
-        const wallets = await getUserWalletIds(userId);
 
+        // Only 3 nodes available (node 3 also went down)
         const reshare = await reshareOnNodes(
           userId,
-          [0, 1, 2, 3],
+          [0, 1, 2],
           signUp.secp256k1Pk,
           signUp.ed25519PkHex,
           signUp.nodeShares,
         );
-        expect(reshare.status).toBe(200);
-        expect(
-          await getWalletKSNodeCount(wallets.secp256k1WalletId!),
-        ).toBeGreaterThanOrEqual(4);
+        expect(reshare.status).toBe(400);
+        expect(reshare.body.success).toBe(false);
       });
     });
 
     describe("registration_threshold = null", () => {
-      it("C-5: signup(6/6) → reshare(5, 1 down) → fail (all-or-nothing)", async () => {
+      it("C-5: signup(4/6, threshold=4) → change to null → 2 still down → reshare fail (all-or-nothing)", async () => {
         await ctx.resetAllDatabases();
-        await setRegistrationThreshold(null);
+        await setRegistrationThreshold(4);
         const userId = nextUserId();
 
-        const signUp = await signUpV2(userId, [0, 1, 2, 3, 4, 5]);
+        const signUp = await signUpV2(userId, [0, 1, 2, 3]);
         expect(signUp.status).toBe(200);
 
+        // Change threshold to null (all-or-nothing)
+        await setRegistrationThreshold(null);
+
+        // 2 nodes still down → 4 < 6 → fail
         const reshare = await reshareOnNodes(
           userId,
-          [0, 1, 2, 3, 4],
+          [0, 1, 2, 3],
           signUp.secp256k1Pk,
           signUp.ed25519PkHex,
           signUp.nodeShares,
@@ -732,14 +734,18 @@ describe("e2e_comprehensive_6node", () => {
         expect(reshare.body.success).toBe(false);
       });
 
-      it("C-6: signup(6/6) → reshare(6, all UP) → success", async () => {
+      it("C-6: signup(4/6, threshold=4) → change to null → all 6 recovered → reshare success", async () => {
         await ctx.resetAllDatabases();
-        await setRegistrationThreshold(null);
+        await setRegistrationThreshold(4);
         const userId = nextUserId();
 
-        const signUp = await signUpV2(userId, [0, 1, 2, 3, 4, 5]);
+        const signUp = await signUpV2(userId, [0, 1, 2, 3]);
         expect(signUp.status).toBe(200);
 
+        // Change threshold to null (all-or-nothing)
+        await setRegistrationThreshold(null);
+
+        // All 6 recovered → 6 >= 6 → success
         const reshare = await reshareOnNodes(
           userId,
           [0, 1, 2, 3, 4, 5],
@@ -792,10 +798,145 @@ describe("e2e_comprehensive_6node", () => {
         expect(status).toBe(400);
         expect(body.success).toBe(false);
       });
+
+      it("D-4: D-2 → 2 recovered → reshare → ed25519 expanded to 6", async () => {
+        await ctx.resetAllDatabases();
+        await setRegistrationThreshold(4);
+        const userId = nextUserId();
+        const { secp256k1Pk } = await prepareSecpOnlyUser(userId);
+
+        // ed25519 on 4 nodes (2 down)
+        const ed25519Result = await addEd25519OnNodes(userId, [0, 1, 2, 3]);
+        expect(ed25519Result.status).toBe(200);
+
+        const wallets = await getUserWalletIds(userId);
+        expect(await getWalletKSNodeCount(wallets.ed25519WalletId!)).toBe(4);
+
+        // Get ed25519 public key from DB
+        const edWallet = await ctx.okoApiPool.query(
+          `SELECT encode(public_key, 'hex') as pk FROM oko_wallets WHERE wallet_id = $1`,
+          [wallets.ed25519WalletId],
+        );
+        const ed25519PkHex = edWallet.rows[0].pk;
+
+        // Reshare to all 6 (nodes 4,5 recovered)
+        const reshareIdToken = nextIdToken();
+        const reshareKeypair = generateClientKeypair();
+        const reshareSessionId = generateSessionId();
+        const reshareIdHash = computeIdTokenHash(AUTH_TYPE, reshareIdToken);
+
+        const okoCommit = await request(ctx.okoApiApp)
+          .post("/tss/v2/commit")
+          .send({
+            session_id: reshareSessionId,
+            operation_type: "reshare",
+            client_ephemeral_pubkey: reshareKeypair.publicKey.toHex(),
+            id_token_hash: reshareIdHash,
+          });
+        expect(okoCommit.status).toBe(200);
+        const okoNodePk = okoCommit.body.data.node_pubkey;
+
+        const signinSig = createRevealSignature(
+          reshareKeypair.privateKey,
+          okoNodePk,
+          reshareSessionId,
+          AUTH_TYPE,
+          reshareIdToken,
+          "reshare",
+          "signin",
+        );
+        await request(ctx.okoApiApp)
+          .post("/tss/v2/user/signin")
+          .set("x-mock-user-id", userId)
+          .set("Authorization", `Bearer ${reshareIdToken}`)
+          .send({
+            auth_type: AUTH_TYPE,
+            cr_session_id: reshareSessionId,
+            cr_signature: signinSig,
+          })
+          .expect(200);
+
+        const resharedNodes: Array<{ name: string; endpoint: string }> = [];
+        for (let i = 0; i < 6; i++) {
+          const ksnCommit = await request(ctx.ksnApps[i])
+            .post("/keyshare/v2/commit")
+            .send({
+              session_id: reshareSessionId,
+              operation_type: "reshare",
+              client_ephemeral_pubkey: reshareKeypair.publicKey.toHex(),
+              id_token_hash: reshareIdHash,
+            });
+          expect(ksnCommit.status).toBe(200);
+
+          const sig = createRevealSignature(
+            reshareKeypair.privateKey,
+            ksnCommit.body.data.node_pubkey,
+            reshareSessionId,
+            AUTH_TYPE,
+            reshareIdToken,
+            "reshare",
+            "reshare",
+          );
+
+          const res = await request(ctx.ksnApps[i])
+            .post("/keyshare/v2/reshare")
+            .set("x-mock-user-id", userId)
+            .set("Authorization", `Bearer ${reshareIdToken}`)
+            .send({
+              auth_type: AUTH_TYPE,
+              wallets: {
+                secp256k1: {
+                  public_key: secp256k1Pk,
+                  share: generateSecp256k1Share(i),
+                },
+                ed25519: {
+                  public_key: ed25519PkHex,
+                  share: (
+                    ["aa", "bb", "cc", "dd", "ee", "ff"][i] ?? "11"
+                  ).repeat(64),
+                  seed_share: TEST_SEED_SHARE,
+                },
+              },
+              cr_session_id: reshareSessionId,
+              cr_signature: sig,
+            });
+          expect(res.status).toBe(200);
+          resharedNodes.push({
+            name: `test_node_${i + 1}`,
+            endpoint: ctx.ksnUrls[i],
+          });
+        }
+
+        const reshareSig = createRevealSignature(
+          reshareKeypair.privateKey,
+          okoNodePk,
+          reshareSessionId,
+          AUTH_TYPE,
+          reshareIdToken,
+          "reshare",
+          "reshare",
+        );
+        const okoReshare = await request(ctx.okoApiApp)
+          .post("/tss/v2/user/reshare")
+          .set("x-mock-user-id", userId)
+          .set("Authorization", `Bearer ${reshareIdToken}`)
+          .send({
+            auth_type: AUTH_TYPE,
+            secp256k1_public_key: secp256k1Pk,
+            ed25519_public_key: ed25519PkHex,
+            reshared_key_shares: resharedNodes,
+            cr_session_id: reshareSessionId,
+            cr_signature: reshareSig,
+          });
+        expect(okoReshare.status).toBe(200);
+
+        // ed25519 expanded to 6
+        expect(await getWalletKSNodeCount(wallets.ed25519WalletId!)).toBe(6);
+      });
     });
 
     describe("registration_threshold = null", () => {
-      it("D-4: secp256k1 6/6, all UP → ed25519 6", async () => {
+      it("D-5: secp256k1 6/6, all UP → ed25519 6 (null)", async () => {
         await ctx.resetAllDatabases();
         await setRegistrationThreshold(null);
         const userId = nextUserId();
@@ -808,7 +949,7 @@ describe("e2e_comprehensive_6node", () => {
         expect(await getWalletKSNodeCount(wallets.ed25519WalletId!)).toBe(6);
       });
 
-      it("D-5: secp256k1 6/6, 1 DOWN → fail (all-or-nothing)", async () => {
+      it("D-6: secp256k1 6/6, 1 DOWN → fail (all-or-nothing)", async () => {
         await ctx.resetAllDatabases();
         await setRegistrationThreshold(null);
         const userId = nextUserId();
