@@ -1,6 +1,7 @@
 "use client";
 
 import type { AuthType } from "@oko-wallet/oko-types/auth";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { type FC, useEffect, useState } from "react";
 
@@ -22,6 +23,10 @@ type SigningInState =
 
 export const AccountWidget: FC<AccountWidgetProps> = () => {
   const okoWallet = useSDKState(selectCosmosSDK)?.okoWallet;
+  const refreshSvmEd25519Key = useSDKState(
+    (state) => state.refreshSvmEd25519Key,
+  );
+  const queryClient = useQueryClient();
   const [signingInState, setSigningInState] = useState<SigningInState>({
     status: "ready",
   });
@@ -55,6 +60,13 @@ export const AccountWidget: FC<AccountWidgetProps> = () => {
     try {
       setSigningInState({ status: "signing-in" });
       await okoWallet.signIn(method === "auth0" ? "email" : method);
+
+      // After sign-in, Ed25519 key is now available in the iframe.
+      // Re-fetch it for SVM SDK (may have been null during initial lazy init).
+      const refreshed = await refreshSvmEd25519Key();
+      if (refreshed) {
+        await queryClient.invalidateQueries({ queryKey: ["address", "svm"] });
+      }
 
       setAuthType(method);
       setSigningInState({ status: "ready" });
