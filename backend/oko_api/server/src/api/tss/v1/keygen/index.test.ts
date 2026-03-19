@@ -23,7 +23,7 @@ import type { Pool } from "pg";
 import type { Logger } from "winston";
 
 import { TEST_CUSTOMER } from "@oko-wallet-api/api/tss/tests";
-import { TEMP_ENC_SECRET } from "@oko-wallet-api/api/tss/utils";
+import { TEST_ENCRYPTION_SECRET } from "@oko-wallet-api/testing/app";
 import { testPgConfig } from "@oko-wallet-api/database/test_config";
 import { resetPgDatabase } from "@oko-wallet-api/testing/database";
 
@@ -135,7 +135,7 @@ describe("keygen_v1_test", () => {
         pool,
         jwtConfig,
         keygenRequest,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
         customerId,
       );
@@ -167,7 +167,7 @@ describe("keygen_v1_test", () => {
       );
       const decryptedShare = decryptData(
         wallet.data?.enc_tss_share.toString("utf-8") as any,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
       );
       expect(decryptedShare).toEqual(keygen_2.private_share);
 
@@ -239,7 +239,7 @@ describe("keygen_v1_test", () => {
         pool,
         jwtConfig,
         keygenRequest,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
         customerId,
       );
@@ -287,7 +287,7 @@ describe("keygen_v1_test", () => {
         pool,
         jwtConfig,
         keygenRequest,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
         customerId,
       );
@@ -329,7 +329,7 @@ describe("keygen_v1_test", () => {
         pool,
         jwtConfig,
         keygenRequest,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
         customerId,
       );
@@ -373,7 +373,7 @@ describe("keygen_v1_test", () => {
         pool,
         jwtConfig,
         keygenRequest,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
         customerId,
       );

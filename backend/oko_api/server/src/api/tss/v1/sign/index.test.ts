@@ -66,7 +66,7 @@ import type { Pool } from "pg";
 import type { Logger } from "winston";
 
 import { TEST_CUSTOMER } from "@oko-wallet-api/api/tss/tests";
-import { TEMP_ENC_SECRET } from "@oko-wallet-api/api/tss/utils";
+import { TEST_ENCRYPTION_SECRET } from "@oko-wallet-api/testing/app";
 import {
   runPresignStep1,
   runPresignStep2,
@@ -170,7 +170,7 @@ async function setUpTssStage(pool: Pool) {
       expires_in: "1h",
     },
     keygenRequest,
-    TEMP_ENC_SECRET,
+    TEST_ENCRYPTION_SECRET,
     mockLogger,
     customerId,
   );
@@ -434,7 +434,7 @@ async function setUpTssStage(pool: Pool) {
   const presignStep1Response = await runPresignStep1(
     pool,
     presignStep1Request,
-    TEMP_ENC_SECRET,
+    TEST_ENCRYPTION_SECRET,
   );
   if (presignStep1Response.success === false) {
     console.error(presignStep1Response);
