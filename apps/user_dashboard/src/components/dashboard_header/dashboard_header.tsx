@@ -15,7 +15,6 @@ import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
 import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
-import { useQueryClient } from "@tanstack/react-query";
 import type { Property } from "csstype";
 import { useRouter } from "next/navigation";
 import type { FC, ReactNode } from "react";
@@ -25,11 +24,8 @@ import {
   OKO_FEATURE_REQUEST_ENDPOINT,
   OKO_GET_SUPPORT_ENDPOINT,
 } from "@oko-wallet-user-dashboard/fetch";
+import { useSignOut } from "@oko-wallet-user-dashboard/hooks/use_sign_out";
 import { paths } from "@oko-wallet-user-dashboard/paths";
-import {
-  selectCosmosSDK,
-  useSDKState,
-} from "@oko-wallet-user-dashboard/state/sdk";
 import { useUserInfoState } from "@oko-wallet-user-dashboard/state/user_info";
 import { useViewState } from "@oko-wallet-user-dashboard/state/view";
 
@@ -136,15 +132,13 @@ export const DashboardHeader: FC<{
   const email = useUserInfoState((state) => state.email);
   const name = useUserInfoState((state) => state.name);
   const authType = useUserInfoState((state) => state.authType);
-  const clearUserInfo = useUserInfoState((state) => state.clearUserInfo);
   const usesName =
     authType === "discord" ||
     authType === "telegram" ||
     authType === "x" ||
     authType === "github";
   const displayIdentifier = usesName ? name : email;
-  const okoWallet = useSDKState(selectCosmosSDK)?.okoWallet;
-  const queryClient = useQueryClient();
+  const signOut = useSignOut();
   const router = useRouter();
 
   return (
@@ -267,16 +261,7 @@ export const DashboardHeader: FC<{
                     id: "sign-out",
                     label: "Sign out",
                     icon: <LogoutIcon size={20} />,
-                    onClick: async () => {
-                      if (!okoWallet) {
-                        console.error("okoWallet is not initialized");
-                        return;
-                      }
-
-                      await okoWallet.signOut();
-                      queryClient.clear();
-                      clearUserInfo();
-                    },
+                    onClick: signOut,
                   },
                 ],
               }}
