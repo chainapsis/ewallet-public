@@ -6,12 +6,21 @@ import styles from "./make_sig_modal_code_block_container.module.scss";
 export interface MakeSignatureRawCodeBlockContainerProps {
   children: ReactNode;
   className?: string;
+  variant?: "top-level" | "embedded";
 }
 
 export const MakeSignatureRawCodeBlockContainer: FC<
   MakeSignatureRawCodeBlockContainerProps
-> = ({ children, className }) => {
+> = ({ children, className, variant = "top-level" }) => {
   return (
-    <div className={cn(styles.codeBlockContainer, className)}>{children}</div>
+    <div
+      className={cn(
+        styles.codeBlockContainer,
+        variant === "embedded" ? styles.embedded : styles.topLevel,
+        className,
+      )}
+    >
+      {children}
+    </div>
   );
 };

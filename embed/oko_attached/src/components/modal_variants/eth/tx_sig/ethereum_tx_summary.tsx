@@ -42,11 +42,8 @@ export const EthereumTxSummary: FC<EthereumTxSummaryProps> = ({
 
   if (isRawView) {
     content = (
-      <MakeSignatureRawCodeBlockContainer>
-        <MakeSignatureRawCodeBlock
-          className={styles.codeBlock}
-          code={JSON.stringify(rawTx, null, 2)}
-        />
+      <MakeSignatureRawCodeBlockContainer className={styles.rawSurface}>
+        <MakeSignatureRawCodeBlock code={JSON.stringify(rawTx, null, 2)} />
       </MakeSignatureRawCodeBlockContainer>
     );
   } else {

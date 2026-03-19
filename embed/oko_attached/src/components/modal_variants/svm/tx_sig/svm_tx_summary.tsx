@@ -77,11 +77,8 @@ export const SvmTxSummary: FC<SvmTxSummaryProps> = ({
 
   if (isRawView) {
     content = (
-      <MakeSignatureRawCodeBlockContainer>
-        <MakeSignatureRawCodeBlock
-          className={styles.codeBlock}
-          code={rawData}
-        />
+      <MakeSignatureRawCodeBlockContainer className={styles.rawSurface}>
+        <MakeSignatureRawCodeBlock code={rawData} />
       </MakeSignatureRawCodeBlockContainer>
     );
   } else {

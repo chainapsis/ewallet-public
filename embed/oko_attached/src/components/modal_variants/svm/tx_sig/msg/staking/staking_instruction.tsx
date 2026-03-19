@@ -7,6 +7,7 @@ import { type FC, useState } from "react";
 import styles from "./staking_instruction.module.scss";
 import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
 import { SOLANA_LOGO_URL } from "@oko-wallet-attached/constants/urls";
+import { useMobileMode } from "@oko-wallet-attached/hooks/mobile_mode";
 import type { ParsedInstruction } from "@oko-wallet-attached/tx-parsers/svm";
 
 const STAKE_ACCOUNT_RENT_LAMPORTS = 2_282_880; // ~0.00228288 SOL
@@ -123,6 +124,8 @@ export const StakingInstruction: FC<StakingInstructionProps> = ({
   instruction,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isPressed, setIsPressed] = useState(false);
+  const isMobile = useMobileMode();
 
   const stakingData = extractStakingData(instruction);
   if (!stakingData) {
@@ -131,33 +134,60 @@ export const StakingInstruction: FC<StakingInstructionProps> = ({
 
   const { stakeAmount, rentAmount, totalAmount } = stakingData;
   const hasRent = Number(rentAmount) > 0;
+  const shouldUsePressedState = isMobile && hasRent;
+
+  function clearPressedState() {
+    setIsPressed(false);
+  }
 
   function handleToggle() {
+    clearPressedState();
     if (hasRent) {
       setIsExpanded((prev) => !prev);
     }
   }
 
   return (
-    <div className={styles.container}>
+    <div
+      className={styles.container}
+      data-has-rent={hasRent ? "true" : "false"}
+      data-pressed={isPressed ? "true" : "false"}
+    >
       <button
         type="button"
         className={styles.header}
         onClick={handleToggle}
+        onPointerDown={() => {
+          if (shouldUsePressedState) {
+            setIsPressed(true);
+          }
+        }}
+        onPointerUp={clearPressedState}
+        onPointerCancel={clearPressedState}
+        onPointerLeave={clearPressedState}
+        onBlur={clearPressedState}
         disabled={!hasRent}
       >
         <div className={styles.headerContent}>
-          <Typography color="tertiary" size="xs" weight="medium">
+          <Typography
+            color="tertiary"
+            size={isMobile ? "sm" : "xs"}
+            weight="medium"
+          >
             Amount to Lock
           </Typography>
           <div className={styles.totalAmount}>
             <Avatar
               src={SOLANA_LOGO_URL}
               alt="SOL"
-              size="sm"
+              size={isMobile ? "md" : "sm"}
               variant="rounded"
             />
-            <Typography color="secondary" size="lg" weight="semibold">
+            <Typography
+              color="secondary"
+              size={isMobile ? "xl" : "lg"}
+              weight="semibold"
+            >
               {formatLamports(totalAmount)} SOL
             </Typography>
           </div>
@@ -166,6 +196,7 @@ export const StakingInstruction: FC<StakingInstructionProps> = ({
           <ChevronDownIcon
             className={`${styles.chevronIcon} ${isExpanded ? styles.chevronIconExpanded : ""}`}
             color="var(--fg-tertiary)"
+            size={isMobile ? 20 : 16}
           />
         )}
       </button>
@@ -175,22 +206,27 @@ export const StakingInstruction: FC<StakingInstructionProps> = ({
           <div className={styles.divider} />
 
           <div className={styles.row}>
-            <Typography
-              color="secondary"
-              size="xs"
-              weight="semibold"
-              className={styles.rowLabel}
-            >
-              Stake
-            </Typography>
+            <div className={styles.rowLabel}>
+              <Typography
+                color="secondary"
+                size={isMobile ? "sm" : "xs"}
+                weight="semibold"
+              >
+                Stake
+              </Typography>
+            </div>
             <div className={styles.rowValue}>
               <Avatar
                 src={SOLANA_LOGO_URL}
                 alt="SOL"
-                size="sm"
+                size={isMobile ? "md" : "sm"}
                 variant="rounded"
               />
-              <Typography color="tertiary" size="sm" weight="medium">
+              <Typography
+                color="tertiary"
+                size={isMobile ? "md" : "sm"}
+                weight="medium"
+              >
                 {formatLamports(stakeAmount)} SOL
               </Typography>
             </div>
@@ -198,10 +234,15 @@ export const StakingInstruction: FC<StakingInstructionProps> = ({
 
           <div className={styles.row}>
             <div className={styles.rowLabel}>
-              <Typography color="secondary" size="xs" weight="semibold">
+              <Typography
+                color="secondary"
+                size={isMobile ? "sm" : "xs"}
+                weight="semibold"
+              >
                 Rent
               </Typography>
               <Tooltip
+                className={styles.infoIconTooltip}
                 content="A small SOL deposit, returned when you unstake."
                 placement="top"
               >
@@ -215,10 +256,14 @@ export const StakingInstruction: FC<StakingInstructionProps> = ({
               <Avatar
                 src={SOLANA_LOGO_URL}
                 alt="SOL"
-                size="sm"
+                size={isMobile ? "md" : "sm"}
                 variant="rounded"
               />
-              <Typography color="tertiary" size="sm" weight="medium">
+              <Typography
+                color="tertiary"
+                size={isMobile ? "md" : "sm"}
+                weight="medium"
+              >
                 {formatLamports(rentAmount)} SOL
               </Typography>
             </div>

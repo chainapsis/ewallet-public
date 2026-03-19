@@ -64,11 +64,8 @@ export const CosmosTxSummary: FC<CosmosTxSummaryProps> = ({
           </div>
         </div>
         {isRawView ? (
-          <MakeSignatureRawCodeBlockContainer>
-            <MakeSignatureRawCodeBlock
-              className={styles.codeBlock}
-              code={signDocString}
-            />
+          <MakeSignatureRawCodeBlockContainer className={styles.rawSurface}>
+            <MakeSignatureRawCodeBlock code={signDocString} />
           </MakeSignatureRawCodeBlockContainer>
         ) : (
           <Messages

@@ -11,6 +11,7 @@ import styles from "./permit_action.module.scss";
 import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
 import { Collapsible } from "@oko-wallet-attached/components/collapsible/collapsible";
 import { MakeSignatureRawCodeBlock } from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_sig_modal_code_block";
+import { MakeSignatureRawCodeBlockContainer } from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_sig_modal_code_block_container";
 import { useGetTokenMetadata } from "@oko-wallet-attached/web3/ethereum/queries";
 import { formatTokenAmount } from "@oko-wallet-attached/web3/ethereum/utils";
 
@@ -142,7 +143,12 @@ export const PermitAction: FC<PermitActionProps> = ({
       </div>
       <Spacing height={12} />
       <Collapsible title="Message" className={styles.collapsibleCodeBlock}>
-        <MakeSignatureRawCodeBlock code={stringify(typedData, null, 2)} />
+        <MakeSignatureRawCodeBlockContainer variant="embedded">
+          <MakeSignatureRawCodeBlock
+            code={stringify(typedData, null, 2)}
+            variant="embedded"
+          />
+        </MakeSignatureRawCodeBlockContainer>
       </Collapsible>
     </Fragment>
   );

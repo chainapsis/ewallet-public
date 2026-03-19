@@ -57,6 +57,7 @@ function renderInstruction(
   instruction: ParsedInstruction,
   index: number,
   chainId: string,
+  embedded = false,
 ): ReactNode {
   const { programId, instructionName, data, accounts } = instruction;
 
@@ -122,11 +123,23 @@ function renderInstruction(
       }
     }
 
-    return <UnknownInstruction key={index} instruction={instruction} />;
+    return (
+      <UnknownInstruction
+        key={index}
+        instruction={instruction}
+        embedded={embedded}
+      />
+    );
   }
 
   // Default: Unknown instruction
-  return <UnknownInstruction key={index} instruction={instruction} />;
+  return (
+    <UnknownInstruction
+      key={index}
+      instruction={instruction}
+      embedded={embedded}
+    />
+  );
 }
 
 export interface InstructionsProps {
@@ -164,7 +177,7 @@ export const Instructions: FC<InstructionsProps> = ({
   if (validInstructions.length === 1) {
     return (
       <div className={styles.instructionsContainer}>
-        {renderInstruction(validInstructions[0], 0, chainId)}
+        {renderInstruction(validInstructions[0], 0, chainId, false)}
       </div>
     );
   }
@@ -177,9 +190,10 @@ export const Instructions: FC<InstructionsProps> = ({
           // biome-ignore lint/suspicious/noArrayIndexKey: instruction list display only
           key={index}
           title={getInstructionTitle(instruction)}
-          defaultExpanded={index === 0}
+          defaultExpanded={false}
+          className={styles.multiInstructionRow}
         >
-          {renderInstruction(instruction, index, chainId)}
+          {renderInstruction(instruction, index, chainId, true)}
         </Collapsible>
       ))}
     </div>
