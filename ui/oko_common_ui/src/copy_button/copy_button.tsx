@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import styles from "./copy_button.module.scss";
 import { Button, type ButtonProps } from "@oko-wallet-common-ui/button/button";
 import { IconTransition } from "@oko-wallet-common-ui/icon_transition/icon_transition";
-import { CheckCircleOutlinedIcon } from "@oko-wallet-common-ui/icons/check_circle_outlined";
+import { CheckThinIcon } from "@oko-wallet-common-ui/icons/check_thin_icon";
 import { CopyOutlinedIcon } from "@oko-wallet-common-ui/icons/copy_outlined";
 
 interface CopyButtonProps extends Omit<ButtonProps, "children"> {
@@ -44,7 +44,7 @@ export const CopyButton: React.FC<CopyButtonProps> = ({
           <CopyOutlinedIcon size={resolvedIconSize} color={defaultColor} />
         }
         activeIcon={
-          <CheckCircleOutlinedIcon
+          <CheckThinIcon
             size={resolvedIconSize}
             color={successColor ?? "var(--fg-success-primary)"}
           />
