@@ -6,6 +6,8 @@ import type {
   DeleteKSNodeRequest,
   DeleteKSNodeResponse,
   GetKSNodeByIdResponse,
+  UpdateKeyShareNodeMetaRequest,
+  UpdateKeyShareNodeMetaResponse,
   UpdateKSNodeRequest,
   UpdateKSNodeResponse,
 } from "@oko-wallet/oko-types/admin";
@@ -140,6 +142,32 @@ export async function updateKeyShareNode({
 
   return doFetch<UpdateKSNodeResponse>(
     `${OKO_ADMIN_API_ENDPOINT_V1}/ks_node/update_ks_node`,
+    {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    },
+  );
+}
+
+export type UpdateKeyShareNodeMetaParams = {
+  token: string;
+  registration_threshold: number | null;
+};
+
+export async function updateKeyShareNodeMeta({
+  token,
+  registration_threshold,
+}: UpdateKeyShareNodeMetaParams) {
+  const body: UpdateKeyShareNodeMetaRequest = {
+    registration_threshold,
+  };
+
+  return doFetch<UpdateKeyShareNodeMetaResponse>(
+    `${OKO_ADMIN_API_ENDPOINT_V1}/ks_node/update_ks_node_meta`,
     {
       method: "POST",
       headers: {

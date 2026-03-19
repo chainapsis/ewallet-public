@@ -24,3 +24,48 @@
     background: var(--error-700) !important;
   }
 }
+
+.settingsSection {
+  width: 100%;
+  padding: 16px 20px;
+  background: var(--gray-50, #f9fafb);
+  border: 1px solid var(--gray-200, #e5e7eb);
+  border-radius: 8px;
+}
+
+.settingRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.settingLabel {
+  font-weight: 600;
+  font-size: 14px;
+  min-width: 180px;
+}
+
+.settingValue {
+  font-size: 14px;
+  color: var(--gray-600, #4b5563);
+}
+
+.settingEdit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settingInput {
+  width: 200px;
+  padding: 6px 12px;
+  border: 1px solid var(--gray-300, #d1d5db);
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.errorText {
+  color: var(--error-600, #dc2626);
+  font-size: 12px;
+  margin-top: 8px;
+}
