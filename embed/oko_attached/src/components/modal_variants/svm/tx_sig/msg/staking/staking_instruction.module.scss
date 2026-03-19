@@ -5,13 +5,31 @@
   border-radius: 12px;
   background: var(--bg-secondary);
   overflow: hidden;
+}
 
+.container[data-has-rent="false"] {
   &:hover {
     background: var(--bg-secondary-hover);
 
     .chevronIcon {
       color: var(--fg-tertiary-hover);
     }
+  }
+}
+
+.container[data-has-rent="true"] {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: var(--bg-secondary-hover);
+
+      .chevronIcon {
+        color: var(--fg-tertiary-hover);
+      }
+    }
+  }
+
+  &[data-pressed="true"] {
+    background: var(--bg-secondary-hover);
   }
 }
 

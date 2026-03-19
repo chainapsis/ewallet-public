@@ -124,6 +124,7 @@ export const StakingInstruction: FC<StakingInstructionProps> = ({
   instruction,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isPressed, setIsPressed] = useState(false);
   const isMobile = useMobileMode();
 
   const stakingData = extractStakingData(instruction);
@@ -133,19 +134,38 @@ export const StakingInstruction: FC<StakingInstructionProps> = ({
 
   const { stakeAmount, rentAmount, totalAmount } = stakingData;
   const hasRent = Number(rentAmount) > 0;
+  const shouldUsePressedState = isMobile && hasRent;
+
+  function clearPressedState() {
+    setIsPressed(false);
+  }
 
   function handleToggle() {
+    clearPressedState();
     if (hasRent) {
       setIsExpanded((prev) => !prev);
     }
   }
 
   return (
-    <div className={styles.container}>
+    <div
+      className={styles.container}
+      data-has-rent={hasRent ? "true" : "false"}
+      data-pressed={isPressed ? "true" : "false"}
+    >
       <button
         type="button"
         className={styles.header}
         onClick={handleToggle}
+        onPointerDown={() => {
+          if (shouldUsePressedState) {
+            setIsPressed(true);
+          }
+        }}
+        onPointerUp={clearPressedState}
+        onPointerCancel={clearPressedState}
+        onPointerLeave={clearPressedState}
+        onBlur={clearPressedState}
         disabled={!hasRent}
       >
         <div className={styles.headerContent}>
