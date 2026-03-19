@@ -2,7 +2,7 @@
 
 import { Button } from "@oko-wallet/oko-common-ui/button";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { type FC, useState } from "react";
 import { FormattedMessage } from "react-intl";
@@ -45,18 +45,15 @@ export const KeyshareNodesView: FC = () => {
 
   const isActivated = tssAllActivationData?.tss_activation_setting?.is_enabled;
 
-  // Registration threshold state
-  const [regThresholdInput, setRegThresholdInput] = useState<string>("");
-  const [isEditingThreshold, setIsEditingThreshold] = useState(false);
+  // Registration threshold state from server
+  const meta = tssAllActivationData?.key_share_node_meta;
+  const sssThreshold = meta?.sss_threshold ?? 2;
+  const currentThreshold = meta?.registration_threshold ?? null;
+  const activeNodes =
+    data?.ksNodes.filter((n) => n.status === "ACTIVE").length ?? 0;
 
-  const { data: metaData, refetch: refetchMeta } = useQuery({
-    queryKey: ["keyShareNodeMeta"],
-    queryFn: async () => {
-      const res = await fetch("/api/admin/key_share_node_meta");
-      return null; // Placeholder — actual value comes from ksNodes data
-    },
-    enabled: false, // We'll get this from the DB directly
-  });
+  const [regThresholdSelect, setRegThresholdSelect] = useState<string>("ALL");
+  const [isEditingThreshold, setIsEditingThreshold] = useState(false);
 
   const updateThresholdMutation = useMutation({
     mutationFn: (value: number | null) =>
@@ -66,23 +63,31 @@ export const KeyshareNodesView: FC = () => {
       }),
     onSuccess: () => {
       setIsEditingThreshold(false);
-      queryClient.invalidateQueries({ queryKey: ["keyShareNodeMeta"] });
+      queryClient.invalidateQueries({
+        queryKey: ["tss-activation-setting"],
+      });
     },
   });
 
+  // Build dropdown options: sssThreshold .. activeNodes + ALL
+  const thresholdOptions: string[] = [];
+  for (let i = sssThreshold; i <= activeNodes; i++) {
+    thresholdOptions.push(String(i));
+  }
+  thresholdOptions.push("ALL");
+
   const handleSaveThreshold = () => {
     const value =
-      regThresholdInput === "" ? null : parseInt(regThresholdInput, 10);
-    if (value !== null && Number.isNaN(value)) {
-      return;
-    }
+      regThresholdSelect === "ALL" ? null : parseInt(regThresholdSelect, 10);
 
-    const displayValue =
-      value === null ? "null (all-or-nothing)" : String(value);
+    const displayValue = value === null ? "ALL" : String(value);
     const confirmed = confirm(
-      `Are you sure you want to change registration_threshold to ${displayValue}?\n\n` +
-        "This affects how many KS nodes must succeed for sign-up, reshare, and ed25519 keygen.\n" +
-        "Setting this value incorrectly may lock users out of their wallets.",
+      `Change Registration Threshold to ${displayValue}?\n\n` +
+        `Active nodes: ${activeNodes} / SSS Threshold: ${sssThreshold}\n\n` +
+        "This determines the minimum number of nodes that must respond\n" +
+        "during sign-up, sign-in (reshare), and Ed25519 key generation.\n\n" +
+        "An incorrect value may block new users from signing up\n" +
+        "or prevent existing users from signing in.",
     );
     if (!confirmed) {
       return;
@@ -96,6 +101,7 @@ export const KeyshareNodesView: FC = () => {
       <TitleHeader
         title="Keyshare Nodes"
         totalCount={data?.ksNodes.length}
+        activeCount={activeNodes}
         renderRightContent={() => (
           <div className={styles.buttonGroup}>
             <a
@@ -136,17 +142,25 @@ export const KeyshareNodesView: FC = () => {
 
       <div className={styles.settingsSection}>
         <div className={styles.settingRow}>
+          <span className={styles.settingLabel}>SSS Threshold</span>
+          <span className={styles.settingValue}>{sssThreshold}</span>
+        </div>
+        <Spacing height={12} />
+        <div className={styles.settingRow}>
           <span className={styles.settingLabel}>Registration Threshold</span>
           {isEditingThreshold ? (
             <div className={styles.settingEdit}>
-              <input
-                type="number"
-                min={1}
-                placeholder="null (all-or-nothing)"
-                value={regThresholdInput}
-                onChange={(e) => setRegThresholdInput(e.target.value)}
+              <select
+                value={regThresholdSelect}
+                onChange={(e) => setRegThresholdSelect(e.target.value)}
                 className={styles.settingInput}
-              />
+              >
+                {thresholdOptions.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
               <Button
                 variant="primary"
                 onClick={handleSaveThreshold}
@@ -164,13 +178,17 @@ export const KeyshareNodesView: FC = () => {
           ) : (
             <div className={styles.settingEdit}>
               <span className={styles.settingValue}>
-                {data?.ksNodes ? "—" : "Loading..."}
+                {currentThreshold === null ? "ALL" : currentThreshold}
               </span>
               <Button
                 variant="secondary"
                 onClick={() => {
                   setIsEditingThreshold(true);
-                  setRegThresholdInput("");
+                  setRegThresholdSelect(
+                    currentThreshold === null
+                      ? "ALL"
+                      : String(currentThreshold),
+                  );
                 }}
               >
                 Edit

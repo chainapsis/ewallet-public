@@ -64,6 +64,11 @@
   font-size: 14px;
 }
 
+.settingHint {
+  font-size: 12px;
+  color: var(--gray-500, #6b7280);
+}
+
 .errorText {
   color: var(--error-600, #dc2626);
   font-size: 12px;
