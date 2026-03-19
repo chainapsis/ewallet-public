@@ -92,11 +92,13 @@
   }
 }
 
-:global(html[data-mobile]) .multiInstructionRow:has(> :first-child:active) {
-  background: var(--bg-secondary-hover);
+@media (hover: none), (pointer: coarse) {
+  .multiInstructionRow:has(> :first-child:active) {
+    background: var(--bg-secondary-hover);
 
-  > :first-child svg {
-    color: var(--fg-tertiary-hover);
+    > :first-child svg {
+      color: var(--fg-tertiary-hover);
+    }
   }
 }
 
