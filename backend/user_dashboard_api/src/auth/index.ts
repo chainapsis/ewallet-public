@@ -16,6 +16,7 @@ import jwt from "jsonwebtoken";
 import {
   CUSTOMER_AUDIENCE,
   CUSTOMER_ISSUER,
+  SILENT_SIGNIN_MAX_TOKEN_AGE,
   USER_AUDIENCE,
   USER_ISSUER,
   USER_TOKEN_EXPIRATION_WINDOW,
@@ -26,6 +27,7 @@ export type UserTokenJWTPayloadV2 = UserTokenPayloadV2 & jwt.JwtPayload;
 export type VerifyUserTokenResult =
   | { type: "invalid_token"; msg: string }
   | { type: "expired"; payload: UserTokenJWTPayload | UserTokenJWTPayloadV2 }
+  | { type: "expired_beyond_renewal"; msg: string }
   | { type: "unknown_error"; msg: string };
 export interface VerifyUserTokenArgs {
   token: string;
@@ -56,8 +58,20 @@ export function verifyUserToken(
 
     const now = dayjs();
     const issuedAt = dayjs(new Date(payload.iat * 1000));
+    const tokenAgeMs = now.diff(issuedAt);
+
+    if (tokenAgeMs > SILENT_SIGNIN_MAX_TOKEN_AGE) {
+      return {
+        success: false,
+        err: {
+          type: "expired_beyond_renewal",
+          msg: "Token is too old for silent renewal. Please re-authenticate.",
+        },
+      };
+    }
+
     const isOrWillSoonBeExpired =
-      now.diff(issuedAt) > USER_TOKEN_EXPIRATION_WINDOW * 0.75;
+      tokenAgeMs > USER_TOKEN_EXPIRATION_WINDOW * 0.75;
 
     if (isOrWillSoonBeExpired) {
       return {
@@ -115,8 +129,20 @@ export function verifyUserTokenV2(
 
     const now = dayjs();
     const issuedAt = dayjs(new Date(payload.iat * 1000));
+    const tokenAgeMs = now.diff(issuedAt);
+
+    if (tokenAgeMs > SILENT_SIGNIN_MAX_TOKEN_AGE) {
+      return {
+        success: false,
+        err: {
+          type: "expired_beyond_renewal",
+          msg: "Token is too old for silent renewal. Please re-authenticate.",
+        },
+      };
+    }
+
     const isOrWillSoonBeExpired =
-      now.diff(issuedAt) > USER_TOKEN_EXPIRATION_WINDOW * 0.75;
+      tokenAgeMs > USER_TOKEN_EXPIRATION_WINDOW * 0.75;
 
     if (isOrWillSoonBeExpired) {
       return {
