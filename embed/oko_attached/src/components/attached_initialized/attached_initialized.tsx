@@ -9,7 +9,13 @@ import { useMemoryState } from "@oko-wallet-attached/store/memory";
 
 const isMobile =
   typeof window !== "undefined" &&
-  new URLSearchParams(window.location.search).get("mobile") === "true";
+  (() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    return (
+      searchParams.get("mobile") === "true" ||
+      searchParams.get("mobile_native") === "true"
+    );
+  })();
 
 export const AttachedInitialized: FC<PropsWithChildren> = ({ children }) => {
   const { theme: initTheme } = useInitializeApp();

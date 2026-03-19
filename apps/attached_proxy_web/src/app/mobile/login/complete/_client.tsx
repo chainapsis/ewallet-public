@@ -1,6 +1,7 @@
 import type {
   OkoWalletMsgGetWalletInfoAck,
   OkoWalletMsgOAuthInfoPassAck,
+  OkoWalletMsgOAuthSignInUpdate,
 } from "@oko-wallet/oko-sdk-core";
 import {
   type RefObject,
@@ -191,11 +192,23 @@ export function LoginCompleteClient({
       }
 
       if (msg.msg_type === "oauth_sign_in_update") {
+        const update = msg as OkoWalletMsgOAuthSignInUpdate;
         event.ports?.[0]?.postMessage({
           target: "oko_attached",
           msg_type: "oauth_sign_in_update_ack",
           payload: null,
         });
+
+        if (!update.payload.success) {
+          const error = formatOAuthSignInError(update.payload.err);
+          setStatus(`Error: ${error}`);
+          console.error(
+            "[oko-mobile-login-complete] oauth_sign_in_update failed:",
+            update.payload.err,
+          );
+          return;
+        }
+
         setStatus("Securing wallet...");
         handleKeygenComplete();
       }
@@ -297,4 +310,17 @@ function buildOAuthPayload(
   }
 
   return null;
+}
+
+function formatOAuthSignInError(err: unknown): string {
+  if (!err || typeof err !== "object") {
+    return "OAuth sign-in failed";
+  }
+
+  const type =
+    "type" in err && typeof err.type === "string" ? err.type : "unknown";
+  const detail =
+    "error" in err && typeof err.error === "string" ? err.error : null;
+
+  return detail ? `${type}: ${detail}` : type;
 }

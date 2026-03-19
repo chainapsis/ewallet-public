@@ -33,6 +33,10 @@ export function EmailLoginClient({
         sessionStorage.setItem("oko_mobile_redirect_scheme", redirectScheme);
       }
       sessionStorage.setItem("oko_mobile_api_key", apiKey);
+      const clientRandom = parseClientRandomFromHash();
+      if (clientRandom) {
+        sessionStorage.setItem("oko_mobile_client_random", clientRandom);
+      }
 
       // Generate nonce
       const nonceBytes = new Uint8Array(16);

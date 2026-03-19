@@ -75,8 +75,15 @@ export function handleOAuthCallbackRedirect(): boolean {
     params.set("code", code);
   }
 
-  window.location.replace(
-    `${window.location.origin}/mobile/login/complete?${params.toString()}`,
+  const completeUrl = new URL(
+    `/mobile/login/complete?${params.toString()}`,
+    window.location.origin,
   );
+  const clientRandom = sessionStorage.getItem("oko_mobile_client_random");
+  if (clientRandom) {
+    completeUrl.hash = `client_random=${encodeURIComponent(clientRandom)}`;
+  }
+
+  window.location.replace(completeUrl.toString());
   return true;
 }

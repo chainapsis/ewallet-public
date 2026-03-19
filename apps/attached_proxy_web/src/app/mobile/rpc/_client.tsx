@@ -68,9 +68,6 @@ export function RpcClient({
         setShowIframe(true);
         if (iframeRef.current) {
           iframeRef.current.style.display = "";
-          iframeRef.current.style.flex = "1";
-          iframeRef.current.style.width = "100%";
-          iframeRef.current.style.border = "none";
         }
       }
 

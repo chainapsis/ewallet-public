@@ -35,7 +35,16 @@ export function App() {
         title="Oko Wallet"
         ref={iframeRef}
         src={iframeSrc}
-        style={{ display: "none" }}
+        style={{
+          display: "none",
+          position: "fixed",
+          inset: 0,
+          width: "100vw",
+          height: "100dvh",
+          border: "none",
+          background: "transparent",
+          zIndex: 1,
+        }}
       />
       <Router path={path} iframeRef={iframeRef} />
     </>
