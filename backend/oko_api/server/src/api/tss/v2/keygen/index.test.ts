@@ -743,7 +743,7 @@ describe("keygen_v2_test", () => {
         pool,
         jwtConfig,
         keygenRequest,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
         customerId,
       );
@@ -832,7 +832,7 @@ describe("keygen_v2_test", () => {
         pool,
         jwtConfig,
         keygenRequest,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
         customerId,
       );
@@ -889,7 +889,7 @@ describe("keygen_v2_test", () => {
         pool,
         jwtConfig,
         keygenRequest,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
         customerId,
       );
@@ -1389,7 +1389,7 @@ describe("keygen_v2_test", () => {
         pool,
         TEST_JWT_CONFIG_ED25519,
         request,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
       );
 
@@ -1415,7 +1415,7 @@ describe("keygen_v2_test", () => {
         pool,
         TEST_JWT_CONFIG_ED25519,
         request,
-        TEMP_ENC_SECRET,
+        TEST_ENCRYPTION_SECRET,
         mockLogger,
       );
 
