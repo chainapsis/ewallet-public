@@ -13,7 +13,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@oko-wallet-attached-proxy-web": path.resolve(__dirname, "src"),
+      "@oko-wallet-attached-mobile-host-web": path.resolve(__dirname, "src"),
     },
   },
   server: {

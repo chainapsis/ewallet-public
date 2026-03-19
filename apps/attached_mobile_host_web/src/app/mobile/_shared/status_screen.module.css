@@ -5,8 +5,8 @@
   justify-content: center;
   padding: max(24px, env(safe-area-inset-top)) 24px
     max(24px, env(safe-area-inset-bottom));
-  background: var(--proxy-bg);
-  color: var(--proxy-text-primary);
+  background: var(--mobile-host-bg);
+  color: var(--mobile-host-text-primary);
   text-align: center;
   box-sizing: border-box;
 }
@@ -24,8 +24,8 @@
   width: 40px;
   height: 40px;
   border-radius: 999px;
-  border: 3px solid var(--proxy-spinner-track);
-  border-top-color: var(--proxy-spinner-head);
+  border: 3px solid var(--mobile-host-spinner-track);
+  border-top-color: var(--mobile-host-spinner-head);
   animation: spin 0.9s linear infinite;
 }
 
@@ -41,15 +41,15 @@
   margin: 0;
   font-size: 14px;
   line-height: 1.6;
-  color: var(--proxy-text-tertiary);
+  color: var(--mobile-host-text-tertiary);
 }
 
 .error .title {
-  color: var(--proxy-text-error);
+  color: var(--mobile-host-text-error);
 }
 
 .error .detail {
-  color: var(--proxy-text-error-secondary);
+  color: var(--mobile-host-text-error-secondary);
 }
 
 @keyframes spin {

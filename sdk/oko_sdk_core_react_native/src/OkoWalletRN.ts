@@ -35,7 +35,7 @@ interface PersistedWalletInfo extends OkoWalletState {
   sdkEndpoint?: string;
 }
 
-const DEFAULT_SDK_ENDPOINT = "https://proxy.oko.app";
+const DEFAULT_SDK_ENDPOINT = "https://mobile.oko.app";
 
 export interface OkoWalletRNConfig {
   apiKey: string;

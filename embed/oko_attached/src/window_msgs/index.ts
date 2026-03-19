@@ -45,7 +45,7 @@ export function makeMsgHandler() {
       data?.msg_type === "set_reauth_params"
     ) {
       // set_reauth_params is sent from the re-auth popup (same attached origin)
-      // or from the host parent window (cross-origin iframe, e.g. mobile proxy web)
+      // or from the host parent window (cross-origin iframe, e.g. mobile mobile host web)
       const registeredHostOrigin = useMemoryState.getState().hostOrigin;
       if (
         event.origin !== window.location.origin &&
@@ -120,7 +120,7 @@ export function makeMsgHandler() {
     }
 
     const memState = useMemoryState.getState();
-    // When the message comes from attached_proxy_web (mobile native proxy),
+    // When the message comes from attached_mobile_host_web (mobile native host),
     // keep the appName set during initialization (e.g. apiKey-derived name).
     const isFromProxy =
       MOBILE_NATIVE_ORIGIN && event.origin === MOBILE_NATIVE_ORIGIN;

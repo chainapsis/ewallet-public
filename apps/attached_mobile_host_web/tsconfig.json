@@ -14,7 +14,7 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "paths": {
-      "@oko-wallet-attached-proxy-web/*": ["./src/*"]
+      "@oko-wallet-attached-mobile-host-web/*": ["./src/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "vite-env.d.ts"],

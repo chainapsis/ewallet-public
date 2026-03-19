@@ -110,7 +110,7 @@ async function buildOAuthUrl(
     ...(mobileOsBrowser && { mobileOsBrowser }),
   };
 
-  // Mobile OS browser: redirect back to proxy web (targetOrigin), not attached
+  // Mobile OS browser: redirect back to mobile host web (targetOrigin), not attached
   const redirectBaseOrigin = mobileOsBrowser
     ? targetOrigin
     : window.location.origin;

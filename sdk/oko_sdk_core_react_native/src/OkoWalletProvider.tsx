@@ -8,7 +8,7 @@ export const OkoWalletContext = createContext<OkoWalletRN | null>(null);
 export interface OkoWalletProviderProps {
   /** Oko API key */
   apiKey: string;
-  /** Proxy endpoint for OS browser flows (e.g. https://proxy.oko.app) */
+  /** Mobile host endpoint for OS browser flows (e.g. https://mobile.oko.app) */
   sdkEndpoint?: string;
   /** Deep link scheme for OAuth callbacks (default: "okowallet") */
   redirectScheme?: string;

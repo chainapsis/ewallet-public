@@ -1,4 +1,4 @@
-# attached_proxy_web
+# attached_mobile_host_web
 
 React Native 모바일 앱과 `oko_attached` iframe 사이의 **Generic RPC 브릿지** 역할을 하는
 Next.js 웹 앱. OS 브라우저(iOS ASWebAuthenticationSession / Android AuthTabIntent)에서
@@ -6,17 +6,17 @@ Next.js 웹 앱. OS 브라우저(iOS ASWebAuthenticationSession / Android AuthTa
 
 ## 설계 목표
 
-- `attached_proxy_web`은 일반 dapp과 같은 형태로 `oko_attached`를 iframe으로 가진다.
+- `attached_mobile_host_web`은 일반 dapp과 같은 형태로 `oko_attached`를 iframe으로 가진다.
 - 앱에서 `{method, args}` 형태로 파라미터를 전달하면, iframe이 init된 후 해당 method를
   args와 함께 실행한다.
 - 실행 결과를 적절한 형태로 앱에 반환한다.
-- 앱 ↔ `attached_proxy_web` 간 `Uint8Array`, `bigint` 등 JSON으로 직접 전달할 수 없는
+- 앱 ↔ `attached_mobile_host_web` 간 `Uint8Array`, `bigint` 등 JSON으로 직접 전달할 수 없는
   타입은 공통 코덱으로 인코딩/디코딩한다.
 - Sign-in/up은 OAuth 리다이렉트, keygen 등 특수한 로직이 필요하므로 generic RPC와
   별도로 처리한다.
-- 여기서 RPC는 백엔드 서버를 경유하는 remote RPC가 아니다. 앱 ↔ `attached_proxy_web` ↔
+- 여기서 RPC는 백엔드 서버를 경유하는 remote RPC가 아니다. 앱 ↔ `attached_mobile_host_web` ↔
   iframe 간의 **로컬 통신**만으로 완결되며, 별도의 백엔드 API 호출 없이 URL 인코딩과
-  postMessage, scheme redirect만으로 요청과 결과를 주고받는다. `attached_proxy_web`은
+  postMessage, scheme redirect만으로 요청과 결과를 주고받는다. `attached_mobile_host_web`은
   순수한 정적 웹 페이지로서 클라이언트 사이드에서만 동작한다.
 
 ## 통신 흐름
@@ -27,7 +27,7 @@ Next.js 웹 앱. OS 브라우저(iOS ASWebAuthenticationSession / Android AuthTa
 RN App
   │  openAuthSession("/mobile/rpc?method=open_modal&...#v=1&p=<encoded>")
   ▼
-attached_proxy_web (OS 브라우저)
+attached_mobile_host_web (OS 브라우저)
   │  1. URL에서 method + encoded payload 파싱
   │  2. oko_attached iframe 로드 (https://attached.oko.app, cross-origin)
   │  3. iframe init 메시지 수신 → init_ack 응답

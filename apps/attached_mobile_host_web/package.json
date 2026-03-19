@@ -1,5 +1,5 @@
 {
-  "name": "@oko-wallet/attached-proxy-web",
+  "name": "@oko-wallet/attached-mobile-host-web",
   "version": "0.1.0-alpha.0",
   "private": true,
   "type": "module",

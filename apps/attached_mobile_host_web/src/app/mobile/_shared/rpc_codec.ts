@@ -2,7 +2,7 @@ import { Buffer } from "buffer";
 import pako from "pako";
 
 /**
- * Generic RPC codec for app ↔ attached_proxy_web communication.
+ * Generic RPC codec for app ↔ attached_mobile_host_web communication.
  * Mirror of the mobile SDK RPC codec (e.g. oko_sdk_core_react_native/src/codec/rpc_codec.ts)
  */
 
@@ -153,7 +153,7 @@ export function decodeRpcPayload<T>(encoded: string): T {
   return fromEncodedValue(parsed) as T;
 }
 
-// ─── URL helpers (proxy web side) ───
+// ─── URL helpers (mobile host web side) ───
 
 /**
  * Parse RPC method and encoded payload from the current page URL.

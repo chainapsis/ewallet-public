@@ -2,7 +2,7 @@ import { Buffer } from "buffer";
 import pako from "pako";
 
 /**
- * Generic RPC codec for app ↔ attached_proxy_web communication.
+ * Generic RPC codec for app ↔ attached_mobile_host_web communication.
  *
  * Handles types that can't be directly serialized to JSON:
  * - bigint  → { __oko_t: "bigint", value: "123" }
