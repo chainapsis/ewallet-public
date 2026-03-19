@@ -80,6 +80,26 @@
   width: 100%;
 }
 
+.multiInstructionRow {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: var(--bg-secondary-hover);
+
+      > :first-child svg {
+        color: var(--fg-tertiary-hover);
+      }
+    }
+  }
+}
+
+:global(html[data-mobile]) .multiInstructionRow:has(> :first-child:active) {
+  background: var(--bg-secondary-hover);
+
+  > :first-child svg {
+    color: var(--fg-tertiary-hover);
+  }
+}
+
 // When collapsible contains tokenAddressRow (unknown token),
 // reduce horizontal padding so hover bg sits at 8px from card edge.
 // Add 8px padding to header so title stays at 16px.

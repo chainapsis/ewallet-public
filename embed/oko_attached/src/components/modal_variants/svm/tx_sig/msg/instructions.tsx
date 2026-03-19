@@ -191,6 +191,7 @@ export const Instructions: FC<InstructionsProps> = ({
           key={index}
           title={getInstructionTitle(instruction)}
           defaultExpanded={false}
+          className={styles.multiInstructionRow}
         >
           {renderInstruction(instruction, index, chainId, true)}
         </Collapsible>
