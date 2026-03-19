@@ -20,6 +20,7 @@ import { get_wallet_list } from "./get_wallet_list";
 import { resend_customer_user_password } from "./resend_customer_user_password";
 import { set_tss_all_activation_setting } from "./set_tss_all_activation_setting";
 import { update_ks_node } from "./update_ks_node";
+import { update_ks_node_meta } from "./update_ks_node_meta";
 import { user_login } from "./user_login";
 import { user_logout } from "./user_logout";
 import { adminAuthMiddleware } from "@oko-wallet-admin-api/middleware/auth";
@@ -113,6 +114,12 @@ export function makeOkoAdminRouter() {
   router.post("/ks_node/delete_ks_node", adminAuthMiddleware, delete_ks_node);
 
   router.post("/ks_node/update_ks_node", adminAuthMiddleware, update_ks_node);
+
+  router.post(
+    "/ks_node/update_ks_node_meta",
+    adminAuthMiddleware,
+    update_ks_node_meta,
+  );
 
   router.post(
     "/ks_node/activate_ks_node",

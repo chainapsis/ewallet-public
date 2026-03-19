@@ -148,8 +148,11 @@ export async function reshareUserKeySharesV2(
   secp256k1: ReshareWalletInfoSecp256k1,
   ed25519: ReshareWalletInfoEd25519,
   session: ClientCommitRevealSession,
+  committedNodeEndpoints: string[],
 ): Promise<Result<ReshareV2Result, string>> {
   const { threshold, nodes } = keyshareNodeMeta;
+  const registrationThreshold =
+    keyshareNodeMeta.registration_threshold ?? nodes.length;
 
   // 1. Classify nodes by unified status
   const activeNodes = nodes.filter((n) => n.wallet_status === "ACTIVE");
@@ -232,12 +235,15 @@ export async function reshareUserKeySharesV2(
     originalSecret: [...seedExpandRes.data.original_secret.toUint8Array()],
   };
 
-  // 5. Send new shares to ALL nodes
-  const allNodes = nodes;
+  // 5. Send new shares to committed nodes (partial success allowed)
+  // Only send to nodes that successfully committed; skip unreachable nodes
+  const targetNodes = nodes.filter((n) =>
+    committedNodeEndpoints.includes(n.endpoint),
+  );
   const resharedNodes: NodeNameAndEndpoint[] = [];
 
   const sendResults = await Promise.all(
-    allNodes.map(async (node) => {
+    targetNodes.map(async (node) => {
       // Find shares for this node
       const secp256k1Share = secp256k1Result.resharedShares.find(
         (s) => s.node.endpoint === node.endpoint,
@@ -281,23 +287,28 @@ export async function reshareUserKeySharesV2(
         } as const;
       }
 
-      resharedNodes.push({ name: node.name, endpoint: node.endpoint });
-
-      return reshareKeySharesV2(
+      const res = await reshareKeySharesV2(
         node.endpoint,
         idToken,
         authType,
         wallets,
         commitRevealRes.data,
       );
+
+      if (res.success) {
+        resharedNodes.push({ name: node.name, endpoint: node.endpoint });
+      }
+
+      return res;
     }),
   );
 
-  const errResults = sendResults.filter((r) => !r.success);
-  if (errResults.length > 0) {
+  const successCount = sendResults.filter((r) => r.success).length;
+  if (successCount < registrationThreshold) {
+    const errResults = sendResults.filter((r) => !r.success);
     return {
       success: false,
-      err: errResults.map((r) => (r as { err: string }).err).join("\n"),
+      err: `Reshare insufficient: ${successCount}/${targetNodes.length} nodes succeeded (need ${registrationThreshold})\n${errResults.map((r) => (r as { err: string }).err).join("\n")}`,
     };
   }
 

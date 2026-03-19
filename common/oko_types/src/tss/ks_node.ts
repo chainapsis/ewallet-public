@@ -33,6 +33,7 @@ export interface NodeStatusInfo {
 
 export interface KeyShareNodeMetaWithNodeStatusInfo {
   threshold: number;
+  registration_threshold: number | null;
   nodes: NodeStatusInfo[];
 }
 

@@ -72,3 +72,11 @@ export interface DeleteKSNodeRequest {
 export interface DeleteKSNodeResponse {
   node_id: string;
 }
+
+export interface UpdateKeyShareNodeMetaRequest {
+  registration_threshold: number | null;
+}
+
+export interface UpdateKeyShareNodeMetaResponse {
+  registration_threshold: number | null;
+}

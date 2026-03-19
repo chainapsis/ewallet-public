@@ -8,6 +8,7 @@ import {
   commitAll,
   createOkoApiCommitRevealParams,
   type KsnCommitTarget,
+  resolvePendingCommits,
 } from "@oko-wallet-attached/crypto/commit_reveal";
 import { reshareUserKeySharesV2 } from "@oko-wallet-attached/crypto/reshare_v2";
 import { signInV2 } from "@oko-wallet-attached/requests/oko_api";
@@ -24,9 +25,11 @@ export async function handleReshareV2(
   apiKey?: string,
 ): Promise<Result<UserSignInResultV2, OAuthSignInError>> {
   const { nodes } = keyshareNodeMeta;
+  const registrationThreshold =
+    keyshareNodeMeta.registration_threshold ?? nodes.length;
 
   // 1. Prepare commit targets (all nodes) with "reshare" operation type
-  // For reshare, all nodes must commit since we send reshared shares to all of them
+  // Use registration_threshold to allow partial success when some nodes are down
   const ksnCommitTargets: KsnCommitTarget[] = nodes.map((node) => ({
     nodeUrl: node.endpoint,
     operationType: "reshare" as const,
@@ -36,7 +39,7 @@ export async function handleReshareV2(
     authType,
     idToken,
     ksnCommitTargets,
-    nodes.length, // All nodes must commit for reshare
+    registrationThreshold,
   );
   if (!commitRes.success) {
     return {
@@ -44,7 +47,10 @@ export async function handleReshareV2(
       err: { type: "reshare_fail", error: commitRes.err },
     };
   }
-  const { session } = commitRes.data;
+  const session = await resolvePendingCommits(
+    commitRes.data.session,
+    commitRes.data.pendingCommits,
+  );
 
   // 3. Sign in to Oko API
   const signInCommitRevealRes = createOkoApiCommitRevealParams(
@@ -115,6 +121,8 @@ export async function handleReshareV2(
   }
 
   // 4. Call reshareUserKeySharesV2 with commit-reveal session
+  // Use session-based endpoints (includes both readyNodes and resolved pending nodes)
+  const committedNodeEndpoints = Object.keys(session.ksn_node_pubkeys);
   const reshareRes = await reshareUserKeySharesV2(
     idToken,
     authType,
@@ -125,6 +133,7 @@ export async function handleReshareV2(
       serverVerifyingShare: serverVerifyingShareRes.data,
     },
     session,
+    committedNodeEndpoints,
   );
   if (!reshareRes.success) {
     return {

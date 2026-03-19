@@ -106,6 +106,7 @@ export async function handleExistingUser(
       // Update keyshare node meta to mark the lost node
       const updatedNodeMeta: KeyShareNodeMetaWithNodeStatusInfo = {
         threshold: keyshareNodeMeta.threshold,
+        registration_threshold: keyshareNodeMeta.registration_threshold,
         nodes: keyshareNodeMeta.nodes.map((n) =>
           n.name === error.affectedNode.name
             ? {

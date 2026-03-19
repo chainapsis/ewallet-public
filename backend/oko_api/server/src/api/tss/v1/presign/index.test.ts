@@ -143,6 +143,7 @@ async function setUpTssStage(pool: Pool) {
 
   await insertKeyShareNodeMeta(pool, {
     sss_threshold: SSS_THRESHOLD,
+    registration_threshold: null,
   });
 
   const ksNodeIds = await setUpKSNodes(pool);

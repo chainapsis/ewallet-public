@@ -15,6 +15,7 @@ import {
   createKsnCommitRevealParams,
   createOkoApiCommitRevealParams,
   type KsnCommitTarget,
+  resolvePendingCommits,
 } from "@oko-wallet-attached/crypto/commit_reveal";
 import { encodePoint256ToKeyShareString } from "@oko-wallet-attached/crypto/key_share_utils";
 import { splitUserKeyShares } from "@oko-wallet-attached/crypto/keygen";
@@ -81,8 +82,9 @@ export async function handleNewUserV2(
   } = ed25519KeygenSplitRes.data;
 
   // 4. Commit to oko_api and ks nodes
-  // For sign_up, all nodes must succeed since we register to all of them
   const { nodes } = keyshareNodeMeta;
+  const registrationThreshold =
+    keyshareNodeMeta.registration_threshold ?? nodes.length;
   const ksnCommitTargets: KsnCommitTarget[] = nodes.map((node) => ({
     nodeUrl: node.endpoint,
     operationType: "sign_up",
@@ -92,7 +94,7 @@ export async function handleNewUserV2(
     authType,
     idToken,
     ksnCommitTargets,
-    nodes.length, // All nodes must commit for sign_up
+    registrationThreshold,
   );
   if (!commitRes.success) {
     return {
@@ -100,7 +102,10 @@ export async function handleNewUserV2(
       err: { type: "sign_in_request_fail", error: commitRes.err },
     };
   }
-  const { session } = commitRes.data;
+  const session = await resolvePendingCommits(
+    commitRes.data.session,
+    commitRes.data.pendingCommits,
+  );
 
   // 5. Send key shares by both curves to ks nodes using registerKeySharesV2
   const registerKeySharesResults: Result<void, string>[] = await Promise.all(
@@ -150,10 +155,13 @@ export async function handleNewUserV2(
       );
     }),
   );
-  const registerErrResults = registerKeySharesResults.filter(
-    (result) => result.success === false,
-  );
-  if (registerErrResults.length > 0) {
+  const registerSuccessCount = registerKeySharesResults.filter(
+    (result) => result.success === true,
+  ).length;
+  if (registerSuccessCount < registrationThreshold) {
+    const registerErrResults = registerKeySharesResults.filter(
+      (result) => result.success === false,
+    );
     return {
       success: false,
       err: {

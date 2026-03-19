@@ -55,6 +55,7 @@ describe("tss_session_test", () => {
     await resetPgDatabase(pool);
     await insertKeyShareNodeMeta(pool, {
       sss_threshold: SSS_THRESHOLD,
+      registration_threshold: null,
     });
   });
 

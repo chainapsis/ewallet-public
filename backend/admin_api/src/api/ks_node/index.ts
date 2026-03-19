@@ -1,3 +1,4 @@
+import { updateRegistrationThreshold } from "@oko-wallet/oko-pg-interface/key_share_node_meta";
 import {
   deleteKSNodeById,
   getAllKSNodesWithHealthCheck,
@@ -18,6 +19,8 @@ import type {
   GetAllKSNodeResponse,
   GetKSNodeByIdRequest,
   GetKSNodeByIdResponse,
+  UpdateKeyShareNodeMetaRequest,
+  UpdateKeyShareNodeMetaResponse,
   UpdateKSNodeRequest,
   UpdateKSNodeResponse,
 } from "@oko-wallet/oko-types/admin";
@@ -323,6 +326,38 @@ export async function deleteKSNode(
       success: false,
       code: "UNKNOWN_ERROR",
       msg: `Failed to delete ksNode: ${err}`,
+    };
+  }
+}
+
+export async function updateKeyShareNodeMeta(
+  db: Pool,
+  body: UpdateKeyShareNodeMetaRequest,
+): Promise<OkoApiResponse<UpdateKeyShareNodeMetaResponse>> {
+  try {
+    const result = await updateRegistrationThreshold(
+      db,
+      body.registration_threshold,
+    );
+    if (!result.success) {
+      return {
+        success: false,
+        code: "INVALID_REQUEST",
+        msg: result.err,
+      };
+    }
+
+    return {
+      success: true,
+      data: {
+        registration_threshold: result.data.registration_threshold,
+      },
+    };
+  } catch (err) {
+    return {
+      success: false,
+      code: "UNKNOWN_ERROR",
+      msg: `Failed to update key share node meta: ${err}`,
     };
   }
 }

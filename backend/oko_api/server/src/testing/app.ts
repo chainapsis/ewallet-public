@@ -4,6 +4,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import winston from "winston";
 
+import { makeLogRouterV1 } from "@oko-wallet-api/routes/log_v1";
 import { makeTSSRouterV1 } from "@oko-wallet-api/routes/tss_v1";
 import { makeTSSRouterV2 } from "@oko-wallet-api/routes/tss_v2";
 
@@ -43,6 +44,7 @@ export function makeApp(env: TestEnvs) {
 
   app.use("/tss/v1", makeTSSRouterV1());
   app.use("/tss/v2", makeTSSRouterV2());
+  app.use("/log/v1", makeLogRouterV1());
 
   const e = env as any;
   app.locals.jwt_secret = e.JWT_SECRET;
