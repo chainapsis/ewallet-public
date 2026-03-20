@@ -7,6 +7,7 @@ import { forgotPassword } from "./forgot_password";
 import { getCustomerApiKeys } from "./get_customer_api_keys";
 import { getCustomerInfo } from "./get_customer_info";
 import { getTeamMembers } from "./get_team_members";
+import { inviteTeamMember } from "./invite_team_member";
 import { resetPasswordConfirm } from "./reset_password_confirm";
 import { sendCode } from "./send_code";
 import { signIn } from "./signin";
@@ -15,6 +16,7 @@ import { verifyLogin } from "./verify_login";
 import { verifyResetCode } from "./verify_reset_code";
 import {
   customerJwtMiddleware,
+  requireAdmin,
   resolveTeamMember,
 } from "@oko-wallet-ctd-api/middleware/auth";
 import { customerLogoUploadMiddleware } from "@oko-wallet-ctd-api/middleware/multer";
@@ -93,6 +95,14 @@ export function makeCustomerRouter() {
     customerJwtMiddleware,
     resolveTeamMember,
     getTeamMembers,
+  );
+
+  router.post(
+    "/customer/team/invite_member",
+    customerJwtMiddleware,
+    resolveTeamMember,
+    requireAdmin,
+    inviteTeamMember,
   );
 
   router.post(
