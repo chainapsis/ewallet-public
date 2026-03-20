@@ -616,6 +616,28 @@ export async function countActiveMembers(
   }
 }
 
+export async function getCTDUserByEmailAndCustomerId(
+  db: Pool | PoolClient,
+  email: string,
+  customerId: string,
+): Promise<Result<CustomerDashboardUser | null, string>> {
+  const query = `
+    SELECT *
+    FROM customer_dashboard_users
+    WHERE email = $1 AND customer_id = $2 AND status = 'ACTIVE'
+  `;
+
+  try {
+    const result = await db.query(query, [email, customerId]);
+    return {
+      success: true,
+      data: result.rows[0] ?? null,
+    };
+  } catch (error) {
+    return { success: false, err: String(error) };
+  }
+}
+
 export async function getActiveMembersByCustomerId(
   db: Pool | PoolClient,
   customerId: string,
