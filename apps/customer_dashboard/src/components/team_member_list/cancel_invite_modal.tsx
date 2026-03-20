@@ -8,10 +8,10 @@ import { type FC, useRef } from "react";
 import { IconPattern } from "./icon_pattern";
 import inviteStyles from "./invite_modal.module.scss";
 import styles from "./leave_team_modal.module.scss";
-import type { TeamMember } from "./mock_data";
+import type { TeamListItem } from "./types";
 
 interface CancelInviteModalProps {
-  member: TeamMember;
+  member: TeamListItem;
   onCancelInvite: () => void;
   onClose: () => void;
 }

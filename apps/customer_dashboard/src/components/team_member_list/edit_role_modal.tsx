@@ -8,10 +8,10 @@ import { type FC, useRef, useState } from "react";
 
 import { IconPattern } from "./icon_pattern";
 import styles from "./invite_modal.module.scss";
-import type { TeamMember } from "./mock_data";
+import type { TeamListItem } from "./types";
 
 interface EditRoleModalProps {
-  member: TeamMember;
+  member: TeamListItem;
   onUpdate: (role: "Admin" | "Member") => void;
   onClose: () => void;
 }
@@ -57,7 +57,9 @@ export const EditRoleModal: FC<EditRoleModalProps> = ({
   onUpdate,
   onClose,
 }) => {
-  const [role, setRole] = useState<"Admin" | "Member">(member.role);
+  const [role, setRole] = useState<"Admin" | "Member">(
+    member.role === "admin" ? "Admin" : "Member",
+  );
   const mouseDownOnOverlay = useRef(false);
   const initial = member.email.charAt(0).toUpperCase();
 
