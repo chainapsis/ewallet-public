@@ -20,14 +20,14 @@ const BASE_MEMBERS: TeamMember[] = [
   {
     user_id: "2",
     email: "name@domain.com",
-    role: "Admin",
+    role: "Member",
     status: "Invitation Pending",
     is_me: false,
   },
   {
     user_id: "3",
     email: "name@domain.com",
-    role: "Admin",
+    role: "Member",
     status: "Active",
     is_me: false,
   },

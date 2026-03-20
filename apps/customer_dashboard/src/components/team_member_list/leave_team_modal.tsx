@@ -12,11 +12,13 @@ import styles from "./leave_team_modal.module.scss";
 interface LeaveTeamModalProps {
   onLeave: () => void;
   onClose: () => void;
+  isSoleMember?: boolean;
 }
 
 export const LeaveTeamModal: FC<LeaveTeamModalProps> = ({
   onLeave,
   onClose,
+  isSoleMember = false,
 }) => {
   const mouseDownOnOverlay = useRef(false);
 
@@ -55,8 +57,9 @@ export const LeaveTeamModal: FC<LeaveTeamModalProps> = ({
               Are you sure you want to leave?
             </Typography>
             <Typography size="sm" weight="regular" color="tertiary">
-              Once you leave, you won't be able to access this team anymore.
-              You'll need a new invite from an admin to rejoin.
+              {isSoleMember
+                ? "You're the only member of this team. Leaving will delete the team."
+                : "Once you leave, you won't be able to access this team anymore. You'll need a new invite from an admin to rejoin."}
             </Typography>
           </div>
         </div>
@@ -66,7 +69,7 @@ export const LeaveTeamModal: FC<LeaveTeamModalProps> = ({
             Cancel
           </Button>
           <Button variant="primary" size="md" fullWidth onClick={onLeave}>
-            Leave
+            {isSoleMember ? "Leave Anyway" : "Leave"}
           </Button>
         </div>
       </div>

@@ -1,0 +1,124 @@
+.transferModalOpen {
+  min-height: 471px;
+}
+
+.confirmBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px 24px 0;
+}
+
+.dropdownWrapper {
+  position: relative;
+  margin-top: 6px;
+}
+
+.dropdownTrigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  background: var(--bg-primary);
+  box-shadow: 0 1px 2px 0 rgba(10, 13, 18, 0.05);
+  cursor: pointer;
+  text-align: left;
+}
+
+
+.dropdownText {
+  flex: 1;
+  font-size: 15px;
+  line-height: 22px;
+  color: var(--fg-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dropdownPlaceholder {
+  color: var(--fg-quinary);
+}
+
+.chevron {
+  flex-shrink: 0;
+  transition: transform 0.15s;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  overflow: hidden;
+}
+
+.dropdownSearch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-secondary);
+}
+
+.dropdownSearchInput {
+  flex: 1;
+  border: none;
+  background: none;
+  outline: none;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--fg-primary);
+
+  &::placeholder {
+    color: var(--fg-quinary);
+  }
+}
+
+.dropdownList {
+  max-height: 132px;
+  overflow-y: auto;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-bottom: 1px solid var(--border-secondary);
+  background: none;
+  cursor: pointer;
+  text-align: left;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: var(--bg-primary-hover);
+  }
+}
+
+.checkIcon {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.dropdownEmpty {
+  padding: 24px 14px;
+  text-align: center;
+}

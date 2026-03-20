@@ -27,6 +27,7 @@ import { RemoveMemberModal } from "./remove_member_modal";
 import { ResendInviteModal } from "./resend_invite_modal";
 import styles from "./team_member_list.module.scss";
 import { TeamMemberRow } from "./team_member_row";
+import { TransferAdminModal } from "./transfer_admin_modal";
 import { displayToast } from "@oko-wallet-ct-dashboard/components/toast";
 
 type FilterTab = "all" | "admins" | "members" | "active" | "pending";
@@ -108,17 +109,41 @@ const getPageNumbers = (
   ];
 };
 
-const SortIcon = () => (
+type SortDirection = "asc" | "desc" | null;
+
+const SortIcon: FC<{ direction: SortDirection }> = ({ direction }) => (
   <span className={styles.sortIconWrapper}>
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-      <path
-        d="M3.5 4.5L6 2L8.5 4.5M3.5 7.5L6 10L8.5 7.5"
-        stroke="var(--fg-quaternary)"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    {direction === "asc" ? (
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <path
+          d="M6 10V2M6 2L3 5M6 2L9 5"
+          stroke="var(--fg-primary)"
+          strokeWidth="1.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ) : direction === "desc" ? (
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <path
+          d="M6 2V10M6 10L3 7M6 10L9 7"
+          stroke="var(--fg-primary)"
+          strokeWidth="1.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ) : (
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <path
+          d="M3.5 4.5L6 2L8.5 4.5M3.5 7.5L6 10L8.5 7.5"
+          stroke="var(--fg-quaternary)"
+          strokeWidth="1.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    )}
   </span>
 );
 
@@ -133,8 +158,33 @@ export const TeamMemberList: FC = () => {
   const [resendMember, setResendMember] = useState<TeamMember | null>(null);
   const [cancelInviteMember, setCancelInviteMember] =
     useState<TeamMember | null>(null);
+  const [showTransferModal, setShowTransferModal] = useState(false);
+  const [sortColumn, setSortColumn] = useState<string | null>("role");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      if (sortDirection === "desc") {
+        setSortDirection("asc");
+      } else if (sortDirection === "asc") {
+        setSortColumn(null);
+        setSortDirection(null);
+      }
+    } else {
+      setSortColumn(column);
+      setSortDirection("desc");
+    }
+  };
+
+  const getSortDirection = (column: string): SortDirection =>
+    sortColumn === column ? sortDirection : null;
 
   const isAdmin = MOCK_IS_ADMIN;
+  const isSoleAdmin =
+    isAdmin &&
+    MOCK_TEAM_MEMBERS.filter((m) => m.role === "Admin" && m.status === "Active")
+      .length === 1;
+  const isSoleMember = MOCK_TEAM_MEMBERS.length === 1;
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -186,14 +236,14 @@ export const TeamMemberList: FC = () => {
           {"{dApp Name}"} Team
         </Typography>
         {isAdmin ? (
-          <Button
-            variant="primary"
-            size="md"
+          <button
+            type="button"
+            className={styles.inviteButton}
             onClick={() => setShowInviteModal(true)}
           >
             <UsersIcon color="currentColor" size={20} />
             Invite
-          </Button>
+          </button>
         ) : (
           <Button
             variant="secondary"
@@ -315,22 +365,31 @@ export const TeamMemberList: FC = () => {
           <Table noWrap className={styles.table}>
             <TableHead className={styles.tableHead}>
               <TableRow>
-                <TableHeaderCell className={styles.emailColumn}>
+                <TableHeaderCell
+                  className={styles.emailColumn}
+                  onClick={() => handleSort("email")}
+                >
                   <div className={styles.sortableHeader}>
                     Email
-                    <SortIcon />
+                    <SortIcon direction={getSortDirection("email")} />
                   </div>
                 </TableHeaderCell>
-                <TableHeaderCell className={styles.roleColumn}>
+                <TableHeaderCell
+                  className={styles.roleColumn}
+                  onClick={() => handleSort("role")}
+                >
                   <div className={styles.sortableHeader}>
                     Role
-                    <SortIcon />
+                    <SortIcon direction={getSortDirection("role")} />
                   </div>
                 </TableHeaderCell>
-                <TableHeaderCell className={styles.statusColumn}>
+                <TableHeaderCell
+                  className={styles.statusColumn}
+                  onClick={() => handleSort("status")}
+                >
                   <div className={styles.sortableHeader}>
                     Status
-                    <SortIcon />
+                    <SortIcon direction={getSortDirection("status")} />
                   </div>
                 </TableHeaderCell>
                 <TableHeaderCell className={styles.actionCell} />
@@ -342,7 +401,15 @@ export const TeamMemberList: FC = () => {
                   key={member.user_id}
                   member={member}
                   isAdmin={isAdmin}
-                  onLeave={() => setShowLeaveModal(true)}
+                  onLeave={() => {
+                    if (isSoleMember) {
+                      setShowLeaveModal(true);
+                    } else if (isSoleAdmin) {
+                      setShowTransferModal(true);
+                    } else {
+                      setShowLeaveModal(true);
+                    }
+                  }}
                   onEditRole={setEditRoleMember}
                   onRemove={setRemoveMember}
                   onResend={setResendMember}
@@ -401,6 +468,7 @@ export const TeamMemberList: FC = () => {
       )}
       {showLeaveModal && (
         <LeaveTeamModal
+          isSoleMember={isSoleMember}
           onLeave={() => {
             setShowLeaveModal(false);
             displayToast({
@@ -457,6 +525,14 @@ export const TeamMemberList: FC = () => {
             displayToast({ variant: "success", title: "Invitation resent" });
           }}
           onClose={() => setResendMember(null)}
+        />
+      )}
+      {showTransferModal && (
+        <TransferAdminModal
+          onTransfer={() => {
+            setShowTransferModal(false);
+          }}
+          onClose={() => setShowTransferModal(false)}
         />
       )}
       {cancelInviteMember && (
