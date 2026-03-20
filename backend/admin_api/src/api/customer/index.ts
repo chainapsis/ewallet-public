@@ -92,6 +92,23 @@ export async function createCustomer(
       };
     }
 
+    // Check if email is already associated with a team
+    const existingUserRes = await getCTDUserWithCustomerByEmail(db, body.email);
+    if (!existingUserRes.success) {
+      return {
+        success: false,
+        code: "UNKNOWN_ERROR",
+        msg: `Failed to check existing user: ${existingUserRes.err}`,
+      };
+    }
+    if (existingUserRes.data !== null) {
+      return {
+        success: false,
+        code: "DUPLICATE_TEAM_MEMBER",
+        msg: "This email is already associated with a team",
+      };
+    }
+
     const theme: CustomerTheme =
       body.theme === "light" || body.theme === "dark" || body.theme === "system"
         ? body.theme
