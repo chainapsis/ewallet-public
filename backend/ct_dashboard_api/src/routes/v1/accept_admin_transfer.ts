@@ -148,7 +148,7 @@ export async function acceptAdminTransfer(
       await updateAdminTransferStatus(client, transfer.transfer_id, "ACCEPTED");
 
       await client.query("COMMIT");
-    } catch (txError) {
+    } catch (_txError) {
       await client.query("ROLLBACK");
       res.status(500).json({
         success: false,

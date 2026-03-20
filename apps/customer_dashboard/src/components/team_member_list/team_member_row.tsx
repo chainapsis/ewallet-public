@@ -8,17 +8,17 @@ import { Tooltip } from "@oko-wallet/oko-common-ui/tooltip";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import type { FC } from "react";
 
-import type { TeamMember } from "./mock_data";
 import styles from "./team_member_list.module.scss";
+import type { TeamListItem } from "./types";
 
 interface TeamMemberRowProps {
-  member: TeamMember;
+  member: TeamListItem;
   isAdmin: boolean;
   onLeave: () => void;
-  onEditRole: (member: TeamMember) => void;
-  onRemove: (member: TeamMember) => void;
-  onResend: (member: TeamMember) => void;
-  onCancelInvite: (member: TeamMember) => void;
+  onEditRole: (member: TeamListItem) => void;
+  onRemove: (member: TeamListItem) => void;
+  onResend: (member: TeamListItem) => void;
+  onCancelInvite: (member: TeamListItem) => void;
 }
 
 const ShieldIcon = () => (
@@ -71,14 +71,14 @@ const XCircleIcon = () => (
 );
 
 const MemberActions: FC<{
-  member: TeamMember;
+  member: TeamListItem;
   onLeave: () => void;
   onEditRole: () => void;
   onRemove: () => void;
   onResend: () => void;
   onCancelInvite: () => void;
 }> = ({ member, onLeave, onEditRole, onRemove, onResend, onCancelInvite }) => {
-  if (member.is_me) {
+  if (member.is_current_user) {
     return (
       <>
         <Tooltip
@@ -194,12 +194,12 @@ export const TeamMemberRow: FC<TeamMemberRowProps> = ({
           <div className={styles.avatar}>{initial}</div>
           <Typography size="sm" weight="medium" color="primary">
             {member.email}
-            {member.is_me && " (You)"}
+            {member.is_current_user && " (You)"}
           </Typography>
         </div>
       </TableCell>
       <TableCell>
-        {member.role === "Admin" ? (
+        {member.role === "admin" ? (
           <span className={styles.roleBadge}>
             <ShieldIcon />
             Admin
@@ -235,7 +235,7 @@ export const TeamMemberRow: FC<TeamMemberRowProps> = ({
             />
           </div>
         ) : (
-          member.is_me && (
+          member.is_current_user && (
             <Tooltip
               title="Leave Team"
               placement="top"

@@ -128,7 +128,7 @@ export async function leaveTeam(
         await softDeleteCTDUser(client, userId, customerId);
         await deleteCustomer(client, { customer_id: customerId });
         await client.query("COMMIT");
-      } catch (txError) {
+      } catch (_txError) {
         await client.query("ROLLBACK");
         res.status(500).json({
           success: false,
