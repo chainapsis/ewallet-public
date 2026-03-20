@@ -21,10 +21,10 @@ export async function buildFrost(..._args: any[]) {
   expectSuccess(wasmRet, "wasm build failed");
   console.log("%s %s", chalk.bold.green("Done"), "build wasm frost keplr");
 
-  const copyRet = spawnSync("yarn", ["run", "copy_wasm"], {
+  const copyRet = spawnSync("yarn", ["run", "copy_wasm_frost"], {
     cwd: paths.oko_attached,
     stdio: "inherit",
   });
-  expectSuccess(copyRet, "copy failed");
-  console.log("%s %s", chalk.bold.green("Done"), "copy wasm");
+  expectSuccess(copyRet, "copy frost wasm failed");
+  console.log("%s %s", chalk.bold.green("Done"), "copy wasm frost");
 }

@@ -20,4 +20,11 @@ export async function buildCs(..._args: any[]) {
   });
   expectSuccess(caitSithWasmRet, "wasm build failed");
   console.log("%s %s", chalk.bold.green("Done"), "build wasm cait sith");
+
+  const copyRet = spawnSync("yarn", ["run", "copy_wasm_cs"], {
+    cwd: paths.oko_attached,
+    stdio: "inherit",
+  });
+  expectSuccess(copyRet, "copy cait sith wasm failed");
+  console.log("%s %s", chalk.bold.green("Done"), "copy wasm cait sith");
 }
