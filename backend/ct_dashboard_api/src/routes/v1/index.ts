@@ -10,11 +10,13 @@ import { getCustomerApiKeys } from "./get_customer_api_keys";
 import { getCustomerInfo } from "./get_customer_info";
 import { getTeamMembers } from "./get_team_members";
 import { inviteTeamMember } from "./invite_team_member";
+import { removeTeamMember } from "./remove_team_member";
 import { resendInvitation } from "./resend_invitation";
 import { resetPasswordConfirm } from "./reset_password_confirm";
 import { sendCode } from "./send_code";
 import { signIn } from "./signin";
 import { updateCustomerInfoRoute } from "./update_customer_info";
+import { updateMemberRole } from "./update_member_role";
 import { verifyLogin } from "./verify_login";
 import { verifyResetCode } from "./verify_reset_code";
 import {
@@ -126,6 +128,22 @@ export function makeCustomerRouter() {
     resolveTeamMember,
     requireAdmin,
     cancelInvitation,
+  );
+
+  router.post(
+    "/customer/team/update_member_role",
+    customerJwtMiddleware,
+    resolveTeamMember,
+    requireAdmin,
+    updateMemberRole,
+  );
+
+  router.post(
+    "/customer/team/remove_member",
+    customerJwtMiddleware,
+    resolveTeamMember,
+    requireAdmin,
+    removeTeamMember,
   );
 
   router.post(
