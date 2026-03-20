@@ -15,7 +15,8 @@ Self-hosting uses Docker images that are built locally, so you need a working
 development setup before running any Docker Compose stacks. Make sure you
 complete the prerequisites and build steps in
 [Development Setup](../development/environment-setup) (Node/Yarn/Rust, install,
-and `yarn ci build_pkgs` / `yarn ci build_cs`) before continuing.
+and `yarn ci build_pkgs` / `yarn ci build_cs` / `yarn ci build_frost`) before
+continuing.
 
 ## Components (to run)
 

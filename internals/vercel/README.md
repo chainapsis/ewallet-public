@@ -12,6 +12,7 @@ If you haven't built wasm before, in the workspace root,
 
 ```sh
 yarn ci build_cs
+yarn ci build_frost
 ```
 
 #### Preview
