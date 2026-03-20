@@ -194,7 +194,7 @@ export async function inviteTeamMember(
       },
     });
     return;
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       code: "UNKNOWN_ERROR",

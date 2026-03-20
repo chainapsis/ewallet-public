@@ -113,7 +113,7 @@ export async function resolveTeamMember(
 
     next();
     return;
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({
       success: false,
       code: "UNKNOWN_ERROR",
