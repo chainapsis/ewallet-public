@@ -27,6 +27,29 @@ export type AdminTransferStatus =
   | "REJECTED"
   | "EXPIRED";
 
+export interface GetTeamMembersResponse {
+  members: TeamMember[];
+  pending_invitations: PendingInvitation[];
+  total: number;
+  team_name: string;
+}
+
+export interface InviteTeamMemberResponse {
+  invitation_id: string;
+  email: string;
+  role: CustomerDashboardUserRole;
+}
+
+export interface AcceptInvitationResponse {
+  action: "joined" | "signup_required";
+  email: string;
+  customer_id: string;
+}
+
+export interface LeaveTeamResponse {
+  action: "left" | "transfer_requested";
+}
+
 export interface AdminTransferRequest {
   transfer_id: string;
   customer_id: string;
