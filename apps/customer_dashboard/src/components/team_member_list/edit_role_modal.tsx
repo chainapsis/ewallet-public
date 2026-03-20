@@ -6,6 +6,7 @@ import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import cn from "classnames";
 import { type FC, useRef, useState } from "react";
 
+import { IconPattern } from "./icon_pattern";
 import styles from "./invite_modal.module.scss";
 import type { TeamMember } from "./mock_data";
 
@@ -84,8 +85,11 @@ export const EditRoleModal: FC<EditRoleModalProps> = ({
         </button>
 
         <div className={styles.header}>
-          <div className={styles.iconWrapper}>
-            <UserEditIcon />
+          <div className={styles.iconContainer}>
+            <IconPattern className={styles.iconPattern} />
+            <div className={styles.iconWrapper}>
+              <UserEditIcon />
+            </div>
           </div>
           <div className={styles.textContent}>
             <Typography size="md" weight="semibold" color="primary">

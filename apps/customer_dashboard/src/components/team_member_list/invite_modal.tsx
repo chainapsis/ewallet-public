@@ -7,6 +7,7 @@ import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import cn from "classnames";
 import { type FC, useRef, useState } from "react";
 
+import { IconPattern } from "./icon_pattern";
 import styles from "./invite_modal.module.scss";
 
 interface InviteModalProps {
@@ -132,8 +133,11 @@ export const InviteModal: FC<InviteModalProps> = ({ onInvite, onClose }) => {
         </button>
 
         <div className={styles.header}>
-          <div className={styles.iconWrapper}>
-            <UserPlusIcon />
+          <div className={styles.iconContainer}>
+            <IconPattern className={styles.iconPattern} />
+            <div className={styles.iconWrapper}>
+              <UserPlusIcon />
+            </div>
           </div>
           <div className={styles.textContent}>
             <Typography size="md" weight="semibold" color="primary">

@@ -25,9 +25,27 @@
 
 .header {
   padding: 24px 24px 0;
+  overflow: hidden;
+}
+
+.iconContainer {
+  position: relative;
+  width: 48px;
+  height: 48px;
+}
+
+.iconPattern {
+  position: absolute;
+  top: -24px;
+  left: -24px;
+  width: 216px;
+  height: 216px;
+  pointer-events: none;
 }
 
 .iconWrapper {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
