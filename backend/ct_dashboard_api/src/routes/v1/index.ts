@@ -1,5 +1,6 @@
 import express from "express";
 
+import { cancelInvitation } from "./cancel_invitation";
 import { changePassword } from "./change_password";
 import { createApiKey } from "./create_api_key";
 import { deleteApiKey } from "./delete_api_key";
@@ -8,6 +9,7 @@ import { getCustomerApiKeys } from "./get_customer_api_keys";
 import { getCustomerInfo } from "./get_customer_info";
 import { getTeamMembers } from "./get_team_members";
 import { inviteTeamMember } from "./invite_team_member";
+import { resendInvitation } from "./resend_invitation";
 import { resetPasswordConfirm } from "./reset_password_confirm";
 import { sendCode } from "./send_code";
 import { signIn } from "./signin";
@@ -103,6 +105,22 @@ export function makeCustomerRouter() {
     resolveTeamMember,
     requireAdmin,
     inviteTeamMember,
+  );
+
+  router.post(
+    "/customer/team/resend_invitation",
+    customerJwtMiddleware,
+    resolveTeamMember,
+    requireAdmin,
+    resendInvitation,
+  );
+
+  router.post(
+    "/customer/team/cancel_invitation",
+    customerJwtMiddleware,
+    resolveTeamMember,
+    requireAdmin,
+    cancelInvitation,
   );
 
   router.post(
