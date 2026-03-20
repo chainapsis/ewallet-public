@@ -18,6 +18,7 @@ import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import cn from "classnames";
 import { type FC, useEffect, useMemo, useRef, useState } from "react";
 
+import { CancelInviteModal } from "./cancel_invite_modal";
 import { EditRoleModal } from "./edit_role_modal";
 import { InviteModal } from "./invite_modal";
 import { LeaveTeamModal } from "./leave_team_modal";
@@ -26,6 +27,7 @@ import { RemoveMemberModal } from "./remove_member_modal";
 import { ResendInviteModal } from "./resend_invite_modal";
 import styles from "./team_member_list.module.scss";
 import { TeamMemberRow } from "./team_member_row";
+import { displayToast } from "@oko-wallet-ct-dashboard/components/toast";
 
 type FilterTab = "all" | "admins" | "members" | "active" | "pending";
 
@@ -129,6 +131,8 @@ export const TeamMemberList: FC = () => {
   const [editRoleMember, setEditRoleMember] = useState<TeamMember | null>(null);
   const [removeMember, setRemoveMember] = useState<TeamMember | null>(null);
   const [resendMember, setResendMember] = useState<TeamMember | null>(null);
+  const [cancelInviteMember, setCancelInviteMember] =
+    useState<TeamMember | null>(null);
 
   const isAdmin = MOCK_IS_ADMIN;
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -342,6 +346,7 @@ export const TeamMemberList: FC = () => {
                   onEditRole={setEditRoleMember}
                   onRemove={setRemoveMember}
                   onResend={setResendMember}
+                  onCancelInvite={setCancelInviteMember}
                 />
               ))}
             </TableBody>
@@ -396,35 +401,75 @@ export const TeamMemberList: FC = () => {
       )}
       {showLeaveModal && (
         <LeaveTeamModal
-          onLeave={() => setShowLeaveModal(false)}
+          onLeave={() => {
+            setShowLeaveModal(false);
+            displayToast({
+              variant: "success",
+              title: "You have left the team",
+            });
+          }}
           onClose={() => setShowLeaveModal(false)}
         />
       )}
       {showInviteModal && (
         <InviteModal
-          onInvite={() => setShowInviteModal(false)}
+          onInvite={() => {
+            setShowInviteModal(false);
+            displayToast({
+              variant: "success",
+              title: "The invitation has been sent",
+            });
+          }}
           onClose={() => setShowInviteModal(false)}
         />
       )}
       {editRoleMember && (
         <EditRoleModal
           member={editRoleMember}
-          onUpdate={() => setEditRoleMember(null)}
+          onUpdate={() => {
+            setEditRoleMember(null);
+            displayToast({
+              variant: "success",
+              title: "The role has been updated",
+            });
+          }}
           onClose={() => setEditRoleMember(null)}
         />
       )}
       {removeMember && (
         <RemoveMemberModal
           member={removeMember}
-          onRemove={() => setRemoveMember(null)}
+          onRemove={() => {
+            setRemoveMember(null);
+            displayToast({
+              variant: "success",
+              title: "User has been removed",
+            });
+          }}
           onClose={() => setRemoveMember(null)}
         />
       )}
       {resendMember && (
         <ResendInviteModal
           member={resendMember}
-          onResend={() => setResendMember(null)}
+          onResend={() => {
+            setResendMember(null);
+            displayToast({ variant: "success", title: "Invitation resent" });
+          }}
           onClose={() => setResendMember(null)}
+        />
+      )}
+      {cancelInviteMember && (
+        <CancelInviteModal
+          member={cancelInviteMember}
+          onCancelInvite={() => {
+            setCancelInviteMember(null);
+            displayToast({
+              variant: "success",
+              title: "Invitation has been canceled",
+            });
+          }}
+          onClose={() => setCancelInviteMember(null)}
         />
       )}
     </div>

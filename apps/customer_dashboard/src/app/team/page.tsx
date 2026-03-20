@@ -4,6 +4,7 @@ import { DashboardBody } from "@oko-wallet-ct-dashboard/components/dashboard_bod
 import { DashboardHeader } from "@oko-wallet-ct-dashboard/components/dashboard_header/dashboard_header";
 import { LeftBar } from "@oko-wallet-ct-dashboard/components/left_bar/left_bar";
 import { TeamMemberList } from "@oko-wallet-ct-dashboard/components/team_member_list/team_member_list";
+import { ToastContainer } from "@oko-wallet-ct-dashboard/components/toast";
 
 export default function TeamPage() {
   return (
@@ -14,6 +15,7 @@ export default function TeamPage() {
           <LeftBar />
           <DashboardBody>
             <TeamMemberList />
+            <ToastContainer />
           </DashboardBody>
         </div>
       </div>
