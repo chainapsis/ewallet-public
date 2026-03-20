@@ -120,12 +120,11 @@ forwarded to the operation script.
 - Build Cait Sith (tECDSA): `yarn ci build_cs`
   - Builds Rust addon (required for `oko_api` TSS operations: triples, presign,
     sign)
-  - Builds WASM (required for `oko_attached` client-side tECDSA operations)
+  - Builds WASM and copies into `oko_attached/public/pkg/` (client-side tECDSA)
 - Build FROST (tEdDSA): `yarn ci build_frost`
   - Builds Rust addon (required for `oko_api` Ed25519 TSS operations: keygen,
     sign)
-  - Builds WASM (required for `oko_attached` client-side tEdDSA operations)
-  - Copies all WASM assets into `oko_attached/public/pkg/`
+  - Builds WASM and copies into `oko_attached/public/pkg/` (client-side tEdDSA)
 - Typecheck: `yarn ci typecheck`
 - keyshare node DB migration: `yarn ci db_migrate_ksn --use-env-file`
   - With `--use-env-file`, reads `~/.oko/key_share_node*.env` to create/migrate
