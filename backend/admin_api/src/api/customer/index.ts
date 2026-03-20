@@ -182,6 +182,7 @@ export async function createCustomer(
         user_id,
         customer_id,
         email: body.email,
+        role: "admin",
         status: "ACTIVE",
         is_email_verified: false,
         password_hash,

@@ -163,8 +163,8 @@ export async function getCustomerAndCTDUserByCustomerId(
   customerDashboardUserId: string,
 ): Promise<Result<CustomerAndCTDUser, string>> {
   const query = `
-SELECT 
-  c.*, u.user_id, u.email, u.status as user_status, 
+SELECT
+  c.*, u.user_id, u.email, u.role, u.status as user_status,
   u.is_email_verified
 FROM customers c
 JOIN customer_dashboard_users u ON c.customer_id = u.customer_id
@@ -192,6 +192,7 @@ LIMIT 1
         customer_id: row.customer_id,
         user_id: row.user_id,
         email: row.email,
+        role: row.role,
         status: row.user_status,
         is_email_verified: row.is_email_verified,
       },
