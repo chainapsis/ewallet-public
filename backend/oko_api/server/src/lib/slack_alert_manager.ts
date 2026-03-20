@@ -58,28 +58,32 @@ export class SlackAlertManager {
 
     if (!existing) {
       // First occurrence — send immediately
-      this.alerts.set(key, {
-        key,
-        firstSeen: now,
-        lastSent: now,
-        suppressedCount: 0,
-        lastMessage: message,
-        resolved: false,
-        resolvedAt: null,
-      });
-      await sendSlackAlert(message, this.webhookUrl);
+      const sent = await sendSlackAlert(message, this.webhookUrl);
+      if (sent) {
+        this.alerts.set(key, {
+          key,
+          firstSeen: now,
+          lastSent: now,
+          suppressedCount: 0,
+          lastMessage: message,
+          resolved: false,
+          resolvedAt: null,
+        });
+      }
       return;
     }
 
     // Alert was previously resolved — treat as new
     if (existing.resolved) {
-      existing.firstSeen = now;
-      existing.lastSent = now;
-      existing.suppressedCount = 0;
-      existing.lastMessage = message;
-      existing.resolved = false;
-      existing.resolvedAt = null;
-      await sendSlackAlert(message, this.webhookUrl);
+      const sent = await sendSlackAlert(message, this.webhookUrl);
+      if (sent) {
+        existing.firstSeen = now;
+        existing.lastSent = now;
+        existing.suppressedCount = 0;
+        existing.lastMessage = message;
+        existing.resolved = false;
+        existing.resolvedAt = null;
+      }
       return;
     }
 
@@ -90,10 +94,12 @@ export class SlackAlertManager {
       const count = existing.suppressedCount + 1;
       const durationMin = Math.round((now - existing.firstSeen) / 60_000);
       const reminder = `[Ongoing] ${message} (${count} occurrences in the last ${durationMin} min)`;
-      existing.lastSent = now;
-      existing.suppressedCount = 0;
-      existing.lastMessage = message;
-      await sendSlackAlert(reminder, this.webhookUrl);
+      const sent = await sendSlackAlert(reminder, this.webhookUrl);
+      if (sent) {
+        existing.lastSent = now;
+        existing.suppressedCount = 0;
+        existing.lastMessage = message;
+      }
       return;
     }
 
@@ -124,27 +130,42 @@ export class SlackAlertManager {
       return;
     }
 
-    const messages: string[] = [];
+    const resolvedEntries: string[] = [];
+    const resolvedAlertKeys: string[] = [];
     for (const key of resolvedKeys) {
       const state = this.alerts.get(key);
       if (state?.resolved) {
-        messages.push(state.lastMessage);
+        resolvedEntries.push(state.lastMessage);
+        resolvedAlertKeys.push(key);
       }
     }
 
-    if (messages.length === 1) {
-      await sendSlackAlert(`[Resolved] ${messages[0]}`, this.webhookUrl);
-    } else if (messages.length > 1) {
-      const body = messages.map((m) => `  • ${m}`).join("\n");
-      await sendSlackAlert(
-        `[Resolved] ${messages.length} alerts resolved:\n${body}`,
+    let sent = false;
+    if (resolvedEntries.length === 1) {
+      sent = await sendSlackAlert(
+        `[Resolved] ${resolvedEntries[0]}`,
         this.webhookUrl,
       );
+    } else if (resolvedEntries.length > 1) {
+      const body = resolvedEntries.map((m) => `  • ${m}`).join("\n");
+      sent = await sendSlackAlert(
+        `[Resolved] ${resolvedEntries.length} alerts resolved:\n${body}`,
+        this.webhookUrl,
+      );
+    }
+
+    // Clear resolved entries after successful send to prevent repeated notifications
+    if (sent) {
+      for (const key of resolvedAlertKeys) {
+        this.alerts.delete(key);
+      }
     }
   }
 
   async batchAlert(entries: BatchAlertEntry[]): Promise<void> {
     const toSend: string[] = [];
+    const pendingNew: BatchAlertEntry[] = [];
+    const pendingReminder: { entry: BatchAlertEntry; now: number }[] = [];
 
     for (const entry of entries) {
       const now = this.now();
@@ -154,16 +175,8 @@ export class SlackAlertManager {
       const existing = this.alerts.get(entry.key);
 
       if (!existing || existing.resolved) {
-        // New or re-fired after resolution
-        this.alerts.set(entry.key, {
-          key: entry.key,
-          firstSeen: now,
-          lastSent: now,
-          suppressedCount: 0,
-          lastMessage: entry.message,
-          resolved: false,
-          resolvedAt: null,
-        });
+        // New or re-fired after resolution — defer state write until send succeeds
+        pendingNew.push(entry);
         toSend.push(entry.message);
         continue;
       }
@@ -176,9 +189,7 @@ export class SlackAlertManager {
         toSend.push(
           `[Ongoing] ${entry.message} (${count} occurrences in the last ${durationMin} min)`,
         );
-        existing.lastSent = now;
-        existing.suppressedCount = 0;
-        existing.lastMessage = entry.message;
+        pendingReminder.push({ entry, now });
       } else {
         existing.suppressedCount++;
         existing.lastMessage = entry.message;
@@ -189,14 +200,38 @@ export class SlackAlertManager {
       return;
     }
 
+    let sent = false;
     if (toSend.length === 1) {
-      await sendSlackAlert(toSend[0], this.webhookUrl);
+      sent = await sendSlackAlert(toSend[0], this.webhookUrl);
     } else {
       const body = toSend.map((m) => `  • ${m}`).join("\n");
-      await sendSlackAlert(
+      sent = await sendSlackAlert(
         `[KS Node Alert] ${toSend.length} issues detected:\n${body}`,
         this.webhookUrl,
       );
+    }
+
+    if (sent) {
+      const now = this.now();
+      for (const entry of pendingNew) {
+        this.alerts.set(entry.key, {
+          key: entry.key,
+          firstSeen: now,
+          lastSent: now,
+          suppressedCount: 0,
+          lastMessage: entry.message,
+          resolved: false,
+          resolvedAt: null,
+        });
+      }
+      for (const { entry, now: ts } of pendingReminder) {
+        const existing = this.alerts.get(entry.key);
+        if (existing) {
+          existing.lastSent = ts;
+          existing.suppressedCount = 0;
+          existing.lastMessage = entry.message;
+        }
+      }
     }
   }
 

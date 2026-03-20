@@ -1,10 +1,10 @@
 export async function sendSlackAlert(
   message: string,
   webhookUrl: string | null,
-): Promise<void> {
+): Promise<boolean> {
   if (!webhookUrl) {
     console.warn("SLACK_WEBHOOK_URL is not set. Skipping Slack alert.");
-    return;
+    return false;
   }
 
   try {
@@ -22,8 +22,11 @@ export async function sendSlackAlert(
       console.error(
         `Failed to send Slack alert: ${response.status} ${response.statusText}`,
       );
+      return false;
     }
+    return true;
   } catch (error) {
     console.error("Error sending Slack alert:", error);
+    return false;
   }
 }
