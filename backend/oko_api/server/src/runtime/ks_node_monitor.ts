@@ -6,22 +6,26 @@ import dayjs from "dayjs";
 import type { Pool } from "pg";
 import type { Logger } from "winston";
 
-import type { SlackAlertManager } from "@oko-wallet-api/lib/slack_alert_manager";
+import {
+  clearAlert,
+  shouldAlert,
+  wasAlerted,
+} from "@oko-wallet-api/lib/alert_throttle";
+import { sendSlackAlert } from "@oko-wallet-api/lib/slack";
 
 const HEARTBEAT_THRESHOLD_MINUTES = 10;
-const HEARTBEAT_COOLDOWN_MS = 15 * 60 * 1000; // 15 minutes
-const HEARTBEAT_REMINDER_MS = 30 * 60 * 1000; // 30 minutes
+const HEARTBEAT_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes
 
 export function startKSNodeHeartbeatRuntime(
   db: Pool,
   logger: Logger,
-  options: { intervalSeconds: number; alertManager: SlackAlertManager },
+  options: { intervalSeconds: number; slackWebhookUrl: string | null },
 ) {
   logger.info("Starting KS Node heartbeat runtime");
 
   const run = async () => {
     try {
-      await checkKSNodeHeartbeats(db, logger, options.alertManager);
+      await checkKSNodeHeartbeats(db, logger, options.slackWebhookUrl);
     } catch (err) {
       logger.error("KS Node heartbeat runtime error: %s", err);
     }
@@ -34,7 +38,7 @@ export function startKSNodeHeartbeatRuntime(
 async function checkKSNodeHeartbeats(
   db: Pool,
   logger: Logger,
-  alertManager: SlackAlertManager,
+  slackWebhookUrl: string | null,
 ) {
   const latestTelemetriesRes = await getLatestKSNodeTelemetries(db);
   if (!latestTelemetriesRes.success) {
@@ -48,12 +52,8 @@ async function checkKSNodeHeartbeats(
   const now = dayjs();
   const threshold = now.subtract(HEARTBEAT_THRESHOLD_MINUTES, "minute");
 
-  const unresponsiveAlerts: {
-    key: string;
-    message: string;
-    options: { cooldownMs: number; reminderIntervalMs: number };
-  }[] = [];
-  const recoveredKeys: string[] = [];
+  const toAlert: string[] = [];
+  const recovered: string[] = [];
 
   for (const telemetry of latestTelemetriesRes.data) {
     const lastUpdate = dayjs(telemetry.created_at);
@@ -61,35 +61,50 @@ async function checkKSNodeHeartbeats(
     const alertKey = `heartbeat:${publicKey}`;
 
     if (lastUpdate.isBefore(threshold)) {
-      const nodeRes = await getKSNodeByPublicKey(db, publicKey);
-      const nodeName =
-        nodeRes.success && nodeRes.data
-          ? `${nodeRes.data.node_name} (${publicKey})`
-          : publicKey;
+      if (shouldAlert(alertKey, HEARTBEAT_INTERVAL_MS)) {
+        const nodeRes = await getKSNodeByPublicKey(db, publicKey);
+        const nodeName =
+          nodeRes.success && nodeRes.data
+            ? `${nodeRes.data.node_name} (${publicKey})`
+            : publicKey;
 
-      unresponsiveAlerts.push({
-        key: alertKey,
-        message: `Node ${nodeName} has not reported telemetry for over ${HEARTBEAT_THRESHOLD_MINUTES} minutes. Last seen: ${lastUpdate.toISOString()}`,
-        options: {
-          cooldownMs: HEARTBEAT_COOLDOWN_MS,
-          reminderIntervalMs: HEARTBEAT_REMINDER_MS,
-        },
-      });
+        toAlert.push(
+          `Node ${nodeName} has not reported telemetry for over ${HEARTBEAT_THRESHOLD_MINUTES} minutes. Last seen: ${lastUpdate.toISOString()}`,
+        );
+      }
     } else {
-      recoveredKeys.push(alertKey);
+      if (wasAlerted(alertKey)) {
+        const nodeRes = await getKSNodeByPublicKey(db, publicKey);
+        const nodeName =
+          nodeRes.success && nodeRes.data
+            ? `${nodeRes.data.node_name} (${publicKey})`
+            : publicKey;
+
+        recovered.push(`Node ${nodeName}`);
+        clearAlert(alertKey);
+      }
     }
   }
 
-  // Resolve recovered nodes
-  for (const key of recoveredKeys) {
-    alertManager.resolve(key);
+  // Send resolved notifications
+  if (recovered.length === 1) {
+    await sendSlackAlert(`[Resolved] ${recovered[0]}`, slackWebhookUrl);
+  } else if (recovered.length > 1) {
+    const body = recovered.map((m) => `  • ${m}`).join("\n");
+    await sendSlackAlert(
+      `[Resolved] ${recovered.length} nodes recovered:\n${body}`,
+      slackWebhookUrl,
+    );
   }
 
-  // Send resolved notifications if any
-  await alertManager.sendResolvedBatch(recoveredKeys);
-
-  // Batch alert for unresponsive nodes
-  if (unresponsiveAlerts.length > 0) {
-    await alertManager.batchAlert(unresponsiveAlerts);
+  // Send unresponsive alerts (batched)
+  if (toAlert.length === 1) {
+    await sendSlackAlert(`[KS Node Alert] ${toAlert[0]}`, slackWebhookUrl);
+  } else if (toAlert.length > 1) {
+    const body = toAlert.map((m) => `  • ${m}`).join("\n");
+    await sendSlackAlert(
+      `[KS Node Alert] ${toAlert.length} nodes unresponsive:\n${body}`,
+      slackWebhookUrl,
+    );
   }
 }

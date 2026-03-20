@@ -11,7 +11,6 @@ import knex from "knex";
 import { makeApp } from "@oko-wallet-api/app";
 import { ENV_FILE_NAME, envSchema } from "@oko-wallet-api/envs";
 import { getCommitHash } from "@oko-wallet-api/git";
-import { SlackAlertManager } from "@oko-wallet-api/lib/slack_alert_manager";
 import { startKSNodeHealthCheckRuntime } from "@oko-wallet-api/runtime/health_check_node";
 import { startInactiveCustomerUserReminderRuntime } from "@oko-wallet-api/runtime/inactive_customer_user_reminders";
 import { startKSNodeHeartbeatRuntime } from "@oko-wallet-api/runtime/ks_node_monitor";
@@ -89,10 +88,7 @@ async function main() {
     github_client_secret: envs.GITHUB_CLIENT_SECRET!,
   });
 
-  const alertManager = new SlackAlertManager(state.slack_webhook_url);
-
   const app = makeApp(state);
-  app.locals.slack_alert_manager = alertManager;
 
   startKSNodeHealthCheckRuntime(state.db, state.logger, {
     intervalSeconds: 10 * 60, // 10 minutes
@@ -100,7 +96,7 @@ async function main() {
 
   startKSNodeHeartbeatRuntime(state.db, state.logger, {
     intervalSeconds: 60, // 1 minute
-    alertManager,
+    slackWebhookUrl: state.slack_webhook_url,
   });
 
   startInactiveCustomerUserReminderRuntime(state.db, state.logger, {
