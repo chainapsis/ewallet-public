@@ -18,6 +18,7 @@ import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import cn from "classnames";
 import { type FC, useEffect, useMemo, useRef, useState } from "react";
 
+import { InviteModal } from "./invite_modal";
 import { LeaveTeamModal } from "./leave_team_modal";
 import { MOCK_IS_ADMIN, MOCK_TEAM_MEMBERS, type TeamMember } from "./mock_data";
 import styles from "./team_member_list.module.scss";
@@ -121,6 +122,7 @@ export const TeamMemberList: FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
 
   const isAdmin = MOCK_IS_ADMIN;
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -174,7 +176,11 @@ export const TeamMemberList: FC = () => {
           {"{dApp Name}"} Team
         </Typography>
         {isAdmin ? (
-          <Button variant="primary" size="md">
+          <Button
+            variant="primary"
+            size="md"
+            onClick={() => setShowInviteModal(true)}
+          >
             <UsersIcon color="currentColor" size={20} />
             Invite
           </Button>
@@ -383,6 +389,12 @@ export const TeamMemberList: FC = () => {
         <LeaveTeamModal
           onLeave={() => setShowLeaveModal(false)}
           onClose={() => setShowLeaveModal(false)}
+        />
+      )}
+      {showInviteModal && (
+        <InviteModal
+          onInvite={() => setShowInviteModal(false)}
+          onClose={() => setShowInviteModal(false)}
         />
       )}
     </div>
