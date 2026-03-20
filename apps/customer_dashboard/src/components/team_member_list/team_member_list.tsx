@@ -22,6 +22,8 @@ import { EditRoleModal } from "./edit_role_modal";
 import { InviteModal } from "./invite_modal";
 import { LeaveTeamModal } from "./leave_team_modal";
 import { MOCK_IS_ADMIN, MOCK_TEAM_MEMBERS, type TeamMember } from "./mock_data";
+import { RemoveMemberModal } from "./remove_member_modal";
+import { ResendInviteModal } from "./resend_invite_modal";
 import styles from "./team_member_list.module.scss";
 import { TeamMemberRow } from "./team_member_row";
 
@@ -125,6 +127,8 @@ export const TeamMemberList: FC = () => {
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [editRoleMember, setEditRoleMember] = useState<TeamMember | null>(null);
+  const [removeMember, setRemoveMember] = useState<TeamMember | null>(null);
+  const [resendMember, setResendMember] = useState<TeamMember | null>(null);
 
   const isAdmin = MOCK_IS_ADMIN;
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -336,6 +340,8 @@ export const TeamMemberList: FC = () => {
                   isAdmin={isAdmin}
                   onLeave={() => setShowLeaveModal(true)}
                   onEditRole={setEditRoleMember}
+                  onRemove={setRemoveMember}
+                  onResend={setResendMember}
                 />
               ))}
             </TableBody>
@@ -405,6 +411,20 @@ export const TeamMemberList: FC = () => {
           member={editRoleMember}
           onUpdate={() => setEditRoleMember(null)}
           onClose={() => setEditRoleMember(null)}
+        />
+      )}
+      {removeMember && (
+        <RemoveMemberModal
+          member={removeMember}
+          onRemove={() => setRemoveMember(null)}
+          onClose={() => setRemoveMember(null)}
+        />
+      )}
+      {resendMember && (
+        <ResendInviteModal
+          member={resendMember}
+          onResend={() => setResendMember(null)}
+          onClose={() => setResendMember(null)}
         />
       )}
     </div>
