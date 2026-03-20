@@ -6,13 +6,17 @@ import { deleteApiKey } from "./delete_api_key";
 import { forgotPassword } from "./forgot_password";
 import { getCustomerApiKeys } from "./get_customer_api_keys";
 import { getCustomerInfo } from "./get_customer_info";
+import { getTeamMembers } from "./get_team_members";
 import { resetPasswordConfirm } from "./reset_password_confirm";
 import { sendCode } from "./send_code";
 import { signIn } from "./signin";
 import { updateCustomerInfoRoute } from "./update_customer_info";
 import { verifyLogin } from "./verify_login";
 import { verifyResetCode } from "./verify_reset_code";
-import { customerJwtMiddleware } from "@oko-wallet-ctd-api/middleware/auth";
+import {
+  customerJwtMiddleware,
+  resolveTeamMember,
+} from "@oko-wallet-ctd-api/middleware/auth";
 import { customerLogoUploadMiddleware } from "@oko-wallet-ctd-api/middleware/multer";
 import { rateLimitMiddleware } from "@oko-wallet-ctd-api/middleware/rate_limit";
 
@@ -80,6 +84,15 @@ export function makeCustomerRouter() {
     // rateLimitMiddleware({ windowSeconds: 60, maxRequests: 30 }),
     customerJwtMiddleware,
     deleteApiKey,
+  );
+
+  // ─── Team ─────────────────────────────────────────────────────
+
+  router.post(
+    "/customer/team/get_members",
+    customerJwtMiddleware,
+    resolveTeamMember,
+    getTeamMembers,
   );
 
   router.post(

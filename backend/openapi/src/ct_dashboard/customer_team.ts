@@ -15,7 +15,6 @@ const TeamMemberSchema = registry.register(
     email: z.string(),
     role: RoleSchema,
     is_current_user: z.boolean(),
-    created_at: z.string(),
   }),
 );
 
@@ -27,7 +26,6 @@ const PendingInvitationSchema = registry.register(
     role: RoleSchema,
     status: z.literal("PENDING"),
     last_sent_at: z.string().nullable(),
-    created_at: z.string(),
   }),
 );
 

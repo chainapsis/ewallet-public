@@ -5,7 +5,6 @@ export interface TeamMember {
   email: string;
   role: CustomerDashboardUserRole;
   is_current_user: boolean;
-  created_at: string;
 }
 
 export type TeamInvitationStatus =
@@ -20,7 +19,6 @@ export interface PendingInvitation {
   role: CustomerDashboardUserRole;
   status: TeamInvitationStatus;
   last_sent_at: string | null;
-  created_at: string;
 }
 
 export type AdminTransferStatus =
