@@ -10,6 +10,7 @@ import { getCustomerApiKeys } from "./get_customer_api_keys";
 import { getCustomerInfo } from "./get_customer_info";
 import { getTeamMembers } from "./get_team_members";
 import { inviteTeamMember } from "./invite_team_member";
+import { leaveTeam } from "./leave_team";
 import { removeTeamMember } from "./remove_team_member";
 import { resendInvitation } from "./resend_invitation";
 import { resetPasswordConfirm } from "./reset_password_confirm";
@@ -144,6 +145,13 @@ export function makeCustomerRouter() {
     resolveTeamMember,
     requireAdmin,
     removeTeamMember,
+  );
+
+  router.post(
+    "/customer/team/leave",
+    customerJwtMiddleware,
+    resolveTeamMember,
+    leaveTeam,
   );
 
   router.post(
