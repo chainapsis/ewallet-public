@@ -122,8 +122,23 @@ export async function leaveTeam(
 
     // Scenario 4: Sole user (1 admin, no members) → leave + delete customer
     if (totalMembers === 1) {
-      await softDeleteCTDUser(state.db, userId, customerId);
-      await deleteCustomer(state.db, { customer_id: customerId });
+      const client = await state.db.connect();
+      try {
+        await client.query("BEGIN");
+        await softDeleteCTDUser(client, userId, customerId);
+        await deleteCustomer(client, { customer_id: customerId });
+        await client.query("COMMIT");
+      } catch (txError) {
+        await client.query("ROLLBACK");
+        res.status(500).json({
+          success: false,
+          code: "UNKNOWN_ERROR",
+          msg: "Failed to leave team",
+        });
+        return;
+      } finally {
+        client.release();
+      }
       res.status(200).json({
         success: true,
         data: { action: "left" },

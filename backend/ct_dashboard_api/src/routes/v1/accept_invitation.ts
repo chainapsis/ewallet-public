@@ -145,32 +145,50 @@ export async function acceptInvitation(
       return;
     }
 
-    // User exists — add to team
+    // User exists — add to team (transactional)
     const userId = randomUUID();
-    const insertRes = await insertCustomerDashboardUser(state.db, {
-      user_id: userId,
-      customer_id: invitation.customer_id,
-      email: invitation.email,
-      role: invitation.role as CustomerDashboardUserRole,
-      status: "ACTIVE",
-      is_email_verified: true,
-      password_hash: existingUserRes.data.user.password_hash,
-    });
+    const client = await state.db.connect();
+    try {
+      await client.query("BEGIN");
 
-    if (!insertRes.success) {
+      const insertRes = await insertCustomerDashboardUser(client, {
+        user_id: userId,
+        customer_id: invitation.customer_id,
+        email: invitation.email,
+        role: invitation.role as CustomerDashboardUserRole,
+        status: "ACTIVE",
+        is_email_verified: true,
+        password_hash: existingUserRes.data.user.password_hash,
+      });
+
+      if (!insertRes.success) {
+        await client.query("ROLLBACK");
+        res.status(500).json({
+          success: false,
+          code: "UNKNOWN_ERROR",
+          msg: insertRes.err,
+        });
+        return;
+      }
+
+      await updateTeamInvitationStatus(
+        client,
+        invitation.invitation_id,
+        "ACCEPTED",
+      );
+
+      await client.query("COMMIT");
+    } catch (txError) {
+      await client.query("ROLLBACK");
       res.status(500).json({
         success: false,
         code: "UNKNOWN_ERROR",
-        msg: insertRes.err,
+        msg: "Failed to accept invitation",
       });
       return;
+    } finally {
+      client.release();
     }
-
-    await updateTeamInvitationStatus(
-      state.db,
-      invitation.invitation_id,
-      "ACCEPTED",
-    );
 
     res.status(200).json({
       success: true,

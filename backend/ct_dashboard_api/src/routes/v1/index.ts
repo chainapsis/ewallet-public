@@ -1,5 +1,6 @@
 import express from "express";
 
+import { acceptAdminTransfer } from "./accept_admin_transfer";
 import { acceptInvitation } from "./accept_invitation";
 import { cancelInvitation } from "./cancel_invitation";
 import { changePassword } from "./change_password";
@@ -152,6 +153,13 @@ export function makeCustomerRouter() {
     customerJwtMiddleware,
     resolveTeamMember,
     leaveTeam,
+  );
+
+  router.post(
+    "/customer/team/accept_admin_transfer",
+    customerJwtMiddleware,
+    resolveTeamMember,
+    acceptAdminTransfer,
   );
 
   router.post(
