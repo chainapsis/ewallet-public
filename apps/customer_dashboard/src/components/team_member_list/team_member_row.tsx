@@ -18,6 +18,7 @@ interface TeamMemberRowProps {
   onEditRole: (member: TeamMember) => void;
   onRemove: (member: TeamMember) => void;
   onResend: (member: TeamMember) => void;
+  onCancelInvite: (member: TeamMember) => void;
 }
 
 const ShieldIcon = () => (
@@ -75,7 +76,8 @@ const MemberActions: FC<{
   onEditRole: () => void;
   onRemove: () => void;
   onResend: () => void;
-}> = ({ member, onLeave, onEditRole, onRemove, onResend }) => {
+  onCancelInvite: () => void;
+}> = ({ member, onLeave, onEditRole, onRemove, onResend, onCancelInvite }) => {
   if (member.is_me) {
     return (
       <>
@@ -131,7 +133,12 @@ const MemberActions: FC<{
           hideFloatingArrow
           className={styles.tooltipWrapper}
         >
-          <IconButton hierarchy="tertiary" size="xs" icon={<XCircleIcon />} />
+          <IconButton
+            hierarchy="tertiary"
+            size="xs"
+            icon={<XCircleIcon />}
+            onClick={onCancelInvite}
+          />
         </Tooltip>
       </>
     );
@@ -176,6 +183,7 @@ export const TeamMemberRow: FC<TeamMemberRowProps> = ({
   onEditRole,
   onRemove,
   onResend,
+  onCancelInvite,
 }) => {
   const initial = member.email.charAt(0).toUpperCase();
 
@@ -223,6 +231,7 @@ export const TeamMemberRow: FC<TeamMemberRowProps> = ({
               onEditRole={() => onEditRole(member)}
               onRemove={() => onRemove(member)}
               onResend={() => onResend(member)}
+              onCancelInvite={() => onCancelInvite(member)}
             />
           </div>
         ) : (
