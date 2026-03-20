@@ -7,7 +7,7 @@ import {
   InviteTeamMemberRequestSchema,
   InviteTeamMemberSuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/ct_dashboard";
-import { getCTDUserByUserIdAndCustomerId } from "@oko-wallet/oko-pg-interface/customer_dashboard_users";
+import { getCTDUserByEmailAndCustomerId } from "@oko-wallet/oko-pg-interface/customer_dashboard_users";
 import {
   getPendingInvitationByEmail,
   insertTeamInvitation,
@@ -89,10 +89,10 @@ export async function inviteTeamMember(
       return;
     }
 
-    // Check if user is already a team member
-    const existingMemberRes = await getCTDUserByUserIdAndCustomerId(
+    // Check if email already belongs to this team
+    const existingMemberRes = await getCTDUserByEmailAndCustomerId(
       state.db,
-      userId,
+      email,
       customerId,
     );
     if (!existingMemberRes.success) {
@@ -103,14 +103,7 @@ export async function inviteTeamMember(
       });
       return;
     }
-
-    // Check if email already belongs to this team
-    const checkQuery = `
-      SELECT user_id FROM customer_dashboard_users
-      WHERE email = $1 AND customer_id = $2 AND status = 'ACTIVE'
-    `;
-    const checkResult = await state.db.query(checkQuery, [email, customerId]);
-    if (checkResult.rows.length > 0) {
+    if (existingMemberRes.data !== null) {
       res.status(ErrorCodeMap.DUPLICATE_TEAM_MEMBER).json({
         success: false,
         code: "DUPLICATE_TEAM_MEMBER",

@@ -1,5 +1,6 @@
 import express from "express";
 
+import { acceptInvitation } from "./accept_invitation";
 import { cancelInvitation } from "./cancel_invitation";
 import { changePassword } from "./change_password";
 import { createApiKey } from "./create_api_key";
@@ -90,7 +91,11 @@ export function makeCustomerRouter() {
     deleteApiKey,
   );
 
-  // ─── Team ─────────────────────────────────────────────────────
+  // ─── Team (public) ─────────────────────────────────────────────
+
+  router.post("/customer/team/accept_invitation", acceptInvitation);
+
+  // ─── Team (authenticated) ─────────────────────────────────────
 
   router.post(
     "/customer/team/get_members",
