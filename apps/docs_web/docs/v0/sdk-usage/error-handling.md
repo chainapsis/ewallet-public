@@ -141,6 +141,43 @@ try {
 }
 ```
 
+## React Native Error Patterns
+
+When using the React Native SDK
+(`@oko-wallet/oko-sdk-core-react-native`), you may encounter these
+platform-specific errors:
+
+### User Cancelled Sign-In
+
+The user closed the OS browser before completing the OAuth flow. The
+`signIn()` call will throw an error. Handle this gracefully in your UI:
+
+```typescript
+try {
+  await wallet.signIn("google");
+} catch (error) {
+  // User may have cancelled — show a retry option, not a crash screen
+  console.warn("Sign-in cancelled or failed:", error);
+}
+```
+
+### Browser Session Missing
+
+The SDK automatically clears cached wallet info when the OS browser
+session becomes invalid (e.g., `api_key_not_found`, `wallet_not_found`,
+`jwt_not_found`). This triggers a `CORE__accountsChanged` event with all
+fields set to `null`. Listen for this event to update your UI.
+
+### Missing Browser Dependency
+
+If neither `expo-web-browser` nor `react-native-inappbrowser-reborn` is
+installed, the SDK throws an error when attempting any browser-based
+operation (`signIn`, `openModal`, etc.). Install one of the two supported
+packages.
+
+For more RN-specific issues, see
+**[React Native Integration — Troubleshooting](./mobile/react-native-integration#troubleshooting)**.
+
 ## Next Steps
 
 - **[SDK Overview](./sdk-overview)** - Back to basics
