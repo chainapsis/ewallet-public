@@ -18,6 +18,7 @@ import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import cn from "classnames";
 import { type FC, useEffect, useMemo, useRef, useState } from "react";
 
+import { EditRoleModal } from "./edit_role_modal";
 import { InviteModal } from "./invite_modal";
 import { LeaveTeamModal } from "./leave_team_modal";
 import { MOCK_IS_ADMIN, MOCK_TEAM_MEMBERS, type TeamMember } from "./mock_data";
@@ -123,6 +124,7 @@ export const TeamMemberList: FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [editRoleMember, setEditRoleMember] = useState<TeamMember | null>(null);
 
   const isAdmin = MOCK_IS_ADMIN;
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -333,6 +335,7 @@ export const TeamMemberList: FC = () => {
                   member={member}
                   isAdmin={isAdmin}
                   onLeave={() => setShowLeaveModal(true)}
+                  onEditRole={setEditRoleMember}
                 />
               ))}
             </TableBody>
@@ -395,6 +398,13 @@ export const TeamMemberList: FC = () => {
         <InviteModal
           onInvite={() => setShowInviteModal(false)}
           onClose={() => setShowInviteModal(false)}
+        />
+      )}
+      {editRoleMember && (
+        <EditRoleModal
+          member={editRoleMember}
+          onUpdate={() => setEditRoleMember(null)}
+          onClose={() => setEditRoleMember(null)}
         />
       )}
     </div>
