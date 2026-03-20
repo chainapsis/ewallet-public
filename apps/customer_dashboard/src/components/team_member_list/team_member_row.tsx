@@ -15,6 +15,7 @@ interface TeamMemberRowProps {
   member: TeamMember;
   isAdmin: boolean;
   onLeave: () => void;
+  onEditRole: (member: TeamMember) => void;
 }
 
 const ShieldIcon = () => (
@@ -66,10 +67,11 @@ const XCircleIcon = () => (
   </svg>
 );
 
-const MemberActions: FC<{ member: TeamMember; onLeave: () => void }> = ({
-  member,
-  onLeave,
-}) => {
+const MemberActions: FC<{
+  member: TeamMember;
+  onLeave: () => void;
+  onEditRole: () => void;
+}> = ({ member, onLeave, onEditRole }) => {
   if (member.is_me) {
     return (
       <>
@@ -79,7 +81,12 @@ const MemberActions: FC<{ member: TeamMember; onLeave: () => void }> = ({
           hideFloatingArrow
           className={styles.tooltipWrapper}
         >
-          <IconButton hierarchy="tertiary" size="xs" icon={<UserEditIcon />} />
+          <IconButton
+            hierarchy="tertiary"
+            size="xs"
+            icon={<UserEditIcon />}
+            onClick={onEditRole}
+          />
         </Tooltip>
         <Tooltip
           title="Leave Team"
@@ -129,7 +136,12 @@ const MemberActions: FC<{ member: TeamMember; onLeave: () => void }> = ({
         hideFloatingArrow
         className={styles.tooltipWrapper}
       >
-        <IconButton hierarchy="tertiary" size="xs" icon={<UserEditIcon />} />
+        <IconButton
+          hierarchy="tertiary"
+          size="xs"
+          icon={<UserEditIcon />}
+          onClick={onEditRole}
+        />
       </Tooltip>
       <Tooltip
         title="Remove"
@@ -151,6 +163,7 @@ export const TeamMemberRow: FC<TeamMemberRowProps> = ({
   member,
   isAdmin,
   onLeave,
+  onEditRole,
 }) => {
   const initial = member.email.charAt(0).toUpperCase();
 
@@ -192,7 +205,11 @@ export const TeamMemberRow: FC<TeamMemberRowProps> = ({
       <TableCell className={styles.actionCell} align="right">
         {isAdmin ? (
           <div className={styles.adminActions}>
-            <MemberActions member={member} onLeave={onLeave} />
+            <MemberActions
+              member={member}
+              onLeave={onLeave}
+              onEditRole={() => onEditRole(member)}
+            />
           </div>
         ) : (
           member.is_me && (
