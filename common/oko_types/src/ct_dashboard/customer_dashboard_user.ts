@@ -14,10 +14,13 @@ export type AddCustomerRequest = {
   password_hash: string;
 };
 
+export type CustomerDashboardUserRole = "admin" | "member";
+
 export interface CustomerDashboardUser {
   customer_id: string;
   user_id: string;
   email: string;
+  role: CustomerDashboardUserRole;
   status: CustomerDashboardUserStatus;
   is_email_verified: boolean;
 }
