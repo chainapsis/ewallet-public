@@ -6,7 +6,7 @@ import {
 import type { Result } from "@oko-wallet/stdlib-js";
 import type { Pool } from "pg";
 
-import { sendSlackAlert } from "@oko-wallet-api/lib/slack";
+import type { SlackAlertManager } from "@oko-wallet-api/lib/slack_alert_manager";
 
 export interface KSNodeTelemetryPayload {
   public_key: string;
@@ -14,19 +14,28 @@ export interface KSNodeTelemetryPayload {
   payload: any;
 }
 
+const DB_ERROR_COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes
+const DB_ERROR_REMINDER_MS = 30 * 60 * 1000; // 30 minutes
+const KEY_SHARE_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
+const KEY_SHARE_REMINDER_MS = 15 * 60 * 1000; // 15 minutes
+
 export async function processKSNodeTelemetry(
   db: Pool,
   input: KSNodeTelemetryPayload,
-  slackWebhookUrl: string | null,
+  alertManager: SlackAlertManager,
 ): Promise<Result<void, string>> {
   const { public_key, key_share_count, payload } = input;
 
   // 1. Check if node exists
   const nodeRes = await getKSNodeByPublicKey(db, public_key);
   if (!nodeRes.success) {
-    await sendSlackAlert(
+    await alertManager.alert(
+      `db-error:node-lookup:${public_key}`,
       `[TSS API Error] Failed to check if node exists ${public_key}: ${nodeRes.err}`,
-      slackWebhookUrl,
+      {
+        cooldownMs: DB_ERROR_COOLDOWN_MS,
+        reminderIntervalMs: DB_ERROR_REMINDER_MS,
+      },
     );
     return { success: false, err: nodeRes.err };
   }
@@ -42,9 +51,13 @@ export async function processKSNodeTelemetry(
   // 2. Get previous telemetry for comparison
   const lastTelemetryRes = await getLastKSNodeTelemetry(db, public_key);
   if (!lastTelemetryRes.success) {
-    await sendSlackAlert(
+    await alertManager.alert(
+      `db-error:get-last-telemetry:${public_key}`,
       `[TSS API Error] Failed to get last telemetry for node ${public_key}: ${lastTelemetryRes.err}`,
-      slackWebhookUrl,
+      {
+        cooldownMs: DB_ERROR_COOLDOWN_MS,
+        reminderIntervalMs: DB_ERROR_REMINDER_MS,
+      },
     );
     return { success: false, err: lastTelemetryRes.err };
   }
@@ -59,9 +72,13 @@ export async function processKSNodeTelemetry(
     payload,
   );
   if (!insertRes.success) {
-    await sendSlackAlert(
+    await alertManager.alert(
+      `db-error:insert-telemetry:${public_key}`,
       `[TSS API Error] Failed to insert telemetry for node ${public_key}: ${insertRes.err}`,
-      slackWebhookUrl,
+      {
+        cooldownMs: DB_ERROR_COOLDOWN_MS,
+        reminderIntervalMs: DB_ERROR_REMINDER_MS,
+      },
     );
     return { success: false, err: insertRes.err };
   }
@@ -70,9 +87,13 @@ export async function processKSNodeTelemetry(
   const nodeName = `${nodeRes.data!.node_name} (${public_key})`;
 
   if (lastTelemetry && key_share_count < lastTelemetry.key_share_count) {
-    await sendSlackAlert(
+    await alertManager.alert(
+      `anomaly:key-share-decrease:${public_key}`,
       `[KS Node Alert] Key share count decreased for node: ${nodeName}. Previous: ${lastTelemetry.key_share_count}, Current: ${key_share_count}`,
-      slackWebhookUrl,
+      {
+        cooldownMs: KEY_SHARE_COOLDOWN_MS,
+        reminderIntervalMs: KEY_SHARE_REMINDER_MS,
+      },
     );
   }
 

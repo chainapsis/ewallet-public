@@ -98,7 +98,7 @@ export function setKSNodeTelemetryRoutes(router: Router) {
       const result = await processKSNodeTelemetry(
         req.app.locals.db,
         payload,
-        req.app.locals.slack_webhook_url,
+        req.app.locals.slack_alert_manager!,
       );
 
       if (!result.success) {
