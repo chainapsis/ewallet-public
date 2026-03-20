@@ -65,6 +65,8 @@
   flex-direction: column;
   gap: 2px;
   margin-top: 16px;
+  position: relative;
+  z-index: 1;
 }
 
 .closeButton {
@@ -85,10 +87,17 @@
   &:hover {
     background: var(--bg-secondary);
   }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px var(--bg-primary, white),
+      0 0 0 4px var(--gray-400, #a4a7ae);
+  }
 }
 
 .body {
-  padding: 16px 24px 0;
+  padding: 40px 24px 0;
 }
 
 .actions {
