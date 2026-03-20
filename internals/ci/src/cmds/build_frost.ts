@@ -5,7 +5,14 @@ import { expectSuccess } from "@oko-wallet-ci/expect";
 import { paths } from "@oko-wallet-ci/paths";
 
 export async function buildFrost(..._args: any[]) {
-  console.log("Building frost_ed25519_keplr_wasm...");
+  console.log("Building FROST (tEdDSA)...");
+
+  const teddsaAddonRet = spawnSync("yarn", ["run", "build"], {
+    cwd: paths.teddsa_addon_addon,
+    stdio: "inherit",
+  });
+  expectSuccess(teddsaAddonRet, "teddsa addon build failed");
+  console.log("%s %s", chalk.bold.green("Done"), "teddsa addon");
 
   const wasmRet = spawnSync("yarn", ["run", "build:wasm"], {
     cwd: paths.frost_keplr_wasm,
