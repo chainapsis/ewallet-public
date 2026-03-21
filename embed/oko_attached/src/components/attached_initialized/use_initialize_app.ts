@@ -140,9 +140,9 @@ export function useInitializeApp() {
           walletForAuth?.authType,
         );
 
-        const sdkThemeParam = searchParams.get(
-          "theme",
-        ) as OkoWalletTheme | null;
+        const rawTheme = searchParams.get("theme");
+        const sdkThemeParam: OkoWalletTheme | null =
+          rawTheme === "light" || rawTheme === "dark" ? rawTheme : null;
 
         const oldTheme = getTheme(hostOrigin);
         const themeResult = await determineTheme(
