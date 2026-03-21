@@ -234,6 +234,7 @@ import { mainnet } from "viem/chains";
 
 const oko = toOko({
   api_key: "YOUR_API_KEY",
+  theme: "dark",
 });
 
 export const config = createConfig({

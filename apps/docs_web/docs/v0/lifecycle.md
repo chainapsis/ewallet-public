@@ -26,6 +26,7 @@ import { mainnet } from "viem/chains";
 // User clicks "Connect Wallet" in your dApp
 const initRes = OkoEthWallet.init({
   api_key: "your-api-key",
+  theme: "dark",
 });
 
 if (!initRes.success) {
@@ -286,6 +287,7 @@ class OkoWallet {
     // Step 1: Initialize OkoEthWallet
     const initRes = OkoEthWallet.init({
       api_key: apiKey,
+      theme: "dark",
     });
 
     if (!initRes.success) {
@@ -373,6 +375,7 @@ import { OkoCosmosWallet } from "@oko-wallet/oko-sdk-cosmos";
 // Step 1: Initialize Cosmos wallet
 const initRes = OkoCosmosWallet.init({
   api_key: "your-api-key",
+  theme: "dark",
 });
 
 if (!initRes.success) {
@@ -434,6 +437,7 @@ import {
 const initRes = OkoSvmWallet.init({
   api_key: "your-api-key",
   chain_id: "solana:mainnet",
+  theme: "dark",
 });
 
 if (!initRes.success) {
