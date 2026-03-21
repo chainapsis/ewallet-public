@@ -72,6 +72,10 @@ export function init(
       }
 
       sdkEndpointURL.searchParams.append("sdk_version", OkoWallet.version);
+
+      if (args.theme) {
+        sdkEndpointURL.searchParams.append("theme", args.theme);
+      }
     } catch (_err) {
       return {
         success: false,

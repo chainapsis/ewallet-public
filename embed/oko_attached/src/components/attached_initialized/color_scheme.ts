@@ -1,4 +1,5 @@
 import type { Theme } from "@oko-wallet/oko-common-ui/theme";
+import type { OkoWalletTheme } from "@oko-wallet/oko-sdk-core";
 
 import { getSystemTheme } from "@oko-wallet-attached/components/google_callback/theme";
 import { getThemeByHostOrigin } from "@oko-wallet-attached/requests/theme";
@@ -50,9 +51,17 @@ export interface ThemeResult {
 export async function determineTheme(
   hostOrigin: string,
   oldTheme: Theme | null,
+  sdkThemeOverride?: OkoWalletTheme | null,
 ): Promise<ThemeResult> {
   const usesSystemFallback = oldTheme === null;
   const fallbackTheme: Theme = oldTheme ?? getSystemTheme();
+
+  if (sdkThemeOverride) {
+    return {
+      theme: sdkThemeOverride,
+      usesSystemPreference: false,
+    };
+  }
 
   const themeRes = await getThemeByHostOrigin(hostOrigin);
 

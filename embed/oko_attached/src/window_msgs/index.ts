@@ -71,9 +71,13 @@ export function makeMsgHandler() {
       return;
     }
 
-    // set_theme: portless fire-and-forget from demo/sandbox host
+    // set_theme: portless fire-and-forget from SDK host
     if (data?.target === "oko_attached" && data?.msg_type === "set_theme") {
-      if (event.origin !== DEMO_WEB_ORIGIN) {
+      const registeredHostOrigin = useMemoryState.getState().hostOrigin;
+      if (
+        event.origin !== DEMO_WEB_ORIGIN &&
+        event.origin !== registeredHostOrigin
+      ) {
         console.warn(
           "[attached] set_theme rejected from origin:",
           event.origin,

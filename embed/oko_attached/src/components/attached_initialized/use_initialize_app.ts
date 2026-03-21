@@ -1,5 +1,8 @@
 import type { Theme } from "@oko-wallet/oko-common-ui/theme";
-import type { OkoWalletMsgInit } from "@oko-wallet/oko-sdk-core";
+import type {
+  OkoWalletMsgInit,
+  OkoWalletTheme,
+} from "@oko-wallet/oko-sdk-core";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import { UTM_CAMPAIGN, UTM_SOURCE } from "@oko-wallet/oko-types/referral";
 // import { useSearchParams } from "next/navigation";
@@ -137,8 +140,16 @@ export function useInitializeApp() {
           walletForAuth?.authType,
         );
 
+        const sdkThemeParam = searchParams.get(
+          "theme",
+        ) as OkoWalletTheme | null;
+
         const oldTheme = getTheme(hostOrigin);
-        const themeResult = await determineTheme(hostOrigin, oldTheme);
+        const themeResult = await determineTheme(
+          hostOrigin,
+          oldTheme,
+          sdkThemeParam,
+        );
         const determinedThemeByCustomer = themeResult.theme;
 
         const isMobileParam = searchParams.get("mobile") === "true";

@@ -1,6 +1,4 @@
-import type { Theme } from "@oko-wallet/oko-common-ui/theme";
-
-export function getSystemTheme(): Theme {
+export function getSystemTheme(): "light" | "dark" {
   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)");
 
   if (prefersDark.matches) {
