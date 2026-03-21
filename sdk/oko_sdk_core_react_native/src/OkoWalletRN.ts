@@ -272,7 +272,7 @@ export class OkoWalletRN implements OkoWalletInterface {
     return this.state.authType;
   }
 
-  setTheme(_theme: OkoWalletTheme): void {}
+  async setTheme(_theme: OkoWalletTheme): Promise<void> {}
 
   closeModal(): void {}
 

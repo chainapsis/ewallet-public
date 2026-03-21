@@ -1,7 +1,14 @@
 import { Button } from "@oko-wallet/oko-common-ui/button";
 import type { OkoWalletProtectedMsgs } from "@oko-wallet/oko-sdk-core";
 import type { CurveType } from "@oko-wallet/oko-types/crypto";
-import { type FC, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  type FC,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import styles from "./export_display.module.scss";
 import { postLog } from "@oko-wallet-attached/requests/logging";
@@ -76,6 +83,21 @@ const VALID_KEY_TYPES: ReadonlySet<string> = new Set(["secp256k1", "ed25519"]);
 const MAX_KEY_REQUEST_ATTEMPTS = 3;
 
 export const ExportDisplay: FC = () => {
+  // Force light theme — this route is loaded directly (not through AttachedInitialized),
+  // so the SDK theme URL param is not available here.
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    const prevTheme = root.getAttribute("data-theme");
+    root.setAttribute("data-theme", "light");
+    return () => {
+      if (prevTheme) {
+        root.setAttribute("data-theme", prevTheme);
+      } else {
+        root.removeAttribute("data-theme");
+      }
+    };
+  }, []);
+
   const keyType = useMemo(() => {
     const raw = new URLSearchParams(window.location.search).get("key_type");
     const parsed = raw && VALID_KEY_TYPES.has(raw) ? (raw as CurveType) : null;

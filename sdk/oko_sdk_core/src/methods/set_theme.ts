@@ -4,7 +4,12 @@ import type {
   OkoWalletWebInterface,
 } from "@oko-wallet-sdk-core/types";
 
-export function setTheme(this: OkoWalletWebInterface, theme: OkoWalletTheme) {
+export async function setTheme(
+  this: OkoWalletWebInterface,
+  theme: OkoWalletTheme,
+) {
+  await this.waitUntilInitialized;
+
   const contentWindow = this.iframe.contentWindow;
   if (contentWindow === null) {
     console.warn("[oko] setTheme: iframe contentWindow is null");
