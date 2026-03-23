@@ -9,12 +9,24 @@ Complete guide for integrating Oko into React Native applications, covering both
 Expo and bare React Native projects.
 
 <!-- prettier-ignore -->
-:::warning Important
-Use the React Native SDK (`@oko-wallet/oko-sdk-core-react-native`) instead of
-the web SDK packages (`@oko-wallet/oko-sdk-eth`,
-`@oko-wallet/oko-sdk-cosmos`, `@oko-wallet/oko-sdk-svm`) in React Native apps.
-The web SDKs depend on browser APIs (`iframe`, `window.postMessage`) that are
-not available in React Native.
+:::info SDK Architecture
+The React Native SDK (`@oko-wallet/oko-sdk-core-react-native`) is the
+**platform adapter** for React Native. It replaces the web core's
+iframe/postMessage transport with OS browser + deep links.
+
+The chain-specific SDKs (`@oko-wallet/oko-sdk-eth`,
+`@oko-wallet/oko-sdk-cosmos`, `@oko-wallet/oko-sdk-svm`) **work in React
+Native** — pass the RN wallet instance to their constructors:
+
+```typescript
+import { useOkoWallet } from "@oko-wallet/oko-sdk-core-react-native";
+import { OkoEthWallet } from "@oko-wallet/oko-sdk-eth";
+import type { OkoWalletInterface } from "@oko-wallet/oko-sdk-core";
+
+const wallet = useOkoWallet();
+const eth = new OkoEthWallet(wallet as unknown as OkoWalletInterface);
+```
+
 :::
 
 <!-- prettier-ignore -->
@@ -51,6 +63,22 @@ applied when you import from the package. No manual polyfill setup is needed.
 
 ```bash
 npm install @oko-wallet/oko-sdk-core-react-native
+```
+
+### Chain SDKs (optional)
+
+Install the chain-specific SDKs you need. They use the RN wallet as their
+transport layer — no additional browser dependencies required.
+
+```bash
+# For Ethereum / EVM chains
+npm install @oko-wallet/oko-sdk-eth
+
+# For Cosmos chains
+npm install @oko-wallet/oko-sdk-cosmos
+
+# For Solana
+npm install @oko-wallet/oko-sdk-svm
 ```
 
 ### Required Peer Dependencies
@@ -107,6 +135,7 @@ export default function App() {
 | `apiKey`         | Yes      | —                          | Your Oko API key                                                                                                                           |
 | `sdkEndpoint`    | No       | `https://mobile.oko.app`  | Mobile host endpoint. Override for [self-hosted deployments](#sdkendpoint-for-self-hosted-deployments).                                    |
 | `redirectScheme` | No       | `"okowallet"`              | Your app's URL scheme. iOS and Android fallback flows use it directly; it should match the scheme configured in your native project (see [Platform Setup](./react-native-platform-setup)). |
+| `androidCallbackScheme` | No | `"oko.auth.callback"` | Android-only callback scheme for `OkoAuthCallbackActivity`. Must match `callbackScheme` in the Expo config plugin or your `AndroidManifest` intent-filter. Set a unique value per app to avoid collisions when multiple Oko-powered apps are installed on the same device. See [Platform Setup](./react-native-platform-setup). |
 
 ### Using the Hook
 
@@ -247,10 +276,93 @@ All methods return Promises. They internally await initialization, but calling
 
 ## Transaction Signing
 
-Under the hood, signing-related flows use the same OS-browser transport. For
-most apps, prefer the chain-specific SDK guides below instead of constructing
-raw messages yourself. For example, you can use `sendMsgToIframe()` directly for
-advanced queries such as chain metadata:
+Use the chain-specific SDKs for signing. They accept the RN wallet instance and
+handle all OS-browser transport automatically.
+
+### Ethereum / EVM
+
+```typescript
+import { useMemo } from "react";
+import { useOkoWallet } from "@oko-wallet/oko-sdk-core-react-native";
+import { OkoEthWallet } from "@oko-wallet/oko-sdk-eth";
+import type { OkoWalletInterface } from "@oko-wallet/oko-sdk-core";
+
+function EthExample() {
+  const wallet = useOkoWallet();
+  const eth = useMemo(
+    () => new OkoEthWallet(wallet as unknown as OkoWalletInterface),
+    [wallet],
+  );
+
+  const signMessage = async () => {
+    const address = await eth.getAddress();
+    const signature = await eth.sign("Hello Oko!");
+    console.log("Signed by", address, ":", signature);
+  };
+}
+```
+
+For full EVM API (transactions, typed data, EIP-1193 provider):
+**[Ethereum Integration](../ethereum-integration)**
+
+### Cosmos
+
+```typescript
+import { useMemo } from "react";
+import { useOkoWallet } from "@oko-wallet/oko-sdk-core-react-native";
+import { OkoCosmosWallet } from "@oko-wallet/oko-sdk-cosmos";
+import type { OkoWalletInterface } from "@oko-wallet/oko-sdk-core";
+
+function CosmosExample() {
+  const wallet = useOkoWallet();
+  const cosmos = useMemo(
+    () => new OkoCosmosWallet(wallet as unknown as OkoWalletInterface),
+    [wallet],
+  );
+
+  const getAccount = async () => {
+    const key = await cosmos.getKey("cosmoshub-4");
+    console.log("Cosmos address:", key.bech32Address);
+  };
+}
+```
+
+For full Cosmos API (signDirect, signAmino, signArbitrary, sendTx):
+**[Cosmos Integration](../cosmos-integration)**
+
+### Solana
+
+```typescript
+import { useMemo } from "react";
+import { useOkoWallet } from "@oko-wallet/oko-sdk-core-react-native";
+import { OkoSvmWallet } from "@oko-wallet/oko-sdk-svm";
+import type { OkoWalletInterface } from "@oko-wallet/oko-sdk-core";
+
+function SolanaExample() {
+  const wallet = useOkoWallet();
+  const svm = useMemo(
+    () =>
+      new OkoSvmWallet(wallet as unknown as OkoWalletInterface, {
+        chain_id: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+      }),
+    [wallet],
+  );
+
+  const connect = async () => {
+    await svm.connect();
+    const address = svm.publicKey?.toBase58();
+    console.log("Solana address:", address);
+  };
+}
+```
+
+For full Solana API (signMessage, signTransaction, signAndSendTransaction):
+**[Solana Integration](../solana-integration)**
+
+<!-- prettier-ignore -->
+:::tip Advanced: Raw Messages
+For edge cases like custom chain metadata queries, you can use
+`sendMsgToIframe()` directly:
 
 ```typescript
 const response = await wallet.sendMsgToIframe({
@@ -260,11 +372,7 @@ const response = await wallet.sendMsgToIframe({
 });
 ```
 
-For detailed transaction construction and signing examples for each chain:
-
-- **[Ethereum Integration](../ethereum-integration)** — EVM transaction signing
-- **[Cosmos Integration](../cosmos-integration)** — Cosmos transaction signing
-- **[Solana Integration](../solana-integration)** — Solana transaction signing
+:::
 
 ## Event Handling
 
@@ -360,10 +468,10 @@ is running at that URL.
 
 - **[React Native Platform Setup](./react-native-platform-setup)** — Expo
   config plugin and deep link configuration
-- **[Ethereum Integration](../ethereum-integration)** — EVM transaction signing
-  details
-- **[Cosmos Integration](../cosmos-integration)** — Cosmos transaction signing
-  details
-- **[Solana Integration](../solana-integration)** — Solana transaction signing
-  details
+- **[Ethereum Integration](../ethereum-integration)** — Full EVM signing API
+  (works with RN wallet via `OkoEthWallet`)
+- **[Cosmos Integration](../cosmos-integration)** — Full Cosmos signing API
+  (works with RN wallet via `OkoCosmosWallet`)
+- **[Solana Integration](../solana-integration)** — Full Solana signing API
+  (works with RN wallet via `OkoSvmWallet`)
 - **[Error Handling](../error-handling)** — Error handling patterns
