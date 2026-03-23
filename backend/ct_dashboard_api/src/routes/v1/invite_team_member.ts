@@ -163,7 +163,7 @@ export async function inviteTeamMember(
     const teamName =
       customerRes.success && customerRes.data ? customerRes.data.label : "Oko";
 
-    const inviteUrl = `${state.dashboard_url}/team/invite?token=${token}`;
+    const inviteUrl = `${state.dapp_dashboard_url}/team/invite?token=${token}`;
 
     await sendTeamInvitationEmail(
       email,

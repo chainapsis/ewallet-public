@@ -220,7 +220,7 @@ export async function leaveTeam(
     const teamName =
       customerRes.success && customerRes.data ? customerRes.data.label : "Oko";
 
-    const transferUrl = `${state.dashboard_url}/team/admin-transfer?token=${token}`;
+    const transferUrl = `${state.dapp_dashboard_url}/team/admin-transfer?token=${token}`;
 
     await sendAdminTransferEmail(
       targetRes.data.email,

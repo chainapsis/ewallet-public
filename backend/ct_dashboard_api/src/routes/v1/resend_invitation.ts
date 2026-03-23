@@ -131,7 +131,7 @@ export async function resendInvitation(
     const teamName =
       customerRes.success && customerRes.data ? customerRes.data.label : "Oko";
 
-    const inviteUrl = `${state.dashboard_url}/team/invite?token=${invitation.token}`;
+    const inviteUrl = `${state.dapp_dashboard_url}/team/invite?token=${invitation.token}`;
 
     await sendTeamInvitationEmail(
       invitation.email,
