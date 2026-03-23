@@ -21,4 +21,5 @@ export const envSchema = z.object({
   NEXT_PUBLIC_COINGECKO_COIN_DATA_BY_TOKEN_ADDRESS: z.string(),
   NEXT_PUBLIC_SKIP_TOKEN_INFO_API_URI: z.string(),
   NEXT_PUBLIC_ETHEREUM_ENDPOINT: z.string(),
+  NEXT_PUBLIC_KEPLR_CHAIN_REGISTRY_ENDPOINT: z.string(),
 });
