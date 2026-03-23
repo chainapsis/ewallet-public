@@ -24,7 +24,7 @@ import { OkoEthWallet } from "@oko-wallet/oko-sdk-eth";
 import type { OkoWalletInterface } from "@oko-wallet/oko-sdk-core";
 
 const wallet = useOkoWallet();
-const eth = new OkoEthWallet(wallet as unknown as OkoWalletInterface);
+const eth = new OkoEthWallet(wallet as OkoWalletInterface);
 ```
 
 :::
@@ -290,7 +290,7 @@ import type { OkoWalletInterface } from "@oko-wallet/oko-sdk-core";
 function EthExample() {
   const wallet = useOkoWallet();
   const eth = useMemo(
-    () => new OkoEthWallet(wallet as unknown as OkoWalletInterface),
+    () => new OkoEthWallet(wallet as OkoWalletInterface),
     [wallet],
   );
 
@@ -316,7 +316,7 @@ import type { OkoWalletInterface } from "@oko-wallet/oko-sdk-core";
 function CosmosExample() {
   const wallet = useOkoWallet();
   const cosmos = useMemo(
-    () => new OkoCosmosWallet(wallet as unknown as OkoWalletInterface),
+    () => new OkoCosmosWallet(wallet as OkoWalletInterface),
     [wallet],
   );
 
@@ -342,7 +342,7 @@ function SolanaExample() {
   const wallet = useOkoWallet();
   const svm = useMemo(
     () =>
-      new OkoSvmWallet(wallet as unknown as OkoWalletInterface, {
+      new OkoSvmWallet(wallet as OkoWalletInterface, {
         chain_id: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
       }),
     [wallet],
