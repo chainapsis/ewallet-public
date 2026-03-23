@@ -21,11 +21,18 @@
 }
 
 .eyeButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: none;
   cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg-tertiary);
 }

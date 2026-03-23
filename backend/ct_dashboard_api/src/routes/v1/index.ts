@@ -29,78 +29,56 @@ import {
 import { customerLogoUploadMiddleware } from "@oko-wallet-ctd-api/middleware/multer";
 import { rateLimitMiddleware } from "@oko-wallet-ctd-api/middleware/rate_limit";
 
+const rateLimit = rateLimitMiddleware({
+  windowSeconds: 60,
+  maxRequests: 30,
+});
+
 export function makeCustomerRouter() {
   const router = express.Router();
 
-  router.use(rateLimitMiddleware({ windowSeconds: 60, maxRequests: 30 }));
-
-  router.post(
-    "/customer/auth/forgot-password",
-    // rateLimitMiddleware({ windowSeconds: 60, maxRequests: 30 }),
-    forgotPassword,
-  );
-
-  router.post(
-    "/customer/auth/verify-reset-code",
-    // rateLimitMiddleware({ windowSeconds: 60, maxRequests: 30 }),
-    verifyResetCode,
-  );
-
+  router.post("/customer/auth/forgot-password", rateLimit, forgotPassword);
+  router.post("/customer/auth/verify-reset-code", rateLimit, verifyResetCode);
   router.post(
     "/customer/auth/reset-password-confirm",
-    // rateLimitMiddleware({ windowSeconds: 60, maxRequests: 30 }),
+    rateLimit,
     resetPasswordConfirm,
   );
-
-  router.post(
-    "/customer/auth/send-code",
-    // rateLimitMiddleware({ windowSeconds: 60, maxRequests: 30 }),
-    sendCode,
-  );
-
-  router.post(
-    "/customer/auth/verify-login",
-    // rateLimitMiddleware({ windowSeconds: 60, maxRequests: 30 }),
-    verifyLogin,
-  );
-
-  router.post(
-    "/customer/auth/signin",
-    // rateLimitMiddleware({ windowSeconds: 60, maxRequests: 30 }),
-    signIn,
-  );
-
+  router.post("/customer/auth/send-code", rateLimit, sendCode);
+  router.post("/customer/auth/verify-login", rateLimit, verifyLogin);
+  router.post("/customer/auth/signin", rateLimit, signIn);
   router.post(
     "/customer/auth/change-password",
-    // rateLimitMiddleware({ windowSeconds: 60, maxRequests: 30 }),
+    rateLimit,
     customerJwtMiddleware,
     changePassword,
   );
 
   router.post("/customer/info", customerJwtMiddleware, getCustomerInfo);
-
   router.post("/customer/api_keys", customerJwtMiddleware, getCustomerApiKeys);
 
   router.post(
     "/customer/api_keys/create",
-    // rateLimitMiddleware({ windowSeconds: 60, maxRequests: 30 }),
+    rateLimit,
     customerJwtMiddleware,
     createApiKey,
   );
-
   router.post(
     "/customer/api_keys/delete",
-    // rateLimitMiddleware({ windowSeconds: 60, maxRequests: 30 }),
+    rateLimit,
     customerJwtMiddleware,
     deleteApiKey,
   );
-
-  // ─── Team (public) ─────────────────────────────────────────────
+  router.post(
+    "/customer/update_info",
+    rateLimit,
+    customerJwtMiddleware,
+    customerLogoUploadMiddleware,
+    updateCustomerInfoRoute,
+  );
 
   router.post("/customer/team/validate_invitation", validateInvitation);
-  router.post("/customer/team/accept_invitation", acceptInvitation);
-
-  // ─── Team (authenticated) ─────────────────────────────────────
+  router.post("/customer/team/accept_invitation", rateLimit, acceptInvitation);
 
   router.post(
     "/customer/team/get_members",
@@ -111,57 +89,50 @@ export function makeCustomerRouter() {
 
   router.post(
     "/customer/team/invite_member",
+    rateLimit,
     customerJwtMiddleware,
     resolveTeamMember,
     requireAdmin,
     inviteTeamMember,
   );
-
   router.post(
     "/customer/team/resend_invitation",
+    rateLimit,
     customerJwtMiddleware,
     resolveTeamMember,
     requireAdmin,
     resendInvitation,
   );
-
   router.post(
     "/customer/team/cancel_invitation",
+    rateLimit,
     customerJwtMiddleware,
     resolveTeamMember,
     requireAdmin,
     cancelInvitation,
   );
-
   router.post(
     "/customer/team/update_member_role",
+    rateLimit,
     customerJwtMiddleware,
     resolveTeamMember,
     requireAdmin,
     updateMemberRole,
   );
-
   router.post(
     "/customer/team/remove_member",
+    rateLimit,
     customerJwtMiddleware,
     resolveTeamMember,
     requireAdmin,
     removeTeamMember,
   );
-
   router.post(
     "/customer/team/leave",
+    rateLimit,
     customerJwtMiddleware,
     resolveTeamMember,
     leaveTeam,
-  );
-
-  router.post(
-    "/customer/update_info",
-    // rateLimitMiddleware({ windowSeconds: 60, maxRequests: 30 }),
-    customerJwtMiddleware,
-    customerLogoUploadMiddleware,
-    updateCustomerInfoRoute,
   );
 
   return router;
