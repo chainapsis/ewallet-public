@@ -369,11 +369,11 @@ export default function ForgotPasswordPage() {
             }}
             fullWidth
             requiredSymbol
-            maxLength={16}
+            maxLength={PASSWORD_MAX_LENGTH}
             helpText={
               error
                 ? undefined
-                : "Password must be 8-16 characters and must include numbers."
+                : "Password must be 8-20 characters and must include numbers."
             }
             SideComponent={
               <button
@@ -397,7 +397,7 @@ export default function ForgotPasswordPage() {
             }}
             fullWidth
             requiredSymbol
-            maxLength={16}
+            maxLength={PASSWORD_MAX_LENGTH}
             SideComponent={
               <button
                 type="button"
