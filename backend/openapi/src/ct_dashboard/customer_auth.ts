@@ -115,11 +115,11 @@ export const ChangePasswordRequestSchema = registry.register(
     new_password: z
       .string()
       .min(8)
-      .max(16)
+      .max(20)
       .regex(/\d/, "Password must include at least one number")
       .openapi({
         description:
-          "New password to set (8-16 characters, must include at least one number)",
+          "New password to set (8-20 characters, must include at least one number)",
       }),
     original_password: z.string().optional().openapi({
       description: "Current password for verification",
@@ -220,11 +220,11 @@ export const ResetPasswordConfirmRequestSchema = registry.register(
     newPassword: z
       .string()
       .min(8)
-      .max(16)
+      .max(20)
       .regex(/\d/, "Password must include at least one number")
       .openapi({
         description:
-          "The new password (8-16 characters, must include at least one number)",
+          "The new password (8-20 characters, must include at least one number)",
       }),
   }),
 );

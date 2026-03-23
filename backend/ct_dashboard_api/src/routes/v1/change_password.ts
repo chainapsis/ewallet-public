@@ -118,7 +118,7 @@ export async function changePassword(
       res.status(400).json({
         success: false,
         code: "INVALID_EMAIL_OR_PASSWORD",
-        msg: "Password must be at most 16 characters long",
+        msg: `Password must be at most ${CHANGED_PASSWORD_MAX_LENGTH} characters long`,
       });
       return;
     }
