@@ -103,6 +103,22 @@ export async function requestCancelInvitation({
   );
 }
 
+export async function requestValidateInvitation({ token }: { token: string }) {
+  return errorHandle<{
+    email: string;
+    role: string;
+    team_name: string;
+  }>(() =>
+    fetch(`${CUSTOMER_V1_ENDPOINT}/customer/team/validate_invitation`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ token }),
+    }),
+  );
+}
+
 export async function requestAcceptInvitation({
   token,
   password,

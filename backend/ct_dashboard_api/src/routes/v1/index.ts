@@ -18,6 +18,7 @@ import { sendCode } from "./send_code";
 import { signIn } from "./signin";
 import { updateCustomerInfoRoute } from "./update_customer_info";
 import { updateMemberRole } from "./update_member_role";
+import { validateInvitation } from "./validate_invitation";
 import { verifyLogin } from "./verify_login";
 import { verifyResetCode } from "./verify_reset_code";
 import {
@@ -96,6 +97,7 @@ export function makeCustomerRouter() {
 
   // ─── Team (public) ─────────────────────────────────────────────
 
+  router.post("/customer/team/validate_invitation", validateInvitation);
   router.post("/customer/team/accept_invitation", acceptInvitation);
 
   // ─── Team (authenticated) ─────────────────────────────────────
