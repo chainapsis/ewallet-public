@@ -1,4 +1,3 @@
-import { Connection, PublicKey } from "@solana/web3.js";
 import { useQueries } from "@tanstack/react-query";
 
 import {
@@ -12,14 +11,17 @@ import {
   getAlchemyEndpoint,
   isAlchemySupported,
 } from "@oko-wallet-user-dashboard/constants/alchemy";
+import { fetchCosmosRawBalances } from "@oko-wallet-user-dashboard/fetch/cosmos_balances";
 import {
   fetchCw20TokenBalances,
   fetchCw20TokenRegistry,
 } from "@oko-wallet-user-dashboard/fetch/cw20_token_balances";
 import { fetchErc20TokenBalances } from "@oko-wallet-user-dashboard/fetch/erc20_token_balances";
+import { fetchEvmNativeBalance } from "@oko-wallet-user-dashboard/fetch/evm_native_balance";
 import { fetchFactoryTokenMeta } from "@oko-wallet-user-dashboard/fetch/factory_token_meta";
 import { fetchOsmosisAssetList } from "@oko-wallet-user-dashboard/fetch/osmosis_asset_list";
 import { fetchSplTokenBalances } from "@oko-wallet-user-dashboard/fetch/spl_token_balances";
+import { fetchSvmNativeBalance } from "@oko-wallet-user-dashboard/fetch/svm_native_balance";
 import { DEFAULT_ENABLED_CHAINS } from "@oko-wallet-user-dashboard/state/chains";
 import { useUserInfoState } from "@oko-wallet-user-dashboard/state/user_info";
 import { useAssetMetaStore } from "@oko-wallet-user-dashboard/store/asset_meta";
@@ -56,58 +58,6 @@ function buildTokenBalance(
     isFetching: false,
     error: undefined,
   };
-}
-
-async function fetchCosmosRawBalances(
-  restEndpoint: string,
-  cosmosAddress: string,
-): Promise<RawBalance[]> {
-  const response = await fetch(
-    `${restEndpoint}/cosmos/bank/v1beta1/balances/${cosmosAddress}`,
-  );
-  if (!response.ok) {
-    throw new Error(`Failed to fetch balances: ${response.statusText}`);
-  }
-
-  const data = await response.json();
-  return (data.balances ?? []) as RawBalance[];
-}
-
-async function fetchEvmNativeBalance(
-  rpcEndpoint: string,
-  address: string,
-): Promise<string> {
-  const response = await fetch(rpcEndpoint, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      jsonrpc: "2.0",
-      method: "eth_getBalance",
-      params: [address, "latest"],
-      id: 1,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch EVM balance: ${response.statusText}`);
-  }
-
-  const data = await response.json();
-  if (data.error) {
-    throw new Error(data.error.message);
-  }
-
-  return BigInt(data.result).toString();
-}
-
-async function fetchSvmNativeBalance(
-  rpcEndpoint: string,
-  address: string,
-): Promise<string> {
-  const connection = new Connection(rpcEndpoint);
-  const pubkey = new PublicKey(address);
-  const balance = await connection.getBalance(pubkey);
-  return balance.toString();
 }
 
 async function getCosmosBalances(
