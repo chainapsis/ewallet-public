@@ -257,25 +257,6 @@ function sendInitMsg(hostOrigin: string, msg: OkoWalletMsgInit) {
   return sendMsgToWindow(window.parent, msg, hostOrigin);
 }
 
-function isTokenExpired(token: string): boolean {
-  try {
-    const payload = token.split(".")[1];
-    if (!payload) {
-      return true;
-    }
-    const decoded = JSON.parse(
-      atob(payload.replace(/-/g, "+").replace(/_/g, "/")),
-    );
-    const exp = Number(decoded.exp);
-    if (!Number.isFinite(exp)) {
-      return true;
-    }
-    return Math.floor(Date.now() / 1000) >= exp;
-  } catch {
-    return true;
-  }
-}
-
 async function silentlyRefreshAuthToken(
   authToken: string | null,
   hostOrigin: string,
@@ -306,15 +287,9 @@ async function silentlyRefreshAuthToken(
       return true;
     }
 
-    // Non-401 failure (network error, server error, etc.): check if
-    // the token has expired client-side. If so, clear state so the
-    // host app can prompt re-auth rather than failing on subsequent
-    // signing requests with a stale token.
-    if (isTokenExpired(authToken)) {
-      setAuthToken(hostOrigin, null);
-      return true;
-    }
-
+    // Non-401 failures (network error, server error, etc.): keep the
+    // token. The server may still accept it for renewal on the next
+    // attempt (tokens past exp can be renewed within the 7-day window).
     return false;
   }
 
@@ -329,12 +304,7 @@ async function silentlyRefreshAuthToken(
   }
 
   // Server returned 200 but application-level failure (e.g. UNKNOWN_ERROR).
-  // Token renewal did not succeed — check if the token has expired.
+  // Keep the token — the server may still renew it on the next attempt.
   console.error("[attached] silent sign-in app error, code: %s", resp.code);
-  if (isTokenExpired(authToken)) {
-    setAuthToken(hostOrigin, null);
-    return true;
-  }
-
   return false;
 }
