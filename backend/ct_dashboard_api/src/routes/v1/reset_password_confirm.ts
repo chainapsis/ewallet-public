@@ -93,7 +93,7 @@ export async function resetPasswordConfirm(
       res.status(400).json({
         success: false,
         code: "INVALID_EMAIL_OR_PASSWORD",
-        msg: "Password too short",
+        msg: `Password must be at least ${CHANGED_PASSWORD_MIN_LENGTH} characters long`,
       });
       return;
     }
