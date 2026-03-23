@@ -10799,7 +10799,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oko-wallet/bytes@npm:^0.1.2-alpha.1, @oko-wallet/bytes@npm:^0.1.2-alpha.11, @oko-wallet/bytes@npm:^0.1.2-alpha.2, @oko-wallet/bytes@workspace:*, @oko-wallet/bytes@workspace:crypto/bytes":
+"@oko-wallet/bytes@npm:^0.1.2-alpha.1, @oko-wallet/bytes@npm:^0.1.2-alpha.2, @oko-wallet/bytes@workspace:*, @oko-wallet/bytes@workspace:crypto/bytes":
   version: 0.0.0-use.local
   resolution: "@oko-wallet/bytes@workspace:crypto/bytes"
   dependencies:
@@ -11651,7 +11651,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oko-wallet/oko-sdk-core@npm:^0.1.2-alpha.1, @oko-wallet/oko-sdk-core@npm:^0.1.2-alpha.11, @oko-wallet/oko-sdk-core@workspace:*, @oko-wallet/oko-sdk-core@workspace:sdk/oko_sdk_core":
+"@oko-wallet/oko-sdk-core@npm:^0.1.2-alpha.1, @oko-wallet/oko-sdk-core@workspace:*, @oko-wallet/oko-sdk-core@workspace:sdk/oko_sdk_core":
   version: 0.0.0-use.local
   resolution: "@oko-wallet/oko-sdk-core@workspace:sdk/oko_sdk_core"
   dependencies:
@@ -11819,7 +11819,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oko-wallet/oko-types@npm:^0.1.2-alpha.1, @oko-wallet/oko-types@npm:^0.1.2-alpha.11, @oko-wallet/oko-types@npm:^0.1.2-alpha.2, @oko-wallet/oko-types@workspace:*, @oko-wallet/oko-types@workspace:common/oko_types":
+"@oko-wallet/oko-types@npm:^0.1.2-alpha.1, @oko-wallet/oko-types@npm:^0.1.2-alpha.2, @oko-wallet/oko-types@workspace:*, @oko-wallet/oko-types@workspace:common/oko_types":
   version: 0.0.0-use.local
   resolution: "@oko-wallet/oko-types@workspace:common/oko_types"
   dependencies:
@@ -12012,7 +12012,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oko-wallet/stdlib-js@npm:^0.1.2-alpha.11, @oko-wallet/stdlib-js@workspace:*, @oko-wallet/stdlib-js@workspace:lib/stdlib_js":
+"@oko-wallet/stdlib-js@npm:^0.1.2-alpha.11":
+  version: 0.1.2-alpha.11
+  resolution: "@oko-wallet/stdlib-js@npm:0.1.2-alpha.11"
+  checksum: 10c0/309753fc51c7f88b0ae5da610d67a3089ae5b3995c4da186f7bf0e879bb2034acf30e90007fa2826ab7d3b2190756f87faeb896b35587a92928f874e2a924a33
+  languageName: node
+  linkType: hard
+
+"@oko-wallet/stdlib-js@workspace:*, @oko-wallet/stdlib-js@workspace:lib/stdlib_js":
   version: 0.0.0-use.local
   resolution: "@oko-wallet/stdlib-js@workspace:lib/stdlib_js"
   dependencies:
@@ -12025,13 +12032,6 @@ __metadata:
     typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
-
-"@oko-wallet/stdlib-js@npm:^0.1.2-alpha.11":
-  version: 0.1.2-alpha.11
-  resolution: "@oko-wallet/stdlib-js@npm:0.1.2-alpha.11"
-  checksum: 10c0/309753fc51c7f88b0ae5da610d67a3089ae5b3995c4da186f7bf0e879bb2034acf30e90007fa2826ab7d3b2190756f87faeb896b35587a92928f874e2a924a33
-  languageName: node
-  linkType: hard
 
 "@oko-wallet/tecdsa-interface@npm:0.0.2-alpha.22":
   version: 0.0.2-alpha.22
