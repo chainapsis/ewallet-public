@@ -24,6 +24,7 @@ export async function openSignInModal(
         state.isModalOpen = false;
         reject(new Error("Sign in cancelled"));
       },
+      theme: this._theme ?? "system",
     });
   });
 }
