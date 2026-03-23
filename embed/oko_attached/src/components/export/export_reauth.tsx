@@ -11,13 +11,17 @@ import { getSystemTheme } from "@oko-wallet-attached/components/google_callback/
 type ReauthStatus = "loading" | "redirecting" | "error";
 
 export const ExportReauth = () => {
-  const theme = getSystemTheme();
+  const params = new URLSearchParams(window.location.search);
+  const themeParam = params.get("theme");
+  const theme =
+    themeParam === "light" || themeParam === "dark"
+      ? themeParam
+      : getSystemTheme();
 
   useLayoutEffect(() => {
     setColorScheme(theme);
   }, [theme]);
 
-  const params = new URLSearchParams(window.location.search);
   const authType = params.get("auth_type") as AuthType | null;
 
   if (!authType) {
