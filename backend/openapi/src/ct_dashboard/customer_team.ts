@@ -201,25 +201,7 @@ export const LeaveTeamSuccessResponseSchema = registry.register(
   z.object({
     success: z.literal(true),
     data: z.object({
-      action: z.enum(["left", "transfer_requested"]),
+      action: z.literal("left"),
     }),
-  }),
-);
-
-// ─── Accept Admin Transfer ────────────────────────────────────────
-
-export const AcceptAdminTransferRequestSchema = registry.register(
-  "AcceptAdminTransferRequest",
-  z.object({
-    token: z.string().openapi({
-      description: "Admin transfer token from email link",
-    }),
-  }),
-);
-
-export const AcceptAdminTransferSuccessResponseSchema = registry.register(
-  "AcceptAdminTransferSuccessResponse",
-  z.object({
-    success: z.literal(true),
   }),
 );

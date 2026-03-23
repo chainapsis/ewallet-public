@@ -1,4 +1,3 @@
-import { randomBytes } from "node:crypto";
 import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
 import { registry } from "@oko-wallet/oko-api-openapi";
 import { ErrorResponseSchema } from "@oko-wallet/oko-api-openapi/common";
@@ -9,21 +8,16 @@ import {
 } from "@oko-wallet/oko-api-openapi/ct_dashboard";
 import { updateAPIKeyStatusByCustomerId } from "@oko-wallet/oko-pg-interface/api_keys";
 import {
-  getPendingAdminTransferByCustomerId,
-  insertAdminTransfer,
-} from "@oko-wallet/oko-pg-interface/customer_admin_transfers";
-import {
   countActiveMembers,
   countAdminsByCustomerId,
   getCTDUserByUserIdAndCustomerId,
   softDeleteCTDUser,
+  updateCTDUserRole,
 } from "@oko-wallet/oko-pg-interface/customer_dashboard_users";
 import { deleteCustomer } from "@oko-wallet/oko-pg-interface/customers";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type { Response } from "express";
 
-import { TRANSFER_EXPIRY_DAYS } from "@oko-wallet-ctd-api/constants";
-import { sendAdminTransferEmail } from "@oko-wallet-ctd-api/email/admin_transfer";
 import type { CustomerAuthenticatedRequest } from "@oko-wallet-ctd-api/middleware/auth";
 
 registry.registerPath({
@@ -46,7 +40,7 @@ registry.registerPath({
   },
   responses: {
     200: {
-      description: "Left team or transfer requested",
+      description: "Left team",
       content: {
         "application/json": {
           schema: LeaveTeamSuccessResponseSchema,
@@ -75,7 +69,7 @@ export async function leaveTeam(
   try {
     const state = req.app.locals;
     const userId = res.locals.user_id;
-    const { customer_id: customerId, label: teamName, role } = res.locals.team;
+    const { customer_id: customerId, role } = res.locals.team;
     const { target_user_id } = req.body;
 
     // Scenario 1: Member → just leave
@@ -143,7 +137,7 @@ export async function leaveTeam(
       return;
     }
 
-    // Scenario 3: Sole admin with members → must transfer admin role
+    // Scenario 3: Sole admin with members → instant transfer + leave
     if (!target_user_id) {
       res.status(ErrorCodeMap.TARGET_USER_REQUIRED).json({
         success: false,
@@ -158,20 +152,6 @@ export async function leaveTeam(
         success: false,
         code: "INVALID_REQUEST",
         msg: "Cannot transfer admin role to yourself",
-      });
-      return;
-    }
-
-    // Check if there's already a pending transfer
-    const pendingTransferRes = await getPendingAdminTransferByCustomerId(
-      state.db,
-      customerId,
-    );
-    if (pendingTransferRes.success && pendingTransferRes.data !== null) {
-      res.status(ErrorCodeMap.TRANSFER_ALREADY_PENDING).json({
-        success: false,
-        code: "TRANSFER_ALREADY_PENDING",
-        msg: "An admin transfer is already pending",
       });
       return;
     }
@@ -199,58 +179,19 @@ export async function leaveTeam(
       return;
     }
 
-    // Insert transfer + send email in transaction
-    const token = randomBytes(32).toString("hex");
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + TRANSFER_EXPIRY_DAYS);
-
+    // Promote target + remove self in transaction
     const client = await state.db.connect();
     try {
       await client.query("BEGIN");
-
-      const transferRes = await insertAdminTransfer(client, {
-        customer_id: customerId,
-        from_user_id: userId,
-        to_user_id: target_user_id,
-        token,
-        expires_at: expiresAt,
-      });
-
-      if (!transferRes.success) {
-        throw new Error(transferRes.err);
-      }
-
-      const transferUrl = `${state.dapp_dashboard_url}/team/admin-transfer?token=${token}`;
-
-      const emailRes = await sendAdminTransferEmail(
-        targetRes.data.email,
-        transferUrl,
-        teamName,
-        state.from_email,
-        {
-          smtp_host: state.smtp_host,
-          smtp_port: state.smtp_port,
-          smtp_user: state.smtp_user,
-          smtp_pass: state.smtp_pass,
-        },
-      );
-
-      if (!emailRes.success) {
-        throw new Error("Failed to send admin transfer email");
-      }
-
+      await updateCTDUserRole(client, target_user_id, customerId, "admin");
+      await softDeleteCTDUser(client, userId, customerId);
       await client.query("COMMIT");
-    } catch (txError) {
+    } catch (_txError) {
       await client.query("ROLLBACK");
-      const msg =
-        txError instanceof Error ? txError.message : "Internal server error";
-      const code = msg.includes("send")
-        ? "FAILED_TO_SEND_EMAIL"
-        : "UNKNOWN_ERROR";
       res.status(500).json({
         success: false,
-        code,
-        msg,
+        code: "UNKNOWN_ERROR",
+        msg: "Failed to transfer admin role",
       });
       return;
     } finally {
@@ -259,7 +200,7 @@ export async function leaveTeam(
 
     res.status(200).json({
       success: true,
-      data: { action: "transfer_requested" },
+      data: { action: "left" },
     });
     return;
   } catch (_error) {
