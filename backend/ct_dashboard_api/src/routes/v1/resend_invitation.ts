@@ -124,49 +124,61 @@ export async function resendInvitation(
       }
     }
 
-    // Generate new token + expiry, send email, then persist
+    // Refresh token + send email in transaction
     const newToken = randomBytes(32).toString("hex");
     const newExpiresAt = new Date();
     newExpiresAt.setDate(newExpiresAt.getDate() + INVITATION_EXPIRY_DAYS);
 
-    const inviteUrl = `${state.dapp_dashboard_url}/team/invite?token=${newToken}`;
+    const client = await state.db.connect();
+    try {
+      await client.query("BEGIN");
 
-    const emailRes = await sendTeamInvitationEmail(
-      invitation.email,
-      inviteUrl,
-      teamName,
-      state.from_email,
-      {
-        smtp_host: state.smtp_host,
-        smtp_port: state.smtp_port,
-        smtp_user: state.smtp_user,
-        smtp_pass: state.smtp_pass,
-      },
-    );
+      const refreshRes = await refreshTeamInvitation(
+        client,
+        invitation_id,
+        newToken,
+        newExpiresAt,
+      );
 
-    if (!emailRes.success) {
+      if (!refreshRes.success) {
+        throw new Error(refreshRes.err);
+      }
+
+      const inviteUrl = `${state.dapp_dashboard_url}/team/invite?token=${newToken}`;
+
+      const emailRes = await sendTeamInvitationEmail(
+        invitation.email,
+        inviteUrl,
+        teamName,
+        state.from_email,
+        {
+          smtp_host: state.smtp_host,
+          smtp_port: state.smtp_port,
+          smtp_user: state.smtp_user,
+          smtp_pass: state.smtp_pass,
+        },
+      );
+
+      if (!emailRes.success) {
+        throw new Error("Failed to send invitation email");
+      }
+
+      await client.query("COMMIT");
+    } catch (txError) {
+      await client.query("ROLLBACK");
+      const msg =
+        txError instanceof Error ? txError.message : "Internal server error";
+      const code = msg.includes("send")
+        ? "FAILED_TO_SEND_EMAIL"
+        : "UNKNOWN_ERROR";
       res.status(500).json({
         success: false,
-        code: "FAILED_TO_SEND_EMAIL",
-        msg: "Failed to send invitation email",
+        code,
+        msg,
       });
       return;
-    }
-
-    const refreshRes = await refreshTeamInvitation(
-      state.db,
-      invitation_id,
-      newToken,
-      newExpiresAt,
-    );
-
-    if (!refreshRes.success) {
-      res.status(500).json({
-        success: false,
-        code: "UNKNOWN_ERROR",
-        msg: "Failed to update invitation token",
-      });
-      return;
+    } finally {
+      client.release();
     }
 
     res.status(200).json({
