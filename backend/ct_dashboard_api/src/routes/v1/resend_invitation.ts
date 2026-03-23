@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
 import { registry } from "@oko-wallet/oko-api-openapi";
 import { ErrorResponseSchema } from "@oko-wallet/oko-api-openapi/common";
@@ -8,15 +9,17 @@ import {
 } from "@oko-wallet/oko-api-openapi/ct_dashboard";
 import {
   getTeamInvitationById,
-  updateTeamInvitationLastSentAt,
+  refreshTeamInvitation,
 } from "@oko-wallet/oko-pg-interface/customer_team_invitations";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type { Response } from "express";
 
+import {
+  INVITATION_EXPIRY_DAYS,
+  RESEND_COOLDOWN_MS,
+} from "@oko-wallet-ctd-api/constants";
 import { sendTeamInvitationEmail } from "@oko-wallet-ctd-api/email/team_invitation";
 import type { CustomerAuthenticatedRequest } from "@oko-wallet-ctd-api/middleware/auth";
-
-const RESEND_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
 
 registry.registerPath({
   method: "post",
@@ -121,8 +124,12 @@ export async function resendInvitation(
       }
     }
 
-    // Send email first, then update last_sent_at
-    const inviteUrl = `${state.dapp_dashboard_url}/team/invite?token=${invitation.token}`;
+    // Generate new token + expiry, send email, then persist
+    const newToken = randomBytes(32).toString("hex");
+    const newExpiresAt = new Date();
+    newExpiresAt.setDate(newExpiresAt.getDate() + INVITATION_EXPIRY_DAYS);
+
+    const inviteUrl = `${state.dapp_dashboard_url}/team/invite?token=${newToken}`;
 
     const emailRes = await sendTeamInvitationEmail(
       invitation.email,
@@ -146,7 +153,12 @@ export async function resendInvitation(
       return;
     }
 
-    await updateTeamInvitationLastSentAt(state.db, invitation_id);
+    await refreshTeamInvitation(
+      state.db,
+      invitation_id,
+      newToken,
+      newExpiresAt,
+    );
 
     res.status(200).json({
       success: true,
