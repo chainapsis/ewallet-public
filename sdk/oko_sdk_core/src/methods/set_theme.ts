@@ -8,6 +8,8 @@ export async function setTheme(
   this: OkoWalletWebInterface,
   theme: OkoWalletTheme,
 ) {
+  this._theme = theme;
+
   await this.waitUntilInitialized;
 
   const contentWindow = this.iframe.contentWindow;

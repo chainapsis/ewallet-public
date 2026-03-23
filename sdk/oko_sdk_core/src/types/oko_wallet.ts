@@ -68,6 +68,7 @@ export interface OkoWalletWebInterface extends OkoWalletInterface {
   iframe: HTMLIFrameElement;
   activePopupId: string | null;
   activePopupWindow: Window | null;
+  _theme: OkoWalletTheme | null;
 }
 
 export interface OkoWalletInitArgs {

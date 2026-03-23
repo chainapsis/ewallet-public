@@ -101,6 +101,7 @@ export function init(
     const iframe = iframeRes.data;
 
     const okoWallet = new OkoWallet(args.api_key, iframe, sdkEndpoint);
+    okoWallet._theme = args.theme ?? null;
 
     if (window.__oko) {
       console.warn("[oko] oko wallet has been initialized by another process");
