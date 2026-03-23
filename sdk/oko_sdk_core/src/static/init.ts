@@ -40,6 +40,10 @@ export function init(
     if (window.__oko) {
       console.warn("[oko] already initialized");
 
+      if (args.theme) {
+        window.__oko.setTheme(args.theme);
+      }
+
       return { success: true, data: window.__oko };
     }
 
