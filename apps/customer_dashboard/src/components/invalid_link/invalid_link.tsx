@@ -1,7 +1,7 @@
 "use client";
 
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import type { FC } from "react";
+import type { FC, ReactNode } from "react";
 
 import styles from "./invalid_link.module.scss";
 
@@ -10,12 +10,25 @@ const ILLUSTRATION_URL =
 
 interface InvalidLinkProps {
   title?: string;
-  description?: string;
+  description?: ReactNode;
 }
 
 export const InvalidLink: FC<InvalidLinkProps> = ({
   title = "This invite link is no longer valid.",
-  description = "Ask your team admin to re-invite you.",
+  description = (
+    <>
+      <Typography size="lg" weight="medium" color="secondary">
+        This invite may have expired, been used, or cancelled.
+      </Typography>
+      <Typography size="lg" weight="medium" color="secondary">
+        For other issues, contact us at{" "}
+        <a href="mailto:contact@oko.app" className={styles.emailLink}>
+          contact@oko.app
+        </a>
+        .
+      </Typography>
+    </>
+  ),
 }) => {
   return (
     <div className={styles.wrapper}>
@@ -30,9 +43,7 @@ export const InvalidLink: FC<InvalidLinkProps> = ({
           <Typography size="display-xs" weight="semibold" color="primary">
             {title}
           </Typography>
-          <Typography size="lg" weight="medium" color="secondary">
-            {description}
-          </Typography>
+          {description}
         </div>
       </div>
     </div>
