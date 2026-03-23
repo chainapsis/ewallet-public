@@ -9463,7 +9463,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@noble/hashes@npm:2.0.1":
+"@noble/hashes@npm:2.0.1, @noble/hashes@npm:^2.0.1":
   version: 2.0.1
   resolution: "@noble/hashes@npm:2.0.1"
   checksum: 10c0/e81769ce21c3b1c80141a3b99bd001f17edea09879aa936692ae39525477386d696101cd573928a304806efb2b9fa751e1dd83241c67d0c84d30091e85c79bdb
@@ -11945,6 +11945,7 @@ __metadata:
     "@floating-ui/react": "npm:^0.27.16"
     "@keplr-wallet/cosmos": "npm:0.12.297"
     "@keplr-wallet/unit": "npm:0.12.297"
+    "@noble/hashes": "npm:^2.0.1"
     "@oko-wallet/dotenv": "npm:^0.0.2-alpha.29"
     "@oko-wallet/oko-common-ui": "workspace:*"
     "@oko-wallet/oko-sdk-cosmos": "npm:^0.1.2-alpha.1"
@@ -11961,6 +11962,7 @@ __metadata:
     "@types/node": "npm:^24.10.1"
     "@types/react": "npm:^19.2.7"
     "@types/react-dom": "npm:^19.2.3"
+    bech32: "npm:^2.0.0"
     classnames: "npm:^2.5.1"
     lodash.throttle: "npm:^4.1.1"
     next: "npm:^16.1.1"
