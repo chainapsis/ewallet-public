@@ -26,6 +26,7 @@
     "sdk/oko_cosmos_kit",
     "sdk/oko_interchain_kit",
     "sdk/oko_sdk_core",
+    "sdk/oko_sdk_core_react_native",
     "sdk/oko_sdk_cosmos",
     "sdk/oko_sdk_eth",
     "sdk/oko_sdk_svm",
