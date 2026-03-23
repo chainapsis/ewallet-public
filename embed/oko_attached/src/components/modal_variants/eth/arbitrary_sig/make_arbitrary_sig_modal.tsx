@@ -122,7 +122,7 @@ export const MakeArbitrarySigModal: FC<MakeArbitrarySigModalProps> = ({
         <SignWithOkoBox theme={theme} />
       </CommonModal>
 
-      {isDemo && <DemoView />}
+      {isDemo && <DemoView hideOnMobile />}
     </div>
   );
 };

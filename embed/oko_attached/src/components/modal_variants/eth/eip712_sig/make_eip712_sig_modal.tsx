@@ -69,7 +69,7 @@ export const MakeEIP712SigModal: FC<MakeEIP712SigModalProps> = ({
         <SignWithOkoBox theme={theme} />
       </CommonModal>
 
-      {isDemo && <DemoView />}
+      {isDemo && <DemoView hideOnMobile />}
     </div>
   );
 };

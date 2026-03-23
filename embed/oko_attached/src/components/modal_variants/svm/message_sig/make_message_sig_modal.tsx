@@ -132,7 +132,7 @@ export const MakeMessageSigModal: FC<MakeMessageSigModalProps> = ({
         <SignWithOkoBox theme={theme} />
       </CommonModal>
 
-      {isDemo && <DemoView />}
+      {isDemo && <DemoView hideOnMobile />}
     </div>
   );
 };
