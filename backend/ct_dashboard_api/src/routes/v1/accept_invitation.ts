@@ -127,6 +127,20 @@ export async function acceptInvitation(
       return;
     }
 
+    // Verify customer is still active
+    const customerCheck = await state.db.query(
+      "SELECT 1 FROM customers WHERE customer_id = $1 AND status = 'ACTIVE'",
+      [invitation.customer_id],
+    );
+    if (customerCheck.rows.length === 0) {
+      res.status(ErrorCodeMap.INVITATION_NOT_FOUND).json({
+        success: false,
+        code: "INVITATION_NOT_FOUND",
+        msg: "The team no longer exists",
+      });
+      return;
+    }
+
     // Check if email is already associated with any team
     const existingUserRes = await getCTDUserWithCustomerByEmail(
       state.db,

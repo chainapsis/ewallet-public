@@ -11,6 +11,7 @@ export async function sendTeamInvitationEmail(
 ): Promise<EmailResult> {
   const subject = `You've been invited to join ${teamName} on Oko`;
 
+  // TEMPORARY: Placeholder email template. Will be replaced with a branded design.
   const html = `
     <!DOCTYPE html>
     <html lang="en">
