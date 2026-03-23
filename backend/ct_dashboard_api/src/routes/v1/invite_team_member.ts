@@ -15,11 +15,12 @@ import {
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type { Response } from "express";
 
+import {
+  EMAIL_REGEX,
+  INVITATION_EXPIRY_DAYS,
+} from "@oko-wallet-ctd-api/constants";
 import { sendTeamInvitationEmail } from "@oko-wallet-ctd-api/email/team_invitation";
 import type { CustomerAuthenticatedRequest } from "@oko-wallet-ctd-api/middleware/auth";
-
-const INVITATION_EXPIRY_DAYS = 7;
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 registry.registerPath({
   method: "post",

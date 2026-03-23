@@ -113,19 +113,25 @@ export async function updateTeamInvitationStatus(
   }
 }
 
-export async function updateTeamInvitationLastSentAt(
+export async function refreshTeamInvitation(
   db: Pool | PoolClient,
   invitationId: string,
+  newToken: string,
+  newExpiresAt: Date,
 ): Promise<Result<CustomerTeamInvitation, string>> {
   const query = `
     UPDATE customer_team_invitations
-    SET last_sent_at = now(), updated_at = now()
-    WHERE invitation_id = $1
+    SET token = $1, expires_at = $2, last_sent_at = now(), updated_at = now()
+    WHERE invitation_id = $3
     RETURNING *
   `;
 
   try {
-    const result = await db.query(query, [invitationId]);
+    const result = await db.query(query, [
+      newToken,
+      newExpiresAt,
+      invitationId,
+    ]);
     const row = result.rows[0];
     if (!row) {
       return { success: false, err: "Invitation not found" };

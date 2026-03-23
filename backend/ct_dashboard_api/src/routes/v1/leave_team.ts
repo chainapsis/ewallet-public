@@ -22,10 +22,9 @@ import { deleteCustomer } from "@oko-wallet/oko-pg-interface/customers";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type { Response } from "express";
 
+import { TRANSFER_EXPIRY_DAYS } from "@oko-wallet-ctd-api/constants";
 import { sendAdminTransferEmail } from "@oko-wallet-ctd-api/email/admin_transfer";
 import type { CustomerAuthenticatedRequest } from "@oko-wallet-ctd-api/middleware/auth";
-
-const TRANSFER_EXPIRY_DAYS = 7;
 
 registry.registerPath({
   method: "post",
