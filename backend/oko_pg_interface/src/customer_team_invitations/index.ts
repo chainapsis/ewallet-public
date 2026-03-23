@@ -162,6 +162,7 @@ export async function getPendingInvitationByEmail(
   const query = `
     SELECT * FROM customer_team_invitations
     WHERE customer_id = $1 AND email = $2 AND status = 'PENDING'
+      AND expires_at > NOW()
   `;
 
   try {

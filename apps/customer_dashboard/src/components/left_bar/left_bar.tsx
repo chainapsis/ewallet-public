@@ -25,7 +25,7 @@ export const LeftBar: FC = () => {
     }
     const res = await requestGetTeamMembers({ token, limit: 1 });
     if (res.success) {
-      setTeamMemberCount(res.data.total);
+      setTeamMemberCount(res.data.total + res.data.pending_invitations.length);
     }
   }, [token]);
 
