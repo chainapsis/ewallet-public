@@ -5,10 +5,6 @@ import { CommonModal } from "@oko-wallet-attached/components/modal_variants/comm
 import styles from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_signature_modal.module.scss";
 
 export const DemoView: FC = () => {
-  if (document.documentElement.hasAttribute("data-mobile")) {
-    return null;
-  }
-
   return (
     <CommonModal padding="12px">
       <Typography
