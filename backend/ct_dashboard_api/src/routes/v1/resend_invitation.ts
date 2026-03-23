@@ -133,7 +133,7 @@ export async function resendInvitation(
 
     const inviteUrl = `${state.dapp_dashboard_url}/team/invite?token=${invitation.token}`;
 
-    await sendTeamInvitationEmail(
+    const emailRes = await sendTeamInvitationEmail(
       invitation.email,
       inviteUrl,
       teamName,
@@ -145,6 +145,15 @@ export async function resendInvitation(
         smtp_pass: state.smtp_pass,
       },
     );
+
+    if (!emailRes.success) {
+      res.status(500).json({
+        success: false,
+        code: "FAILED_TO_SEND_EMAIL",
+        msg: "Failed to send invitation email",
+      });
+      return;
+    }
 
     res.status(200).json({
       success: true,
