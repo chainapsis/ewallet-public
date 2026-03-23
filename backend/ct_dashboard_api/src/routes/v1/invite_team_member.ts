@@ -7,7 +7,7 @@ import {
   InviteTeamMemberRequestSchema,
   InviteTeamMemberSuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/ct_dashboard";
-import { getCTDUserByEmailAndCustomerId } from "@oko-wallet/oko-pg-interface/customer_dashboard_users";
+import { getCTDUserWithCustomerByEmail } from "@oko-wallet/oko-pg-interface/customer_dashboard_users";
 import {
   getPendingInvitationByEmail,
   insertTeamInvitation,
@@ -89,25 +89,21 @@ export async function inviteTeamMember(
       return;
     }
 
-    // Check if email already belongs to this team
-    const existingMemberRes = await getCTDUserByEmailAndCustomerId(
-      state.db,
-      email,
-      customerId,
-    );
-    if (!existingMemberRes.success) {
+    // Check if email is already associated with any team
+    const otherTeamRes = await getCTDUserWithCustomerByEmail(state.db, email);
+    if (!otherTeamRes.success) {
       res.status(500).json({
         success: false,
         code: "UNKNOWN_ERROR",
-        msg: existingMemberRes.err,
+        msg: otherTeamRes.err,
       });
       return;
     }
-    if (existingMemberRes.data !== null) {
+    if (otherTeamRes.data !== null) {
       res.status(ErrorCodeMap.DUPLICATE_TEAM_MEMBER).json({
         success: false,
         code: "DUPLICATE_TEAM_MEMBER",
-        msg: "This email is already a team member",
+        msg: "This email is already associated with another team",
       });
       return;
     }

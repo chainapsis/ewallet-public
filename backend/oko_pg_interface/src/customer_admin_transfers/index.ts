@@ -97,6 +97,7 @@ export async function getPendingAdminTransferByCustomerId(
   const query = `
     SELECT * FROM customer_admin_transfers
     WHERE customer_id = $1 AND status = 'PENDING'
+      AND expires_at > NOW()
     ORDER BY created_at DESC
     LIMIT 1
   `;
