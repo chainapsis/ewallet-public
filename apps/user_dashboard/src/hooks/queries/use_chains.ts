@@ -4,13 +4,14 @@
  */
 
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 import { KEPLR_API_ENDPOINT } from "@oko-wallet-user-dashboard/fetch";
 import {
   DEFAULT_ENABLED_CHAINS,
   useChainStore,
 } from "@oko-wallet-user-dashboard/state/chains";
+import { useNativeChainsStore } from "@oko-wallet-user-dashboard/store/native_chains";
 import type {
   CosmosChainInfo,
   ModularChainInfo,
@@ -109,4 +110,24 @@ export function useChain(chainId: string | undefined) {
   }, [chains, chainId]);
 
   return { chain, isLoading };
+}
+
+/**
+ * Hook to get native chain identifiers from Keplr chain registry
+ */
+export function useGetNativeChainIdentifiers() {
+  const nativeChainIdentifiers = useNativeChainsStore(
+    (state) => state.chainIdentifiers,
+  );
+  const fetchNativeChains = useNativeChainsStore(
+    (state) => state.fetchNativeChains,
+  );
+
+  useEffect(() => {
+    if (nativeChainIdentifiers.length === 0) {
+      fetchNativeChains();
+    }
+  }, [nativeChainIdentifiers.length, fetchNativeChains]);
+
+  return nativeChainIdentifiers;
 }
