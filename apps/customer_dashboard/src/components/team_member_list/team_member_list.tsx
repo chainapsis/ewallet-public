@@ -95,6 +95,35 @@ const filterItems = (
   return filtered;
 };
 
+const sortItems = (
+  items: TeamListItem[],
+  column: string | null,
+  direction: "asc" | "desc" | null,
+): TeamListItem[] => {
+  if (!column || !direction) {
+    return items;
+  }
+
+  const multiplier = direction === "asc" ? 1 : -1;
+
+  return [...items].sort((a, b) => {
+    switch (column) {
+      case "email":
+        return a.email.localeCompare(b.email) * multiplier;
+      case "role": {
+        const roleOrder = { admin: 0, member: 1 };
+        return (roleOrder[a.role] - roleOrder[b.role]) * multiplier;
+      }
+      case "status": {
+        const statusOrder = { Active: 0, "Invitation Pending": 1 };
+        return (statusOrder[a.status] - statusOrder[b.status]) * multiplier;
+      }
+      default:
+        return 0;
+    }
+  });
+};
+
 const getPageNumbers = (
   currentPage: number,
   totalPages: number,
@@ -263,8 +292,13 @@ export const TeamMemberList: FC = () => {
   );
 
   const filteredMembers = useMemo(
-    () => filterItems(allItems, activeFilter, searchQuery),
-    [allItems, activeFilter, searchQuery],
+    () =>
+      sortItems(
+        filterItems(allItems, activeFilter, searchQuery),
+        sortColumn,
+        sortDirection,
+      ),
+    [allItems, activeFilter, searchQuery, sortColumn, sortDirection],
   );
 
   const totalPages = Math.max(
