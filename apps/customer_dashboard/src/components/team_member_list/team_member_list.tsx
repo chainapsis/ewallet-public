@@ -436,7 +436,7 @@ export const TeamMemberList: FC = () => {
       setShowTransferModal(false);
       displayToast({
         variant: "success",
-        title: "Admin transfer request sent",
+        title: "Admin role transferred. You have left the team.",
       });
     } else {
       displayToast({ variant: "error", title: res.msg });

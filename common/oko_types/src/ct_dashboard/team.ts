@@ -21,12 +21,6 @@ export interface PendingInvitation {
   last_sent_at: string | null;
 }
 
-export type AdminTransferStatus =
-  | "PENDING"
-  | "ACCEPTED"
-  | "REJECTED"
-  | "EXPIRED";
-
 export interface GetTeamMembersResponse {
   members: TeamMember[];
   pending_invitations: PendingInvitation[];
@@ -47,15 +41,5 @@ export interface AcceptInvitationResponse {
 }
 
 export interface LeaveTeamResponse {
-  action: "left" | "transfer_requested";
-}
-
-export interface AdminTransferRequest {
-  transfer_id: string;
-  customer_id: string;
-  from_user_id: string;
-  to_user_id: string;
-  status: AdminTransferStatus;
-  expires_at: string;
-  created_at: string;
+  action: "left";
 }

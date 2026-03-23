@@ -179,22 +179,3 @@ export async function requestLeaveTeam({
     }),
   );
 }
-
-export async function requestAcceptAdminTransfer({
-  token,
-  transferToken,
-}: {
-  token: string;
-  transferToken: string;
-}) {
-  return errorHandle<{ transfer_id: string }>(() =>
-    fetch(`${CUSTOMER_V1_ENDPOINT}/customer/team/accept_admin_transfer`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ token: transferToken }),
-    }),
-  );
-}
