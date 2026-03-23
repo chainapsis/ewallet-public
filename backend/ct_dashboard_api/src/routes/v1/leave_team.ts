@@ -7,6 +7,7 @@ import {
   LeaveTeamRequestSchema,
   LeaveTeamSuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/ct_dashboard";
+import { updateAPIKeyStatusByCustomerId } from "@oko-wallet/oko-pg-interface/api_keys";
 import {
   getPendingAdminTransferByCustomerId,
   insertAdminTransfer,
@@ -126,6 +127,7 @@ export async function leaveTeam(
       try {
         await client.query("BEGIN");
         await softDeleteCTDUser(client, userId, customerId);
+        await updateAPIKeyStatusByCustomerId(client, customerId, false);
         await deleteCustomer(client, { customer_id: customerId });
         await client.query("COMMIT");
       } catch (_txError) {
@@ -152,6 +154,15 @@ export async function leaveTeam(
         success: false,
         code: "TARGET_USER_REQUIRED",
         msg: "Must specify a member to transfer admin role to",
+      });
+      return;
+    }
+
+    if (target_user_id === userId) {
+      res.status(ErrorCodeMap.INVALID_REQUEST).json({
+        success: false,
+        code: "INVALID_REQUEST",
+        msg: "Cannot transfer admin role to yourself",
       });
       return;
     }
@@ -222,7 +233,7 @@ export async function leaveTeam(
 
     const transferUrl = `${state.dapp_dashboard_url}/team/admin-transfer?token=${token}`;
 
-    await sendAdminTransferEmail(
+    const emailRes = await sendAdminTransferEmail(
       targetRes.data.email,
       transferUrl,
       teamName,
@@ -234,6 +245,15 @@ export async function leaveTeam(
         smtp_pass: state.smtp_pass,
       },
     );
+
+    if (!emailRes.success) {
+      res.status(500).json({
+        success: false,
+        code: "FAILED_TO_SEND_EMAIL",
+        msg: "Failed to send admin transfer email",
+      });
+      return;
+    }
 
     res.status(200).json({
       success: true,

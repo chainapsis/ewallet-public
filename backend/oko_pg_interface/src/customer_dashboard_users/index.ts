@@ -58,6 +58,10 @@ RETURNING *
   }
 }
 
+// NOTE: LIMIT 1 assumes one active row per email. Currently enforced at the
+// application level (multi-team is blocked in createCustomer). If multi-team
+// support is enabled in the future, this query and all callers (signin,
+// verify_login, send_code) must be updated to let the user choose a team.
 export async function getCTDUserWithCustomerByEmail(
   db: Pool,
   email: string,
@@ -111,7 +115,8 @@ LIMIT 1
   }
 }
 
-// Assume 1:1 mapping(email <-> customer_id) for now
+// NOTE: Same LIMIT 1 assumption as getCTDUserWithCustomerByEmail above.
+// Must be revisited when multi-team support is enabled.
 export async function getCTDUserWithCustomerAndPasswordHashByEmail(
   db: Pool,
   email: string,

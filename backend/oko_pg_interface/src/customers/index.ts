@@ -219,9 +219,9 @@ export async function getCustomerByUserId(
 SELECT * 
 FROM customers 
 WHERE customer_id = (
-    SELECT customer_id 
-    FROM customer_dashboard_users 
-    WHERE user_id = $1
+    SELECT customer_id
+    FROM customer_dashboard_users
+    WHERE user_id = $1 AND status = 'ACTIVE'
   ) AND status = 'ACTIVE'
 LIMIT 1
 `;
