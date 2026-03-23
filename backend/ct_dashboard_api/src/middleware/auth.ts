@@ -68,9 +68,15 @@ export async function customerJwtMiddleware(
   }
 }
 
+export interface TeamContext {
+  customer_id: string;
+  label: string;
+  role: string;
+}
+
 /**
  * Resolves the team member context from JWT user_id.
- * Sets res.locals.customer_id and res.locals.role.
+ * Sets res.locals.team = { customer_id, label, role }.
  * Must be used after customerJwtMiddleware.
  */
 export async function resolveTeamMember(
@@ -92,11 +98,11 @@ export async function resolveTeamMember(
       return;
     }
 
-    const customerId = customerRes.data.customer_id;
+    const customer = customerRes.data;
     const memberRes = await getCTDUserByUserIdAndCustomerId(
       state.db,
       userId,
-      customerId,
+      customer.customer_id,
     );
 
     if (!memberRes.success || memberRes.data === null) {
@@ -108,8 +114,11 @@ export async function resolveTeamMember(
       return;
     }
 
-    res.locals.customer_id = customerId;
-    res.locals.role = memberRes.data.role;
+    res.locals.team = {
+      customer_id: customer.customer_id,
+      label: customer.label,
+      role: memberRes.data.role,
+    } satisfies TeamContext;
 
     next();
     return;
@@ -132,7 +141,7 @@ export async function requireAdmin(
   res: Response,
   next: NextFunction,
 ) {
-  if (res.locals.role !== "admin") {
+  if (res.locals.team?.role !== "admin") {
     res.status(403).json({
       success: false,
       code: "FORBIDDEN",

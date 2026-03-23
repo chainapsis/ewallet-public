@@ -7,7 +7,6 @@ import {
 } from "@oko-wallet/oko-api-openapi/ct_dashboard";
 import { getTeamMembersByCustomerId } from "@oko-wallet/oko-pg-interface/customer_dashboard_users";
 import { getPendingInvitationsByCustomerId } from "@oko-wallet/oko-pg-interface/customer_team_invitations";
-import { getCustomerByUserId } from "@oko-wallet/oko-pg-interface/customers";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type { Response } from "express";
 
@@ -63,11 +62,11 @@ export async function getTeamMembers(
   try {
     const state = req.app.locals;
     const userId = res.locals.user_id;
-    const customerId = res.locals.customer_id;
+    const { customer_id: customerId, label: teamName } = res.locals.team;
 
     const { limit = 20, offset = 0, search, sort_by, sort_order } = req.body;
 
-    const [membersRes, invitationsRes, customerRes] = await Promise.all([
+    const [membersRes, invitationsRes] = await Promise.all([
       getTeamMembersByCustomerId(state.db, customerId, {
         limit,
         offset,
@@ -76,7 +75,6 @@ export async function getTeamMembers(
         sortOrder: sort_order,
       }),
       getPendingInvitationsByCustomerId(state.db, customerId),
-      getCustomerByUserId(state.db, userId),
     ]);
 
     if (!membersRes.success) {
@@ -96,9 +94,6 @@ export async function getTeamMembers(
       });
       return;
     }
-
-    const teamName =
-      customerRes.success && customerRes.data ? customerRes.data.label : "";
 
     const members = membersRes.data.members.map((m) => ({
       user_id: m.user_id,

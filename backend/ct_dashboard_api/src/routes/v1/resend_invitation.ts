@@ -10,7 +10,6 @@ import {
   getTeamInvitationById,
   updateTeamInvitationLastSentAt,
 } from "@oko-wallet/oko-pg-interface/customer_team_invitations";
-import { getCustomerByUserId } from "@oko-wallet/oko-pg-interface/customers";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type { Response } from "express";
 
@@ -67,8 +66,7 @@ export async function resendInvitation(
 ) {
   try {
     const state = req.app.locals;
-    const userId = res.locals.user_id;
-    const customerId = res.locals.customer_id;
+    const { customer_id: customerId, label: teamName } = res.locals.team;
     const { invitation_id } = req.body;
 
     const invitationRes = await getTeamInvitationById(
@@ -123,14 +121,7 @@ export async function resendInvitation(
       }
     }
 
-    // Update last_sent_at
-    await updateTeamInvitationLastSentAt(state.db, invitation_id);
-
-    // Resend email
-    const customerRes = await getCustomerByUserId(state.db, userId);
-    const teamName =
-      customerRes.success && customerRes.data ? customerRes.data.label : "Oko";
-
+    // Send email first, then update last_sent_at
     const inviteUrl = `${state.dapp_dashboard_url}/team/invite?token=${invitation.token}`;
 
     const emailRes = await sendTeamInvitationEmail(
@@ -154,6 +145,8 @@ export async function resendInvitation(
       });
       return;
     }
+
+    await updateTeamInvitationLastSentAt(state.db, invitation_id);
 
     res.status(200).json({
       success: true,

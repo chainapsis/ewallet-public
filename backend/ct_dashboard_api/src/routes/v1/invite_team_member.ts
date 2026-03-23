@@ -12,7 +12,6 @@ import {
   getPendingInvitationByEmail,
   insertTeamInvitation,
 } from "@oko-wallet/oko-pg-interface/customer_team_invitations";
-import { getCustomerByUserId } from "@oko-wallet/oko-pg-interface/customers";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type { Response } from "express";
 
@@ -77,7 +76,7 @@ export async function inviteTeamMember(
   try {
     const state = req.app.locals;
     const userId = res.locals.user_id;
-    const customerId = res.locals.customer_id;
+    const { customer_id: customerId, label: teamName } = res.locals.team;
     const { email, role } = req.body;
 
     if (!email || !EMAIL_REGEX.test(email)) {
@@ -131,67 +130,74 @@ export async function inviteTeamMember(
       return;
     }
 
-    // Generate token and create invitation
+    // Insert invitation + send email in transaction
     const token = randomBytes(32).toString("hex");
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + INVITATION_EXPIRY_DAYS);
 
-    const invitationRes = await insertTeamInvitation(state.db, {
-      customer_id: customerId,
-      email,
-      role,
-      token,
-      inviter_user_id: userId,
-      expires_at: expiresAt,
-    });
+    const client = await state.db.connect();
+    try {
+      await client.query("BEGIN");
 
-    if (!invitationRes.success) {
-      res.status(500).json({
-        success: false,
-        code: "UNKNOWN_ERROR",
-        msg: invitationRes.err,
+      const invitationRes = await insertTeamInvitation(client, {
+        customer_id: customerId,
+        email,
+        role,
+        token,
+        inviter_user_id: userId,
+        expires_at: expiresAt,
+      });
+
+      if (!invitationRes.success) {
+        throw new Error(invitationRes.err);
+      }
+
+      const inviteUrl = `${state.dapp_dashboard_url}/team/invite?token=${token}`;
+
+      const emailRes = await sendTeamInvitationEmail(
+        email,
+        inviteUrl,
+        teamName,
+        state.from_email,
+        {
+          smtp_host: state.smtp_host,
+          smtp_port: state.smtp_port,
+          smtp_user: state.smtp_user,
+          smtp_pass: state.smtp_pass,
+        },
+      );
+
+      if (!emailRes.success) {
+        throw new Error("Failed to send invitation email");
+      }
+
+      await client.query("COMMIT");
+
+      res.status(200).json({
+        success: true,
+        data: {
+          invitation_id: invitationRes.data.invitation_id,
+          email: invitationRes.data.email,
+          role: invitationRes.data.role,
+        },
       });
       return;
-    }
-
-    // Send invitation email
-    const customerRes = await getCustomerByUserId(state.db, userId);
-    const teamName =
-      customerRes.success && customerRes.data ? customerRes.data.label : "Oko";
-
-    const inviteUrl = `${state.dapp_dashboard_url}/team/invite?token=${token}`;
-
-    const emailRes = await sendTeamInvitationEmail(
-      email,
-      inviteUrl,
-      teamName,
-      state.from_email,
-      {
-        smtp_host: state.smtp_host,
-        smtp_port: state.smtp_port,
-        smtp_user: state.smtp_user,
-        smtp_pass: state.smtp_pass,
-      },
-    );
-
-    if (!emailRes.success) {
+    } catch (txError) {
+      await client.query("ROLLBACK");
+      const msg =
+        txError instanceof Error ? txError.message : "Internal server error";
+      const code = msg.includes("send")
+        ? "FAILED_TO_SEND_EMAIL"
+        : "UNKNOWN_ERROR";
       res.status(500).json({
         success: false,
-        code: "FAILED_TO_SEND_EMAIL",
-        msg: "Failed to send invitation email",
+        code,
+        msg,
       });
       return;
+    } finally {
+      client.release();
     }
-
-    res.status(200).json({
-      success: true,
-      data: {
-        invitation_id: invitationRes.data.invitation_id,
-        email: invitationRes.data.email,
-        role: invitationRes.data.role,
-      },
-    });
-    return;
   } catch (_error) {
     res.status(500).json({
       success: false,

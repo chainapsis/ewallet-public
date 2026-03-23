@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { hashPassword } from "@oko-wallet/crypto-js";
 import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
 import { registry } from "@oko-wallet/oko-api-openapi";
 import { ErrorResponseSchema } from "@oko-wallet/oko-api-openapi/common";
@@ -7,7 +8,7 @@ import {
   AcceptInvitationSuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/ct_dashboard";
 import {
-  getCTDUserWithCustomerAndPasswordHashByEmail,
+  getCTDUserWithCustomerByEmail,
   insertCustomerDashboardUser,
 } from "@oko-wallet/oko-pg-interface/customer_dashboard_users";
 import {
@@ -18,13 +19,15 @@ import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type { CustomerDashboardUserRole } from "@oko-wallet/oko-types/ct_dashboard";
 import type { Request, Response } from "express";
 
+import { generateCustomerToken } from "@oko-wallet-ctd-api/auth";
+
 registry.registerPath({
   method: "post",
   path: "/customer_dashboard/v1/customer/team/accept_invitation",
   tags: ["Customer Dashboard - Team"],
   summary: "Accept team invitation",
   description:
-    "Accepts a team invitation using the token from the email link. No authentication required.",
+    "Accepts a team invitation, creates the user account, and returns a JWT. No authentication required.",
   request: {
     body: {
       required: true,
@@ -37,7 +40,7 @@ registry.registerPath({
   },
   responses: {
     200: {
-      description: "Invitation accepted or signup required",
+      description: "Invitation accepted, account created",
       content: {
         "application/json": {
           schema: AcceptInvitationSuccessResponseSchema,
@@ -46,6 +49,12 @@ registry.registerPath({
     },
     404: {
       description: "Invitation not found",
+      content: {
+        "application/json": { schema: ErrorResponseSchema },
+      },
+    },
+    409: {
+      description: "Email already belongs to a team",
       content: {
         "application/json": { schema: ErrorResponseSchema },
       },
@@ -65,8 +74,9 @@ export async function acceptInvitation(
 ) {
   try {
     const state = req.app.locals;
-    const { token } = req.body;
+    const { token, password } = req.body;
 
+    // Validate token
     const invitationRes = await getTeamInvitationByToken(state.db, token);
 
     if (!invitationRes.success) {
@@ -117,8 +127,8 @@ export async function acceptInvitation(
       return;
     }
 
-    // Check if user already exists (need password_hash for reuse)
-    const existingUserRes = await getCTDUserWithCustomerAndPasswordHashByEmail(
+    // Check if email is already associated with any team
+    const existingUserRes = await getCTDUserWithCustomerByEmail(
       state.db,
       invitation.email,
     );
@@ -132,21 +142,19 @@ export async function acceptInvitation(
       return;
     }
 
-    if (existingUserRes.data === null) {
-      // User doesn't exist yet — frontend should redirect to signup
-      res.status(200).json({
-        success: true,
-        data: {
-          action: "signup_required",
-          email: invitation.email,
-          customer_id: invitation.customer_id,
-        },
+    if (existingUserRes.data !== null) {
+      res.status(ErrorCodeMap.DUPLICATE_TEAM_MEMBER).json({
+        success: false,
+        code: "DUPLICATE_TEAM_MEMBER",
+        msg: "This email is already associated with a team",
       });
       return;
     }
 
-    // User exists — add to team (transactional)
+    // Create user account + accept invitation in transaction
     const userId = randomUUID();
+    const passwordHash = await hashPassword(password);
+
     const client = await state.db.connect();
     try {
       await client.query("BEGIN");
@@ -158,17 +166,11 @@ export async function acceptInvitation(
         role: invitation.role as CustomerDashboardUserRole,
         status: "ACTIVE",
         is_email_verified: true,
-        password_hash: existingUserRes.data.user.password_hash,
+        password_hash: passwordHash,
       });
 
       if (!insertRes.success) {
-        await client.query("ROLLBACK");
-        res.status(500).json({
-          success: false,
-          code: "UNKNOWN_ERROR",
-          msg: insertRes.err,
-        });
-        return;
+        throw new Error(insertRes.err);
       }
 
       await updateTeamInvitationStatus(
@@ -190,10 +192,28 @@ export async function acceptInvitation(
       client.release();
     }
 
+    // Generate JWT for the new user
+    const tokenRes = generateCustomerToken({
+      user_id: userId,
+      jwt_config: {
+        secret: state.jwt_secret,
+        expires_in: state.jwt_expires_in,
+      },
+    });
+
+    if (!tokenRes.success) {
+      res.status(500).json({
+        success: false,
+        code: "FAILED_TO_GENERATE_TOKEN",
+        msg: tokenRes.err,
+      });
+      return;
+    }
+
     res.status(200).json({
       success: true,
       data: {
-        action: "joined",
+        token: tokenRes.data.token,
         email: invitation.email,
         customer_id: invitation.customer_id,
       },

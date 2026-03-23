@@ -41,7 +41,7 @@ export interface InviteTeamMemberResponse {
 }
 
 export interface AcceptInvitationResponse {
-  action: "joined" | "signup_required";
+  token: string;
   email: string;
   customer_id: string;
 }

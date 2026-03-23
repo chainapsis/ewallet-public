@@ -18,10 +18,7 @@ import {
   getCTDUserByUserIdAndCustomerId,
   softDeleteCTDUser,
 } from "@oko-wallet/oko-pg-interface/customer_dashboard_users";
-import {
-  deleteCustomer,
-  getCustomerByUserId,
-} from "@oko-wallet/oko-pg-interface/customers";
+import { deleteCustomer } from "@oko-wallet/oko-pg-interface/customers";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type { Response } from "express";
 
@@ -79,8 +76,7 @@ export async function leaveTeam(
   try {
     const state = req.app.locals;
     const userId = res.locals.user_id;
-    const customerId = res.locals.customer_id;
-    const role = res.locals.role;
+    const { customer_id: customerId, label: teamName, role } = res.locals.team;
     const { target_user_id } = req.body;
 
     // Scenario 1: Member → just leave
@@ -204,55 +200,62 @@ export async function leaveTeam(
       return;
     }
 
-    // Create admin transfer request
+    // Insert transfer + send email in transaction
     const token = randomBytes(32).toString("hex");
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + TRANSFER_EXPIRY_DAYS);
 
-    const transferRes = await insertAdminTransfer(state.db, {
-      customer_id: customerId,
-      from_user_id: userId,
-      to_user_id: target_user_id,
-      token,
-      expires_at: expiresAt,
-    });
+    const client = await state.db.connect();
+    try {
+      await client.query("BEGIN");
 
-    if (!transferRes.success) {
+      const transferRes = await insertAdminTransfer(client, {
+        customer_id: customerId,
+        from_user_id: userId,
+        to_user_id: target_user_id,
+        token,
+        expires_at: expiresAt,
+      });
+
+      if (!transferRes.success) {
+        throw new Error(transferRes.err);
+      }
+
+      const transferUrl = `${state.dapp_dashboard_url}/team/admin-transfer?token=${token}`;
+
+      const emailRes = await sendAdminTransferEmail(
+        targetRes.data.email,
+        transferUrl,
+        teamName,
+        state.from_email,
+        {
+          smtp_host: state.smtp_host,
+          smtp_port: state.smtp_port,
+          smtp_user: state.smtp_user,
+          smtp_pass: state.smtp_pass,
+        },
+      );
+
+      if (!emailRes.success) {
+        throw new Error("Failed to send admin transfer email");
+      }
+
+      await client.query("COMMIT");
+    } catch (txError) {
+      await client.query("ROLLBACK");
+      const msg =
+        txError instanceof Error ? txError.message : "Internal server error";
+      const code = msg.includes("send")
+        ? "FAILED_TO_SEND_EMAIL"
+        : "UNKNOWN_ERROR";
       res.status(500).json({
         success: false,
-        code: "UNKNOWN_ERROR",
-        msg: transferRes.err,
+        code,
+        msg,
       });
       return;
-    }
-
-    // Send admin transfer email
-    const customerRes = await getCustomerByUserId(state.db, userId);
-    const teamName =
-      customerRes.success && customerRes.data ? customerRes.data.label : "Oko";
-
-    const transferUrl = `${state.dapp_dashboard_url}/team/admin-transfer?token=${token}`;
-
-    const emailRes = await sendAdminTransferEmail(
-      targetRes.data.email,
-      transferUrl,
-      teamName,
-      state.from_email,
-      {
-        smtp_host: state.smtp_host,
-        smtp_port: state.smtp_port,
-        smtp_user: state.smtp_user,
-        smtp_pass: state.smtp_pass,
-      },
-    );
-
-    if (!emailRes.success) {
-      res.status(500).json({
-        success: false,
-        code: "FAILED_TO_SEND_EMAIL",
-        msg: "Failed to send admin transfer email",
-      });
-      return;
+    } finally {
+      client.release();
     }
 
     res.status(200).json({

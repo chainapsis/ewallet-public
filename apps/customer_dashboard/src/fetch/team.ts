@@ -103,14 +103,20 @@ export async function requestCancelInvitation({
   );
 }
 
-export async function requestAcceptInvitation({ token }: { token: string }) {
+export async function requestAcceptInvitation({
+  token,
+  password,
+}: {
+  token: string;
+  password: string;
+}) {
   return errorHandle<AcceptInvitationResponse>(() =>
     fetch(`${CUSTOMER_V1_ENDPOINT}/customer/team/accept_invitation`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
       },
-      body: JSON.stringify({ token }),
+      body: JSON.stringify({ token, password }),
     }),
   );
 }

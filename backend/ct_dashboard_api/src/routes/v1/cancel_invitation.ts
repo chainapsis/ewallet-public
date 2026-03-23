@@ -57,7 +57,7 @@ export async function cancelInvitation(
 ) {
   try {
     const state = req.app.locals;
-    const customerId = res.locals.customer_id;
+    const { customer_id: customerId } = res.locals.team;
     const { invitation_id } = req.body;
 
     const invitationRes = await getTeamInvitationById(
