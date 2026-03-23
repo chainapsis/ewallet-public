@@ -78,6 +78,9 @@ export function LoginCompleteClient({
     }
 
     sessionDataRef.current = { redirectScheme, oauthPayload };
+    sessionStorage.removeItem("oko_mobile_redirect_scheme");
+    sessionStorage.removeItem("oko_mobile_api_key");
+    sessionStorage.removeItem("oko_mobile_client_random");
   }, [oauthParams]);
 
   // Handle init from attached iframe

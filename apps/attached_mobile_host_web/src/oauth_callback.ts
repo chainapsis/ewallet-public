@@ -1,3 +1,12 @@
+import {
+  buildMobileLoginCompleteUrl,
+  getMobileSessionSnapshot,
+  hasOAuthPayload,
+  inferProviderFromCallbackPath,
+  parseOAuthState,
+  readOAuthCallbackTokens,
+} from "./oauth_callback_utils";
+
 /**
  * Handle OAuth provider callback redirects before React mounts.
  *
@@ -14,76 +23,46 @@ export function handleOAuthCallbackRedirect(): boolean {
     return false;
   }
 
-  const hash = window.location.hash;
-  const searchParams = new URLSearchParams(window.location.search);
-
-  let accessToken: string | null = null;
-  let idToken: string | null = null;
-  let code: string | null = null;
-  let stateStr: string | null = null;
-
-  // Hash fragment (Google, Auth0/email)
-  if (hash && hash.length > 1) {
-    const hashParams = new URLSearchParams(hash.substring(1));
-    accessToken = hashParams.get("access_token");
-    idToken = hashParams.get("id_token");
-    stateStr = hashParams.get("state");
-  }
-
-  // Query params (X, Discord, GitHub)
-  if (!stateStr) {
-    code = searchParams.get("code");
-    stateStr = searchParams.get("state");
-  }
-
-  if (!stateStr) {
-    return false;
-  }
-
-  // Parse state — JSON (Google, Auth0) or base64+JSON (X, Discord, GitHub)
-  let state: Record<string, string> = {};
-  try {
-    state = JSON.parse(stateStr);
-  } catch {
-    try {
-      state = JSON.parse(atob(stateStr));
-    } catch {
-      /* ignore */
-    }
-  }
-
-  const provider = state.provider ?? "";
-  const apiKey = state.apiKey ?? "";
-  const targetOrigin = state.targetOrigin ?? "";
-  const redirectScheme = state.redirectScheme ?? null;
-
-  const params = new URLSearchParams();
-  params.set("provider", provider);
-  params.set("api_key", apiKey);
-  params.set("host_origin", targetOrigin);
-  params.set("auth_type", provider);
-  if (redirectScheme) {
-    params.set("redirect_scheme", redirectScheme);
-  }
-  if (accessToken) {
-    params.set("access_token", accessToken);
-  }
-  if (idToken) {
-    params.set("id_token", idToken);
-  }
-  if (code) {
-    params.set("code", code);
-  }
-
-  const completeUrl = new URL(
-    `/mobile/login/complete?${params.toString()}`,
-    window.location.origin,
+  const tokens = readOAuthCallbackTokens(
+    window.location.hash,
+    window.location.search,
   );
-  const clientRandom = sessionStorage.getItem("oko_mobile_client_random");
-  if (clientRandom) {
-    completeUrl.hash = `client_random=${encodeURIComponent(clientRandom)}`;
+  const parsedState = parseOAuthState(tokens.stateStr);
+
+  let provider = parsedState?.provider ?? "";
+  let apiKey = parsedState?.apiKey ?? "";
+  let targetOrigin = parsedState?.targetOrigin ?? "";
+  let redirectScheme = parsedState?.redirectScheme ?? null;
+  let clientRandom = sessionStorage.getItem("oko_mobile_client_random");
+
+  if (!parsedState) {
+    const mobileSession = getMobileSessionSnapshot(sessionStorage);
+    const inferredProvider = inferProviderFromCallbackPath(path);
+
+    if (!mobileSession || !inferredProvider || !hasOAuthPayload(tokens)) {
+      return false;
+    }
+
+    provider = inferredProvider;
+    apiKey = mobileSession.apiKey;
+    redirectScheme = mobileSession.redirectScheme;
+    clientRandom = mobileSession.clientRandom;
+    targetOrigin = window.location.origin;
   }
 
-  window.location.replace(completeUrl.toString());
+  const completeUrl = buildMobileLoginCompleteUrl({
+    origin: window.location.origin,
+    provider,
+    apiKey,
+    targetOrigin,
+    authType: provider,
+    redirectScheme,
+    accessToken: tokens.accessToken,
+    idToken: tokens.idToken,
+    code: tokens.code,
+    clientRandom,
+  });
+
+  window.location.replace(completeUrl);
   return true;
 }

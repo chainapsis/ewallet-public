@@ -251,6 +251,7 @@ export class OkoWalletRN implements OkoWalletInterface {
         this.sdkEndpoint,
         this.redirectScheme,
         this.androidCallbackScheme,
+        this._clientRandom,
       );
     } catch (error) {
       console.warn("[oko-rn] OS-browser sign-out failed:", error);

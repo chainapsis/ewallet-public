@@ -1,5 +1,6 @@
 const ATTACHED_ORIGIN =
-  import.meta.env.VITE_ATTACHED_ORIGIN ?? "https://attached.oko.app";
+  (import.meta as ImportMeta & { env?: { VITE_ATTACHED_ORIGIN?: string } }).env
+    ?.VITE_ATTACHED_ORIGIN ?? "https://attached.oko.app";
 
 /**
  * Build the iframe src for the attached wallet.
