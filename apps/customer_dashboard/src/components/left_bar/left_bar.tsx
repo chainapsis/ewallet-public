@@ -5,17 +5,33 @@ import { HomeOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/home_outlined"
 import { UsersIcon } from "@oko-wallet/oko-common-ui/icons/users";
 import { MenuItem } from "@oko-wallet/oko-common-ui/menu";
 import { usePathname } from "next/navigation";
-import type { FC } from "react";
+import { type FC, useCallback, useEffect, useState } from "react";
 
 import { AccountInfoWithSubMenu } from "../account_info_with_sub_menu/account_info_with_sub_menu";
 import { ExternalLinkItem } from "../external_link_item/external_link_item";
 import styles from "./left_bar.module.scss";
+import { requestGetTeamMembers } from "@oko-wallet-ct-dashboard/fetch/team";
 import { paths } from "@oko-wallet-ct-dashboard/paths";
-
-const MOCK_TEAM_MEMBER_COUNT = 96;
+import { useAppState } from "@oko-wallet-ct-dashboard/state";
 
 export const LeftBar: FC = () => {
   const pathname = usePathname();
+  const token = useAppState((s) => s.token);
+  const [teamMemberCount, setTeamMemberCount] = useState<number | null>(null);
+
+  const fetchCount = useCallback(async () => {
+    if (!token) {
+      return;
+    }
+    const res = await requestGetTeamMembers({ token, limit: 1 });
+    if (res.success) {
+      setTeamMemberCount(res.data.total);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    fetchCount();
+  }, [fetchCount]);
 
   return (
     <div className={styles.wrapper}>
@@ -37,7 +53,7 @@ export const LeftBar: FC = () => {
           />
           <Badge
             color="gray"
-            label={String(MOCK_TEAM_MEMBER_COUNT)}
+            label={teamMemberCount !== null ? String(teamMemberCount) : "–"}
             size="sm"
           />
         </div>
