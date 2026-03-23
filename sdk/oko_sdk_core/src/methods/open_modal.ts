@@ -144,6 +144,11 @@ function openEmailLoginPopup(
     url.searchParams.set("modal_id", modalId);
     url.searchParams.set("host_origin", window.location.origin);
 
+    const iframeTheme = new URL(this.iframe.src).searchParams.get("theme");
+    if (iframeTheme) {
+      url.searchParams.set("theme", iframeTheme);
+    }
+
     try {
       popupWindow.location.href = url.toString();
     } catch (error) {
@@ -175,6 +180,11 @@ function openTelegramLoginPopup(
 
   url.searchParams.set("modal_id", modalId);
   url.searchParams.set("host_origin", window.location.origin);
+
+  const iframeTheme = new URL(this.iframe.src).searchParams.get("theme");
+  if (iframeTheme) {
+    url.searchParams.set("theme", iframeTheme);
+  }
 
   if (
     msg.payload.modal_type === "auth/telegram_login" &&
