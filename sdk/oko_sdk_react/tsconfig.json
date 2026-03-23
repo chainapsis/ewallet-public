@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["dom", "es2017", "esnext.asynciterable"],
+    "jsx": "react-jsx",
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "removeComments": true,
+    "verbatimModuleSyntax": true,
+    "noImplicitAny": true,
+    "strict": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "declaration": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "rootDir": ".",
+    "paths": {
+      "@oko-wallet-sdk-react/*": ["./src/*"]
+    }
+  },
+  "include": ["**/*", "*.json"],
+  "exclude": ["node_modules", "dist"]
+}
