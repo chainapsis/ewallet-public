@@ -131,6 +131,9 @@ export const AcceptInvitationRequestSchema = registry.register(
     token: z.string().openapi({
       description: "Invitation token from email link",
     }),
+    password: z.string().min(8).max(16).openapi({
+      description: "Password for the new account",
+    }),
   }),
 );
 
@@ -139,7 +142,9 @@ export const AcceptInvitationSuccessResponseSchema = registry.register(
   z.object({
     success: z.literal(true),
     data: z.object({
-      action: z.enum(["joined", "signup_required"]),
+      token: z.string().openapi({
+        description: "JWT token for the new session",
+      }),
       email: z.string(),
       customer_id: z.string().uuid(),
     }),

@@ -27,12 +27,6 @@ export async function up(knex: Knex): Promise<void> {
     table.index(["customer_id", "status"], "idx_invitations_customer_status");
     table.index(["email"], "idx_invitations_email");
   });
-
-  await knex.raw(`
-    CREATE UNIQUE INDEX idx_invitations_customer_email_pending
-    ON customer_team_invitations (customer_id, email)
-    WHERE status = 'PENDING'
-  `);
 }
 
 export async function down(knex: Knex): Promise<void> {

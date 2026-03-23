@@ -64,7 +64,7 @@ export async function updateMemberRole(
   try {
     const state = req.app.locals;
     const currentUserId = res.locals.user_id;
-    const customerId = res.locals.customer_id;
+    const { customer_id: customerId } = res.locals.team;
     const { user_id, role } = req.body;
 
     if (user_id === currentUserId) {
