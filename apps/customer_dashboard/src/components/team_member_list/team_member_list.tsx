@@ -233,6 +233,8 @@ export const TeamMemberList: FC = () => {
       );
       setAllItems([...memberItems, ...invitationItems]);
       setTeamName(res.data.team_name);
+      setActiveFilter("all");
+      setCurrentPage(1);
     }
     setLoading(false);
   }, [token]);
@@ -419,6 +421,9 @@ export const TeamMemberList: FC = () => {
     if (res.success) {
       setShowLeaveModal(false);
       displayToast({ variant: "success", title: "You have left the team" });
+      setTimeout(() => {
+        useAppState.getState().resetUser();
+      }, 1500);
     } else {
       displayToast({ variant: "error", title: res.msg });
     }
@@ -438,6 +443,9 @@ export const TeamMemberList: FC = () => {
         variant: "success",
         title: "Admin role transferred. You have left the team.",
       });
+      setTimeout(() => {
+        useAppState.getState().resetUser();
+      }, 1500);
     } else {
       displayToast({ variant: "error", title: res.msg });
     }
