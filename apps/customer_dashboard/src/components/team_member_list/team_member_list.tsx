@@ -16,14 +16,7 @@ import {
 } from "@oko-wallet/oko-common-ui/table";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import cn from "classnames";
-import {
-  type FC,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { type FC, useEffect, useMemo, useRef, useState } from "react";
 
 import { CancelInviteModal } from "./cancel_invite_modal";
 import { EditRoleModal } from "./edit_role_modal";
@@ -42,13 +35,16 @@ import {
 import { displayToast } from "@oko-wallet-ct-dashboard/components/toast";
 import {
   requestCancelInvitation,
-  requestGetTeamMembers,
   requestInviteTeamMember,
   requestLeaveTeam,
   requestRemoveTeamMember,
   requestResendInvitation,
   requestUpdateMemberRole,
 } from "@oko-wallet-ct-dashboard/fetch/team";
+import {
+  useInvalidateTeamMembers,
+  useTeamMembers,
+} from "@oko-wallet-ct-dashboard/hooks/use_team_members";
 import { useAppState } from "@oko-wallet-ct-dashboard/state";
 
 type FilterTab = "all" | "admins" | "members" | "active" | "pending";
@@ -212,10 +208,20 @@ const SortIcon: FC<{ direction: SortDirection }> = ({ direction }) => (
 
 export const TeamMemberList: FC = () => {
   const token = useAppState((s) => s.token);
+  const { data: teamData, isLoading: loading } = useTeamMembers();
+  const invalidateTeamMembers = useInvalidateTeamMembers();
 
-  const [allItems, setAllItems] = useState<TeamListItem[]>([]);
-  const [teamName, setTeamName] = useState("");
-  const [loading, setLoading] = useState(true);
+  const allItems = useMemo(() => {
+    if (!teamData) {
+      return [];
+    }
+    return [
+      ...membersToListItems(teamData.members),
+      ...invitationsToListItems(teamData.pending_invitations),
+    ];
+  }, [teamData]);
+
+  const teamName = teamData?.team_name ?? "";
 
   const [activeFilter, setActiveFilter] = useState<FilterTab>("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -230,35 +236,8 @@ export const TeamMemberList: FC = () => {
   const [cancelInviteMember, setCancelInviteMember] =
     useState<TeamListItem | null>(null);
   const [showTransferModal, setShowTransferModal] = useState(false);
-  const [sortColumn, setSortColumn] = useState<string | null>("role");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
-
-  const fetchMembers = useCallback(async () => {
-    if (!token) {
-      return;
-    }
-    setLoading(true);
-    setAllItems([]);
-    const res = await requestGetTeamMembers({ token });
-    if (res.success) {
-      const memberItems = membersToListItems(res.data.members);
-      const invitationItems = invitationsToListItems(
-        res.data.pending_invitations,
-      );
-      setAllItems([...memberItems, ...invitationItems]);
-      setTeamName(res.data.team_name);
-      setActiveFilter("all");
-      setSearchQuery("");
-      setSortColumn(null);
-      setSortDirection(null);
-      setCurrentPage(1);
-    }
-    setLoading(false);
-  }, [token]);
-
-  useEffect(() => {
-    fetchMembers();
-  }, [fetchMembers]);
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
 
   const currentUser = useMemo(
     () => allItems.find((m) => m.is_current_user),
@@ -352,7 +331,7 @@ export const TeamMemberList: FC = () => {
         variant: "success",
         title: "The invitation has been sent",
       });
-      await fetchMembers();
+      invalidateTeamMembers();
     } else {
       displayToast({ variant: "error", title: res.msg });
     }
@@ -370,7 +349,7 @@ export const TeamMemberList: FC = () => {
     if (res.success) {
       setEditRoleMember(null);
       displayToast({ variant: "success", title: "The role has been updated" });
-      await fetchMembers();
+      invalidateTeamMembers();
     } else {
       displayToast({ variant: "error", title: res.msg });
     }
@@ -387,7 +366,7 @@ export const TeamMemberList: FC = () => {
     if (res.success) {
       setRemoveMember(null);
       displayToast({ variant: "success", title: "User has been removed" });
-      await fetchMembers();
+      invalidateTeamMembers();
     } else {
       displayToast({ variant: "error", title: res.msg });
     }
@@ -404,7 +383,7 @@ export const TeamMemberList: FC = () => {
     if (res.success) {
       setResendMember(null);
       displayToast({ variant: "success", title: "Invitation resent" });
-      await fetchMembers();
+      invalidateTeamMembers();
     } else {
       displayToast({ variant: "error", title: res.msg });
     }
@@ -424,7 +403,7 @@ export const TeamMemberList: FC = () => {
         variant: "success",
         title: "Invitation has been canceled",
       });
-      await fetchMembers();
+      invalidateTeamMembers();
     } else {
       displayToast({ variant: "error", title: res.msg });
     }
