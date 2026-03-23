@@ -19,5 +19,9 @@
   align-items: center;
   gap: 12px;
   text-align: center;
-  white-space: nowrap;
+}
+
+.emailLink {
+  color: var(--fg-secondary);
+  text-decoration: underline;
 }
