@@ -8,7 +8,7 @@ import {
 } from "@oko-wallet/oko-api-openapi/ct_dashboard";
 import {
   getTeamInvitationById,
-  updateTeamInvitationStatus,
+  updatePendingInvitationStatus,
 } from "@oko-wallet/oko-pg-interface/customer_team_invitations";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type { Response } from "express";
@@ -93,7 +93,7 @@ export async function cancelInvitation(
       return;
     }
 
-    await updateTeamInvitationStatus(state.db, invitation_id, "CANCELLED");
+    await updatePendingInvitationStatus(state.db, invitation_id, "CANCELLED");
 
     res.status(200).json({
       success: true,

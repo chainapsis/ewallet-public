@@ -153,12 +153,21 @@ export async function resendInvitation(
       return;
     }
 
-    await refreshTeamInvitation(
+    const refreshRes = await refreshTeamInvitation(
       state.db,
       invitation_id,
       newToken,
       newExpiresAt,
     );
+
+    if (!refreshRes.success) {
+      res.status(500).json({
+        success: false,
+        code: "UNKNOWN_ERROR",
+        msg: "Failed to update invitation token",
+      });
+      return;
+    }
 
     res.status(200).json({
       success: true,

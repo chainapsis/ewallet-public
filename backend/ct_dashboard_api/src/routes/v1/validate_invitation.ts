@@ -4,7 +4,7 @@ import { ErrorResponseSchema } from "@oko-wallet/oko-api-openapi/common";
 import { getCTDUserWithCustomerByEmail } from "@oko-wallet/oko-pg-interface/customer_dashboard_users";
 import {
   getTeamInvitationByToken,
-  updateTeamInvitationStatus,
+  updatePendingInvitationStatus,
 } from "@oko-wallet/oko-pg-interface/customer_team_invitations";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type { Request, Response } from "express";
@@ -116,7 +116,7 @@ export async function validateInvitation(
     }
 
     if (new Date(invitation.expires_at) < new Date()) {
-      await updateTeamInvitationStatus(
+      await updatePendingInvitationStatus(
         state.db,
         invitation.invitation_id,
         "EXPIRED",

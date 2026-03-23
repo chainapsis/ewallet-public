@@ -13,7 +13,7 @@ import {
 } from "@oko-wallet/oko-pg-interface/customer_dashboard_users";
 import {
   getTeamInvitationByToken,
-  updateTeamInvitationStatus,
+  updatePendingInvitationStatus,
 } from "@oko-wallet/oko-pg-interface/customer_team_invitations";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type { CustomerDashboardUserRole } from "@oko-wallet/oko-types/ct_dashboard";
@@ -114,7 +114,7 @@ export async function acceptInvitation(
 
     // Check expiry
     if (new Date(invitation.expires_at) < new Date()) {
-      await updateTeamInvitationStatus(
+      await updatePendingInvitationStatus(
         state.db,
         invitation.invitation_id,
         "EXPIRED",
@@ -187,11 +187,15 @@ export async function acceptInvitation(
         throw new Error(insertRes.err);
       }
 
-      await updateTeamInvitationStatus(
+      const statusRes = await updatePendingInvitationStatus(
         client,
         invitation.invitation_id,
         "ACCEPTED",
       );
+
+      if (!statusRes.success) {
+        throw new Error(statusRes.err);
+      }
 
       await client.query("COMMIT");
     } catch (_txError) {
