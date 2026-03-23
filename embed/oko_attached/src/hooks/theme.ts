@@ -1,4 +1,5 @@
 import type { Theme } from "@oko-wallet/oko-common-ui/theme";
+import type { OkoWalletTheme } from "@oko-wallet/oko-sdk-core";
 import { RedirectUriSearchParamsKey } from "@oko-wallet/oko-sdk-core";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import { useLayoutEffect, useState } from "react";
@@ -23,9 +24,14 @@ export function useSetThemeInCallback(providerType: AuthType) {
 
     async function fn() {
       let hostOrigin: string | null = null;
+      let sdkThemeOverride: OkoWalletTheme | null = null;
+
       if (providerType === "google") {
         const oauthState = getOAuthStateFromUrl();
         hostOrigin = oauthState.targetOrigin;
+        if (oauthState.theme === "light" || oauthState.theme === "dark") {
+          sdkThemeOverride = oauthState.theme;
+        }
       }
 
       if (providerType === "auth0") {
@@ -45,8 +51,10 @@ export function useSetThemeInCallback(providerType: AuthType) {
         const stateParam =
           urlParams.get(RedirectUriSearchParamsKey.STATE) || "{}";
         const oauthState = JSON.parse(atob(stateParam));
-        const targetOrigin: string = oauthState.targetOrigin;
-        hostOrigin = targetOrigin;
+        hostOrigin = oauthState.targetOrigin;
+        if (oauthState.theme === "light" || oauthState.theme === "dark") {
+          sdkThemeOverride = oauthState.theme;
+        }
       }
 
       if (!hostOrigin) {
@@ -54,7 +62,11 @@ export function useSetThemeInCallback(providerType: AuthType) {
       }
 
       const oldTheme = getTheme(hostOrigin);
-      const { theme } = await determineTheme(hostOrigin, oldTheme);
+      const { theme } = await determineTheme(
+        hostOrigin,
+        oldTheme,
+        sdkThemeOverride,
+      );
 
       setColorScheme(theme);
       _setTheme(theme);
