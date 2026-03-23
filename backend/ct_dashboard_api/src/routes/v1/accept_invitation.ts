@@ -76,6 +76,21 @@ export async function acceptInvitation(
     const state = req.app.locals;
     const { token, password } = req.body;
 
+    // Validate password
+    if (
+      !password ||
+      password.length < 8 ||
+      password.length > 20 ||
+      !/\d/.test(password)
+    ) {
+      res.status(ErrorCodeMap.INVALID_REQUEST).json({
+        success: false,
+        code: "INVALID_REQUEST",
+        msg: "Password must be 8-20 characters and include at least one number",
+      });
+      return;
+    }
+
     // Validate token
     const invitationRes = await getTeamInvitationByToken(state.db, token);
 
