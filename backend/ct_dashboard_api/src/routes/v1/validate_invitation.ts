@@ -143,7 +143,7 @@ export async function validateInvitation(
       return;
     }
 
-    // Get team name from customer
+    // Verify customer is still active
     const customerQuery = `
       SELECT label FROM customers
       WHERE customer_id = $1 AND status = 'ACTIVE'
@@ -151,7 +151,15 @@ export async function validateInvitation(
     const customerResult = await state.db.query(customerQuery, [
       invitation.customer_id,
     ]);
-    const teamName = customerResult.rows[0]?.label ?? "";
+    if (customerResult.rows.length === 0) {
+      res.status(ErrorCodeMap.INVITATION_NOT_FOUND).json({
+        success: false,
+        code: "INVITATION_NOT_FOUND",
+        msg: "The team no longer exists",
+      });
+      return;
+    }
+    const teamName = customerResult.rows[0].label;
 
     res.status(200).json({
       success: true,

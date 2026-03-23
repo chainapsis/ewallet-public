@@ -101,7 +101,20 @@ const sortItems = (
   direction: "asc" | "desc" | null,
 ): TeamListItem[] => {
   if (!column || !direction) {
-    return items;
+    return [...items].sort((a, b) => {
+      if (a.is_current_user && !b.is_current_user) {
+        return -1;
+      }
+      if (!a.is_current_user && b.is_current_user) {
+        return 1;
+      }
+      const roleOrder = { admin: 0, member: 1 };
+      const roleDiff = roleOrder[a.role] - roleOrder[b.role];
+      if (roleDiff !== 0) {
+        return roleDiff;
+      }
+      return a.email.localeCompare(b.email);
+    });
   }
 
   const multiplier = direction === "asc" ? 1 : -1;
@@ -225,6 +238,7 @@ export const TeamMemberList: FC = () => {
       return;
     }
     setLoading(true);
+    setAllItems([]);
     const res = await requestGetTeamMembers({ token });
     if (res.success) {
       const memberItems = membersToListItems(res.data.members);
@@ -234,6 +248,9 @@ export const TeamMemberList: FC = () => {
       setAllItems([...memberItems, ...invitationItems]);
       setTeamName(res.data.team_name);
       setActiveFilter("all");
+      setSearchQuery("");
+      setSortColumn(null);
+      setSortDirection(null);
       setCurrentPage(1);
     }
     setLoading(false);
