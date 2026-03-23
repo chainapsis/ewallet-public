@@ -2,23 +2,15 @@
 
 import { LoadingCircleIcon } from "@oko-wallet/oko-common-ui/icons/loading_circle_icon";
 import { WarningIcon } from "@oko-wallet/oko-common-ui/icons/warning_icon";
-import type { Theme } from "@oko-wallet/oko-common-ui/theme";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import { type FC, useEffect, useState } from "react";
+import type { FC } from "react";
 
 import { useTelegramCallback } from "./use_callback";
-import { setColorScheme } from "@oko-wallet-attached/components/attached_initialized/color_scheme";
-import { getSystemTheme } from "@oko-wallet-attached/components/google_callback/theme";
 import telegramStyles from "@oko-wallet-attached/components/telegram/telegram_login_popup.module.scss";
+import { useSetThemeInCallback } from "@oko-wallet-attached/hooks/theme";
 
 export const TelegramCallback: FC = () => {
-  const [_theme, setTheme] = useState<Theme>("light");
-
-  useEffect(() => {
-    const theme = getSystemTheme();
-    setColorScheme(theme);
-    setTheme(theme);
-  }, []);
+  useSetThemeInCallback("telegram");
 
   const { error } = useTelegramCallback();
 

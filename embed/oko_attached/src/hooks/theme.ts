@@ -34,11 +34,15 @@ export function useSetThemeInCallback(providerType: AuthType) {
         }
       }
 
-      if (providerType === "auth0") {
+      if (providerType === "auth0" || providerType === "telegram") {
         const searchParams = new URLSearchParams(window.location.search);
         const hostOriginFromQuery = searchParams.get("host_origin");
         if (hostOriginFromQuery) {
           hostOrigin = hostOriginFromQuery;
+        }
+        const themeParam = searchParams.get("theme");
+        if (themeParam === "light" || themeParam === "dark") {
+          sdkThemeOverride = themeParam;
         }
       }
 

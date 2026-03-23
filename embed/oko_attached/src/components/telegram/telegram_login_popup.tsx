@@ -39,6 +39,11 @@ export const TelegramLoginPopup: FC = () => {
       callbackUrl.searchParams.set("host_origin", hostOrigin);
     }
 
+    const themeParam = urlParams.get("theme");
+    if (themeParam) {
+      callbackUrl.searchParams.set("theme", themeParam);
+    }
+
     const script = document.createElement("script");
     script.src = "https://telegram.org/js/telegram-widget.js?22";
     script.setAttribute("data-telegram-login", cleanBotName);

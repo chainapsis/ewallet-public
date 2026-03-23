@@ -270,6 +270,11 @@ export function useEmailLogin({
     callbackUrl.searchParams.set("modal_id", modalIdFromQuery);
     callbackUrl.searchParams.set("host_origin", hostOrigin);
 
+    const themeParam = urlParams.get("theme");
+    if (themeParam) {
+      callbackUrl.searchParams.set("theme", themeParam);
+    }
+
     verifyEmailOTPCode({
       webAuth,
       email: email.trim(),
