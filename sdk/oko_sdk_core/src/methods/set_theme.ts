@@ -25,4 +25,8 @@ export async function setTheme(
   };
 
   contentWindow.postMessage(msg, this.sdkEndpoint);
+
+  if (this.activePopupWindow && !this.activePopupWindow.closed) {
+    this.activePopupWindow.postMessage(msg, this.sdkEndpoint);
+  }
 }
