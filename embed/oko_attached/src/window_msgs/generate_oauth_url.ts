@@ -102,7 +102,9 @@ async function buildOAuthUrl(
 ): Promise<string> {
   const appState = useAppState.getState();
 
-  const sdkTheme = new URLSearchParams(window.location.search).get("theme");
+  const storeTheme = appState.getTheme(hostOrigin);
+  const sdkTheme =
+    storeTheme ?? new URLSearchParams(window.location.search).get("theme");
 
   const state: OAuthState = {
     apiKey,

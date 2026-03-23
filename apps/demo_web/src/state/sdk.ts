@@ -163,6 +163,7 @@ export const useSDKState = create(
           sdk_endpoint: process.env.NEXT_PUBLIC_OKO_SDK_ENDPOINT,
           // TODO: @dan
           chain_id: "solana:devnet",
+          theme: useThemeState.getState().theme,
         });
 
         if (initRes.success) {
