@@ -89,7 +89,7 @@ export async function getTeamInvitationById(
   }
 }
 
-export async function updateTeamInvitationStatus(
+export async function updatePendingInvitationStatus(
   db: Pool | PoolClient,
   invitationId: string,
   status: string,
@@ -97,7 +97,7 @@ export async function updateTeamInvitationStatus(
   const query = `
     UPDATE customer_team_invitations
     SET status = $1, updated_at = now()
-    WHERE invitation_id = $2
+    WHERE invitation_id = $2 AND status = 'PENDING'
     RETURNING *
   `;
 

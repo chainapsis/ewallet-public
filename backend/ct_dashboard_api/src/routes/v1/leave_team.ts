@@ -115,9 +115,28 @@ export async function leaveTeam(
       const client = await state.db.connect();
       try {
         await client.query("BEGIN");
-        await softDeleteCTDUser(client, userId, customerId);
-        await updateAPIKeyStatusByCustomerId(client, customerId, false);
-        await deleteCustomer(client, { customer_id: customerId });
+
+        const delUserRes = await softDeleteCTDUser(client, userId, customerId);
+        if (!delUserRes.success) {
+          throw new Error(delUserRes.err);
+        }
+
+        const delKeysRes = await updateAPIKeyStatusByCustomerId(
+          client,
+          customerId,
+          false,
+        );
+        if (!delKeysRes.success) {
+          throw new Error(delKeysRes.err);
+        }
+
+        const delCustRes = await deleteCustomer(client, {
+          customer_id: customerId,
+        });
+        if (!delCustRes.success) {
+          throw new Error(delCustRes.err);
+        }
+
         await client.query("COMMIT");
       } catch (_txError) {
         await client.query("ROLLBACK");
@@ -183,8 +202,22 @@ export async function leaveTeam(
     const client = await state.db.connect();
     try {
       await client.query("BEGIN");
-      await updateCTDUserRole(client, target_user_id, customerId, "admin");
-      await softDeleteCTDUser(client, userId, customerId);
+
+      const promoteRes = await updateCTDUserRole(
+        client,
+        target_user_id,
+        customerId,
+        "admin",
+      );
+      if (!promoteRes.success) {
+        throw new Error(promoteRes.err);
+      }
+
+      const deleteRes = await softDeleteCTDUser(client, userId, customerId);
+      if (!deleteRes.success) {
+        throw new Error(deleteRes.err);
+      }
+
       await client.query("COMMIT");
     } catch (_txError) {
       await client.query("ROLLBACK");
