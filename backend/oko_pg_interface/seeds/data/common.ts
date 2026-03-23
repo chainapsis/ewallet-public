@@ -28,6 +28,7 @@ export const API_KEY =
 export function createKeyShareNodeMeta(): KeyShareNodeMeta {
   return {
     sss_threshold: 2,
+    registration_threshold: null,
   };
 }
 

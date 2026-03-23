@@ -33,6 +33,23 @@
   aspect-ratio: 1/1;
 }
 
+.menuItemWithBadge {
+  position: relative;
+
+  > a {
+    display: block;
+    width: 100%;
+  }
+}
+
+.menuItemWithBadge > span {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
 .featureRequestButton {
   border: none;
   background: none;

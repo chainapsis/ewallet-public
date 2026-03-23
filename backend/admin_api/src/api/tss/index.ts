@@ -1,3 +1,4 @@
+import { getKeyShareNodeMeta } from "@oko-wallet/oko-pg-interface/key_share_node_meta";
 import { getTssSessions } from "@oko-wallet/oko-pg-interface/tss";
 import {
   getTssActivationSetting as getTssAllActivationSettingPG,
@@ -94,10 +95,20 @@ export async function getTssAllActivationSetting(
       };
     }
 
+    // Also fetch key_share_node_meta for sss_threshold and registration_threshold
+    const metaRes = await getKeyShareNodeMeta(db);
+    const keyShareNodeMeta = metaRes.success
+      ? {
+          sss_threshold: metaRes.data.sss_threshold,
+          registration_threshold: metaRes.data.registration_threshold,
+        }
+      : undefined;
+
     return {
       success: true,
       data: {
         tss_activation_setting: getTssActivationRes.data,
+        key_share_node_meta: keyShareNodeMeta,
       },
     };
   } catch (error) {

@@ -112,6 +112,7 @@ describe("keygen_v2_test", () => {
     await resetPgDatabase(pool);
     await insertKeyShareNodeMeta(pool, {
       sss_threshold: sssThreshold,
+      registration_threshold: null,
     });
     jest.clearAllMocks();
   });
@@ -673,6 +674,231 @@ describe("keygen_v2_test", () => {
       expect(keygenResponse.code).toEqual("KEYSHARE_NODE_INSUFFICIENT");
       expect(keygenResponse.msg).toEqual("keyshare node insufficient error");
     });
+
+    it("run keygenV2 partial success - registers only successful nodes as wallet_ks_nodes", async () => {
+      const secp256k1KeygenResult = napiRunKeygenClientCentralized();
+      const ed25519KeygenResult = runKeygenCentralizedEd25519();
+
+      const keygen_2_secp256k1 =
+        secp256k1KeygenResult.keygen_outputs[Participant.P1];
+      const keygen_2_ed25519 =
+        ed25519KeygenResult.keygen_outputs[Participant.P1];
+
+      const keygenRequest: KeygenRequestV2 = {
+        auth_type: "google",
+        user_identifier: "test@test.com",
+        email: "test@test.com",
+        keygen_2_secp256k1: {
+          public_key: keygen_2_secp256k1.public_key,
+          private_share: keygen_2_secp256k1.private_share,
+        },
+        keygen_2_ed25519: {
+          key_package: keygen_2_ed25519.key_package,
+          public_key_package: keygen_2_ed25519.public_key_package,
+          identifier: [...keygen_2_ed25519.identifier],
+          public_key: [...ed25519KeygenResult.public_key],
+        },
+        ed25519_seed_share: TEST_SEED_SHARE,
+      };
+
+      const jwtConfig = {
+        secret: "test-jwt-secret",
+        expires_in: "1h",
+      };
+
+      // Set registration_threshold = 2
+      await insertKeyShareNodeMeta(pool, {
+        sss_threshold: sssThreshold,
+        registration_threshold: 2,
+      });
+
+      // Set up 3 KS nodes but mock returns only 2 (partial success)
+      const ksNodeNames = ["ksNode1", "ksNode2", "ksNode3"];
+      const ksNodeIds: string[] = [];
+      const createKSNodesRes = await Promise.all(
+        ksNodeNames.map((ksNodeName) =>
+          insertKSNode(pool, ksNodeName, `http://test.com/${ksNodeName}`),
+        ),
+      );
+      for (const res of createKSNodesRes) {
+        if (res.success === false) {
+          throw new Error("Failed to create ks nodes");
+        }
+        ksNodeIds.push(res.data.node_id);
+      }
+
+      // Mock returns only first 2 nodes (node 3 "failed")
+      const successNodeIds = [ksNodeIds[0], ksNodeIds[1]];
+      (mockCheckKeyShareFromKSNodesV2 as any).mockResolvedValue({
+        success: true,
+        data: {
+          secp256k1: { nodeIds: successNodeIds },
+          ed25519: { nodeIds: successNodeIds },
+        },
+      });
+
+      const customerId = await createTestCustomer(pool);
+
+      const keygenResponse = await runKeygenV2(
+        pool,
+        jwtConfig,
+        keygenRequest,
+        TEST_ENCRYPTION_SECRET,
+        mockLogger,
+        customerId,
+      );
+      if (keygenResponse.success === false) {
+        console.error(keygenResponse);
+        throw new Error("Failed to run keygenV2");
+      }
+
+      expect(keygenResponse.success).toBe(true);
+
+      // Verify only successful nodes are registered as wallet_ks_nodes
+      const secp256k1KSNodesRes = await getWalletKSNodesByWalletId(
+        pool,
+        keygenResponse.data?.user.wallet_id_secp256k1,
+      );
+      if (secp256k1KSNodesRes.success === false) {
+        throw new Error("Failed to get secp256k1 wallet KS nodes");
+      }
+      expect(secp256k1KSNodesRes.data).toHaveLength(2);
+      expect(secp256k1KSNodesRes.data.map((n) => n.node_id).sort()).toEqual(
+        successNodeIds.sort(),
+      );
+
+      const ed25519KSNodesRes = await getWalletKSNodesByWalletId(
+        pool,
+        keygenResponse.data?.user.wallet_id_ed25519,
+      );
+      if (ed25519KSNodesRes.success === false) {
+        throw new Error("Failed to get ed25519 wallet KS nodes");
+      }
+      expect(ed25519KSNodesRes.data).toHaveLength(2);
+      expect(ed25519KSNodesRes.data.map((n) => n.node_id).sort()).toEqual(
+        successNodeIds.sort(),
+      );
+    });
+
+    it("run keygenV2 passes registrationThreshold to checkKeyShareFromKSNodesV2", async () => {
+      const secp256k1KeygenResult = napiRunKeygenClientCentralized();
+      const ed25519KeygenResult = runKeygenCentralizedEd25519();
+
+      const keygen_2_secp256k1 =
+        secp256k1KeygenResult.keygen_outputs[Participant.P1];
+      const keygen_2_ed25519 =
+        ed25519KeygenResult.keygen_outputs[Participant.P1];
+
+      const keygenRequest: KeygenRequestV2 = {
+        auth_type: "google",
+        user_identifier: "test@test.com",
+        email: "test@test.com",
+        keygen_2_secp256k1: {
+          public_key: keygen_2_secp256k1.public_key,
+          private_share: keygen_2_secp256k1.private_share,
+        },
+        keygen_2_ed25519: {
+          key_package: keygen_2_ed25519.key_package,
+          public_key_package: keygen_2_ed25519.public_key_package,
+          identifier: [...keygen_2_ed25519.identifier],
+          public_key: [...ed25519KeygenResult.public_key],
+        },
+        ed25519_seed_share: TEST_SEED_SHARE,
+      };
+
+      const jwtConfig = {
+        secret: "test-jwt-secret",
+        expires_in: "1h",
+      };
+
+      // Set registration_threshold = 2
+      await insertKeyShareNodeMeta(pool, {
+        sss_threshold: sssThreshold,
+        registration_threshold: 2,
+      });
+
+      const ksNodeIds = await setUpKSNodes(pool);
+      (mockCheckKeyShareFromKSNodesV2 as any).mockResolvedValue({
+        success: true,
+        data: {
+          secp256k1: { nodeIds: ksNodeIds },
+          ed25519: { nodeIds: ksNodeIds },
+        },
+      });
+
+      const customerId = await createTestCustomer(pool);
+
+      await runKeygenV2(
+        pool,
+        jwtConfig,
+        keygenRequest,
+        TEST_ENCRYPTION_SECRET,
+        mockLogger,
+        customerId,
+      );
+
+      // Verify registrationThreshold (5th arg) was passed as 2
+      expect(mockCheckKeyShareFromKSNodesV2).toHaveBeenCalledTimes(1);
+      const callArgs = mockCheckKeyShareFromKSNodesV2.mock.calls[0];
+      expect(callArgs[4]).toBe(2);
+    });
+
+    it("run keygenV2 passes null registrationThreshold when not set", async () => {
+      const secp256k1KeygenResult = napiRunKeygenClientCentralized();
+      const ed25519KeygenResult = runKeygenCentralizedEd25519();
+
+      const keygen_2_secp256k1 =
+        secp256k1KeygenResult.keygen_outputs[Participant.P1];
+      const keygen_2_ed25519 =
+        ed25519KeygenResult.keygen_outputs[Participant.P1];
+
+      const keygenRequest: KeygenRequestV2 = {
+        auth_type: "google",
+        user_identifier: "test@test.com",
+        email: "test@test.com",
+        keygen_2_secp256k1: {
+          public_key: keygen_2_secp256k1.public_key,
+          private_share: keygen_2_secp256k1.private_share,
+        },
+        keygen_2_ed25519: {
+          key_package: keygen_2_ed25519.key_package,
+          public_key_package: keygen_2_ed25519.public_key_package,
+          identifier: [...keygen_2_ed25519.identifier],
+          public_key: [...ed25519KeygenResult.public_key],
+        },
+        ed25519_seed_share: TEST_SEED_SHARE,
+      };
+
+      const jwtConfig = {
+        secret: "test-jwt-secret",
+        expires_in: "1h",
+      };
+
+      const ksNodeIds = await setUpKSNodes(pool);
+      (mockCheckKeyShareFromKSNodesV2 as any).mockResolvedValue({
+        success: true,
+        data: {
+          secp256k1: { nodeIds: ksNodeIds },
+          ed25519: { nodeIds: ksNodeIds },
+        },
+      });
+
+      const customerId = await createTestCustomer(pool);
+
+      await runKeygenV2(
+        pool,
+        jwtConfig,
+        keygenRequest,
+        TEST_ENCRYPTION_SECRET,
+        mockLogger,
+        customerId,
+      );
+
+      // Verify registrationThreshold (5th arg) is null (beforeEach sets registration_threshold: null)
+      expect(mockCheckKeyShareFromKSNodesV2).toHaveBeenCalledTimes(1);
+      const callArgs = mockCheckKeyShareFromKSNodesV2.mock.calls[0];
+      expect(callArgs[4]).toBeNull();
+    });
   });
 
   describe("runKeygenEd25519", () => {
@@ -1139,6 +1365,64 @@ describe("keygen_v2_test", () => {
           );
         }
       }
+    });
+
+    it("run runKeygenEd25519 passes registrationThreshold to checkKeyShareFromKSNodesV2", async () => {
+      // Set registration_threshold = 2
+      await insertKeyShareNodeMeta(pool, {
+        sss_threshold: sssThreshold,
+        registration_threshold: 2,
+      });
+
+      const { ksNodeIds } = await setUpUserWithSecp256k1Wallet(pool);
+      (mockCheckKeyShareFromKSNodesV2 as any).mockResolvedValue({
+        success: true,
+        data: {
+          ed25519: { nodeIds: ksNodeIds },
+        },
+      });
+
+      const keygenResult = runKeygenCentralizedEd25519();
+      const request = generateKeygenRequest(keygenResult);
+
+      await runKeygenEd25519(
+        pool,
+        TEST_JWT_CONFIG_ED25519,
+        request,
+        TEST_ENCRYPTION_SECRET,
+        mockLogger,
+      );
+
+      // Verify registrationThreshold (5th arg) was passed as 2
+      expect(mockCheckKeyShareFromKSNodesV2).toHaveBeenCalledTimes(1);
+      const callArgs = mockCheckKeyShareFromKSNodesV2.mock.calls[0];
+      expect(callArgs[4]).toBe(2);
+    });
+
+    it("run runKeygenEd25519 passes null registrationThreshold when not set", async () => {
+      const { ksNodeIds } = await setUpUserWithSecp256k1Wallet(pool);
+      (mockCheckKeyShareFromKSNodesV2 as any).mockResolvedValue({
+        success: true,
+        data: {
+          ed25519: { nodeIds: ksNodeIds },
+        },
+      });
+
+      const keygenResult = runKeygenCentralizedEd25519();
+      const request = generateKeygenRequest(keygenResult);
+
+      await runKeygenEd25519(
+        pool,
+        TEST_JWT_CONFIG_ED25519,
+        request,
+        TEST_ENCRYPTION_SECRET,
+        mockLogger,
+      );
+
+      // Verify registrationThreshold (5th arg) is null (beforeEach sets registration_threshold: null)
+      expect(mockCheckKeyShareFromKSNodesV2).toHaveBeenCalledTimes(1);
+      const callArgs = mockCheckKeyShareFromKSNodesV2.mock.calls[0];
+      expect(callArgs[4]).toBeNull();
     });
   });
 });

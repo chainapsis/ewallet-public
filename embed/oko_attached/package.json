@@ -6,7 +6,9 @@
   "scripts": {
     "create_env": "tsx src/bin/create_env.ts",
     "clean": "del-cli ./public/pkg",
-    "copy_wasm": "yarn run clean && cp -R ../../crypto/tecdsa/cait_sith_keplr_wasm/pkg ./public && cp ../../crypto/teddsa/frost_ed25519_keplr_wasm/pkg/frost_ed25519_keplr_wasm_bg.wasm ./public/pkg/",
+    "copy_wasm": "yarn run clean && mkdir -p ./public/pkg && cp ../../crypto/tecdsa/cait_sith_keplr_wasm/pkg/cait_sith_keplr_wasm_bg.wasm ./public/pkg/ && cp ../../crypto/teddsa/frost_ed25519_keplr_wasm/pkg/frost_ed25519_keplr_wasm_bg.wasm ./public/pkg/",
+    "copy_wasm_cs": "mkdir -p ./public/pkg && cp ../../crypto/tecdsa/cait_sith_keplr_wasm/pkg/cait_sith_keplr_wasm_bg.wasm ./public/pkg/",
+    "copy_wasm_frost": "mkdir -p ./public/pkg && cp ../../crypto/teddsa/frost_ed25519_keplr_wasm/pkg/frost_ed25519_keplr_wasm_bg.wasm ./public/pkg/",
     "dev": "tsx ./src/bin/launch.ts",
     "build": "vite build && tsc --noEmit",
     "serve": "vite preview",

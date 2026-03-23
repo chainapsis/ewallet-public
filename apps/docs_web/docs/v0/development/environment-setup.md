@@ -48,9 +48,11 @@ cd oko
 yarn
 yarn ci build_pkgs
 yarn ci build_cs
+yarn ci build_frost
 ```
 
-This installs dependencies and builds core packages and Cait Sith.
+This installs dependencies, builds core packages, Cait Sith (tECDSA), and
+FROST (tEdDSA).
 
 ## Git hooks
 
@@ -115,12 +117,14 @@ forwarded to the operation script.
 - Build packages: `yarn ci build_pkgs`
   - Packages are built in the right order
   - Required for all services that depend on these core packages
-- Build Cait Sith: `yarn ci build_cs`
+- Build Cait Sith (tECDSA): `yarn ci build_cs`
   - Builds Rust addon (required for `oko_api` TSS operations: triples, presign,
     sign)
-  - Builds WASM (required for `oko_attached` client-side TSS operations: keygen,
-    combine, reshare, signing)
-  - Copies WASM into `oko_attached/public/pkg/`
+  - Builds WASM and copies into `oko_attached/public/pkg/` (client-side tECDSA)
+- Build FROST (tEdDSA): `yarn ci build_frost`
+  - Builds Rust addon (required for `oko_api` Ed25519 TSS operations: keygen,
+    sign)
+  - Builds WASM and copies into `oko_attached/public/pkg/` (client-side tEdDSA)
 - Typecheck: `yarn ci typecheck`
 - keyshare node DB migration: `yarn ci db_migrate_ksn --use-env-file`
   - With `--use-env-file`, reads `~/.oko/key_share_node*.env` to create/migrate

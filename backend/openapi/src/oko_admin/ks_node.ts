@@ -220,6 +220,34 @@ export const DeleteKSNodeSuccessResponseSchema = registry.register(
   }),
 );
 
+// ── Key Share Node Meta ──────────────────────────────────────────────
+
+export const UpdateKeyShareNodeMetaRequestSchema = registry.register(
+  "UpdateKeyShareNodeMetaRequest",
+  z.object({
+    registration_threshold: z.number().int().nullable().openapi({
+      description:
+        "Minimum nodes required for registration (null = all-or-nothing). Must be >= sss_threshold.",
+    }),
+  }),
+);
+
+export const UpdateKeyShareNodeMetaSuccessResponseSchema = registry.register(
+  "UpdateKeyShareNodeMetaSuccessResponse",
+  z.object({
+    success: z.literal(true).openapi({
+      description: "Indicates the request succeeded",
+    }),
+    data: z.object({
+      registration_threshold: z.number().int().nullable().openapi({
+        description: "Updated registration threshold value",
+      }),
+    }),
+  }),
+);
+
+// ── Health Check ─────────────────────────────────────────────────────
+
 const KSNodeHealthCheckSchema = registry.register(
   "KSNodeHealthCheck",
   z.object({

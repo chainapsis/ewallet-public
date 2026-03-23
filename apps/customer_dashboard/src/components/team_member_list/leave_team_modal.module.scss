@@ -1,0 +1,107 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  position: relative;
+  width: 400px;
+  max-width: 90vw;
+  background: var(--bg-primary);
+  border-radius: 16px;
+  border: 1px solid var(--border-primary);
+  box-shadow: var(--shadow-xl);
+  box-sizing: border-box;
+  overflow: clip;
+}
+
+.content {
+  padding: 24px 24px 0;
+  overflow: hidden;
+}
+
+.iconContainer {
+  position: relative;
+  width: 48px;
+  height: 48px;
+}
+
+.iconPattern {
+  position: absolute;
+  top: -24px;
+  left: -24px;
+  width: 216px;
+  height: 216px;
+  pointer-events: none;
+}
+
+.iconWrapper {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  border: 1px solid var(--border-primary);
+  background: var(--bg-primary);
+  box-shadow:
+    0 1px 2px 0 rgba(10, 13, 18, 0.05),
+    inset 0 0 0 1px rgba(10, 13, 18, 0.18),
+    inset 0 -2px 0 0 rgba(10, 13, 18, 0.05);
+}
+
+.textContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.closeButton {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 8px;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--bg-secondary);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px var(--bg-primary, white),
+      0 0 0 4px var(--gray-400, #a4a7ae);
+  }
+}
+
+.body {
+  padding: 40px 24px 0;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  padding: 32px 24px 24px;
+}

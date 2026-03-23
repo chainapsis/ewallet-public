@@ -5,4 +5,5 @@ export const paths = {
   change_password: "/users/reset_password?after_login=true",
   reset_password: "/users/reset_password",
   edit_info: "/edit-info",
+  team: "/team",
 };

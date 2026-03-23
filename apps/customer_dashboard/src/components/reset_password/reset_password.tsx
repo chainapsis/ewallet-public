@@ -9,6 +9,7 @@ import { type FC, useState } from "react";
 
 import styles from "./reset_password.module.scss";
 import { useResetPasswordForm } from "./use_reset_password_form";
+import { PASSWORD_MAX_LENGTH } from "@oko-wallet-ct-dashboard/constants";
 import { AccountForm } from "@oko-wallet-ct-dashboard/ui";
 
 interface ResetPasswordProps {
@@ -65,11 +66,11 @@ export const ResetPassword: FC<ResetPasswordProps> = ({ isAfterLogin }) => {
           placeholder="Enter new password"
           requiredSymbol
           type={showNewPassword ? "text" : "password"}
-          maxLength={16}
+          maxLength={PASSWORD_MAX_LENGTH}
           helpText={
             errors.newPassword
               ? ""
-              : "Password must be 8–16 characters and must include numbers."
+              : "Password must be 8–20 characters and must include numbers."
           }
           error={errors.newPassword?.message}
           fullWidth
@@ -92,7 +93,7 @@ export const ResetPassword: FC<ResetPasswordProps> = ({ isAfterLogin }) => {
           placeholder="Confirm password"
           requiredSymbol
           type={showConfirmPassword ? "text" : "password"}
-          maxLength={16}
+          maxLength={PASSWORD_MAX_LENGTH}
           error={errors.confirmPassword?.message}
           fullWidth
           SideComponent={

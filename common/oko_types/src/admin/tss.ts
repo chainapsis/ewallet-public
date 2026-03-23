@@ -19,6 +19,10 @@ export interface GetTssSessionListResponse {
 
 export interface GetTssAllActivationSettingResponse {
   tss_activation_setting: TssActivationSetting;
+  key_share_node_meta?: {
+    sss_threshold: number;
+    registration_threshold: number | null;
+  };
 }
 
 export interface SetTssAllActivationSettingRequest {

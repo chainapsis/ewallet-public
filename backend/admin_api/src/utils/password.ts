@@ -11,7 +11,7 @@ function getRandomChar(charset: string): string {
   }
 }
 
-export function generatePassword(length: number = 16): string {
+export function generatePassword(length: number = 20): string {
   const lower = "abcdefghijklmnopqrstuvwxyz";
   const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const numbers = "0123456789";

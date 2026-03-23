@@ -240,6 +240,8 @@ export async function checkEmailV2(
       };
     }
     const globalThreshold = getKeyshareNodeMetaRes.data.sss_threshold;
+    const registrationThreshold =
+      getKeyshareNodeMetaRes.data.registration_threshold;
     const activeNodesBelowThreshold = activeKSNodes.length < globalThreshold;
 
     // Case 1: User doesn't exist
@@ -251,6 +253,7 @@ export async function checkEmailV2(
           active_nodes_below_threshold: activeNodesBelowThreshold,
           keyshare_node_meta: {
             threshold: globalThreshold,
+            registration_threshold: registrationThreshold,
             nodes: activeKSNodes.map((ksNode) => ({
               name: ksNode.node_name,
               endpoint: ksNode.server_url,
@@ -299,6 +302,7 @@ export async function checkEmailV2(
         secp256k1Wallet,
         activeKSNodes,
         globalThreshold,
+        registrationThreshold,
       );
       if (!secp256k1CheckInfoRes.success) {
         return {
@@ -326,6 +330,7 @@ export async function checkEmailV2(
         ed25519Wallet,
         activeKSNodes,
         globalThreshold,
+        registrationThreshold,
       );
       if (!unifiedCheckInfoRes.success) {
         return {
@@ -352,6 +357,7 @@ export async function checkEmailV2(
         active_nodes_below_threshold: activeNodesBelowThreshold,
         keyshare_node_meta: {
           threshold: globalThreshold,
+          registration_threshold: registrationThreshold,
           nodes: activeKSNodes.map((ksNode) => ({
             name: ksNode.node_name,
             endpoint: ksNode.server_url,
@@ -426,7 +432,17 @@ export async function updateWalletKSNodesForReshareV2(
         msg: "Unknown server_urls detected",
       };
     }
-    const nodeIds = getKSNodesRes.data.map((n) => n.node_id);
+    // Get registration threshold for partial success
+    const getKeyshareNodeMetaRes = await getKeyShareNodeMeta(db);
+    if (getKeyshareNodeMetaRes.success === false) {
+      return {
+        success: false,
+        code: "UNKNOWN_ERROR",
+        msg: `getKeyShareNodeMeta error: ${getKeyshareNodeMetaRes.err}`,
+      };
+    }
+    const registrationThreshold =
+      getKeyshareNodeMetaRes.data.registration_threshold;
 
     // Check key shares exist on KS nodes
     const checkRes = await checkKeyShareFromKSNodesV2(
@@ -434,6 +450,7 @@ export async function updateWalletKSNodesForReshareV2(
       { secp256k1: secp256k1PublicKey, ed25519: ed25519PublicKey },
       getKSNodesRes.data,
       auth_type,
+      registrationThreshold,
     );
     if (!checkRes.success) {
       return checkRes;
@@ -493,7 +510,10 @@ export async function updateWalletKSNodesForReshareV2(
       };
     }
 
-    // Upsert wallet_ks_nodes for both wallets
+    // Upsert wallet_ks_nodes using only verified nodeIds from checkKeyShareFromKSNodesV2
+    const verifiedSecp256k1NodeIds = checkRes.data.secp256k1?.nodeIds ?? [];
+    const verifiedEd25519NodeIds = checkRes.data.ed25519?.nodeIds ?? [];
+
     const client = await db.connect();
     try {
       await client.query("BEGIN");
@@ -501,7 +521,7 @@ export async function updateWalletKSNodesForReshareV2(
       const secp256k1UpsertRes = await upsertWalletKSNodes(
         client,
         secp256k1WalletRes.data.wallet_id,
-        nodeIds,
+        verifiedSecp256k1NodeIds,
       );
       if (!secp256k1UpsertRes.success) {
         throw new Error(`(secp256k1) ${secp256k1UpsertRes.err}`);
@@ -510,7 +530,7 @@ export async function updateWalletKSNodesForReshareV2(
       const ed25519UpsertRes = await upsertWalletKSNodes(
         client,
         ed25519WalletRes.data.wallet_id,
-        nodeIds,
+        verifiedEd25519NodeIds,
       );
       if (!ed25519UpsertRes.success) {
         throw new Error(`(ed25519) ${ed25519UpsertRes.err}`);
@@ -551,6 +571,7 @@ async function calculateUnifiedCheckInfo(
   ed25519Wallet: Wallet,
   activeKSNodes: KeyShareNode[],
   globalThreshold: number,
+  registrationThreshold: number | null,
 ): Promise<Result<UnifiedCheckInfo, string>> {
   const [secp256k1NodesRes, ed25519NodesRes] = await Promise.all([
     getWalletKSNodesByWalletId(db, secp256k1Wallet.wallet_id),
@@ -624,6 +645,7 @@ async function calculateUnifiedCheckInfo(
     data: {
       keyshare_node_meta: {
         threshold: globalThreshold,
+        registration_threshold: registrationThreshold,
         nodes: unifiedNodes,
       },
       needs_reshare: needsReshare,
@@ -638,6 +660,7 @@ async function calculateSecp256k1OnlyCheckInfo(
   secp256k1Wallet: Wallet,
   activeKSNodes: KeyShareNode[],
   globalThreshold: number,
+  registrationThreshold: number | null,
 ): Promise<Result<UnifiedCheckInfo, string>> {
   const nodesRes = await getWalletKSNodesByWalletId(
     db,
@@ -692,7 +715,11 @@ async function calculateSecp256k1OnlyCheckInfo(
   return {
     success: true,
     data: {
-      keyshare_node_meta: { threshold: globalThreshold, nodes },
+      keyshare_node_meta: {
+        threshold: globalThreshold,
+        registration_threshold: registrationThreshold,
+        nodes,
+      },
       needs_reshare: needsReshare,
       reshare_reasons: needsReshare ? reshare_reasons : undefined,
       active_nodes_below_threshold: activeNodeCount < globalThreshold,

@@ -52,6 +52,25 @@ await jest.unstable_mockModule("@oko-wallet-api/middleware/auth/oauth", () => ({
     mockOauthMiddleware(req, res, next),
 }));
 
+const TEST_CUSTOMER_ID = "test-customer-id";
+
+await jest.unstable_mockModule(
+  "@oko-wallet-api/middleware/auth/api_key_auth",
+  () => ({
+    apiKeyMiddleware: (req: any, res: any, next: any) => {
+      const apiKey = req.headers["x-api-key"];
+      if (!apiKey) {
+        return res.status(401).json({ error: "API key is required" });
+      }
+      res.locals.api_key = {
+        customer_id: TEST_CUSTOMER_ID,
+        is_active: true,
+      };
+      next();
+    },
+  }),
+);
+
 await jest.unstable_mockModule(
   "@oko-wallet-api/middleware/auth/tss_activate",
   () => ({
@@ -100,6 +119,7 @@ describe("keygen_v1_route_test", () => {
   const testEndpoint = "/tss/v1/keygen";
   const validToken = "valid_token";
   const invalidToken = "invalid_token";
+  const validApiKey = "test-api-key";
 
   const testKeygenBody = {
     auth_type: "google",
@@ -110,9 +130,19 @@ describe("keygen_v1_route_test", () => {
   };
 
   describe("keygen", () => {
+    it("should return 401 when no API key is provided", async () => {
+      const response = await request(app)
+        .post(testEndpoint)
+        .send(testKeygenBody);
+
+      expect(response.status).toBe(401);
+      expect(response.body.error).toBe("API key is required");
+    });
+
     it("should return 401 when no authorization header is provided", async () => {
       const response = await request(app)
         .post(testEndpoint)
+        .set("x-api-key", validApiKey)
         .send(testKeygenBody);
 
       expect(response.status).toBe(401);
@@ -124,6 +154,7 @@ describe("keygen_v1_route_test", () => {
     it("should return 401 when invalid token is provided", async () => {
       const response = await request(app)
         .post(testEndpoint)
+        .set("x-api-key", validApiKey)
         .set("Authorization", `Bearer ${invalidToken}`)
         .send(testKeygenBody);
 
@@ -149,6 +180,7 @@ describe("keygen_v1_route_test", () => {
 
       const response = await request(app)
         .post(testEndpoint)
+        .set("x-api-key", validApiKey)
         .set("Authorization", `Bearer ${validToken}`)
         .send(testKeygenBody);
 
@@ -172,6 +204,8 @@ describe("keygen_v1_route_test", () => {
           name: "Test User",
         },
         TEST_ENCRYPTION_SECRET,
+        expect.anything(),
+        TEST_CUSTOMER_ID,
       );
     });
 
@@ -186,6 +220,7 @@ describe("keygen_v1_route_test", () => {
 
       const response = await request(app)
         .post(testEndpoint)
+        .set("x-api-key", validApiKey)
         .set("Authorization", `Bearer ${validToken}`)
         .send(testKeygenBody);
 
@@ -210,6 +245,8 @@ describe("keygen_v1_route_test", () => {
           name: "Test User",
         },
         TEST_ENCRYPTION_SECRET,
+        expect.anything(),
+        TEST_CUSTOMER_ID,
       );
     });
   });

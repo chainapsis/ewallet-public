@@ -196,6 +196,10 @@ const KeyshareNodeMetaV2Schema = z
     threshold: z.number().int().openapi({
       description: "Keyshare threshold",
     }),
+    registration_threshold: z.number().int().nullable().openapi({
+      description:
+        "Registration threshold — minimum nodes required for successful signup",
+    }),
     nodes: z.array(KeyshareNodeV2Schema).openapi({
       description: "Keyshare nodes metadata",
     }),

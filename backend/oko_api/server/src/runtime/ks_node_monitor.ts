@@ -6,9 +6,15 @@ import dayjs from "dayjs";
 import type { Pool } from "pg";
 import type { Logger } from "winston";
 
+import {
+  clearAlert,
+  shouldAlert,
+  wasAlerted,
+} from "@oko-wallet-api/lib/alert_throttle";
 import { sendSlackAlert } from "@oko-wallet-api/lib/slack";
 
 const HEARTBEAT_THRESHOLD_MINUTES = 10;
+const HEARTBEAT_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes
 
 export function startKSNodeHeartbeatRuntime(
   db: Pool,
@@ -46,24 +52,59 @@ async function checkKSNodeHeartbeats(
   const now = dayjs();
   const threshold = now.subtract(HEARTBEAT_THRESHOLD_MINUTES, "minute");
 
+  const toAlert: string[] = [];
+  const recovered: string[] = [];
+
   for (const telemetry of latestTelemetriesRes.data) {
     const lastUpdate = dayjs(telemetry.created_at);
+    const publicKey = telemetry.public_key;
+    const alertKey = `heartbeat:${publicKey}`;
 
     if (lastUpdate.isBefore(threshold)) {
-      // Node is unresponsive
-      const publicKey = telemetry.public_key;
+      if (shouldAlert(alertKey, HEARTBEAT_INTERVAL_MS)) {
+        const nodeRes = await getKSNodeByPublicKey(db, publicKey);
+        const nodeName =
+          nodeRes.success && nodeRes.data
+            ? `${nodeRes.data.node_name} (${publicKey})`
+            : publicKey;
 
-      // Get node name
-      const nodeRes = await getKSNodeByPublicKey(db, publicKey);
-      const nodeName =
-        nodeRes.success && nodeRes.data
-          ? `${nodeRes.data.node_name} (${publicKey})`
-          : publicKey;
+        toAlert.push(
+          `Node ${nodeName} has not reported telemetry for over ${HEARTBEAT_THRESHOLD_MINUTES} minutes. Last seen: ${lastUpdate.toISOString()}`,
+        );
+      }
+    } else {
+      if (wasAlerted(alertKey)) {
+        const nodeRes = await getKSNodeByPublicKey(db, publicKey);
+        const nodeName =
+          nodeRes.success && nodeRes.data
+            ? `${nodeRes.data.node_name} (${publicKey})`
+            : publicKey;
 
-      await sendSlackAlert(
-        `[KS Node Alert] Node ${nodeName} has not reported telemetry for over ${HEARTBEAT_THRESHOLD_MINUTES} minutes. Last seen: ${lastUpdate.toISOString()}`,
-        slackWebhookUrl,
-      );
+        recovered.push(`Node ${nodeName}`);
+        clearAlert(alertKey);
+      }
     }
+  }
+
+  // Send resolved notifications
+  if (recovered.length === 1) {
+    await sendSlackAlert(`[Resolved] ${recovered[0]}`, slackWebhookUrl);
+  } else if (recovered.length > 1) {
+    const body = recovered.map((m) => `  • ${m}`).join("\n");
+    await sendSlackAlert(
+      `[Resolved] ${recovered.length} nodes recovered:\n${body}`,
+      slackWebhookUrl,
+    );
+  }
+
+  // Send unresponsive alerts (batched)
+  if (toAlert.length === 1) {
+    await sendSlackAlert(`[KS Node Alert] ${toAlert[0]}`, slackWebhookUrl);
+  } else if (toAlert.length > 1) {
+    const body = toAlert.map((m) => `  • ${m}`).join("\n");
+    await sendSlackAlert(
+      `[KS Node Alert] ${toAlert.length} nodes unresponsive:\n${body}`,
+      slackWebhookUrl,
+    );
   }
 }

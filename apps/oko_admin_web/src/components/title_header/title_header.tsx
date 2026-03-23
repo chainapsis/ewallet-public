@@ -6,6 +6,7 @@ import styles from "./title_header.module.scss";
 interface TitleHeaderProps {
   title: string;
   totalCount?: number;
+  activeCount?: number;
   verifiedCount?: number;
   txGenCount?: number;
   renderRightContent?: () => ReactNode;
@@ -14,6 +15,7 @@ interface TitleHeaderProps {
 export const TitleHeader: FC<TitleHeaderProps> = ({
   title,
   totalCount,
+  activeCount,
   verifiedCount,
   txGenCount,
   renderRightContent,
@@ -33,6 +35,12 @@ export const TitleHeader: FC<TitleHeaderProps> = ({
         {totalCount !== undefined && (
           <div className={styles.countInfo}>
             <span>Total ({totalCount})</span>
+            {activeCount !== undefined && (
+              <>
+                <span className={styles.divider}>/</span>
+                <span>Active ({activeCount})</span>
+              </>
+            )}
             {verifiedCount !== undefined && (
               <>
                 <span className={styles.divider}>/</span>

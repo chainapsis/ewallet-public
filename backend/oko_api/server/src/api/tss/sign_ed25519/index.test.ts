@@ -78,6 +78,7 @@ async function setUpEd25519Wallet(pool: Pool): Promise<TestSetupResult> {
   const _ksNodeIds = await setUpKSNodes(pool);
   await insertKeyShareNodeMeta(pool, {
     sss_threshold: SSS_THRESHOLD,
+    registration_threshold: null,
   });
 
   // Create customer

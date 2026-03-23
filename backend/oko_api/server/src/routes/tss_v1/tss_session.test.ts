@@ -62,6 +62,7 @@ describe("tss_session_route_test", () => {
 
     await insertKeyShareNodeMeta(pool, {
       sss_threshold: SSS_THRESHOLD,
+      registration_threshold: null,
     });
 
     const createUserRes = await createUser(pool, "test@example.com", "google");
