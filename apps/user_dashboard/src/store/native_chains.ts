@@ -41,8 +41,7 @@ export const useNativeChainsStore = create<
             fetchedAt: Date.now(),
             chainIdentifiers: chainIds.map((c) => getChainIdentifier(c)),
           });
-        } catch {
-        }
+        } catch {}
       },
 
       isNativeChain: (chainId: string) => {
