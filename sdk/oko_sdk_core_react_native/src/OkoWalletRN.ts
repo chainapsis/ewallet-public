@@ -41,6 +41,9 @@ export interface OkoWalletRNConfig {
   apiKey: string;
   sdkEndpoint?: string;
   redirectScheme?: string;
+  /** Android-only callback scheme for OkoAuthCallbackActivity (default: "oko.auth.callback").
+   *  Must match `callbackScheme` in the Expo config plugin (or your AndroidManifest intent-filter). */
+  androidCallbackScheme?: string;
 }
 
 export class OkoWalletRN implements OkoWalletInterface {
@@ -48,6 +51,7 @@ export class OkoWalletRN implements OkoWalletInterface {
   apiKey: string;
   sdkEndpoint: string;
   redirectScheme: string;
+  androidCallbackScheme: string | undefined;
   origin: string;
   eventEmitter: EventEmitter3<OkoWalletCoreEvent2, OkoWalletCoreEventHandler2>;
 
@@ -62,6 +66,7 @@ export class OkoWalletRN implements OkoWalletInterface {
     this.apiKey = config.apiKey;
     this.sdkEndpoint = config.sdkEndpoint ?? DEFAULT_SDK_ENDPOINT;
     this.redirectScheme = config.redirectScheme ?? "okowallet";
+    this.androidCallbackScheme = config.androidCallbackScheme;
     this.origin = `${this.redirectScheme}://`;
     this.state = {
       authType: null,
@@ -162,6 +167,7 @@ export class OkoWalletRN implements OkoWalletInterface {
       this.redirectScheme,
       this.state.publicKey,
       this._clientRandom,
+      this.androidCallbackScheme,
     );
 
     return {
@@ -183,6 +189,7 @@ export class OkoWalletRN implements OkoWalletInterface {
       this.apiKey,
       this.state.publicKey,
       this._clientRandom,
+      this.androidCallbackScheme,
     );
 
     if (
@@ -203,6 +210,7 @@ export class OkoWalletRN implements OkoWalletInterface {
 
     const signInOptions: SignInOptions = {
       redirectScheme: this.redirectScheme,
+      androidCallbackScheme: this.androidCallbackScheme,
     };
 
     const result = await signInRN(
@@ -239,7 +247,11 @@ export class OkoWalletRN implements OkoWalletInterface {
     await this.waitUntilInitialized;
 
     try {
-      await signOutRN(this.sdkEndpoint, this.redirectScheme);
+      await signOutRN(
+        this.sdkEndpoint,
+        this.redirectScheme,
+        this.androidCallbackScheme,
+      );
     } catch (error) {
       console.warn("[oko-rn] OS-browser sign-out failed:", error);
     }

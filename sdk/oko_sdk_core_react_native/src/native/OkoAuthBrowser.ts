@@ -1,15 +1,16 @@
 import { NativeModules, Platform } from "react-native";
 
 /**
- * SDK-internal callback scheme used by OkoAuthCallbackActivity on Android.
+ * Default callback scheme used by OkoAuthCallbackActivity on Android.
  * The library's AndroidManifest.xml registers this scheme on the
  * CallbackActivity, so Android routes the redirect there without a
- * disambiguation popup. (Overridable via config plugin.)
+ * disambiguation popup. Overridable via `androidCallbackScheme` in
+ * OkoWalletRNConfig and `callbackScheme` in the Expo config plugin.
  */
-export const ANDROID_CALLBACK_SCHEME = "oko.auth.callback";
+const DEFAULT_ANDROID_CALLBACK_SCHEME = "oko.auth.callback";
 
 interface OkoAuthBrowserNative {
-  openAuthSessionAsync(url: string): Promise<string>;
+  openAuthSessionAsync(url: string, callbackScheme: string): Promise<string>;
   cancelAuthSession(): void;
 }
 
@@ -84,9 +85,12 @@ const openAuthViaWebBrowser = resolveAuthOpener();
  * Android (native module): SDK's dedicated callback scheme for CallbackActivity.
  * iOS / fallback: app's own scheme for ASWebAuthenticationSession auto-close.
  */
-export function getServerRedirectScheme(appScheme: string): string {
+export function getServerRedirectScheme(
+  appScheme: string,
+  androidCallbackScheme?: string,
+): string {
   if (Platform.OS === "android" && nativeModule) {
-    return ANDROID_CALLBACK_SCHEME;
+    return androidCallbackScheme ?? DEFAULT_ANDROID_CALLBACK_SCHEME;
   }
   return appScheme;
 }
@@ -104,10 +108,12 @@ export function getServerRedirectScheme(appScheme: string): string {
 export async function openAuthSession(
   url: string,
   callbackScheme: string,
+  androidCallbackScheme?: string,
 ): Promise<AuthSessionResult> {
   if (Platform.OS === "android" && nativeModule) {
+    const scheme = androidCallbackScheme ?? DEFAULT_ANDROID_CALLBACK_SCHEME;
     try {
-      const callbackUrl = await nativeModule.openAuthSessionAsync(url);
+      const callbackUrl = await nativeModule.openAuthSessionAsync(url, scheme);
       return { type: "success", url: callbackUrl };
     } catch {
       // Promise was rejected (user pressed back)

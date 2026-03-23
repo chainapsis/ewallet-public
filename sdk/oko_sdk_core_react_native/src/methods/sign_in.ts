@@ -11,6 +11,7 @@ import {
 
 export interface SignInOptions {
   redirectScheme: string;
+  androidCallbackScheme?: string;
 }
 
 export interface SignInResult {
@@ -27,8 +28,12 @@ export async function signInRN(
   clientRandom?: string | null,
 ): Promise<SignInResult> {
   const redirectScheme = options?.redirectScheme ?? DEFAULT_REDIRECT_SCHEME;
+  const androidCallbackScheme = options?.androidCallbackScheme;
 
-  const serverScheme = getServerRedirectScheme(redirectScheme);
+  const serverScheme = getServerRedirectScheme(
+    redirectScheme,
+    androidCallbackScheme,
+  );
   const loginUrl = buildLoginUrl(
     sdkEndpoint,
     type,
@@ -37,7 +42,11 @@ export async function signInRN(
     clientRandom,
   );
 
-  const result = await openAuthSession(loginUrl, redirectScheme);
+  const result = await openAuthSession(
+    loginUrl,
+    redirectScheme,
+    androidCallbackScheme,
+  );
 
   if (result.type === "cancel") {
     throw new Error("Sign-in cancelled");

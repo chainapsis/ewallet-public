@@ -38,10 +38,35 @@ Add the plugin to your `app.json` or `app.config.js`:
 }
 ```
 
-The Expo config plugin can write a custom Android callback scheme into the
-manifest, but the current Android runtime path still expects
-`"oko.auth.callback"`. In practice, treat `oko.auth.callback` as fixed unless
-the runtime implementation is updated too.
+The Expo config plugin writes the Android callback scheme into the manifest. To
+use a custom scheme, pass the same value as `androidCallbackScheme` to
+`OkoWalletProvider` (or `OkoWalletRNConfig`) so the runtime and manifest agree:
+
+```json
+{
+  "expo": {
+    "plugins": [
+      [
+        "@oko-wallet/oko-sdk-core-react-native",
+        { "callbackScheme": "com.myapp.auth" }
+      ]
+    ]
+  }
+}
+```
+
+```tsx
+<OkoWalletProvider
+  apiKey="your-api-key"
+  androidCallbackScheme="com.myapp.auth"
+>
+```
+
+The default scheme is `"oko.auth.callback"`. Since all apps using the Oko SDK
+share this default, users who install multiple Oko-powered apps on the same
+device may see an Android disambiguation popup or have callbacks routed to the
+wrong app. Setting a unique `androidCallbackScheme` per app (e.g., using your
+app's package name) avoids this collision.
 
 After adding the plugin, regenerate native projects:
 
@@ -57,7 +82,7 @@ authentication and signing operations. Two schemes are involved:
 | Scheme           | Purpose                                     | Configured via                                          |
 | ---------------- | ------------------------------------------- | ------------------------------------------------------- |
 | `redirectScheme` | App-level deep link scheme used by iOS and Android fallback flows | `OkoWalletProvider` prop + native URL scheme             |
-| `callbackScheme` | Android-only internal callback for `CallbackActivity` | SDK Android manifest / Expo plugin (the current Android runtime still expects `oko.auth.callback`) |
+| `callbackScheme` | Android-only internal callback for `CallbackActivity` | SDK Android manifest / Expo plugin + `androidCallbackScheme` prop (default: `"oko.auth.callback"`) |
 
 On Android when the native `OkoAuthBrowser` module is available, browser auth
 and signing callbacks use the internal `callbackScheme`. Your app's
@@ -86,8 +111,9 @@ additional `Info.plist` changes are needed for the auth session itself.
 The Expo config plugin handles intent filter injection automatically. After
 `npx expo prebuild`, the following is added to `AndroidManifest.xml`:
 
-- Oko callback and management Activities for the internal
-  `oko.auth.callback` flow
+- Oko callback and management Activities for the internal callback scheme
+  (default: `oko.auth.callback`, customizable via the plugin's `callbackScheme`
+  option)
 
 Your app's standard deep link intent filter comes from Expo's `scheme`
 configuration, not from the Oko plugin.
@@ -135,10 +161,11 @@ Add intent filters to `android/app/src/main/AndroidManifest.xml`:
 ```
 
 The Oko SDK Android library already includes the callback and management
-Activities needed for the internal `oko.auth.callback` flow. In a standard
-React Native setup, you usually do **not** need to register them manually.
-Only verify they are present in the merged manifest if your app uses unusual
-native manifest customization.
+Activities needed for the internal callback scheme flow (default:
+`oko.auth.callback`). In a standard React Native setup, you usually do **not**
+need to register them manually. If you use a custom `androidCallbackScheme`, you
+must also override the scheme in `AndroidManifest.xml` on the
+`OkoAuthCallbackActivity` intent filter to match.
 
 ## Redirect Scheme Configuration
 
@@ -169,7 +196,7 @@ The `redirectScheme` tells the SDK your app's own URL scheme.
 | Value                                       | Where configured                               | Where used                                                    |
 | ------------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------- |
 | `redirectScheme` (e.g., `"okowallet"`)      | `OkoWalletProvider` prop, `Info.plist`, `AndroidManifest.xml` | App-level deep links; used directly by iOS and Android fallback browser flows |
-| `callbackScheme` (`"oko.auth.callback"`)    | SDK Android manifest / Expo plugin             | Android `OkoAuthCallbackActivity` receives the internal auth callback; the current Android runtime still expects this value |
+| `callbackScheme` (default `"oko.auth.callback"`) | SDK Android manifest / Expo plugin + `androidCallbackScheme` prop | Android `OkoAuthCallbackActivity` receives the internal auth callback; customizable to avoid scheme collisions between apps |
 
 ## Browser Dependency Selection
 
@@ -203,7 +230,8 @@ After completing setup, verify everything is configured correctly:
 - [ ] **Deep link test:** Open `okowallet://` from device browser — app should
   open
 - [ ] **CallbackActivity registered** (Android, if using native module):
-  `oko.auth.callback` scheme in `AndroidManifest.xml`
+  callback scheme (default `oko.auth.callback`, or your custom
+  `androidCallbackScheme`) in `AndroidManifest.xml`
 - [ ] **Pod install complete** (iOS, bare RN): Run `cd ios && pod install`
 
 ### Common Setup Issues
@@ -212,7 +240,7 @@ After completing setup, verify everything is configured correctly:
 | ------------------------------ | ----------------------------------------------- | -------------------------------------------------------------------------- |
 | Scheme mismatch                | `redirectScheme` prop doesn't match native config | Ensure the same string is in `OkoWalletProvider`, `Info.plist`, and `AndroidManifest.xml` |
 | Missing prebuild               | Expo plugin changes not applied                 | Run `npx expo prebuild` after modifying `app.json`                         |
-| Android disambiguation popup   | Multiple apps handle the same scheme            | Use a unique `redirectScheme` value                                        |
+| Android disambiguation popup   | Multiple apps handle the same scheme            | Use a unique `redirectScheme`; also set a unique `androidCallbackScheme` to avoid collisions with other Oko-powered apps on the same device |
 | Pod install needed             | Native iOS deps not linked                      | Run `cd ios && pod install`                                                |
 
 ## Next Steps

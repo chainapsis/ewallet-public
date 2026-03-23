@@ -18,9 +18,13 @@ export async function openModalRN(
   apiKey: string,
   expectedPublicKey?: string | null,
   clientRandom?: string | null,
+  androidCallbackScheme?: string,
 ): Promise<Result<OpenModalAckPayload, OpenModalError>> {
   try {
-    const serverScheme = getServerRedirectScheme(redirectScheme);
+    const serverScheme = getServerRedirectScheme(
+      redirectScheme,
+      androidCallbackScheme,
+    );
     const { url: rpcUrl, stats } = buildRpcUrl(
       sdkEndpoint,
       "open_modal",
@@ -39,7 +43,11 @@ export async function openModalRN(
       rpcUrlChars: rpcUrl.length,
     });
 
-    const authResult = await openAuthSession(rpcUrl, redirectScheme);
+    const authResult = await openAuthSession(
+      rpcUrl,
+      redirectScheme,
+      androidCallbackScheme,
+    );
 
     if (authResult.type === "cancel") {
       return {

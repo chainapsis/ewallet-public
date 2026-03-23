@@ -8,10 +8,18 @@ const DEFAULT_REDIRECT_SCHEME = "okowallet";
 export async function signOutRN(
   sdkEndpoint: string,
   redirectScheme = DEFAULT_REDIRECT_SCHEME,
+  androidCallbackScheme?: string,
 ): Promise<void> {
-  const serverScheme = getServerRedirectScheme(redirectScheme);
+  const serverScheme = getServerRedirectScheme(
+    redirectScheme,
+    androidCallbackScheme,
+  );
   const signOutUrl = buildSignOutUrl(sdkEndpoint, serverScheme);
-  const result = await openAuthSession(signOutUrl, redirectScheme);
+  const result = await openAuthSession(
+    signOutUrl,
+    redirectScheme,
+    androidCallbackScheme,
+  );
 
   if (result.type === "cancel") {
     throw new Error("Sign-out cancelled");
