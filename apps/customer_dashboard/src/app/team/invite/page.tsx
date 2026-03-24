@@ -20,7 +20,6 @@ import {
   requestValidateInvitation,
 } from "@oko-wallet-ct-dashboard/fetch/team";
 import { paths } from "@oko-wallet-ct-dashboard/paths";
-import { useAppState } from "@oko-wallet-ct-dashboard/state";
 import { AccountForm } from "@oko-wallet-ct-dashboard/ui";
 
 type PageState = "loading" | "form" | "invalid";
@@ -100,12 +99,7 @@ export default function InviteAcceptPage() {
 
     const res = await requestAcceptInvitation({ token, password });
     if (res.success) {
-      useAppState.getState().setToken(res.data.token);
-      useAppState.getState().setUser({
-        email: res.data.email,
-        is_email_verified: true,
-      });
-      router.push(paths.team);
+      router.push(paths.team_invite_success);
     } else {
       setError(res.msg);
       setIsSubmitting(false);

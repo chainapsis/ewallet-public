@@ -19,8 +19,6 @@ import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type { CustomerDashboardUserRole } from "@oko-wallet/oko-types/ct_dashboard";
 import type { Request, Response } from "express";
 
-import { generateCustomerToken } from "@oko-wallet-ctd-api/auth";
-
 registry.registerPath({
   method: "post",
   path: "/customer_dashboard/v1/customer/team/accept_invitation",
@@ -225,28 +223,9 @@ export async function acceptInvitation(
       client.release();
     }
 
-    // Generate JWT for the new user
-    const tokenRes = generateCustomerToken({
-      user_id: userId,
-      jwt_config: {
-        secret: state.jwt_secret,
-        expires_in: state.jwt_expires_in,
-      },
-    });
-
-    if (!tokenRes.success) {
-      res.status(500).json({
-        success: false,
-        code: "FAILED_TO_GENERATE_TOKEN",
-        msg: tokenRes.err,
-      });
-      return;
-    }
-
     res.status(200).json({
       success: true,
       data: {
-        token: tokenRes.data.token,
         email: invitation.email,
         customer_id: invitation.customer_id,
       },

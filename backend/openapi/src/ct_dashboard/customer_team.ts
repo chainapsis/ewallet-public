@@ -142,9 +142,6 @@ export const AcceptInvitationSuccessResponseSchema = registry.register(
   z.object({
     success: z.literal(true),
     data: z.object({
-      token: z.string().openapi({
-        description: "JWT token for the new session",
-      }),
       email: z.string(),
       customer_id: z.string().uuid(),
     }),
