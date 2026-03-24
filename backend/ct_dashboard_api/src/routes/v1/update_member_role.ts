@@ -11,6 +11,7 @@ import {
   updateCTDUserRole,
 } from "@oko-wallet/oko-pg-interface/customer_dashboard_users";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { UpdateMemberRoleRequest } from "@oko-wallet/oko-types/ct_dashboard";
 import type { Response } from "express";
 
 import type { CustomerAuthenticatedRequest } from "@oko-wallet-ctd-api/middleware/auth";
@@ -58,7 +59,7 @@ registry.registerPath({
 });
 
 export async function updateMemberRole(
-  req: CustomerAuthenticatedRequest,
+  req: CustomerAuthenticatedRequest<UpdateMemberRoleRequest>,
   res: Response<OkoApiResponse<unknown>>,
 ) {
   try {
@@ -66,6 +67,15 @@ export async function updateMemberRole(
     const currentUserId = res.locals.user_id;
     const { customer_id: customerId } = res.locals.team;
     const { user_id, role } = req.body;
+
+    if (role !== "admin" && role !== "member") {
+      res.status(ErrorCodeMap.INVALID_REQUEST).json({
+        success: false,
+        code: "INVALID_REQUEST",
+        msg: "Role must be 'admin' or 'member'",
+      });
+      return;
+    }
 
     if (user_id === currentUserId) {
       res.status(ErrorCodeMap.CANNOT_CHANGE_OWN_ROLE).json({

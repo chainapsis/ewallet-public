@@ -12,6 +12,7 @@ import {
   refreshTeamInvitation,
 } from "@oko-wallet/oko-pg-interface/customer_team_invitations";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { ResendInvitationRequest } from "@oko-wallet/oko-types/ct_dashboard";
 import type { Response } from "express";
 
 import {
@@ -64,7 +65,7 @@ registry.registerPath({
 });
 
 export async function resendInvitation(
-  req: CustomerAuthenticatedRequest,
+  req: CustomerAuthenticatedRequest<ResendInvitationRequest>,
   res: Response<OkoApiResponse<unknown>>,
 ) {
   try {

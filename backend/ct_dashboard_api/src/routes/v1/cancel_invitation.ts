@@ -11,6 +11,7 @@ import {
   updatePendingInvitationStatus,
 } from "@oko-wallet/oko-pg-interface/customer_team_invitations";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { CancelInvitationRequest } from "@oko-wallet/oko-types/ct_dashboard";
 import type { Response } from "express";
 
 import type { CustomerAuthenticatedRequest } from "@oko-wallet-ctd-api/middleware/auth";
@@ -52,7 +53,7 @@ registry.registerPath({
 });
 
 export async function cancelInvitation(
-  req: CustomerAuthenticatedRequest,
+  req: CustomerAuthenticatedRequest<CancelInvitationRequest>,
   res: Response<OkoApiResponse<unknown>>,
 ) {
   try {
@@ -93,7 +94,20 @@ export async function cancelInvitation(
       return;
     }
 
-    await updatePendingInvitationStatus(state.db, invitation_id, "CANCELLED");
+    const cancelRes = await updatePendingInvitationStatus(
+      state.db,
+      invitation_id,
+      "CANCELLED",
+    );
+
+    if (!cancelRes.success) {
+      res.status(500).json({
+        success: false,
+        code: "UNKNOWN_ERROR",
+        msg: "Failed to cancel invitation",
+      });
+      return;
+    }
 
     res.status(200).json({
       success: true,

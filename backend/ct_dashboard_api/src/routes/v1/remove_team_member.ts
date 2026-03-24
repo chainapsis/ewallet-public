@@ -11,6 +11,7 @@ import {
   softDeleteCTDUser,
 } from "@oko-wallet/oko-pg-interface/customer_dashboard_users";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { RemoveMemberRequest } from "@oko-wallet/oko-types/ct_dashboard";
 import type { Response } from "express";
 
 import type { CustomerAuthenticatedRequest } from "@oko-wallet-ctd-api/middleware/auth";
@@ -58,7 +59,7 @@ registry.registerPath({
 });
 
 export async function removeTeamMember(
-  req: CustomerAuthenticatedRequest,
+  req: CustomerAuthenticatedRequest<RemoveMemberRequest>,
   res: Response<OkoApiResponse<unknown>>,
 ) {
   try {

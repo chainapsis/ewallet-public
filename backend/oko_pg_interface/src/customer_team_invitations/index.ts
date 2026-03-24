@@ -1,3 +1,7 @@
+import type {
+  CustomerDashboardUserRole,
+  TeamInvitationStatus,
+} from "@oko-wallet/oko-types/ct_dashboard";
 import type { Result } from "@oko-wallet/stdlib-js";
 import type { Pool, PoolClient } from "pg";
 
@@ -5,9 +9,9 @@ export interface CustomerTeamInvitation {
   invitation_id: string;
   customer_id: string;
   email: string;
-  role: string;
+  role: CustomerDashboardUserRole;
   token: string;
-  status: string;
+  status: TeamInvitationStatus;
   inviter_user_id: string;
   last_sent_at: string | null;
   expires_at: string;
@@ -20,7 +24,7 @@ export async function insertTeamInvitation(
   params: {
     customer_id: string;
     email: string;
-    role: string;
+    role: CustomerDashboardUserRole;
     token: string;
     inviter_user_id: string;
     expires_at: Date;
@@ -92,7 +96,7 @@ export async function getTeamInvitationById(
 export async function updatePendingInvitationStatus(
   db: Pool | PoolClient,
   invitationId: string,
-  status: string,
+  status: TeamInvitationStatus,
 ): Promise<Result<CustomerTeamInvitation, string>> {
   const query = `
     UPDATE customer_team_invitations
