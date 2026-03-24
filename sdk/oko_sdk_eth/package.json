@@ -39,7 +39,7 @@
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
-    "@oko-wallet/oko-sdk-core": "workspace:*",
+    "@oko-wallet/oko-sdk-core": "^0.1.2-alpha.12",
     "@oko-wallet/stdlib-js": "^0.1.2-alpha.12",
     "eventemitter3": "^5.0.1",
     "uuid": "^13.0.0",

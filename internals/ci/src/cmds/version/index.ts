@@ -34,20 +34,18 @@ export async function version(args: any[]) {
   expectSuccess(testSandboxRet, "publish failed");
   console.log("%s %s", chalk.green.bold("Ok"), "sandbox_simple_host");
 
-  // TEMPORARILY DISABLED for alpha.12 publish — workspace:* needed until
-  // oko-sdk-core alpha.12 is on npm. Re-enable after publish.
-  // const wsDeps = findWorkspaceDependencies();
-  // if (wsDeps.length > 0) {
-  //   console.error(
-  //     "%s workspace versioning is prohibited for public packages",
-  //     chalk.red.bold("Error"),
-  //   );
-  //
-  //   for (const dep of wsDeps) {
-  //     console.log("pkg: %s, dep: %s: %s", dep.pkg, dep.depName, dep.version);
-  //   }
-  //   process.exit(1);
-  // }
+  const wsDeps = findWorkspaceDependencies();
+  if (wsDeps.length > 0) {
+    console.error(
+      "%s workspace versioning is prohibited for public packages",
+      chalk.red.bold("Error"),
+    );
+
+    for (const dep of wsDeps) {
+      console.log("pkg: %s, dep: %s: %s", dep.pkg, dep.depName, dep.version);
+    }
+    process.exit(1);
+  }
 
   const changedRet = spawnSync("yarn", ["lerna", "changed", "--json"], {
     cwd: paths.root,

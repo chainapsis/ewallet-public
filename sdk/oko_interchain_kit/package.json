@@ -39,7 +39,7 @@
   "dependencies": {
     "@interchain-kit/core": "^0.10.0",
     "@keplr-wallet/types": "0.12.297",
-    "@oko-wallet/oko-sdk-core": "workspace:*",
+    "@oko-wallet/oko-sdk-core": "^0.1.2-alpha.12",
     "@oko-wallet/oko-sdk-cosmos": "^0.1.2-alpha.12"
   },
   "devDependencies": {
