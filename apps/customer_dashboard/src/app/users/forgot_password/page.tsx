@@ -373,7 +373,7 @@ export default function ForgotPasswordPage() {
             helpText={
               error
                 ? undefined
-                : "Password must be 8-20 characters and must include numbers."
+                : `Password must be ${PASSWORD_MIN_LENGTH}-${PASSWORD_MAX_LENGTH} characters and must include numbers.`
             }
             SideComponent={
               <button

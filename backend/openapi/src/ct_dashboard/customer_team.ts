@@ -131,7 +131,7 @@ export const AcceptInvitationRequestSchema = registry.register(
     token: z.string().openapi({
       description: "Invitation token from email link",
     }),
-    password: z.string().min(8).max(16).openapi({
+    password: z.string().min(8).max(20).openapi({
       description: "Password for the new account",
     }),
   }),
