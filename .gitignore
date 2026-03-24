@@ -397,7 +397,8 @@ $RECYCLE.BIN/
 # !.yarn/versions
 
 # Claude
-.claude/
+.claude/*
+!.claude/settings.json
 .plans/
 .tasks/
 .mcp.json

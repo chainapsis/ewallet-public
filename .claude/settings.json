@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE_PATH=$(node -p \"JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).tool_input.file_path\") && if [[ \"$FILE_PATH\" =~ \\.(ts|tsx|js|jsx)$ ]]; then yarn exec biome check --write \"$FILE_PATH\" >/dev/null 2>&1 || true; fi"
+          }
+        ]
+      }
+    ]
+  }
+}
