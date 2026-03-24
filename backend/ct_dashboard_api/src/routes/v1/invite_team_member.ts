@@ -13,6 +13,7 @@ import {
   insertTeamInvitation,
 } from "@oko-wallet/oko-pg-interface/customer_team_invitations";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { InviteTeamMemberRequest } from "@oko-wallet/oko-types/ct_dashboard";
 import type { Response } from "express";
 
 import {
@@ -71,7 +72,7 @@ registry.registerPath({
 });
 
 export async function inviteTeamMember(
-  req: CustomerAuthenticatedRequest,
+  req: CustomerAuthenticatedRequest<InviteTeamMemberRequest>,
   res: Response<OkoApiResponse<unknown>>,
 ) {
   try {

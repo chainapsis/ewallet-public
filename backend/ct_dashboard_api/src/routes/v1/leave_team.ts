@@ -16,6 +16,7 @@ import {
 } from "@oko-wallet/oko-pg-interface/customer_dashboard_users";
 import { deleteCustomer } from "@oko-wallet/oko-pg-interface/customers";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { LeaveTeamRequest } from "@oko-wallet/oko-types/ct_dashboard";
 import type { Response } from "express";
 
 import type { CustomerAuthenticatedRequest } from "@oko-wallet-ctd-api/middleware/auth";
@@ -63,7 +64,7 @@ registry.registerPath({
 });
 
 export async function leaveTeam(
-  req: CustomerAuthenticatedRequest,
+  req: CustomerAuthenticatedRequest<LeaveTeamRequest>,
   res: Response<OkoApiResponse<unknown>>,
 ) {
   try {

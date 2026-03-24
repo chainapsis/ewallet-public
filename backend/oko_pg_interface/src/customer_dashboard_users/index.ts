@@ -2,6 +2,7 @@ import type {
   CustomerAndCTDUser,
   CustomerAndCTDUserWithPasswordHash,
   CustomerDashboardUser,
+  CustomerDashboardUserRole,
   DeleteCustomerDashboardUsersByCustomerIdRequest,
   DeleteCustomerDashboardUsersByCustomerIdResponse,
   InsertCustomerDashboardUserRequest,
@@ -528,7 +529,7 @@ export async function updateCTDUserRole(
   db: Pool | PoolClient,
   userId: string,
   customerId: string,
-  role: string,
+  role: CustomerDashboardUserRole,
 ): Promise<Result<CustomerDashboardUser, string>> {
   const query = `
     UPDATE customer_dashboard_users

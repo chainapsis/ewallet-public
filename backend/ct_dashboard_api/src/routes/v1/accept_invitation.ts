@@ -16,7 +16,7 @@ import {
   updatePendingInvitationStatus,
 } from "@oko-wallet/oko-pg-interface/customer_team_invitations";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
-import type { CustomerDashboardUserRole } from "@oko-wallet/oko-types/ct_dashboard";
+import type { AcceptInvitationRequest } from "@oko-wallet/oko-types/ct_dashboard";
 import type { Request, Response } from "express";
 
 registry.registerPath({
@@ -67,7 +67,7 @@ registry.registerPath({
 });
 
 export async function acceptInvitation(
-  req: Request,
+  req: Request<unknown, unknown, AcceptInvitationRequest>,
   res: Response<OkoApiResponse<unknown>>,
 ) {
   try {
@@ -190,7 +190,7 @@ export async function acceptInvitation(
         user_id: userId,
         customer_id: invitation.customer_id,
         email: invitation.email,
-        role: invitation.role as CustomerDashboardUserRole,
+        role: invitation.role,
         status: "ACTIVE",
         is_email_verified: true,
         password_hash: passwordHash,

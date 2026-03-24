@@ -7,6 +7,7 @@ import {
   updatePendingInvitationStatus,
 } from "@oko-wallet/oko-pg-interface/customer_team_invitations";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { ValidateInvitationRequest } from "@oko-wallet/oko-types/ct_dashboard";
 import type { Request, Response } from "express";
 import { z } from "zod";
 
@@ -73,7 +74,7 @@ registry.registerPath({
 });
 
 export async function validateInvitation(
-  req: Request,
+  req: Request<unknown, unknown, ValidateInvitationRequest>,
   res: Response<OkoApiResponse<unknown>>,
 ) {
   try {

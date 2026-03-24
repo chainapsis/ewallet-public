@@ -8,6 +8,7 @@ import {
 import { getTeamMembersByCustomerId } from "@oko-wallet/oko-pg-interface/customer_dashboard_users";
 import { getPendingInvitationsByCustomerId } from "@oko-wallet/oko-pg-interface/customer_team_invitations";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type { GetTeamMembersRequest } from "@oko-wallet/oko-types/ct_dashboard";
 import type { Response } from "express";
 
 import type { CustomerAuthenticatedRequest } from "@oko-wallet-ctd-api/middleware/auth";
@@ -56,7 +57,7 @@ registry.registerPath({
 });
 
 export async function getTeamMembers(
-  req: CustomerAuthenticatedRequest,
+  req: CustomerAuthenticatedRequest<GetTeamMembersRequest>,
   res: Response<OkoApiResponse<unknown>>,
 ) {
   try {
