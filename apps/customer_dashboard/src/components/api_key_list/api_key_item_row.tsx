@@ -36,8 +36,12 @@ export const APIKeyItemRow: FC<APIKeyItemRowProps> = ({
   const [isCopied, setIsCopied] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(apiKey);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(apiKey);
+    } catch {
+      return;
+    }
 
     if (timerRef.current) {
       clearTimeout(timerRef.current);

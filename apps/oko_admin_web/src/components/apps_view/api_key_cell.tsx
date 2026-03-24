@@ -15,8 +15,12 @@ export const APIKeyCell: FC<APIKeyCellProps> = ({ apiKeys }) => {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleCopy = (apiKey: string) => {
-    navigator.clipboard.writeText(apiKey);
+  const handleCopy = async (apiKey: string) => {
+    try {
+      await navigator.clipboard.writeText(apiKey);
+    } catch {
+      return;
+    }
 
     if (timerRef.current) {
       clearTimeout(timerRef.current);
