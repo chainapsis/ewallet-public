@@ -126,7 +126,7 @@ export async function refreshTeamInvitation(
   const query = `
     UPDATE customer_team_invitations
     SET token = $1, expires_at = $2, last_sent_at = now(), updated_at = now()
-    WHERE invitation_id = $3
+    WHERE invitation_id = $3 AND status = 'PENDING'
     RETURNING *
   `;
 
