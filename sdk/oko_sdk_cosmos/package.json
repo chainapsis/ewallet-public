@@ -1,6 +1,6 @@
 {
   "name": "@oko-wallet/oko-sdk-cosmos",
-  "version": "0.1.2-alpha.11",
+  "version": "0.1.2-alpha.12",
   "type": "module",
   "publishConfig": {
     "access": "public"
@@ -40,7 +40,7 @@
     "@noble/curves": "1.9.7",
     "@noble/hashes": "^1.8.0",
     "@oko-wallet/oko-sdk-core": "workspace:*",
-    "@oko-wallet/stdlib-js": "^0.1.2-alpha.11",
+    "@oko-wallet/stdlib-js": "^0.1.2-alpha.12",
     "bech32": "^2.0.0",
     "buffer": "^6.0.3",
     "uuid": "^13.0.0"

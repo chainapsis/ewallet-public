@@ -1,6 +1,6 @@
 {
   "name": "@oko-wallet/oko-sdk-svm",
-  "version": "0.1.2-alpha.11",
+  "version": "0.1.2-alpha.12",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "type": "module",
