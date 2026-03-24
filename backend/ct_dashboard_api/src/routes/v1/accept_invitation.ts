@@ -19,6 +19,12 @@ import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type { AcceptInvitationRequest } from "@oko-wallet/oko-types/ct_dashboard";
 import type { Request, Response } from "express";
 
+import {
+  CHANGED_PASSWORD_MAX_LENGTH,
+  CHANGED_PASSWORD_MIN_LENGTH,
+  PASSWORD_CONTAINS_NUMBER_REGEX,
+} from "@oko-wallet-ctd-api/constants";
+
 registry.registerPath({
   method: "post",
   path: "/customer_dashboard/v1/customer/team/accept_invitation",
@@ -77,14 +83,14 @@ export async function acceptInvitation(
     // Validate password
     if (
       !password ||
-      password.length < 8 ||
-      password.length > 20 ||
-      !/\d/.test(password)
+      password.length < CHANGED_PASSWORD_MIN_LENGTH ||
+      password.length > CHANGED_PASSWORD_MAX_LENGTH ||
+      !PASSWORD_CONTAINS_NUMBER_REGEX.test(password)
     ) {
       res.status(ErrorCodeMap.INVALID_REQUEST).json({
         success: false,
         code: "INVALID_REQUEST",
-        msg: "Password must be 8-20 characters and include at least one number",
+        msg: `Password must be ${CHANGED_PASSWORD_MIN_LENGTH}-${CHANGED_PASSWORD_MAX_LENGTH} characters and include at least one number`,
       });
       return;
     }
