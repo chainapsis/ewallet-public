@@ -1,23 +1,19 @@
 .wrapper {
   display: flex;
-  justify-content: center;
-  height: 100vh;
   flex-direction: column;
+  height: 100vh;
+  background: var(--bg-primary);
 }
 
 .body {
-  width: 411px;
-  margin: 146px auto auto auto;
+  display: flex;
+  justify-content: center;
+  padding-top: 248px;
 }
 
-.description {
-  margin-bottom: 16px;
-}
-
-.emailInfo {
-  padding: 8px 12px;
-  background: var(--bg-secondary);
-  border-radius: 8px;
+.formContainer {
+  width: 430px;
+  min-width: 400px;
 }
 
 .eyeButton {

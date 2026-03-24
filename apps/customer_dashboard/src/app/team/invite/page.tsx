@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@oko-wallet/oko-common-ui/button";
 import { EyeIcon } from "@oko-wallet/oko-common-ui/icons/eye";
 import { EyeOffIcon } from "@oko-wallet/oko-common-ui/icons/eye_off";
 import { Input } from "@oko-wallet/oko-common-ui/input";
@@ -20,7 +21,6 @@ import {
   requestValidateInvitation,
 } from "@oko-wallet-ct-dashboard/fetch/team";
 import { paths } from "@oko-wallet-ct-dashboard/paths";
-import { AccountForm } from "@oko-wallet-ct-dashboard/ui";
 
 type PageState = "loading" | "form" | "invalid";
 
@@ -124,100 +124,107 @@ export default function InviteAcceptPage() {
     return null;
   }
 
+  const teamName = invitationInfo?.team_name ?? "the team";
+  const isFormValid = password.length > 0 && confirmPassword.length > 0;
+
   return (
     <div className={styles.wrapper}>
       <DashboardHeader />
       <div className={styles.body}>
-        <Typography
-          tagType="h1"
-          size="display-sm"
-          weight="semibold"
-          color="primary"
-        >
-          Set your password
-        </Typography>
-        <Spacing height={8} />
-        <Typography
-          size="md"
-          weight="regular"
-          color="secondary"
-          className={styles.description}
-        >
-          Set your password to join {invitationInfo?.team_name ?? "the team"}
-        </Typography>
+        <div className={styles.formContainer}>
+          <Spacing height={24} />
 
-        <div className={styles.emailInfo}>
-          <Typography size="sm" weight="medium" color="tertiary">
-            {invitationInfo?.email}
+          <Typography
+            tagType="h1"
+            size="display-sm"
+            weight="semibold"
+            color="primary"
+          >
+            Welcome to the
+            <br />
+            {teamName} Team 👋
           </Typography>
-        </div>
-        <Spacing height={24} />
 
-        <AccountForm
-          onSubmit={handleSubmit}
-          disabled={!password || !confirmPassword || isSubmitting}
-          submitText={isSubmitting ? "Joining..." : "Join Team"}
-        >
-          <Input
-            label="Password"
-            placeholder="Enter password"
-            requiredSymbol
-            type={showPassword ? "text" : "password"}
-            maxLength={16}
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              setError("");
-            }}
-            helpText="Password must be 8–16 characters and must include numbers."
-            fullWidth
-            SideComponent={
-              <button
-                type="button"
-                className={styles.eyeButton}
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeIcon /> : <EyeOffIcon />}
-              </button>
-            }
-          />
+          <Spacing height={12} />
 
-          <Spacing height={28} />
-
-          <Input
-            label="Confirm password"
-            placeholder="Confirm password"
-            requiredSymbol
-            type={showConfirmPassword ? "text" : "password"}
-            maxLength={16}
-            value={confirmPassword}
-            onChange={(e) => {
-              setConfirmPassword(e.target.value);
-              setError("");
-            }}
-            fullWidth
-            SideComponent={
-              <button
-                type="button"
-                className={styles.eyeButton}
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                {showConfirmPassword ? <EyeIcon /> : <EyeOffIcon />}
-              </button>
-            }
-          />
+          <Typography size="md" weight="medium" color="secondary">
+            Create your password to begin.
+          </Typography>
 
           <Spacing height={40} />
 
-          {error && (
-            <>
-              <Typography color="error-primary" size="sm">
-                {error}
-              </Typography>
-              <Spacing height={16} />
-            </>
-          )}
-        </AccountForm>
+          <form onSubmit={handleSubmit}>
+            <Input
+              label="Enter your password"
+              placeholder="Enter new password"
+              requiredSymbol
+              type={showPassword ? "text" : "password"}
+              maxLength={16}
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError("");
+              }}
+              helpText="Password must be 8–16 characters and must include numbers."
+              fullWidth
+              SideComponent={
+                <button
+                  type="button"
+                  className={styles.eyeButton}
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeIcon /> : <EyeOffIcon />}
+                </button>
+              }
+            />
+
+            <Spacing height={28} />
+
+            <Input
+              label="Confirm your password"
+              placeholder="Confirm password"
+              requiredSymbol
+              type={showConfirmPassword ? "text" : "password"}
+              maxLength={16}
+              value={confirmPassword}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                setError("");
+              }}
+              fullWidth
+              SideComponent={
+                <button
+                  type="button"
+                  className={styles.eyeButton}
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? <EyeIcon /> : <EyeOffIcon />}
+                </button>
+              }
+            />
+
+            <Spacing height={40} />
+
+            {error && (
+              <>
+                <Typography color="error-primary" size="sm">
+                  {error}
+                </Typography>
+                <Spacing height={16} />
+              </>
+            )}
+
+            <Button
+              variant="primary"
+              size="md"
+              fullWidth
+              type="submit"
+              disabled={!isFormValid || isSubmitting}
+            >
+              {isSubmitting ? "Setting up..." : "Set Password"}
+            </Button>
+          </form>
+        </div>
       </div>
     </div>
   );
