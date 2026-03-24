@@ -52,6 +52,7 @@ export const OkoProvider = ({ children }) => {
       try {
         const cosmosInitRes = OkoCosmosWallet.init({
           api_key: process.env.REACT_APP_OKO_API_KEY,
+          theme: "dark",
         });
         if (!cosmosInitRes.success) {
           return;
@@ -232,6 +233,26 @@ function App() {
 }
 
 export default App;
+```
+
+## Runtime Theme Switching
+
+If your app supports dark mode, sync the theme with Oko at runtime using
+`setTheme()`:
+
+```typescript
+// hooks/useThemeSync.ts
+import { useEffect } from "react";
+import { useOko } from "../contexts/OkoProvider";
+
+export function useThemeSync(theme: "light" | "dark") {
+  const { cosmosWallet, isInitialized } = useOko();
+
+  useEffect(() => {
+    if (!isInitialized || !cosmosWallet) return;
+    cosmosWallet.okoWallet.setTheme(theme);
+  }, [theme, isInitialized, cosmosWallet]);
+}
 ```
 
 ## Next Steps

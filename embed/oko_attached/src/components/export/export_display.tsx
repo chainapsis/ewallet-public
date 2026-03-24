@@ -66,10 +66,8 @@ const VALID_KEY_TYPES: ReadonlySet<string> = new Set(["secp256k1", "ed25519"]);
 const MAX_KEY_REQUEST_ATTEMPTS = 3;
 
 export const ExportDisplay: FC = () => {
-  // Force light theme — this route is only used inside user_dashboard which has no dark mode.
-  // useLayoutEffect ensures the theme is set before paint, preventing a flash
-  // where dark-mode CSS variables (e.g. --bg-brand-solid: #fafafa) are resolved
-  // from the index.html pre-paint script's data-theme="dark".
+  // Force light theme — this route is loaded directly (not through AttachedInitialized),
+  // so the SDK theme URL param is not available here.
   useLayoutEffect(() => {
     const root = document.documentElement;
     const prevTheme = root.getAttribute("data-theme");

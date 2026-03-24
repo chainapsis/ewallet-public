@@ -26,10 +26,15 @@
     />
     <title>Login - Oko Wallet</title>
     <script>
-      // Apply system theme before first paint to prevent light-to-dark flash
+      // Apply theme before first paint to prevent flash.
+      // SDK callers may pass ?theme=light|dark — honour it over OS preference.
       (function () {
+        var params = new URLSearchParams(window.location.search);
+        var themeParam = params.get("theme");
         var isDark =
-          window.matchMedia?.("(prefers-color-scheme: dark)").matches;
+          themeParam === "dark" || themeParam === "light"
+            ? themeParam === "dark"
+            : window.matchMedia?.("(prefers-color-scheme: dark)").matches;
         var isPopup = window.parent === window;
         if (isDark) {
           document.documentElement.setAttribute("data-theme", "dark");

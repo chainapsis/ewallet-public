@@ -12,6 +12,7 @@ import { on } from "./methods/on";
 import { openModal } from "./methods/open_modal";
 import { openSignInModal } from "./methods/open_sign_in_modal";
 import { sendMsgToIframe } from "./methods/send_msg_to_iframe";
+import { setTheme } from "./methods/set_theme";
 import { signIn } from "./methods/sign_in";
 import { signOut } from "./methods/sign_out";
 import { init } from "./static/init";
@@ -34,6 +35,7 @@ ptype.getEmail = getEmail;
 ptype.getName = getName;
 ptype.getAuthType = getAuthType;
 ptype.getWalletInfo = getWalletInfo;
+ptype.setTheme = setTheme;
 ptype.on = on;
 ptype.off = off;
 

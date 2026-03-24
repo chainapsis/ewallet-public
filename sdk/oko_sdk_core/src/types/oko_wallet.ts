@@ -13,6 +13,8 @@ import type { EventEmitter3 } from "@oko-wallet-sdk-core/event";
 
 export type { WalletInfo };
 
+export type OkoWalletTheme = "light" | "dark";
+
 export interface OkoWalletStaticInterface {
   new (
     apiKey: string,
@@ -51,6 +53,7 @@ export interface OkoWalletInterface {
   getName: () => Promise<string | null>;
   getWalletInfo: () => Promise<WalletInfo | null>;
   getAuthType: () => Promise<AuthType | null>;
+  setTheme: (theme: OkoWalletTheme) => Promise<void>;
   startEmailSignIn: (email: string) => Promise<void>;
   completeEmailSignIn: (email: string, code: string) => Promise<void>;
   on: (handlerDef: OkoWalletCoreEventHandler2) => void;
@@ -65,11 +68,13 @@ export interface OkoWalletWebInterface extends OkoWalletInterface {
   iframe: HTMLIFrameElement;
   activePopupId: string | null;
   activePopupWindow: Window | null;
+  _theme: OkoWalletTheme | null;
 }
 
 export interface OkoWalletInitArgs {
   api_key: string;
   sdk_endpoint?: string;
+  theme?: OkoWalletTheme;
 }
 
 export interface OkoWalletState {

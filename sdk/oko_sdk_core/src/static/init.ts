@@ -40,6 +40,10 @@ export function init(
     if (window.__oko) {
       console.warn("[oko] already initialized");
 
+      if (args.theme) {
+        window.__oko.setTheme(args.theme);
+      }
+
       return { success: true, data: window.__oko };
     }
 
@@ -72,6 +76,10 @@ export function init(
       }
 
       sdkEndpointURL.searchParams.append("sdk_version", OkoWallet.version);
+
+      if (args.theme) {
+        sdkEndpointURL.searchParams.append("theme", args.theme);
+      }
     } catch (_err) {
       return {
         success: false,
@@ -93,6 +101,7 @@ export function init(
     const iframe = iframeRes.data;
 
     const okoWallet = new OkoWallet(args.api_key, iframe, sdkEndpoint);
+    okoWallet._theme = args.theme ?? null;
 
     if (window.__oko) {
       console.warn("[oko] oko wallet has been initialized by another process");

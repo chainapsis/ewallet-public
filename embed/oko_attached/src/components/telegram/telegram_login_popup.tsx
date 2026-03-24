@@ -7,6 +7,7 @@ import { type FC, useContext, useEffect } from "react";
 
 import telegramStyles from "./telegram_login_popup.module.scss";
 import { TELEGRAM_BOT_NAME } from "@oko-wallet-attached/config/telegram";
+import { useAppState } from "@oko-wallet-attached/store/app";
 
 export const TelegramLoginPopup: FC = () => {
   const theme = useContext(ThemeContext);
@@ -37,6 +38,13 @@ export const TelegramLoginPopup: FC = () => {
     }
     if (hostOrigin) {
       callbackUrl.searchParams.set("host_origin", hostOrigin);
+    }
+
+    const currentTheme =
+      (hostOrigin && useAppState.getState().getTheme(hostOrigin)) ??
+      urlParams.get("theme");
+    if (currentTheme) {
+      callbackUrl.searchParams.set("theme", currentTheme);
     }
 
     const script = document.createElement("script");

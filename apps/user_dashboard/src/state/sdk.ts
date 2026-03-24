@@ -183,6 +183,7 @@ export const useSDKState = create(
       const initRes = OkoCosmosWallet.init({
         api_key: OKO_SDK_API_KEY,
         sdk_endpoint: OKO_SDK_ENDPOINT,
+        theme: "light",
       });
 
       if (initRes.success) {

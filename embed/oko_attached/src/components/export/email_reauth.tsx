@@ -180,6 +180,11 @@ export const EmailReauth = () => {
     callbackUrl.searchParams.set("modal_id", "export_key_reauth");
     callbackUrl.searchParams.set("host_origin", window.location.origin);
 
+    const themeParam = new URLSearchParams(window.location.search).get("theme");
+    if (themeParam) {
+      callbackUrl.searchParams.set("theme", themeParam);
+    }
+
     console.log(`${LOG_PREFIX} verifying OTP for`, email.trim());
 
     verifyEmailOTPCode({

@@ -17,6 +17,7 @@ export const OkoWallet = function (
   this.iframe = iframe;
   this.activePopupId = null;
   this.activePopupWindow = null;
+  this._theme = null;
   this.sdkEndpoint = sdkEndpoint;
   this.origin = window.location.origin;
   this.eventEmitter = new EventEmitter3<
