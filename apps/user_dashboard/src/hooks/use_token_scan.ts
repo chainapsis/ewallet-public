@@ -18,7 +18,6 @@ import {
   useSDKState,
 } from "@oko-wallet-user-dashboard/state/sdk";
 import { useUserInfoState } from "@oko-wallet-user-dashboard/state/user_info";
-import { useAssetMetaStore } from "@oko-wallet-user-dashboard/store/asset_meta";
 import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
 import { getChainIdentifier } from "@oko-wallet-user-dashboard/utils/chain";
 import {
@@ -34,15 +33,37 @@ import type {
 } from "@oko-wallet-user-dashboard/workers/token-scan-types";
 
 const STORAGE_KEY = "oko:user_dashboard:token_scan";
+const SCAN_TTL_MS = 3 * 60 * 60 * 1000; // 3 hours
+const SCAN_RETRY_MS = 30 * 1000; // 30 seconds
+
 interface ScanData {
   results: TokenScanResult[];
   completedAt: number;
   isShowedAutoEnableToast: boolean;
 }
 
+function isValidCompletedAt(completedAt: unknown): completedAt is number {
+  return (
+    typeof completedAt === "number" &&
+    Number.isFinite(completedAt) &&
+    completedAt > 0 &&
+    completedAt <= Date.now() + 60_000
+  );
+}
+
 function readScanResults(userKey: string): ScanData | null {
   const data = getStorageItem<Record<string, ScanData>>(STORAGE_KEY);
-  return data?.[userKey] ?? null;
+  const entry = data?.[userKey] ?? null;
+  if (!entry) {
+    return null;
+  }
+  if (!isValidCompletedAt(entry.completedAt)) {
+    return null;
+  }
+  if (Date.now() - entry.completedAt > SCAN_TTL_MS) {
+    return null;
+  }
+  return entry;
 }
 
 function writeScanResults(
@@ -120,10 +141,6 @@ export function useTokenScan() {
     setScanData(readScanResults(userKey));
   }, [userKey]);
 
-  const resolveTokenMetadata = useAssetMetaStore(
-    (state) => state.resolveTokenMetadata,
-  );
-
   const { chains: allChains } = useChains();
   const { chains: enabledChains } = useEnabledChains();
 
@@ -173,16 +190,20 @@ export function useTokenScan() {
     !!ethAddress &&
     !!svmAddress;
 
-  const hasFiredRef = useRef(false);
+  const isScanningRef = useRef(false);
+  const hasRetriedRef = useRef(false);
 
   const scan = useCallback(async () => {
+    if (isScanningRef.current) {
+      return;
+    }
     if (!isReady || !okoCosmos || !ethAddress || !svmAddress || !userKey) {
       return;
     }
     if (scanTargets.length === 0) {
       return;
     }
-    hasFiredRef.current = true;
+    isScanningRef.current = true;
 
     try {
       const key = await okoCosmos.getKey("cosmoshub-4");
@@ -202,8 +223,19 @@ export function useTokenScan() {
         isShowedAutoEnableToast: false,
       });
       writeScanResults(userKey, response.results, response.completedAt, false);
+      hasRetriedRef.current = false;
     } catch {
-      // scan failed silently
+      // Stop after 1 retry
+      if (!hasRetriedRef.current) {
+        hasRetriedRef.current = true;
+        window.setTimeout(() => {
+          isScanningRef.current = false;
+          scan();
+        }, SCAN_RETRY_MS);
+        return;
+      }
+    } finally {
+      isScanningRef.current = false;
     }
   }, [
     isReady,
@@ -213,14 +245,30 @@ export function useTokenScan() {
     userKey,
     scanTargets,
     request,
-    resolveTokenMetadata,
   ]);
 
   useEffect(() => {
-    if (isReady && scanTargets.length > 0 && !hasFiredRef.current) {
-      scan();
+    if (!isReady || scanTargets.length === 0) {
+      return;
     }
-  }, [isReady, scanTargets, scan]);
+
+    if (!scanData?.completedAt) {
+      scan();
+      return;
+    }
+
+    const cacheRemainingTime =
+      SCAN_TTL_MS - (Date.now() - scanData.completedAt);
+    if (cacheRemainingTime <= 0) {
+      scan();
+      return;
+    }
+
+    // In case the cache has expired and the page has not been refreshed,
+    // a re-scan is attempted
+    const timer = window.setTimeout(() => scan(), cacheRemainingTime);
+    return () => window.clearTimeout(timer);
+  }, [isReady, scanTargets, scanData?.completedAt, scan]);
 
   const markToastShown = useCallback(() => {
     if (!userKey || !scanData) {
