@@ -21,7 +21,7 @@ export const MetadataContent: FC<MakeSignatureModalMetadataContentProps> = ({
   origin,
   chainInfo,
   signer,
-  initialViewType = null,
+  initialViewType = "Login Info",
 }) => {
   const appName = useMemoryState((state) => state.appName);
   const faviconUrl = getFaviconUrl(origin);
