@@ -110,10 +110,29 @@ export default function InviteAcceptPage() {
     return (
       <div className={styles.wrapper}>
         <DashboardHeader />
-        <div className={styles.body}>
-          <Typography size="md" weight="regular" color="tertiary">
-            Verifying invitation...
-          </Typography>
+        <div className={styles.loadingBody}>
+          <svg
+            className={styles.spinner}
+            width="32"
+            height="32"
+            viewBox="0 0 62 62"
+            fill="none"
+          >
+            <path
+              d="M58.125 31C58.125 34.5621 57.4234 38.0893 56.0602 41.3803C54.6971 44.6712 52.6991 47.6615 50.1803 50.1803C47.6615 52.6991 44.6712 54.6971 41.3803 56.0602C38.0893 57.4234 34.5621 58.125 31 58.125C27.4379 58.125 23.9107 57.4234 20.6197 56.0602C17.3288 54.6971 14.3385 52.6991 11.8197 50.1803C9.30094 47.6615 7.30292 44.6712 5.93977 41.3803C4.57661 38.0893 3.875 34.5621 3.875 31C3.875 27.4379 4.57661 23.9107 5.93977 20.6197C7.30293 17.3287 9.30095 14.3385 11.8197 11.8197C14.3385 9.30093 17.3288 7.30292 20.6197 5.93976C23.9107 4.57661 27.4379 3.875 31 3.875C34.5621 3.875 38.0893 4.57661 41.3803 5.93977C44.6713 7.30293 47.6615 9.30095 50.1803 11.8197C52.6991 14.3385 54.6971 17.3288 56.0602 20.6197C57.4234 23.9107 58.125 27.4379 58.125 31Z"
+              stroke="var(--bg-tertiary, #e9eaeb)"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M31 3.875C34.5621 3.875 38.0893 4.57661 41.3803 5.93977C44.6713 7.30293 47.6615 9.30094 50.1803 11.8197C52.6991 14.3385 54.6971 17.3288 56.0602 20.6197C57.4234 23.9107 58.125 27.4379 58.125 31"
+              stroke="var(--fg-primary, #181d27)"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </div>
       </div>
     );

@@ -1,19 +1,22 @@
 .wrapper {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
+  position: relative;
+  min-height: 100vh;
   background: var(--bg-primary);
 }
 
 .body {
-  display: flex;
-  justify-content: center;
-  padding-top: 248px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 430px;
 }
 
-.formContainer {
-  width: 430px;
-  min-width: 400px;
+.loadingBody {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .eyeButton {
@@ -31,4 +34,17 @@
   align-items: center;
   justify-content: center;
   color: var(--fg-tertiary);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
 }
