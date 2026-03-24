@@ -178,13 +178,13 @@ export default function InviteAcceptPage() {
               placeholder="Enter new password"
               requiredSymbol
               type={showPassword ? "text" : "password"}
-              maxLength={16}
+              maxLength={PASSWORD_MAX_LENGTH}
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value);
                 setError("");
               }}
-              helpText="Password must be 8–16 characters and must include numbers."
+              helpText={`Password must be ${PASSWORD_MIN_LENGTH}–${PASSWORD_MAX_LENGTH} characters and must include numbers.`}
               fullWidth
               SideComponent={
                 <button
@@ -204,7 +204,7 @@ export default function InviteAcceptPage() {
               placeholder="Confirm password"
               requiredSymbol
               type={showConfirmPassword ? "text" : "password"}
-              maxLength={16}
+              maxLength={PASSWORD_MAX_LENGTH}
               value={confirmPassword}
               onChange={(e) => {
                 setConfirmPassword(e.target.value);

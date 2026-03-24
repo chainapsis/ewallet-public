@@ -373,7 +373,7 @@ describe("Customer Auth API Integration Tests", () => {
   expect(response.status).toBe(200);
   expect(response.body.success).toBe(false);
   expect(response.body.code).toBe('INVALID_EMAIL_OR_PASSWORD');
-  expect(response.body.msg).toBe('Password must be at least 8 characters long');
+  expect(response.body.msg).toMatch(/Password must be at least \d+ characters long/);
   });
 
   it('should return error for non-existent email', async () => {
