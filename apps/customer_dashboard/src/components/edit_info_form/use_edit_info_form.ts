@@ -1,4 +1,4 @@
-import type { Customer, CustomerTheme } from "@oko-wallet/oko-types/customers";
+import type { Customer } from "@oko-wallet/oko-types/customers";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { type ChangeEvent, type DragEvent, useRef, useState } from "react";
@@ -13,7 +13,6 @@ const ONE_MB = 1 * 1024 * 1024;
 export type EditInfoInputs = {
   label: string;
   url: string;
-  theme: CustomerTheme;
 };
 
 interface FormHasChangesArgs {
@@ -21,7 +20,6 @@ interface FormHasChangesArgs {
   url: string;
   logoFile: File | null;
   shouldDeleteLogo: boolean;
-  theme: string;
   customer: Customer | null | undefined;
 }
 
@@ -54,15 +52,13 @@ function formHasChanges({
   url,
   logoFile,
   shouldDeleteLogo,
-  theme,
   customer,
 }: FormHasChangesArgs) {
   return (
     label !== customer?.label ||
     url !== (customer?.url ?? "") ||
     logoFile !== null ||
-    shouldDeleteLogo ||
-    theme !== customer?.theme
+    shouldDeleteLogo
   );
 }
 
@@ -76,7 +72,6 @@ export function useEditInfoForm() {
     register,
     handleSubmit,
     setError,
-    setValue,
     watch,
     clearErrors,
     formState: { errors, isValid },
@@ -86,7 +81,6 @@ export function useEditInfoForm() {
     defaultValues: {
       label: customer.data?.label ?? "",
       url: customer.data?.url ?? "",
-      theme: customer.data?.theme ?? "system",
     },
   });
 
@@ -102,14 +96,12 @@ export function useEditInfoForm() {
 
   const label = watch("label");
   const url = watch("url");
-  const theme = watch("theme");
 
   const hasChanges = formHasChanges({
     label,
     url,
     logoFile,
     shouldDeleteLogo,
-    theme,
     customer: customer.data,
   });
 
@@ -219,9 +211,8 @@ export function useEditInfoForm() {
     const hasLabelChange = data.label !== customer.data?.label;
     const hasUrlChange = data.url !== (customer.data?.url ?? "");
     const hasLogoChange = logoFile !== null || shouldDeleteLogo;
-    const hasThemeChange = data.theme !== customer.data?.theme;
 
-    if (!hasLabelChange && !hasUrlChange && !hasLogoChange && !hasThemeChange) {
+    if (!hasLabelChange && !hasUrlChange && !hasLogoChange) {
       setError("root", { message: "No changes to save." });
       return;
     }
@@ -235,7 +226,6 @@ export function useEditInfoForm() {
         label: hasLabelChange ? data.label : undefined,
         url: hasUrlChange ? data.url : undefined,
         logoFile: logoFile,
-        theme: hasThemeChange ? data.theme : undefined,
         deleteLogo: shouldDeleteLogo,
       });
 
@@ -256,10 +246,6 @@ export function useEditInfoForm() {
     }
   };
 
-  const setTheme = (newTheme: CustomerTheme) => {
-    setValue("theme", newTheme);
-  };
-
   const resetErrors = (field?: keyof EditInfoInputs) => {
     clearErrors("root");
     if (field) {
@@ -274,8 +260,6 @@ export function useEditInfoForm() {
     isLoading,
     isValid,
     hasChanges,
-    theme,
-    setTheme,
     fileInputRef,
     previewUrl,
     isDragging,
