@@ -1,6 +1,6 @@
 ---
 title: Error Handling
-sidebar_position: 10
+sidebar_position: 11
 ---
 
 # Error Handling & Best Practices
