@@ -59,8 +59,9 @@ export function sendReauthParamsToIframe(
   );
 }
 
-function getThemeParam(): string | null {
-  return new URLSearchParams(window.location.search).get("theme");
+function getThemeParam(): "light" | "dark" | null {
+  const raw = new URLSearchParams(window.location.search).get("theme");
+  return raw === "light" || raw === "dark" ? raw : null;
 }
 
 function buildGoogleOAuthUrl(nonce: string): string {
