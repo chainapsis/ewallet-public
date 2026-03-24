@@ -29,6 +29,7 @@ import { mainnet } from "viem/chains";
 // Initialize eth wallet
 const initRes = OkoEthWallet.init({
   api_key: "your-api-key",
+  theme: "dark",
 });
 
 if (!initRes.success) {

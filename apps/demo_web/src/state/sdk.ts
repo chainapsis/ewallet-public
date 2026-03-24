@@ -13,6 +13,7 @@ import {
 import { create } from "zustand";
 import { combine } from "zustand/middleware";
 
+import { useThemeState } from "@oko-wallet-demo-web/state/theme";
 import { useUserInfoState } from "@oko-wallet-demo-web/state/user_info";
 
 interface SDKState {
@@ -70,6 +71,7 @@ export const useSDKState = create(
         api_key:
           "72bd2afd04374f86d563a40b814b7098e5ad6c7f52d3b8f84ab0c3d05f73ac6c",
         sdk_endpoint: process.env.NEXT_PUBLIC_OKO_SDK_ENDPOINT,
+        theme: useThemeState.getState().theme,
       });
 
       if (initRes.success) {
@@ -113,6 +115,7 @@ export const useSDKState = create(
         api_key:
           "72bd2afd04374f86d563a40b814b7098e5ad6c7f52d3b8f84ab0c3d05f73ac6c",
         sdk_endpoint: process.env.NEXT_PUBLIC_OKO_SDK_ENDPOINT,
+        theme: useThemeState.getState().theme,
       });
 
       if (initRes.success) {
@@ -160,6 +163,7 @@ export const useSDKState = create(
           sdk_endpoint: process.env.NEXT_PUBLIC_OKO_SDK_ENDPOINT,
           // TODO: @dan
           chain_id: "solana:devnet",
+          theme: useThemeState.getState().theme,
         });
 
         if (initRes.success) {

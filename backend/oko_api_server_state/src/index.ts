@@ -104,6 +104,7 @@ export interface ServerState {
   ks_node_report_password: string;
   github_client_secret: string;
   server_keypair: EddsaKeypair;
+  dapp_dashboard_url: string;
 }
 
 export interface InitStateArgs {
@@ -137,6 +138,7 @@ export interface InitStateArgs {
   slack_webhook_url: string | null;
   ks_node_report_password: string;
   github_client_secret: string;
+  dapp_dashboard_url: string;
 }
 
 async function initializeServerKeypair(

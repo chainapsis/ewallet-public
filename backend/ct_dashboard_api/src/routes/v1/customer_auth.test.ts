@@ -75,6 +75,7 @@ describe("Customer Auth API Integration Tests", () => {
       user_id: userId,
       customer_id: customerId,
       email: TEST_EMAIL,
+      role: "admin",
       status: "ACTIVE",
       is_email_verified: false,
       password_hash: KNOWN_HASH_FROM_0000,

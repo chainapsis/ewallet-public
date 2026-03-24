@@ -2,6 +2,7 @@ import type {
   CustomerAndCTDUser,
   CustomerAndCTDUserWithPasswordHash,
   CustomerDashboardUser,
+  CustomerDashboardUserRole,
   DeleteCustomerDashboardUsersByCustomerIdRequest,
   DeleteCustomerDashboardUsersByCustomerIdResponse,
   InsertCustomerDashboardUserRequest,
@@ -20,12 +21,12 @@ export async function insertCustomerDashboardUser(
 ): Promise<Result<InsertCustomerDashboardUserResponse, string>> {
   const query = `
 INSERT INTO customer_dashboard_users (
-  user_id, customer_id, email, 
+  user_id, customer_id, email, role,
   status, is_email_verified, password_hash
 )
 VALUES (
-  $1, $2, $3, 
-  $4, $5, $6
+  $1, $2, $3, $4,
+  $5, $6, $7
 )
 RETURNING *
 `;
@@ -35,6 +36,7 @@ RETURNING *
       user.user_id,
       user.customer_id,
       user.email,
+      user.role,
       user.status,
       user.is_email_verified,
       user.password_hash,
@@ -57,18 +59,22 @@ RETURNING *
   }
 }
 
+// NOTE: LIMIT 1 assumes one active row per email. Currently enforced at the
+// application level (multi-team is blocked in createCustomer). If multi-team
+// support is enabled in the future, this query and all callers (signin,
+// verify_login, send_code) must be updated to let the user choose a team.
 export async function getCTDUserWithCustomerByEmail(
   db: Pool,
   email: string,
 ): Promise<Result<CustomerAndCTDUser | null, string>> {
   const query = `
-SELECT 
-  u.user_id, u.customer_id, u.email, u.status, 
-  u.is_email_verified, c.label, c.url, c.logo_url, 
+SELECT
+  u.user_id, u.customer_id, u.email, u.role, u.status,
+  u.is_email_verified, c.label, c.url, c.logo_url,
   c.status as customer_status
 FROM customer_dashboard_users u
 INNER JOIN customers c ON u.customer_id = c.customer_id
-WHERE u.email = $1 AND u.status = 'ACTIVE' 
+WHERE u.email = $1 AND u.status = 'ACTIVE'
   AND c.status = 'ACTIVE'
 LIMIT 1
 `;
@@ -88,6 +94,7 @@ LIMIT 1
           customer_id: r.customer_id,
           user_id: r.user_id,
           email: r.email,
+          role: r.role,
           status: r.status,
           is_email_verified: r.is_email_verified,
         },
@@ -109,7 +116,8 @@ LIMIT 1
   }
 }
 
-// Assume 1:1 mapping(email <-> customer_id) for now
+// NOTE: Same LIMIT 1 assumption as getCTDUserWithCustomerByEmail above.
+// Must be revisited when multi-team support is enabled.
 export async function getCTDUserWithCustomerAndPasswordHashByEmail(
   db: Pool,
   email: string,
@@ -118,7 +126,7 @@ export async function getCTDUserWithCustomerAndPasswordHashByEmail(
 SELECT u.*, c.label, c.url, c.logo_url, c.status as customer_status
 FROM customer_dashboard_users u
 INNER JOIN customers c ON u.customer_id = c.customer_id
-WHERE u.email = $1 AND u.status = 'ACTIVE' 
+WHERE u.email = $1 AND u.status = 'ACTIVE'
   AND c.status = 'ACTIVE'
 LIMIT 1
 `;
@@ -138,6 +146,7 @@ LIMIT 1
           customer_id: r.customer_id,
           user_id: r.user_id,
           email: r.email,
+          role: r.role,
           status: r.status,
           is_email_verified: r.is_email_verified,
           password_hash: r.password_hash,
@@ -317,7 +326,7 @@ export async function getUnverifiedCustomerDashboardUsers(
   timeUntilVerifiedMs: number,
 ): Promise<Result<CustomerAndCTDUser[], string>> {
   const query = `
-SELECT 
+SELECT
   c.customer_id,
   c.label,
   c.status,
@@ -325,6 +334,7 @@ SELECT
   c.logo_url,
   u.user_id,
   u.email,
+  u.role,
   u.status as user_status,
   u.is_email_verified
 FROM customer_dashboard_users u
@@ -353,6 +363,7 @@ WHERE u.status = 'ACTIVE'
         customer_id: row.customer_id,
         user_id: row.user_id,
         email: row.email,
+        role: row.role,
         status: row.user_status,
         is_email_verified: row.is_email_verified,
       },
@@ -369,7 +380,7 @@ export async function getInactiveCustomerDashboardUsers(
   timeUntilInactiveMs: number,
 ): Promise<Result<CustomerAndCTDUser[], string>> {
   const query = `
-SELECT 
+SELECT
   c.customer_id,
   c.label,
   c.status,
@@ -377,6 +388,7 @@ SELECT
   c.logo_url,
   u.user_id,
   u.email,
+  u.role,
   u.status as user_status,
   u.is_email_verified
 FROM customer_dashboard_users u
@@ -407,12 +419,245 @@ WHERE u.status = 'ACTIVE'
         customer_id: row.customer_id,
         user_id: row.user_id,
         email: row.email,
+        role: row.role,
         status: row.user_status,
         is_email_verified: row.is_email_verified,
       },
       theme: row.theme,
     }));
     return { success: true, data };
+  } catch (error) {
+    return { success: false, err: String(error) };
+  }
+}
+
+// ─── Team member queries ──────────────────────────────────────────
+
+export async function getTeamMembersByCustomerId(
+  db: Pool | PoolClient,
+  customerId: string,
+  options: {
+    limit: number;
+    offset: number;
+    search?: string;
+    sortBy?: "role" | "email" | "created_at";
+    sortOrder?: "asc" | "desc";
+  },
+): Promise<
+  Result<{ members: CustomerDashboardUser[]; total: number }, string>
+> {
+  const {
+    limit,
+    offset,
+    search,
+    sortBy = "created_at",
+    sortOrder = "asc",
+  } = options;
+
+  const conditions = ["u.customer_id = $1", "u.status = 'ACTIVE'"];
+  const params: (string | number)[] = [customerId];
+
+  if (search) {
+    params.push(`%${search}%`);
+    conditions.push(`u.email ILIKE $${params.length}`);
+  }
+
+  const whereClause = conditions.join(" AND ");
+
+  const allowedSortColumns: Record<string, string> = {
+    role: "u.role",
+    email: "u.email",
+    created_at: "u.created_at",
+  };
+  const sortColumn = allowedSortColumns[sortBy] ?? "u.created_at";
+  const order = sortOrder === "desc" ? "DESC" : "ASC";
+
+  const countQuery = `
+    SELECT COUNT(*) as total
+    FROM customer_dashboard_users u
+    WHERE ${whereClause}
+  `;
+
+  const dataQuery = `
+    SELECT u.*
+    FROM customer_dashboard_users u
+    WHERE ${whereClause}
+    ORDER BY
+      CASE WHEN u.role = 'admin' THEN 0 ELSE 1 END ASC,
+      ${sortColumn} ${order}
+    LIMIT $${params.length + 1} OFFSET $${params.length + 2}
+  `;
+
+  try {
+    const countResult = await db.query(countQuery, params);
+    const total = Number.parseInt(countResult.rows[0].total, 10);
+
+    const dataResult = await db.query(dataQuery, [...params, limit, offset]);
+
+    return {
+      success: true,
+      data: { members: dataResult.rows, total },
+    };
+  } catch (error) {
+    return { success: false, err: String(error) };
+  }
+}
+
+export async function getCTDUserByUserIdAndCustomerId(
+  db: Pool | PoolClient,
+  userId: string,
+  customerId: string,
+): Promise<Result<CustomerDashboardUser | null, string>> {
+  const query = `
+    SELECT *
+    FROM customer_dashboard_users
+    WHERE user_id = $1 AND customer_id = $2 AND status = 'ACTIVE'
+  `;
+
+  try {
+    const result = await db.query(query, [userId, customerId]);
+    return {
+      success: true,
+      data: result.rows[0] ?? null,
+    };
+  } catch (error) {
+    return { success: false, err: String(error) };
+  }
+}
+
+export async function updateCTDUserRole(
+  db: Pool | PoolClient,
+  userId: string,
+  customerId: string,
+  role: CustomerDashboardUserRole,
+): Promise<Result<CustomerDashboardUser, string>> {
+  const query = `
+    UPDATE customer_dashboard_users
+    SET role = $1, updated_at = now()
+    WHERE user_id = $2 AND customer_id = $3 AND status = 'ACTIVE'
+    RETURNING *
+  `;
+
+  try {
+    const result = await db.query(query, [role, userId, customerId]);
+    const row = result.rows[0];
+    if (!row) {
+      return {
+        success: false,
+        err: `Team member not found: user_id=${userId}, customer_id=${customerId}`,
+      };
+    }
+    return { success: true, data: row };
+  } catch (error) {
+    return { success: false, err: String(error) };
+  }
+}
+
+export async function softDeleteCTDUser(
+  db: Pool | PoolClient,
+  userId: string,
+  customerId: string,
+): Promise<Result<{ user_id: string }, string>> {
+  const query = `
+    UPDATE customer_dashboard_users
+    SET status = 'DELETED', updated_at = now()
+    WHERE user_id = $1 AND customer_id = $2 AND status = 'ACTIVE'
+    RETURNING user_id
+  `;
+
+  try {
+    const result = await db.query(query, [userId, customerId]);
+    const row = result.rows[0];
+    if (!row) {
+      return {
+        success: false,
+        err: `Team member not found: user_id=${userId}, customer_id=${customerId}`,
+      };
+    }
+    return { success: true, data: { user_id: row.user_id } };
+  } catch (error) {
+    return { success: false, err: String(error) };
+  }
+}
+
+export async function countAdminsByCustomerId(
+  db: Pool | PoolClient,
+  customerId: string,
+): Promise<Result<number, string>> {
+  const query = `
+    SELECT COUNT(*) as count
+    FROM customer_dashboard_users
+    WHERE customer_id = $1 AND role = 'admin' AND status = 'ACTIVE'
+  `;
+
+  try {
+    const result = await db.query(query, [customerId]);
+    return {
+      success: true,
+      data: Number.parseInt(result.rows[0].count, 10),
+    };
+  } catch (error) {
+    return { success: false, err: String(error) };
+  }
+}
+
+export async function countActiveMembers(
+  db: Pool | PoolClient,
+  customerId: string,
+): Promise<Result<number, string>> {
+  const query = `
+    SELECT COUNT(*) as count
+    FROM customer_dashboard_users
+    WHERE customer_id = $1 AND status = 'ACTIVE'
+  `;
+
+  try {
+    const result = await db.query(query, [customerId]);
+    return {
+      success: true,
+      data: Number.parseInt(result.rows[0].count, 10),
+    };
+  } catch (error) {
+    return { success: false, err: String(error) };
+  }
+}
+
+export async function getCTDUserByEmailAndCustomerId(
+  db: Pool | PoolClient,
+  email: string,
+  customerId: string,
+): Promise<Result<CustomerDashboardUser | null, string>> {
+  const query = `
+    SELECT *
+    FROM customer_dashboard_users
+    WHERE email = $1 AND customer_id = $2 AND status = 'ACTIVE'
+  `;
+
+  try {
+    const result = await db.query(query, [email, customerId]);
+    return {
+      success: true,
+      data: result.rows[0] ?? null,
+    };
+  } catch (error) {
+    return { success: false, err: String(error) };
+  }
+}
+
+export async function getActiveMembersByCustomerId(
+  db: Pool | PoolClient,
+  customerId: string,
+): Promise<Result<CustomerDashboardUser[], string>> {
+  const query = `
+    SELECT *
+    FROM customer_dashboard_users
+    WHERE customer_id = $1 AND status = 'ACTIVE'
+    ORDER BY role ASC, email ASC
+  `;
+
+  try {
+    const result = await db.query(query, [customerId]);
+    return { success: true, data: result.rows };
   } catch (error) {
     return { success: false, err: String(error) };
   }

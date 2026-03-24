@@ -30,7 +30,7 @@
     "directory": "sdk/oko_sdk_core_react_native"
   },
   "dependencies": {
-    "@oko-wallet/oko-sdk-core": "^0.1.2-alpha.11",
+    "@oko-wallet/oko-sdk-core": "workspace:*",
     "@oko-wallet/oko-types": "^0.1.2-alpha.11",
     "@oko-wallet/stdlib-js": "^0.1.2-alpha.11",
     "buffer": "^6.0.3",

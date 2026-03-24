@@ -1,4 +1,5 @@
 import type { Theme } from "@oko-wallet/oko-common-ui/theme";
+import type { OkoWalletTheme } from "@oko-wallet/oko-sdk-core";
 import { RedirectUriSearchParamsKey } from "@oko-wallet/oko-sdk-core";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import { useLayoutEffect, useState } from "react";
@@ -24,16 +25,25 @@ export function useSetThemeInCallback(providerType: AuthType) {
 
     async function fn() {
       let hostOrigin: string | null = null;
+      let sdkThemeOverride: OkoWalletTheme | null = null;
+
       if (providerType === "google") {
         const oauthState = getOAuthStateFromUrl();
         hostOrigin = oauthState.targetOrigin;
+        if (oauthState.theme === "light" || oauthState.theme === "dark") {
+          sdkThemeOverride = oauthState.theme;
+        }
       }
 
-      if (providerType === "auth0") {
+      if (providerType === "auth0" || providerType === "telegram") {
         const searchParams = new URLSearchParams(window.location.search);
         const hostOriginFromQuery = searchParams.get("host_origin");
         if (hostOriginFromQuery) {
           hostOrigin = hostOriginFromQuery;
+        }
+        const themeParam = searchParams.get("theme");
+        if (themeParam === "light" || themeParam === "dark") {
+          sdkThemeOverride = themeParam;
         }
       }
 
@@ -46,8 +56,10 @@ export function useSetThemeInCallback(providerType: AuthType) {
         const stateParam =
           urlParams.get(RedirectUriSearchParamsKey.STATE) || "{}";
         const oauthState = JSON.parse(atob(stateParam));
-        const targetOrigin: string = oauthState.targetOrigin;
-        hostOrigin = targetOrigin;
+        hostOrigin = oauthState.targetOrigin;
+        if (oauthState.theme === "light" || oauthState.theme === "dark") {
+          sdkThemeOverride = oauthState.theme;
+        }
       }
 
       if (!hostOrigin) {
@@ -56,7 +68,11 @@ export function useSetThemeInCallback(providerType: AuthType) {
 
       const storageKey = useMemoryState.getState().storageKey || hostOrigin;
       const oldTheme = getTheme(storageKey);
-      const { theme } = await determineTheme(hostOrigin, oldTheme);
+      const { theme } = await determineTheme(
+        hostOrigin,
+        oldTheme,
+        sdkThemeOverride,
+      );
 
       setColorScheme(theme);
       _setTheme(theme);

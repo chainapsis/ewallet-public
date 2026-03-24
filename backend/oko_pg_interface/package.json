@@ -15,6 +15,7 @@
     "./api_keys": "./src/api_keys/index.ts",
     "./ks_nodes": "./src/ks_nodes/index.ts",
     "./customer_dashboard_users": "./src/customer_dashboard_users/index.ts",
+    "./customer_team_invitations": "./src/customer_team_invitations/index.ts",
     "./attached": "./src/attached/index.ts",
     "./customers": "./src/customers/index.ts",
     "./email_verifications": "./src/email_verifications/index.ts",

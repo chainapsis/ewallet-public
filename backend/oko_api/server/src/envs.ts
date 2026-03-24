@@ -46,4 +46,6 @@ export const envSchema = z.object({
   KS_NODE_REPORT_PASSWORD: z.string(),
 
   GITHUB_CLIENT_SECRET: z.string(),
+
+  DAPP_DASHBOARD_URL: z.string(),
 });

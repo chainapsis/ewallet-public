@@ -10,12 +10,17 @@ import type { FC } from "react";
 import { AccountInfoWithSubMenu } from "../account_info_with_sub_menu/account_info_with_sub_menu";
 import { ExternalLinkItem } from "../external_link_item/external_link_item";
 import styles from "./left_bar.module.scss";
+import { useTeamMembers } from "@oko-wallet-ct-dashboard/hooks/use_team_members";
 import { paths } from "@oko-wallet-ct-dashboard/paths";
-
-const MOCK_TEAM_MEMBER_COUNT = 96;
 
 export const LeftBar: FC = () => {
   const pathname = usePathname();
+  const { data: teamData } = useTeamMembers();
+
+  const teamMemberCount =
+    teamData !== null && teamData !== undefined
+      ? teamData.total + teamData.pending_invitations.length
+      : null;
 
   return (
     <div className={styles.wrapper}>
@@ -37,7 +42,7 @@ export const LeftBar: FC = () => {
           />
           <Badge
             color="gray"
-            label={String(MOCK_TEAM_MEMBER_COUNT)}
+            label={teamMemberCount !== null ? String(teamMemberCount) : "–"}
             size="sm"
           />
         </div>

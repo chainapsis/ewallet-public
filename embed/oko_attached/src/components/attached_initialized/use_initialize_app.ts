@@ -1,5 +1,8 @@
 import type { Theme } from "@oko-wallet/oko-common-ui/theme";
-import type { OkoWalletMsgInit } from "@oko-wallet/oko-sdk-core";
+import type {
+  OkoWalletMsgInit,
+  OkoWalletTheme,
+} from "@oko-wallet/oko-sdk-core";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import { UTM_CAMPAIGN, UTM_SOURCE } from "@oko-wallet/oko-types/referral";
 // import { useSearchParams } from "next/navigation";
@@ -35,8 +38,14 @@ export function useInitializeApp() {
     setApiKey,
     setReferralInfo,
   } = useMemoryState();
-  const { getAuthToken, getWallet, setAuthToken, setTheme, getTheme } =
-    useAppState();
+  const {
+    getAuthToken,
+    getWallet,
+    setAuthToken,
+    resetAll,
+    setTheme,
+    getTheme,
+  } = useAppState();
   const [isHydrated, setIsHydrated] = useState(false);
   const [resolvedTheme, setResolvedTheme] = useState<Theme | null>(null);
 
@@ -183,15 +192,27 @@ export function useInitializeApp() {
 
         const authToken = getAuthToken(storageKey);
         const walletForAuth = getWallet(storageKey);
-        await silentlyRefreshAuthToken(
+        const wasInvalidated = await silentlyRefreshAuthToken(
           authToken,
           storageKey,
           setAuthToken,
           walletForAuth?.authType,
         );
 
+        if (wasInvalidated) {
+          resetAll(storageKey);
+        }
+
+        const rawTheme = searchParams.get("theme");
+        const sdkThemeParam: OkoWalletTheme | null =
+          rawTheme === "light" || rawTheme === "dark" ? rawTheme : null;
+
         const oldTheme = getTheme(storageKey);
-        const themeResult = await determineTheme(hostOrigin, oldTheme);
+        const themeResult = await determineTheme(
+          hostOrigin,
+          oldTheme,
+          sdkThemeParam,
+        );
         const determinedThemeByCustomer = themeResult.theme;
 
         // Mobile: watch for system theme settling
@@ -299,29 +320,49 @@ async function silentlyRefreshAuthToken(
   storageKey: string,
   setAuthToken: (storageKey: string, token: string | null) => void,
   authType?: AuthType,
-) {
-  if (authToken) {
-    const res = await makeAuthorizedOkoApiRequest<any, SignInSilentlyResponse>(
-      "user/signin_silently",
-      authToken,
-      {
-        auth_type: authType,
-      },
-      TSS_V2_ENDPOINT,
-    );
-
-    if (!res.success) {
-      console.error("Error logging in, err: %s", res.err);
-      return;
-    }
-
-    const resp = res.data;
-    if (resp.success) {
-      if (resp.data.token !== null) {
-        console.log("[attached] refreshing auth token");
-
-        setAuthToken(storageKey, resp.data.token);
-      }
-    }
+): Promise<boolean> {
+  if (!authToken) {
+    return false;
   }
+
+  const res = await makeAuthorizedOkoApiRequest<any, SignInSilentlyResponse>(
+    "user/signin_silently",
+    authToken,
+    {
+      auth_type: authType,
+    },
+    TSS_V2_ENDPOINT,
+  );
+
+  if (!res.success) {
+    console.error("Error logging in, err: %s", res.err);
+
+    // Token rejected (e.g. expired beyond renewal window) — clear it
+    // so the init message reports unauthenticated state and the host
+    // app can prompt re-authentication.
+    if (res.err.type === "status_fail" && res.err.status === 401) {
+      setAuthToken(storageKey, null);
+      return true;
+    }
+
+    // Non-401 failures (network error, server error, etc.): keep the
+    // token. The server may still accept it for renewal on the next
+    // attempt (tokens past exp can be renewed within the 7-day window).
+    return false;
+  }
+
+  const resp = res.data;
+  if (resp.success) {
+    if (resp.data.token !== null) {
+      console.log("[attached] refreshing auth token");
+
+      setAuthToken(storageKey, resp.data.token);
+    }
+    return false;
+  }
+
+  // Server returned 200 but application-level failure (e.g. UNKNOWN_ERROR).
+  // Keep the token — the server may still renew it on the next attempt.
+  console.error("[attached] silent sign-in app error, code: %s", resp.code);
+  return false;
 }

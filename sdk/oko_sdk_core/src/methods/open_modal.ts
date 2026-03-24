@@ -144,6 +144,10 @@ function openEmailLoginPopup(
     url.searchParams.set("modal_id", modalId);
     url.searchParams.set("host_origin", window.location.origin);
 
+    if (this._theme) {
+      url.searchParams.set("theme", this._theme);
+    }
+
     try {
       popupWindow.location.href = url.toString();
     } catch (error) {
@@ -175,6 +179,10 @@ function openTelegramLoginPopup(
 
   url.searchParams.set("modal_id", modalId);
   url.searchParams.set("host_origin", window.location.origin);
+
+  if (this._theme) {
+    url.searchParams.set("theme", this._theme);
+  }
 
   if (
     msg.payload.modal_type === "auth/telegram_login" &&

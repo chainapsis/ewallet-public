@@ -3,15 +3,32 @@
 import { Button } from "@oko-wallet/oko-common-ui/button";
 import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import { type FC, useRef } from "react";
+import { type FC, useCallback, useEffect, useRef, useState } from "react";
 
 import { IconPattern } from "./icon_pattern";
 import inviteStyles from "./invite_modal.module.scss";
 import styles from "./leave_team_modal.module.scss";
-import type { TeamMember } from "./mock_data";
+import type { TeamListItem } from "./types";
+
+const COOLDOWN_MS = 5 * 60 * 1000;
+
+function getRemainingSeconds(lastSentAt: string | null | undefined): number {
+  if (!lastSentAt) {
+    return 0;
+  }
+  const elapsed = Date.now() - new Date(lastSentAt).getTime();
+  const remaining = COOLDOWN_MS - elapsed;
+  return remaining > 0 ? Math.ceil(remaining / 1000) : 0;
+}
+
+function formatTime(totalSeconds: number): string {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
 
 interface ResendInviteModalProps {
-  member: TeamMember;
+  member: TeamListItem;
   onResend: () => void;
   onClose: () => void;
 }
@@ -35,6 +52,24 @@ export const ResendInviteModal: FC<ResendInviteModalProps> = ({
 }) => {
   const mouseDownOnOverlay = useRef(false);
   const initial = member.email.charAt(0).toUpperCase();
+
+  const [remaining, setRemaining] = useState(() =>
+    getRemainingSeconds(member.last_sent_at),
+  );
+
+  const tick = useCallback(() => {
+    setRemaining((prev) => (prev > 0 ? prev - 1 : 0));
+  }, []);
+
+  useEffect(() => {
+    if (remaining <= 0) {
+      return;
+    }
+    const timer = setInterval(tick, 1000);
+    return () => clearInterval(timer);
+  }, [remaining, tick]);
+
+  const isCooldown = remaining > 0;
 
   return (
     <div
@@ -89,8 +124,14 @@ export const ResendInviteModal: FC<ResendInviteModalProps> = ({
           <Button variant="secondary" size="md" fullWidth onClick={onClose}>
             Cancel
           </Button>
-          <Button variant="primary" size="md" fullWidth onClick={onResend}>
-            Resend
+          <Button
+            variant="primary"
+            size="md"
+            fullWidth
+            onClick={onResend}
+            disabled={isCooldown}
+          >
+            {isCooldown ? `Resend in ${formatTime(remaining)}` : "Resend"}
           </Button>
         </div>
       </div>

@@ -19,6 +19,7 @@ export const USER_ISSUER = "https://api.oko.app";
 export const USER_AUDIENCE = "https://api.oko.app";
 
 const EXPIRATION_WINDOW = 1 * 24 * 60 * 60 * 1000; // 1 day in ms
+const SILENT_SIGNIN_MAX_TOKEN_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days in ms
 
 export function generateUserToken(
   args: GenerateUserTokenArgs,
@@ -118,7 +119,19 @@ export function verifyUserToken(
 
     const now = dayjs();
     const issuedAt = dayjs(new Date(payload.iat * 1000));
-    const isOrWillSoonBeExpired = now.diff(issuedAt) > EXPIRATION_WINDOW * 0.75;
+    const tokenAgeMs = now.diff(issuedAt);
+
+    if (tokenAgeMs > SILENT_SIGNIN_MAX_TOKEN_AGE) {
+      return {
+        success: false,
+        err: {
+          type: "expired_beyond_renewal",
+          msg: "Token is too old for silent renewal. Please re-authenticate.",
+        },
+      };
+    }
+
+    const isOrWillSoonBeExpired = tokenAgeMs > EXPIRATION_WINDOW * 0.75;
 
     if (isOrWillSoonBeExpired) {
       return {
@@ -176,7 +189,19 @@ export function verifyUserTokenV2(
 
     const now = dayjs();
     const issuedAt = dayjs(new Date(payload.iat * 1000));
-    const isOrWillSoonBeExpired = now.diff(issuedAt) > EXPIRATION_WINDOW * 0.75;
+    const tokenAgeMs = now.diff(issuedAt);
+
+    if (tokenAgeMs > SILENT_SIGNIN_MAX_TOKEN_AGE) {
+      return {
+        success: false,
+        err: {
+          type: "expired_beyond_renewal",
+          msg: "Token is too old for silent renewal. Please re-authenticate.",
+        },
+      };
+    }
+
+    const isOrWillSoonBeExpired = tokenAgeMs > EXPIRATION_WINDOW * 0.75;
 
     if (isOrWillSoonBeExpired) {
       return {

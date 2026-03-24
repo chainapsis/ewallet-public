@@ -9,6 +9,7 @@ import {
   sendEmailOTPCode,
   verifyEmailOTPCode,
 } from "@oko-wallet-attached/lib/auth0";
+import { useAppState } from "@oko-wallet-attached/store/app";
 import { useMemoryState } from "@oko-wallet-attached/store/memory";
 
 const CODE_LENGTH = 6;
@@ -269,6 +270,12 @@ export function useEmailLogin({
     const callbackUrl = new URL(`${window.location.origin}/email/callback`);
     callbackUrl.searchParams.set("modal_id", modalIdFromQuery);
     callbackUrl.searchParams.set("host_origin", hostOrigin);
+
+    const currentTheme =
+      useAppState.getState().getTheme(hostOrigin) ?? urlParams.get("theme");
+    if (currentTheme) {
+      callbackUrl.searchParams.set("theme", currentTheme);
+    }
 
     verifyEmailOTPCode({
       webAuth,

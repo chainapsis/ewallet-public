@@ -102,12 +102,19 @@ async function buildOAuthUrl(
 ): Promise<string> {
   const appState = useAppState.getState();
 
+  const rawTheme =
+    appState.getTheme(storageKey) ??
+    new URLSearchParams(window.location.search).get("theme");
+  const sdkTheme =
+    rawTheme === "light" || rawTheme === "dark" ? rawTheme : null;
+
   const state: OAuthState = {
     apiKey,
     targetOrigin,
     provider: provider as AuthType,
     ...(redirectScheme ? { redirectScheme } : {}),
     ...(mobileOsBrowser && { mobileOsBrowser }),
+    ...(sdkTheme && { theme: sdkTheme }),
   };
 
   // Mobile OS browser: redirect back to mobile host web (targetOrigin), not attached

@@ -166,6 +166,15 @@ export async function userSignInSilentlyV2(
     return;
   }
 
+  if (v2Result.err.type === "expired_beyond_renewal") {
+    res.status(401).json({
+      success: false,
+      code: "INVALID_AUTH_TOKEN",
+      msg: v2Result.err.msg,
+    });
+    return;
+  }
+
   res.status(401).json({
     success: false,
     code: "INVALID_REQUEST",

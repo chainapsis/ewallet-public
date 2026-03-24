@@ -1,3 +1,5 @@
+import { getCTDUserByUserIdAndCustomerId } from "@oko-wallet/oko-pg-interface/customer_dashboard_users";
+import { getCustomerByUserId } from "@oko-wallet/oko-pg-interface/customers";
 import type { NextFunction, Request, Response } from "express";
 
 import { verifyCustomerToken } from "@oko-wallet-ctd-api/auth";
@@ -64,4 +66,90 @@ export async function customerJwtMiddleware(
     });
     return;
   }
+}
+
+export interface TeamContext {
+  customer_id: string;
+  label: string;
+  role: string;
+}
+
+/**
+ * Resolves the team member context from JWT user_id.
+ * Sets res.locals.team = { customer_id, label, role }.
+ * Must be used after customerJwtMiddleware.
+ */
+export async function resolveTeamMember(
+  req: CustomerAuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const state = req.app.locals;
+    const userId = res.locals.user_id;
+
+    const customerRes = await getCustomerByUserId(state.db, userId);
+    if (!customerRes.success || customerRes.data === null) {
+      res.status(404).json({
+        success: false,
+        code: "CUSTOMER_NOT_FOUND",
+        msg: "Customer not found",
+      });
+      return;
+    }
+
+    const customer = customerRes.data;
+    const memberRes = await getCTDUserByUserIdAndCustomerId(
+      state.db,
+      userId,
+      customer.customer_id,
+    );
+
+    if (!memberRes.success || memberRes.data === null) {
+      res.status(404).json({
+        success: false,
+        code: "TEAM_MEMBER_NOT_FOUND",
+        msg: "Team member not found",
+      });
+      return;
+    }
+
+    res.locals.team = {
+      customer_id: customer.customer_id,
+      label: customer.label,
+      role: memberRes.data.role,
+    } satisfies TeamContext;
+
+    next();
+    return;
+  } catch (_error) {
+    res.status(500).json({
+      success: false,
+      code: "UNKNOWN_ERROR",
+      msg: "Internal server error",
+    });
+    return;
+  }
+}
+
+/**
+ * Requires the authenticated user to have 'admin' role.
+ * Must be used after resolveTeamMember.
+ */
+export async function requireAdmin(
+  _req: CustomerAuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+) {
+  if (res.locals.team?.role !== "admin") {
+    res.status(403).json({
+      success: false,
+      code: "FORBIDDEN",
+      msg: "Admin role required",
+    });
+    return;
+  }
+
+  next();
+  return;
 }

@@ -11616,7 +11616,7 @@ __metadata:
   resolution: "@oko-wallet/oko-sdk-core-react-native@workspace:sdk/oko_sdk_core_react_native"
   dependencies:
     "@expo/config-plugins": "npm:^55.0.6"
-    "@oko-wallet/oko-sdk-core": "npm:^0.1.2-alpha.11"
+    "@oko-wallet/oko-sdk-core": "workspace:*"
     "@oko-wallet/oko-types": "npm:^0.1.2-alpha.11"
     "@oko-wallet/stdlib-js": "npm:^0.1.2-alpha.11"
     "@types/react": "npm:~19.1.0"

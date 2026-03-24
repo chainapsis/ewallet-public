@@ -62,6 +62,7 @@ const SOLANA_CONFIG: WalletStandardConfig = {
 const result = OkoSvmWallet.init({
   api_key: "your-api-key",
   chain_id: SOLANA_DEVNET_CHAIN,
+  theme: "dark",
 });
 
 if (!result.success) {

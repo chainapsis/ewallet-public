@@ -109,6 +109,8 @@ export function createMockOkoWallet(
 
     closeModal: () => {},
 
+    setTheme: async () => {},
+
     sendMsgToIframe: async (msg) => msg,
 
     signIn: async () => {},

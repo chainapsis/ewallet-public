@@ -59,13 +59,20 @@ export function sendReauthParamsToIframe(
   );
 }
 
+function getThemeParam(): "light" | "dark" | null {
+  const raw = new URLSearchParams(window.location.search).get("theme");
+  return raw === "light" || raw === "dark" ? raw : null;
+}
+
 function buildGoogleOAuthUrl(nonce: string): string {
   const redirectUri = `${window.location.origin}/google/callback`;
+  const theme = getThemeParam();
 
   const oauthState: OAuthState = {
     apiKey: "export_key_reauth",
     targetOrigin: getHostOrigin(),
     provider: "google",
+    ...(theme && { theme }),
   };
 
   const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
@@ -83,10 +90,13 @@ function buildGoogleOAuthUrl(nonce: string): string {
 function buildXOAuthUrl(codeChallenge: string): string {
   const redirectUri = `${window.location.origin}/x/callback`;
 
+  const theme = getThemeParam();
+
   const oauthState: OAuthState = {
     apiKey: "export_key_reauth",
     targetOrigin: getHostOrigin(),
     provider: "x",
+    ...(theme && { theme }),
   };
   const oauthStateString = btoa(JSON.stringify(oauthState));
 
@@ -105,10 +115,13 @@ function buildXOAuthUrl(codeChallenge: string): string {
 function buildDiscordOAuthUrl(codeChallenge: string): string {
   const redirectUri = `${window.location.origin}/discord/callback`;
 
+  const theme = getThemeParam();
+
   const oauthState: OAuthState = {
     apiKey: "export_key_reauth",
     targetOrigin: getHostOrigin(),
     provider: "discord",
+    ...(theme && { theme }),
   };
   const oauthStateString = btoa(JSON.stringify(oauthState));
 
@@ -127,10 +140,13 @@ function buildDiscordOAuthUrl(codeChallenge: string): string {
 function buildGithubOAuthUrl(codeChallenge: string): string {
   const redirectUri = `${window.location.origin}/github/callback`;
 
+  const theme = getThemeParam();
+
   const oauthState: OAuthState = {
     apiKey: "export_key_reauth",
     targetOrigin: getHostOrigin(),
     provider: "github",
+    ...(theme && { theme }),
   };
   const oauthStateString = btoa(JSON.stringify(oauthState));
 

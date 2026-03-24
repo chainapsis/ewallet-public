@@ -1,7 +1,9 @@
 import { Badge } from "@oko-wallet/oko-common-ui/badge";
+import { IconTransition } from "@oko-wallet/oko-common-ui/icon_transition";
+import { CheckCircleOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/check_circle_outlined";
 import { CopyOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/copy_outlined";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import { type FC, useState } from "react";
+import { type FC, useRef, useState } from "react";
 
 import styles from "./api_key_cell.module.scss";
 
@@ -10,12 +12,25 @@ type APIKeyCellProps = {
 };
 
 export const APIKeyCell: FC<APIKeyCellProps> = ({ apiKeys }) => {
-  const [isCopied, setIsCopied] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleCopy = (apiKey: string) => {
-    navigator.clipboard.writeText(apiKey);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2000);
+  const handleCopy = async (apiKey: string) => {
+    try {
+      await navigator.clipboard.writeText(apiKey);
+    } catch {
+      return;
+    }
+
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+
+    setCopiedKey(apiKey);
+    timerRef.current = setTimeout(() => {
+      setCopiedKey(null);
+      timerRef.current = null;
+    }, 2000);
   };
 
   return (
@@ -38,24 +53,19 @@ export const APIKeyCell: FC<APIKeyCellProps> = ({ apiKeys }) => {
             {apiKey.api_key.slice(0, 10) + "..." + apiKey.api_key.slice(-10)}
           </Typography>
 
-          {isCopied ? (
-            <Typography
-              tagType="span"
-              size="xs"
-              color="success-primary"
-              className={styles.copiedText}
-            >
-              Copied ✓
-            </Typography>
-          ) : (
-            <button
-              type="button"
-              onClick={() => handleCopy(apiKey.api_key)}
-              className={styles.buttonIcon}
-            >
-              <CopyOutlinedIcon color="var(--fg-tertiary)" />
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => handleCopy(apiKey.api_key)}
+            className={styles.buttonIcon}
+          >
+            <IconTransition
+              isActive={copiedKey === apiKey.api_key}
+              defaultIcon={<CopyOutlinedIcon color="var(--fg-tertiary)" />}
+              activeIcon={
+                <CheckCircleOutlinedIcon color="var(--fg-tertiary)" />
+              }
+            />
+          </button>
         </li>
       ))}
     </ul>

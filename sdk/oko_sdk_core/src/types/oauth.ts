@@ -1,5 +1,7 @@
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 
+import type { OkoWalletTheme } from "./oko_wallet";
+
 export type SignInType =
   | "google"
   | "email"
@@ -15,6 +17,7 @@ export type OAuthState = {
   redirectScheme?: string | null;
   modalId?: string;
   codeVerifier?: string;
+  theme?: OkoWalletTheme;
   /** When true, callback pages redirect to /mobile/login/complete instead of deep-linking.
    *  Used by the OS-browser login flow where keygen runs inside the browser. */
   mobileOsBrowser?: boolean;

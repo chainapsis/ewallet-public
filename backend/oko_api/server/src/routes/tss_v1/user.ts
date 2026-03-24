@@ -344,6 +344,13 @@ export function setUserV1Routes(router: Router) {
             data: { token: signInRes.data.token },
           });
           return;
+        } else if (err.type === "expired_beyond_renewal") {
+          res.status(401).json({
+            success: false,
+            code: "INVALID_AUTH_TOKEN",
+            msg: err.msg,
+          });
+          return;
         } else {
           res.status(401).json({
             success: false,

@@ -46,7 +46,7 @@ const OKO_API_KEY = "your-api-key-here";
 // Configure the SDK with your API key
 const config = {
   api_key: OKO_API_KEY,
-  // other configuration options...
+  theme: "dark", // "light" | "dark" (optional)
 };
 ```
 

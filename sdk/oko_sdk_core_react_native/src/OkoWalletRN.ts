@@ -7,6 +7,7 @@ import {
   type OkoWalletMsg,
   type OkoWalletMsgOpenModal,
   type OkoWalletState,
+  type OkoWalletTheme,
   type OpenModalAckPayload,
   type WalletInfo,
 } from "@oko-wallet/oko-sdk-core";
@@ -297,6 +298,8 @@ export class OkoWalletRN implements OkoWalletInterface {
     await this.waitUntilInitialized;
     return this.state.authType;
   }
+
+  async setTheme(_theme: OkoWalletTheme): Promise<void> {}
 
   closeModal(): void {}
 

@@ -6,4 +6,7 @@ export const paths = {
   reset_password: "/users/reset_password",
   edit_info: "/edit-info",
   team: "/team",
+  team_invite: "/team/invite",
+  team_invite_invalid: "/team/invite/invalid",
+  team_invite_success: "/team/invite/success",
 };

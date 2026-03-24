@@ -28,6 +28,7 @@ import { SOLANA_MAINNET_CHAIN } from "@solana/wallet-standard-chains";
 const initRes = OkoSvmWallet.init({
   api_key: "your-api-key",
   chain_id: SOLANA_MAINNET_CHAIN,
+  theme: "dark",
 });
 
 if (!initRes.success) {
@@ -173,6 +174,7 @@ const SOLANA_CONFIG: WalletStandardConfig = {
 const initRes = OkoSvmWallet.init({
   api_key: "your-api-key",
   chain_id: SOLANA_MAINNET_CHAIN,
+  theme: "dark",
 });
 
 if (initRes.success) {

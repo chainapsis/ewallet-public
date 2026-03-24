@@ -71,6 +71,7 @@ const RIALO_CONFIG: WalletStandardConfig = {
 const result = OkoSvmWallet.init({
   api_key: "your-api-key",
   chain_id: RIALO_DEVNET_CHAIN,
+  theme: "dark",
 });
 
 if (!result.success) {
@@ -146,6 +147,7 @@ export function Providers({ children }: { children: ReactNode }) {
           api_key: process.env.NEXT_PUBLIC_OKO_API_KEY!,
           sdk_endpoint: process.env.NEXT_PUBLIC_OKO_SDK_ENDPOINT,
           chain_id: RIALO_DEVNET_CHAIN,
+          theme: "dark",
         });
 
         if (!result.success) {

@@ -23,10 +23,7 @@ import { handleSignOut } from "./sign_out";
 import { OKO_SDK_TARGET } from "./target";
 import type { MsgEventContext } from "./types";
 import { setColorScheme } from "@oko-wallet-attached/components/attached_initialized/color_scheme";
-import {
-  DEMO_WEB_ORIGIN,
-  MOBILE_NATIVE_ORIGIN,
-} from "@oko-wallet-attached/requests/endpoints";
+import { MOBILE_NATIVE_ORIGIN } from "@oko-wallet-attached/requests/endpoints";
 import { useAppState } from "@oko-wallet-attached/store/app";
 import { useMemoryState } from "@oko-wallet-attached/store/memory";
 
@@ -80,9 +77,10 @@ export function makeMsgHandler() {
       return;
     }
 
-    // set_theme: portless fire-and-forget from demo/sandbox host
+    // set_theme: portless fire-and-forget from SDK host
     if (data?.target === "oko_attached" && data?.msg_type === "set_theme") {
-      if (event.origin !== DEMO_WEB_ORIGIN) {
+      const registeredHostOrigin = useMemoryState.getState().hostOrigin;
+      if (event.origin !== registeredHostOrigin) {
         console.warn(
           "[attached] set_theme rejected from origin:",
           event.origin,

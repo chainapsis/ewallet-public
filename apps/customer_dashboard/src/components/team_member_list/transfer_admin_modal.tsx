@@ -12,11 +12,12 @@ import { type FC, useMemo, useRef, useState } from "react";
 import { IconPattern } from "./icon_pattern";
 import inviteStyles from "./invite_modal.module.scss";
 import styles from "./leave_team_modal.module.scss";
-import { MOCK_TEAM_MEMBERS, type TeamMember } from "./mock_data";
 import transferStyles from "./transfer_admin_modal.module.scss";
+import type { TeamListItem } from "./types";
 
 interface TransferAdminModalProps {
-  onTransfer: (member: TeamMember) => void;
+  members: TeamListItem[];
+  onTransfer: (member: TeamListItem) => void;
   onClose: () => void;
 }
 
@@ -59,18 +60,21 @@ const CheckIcon = () => (
 type Step = "select" | "confirm";
 
 export const TransferAdminModal: FC<TransferAdminModalProps> = ({
+  members,
   onTransfer,
   onClose,
 }) => {
   const [step, setStep] = useState<Step>("select");
-  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
+  const [selectedMember, setSelectedMember] = useState<TeamListItem | null>(
+    null,
+  );
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const mouseDownOnOverlay = useRef(false);
 
   const otherMembers = useMemo(
-    () => MOCK_TEAM_MEMBERS.filter((m) => !m.is_me && m.status === "Active"),
-    [],
+    () => members.filter((m) => !m.is_current_user && m.status === "Active"),
+    [members],
   );
 
   const filteredDropdownMembers = useMemo(() => {
@@ -81,7 +85,7 @@ export const TransferAdminModal: FC<TransferAdminModalProps> = ({
     return otherMembers.filter((m) => m.email.toLowerCase().includes(q));
   }, [otherMembers, searchQuery]);
 
-  const handleSelectMember = (member: TeamMember) => {
+  const handleSelectMember = (member: TeamListItem) => {
     setSelectedMember(member);
     setDropdownOpen(false);
     setSearchQuery("");
@@ -130,8 +134,8 @@ export const TransferAdminModal: FC<TransferAdminModalProps> = ({
                 Are you sure you want to leave?
               </Typography>
               <Typography size="sm" weight="regular" color="tertiary">
-                The user must accept the admin role to complete the transfer.
-                Ask them to check their email.
+                The admin role will be transferred to this user immediately and
+                you will leave the team.
               </Typography>
             </div>
           </div>
@@ -263,7 +267,7 @@ export const TransferAdminModal: FC<TransferAdminModalProps> = ({
                   ) : (
                     filteredDropdownMembers.map((member) => (
                       <button
-                        key={member.user_id}
+                        key={member.id}
                         type="button"
                         className={transferStyles.dropdownItem}
                         onClick={() => handleSelectMember(member)}
@@ -272,7 +276,7 @@ export const TransferAdminModal: FC<TransferAdminModalProps> = ({
                         <Typography size="sm" weight="regular" color="primary">
                           {member.email}
                         </Typography>
-                        {selectedMember?.user_id === member.user_id && (
+                        {selectedMember?.id === member.id && (
                           <span className={transferStyles.checkIcon}>
                             <CheckIcon />
                           </span>

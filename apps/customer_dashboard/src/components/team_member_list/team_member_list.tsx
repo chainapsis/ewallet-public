@@ -22,13 +22,30 @@ import { CancelInviteModal } from "./cancel_invite_modal";
 import { EditRoleModal } from "./edit_role_modal";
 import { InviteModal } from "./invite_modal";
 import { LeaveTeamModal } from "./leave_team_modal";
-import { MOCK_IS_ADMIN, MOCK_TEAM_MEMBERS, type TeamMember } from "./mock_data";
 import { RemoveMemberModal } from "./remove_member_modal";
 import { ResendInviteModal } from "./resend_invite_modal";
 import styles from "./team_member_list.module.scss";
 import { TeamMemberRow } from "./team_member_row";
 import { TransferAdminModal } from "./transfer_admin_modal";
+import {
+  invitationsToListItems,
+  membersToListItems,
+  type TeamListItem,
+} from "./types";
 import { displayToast } from "@oko-wallet-ct-dashboard/components/toast";
+import {
+  requestCancelInvitation,
+  requestInviteTeamMember,
+  requestLeaveTeam,
+  requestRemoveTeamMember,
+  requestResendInvitation,
+  requestUpdateMemberRole,
+} from "@oko-wallet-ct-dashboard/fetch/team";
+import {
+  useInvalidateTeamMembers,
+  useTeamMembers,
+} from "@oko-wallet-ct-dashboard/hooks/use_team_members";
+import { useAppState } from "@oko-wallet-ct-dashboard/state";
 
 type FilterTab = "all" | "admins" | "members" | "active" | "pending";
 
@@ -42,19 +59,19 @@ const FILTERS: { key: FilterTab; label: string }[] = [
   { key: "pending", label: "Pending" },
 ];
 
-const filterMembers = (
-  members: TeamMember[],
+const filterItems = (
+  items: TeamListItem[],
   filter: FilterTab,
   query: string,
-): TeamMember[] => {
-  let filtered = members;
+): TeamListItem[] => {
+  let filtered = items;
 
   switch (filter) {
     case "admins":
-      filtered = filtered.filter((m) => m.role === "Admin");
+      filtered = filtered.filter((m) => m.role === "admin");
       break;
     case "members":
-      filtered = filtered.filter((m) => m.role === "Member");
+      filtered = filtered.filter((m) => m.role === "member");
       break;
     case "active":
       filtered = filtered.filter((m) => m.status === "Active");
@@ -72,6 +89,48 @@ const filterMembers = (
   }
 
   return filtered;
+};
+
+const sortItems = (
+  items: TeamListItem[],
+  column: string | null,
+  direction: "asc" | "desc" | null,
+): TeamListItem[] => {
+  if (!column || !direction) {
+    return [...items].sort((a, b) => {
+      if (a.is_current_user && !b.is_current_user) {
+        return -1;
+      }
+      if (!a.is_current_user && b.is_current_user) {
+        return 1;
+      }
+      const roleOrder = { admin: 0, member: 1 };
+      const roleDiff = roleOrder[a.role] - roleOrder[b.role];
+      if (roleDiff !== 0) {
+        return roleDiff;
+      }
+      return a.email.localeCompare(b.email);
+    });
+  }
+
+  const multiplier = direction === "asc" ? 1 : -1;
+
+  return [...items].sort((a, b) => {
+    switch (column) {
+      case "email":
+        return a.email.localeCompare(b.email) * multiplier;
+      case "role": {
+        const roleOrder = { admin: 0, member: 1 };
+        return (roleOrder[a.role] - roleOrder[b.role]) * multiplier;
+      }
+      case "status": {
+        const statusOrder = { Active: 0, "Invitation Pending": 1 };
+        return (statusOrder[a.status] - statusOrder[b.status]) * multiplier;
+      }
+      default:
+        return 0;
+    }
+  });
 };
 
 const getPageNumbers = (
@@ -148,19 +207,52 @@ const SortIcon: FC<{ direction: SortDirection }> = ({ direction }) => (
 );
 
 export const TeamMemberList: FC = () => {
+  const token = useAppState((s) => s.token);
+  const { data: teamData, isLoading: loading } = useTeamMembers();
+  const invalidateTeamMembers = useInvalidateTeamMembers();
+
+  const allItems = useMemo(() => {
+    if (!teamData) {
+      return [];
+    }
+    return [
+      ...membersToListItems(teamData.members),
+      ...invitationsToListItems(teamData.pending_invitations),
+    ];
+  }, [teamData]);
+
+  const teamName = teamData?.team_name ?? "";
+
   const [activeFilter, setActiveFilter] = useState<FilterTab>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
-  const [editRoleMember, setEditRoleMember] = useState<TeamMember | null>(null);
-  const [removeMember, setRemoveMember] = useState<TeamMember | null>(null);
-  const [resendMember, setResendMember] = useState<TeamMember | null>(null);
+  const [editRoleMember, setEditRoleMember] = useState<TeamListItem | null>(
+    null,
+  );
+  const [removeMember, setRemoveMember] = useState<TeamListItem | null>(null);
+  const [resendMember, setResendMember] = useState<TeamListItem | null>(null);
   const [cancelInviteMember, setCancelInviteMember] =
-    useState<TeamMember | null>(null);
+    useState<TeamListItem | null>(null);
   const [showTransferModal, setShowTransferModal] = useState(false);
-  const [sortColumn, setSortColumn] = useState<string | null>("role");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
+
+  const currentUser = useMemo(
+    () => allItems.find((m) => m.is_current_user),
+    [allItems],
+  );
+  const isAdmin = currentUser?.role === "admin";
+  const adminCount = useMemo(
+    () =>
+      allItems.filter((m) => m.role === "admin" && m.status === "Active")
+        .length,
+    [allItems],
+  );
+  const isSoleAdmin = isAdmin && adminCount === 1;
+  const isSoleMember =
+    allItems.filter((m) => m.status === "Active").length === 1;
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
@@ -179,12 +271,6 @@ export const TeamMemberList: FC = () => {
   const getSortDirection = (column: string): SortDirection =>
     sortColumn === column ? sortDirection : null;
 
-  const isAdmin = MOCK_IS_ADMIN;
-  const isSoleAdmin =
-    isAdmin &&
-    MOCK_TEAM_MEMBERS.filter((m) => m.role === "Admin" && m.status === "Active")
-      .length === 1;
-  const isSoleMember = MOCK_TEAM_MEMBERS.length === 1;
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -199,14 +285,18 @@ export const TeamMemberList: FC = () => {
   }, []);
 
   const pendingCount = useMemo(
-    () =>
-      MOCK_TEAM_MEMBERS.filter((m) => m.status === "Invitation Pending").length,
-    [],
+    () => allItems.filter((m) => m.status === "Invitation Pending").length,
+    [allItems],
   );
 
   const filteredMembers = useMemo(
-    () => filterMembers(MOCK_TEAM_MEMBERS, activeFilter, searchQuery),
-    [activeFilter, searchQuery],
+    () =>
+      sortItems(
+        filterItems(allItems, activeFilter, searchQuery),
+        sortColumn,
+        sortDirection,
+      ),
+    [allItems, activeFilter, searchQuery, sortColumn, sortDirection],
   );
 
   const totalPages = Math.max(
@@ -224,6 +314,149 @@ export const TeamMemberList: FC = () => {
     setCurrentPage(1);
   };
 
+  // ─── Modal callbacks (API-connected) ────────────────────────────
+
+  const handleInvite = async (email: string, role: "Admin" | "Member") => {
+    if (!token) {
+      return;
+    }
+    const res = await requestInviteTeamMember({
+      token,
+      email,
+      role: role === "Admin" ? "admin" : "member",
+    });
+    if (res.success) {
+      setShowInviteModal(false);
+      displayToast({
+        variant: "success",
+        title: "The invitation has been sent",
+      });
+      invalidateTeamMembers();
+    } else {
+      displayToast({ variant: "error", title: res.msg });
+    }
+  };
+
+  const handleEditRole = async (role: "Admin" | "Member") => {
+    if (!token || !editRoleMember) {
+      return;
+    }
+    const res = await requestUpdateMemberRole({
+      token,
+      user_id: editRoleMember.id,
+      role: role === "Admin" ? "admin" : "member",
+    });
+    if (res.success) {
+      setEditRoleMember(null);
+      displayToast({ variant: "success", title: "The role has been updated" });
+      invalidateTeamMembers();
+    } else {
+      displayToast({ variant: "error", title: res.msg });
+    }
+  };
+
+  const handleRemove = async () => {
+    if (!token || !removeMember) {
+      return;
+    }
+    const res = await requestRemoveTeamMember({
+      token,
+      user_id: removeMember.id,
+    });
+    if (res.success) {
+      setRemoveMember(null);
+      displayToast({ variant: "success", title: "User has been removed" });
+      invalidateTeamMembers();
+    } else {
+      displayToast({ variant: "error", title: res.msg });
+    }
+  };
+
+  const handleResend = async () => {
+    if (!token || !resendMember?.invitation_id) {
+      return;
+    }
+    const res = await requestResendInvitation({
+      token,
+      invitation_id: resendMember.invitation_id,
+    });
+    if (res.success) {
+      setResendMember(null);
+      displayToast({ variant: "success", title: "Invitation resent" });
+      invalidateTeamMembers();
+    } else {
+      displayToast({ variant: "error", title: res.msg });
+    }
+  };
+
+  const handleCancelInvite = async () => {
+    if (!token || !cancelInviteMember?.invitation_id) {
+      return;
+    }
+    const res = await requestCancelInvitation({
+      token,
+      invitation_id: cancelInviteMember.invitation_id,
+    });
+    if (res.success) {
+      setCancelInviteMember(null);
+      displayToast({
+        variant: "success",
+        title: "Invitation has been canceled",
+      });
+      invalidateTeamMembers();
+    } else {
+      displayToast({ variant: "error", title: res.msg });
+    }
+  };
+
+  const handleLeave = async () => {
+    if (!token) {
+      return;
+    }
+    const res = await requestLeaveTeam({ token });
+    if (res.success) {
+      setShowLeaveModal(false);
+      displayToast({ variant: "success", title: "You have left the team" });
+      setTimeout(() => {
+        useAppState.getState().resetUser();
+      }, 1500);
+    } else {
+      displayToast({ variant: "error", title: res.msg });
+    }
+  };
+
+  const handleTransfer = async (targetMember: TeamListItem) => {
+    if (!token) {
+      return;
+    }
+    const res = await requestLeaveTeam({
+      token,
+      target_user_id: targetMember.id,
+    });
+    if (res.success) {
+      setShowTransferModal(false);
+      displayToast({
+        variant: "success",
+        title: "Admin role transferred. You have left the team.",
+      });
+      setTimeout(() => {
+        useAppState.getState().resetUser();
+      }, 1500);
+    } else {
+      displayToast({ variant: "error", title: res.msg });
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className={styles.wrapper}>
+        <Typography size="md" weight="regular" color="tertiary">
+          Loading...
+        </Typography>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.header}>
@@ -233,7 +466,7 @@ export const TeamMemberList: FC = () => {
           weight="semibold"
           color="primary"
         >
-          {"{dApp Name}"} Team
+          {teamName || "Team"}
         </Typography>
         {isAdmin ? (
           <button
@@ -259,7 +492,7 @@ export const TeamMemberList: FC = () => {
 
       <div className={styles.countAndSearch}>
         <Typography size="lg" weight="semibold" color="primary">
-          {MOCK_TEAM_MEMBERS.length} Users
+          {allItems.length} Users
         </Typography>
 
         <div className={styles.searchWrapper}>
@@ -398,7 +631,7 @@ export const TeamMemberList: FC = () => {
             <TableBody>
               {paginatedMembers.map((member) => (
                 <TeamMemberRow
-                  key={member.user_id}
+                  key={member.id}
                   member={member}
                   isAdmin={isAdmin}
                   onLeave={() => {
@@ -466,85 +699,52 @@ export const TeamMemberList: FC = () => {
           </button>
         </div>
       )}
+
       {showLeaveModal && (
         <LeaveTeamModal
           isSoleMember={isSoleMember}
-          onLeave={() => {
-            setShowLeaveModal(false);
-            displayToast({
-              variant: "success",
-              title: "You have left the team",
-            });
-          }}
+          onLeave={handleLeave}
           onClose={() => setShowLeaveModal(false)}
         />
       )}
       {showInviteModal && (
         <InviteModal
-          onInvite={() => {
-            setShowInviteModal(false);
-            displayToast({
-              variant: "success",
-              title: "The invitation has been sent",
-            });
-          }}
+          onInvite={handleInvite}
           onClose={() => setShowInviteModal(false)}
         />
       )}
       {editRoleMember && (
         <EditRoleModal
           member={editRoleMember}
-          onUpdate={() => {
-            setEditRoleMember(null);
-            displayToast({
-              variant: "success",
-              title: "The role has been updated",
-            });
-          }}
+          onUpdate={handleEditRole}
           onClose={() => setEditRoleMember(null)}
         />
       )}
       {removeMember && (
         <RemoveMemberModal
           member={removeMember}
-          onRemove={() => {
-            setRemoveMember(null);
-            displayToast({
-              variant: "success",
-              title: "User has been removed",
-            });
-          }}
+          onRemove={handleRemove}
           onClose={() => setRemoveMember(null)}
         />
       )}
       {resendMember && (
         <ResendInviteModal
           member={resendMember}
-          onResend={() => {
-            setResendMember(null);
-            displayToast({ variant: "success", title: "Invitation resent" });
-          }}
+          onResend={handleResend}
           onClose={() => setResendMember(null)}
         />
       )}
       {showTransferModal && (
         <TransferAdminModal
-          onTransfer={() => {
-            setShowTransferModal(false);
-          }}
+          members={allItems}
+          onTransfer={handleTransfer}
           onClose={() => setShowTransferModal(false)}
         />
       )}
       {cancelInviteMember && (
         <CancelInviteModal
           member={cancelInviteMember}
-          onCancelInvite={() => {
-            setCancelInviteMember(null);
-            displayToast({
-              variant: "success",
-              title: "Invitation has been canceled",
-            });
-          }}
+          onCancelInvite={handleCancelInvite}
           onClose={() => setCancelInviteMember(null)}
         />
       )}
