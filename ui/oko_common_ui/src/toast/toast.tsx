@@ -101,6 +101,7 @@ interface ToastProps {
 const Toast: FC<ToastProps> & {
   Container: typeof ToastContainer;
   Inner: typeof ToastInner;
+  Icon: typeof ToastIcon;
   CloseButton: typeof ToastCloseButton;
 } = ({ title, description, variant, onClose, className }) => (
   <ToastContainer className={className}>
@@ -111,6 +112,7 @@ const Toast: FC<ToastProps> & {
 
 Toast.Container = ToastContainer;
 Toast.Inner = ToastInner;
+Toast.Icon = ToastIcon;
 Toast.CloseButton = ToastCloseButton;
 
 export { Toast, type ToastVariant, type ToastProps };
