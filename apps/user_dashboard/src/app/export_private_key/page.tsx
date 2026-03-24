@@ -21,6 +21,7 @@ import type {
   OkoWalletMsgExportPrivateKeyAck,
   OkoWalletProtectedMsgs,
 } from "@oko-wallet/oko-sdk-core";
+import { useOko } from "@oko-wallet/oko-sdk-react";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import {
   type ReactNode,
@@ -33,10 +34,6 @@ import {
 import styles from "./page.module.scss";
 import { Spinner } from "@oko-wallet-user-dashboard/components/spinner/spinner";
 import { displayToast } from "@oko-wallet-user-dashboard/components/toast";
-import {
-  selectCosmosSDK,
-  useSDKState,
-} from "@oko-wallet-user-dashboard/state/sdk";
 import { useUserInfoState } from "@oko-wallet-user-dashboard/state/user_info";
 
 const getAuthProviderInfo = (
@@ -471,7 +468,7 @@ const Page = () => {
     authType === "github";
   const displayIdentifier = usesName ? name : email;
 
-  const okoWallet = useSDKState(selectCosmosSDK)?.okoWallet;
+  const okoWallet = useOko().wallet;
   const attachedOrigin = okoWallet
     ? new URL(okoWallet.sdkEndpoint).origin
     : null;

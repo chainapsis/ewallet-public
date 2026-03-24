@@ -1,10 +1,10 @@
+import { useOko } from "@oko-wallet/oko-sdk-react";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import { type FC, useState } from "react";
 
 import { LoginWidget } from "../login_widget/login_widget";
 import { AccountInfoWidget } from "./account_info_widget";
 import { AuthProgressWidget } from "./auth_progress_widget";
-import { useSDKState } from "@oko-wallet-demo-web/state/sdk";
 import { useUserInfoState } from "@oko-wallet-demo-web/state/user_info";
 import type { LoginMethod } from "@oko-wallet-demo-web/types/login";
 
@@ -24,7 +24,7 @@ function authTypeToLoginMethod(authType: AuthType | null): LoginMethod {
 }
 
 export const AccountWidget: FC<AccountWidgetProps> = () => {
-  const okoWallet = useSDKState((state) => state.oko_cosmos)?.okoWallet;
+  const okoWallet = useOko().wallet;
   const [signingInState, setSigningInState] = useState<SigningInState>({
     status: "ready",
   });

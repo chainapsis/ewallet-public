@@ -1,4 +1,5 @@
 import { SolanaIcon } from "@oko-wallet/oko-common-ui/icons/solana_icon";
+import { useOkoSvm } from "@oko-wallet/oko-sdk-react/svm";
 import {
   Connection,
   LAMPORTS_PER_SOL,
@@ -11,12 +12,11 @@ import { useCallback } from "react";
 
 // import signStyles from "../sign_widget/sign_widget.module.scss";
 import { SignWidget } from "@oko-wallet-demo-web/components/widgets/sign_widget/sign_widget";
-import { useSDKState } from "@oko-wallet-demo-web/state/sdk";
 
 const SOLANA_RPC_URL = "https://api.devnet.solana.com";
 
 export const SolanaOnchainSignWidget = () => {
-  const okoSvm = useSDKState((state) => state.oko_svm);
+  const { svmWallet: okoSvm } = useOkoSvm();
 
   const handleClickSolOnchainSignV0 = useCallback(async () => {
     if (okoSvm === null) {

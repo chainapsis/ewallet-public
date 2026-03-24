@@ -4,12 +4,8 @@ import type {
   OkoWalletMsgGetConnectedApps,
   OkoWalletMsgGetConnectedAppsAck,
 } from "@oko-wallet/oko-sdk-core";
+import { useOkoCosmos } from "@oko-wallet/oko-sdk-react/cosmos";
 import { useQuery } from "@tanstack/react-query";
-
-import {
-  selectCosmosSDK,
-  useSDKState,
-} from "@oko-wallet-user-dashboard/state/sdk";
 
 type UseConnectedAppsResult = UseConnectedAppsSuccess | UseConnectedAppsError;
 
@@ -30,7 +26,7 @@ interface UseConnectedAppsError {
 // NOTE: The __get_connected_apps__ message should only be called from the user_dashboard,
 // so it is not added to the SDK and is instead called separately in useConnectedApp.
 export function useConnectedApps(): UseConnectedAppsResult {
-  const cosmosSDK = useSDKState(selectCosmosSDK);
+  const { cosmosWallet } = useOkoCosmos();
 
   const { data, isLoading, error } = useQuery<
     ConnectedApp[],
@@ -38,7 +34,7 @@ export function useConnectedApps(): UseConnectedAppsResult {
   >({
     queryKey: ["connectedApps"],
     queryFn: async () => {
-      const res = await cosmosSDK!.okoWallet.sendMsgToIframe({
+      const res = await cosmosWallet!.okoWallet.sendMsgToIframe({
         target: "oko_attached",
         msg_type: "__get_connected_apps__",
         payload: null,
@@ -57,7 +53,7 @@ export function useConnectedApps(): UseConnectedAppsResult {
 
       return [];
     },
-    enabled: !!cosmosSDK,
+    enabled: !!cosmosWallet,
   });
 
   if (error) {
