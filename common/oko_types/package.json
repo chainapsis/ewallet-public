@@ -1,6 +1,6 @@
 {
   "name": "@oko-wallet/oko-types",
-  "version": "0.1.2-alpha.11",
+  "version": "0.1.2-alpha.12",
   "type": "module",
   "publishConfig": {
     "access": "public"
@@ -33,7 +33,7 @@
     "./user_dashboard": "./dist/user_dashboard/index.js"
   },
   "dependencies": {
-    "@oko-wallet/bytes": "^0.1.2-alpha.11",
+    "@oko-wallet/bytes": "^0.1.2-alpha.12",
     "@oko-wallet/stdlib-js": "0.0.2-rc.41",
     "@oko-wallet/tecdsa-interface": "0.0.2-alpha.22",
     "del-cli": "^6.0.0",
