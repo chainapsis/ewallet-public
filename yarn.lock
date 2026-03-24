@@ -11778,7 +11778,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@oko-wallet/oko-sdk-svm@workspace:sdk/oko_sdk_svm"
   dependencies:
-    "@oko-wallet/oko-sdk-core": "npm:^0.1.2-alpha.11"
+    "@oko-wallet/oko-sdk-core": "workspace:*"
     "@oko-wallet/stdlib-js": "npm:^0.0.2-rc.42"
     "@rollup/plugin-commonjs": "npm:^25.0.0"
     "@rollup/plugin-node-resolve": "npm:^15.0.0"
