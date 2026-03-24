@@ -20,9 +20,6 @@ export const CustomerSchema = registry.register(
     logo_url: z.string().nullable().optional().openapi({
       description: "Customer logo URL",
     }),
-    theme: z.string().openapi({
-      description: "Customer theme it returns 'light', 'dark' or 'system'",
-    }),
   }),
 );
 

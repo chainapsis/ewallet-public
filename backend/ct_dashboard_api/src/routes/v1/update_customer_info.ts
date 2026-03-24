@@ -8,7 +8,6 @@ import {
 } from "@oko-wallet/oko-pg-interface/customers";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type {
-  CustomerTheme,
   UpdateCustomerInfoRequest,
   UpdateCustomerInfoResponse,
 } from "@oko-wallet/oko-types/customers";
@@ -121,7 +120,7 @@ export async function updateCustomerInfoRoute(
   try {
     const state = req.app.locals;
     const userId = res.locals.user_id;
-    const { label, url, delete_logo, theme } = req.body;
+    const { label, url, delete_logo } = req.body;
 
     const shouldDeleteLogo = delete_logo === "true";
 
@@ -233,7 +232,6 @@ export async function updateCustomerInfoRoute(
       label?: string;
       url?: string | null;
       logo_url?: string | null;
-      theme?: CustomerTheme;
     } = {};
     if (label !== undefined && label.trim() !== "") {
       updates.label = label.trim();
@@ -243,16 +241,6 @@ export async function updateCustomerInfoRoute(
     }
     if (shouldUpdateLogo) {
       updates.logo_url = logo_url;
-    }
-    if (theme === "light" || theme === "dark" || theme === "system") {
-      updates.theme = theme;
-    } else if (theme !== undefined) {
-      res.status(400).json({
-        success: false,
-        code: "INVALID_REQUEST",
-        msg: "theme must be one of light, dark, system",
-      });
-      return;
     }
 
     if (Object.keys(updates).length === 0) {
