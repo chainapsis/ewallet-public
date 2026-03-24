@@ -2,9 +2,7 @@ import type { OkoCoreAction, OkoCoreState } from "./types";
 
 export const initialCoreState: OkoCoreState = {
   wallet: null,
-  isInitialized: false,
   isReady: false,
-  error: null,
   authType: null,
   email: null,
   publicKey: null,
@@ -20,15 +18,6 @@ export function coreReducer(
       return {
         ...state,
         wallet: action.wallet,
-        isInitialized: true,
-        error: null,
-      };
-
-    case "INIT_ERROR":
-      return {
-        ...state,
-        isInitialized: false,
-        error: action.error,
       };
 
     case "READY":

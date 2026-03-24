@@ -1,5 +1,4 @@
 import type {
-  OkoWalletInitError,
   OkoWalletInterface,
   OkoWalletState,
   SignInType,
@@ -24,23 +23,15 @@ export interface OkoSvmConfig {
 
 export interface OkoCoreState {
   wallet: OkoWalletInterface | null;
-  isInitialized: boolean;
   isReady: boolean;
-  error: OkoInitError | null;
   authType: AuthType | null;
   email: string | null;
   publicKey: string | null;
   name: string | null;
 }
 
-export interface OkoInitError {
-  type: string;
-  message?: string;
-}
-
 export type OkoCoreAction =
   | { type: "INIT_SUCCESS"; wallet: OkoWalletInterface }
-  | { type: "INIT_ERROR"; error: OkoInitError }
   | { type: "READY"; state: OkoWalletState }
   | {
       type: "ACCOUNTS_CHANGED";
@@ -51,38 +42,21 @@ export type OkoCoreAction =
     }
   | { type: "SIGNED_OUT" };
 
-export interface UseOkoReturn {
-  wallet: OkoWalletInterface | null;
-  isInitialized: boolean;
-  isReady: boolean;
-  error: OkoInitError | null;
-}
-
-export interface UseAuthReturn {
-  isSignedIn: boolean;
+export interface WalletInfo {
   authType: AuthType | null;
-  signIn: (type: SignInType) => Promise<void>;
-  signOut: () => Promise<void>;
-  openSignInModal: () => Promise<void>;
-}
-
-export interface UseWalletInfoReturn {
   email: string | null;
   name: string | null;
   publicKey: string | null;
+}
+
+export interface UseOkoReturn {
+  wallet: OkoWalletInterface | null;
   isReady: boolean;
-}
-
-export interface UseOkoModalReturn {
-  openModal: OkoWalletInterface["openModal"];
-  closeModal: () => void;
+  isSignedIn: boolean;
+  signIn: (type: SignInType) => Promise<void>;
+  signOut: () => Promise<void>;
   openSignInModal: () => Promise<void>;
+  walletInfo: WalletInfo;
 }
 
-export type {
-  AuthType,
-  SignInType,
-  OkoWalletInterface,
-  OkoWalletState,
-  OkoWalletInitError,
-};
+export type { AuthType, SignInType, OkoWalletInterface, OkoWalletState };

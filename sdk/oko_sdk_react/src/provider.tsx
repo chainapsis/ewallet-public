@@ -46,13 +46,7 @@ export const OkoProvider: FC<OkoProviderProps> = ({ config, children }) => {
     });
 
     if (!coreResult.success) {
-      dispatch({
-        type: "INIT_ERROR",
-        error: {
-          type: coreResult.err.type,
-          message: "msg" in coreResult.err ? coreResult.err.msg : undefined,
-        },
-      });
+      console.error("[oko-react] init failed:", coreResult.err);
       return;
     }
 
