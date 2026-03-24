@@ -75,7 +75,15 @@ export async function leaveTeam(
 
     // Scenario 1: Member → just leave
     if (role !== "admin") {
-      await softDeleteCTDUser(state.db, userId, customerId);
+      const deleteRes = await softDeleteCTDUser(state.db, userId, customerId);
+      if (!deleteRes.success) {
+        res.status(500).json({
+          success: false,
+          code: "UNKNOWN_ERROR",
+          msg: "Failed to leave team",
+        });
+        return;
+      }
       res.status(200).json({
         success: true,
         data: { action: "left" },
@@ -103,7 +111,15 @@ export async function leaveTeam(
 
     // Scenario 2: Admin + other admins exist → just leave
     if (adminCount > 1) {
-      await softDeleteCTDUser(state.db, userId, customerId);
+      const deleteRes = await softDeleteCTDUser(state.db, userId, customerId);
+      if (!deleteRes.success) {
+        res.status(500).json({
+          success: false,
+          code: "UNKNOWN_ERROR",
+          msg: "Failed to leave team",
+        });
+        return;
+      }
       res.status(200).json({
         success: true,
         data: { action: "left" },
