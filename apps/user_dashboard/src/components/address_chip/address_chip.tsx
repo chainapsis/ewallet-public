@@ -1,4 +1,5 @@
-import { CheckCircleOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/check_circle_outlined";
+import { IconTransition } from "@oko-wallet/oko-common-ui/icon_transition";
+import { CheckThinIcon } from "@oko-wallet/oko-common-ui/icons/check_thin_icon";
 import { CopyOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/copy_outlined";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import { type FC, type MouseEvent, useMemo } from "react";
@@ -70,14 +71,15 @@ export const AddressChip: FC<AddressChipProps> = ({
       </div>
 
       <div className={styles.iconContainer}>
-        {isCopied ? (
-          <CheckCircleOutlinedIcon
-            size={16}
-            color="var(--fg-success-primary)"
-          />
-        ) : (
-          <CopyOutlinedIcon size={16} color="var(--fg-tertiary)" />
-        )}
+        <IconTransition
+          isActive={isCopied}
+          defaultIcon={
+            <CopyOutlinedIcon size={16} color="var(--fg-tertiary)" />
+          }
+          activeIcon={
+            <CheckThinIcon size={16} color="var(--fg-success-primary)" />
+          }
+        />
       </div>
     </div>
   );

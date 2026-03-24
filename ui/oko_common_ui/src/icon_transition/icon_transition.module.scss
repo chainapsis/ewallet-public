@@ -1,0 +1,36 @@
+.container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    transform 250ms var(--ease-out-cubic),
+    opacity 250ms var(--ease-out-cubic),
+    filter 250ms var(--ease-out-cubic);
+  transform-origin: center;
+  will-change: transform, opacity, filter;
+  backface-visibility: hidden;
+}
+
+.activeIcon {
+  position: absolute;
+  inset: 0;
+}
+
+.visible {
+  transform: scale(1);
+  opacity: 1;
+  filter: blur(0);
+}
+
+.hidden {
+  transform: scale(0.6);
+  opacity: 0;
+  filter: blur(4px);
+}

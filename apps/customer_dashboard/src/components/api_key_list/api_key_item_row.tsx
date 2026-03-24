@@ -2,6 +2,8 @@
 
 import { AnchoredMenu } from "@oko-wallet/oko-common-ui/anchored_menu";
 import { Badge } from "@oko-wallet/oko-common-ui/badge";
+import { IconTransition } from "@oko-wallet/oko-common-ui/icon_transition";
+import { CheckThinIcon } from "@oko-wallet/oko-common-ui/icons/check_thin_icon";
 import { CopyOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/copy_outlined";
 import { EyeIcon } from "@oko-wallet/oko-common-ui/icons/eye";
 import { EyeOffIcon } from "@oko-wallet/oko-common-ui/icons/eye_off";
@@ -10,7 +12,7 @@ import { TrashIcon } from "@oko-wallet/oko-common-ui/icons/trash";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import { TableCell, TableRow } from "@oko-wallet/oko-common-ui/table";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
-import { type FC, useState } from "react";
+import { type FC, useRef, useState } from "react";
 
 import styles from "./api_key_list.module.scss";
 import { displayToast } from "@oko-wallet-ct-dashboard/components/toast";
@@ -31,9 +33,26 @@ export const APIKeyItemRow: FC<APIKeyItemRowProps> = ({
   onDelete,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(apiKey);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(apiKey);
+    } catch {
+      return;
+    }
+
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+
+    setIsCopied(true);
+    timerRef.current = setTimeout(() => {
+      setIsCopied(false);
+      timerRef.current = null;
+    }, 1500);
+
     displayToast({
       variant: "success",
       title: "Copied!",
@@ -88,7 +107,15 @@ export const APIKeyItemRow: FC<APIKeyItemRowProps> = ({
             onClick={handleCopy}
             className={styles.buttonIcon}
           >
-            <CopyOutlinedIcon color="var(--fg-tertiary)" size={20} />
+            <IconTransition
+              isActive={isCopied}
+              defaultIcon={
+                <CopyOutlinedIcon color="var(--fg-tertiary)" size={20} />
+              }
+              activeIcon={
+                <CheckThinIcon color="var(--fg-tertiary)" size={20} />
+              }
+            />
           </button>
         </div>
       </TableCell>
