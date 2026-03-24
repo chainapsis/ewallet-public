@@ -109,7 +109,7 @@ export const APIKeyItemRow: FC<APIKeyItemRowProps> = ({
                 <CopyOutlinedIcon color="var(--fg-tertiary)" size={20} />
               }
               activeIcon={
-                <CheckThinIcon color="var(--fg-success-primary)" size={20} />
+                <CheckThinIcon color="var(--fg-tertiary)" size={20} />
               }
             />
           </button>
