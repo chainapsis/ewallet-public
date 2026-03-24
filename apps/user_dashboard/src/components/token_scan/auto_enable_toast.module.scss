@@ -1,0 +1,128 @@
+.container {
+  flex-direction: row;
+  align-items: flex-start;
+  width: fit-content;
+
+  @media (max-width: 480px) {
+    min-width: unset;
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  flex-wrap: nowrap;
+
+}
+
+.title {
+  white-space: nowrap;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.chainIcons {
+  display: flex;
+  align-items: center;
+}
+
+.chainIcon {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--white);
+
+  &:not(:first-child) {
+    margin-left: -5px;
+  }
+}
+
+.chainIconMore {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--bg-tertiary);
+  border: 1.5px solid var(--white);
+  margin-left: -5px;
+  font-size: 8px;
+  font-weight: 600;
+  color: var(--fg-secondary);
+}
+
+.chevron {
+  transition: transform 200ms var(--ease-in-out-quart);
+  flex-shrink: 0;
+  margin-right: 4px;
+}
+
+.chevronExpanded {
+  transform: rotate(180deg);
+}
+
+.collapseWrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 300ms var(--ease-in-out-quart);
+
+  &[data-expanded="true"] {
+    grid-template-rows: 1fr;
+  }
+}
+
+.collapseContent {
+  overflow: hidden;
+  opacity: 0;
+  filter: blur(4px);
+  transform: translateY(-4px);
+  transition:
+    opacity 300ms var(--ease-in-out-quart),
+    filter 300ms var(--ease-in-out-quart),
+    transform 300ms var(--ease-in-out-quart);
+
+  [data-expanded="true"] > & {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+.chainList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 12px;
+  padding-left: 36px; // icon 20px + header gap 16px
+}
+
+.chainListItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chainListIcon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
