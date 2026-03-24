@@ -4,7 +4,11 @@ import type { FC } from "react";
 import { CommonModal } from "@oko-wallet-attached/components/modal_variants/common/common_modal";
 import styles from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_signature_modal.module.scss";
 
-export const DemoView: FC = () => {
+export const DemoView: FC<{ hideOnMobile?: boolean }> = ({ hideOnMobile }) => {
+  if (hideOnMobile && document.documentElement.hasAttribute("data-mobile")) {
+    return null;
+  }
+
   return (
     <CommonModal padding="12px">
       <Typography

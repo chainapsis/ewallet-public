@@ -8,13 +8,11 @@ import {
 
 interface SignerInfoProps {
   signer: string;
-  origin: string;
   initialViewType?: "View Address" | "Login Info";
 }
 
 export const SignerInfo: FC<SignerInfoProps> = ({
   signer,
-  origin,
   initialViewType = "View Address",
 }) => {
   const [viewType, setViewType] = useState<"View Address" | "Login Info">(
@@ -28,7 +26,6 @@ export const SignerInfo: FC<SignerInfoProps> = ({
           <SignerAddressOrEmailView
             value={signer}
             type="address"
-            origin={origin}
             prefix="with "
           />
           <SignerAddressOrEmailChangeViewTypeButton
@@ -43,7 +40,6 @@ export const SignerInfo: FC<SignerInfoProps> = ({
           <SignerAddressOrEmailView
             value={signer}
             type="email"
-            origin={origin}
             prefix="with "
           />
           <SignerAddressOrEmailChangeViewTypeButton

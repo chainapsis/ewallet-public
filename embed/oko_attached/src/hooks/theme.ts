@@ -11,6 +11,7 @@ import {
 import { getSystemTheme } from "@oko-wallet-attached/components/google_callback/theme";
 import { getOAuthStateFromUrl } from "@oko-wallet-attached/components/google_callback/use_callback";
 import { useAppState } from "@oko-wallet-attached/store/app";
+import { useMemoryState } from "@oko-wallet-attached/store/memory";
 
 export function useSetThemeInCallback(providerType: AuthType) {
   const { getTheme } = useAppState();
@@ -65,7 +66,8 @@ export function useSetThemeInCallback(providerType: AuthType) {
         return;
       }
 
-      const oldTheme = getTheme(hostOrigin);
+      const storageKey = useMemoryState.getState().storageKey || hostOrigin;
+      const oldTheme = getTheme(storageKey);
       const { theme } = await determineTheme(
         hostOrigin,
         oldTheme,

@@ -80,7 +80,7 @@ react-hook-form.
 | `oko_admin_web`        | 3204 | Internal admin (KSN nodes, users, sig shares)  |
 | `docs_web`             | 3205 | Documentation site (Docusaurus, not Next.js)   |
 | `user_dashboard`       | 3206 | End-user asset management and connected apps   |
-| `attached_proxy_web`   | 3207 | iframe host for mobile ↔ oko_attached communication |
+| `attached_mobile_host_web`   | 3207 | iframe host for mobile ↔ oko_attached communication |
 | `email_template_2`     | 3000 | Email template builder (static export)         |
 
 ### `internals/` — Build Tooling

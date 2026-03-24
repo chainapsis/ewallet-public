@@ -43,122 +43,122 @@ interface AppState {
 }
 
 interface AppActions {
-  resetAll: (hostOrigin: string) => void;
-  getNonce: (hostOrigin: string) => string | null;
-  setNonce: (hostOrigin: string, nonce: string | null) => void;
+  resetAll: (storageKey: string) => void;
+  getNonce: (storageKey: string) => string | null;
+  setNonce: (storageKey: string, nonce: string | null) => void;
 
-  getCodeVerifier: (hostOrigin: string) => string | null;
-  setCodeVerifier: (hostOrigin: string, codeVerifier: string | null) => void;
+  getCodeVerifier: (storageKey: string) => string | null;
+  setCodeVerifier: (storageKey: string, codeVerifier: string | null) => void;
 
-  getWallet: (hostOrigin: string) => WalletState | null;
-  setWallet: (hostOrigin: string, wallet: WalletState | null) => void;
+  getWallet: (storageKey: string) => WalletState | null;
+  setWallet: (storageKey: string, wallet: WalletState | null) => void;
 
-  getWalletEd25519: (hostOrigin: string) => Ed25519WalletState | null;
+  getWalletEd25519: (storageKey: string) => Ed25519WalletState | null;
   setWalletEd25519: (
-    hostOrigin: string,
+    storageKey: string,
     wallet: Ed25519WalletState | null,
   ) => void;
 
-  getKeyshare_1: (hostOrigin: string) => string | null;
-  setKeyshare_1: (hostOrigin: string, keyshare_1: string | null) => void;
+  getKeyshare_1: (storageKey: string) => string | null;
+  setKeyshare_1: (storageKey: string, keyshare_1: string | null) => void;
 
-  getKeyPackageEd25519: (hostOrigin: string) => string | null;
-  setKeyPackageEd25519: (hostOrigin: string, keyPackage: string | null) => void;
+  getKeyPackageEd25519: (storageKey: string) => string | null;
+  setKeyPackageEd25519: (storageKey: string, keyPackage: string | null) => void;
 
-  getSeedEd25519: (hostOrigin: string) => string | null;
-  setSeedEd25519: (hostOrigin: string, seedEd25519: string | null) => void;
+  getSeedEd25519: (storageKey: string) => string | null;
+  setSeedEd25519: (storageKey: string, seedEd25519: string | null) => void;
 
-  getApiKey: (hostOrigin: string) => string | null;
-  setApiKey: (hostOrigin: string, apiKey: string | null) => void;
+  getApiKey: (storageKey: string) => string | null;
+  setApiKey: (storageKey: string, apiKey: string | null) => void;
 
-  getAuthToken: (hostOrigin: string) => string | null;
-  setAuthToken: (hostOrigin: string, jwtToken: string | null) => void;
+  getAuthToken: (storageKey: string) => string | null;
+  setAuthToken: (storageKey: string, jwtToken: string | null) => void;
 
-  getTheme: (hostOrigin: string) => Theme | null;
-  setTheme: (hostOrigin: string, theme: Theme | null) => void;
+  getTheme: (storageKey: string) => Theme | null;
+  setTheme: (storageKey: string, theme: Theme | null) => void;
 
-  getHostOriginList: () => string[];
-  // getPublicKey: (hostOrigin: string) => string | undefined;
+  getStorageKeyList: () => string[];
+  // getPublicKey: (storageKey: string) => string | undefined;
 }
 
 export const useAppState = create(
   persist(
     combine<AppState, AppActions>({ perOrigin: {} }, (set, get) => ({
-      setApiKey: (hostOrigin: string, apiKey: string | null) => {
+      setApiKey: (storageKey: string, apiKey: string | null) => {
         set({
           perOrigin: {
             ...get().perOrigin,
-            [hostOrigin]: {
-              ...get().perOrigin[hostOrigin],
+            [storageKey]: {
+              ...get().perOrigin[storageKey],
               apiKey,
             },
           },
         });
       },
-      setNonce: (hostOrigin: string, nonce: string | null) => {
+      setNonce: (storageKey: string, nonce: string | null) => {
         set({
           perOrigin: {
             ...get().perOrigin,
-            [hostOrigin]: {
-              ...get().perOrigin[hostOrigin],
+            [storageKey]: {
+              ...get().perOrigin[storageKey],
               nonce,
             },
           },
         });
       },
-      setCodeVerifier: (hostOrigin: string, codeVerifier: string | null) => {
+      setCodeVerifier: (storageKey: string, codeVerifier: string | null) => {
         set({
           perOrigin: {
             ...get().perOrigin,
-            [hostOrigin]: {
-              ...get().perOrigin[hostOrigin],
+            [storageKey]: {
+              ...get().perOrigin[storageKey],
               codeVerifier,
             },
           },
         });
       },
-      setKeyshare_1: (hostOrigin: string, keyshare_1: string | null) => {
+      setKeyshare_1: (storageKey: string, keyshare_1: string | null) => {
         set({
           perOrigin: {
             ...get().perOrigin,
-            [hostOrigin]: {
-              ...get().perOrigin[hostOrigin],
+            [storageKey]: {
+              ...get().perOrigin[storageKey],
               keyshare_1,
             },
           },
         });
       },
       setKeyPackageEd25519: (
-        hostOrigin: string,
+        storageKey: string,
         keyPackageEd25519: string | null,
       ) => {
         set({
           perOrigin: {
             ...get().perOrigin,
-            [hostOrigin]: {
-              ...get().perOrigin[hostOrigin],
+            [storageKey]: {
+              ...get().perOrigin[storageKey],
               keyPackageEd25519,
             },
           },
         });
       },
-      setAuthToken: (hostOrigin: string, authToken: string | null) => {
+      setAuthToken: (storageKey: string, authToken: string | null) => {
         set({
           perOrigin: {
             ...get().perOrigin,
-            [hostOrigin]: {
-              ...get().perOrigin[hostOrigin],
+            [storageKey]: {
+              ...get().perOrigin[storageKey],
               authToken,
             },
           },
         });
       },
 
-      resetAll: (hostOrigin: string) => {
+      resetAll: (storageKey: string) => {
         set({
           perOrigin: {
             ...get().perOrigin,
-            [hostOrigin]: {
+            [storageKey]: {
               theme: null,
               apiKey: null,
               keyshare_1: null,
@@ -174,84 +174,84 @@ export const useAppState = create(
         });
       },
 
-      setWallet: (hostOrigin: string, wallet: WalletState | null) => {
+      setWallet: (storageKey: string, wallet: WalletState | null) => {
         set({
           perOrigin: {
             ...get().perOrigin,
-            [hostOrigin]: {
-              ...get().perOrigin[hostOrigin],
+            [storageKey]: {
+              ...get().perOrigin[storageKey],
               wallet,
             },
           },
         });
       },
-      getWallet: (hostOrigin: string) => {
-        return get().perOrigin[hostOrigin]?.wallet;
+      getWallet: (storageKey: string) => {
+        return get().perOrigin[storageKey]?.wallet;
       },
       setWalletEd25519: (
-        hostOrigin: string,
+        storageKey: string,
         ed25519Wallet: Ed25519WalletState | null,
       ) => {
         set({
           perOrigin: {
             ...get().perOrigin,
-            [hostOrigin]: {
-              ...get().perOrigin[hostOrigin],
+            [storageKey]: {
+              ...get().perOrigin[storageKey],
               ed25519Wallet,
             },
           },
         });
       },
-      getWalletEd25519: (hostOrigin: string) => {
-        return get().perOrigin[hostOrigin]?.ed25519Wallet;
+      getWalletEd25519: (storageKey: string) => {
+        return get().perOrigin[storageKey]?.ed25519Wallet;
       },
-      getNonce: (hostOrigin: string) => {
-        return get().perOrigin[hostOrigin]?.nonce;
+      getNonce: (storageKey: string) => {
+        return get().perOrigin[storageKey]?.nonce;
       },
-      getCodeVerifier: (hostOrigin: string) => {
-        return get().perOrigin[hostOrigin]?.codeVerifier;
+      getCodeVerifier: (storageKey: string) => {
+        return get().perOrigin[storageKey]?.codeVerifier;
       },
-      getKeyshare_1: (hostOrigin: string) => {
-        return get().perOrigin[hostOrigin]?.keyshare_1;
+      getKeyshare_1: (storageKey: string) => {
+        return get().perOrigin[storageKey]?.keyshare_1;
       },
-      getKeyPackageEd25519: (hostOrigin: string) => {
-        return get().perOrigin[hostOrigin]?.keyPackageEd25519;
+      getKeyPackageEd25519: (storageKey: string) => {
+        return get().perOrigin[storageKey]?.keyPackageEd25519;
       },
-      setSeedEd25519: (hostOrigin: string, seedEd25519: string | null) => {
+      setSeedEd25519: (storageKey: string, seedEd25519: string | null) => {
         set({
           perOrigin: {
             ...get().perOrigin,
-            [hostOrigin]: {
-              ...get().perOrigin[hostOrigin],
+            [storageKey]: {
+              ...get().perOrigin[storageKey],
               seedEd25519,
             },
           },
         });
       },
-      getSeedEd25519: (hostOrigin: string) => {
-        return get().perOrigin[hostOrigin]?.seedEd25519;
+      getSeedEd25519: (storageKey: string) => {
+        return get().perOrigin[storageKey]?.seedEd25519;
       },
-      getApiKey: (hostOrigin: string) => {
-        return get().perOrigin[hostOrigin]?.apiKey;
+      getApiKey: (storageKey: string) => {
+        return get().perOrigin[storageKey]?.apiKey;
       },
-      getAuthToken: (hostOrigin: string) => {
-        return get().perOrigin[hostOrigin]?.authToken;
+      getAuthToken: (storageKey: string) => {
+        return get().perOrigin[storageKey]?.authToken;
       },
-      getTheme: (hostOrigin: string) => {
-        return get().perOrigin[hostOrigin]?.theme;
+      getTheme: (storageKey: string) => {
+        return get().perOrigin[storageKey]?.theme;
       },
-      setTheme: (hostOrigin: string, theme: Theme | null) => {
+      setTheme: (storageKey: string, theme: Theme | null) => {
         set({
           perOrigin: {
             ...get().perOrigin,
-            [hostOrigin]: {
-              ...get().perOrigin[hostOrigin],
+            [storageKey]: {
+              ...get().perOrigin[storageKey],
               theme,
             },
           },
         });
       },
-      getHostOriginList: () => {
+      getStorageKeyList: () => {
         return Object.keys(get().perOrigin);
       },
     })),

@@ -45,7 +45,7 @@ export const CosmosArbitrarySignatureContent: FC<
       <Spacing height={8} />
 
       {isViewRawData ? (
-        <MakeSignatureRawCodeBlockContainer>
+        <MakeSignatureRawCodeBlockContainer className={styles.rawSurface}>
           <MakeSignatureRawCodeBlock
             code={JSON.stringify(payload.signDoc, null, 2)}
           />

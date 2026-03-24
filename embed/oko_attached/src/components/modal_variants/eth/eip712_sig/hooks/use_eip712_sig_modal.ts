@@ -22,7 +22,10 @@ export function useEIP712SigModal(args: UseEthereumSigModalArgs) {
   const { closeModal, setError } = useMemoryState();
 
   const hostOrigin = data.payload.origin;
-  const theme = useAppState().getTheme(hostOrigin);
+  const storageKey = useMemoryState((state) => state.storageKey);
+  const isMobileNative = useMemoryState((state) => state.isMobileNative);
+  const mobileApiKey = useMemoryState((state) => state.apiKey);
+  const theme = useAppState().getTheme(storageKey);
 
   const { isSupportedChain, isSupportChecked } = useSupportedEthChain({
     chainInfoForModal: data.payload.chain_info,
@@ -31,7 +34,10 @@ export function useEIP712SigModal(args: UseEthereumSigModalArgs) {
   const [isLoading, setIsLoading] = useState(false);
   const [isApproveEnabled, setIsApproveEnabled] = useState(false);
 
-  const isDemo = isDemoOrSandboxOrigin(hostOrigin);
+  const isDemo = isDemoOrSandboxOrigin(hostOrigin, {
+    isMobileNative,
+    apiKey: mobileApiKey,
+  });
 
   useEffect(() => {
     if (!isSupportChecked) {
@@ -78,7 +84,7 @@ export function useEIP712SigModal(args: UseEthereumSigModalArgs) {
       setIsLoading(true);
 
       const signatureRes = await makeEthereumEip712Signature(
-        hostOrigin,
+        storageKey,
         data.payload.data.serialized_typed_data,
         getIsAborted,
       );

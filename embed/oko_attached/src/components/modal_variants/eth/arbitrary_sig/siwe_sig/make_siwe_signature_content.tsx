@@ -15,6 +15,7 @@ import {
   getSiweMessage,
   verifySiweMessage,
 } from "@oko-wallet-attached/components/modal_variants/eth/siwe_message";
+import { useMemoryState } from "@oko-wallet-attached/store/memory";
 
 interface EthereumSiweSignatureContentProps {
   payload: EthereumArbitrarySignPayload;
@@ -24,13 +25,17 @@ interface EthereumSiweSignatureContentProps {
 export const EthereumSiweSignatureContent: FC<
   EthereumSiweSignatureContentProps
 > = ({ payload, theme }) => {
+  const appName = useMemoryState((state) => state.appName);
   const message = getSiweMessage(payload.data.message);
   if (!message) {
     // @unreachable
     throw new Error("unreachable");
   }
 
-  const isValidSiweMessage = verifySiweMessage(message, payload.origin);
+  const isMobileNative = useMemoryState((state) => state.isMobileNative);
+  const isValidSiweMessage = verifySiweMessage(message, payload.origin, {
+    skipOriginCheck: isMobileNative,
+  });
 
   return (
     <div>
@@ -53,16 +58,12 @@ export const EthereumSiweSignatureContent: FC<
             color={isValidSiweMessage ? "primary" : "warning-primary"}
             weight="semibold"
           >
-            {payload.origin.replace(/^https?:\/\//, "")}
+            {appName}
           </Typography>
         </div>
 
         <Spacing height={8} />
-        <SignerInfo
-          origin={payload.origin}
-          signer={payload.signer}
-          initialViewType="Login Info"
-        />
+        <SignerInfo signer={payload.signer} initialViewType="Login Info" />
       </div>
 
       <Spacing height={20} />

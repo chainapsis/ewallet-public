@@ -20,16 +20,21 @@ function formatLamports(lamports: bigint | number): string {
 export interface SvmTransferPrettyProps {
   lamports: bigint | number;
   to?: string;
+  embedded?: boolean;
 }
 
 export const SvmTransferPretty: FC<SvmTransferPrettyProps> = ({
   lamports,
   to,
+  embedded = false,
 }) => {
   const isMobile = useMobileMode();
   return (
     <div className={styles.container}>
-      <TxRow label="Send">
+      <TxRow
+        label="Send"
+        className={embedded ? styles.embeddedTransferRow : undefined}
+      >
         <div className={styles.tokenInfo}>
           <Avatar
             src={SOLANA_LOGO_URL}
@@ -48,7 +53,10 @@ export const SvmTransferPretty: FC<SvmTransferPrettyProps> = ({
         </div>
       </TxRow>
       {to && (
-        <TxRow label="to">
+        <TxRow
+          label="to"
+          className={embedded ? styles.embeddedTransferRow : undefined}
+        >
           <Typography
             color="secondary"
             size={isMobile ? "md" : "sm"}

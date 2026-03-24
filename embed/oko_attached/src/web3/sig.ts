@@ -5,16 +5,16 @@ import { makeSignOutput } from "@oko-wallet-attached/crypto/sign";
 import { useAppState } from "@oko-wallet-attached/store/app";
 
 export async function makeSignature(
-  hostOrigin: string,
+  storageKey: string,
   msg: Uint8Array<ArrayBufferLike>,
   getIsAborted: () => boolean,
 ): Promise<Result<SignOutput, MakeSigError>> {
   const appState = useAppState.getState();
 
-  const walletState = appState.getWallet(hostOrigin);
-  const apiKey = appState.getApiKey(hostOrigin);
-  const keyshare_1 = appState.getKeyshare_1(hostOrigin);
-  const jwtToken = appState.getAuthToken(hostOrigin);
+  const walletState = appState.getWallet(storageKey);
+  const apiKey = appState.getApiKey(storageKey);
+  const keyshare_1 = appState.getKeyshare_1(storageKey);
+  const jwtToken = appState.getAuthToken(storageKey);
 
   if (!apiKey) {
     return { success: false, err: { type: "api_key_not_found" } };

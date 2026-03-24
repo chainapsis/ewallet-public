@@ -11,7 +11,7 @@ import { useAppState } from "@oko-wallet-attached/store/app";
 export async function handleGetConnectedApps(
   ctx: MsgEventContext,
 ): Promise<void> {
-  const { port, hostOrigin } = ctx;
+  const { port, hostOrigin, storageKey } = ctx;
 
   const allowedOrigins = USER_DASHBOARD_ORIGINS.split(",").map((o: string) =>
     o.trim(),
@@ -26,7 +26,7 @@ export async function handleGetConnectedApps(
     return;
   }
 
-  const authToken = useAppState.getState().getAuthToken(hostOrigin);
+  const authToken = useAppState.getState().getAuthToken(storageKey);
   if (!authToken) {
     const ack: OkoWalletMsgGetConnectedAppsAck = {
       target: OKO_SDK_TARGET,

@@ -11,6 +11,7 @@ Unify your wallet experience across Ethereum, Cosmos, and SVM with Oko.
 
 - **Node.js 22+** and **npm/yarn**
 - A modern web framework (React, Vue, etc.)
+- **React Native** (optional): React Native 0.70+, Expo SDK 51+ (optional)
 
 ## NPM Installation
 
@@ -28,6 +29,9 @@ npm install @oko-wallet/oko-sdk-svm
 
 # Core SDK (if building custom integration)
 npm install @oko-wallet/oko-sdk-core
+
+# For React Native
+npm install @oko-wallet/oko-sdk-core-react-native
 ```
 
 ## API Key Setup
@@ -84,7 +88,7 @@ same:
 
 ```typescript
 import { OkoEthWallet } from "@oko-wallet/oko-sdk-eth";
-import { createWalletClient, custom } from "viem";
+import { createWalletClient, custom, parseEther } from "viem";
 import { mainnet } from "viem/chains";
 
 // Initialize Oko (replaces window.ethereum)
@@ -95,9 +99,14 @@ if (!initRes.success) {
 
 const ethWallet = initRes.data;
 const provider = await ethWallet.getEthereumProvider();
+const [account] = await provider.request({ method: "eth_requestAccounts" });
+if (!account) {
+  throw new Error("User must sign in before sending a transaction");
+}
 
 // Use with your existing Web3 library like Viem
 const walletClient = createWalletClient({
+  account,
   chain: mainnet,
   transport: custom(provider),
 });
@@ -139,7 +148,7 @@ await svmWallet.connect();
 const publicKey = svmWallet.publicKey!;
 
 // Send a transaction
-const connection = new Connection("https://api.mainnet.solana.com");
+const connection = new Connection("https://api.mainnet-beta.solana.com");
 const transaction = new Transaction().add(
   SystemProgram.transfer({
     fromPubkey: publicKey,
@@ -147,6 +156,10 @@ const transaction = new Transaction().add(
     lamports: 1_000_000,
   }),
 );
+
+const { blockhash } = await connection.getLatestBlockhash();
+transaction.recentBlockhash = blockhash;
+transaction.feePayer = publicKey;
 
 const signature = await svmWallet.sendTransaction(transaction, connection);
 ```
@@ -186,6 +199,43 @@ const svmWallet = svmInitRes.data;
 // Users can interact with all three ecosystems seamlessly
 // Same Google account, same user experience!
 ```
+
+## React Native
+
+Integrate Oko into React Native apps using the dedicated mobile SDK:
+
+```typescript
+import { Button } from "react-native";
+import {
+  OkoWalletProvider,
+  useOkoWallet,
+} from "@oko-wallet/oko-sdk-core-react-native";
+
+// Wrap your app root
+function App() {
+  return (
+    <OkoWalletProvider apiKey="your-api-key">
+      <SignIn />
+    </OkoWalletProvider>
+  );
+}
+
+// Sign in from any component
+function SignIn() {
+  const wallet = useOkoWallet();
+
+  const handleSignIn = async () => {
+    await wallet.signIn("google");
+    const info = await wallet.getWalletInfo();
+    console.log("Signed in:", info?.email);
+  };
+
+  return <Button title="Sign In" onPress={handleSignIn} />;
+}
+```
+
+For the complete setup guide, see
+**[React Native Integration](../sdk-usage/mobile/react-native-integration)**.
 
 ## Authentication Flow
 

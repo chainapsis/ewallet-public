@@ -1,6 +1,6 @@
 {
   "name": "@oko-wallet/oko-sdk-core-react-native",
-  "version": "0.2.0-alpha.0",
+  "version": "0.1.2-alpha.11",
   "type": "module",
   "scripts": {
     "build": "tsx ./scripts/build.ts",
@@ -31,8 +31,8 @@
   },
   "dependencies": {
     "@oko-wallet/oko-sdk-core": "workspace:*",
-    "@oko-wallet/oko-types": "workspace:*",
-    "@oko-wallet/stdlib-js": "workspace:*",
+    "@oko-wallet/oko-types": "^0.1.2-alpha.11",
+    "@oko-wallet/stdlib-js": "^0.1.2-alpha.11",
     "buffer": "^6.0.3",
     "pako": "^2.1.0"
   },

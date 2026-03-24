@@ -67,6 +67,14 @@ For full schema details, examples, and submission requirements, see the registry
 :::
 
 <!-- prettier-ignore -->
+:::tip React Native
+The React Native SDK (`@oko-wallet/oko-sdk-core-react-native`) supports all the
+same chains listed above. The underlying chain support is identical to the web
+SDKs. See **[React Native Integration](../sdk-usage/mobile/react-native-integration)**
+for mobile setup.
+:::
+
+<!-- prettier-ignore -->
 :::warning Custom chains
 Adding chains dynamically via SDK methods such as `wallet_switchEthereumChain` or Keplr’s
 [`experimentalSuggestChain`](https://docs.keplr.app/api/guide/suggest-chain) is

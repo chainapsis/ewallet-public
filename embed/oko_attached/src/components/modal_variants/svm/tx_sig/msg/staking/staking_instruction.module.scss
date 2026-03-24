@@ -5,13 +5,31 @@
   border-radius: 12px;
   background: var(--bg-secondary);
   overflow: hidden;
+}
 
+.container[data-has-rent="false"] {
   &:hover {
     background: var(--bg-secondary-hover);
 
     .chevronIcon {
       color: var(--fg-tertiary-hover);
     }
+  }
+}
+
+.container[data-has-rent="true"] {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: var(--bg-secondary-hover);
+
+      .chevronIcon {
+        color: var(--fg-tertiary-hover);
+      }
+    }
+  }
+
+  &[data-pressed="true"] {
+    background: var(--bg-secondary-hover);
   }
 }
 
@@ -29,6 +47,10 @@
   &:disabled {
     cursor: default;
   }
+}
+
+:global(html[data-mobile]) .header {
+  -webkit-tap-highlight-color: transparent;
 }
 
 .headerContent {
@@ -91,15 +113,11 @@
 
 .infoIcon {
   cursor: help;
+  display: block;
+  flex-shrink: 0;
 }
 
-// Mobile app mode: enlarge label text
-:global(html[data-mobile]) .headerContent > p {
-  font-size: var(--font-size-sm);
-  line-height: var(--font-line-height-sm);
-}
-
-:global(html[data-mobile]) .rowLabel > p {
-  font-size: var(--font-size-sm);
-  line-height: var(--font-line-height-sm);
+.infoIconTooltip {
+  display: flex;
+  align-items: center;
 }

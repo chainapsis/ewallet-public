@@ -17,6 +17,7 @@ import {
 } from "@oko-wallet-attached/components/modal_variants/svm/siws_message";
 import { SOLANA_LOGO_URL } from "@oko-wallet-attached/constants/urls";
 import { hexToUint8Array } from "@oko-wallet-attached/crypto/keygen_ed25519";
+import { useMemoryState } from "@oko-wallet-attached/store/memory";
 
 interface SvmSiwsSignatureContentProps {
   payload: SvmMessageSignPayload;
@@ -27,6 +28,8 @@ export const SvmSiwsSignatureContent: FC<SvmSiwsSignatureContentProps> = ({
   payload,
   theme: _theme,
 }) => {
+  const appName = useMemoryState((state) => state.appName);
+
   // Decode hex message to string
   const decodedMessage = useMemo(() => {
     try {
@@ -43,7 +46,10 @@ export const SvmSiwsSignatureContent: FC<SvmSiwsSignatureContentProps> = ({
     throw new Error("unreachable");
   }
 
-  const isValidSiwsMessage = verifySiwsMessage(message, payload.origin);
+  const isMobileNative = useMemoryState((state) => state.isMobileNative);
+  const isValidSiwsMessage = verifySiwsMessage(message, payload.origin, {
+    skipOriginCheck: isMobileNative,
+  });
 
   return (
     <div>
@@ -62,16 +68,12 @@ export const SvmSiwsSignatureContent: FC<SvmSiwsSignatureContentProps> = ({
             color={isValidSiwsMessage ? "primary" : "warning-primary"}
             weight="semibold"
           >
-            {payload.origin.replace(/^https?:\/\//, "")}
+            {appName}
           </Typography>
         </div>
 
         <Spacing height={8} />
-        <SignerInfo
-          origin={payload.origin}
-          signer={payload.signer}
-          initialViewType="Login Info"
-        />
+        <SignerInfo signer={payload.signer} initialViewType="Login Info" />
       </div>
 
       <Spacing height={20} />

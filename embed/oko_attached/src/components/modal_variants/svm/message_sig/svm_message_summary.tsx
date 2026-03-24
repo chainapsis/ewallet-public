@@ -65,11 +65,8 @@ export const SvmMessageSummary: FC<SvmMessageSummaryProps> = ({ payload }) => {
 
   if (isRawView) {
     content = (
-      <MakeSignatureRawCodeBlockContainer>
-        <MakeSignatureRawCodeBlock
-          className={styles.codeBlock}
-          code={rawData}
-        />
+      <MakeSignatureRawCodeBlockContainer className={styles.rawSurface}>
+        <MakeSignatureRawCodeBlock code={rawData} />
       </MakeSignatureRawCodeBlockContainer>
     );
   } else {

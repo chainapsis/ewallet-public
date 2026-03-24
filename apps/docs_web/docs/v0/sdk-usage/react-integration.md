@@ -263,3 +263,5 @@ export function useThemeSync(theme: "light" | "dark") {
 - **[RainbowKit Integration](./rainbow-kit-integration)** - RainbowKit
   integration
 - **[Error Handling](./error-handling)** - Error handling patterns
+- **[React Native Integration](./mobile/react-native-integration)** - Building a
+  mobile app? See the React Native guide

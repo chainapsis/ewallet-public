@@ -30,7 +30,14 @@ import { OAUTH_BROADCAST_CHANNEL } from "@oko-wallet-attached/window_msgs/target
 import type { MsgEventContext } from "@oko-wallet-attached/window_msgs/types";
 
 export function useInitializeApp() {
-  const { setHostOrigin, setReferralInfo } = useMemoryState();
+  const {
+    setHostOrigin,
+    setAppName,
+    setStorageKey,
+    setIsMobileNative,
+    setApiKey,
+    setReferralInfo,
+  } = useMemoryState();
   const {
     getAuthToken,
     getWallet,
@@ -75,9 +82,19 @@ export function useInitializeApp() {
           postMessage: (msg: unknown) => bc.postMessage(msg),
         };
 
+        const targetOrigin = message.payload.target_origin;
+        const storageKey = useMemoryState.getState().storageKey;
+        if (!storageKey) {
+          console.warn(
+            "[attached] storageKey not initialized, ignoring BroadcastChannel oauth_info_pass",
+          );
+          return;
+        }
         const ctx: MsgEventContext = {
           port: port as MessagePort,
-          hostOrigin: message.payload.target_origin,
+          hostOrigin: targetOrigin,
+          appName: targetOrigin.replace(/^https?:\/\//, ""),
+          storageKey,
         };
 
         await handleOAuthInfoPassV2(ctx, message);
@@ -131,30 +148,66 @@ export function useInitializeApp() {
 
         setHostOrigin(hostOrigin);
 
+        const isMobileNative = searchParams.get("mobile_native") === "true";
+        const apiKey = searchParams.get("api_key");
+        const clientRandom = searchParams.get("client_random");
+
+        if (isMobileNative && (!clientRandom || clientRandom.length < 16)) {
+          const errMsg = "mobile_native requires client_random (>= 16 chars)";
+          console.error("[attached]", errMsg);
+          if (canNotifyParent) {
+            const msg: OkoWalletMsgInit = {
+              target: "oko_sdk",
+              msg_type: "init",
+              payload: { success: false, err: errMsg },
+            };
+            await sendMsgToWindow(window.parent, msg, "*");
+          }
+          return;
+        }
+
+        const storageKey =
+          isMobileNative && clientRandom
+            ? `oko-mobile://${clientRandom}`
+            : hostOrigin;
+        setStorageKey(storageKey);
+
+        if (isMobileNative && apiKey) {
+          setAppName(apiKey.slice(0, 10));
+          resolveAppNameAsync(apiKey, setAppName);
+        } else {
+          setAppName(hostOrigin.replace(/^https?:\/\//, ""));
+        }
+
+        setIsMobileNative(isMobileNative);
+        if (apiKey) {
+          setApiKey(apiKey);
+        }
+
         setReferralInfo({
           origin: hostOrigin,
           utmSource,
           utmCampaign,
         });
 
-        const authToken = getAuthToken(hostOrigin);
-        const walletForAuth = getWallet(hostOrigin);
+        const authToken = getAuthToken(storageKey);
+        const walletForAuth = getWallet(storageKey);
         const wasInvalidated = await silentlyRefreshAuthToken(
           authToken,
-          hostOrigin,
+          storageKey,
           setAuthToken,
           walletForAuth?.authType,
         );
 
         if (wasInvalidated) {
-          resetAll(hostOrigin);
+          resetAll(storageKey);
         }
 
         const rawTheme = searchParams.get("theme");
         const sdkThemeParam: OkoWalletTheme | null =
           rawTheme === "light" || rawTheme === "dark" ? rawTheme : null;
 
-        const oldTheme = getTheme(hostOrigin);
+        const oldTheme = getTheme(storageKey);
         const themeResult = await determineTheme(
           hostOrigin,
           oldTheme,
@@ -162,28 +215,26 @@ export function useInitializeApp() {
         );
         const determinedThemeByCustomer = themeResult.theme;
 
-        const isMobileParam = searchParams.get("mobile") === "true";
-
         // Mobile: watch for system theme settling
         // (Chrome Custom Tab may report "light" initially then switch to "dark")
-        if (isMobileParam && themeResult.usesSystemPreference) {
+        if (isMobileNative && themeResult.usesSystemPreference) {
           const mq = window.matchMedia("(prefers-color-scheme: dark)");
           mq.addEventListener("change", () => {
             const t: typeof determinedThemeByCustomer = mq.matches
               ? "dark"
               : "light";
             setColorScheme(t);
-            setTheme(hostOrigin, t);
+            setTheme(storageKey, t);
             setResolvedTheme(t);
           });
         }
 
-        setTheme(hostOrigin, determinedThemeByCustomer);
+        setTheme(storageKey, determinedThemeByCustomer);
         setColorScheme(determinedThemeByCustomer);
 
         setResolvedTheme(determinedThemeByCustomer);
 
-        const wallet = getWallet(hostOrigin);
+        const wallet = getWallet(storageKey);
         const authType = wallet?.authType;
         const email = wallet?.email;
         const publicKey = wallet?.publicKey;
@@ -257,10 +308,17 @@ function sendInitMsg(hostOrigin: string, msg: OkoWalletMsgInit) {
   return sendMsgToWindow(window.parent, msg, hostOrigin);
 }
 
+async function resolveAppNameAsync(
+  _apiKey: string,
+  _setAppName: (name: string) => void,
+) {
+  // TODO: fetch app name from backend by apiKey
+}
+
 async function silentlyRefreshAuthToken(
   authToken: string | null,
-  hostOrigin: string,
-  setAuthToken: (hostOrigin: string, token: string | null) => void,
+  storageKey: string,
+  setAuthToken: (storageKey: string, token: string | null) => void,
   authType?: AuthType,
 ): Promise<boolean> {
   if (!authToken) {
@@ -283,7 +341,7 @@ async function silentlyRefreshAuthToken(
     // so the init message reports unauthenticated state and the host
     // app can prompt re-authentication.
     if (res.err.type === "status_fail" && res.err.status === 401) {
-      setAuthToken(hostOrigin, null);
+      setAuthToken(storageKey, null);
       return true;
     }
 
@@ -298,7 +356,7 @@ async function silentlyRefreshAuthToken(
     if (resp.data.token !== null) {
       console.log("[attached] refreshing auth token");
 
-      setAuthToken(hostOrigin, resp.data.token);
+      setAuthToken(storageKey, resp.data.token);
     }
     return false;
   }

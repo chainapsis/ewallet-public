@@ -47,7 +47,7 @@ jobs:
           shared-key: wasm-build
 
       - name: Install dependencies
-        run: yarn install --immutable
+        run: yarn install --immutable --no-check-resolutions
 
       - name: Build CS packages
         run: yarn ci build_cs

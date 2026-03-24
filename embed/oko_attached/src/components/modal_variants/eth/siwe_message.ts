@@ -31,6 +31,10 @@ export function getSiweMessage(
 export function verifySiweMessage(
   message: SiweMessage,
   origin: string,
+  opts?: { skipOriginCheck?: boolean },
 ): boolean {
+  if (opts?.skipOriginCheck) {
+    return true;
+  }
   return verifySignInOrigin(message.domain, message.uri, origin);
 }

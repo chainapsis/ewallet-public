@@ -2,8 +2,7 @@
 
 .container {
   display: flex;
-  padding: 16px;
-  padding-right: 8px;
+  padding: 16px 8px;
   flex-direction: column;
   align-items: flex-start;
   overflow-y: auto;
@@ -35,6 +34,6 @@
 .txRendererContainer {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
   width: 100%;
 }

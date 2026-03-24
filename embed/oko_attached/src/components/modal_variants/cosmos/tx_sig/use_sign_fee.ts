@@ -15,6 +15,7 @@ import {
 } from "@oko-wallet-attached/requests/cosmos_selectable_fees";
 import { isDemoOrSandboxOrigin } from "@oko-wallet-attached/requests/endpoints";
 import { useAssetMetaStore } from "@oko-wallet-attached/store/asset_meta";
+import { useMemoryState } from "@oko-wallet-attached/store/memory";
 
 export interface UseCosmosSignFeeArgs {
   preferNoSetFee: boolean;
@@ -75,8 +76,13 @@ export function useCosmosSignFee(
   const findOrUpdateAssetMeta = useAssetMetaStore(
     (s) => s.findOrUpdateAssetMeta,
   );
+  const isMobileNative = useMemoryState((state) => state.isMobileNative);
+  const mobileApiKey = useMemoryState((state) => state.apiKey);
 
-  const isDemo = isDemoOrSandboxOrigin(hostOrigin);
+  const isDemo = isDemoOrSandboxOrigin(hostOrigin, {
+    isMobileNative,
+    apiKey: mobileApiKey,
+  });
 
   const chainInfo = toChainInfo(modalChainInfo);
   const { data: parsedMsgs } = useGetParsedMsgs({

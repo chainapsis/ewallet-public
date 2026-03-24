@@ -22,11 +22,11 @@ type OAuthCredentialResult = Result<
 
 async function validateOAuthPayloadOfX(
   payload: OAuthTokenRequestPayloadOfX,
-  hostOrigin: string,
+  storageKey: string,
 ): Promise<OAuthCredentialResult> {
   const appState = useAppState.getState();
 
-  const codeVerifierRegistered = appState.getCodeVerifier(hostOrigin);
+  const codeVerifierRegistered = appState.getCodeVerifier(storageKey);
   if (!codeVerifierRegistered) {
     return {
       success: false,
@@ -68,7 +68,7 @@ async function validateOAuthPayloadOfX(
   const userInfo = verifyIdTokenRes.data;
   const tokenInfo = tokenRes.data;
 
-  appState.setCodeVerifier(hostOrigin, null);
+  appState.setCodeVerifier(storageKey, null);
 
   return {
     success: true,
@@ -103,10 +103,10 @@ async function validateOAuthPayloadOfTelegram(
 
 async function validateOAuthPayloadOfDiscord(
   payload: OAuthTokenRequestPayloadOfDiscord,
-  hostOrigin: string,
+  storageKey: string,
 ): Promise<OAuthCredentialResult> {
   const appState = useAppState.getState();
-  const codeVerifierRegistered = appState.getCodeVerifier(hostOrigin);
+  const codeVerifierRegistered = appState.getCodeVerifier(storageKey);
   if (!codeVerifierRegistered) {
     return {
       success: false,
@@ -139,7 +139,7 @@ async function validateOAuthPayloadOfDiscord(
 
   const userInfo = verifyIdTokenRes.data;
 
-  appState.setCodeVerifier(hostOrigin, null);
+  appState.setCodeVerifier(storageKey, null);
 
   return {
     success: true,
@@ -152,10 +152,10 @@ async function validateOAuthPayloadOfDiscord(
 
 async function validateOAuthPayloadOfGithub(
   payload: OAuthTokenRequestPayloadOfGithub,
-  hostOrigin: string,
+  storageKey: string,
 ): Promise<OAuthCredentialResult> {
   const appState = useAppState.getState();
-  const codeVerifierRegistered = appState.getCodeVerifier(hostOrigin);
+  const codeVerifierRegistered = appState.getCodeVerifier(storageKey);
   if (!codeVerifierRegistered) {
     return {
       success: false,
@@ -188,7 +188,7 @@ async function validateOAuthPayloadOfGithub(
 
   const userInfo = verifyIdTokenRes.data;
 
-  appState.setCodeVerifier(hostOrigin, null);
+  appState.setCodeVerifier(storageKey, null);
 
   return {
     success: true,
@@ -201,10 +201,10 @@ async function validateOAuthPayloadOfGithub(
 
 async function validateOAuthPayload(
   payload: OAuthPayload,
-  hostOrigin: string,
+  storageKey: string,
 ): Promise<OAuthCredentialResult> {
   const appState = useAppState.getState();
-  const nonceRegistered = appState.getNonce(hostOrigin);
+  const nonceRegistered = appState.getNonce(storageKey);
 
   if (!nonceRegistered) {
     return {
@@ -238,25 +238,25 @@ async function validateOAuthPayload(
 
 export async function getCredentialsFromPayload(
   payload: OAuthPayload | OAuthTokenRequestPayload,
-  hostOrigin: string,
+  storageKey: string,
 ): Promise<OAuthCredentialResult> {
   if (isOAuthTokenRequestPayload(payload)) {
     switch (payload.auth_type) {
       case "x":
-        return validateOAuthPayloadOfX(payload, hostOrigin);
+        return validateOAuthPayloadOfX(payload, storageKey);
       case "telegram":
         return validateOAuthPayloadOfTelegram(payload);
       case "discord":
-        return validateOAuthPayloadOfDiscord(payload, hostOrigin);
+        return validateOAuthPayloadOfDiscord(payload, storageKey);
       case "github":
-        return validateOAuthPayloadOfGithub(payload, hostOrigin);
+        return validateOAuthPayloadOfGithub(payload, storageKey);
     }
   } else {
     // payload is OAuthPayload
     switch (payload.auth_type) {
       case "google":
       case "auth0":
-        return validateOAuthPayload(payload, hostOrigin);
+        return validateOAuthPayload(payload, storageKey);
       default:
         return {
           success: false,

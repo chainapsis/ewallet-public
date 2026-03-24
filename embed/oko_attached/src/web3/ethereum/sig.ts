@@ -18,13 +18,13 @@ import {
 import { makeSignature } from "@oko-wallet-attached/web3/sig";
 
 export async function makeEthereumTxSignature(
-  hostOrigin: string,
+  storageKey: string,
   txSerializable: TransactionSerializable,
   getIsAborted: () => boolean,
 ): Promise<Result<Hex, MakeSigError>> {
   const msgHash = hashEthereumTransaction(txSerializable);
 
-  const signOutputRes = await makeSignature(hostOrigin, msgHash, getIsAborted);
+  const signOutputRes = await makeSignature(storageKey, msgHash, getIsAborted);
   if (!signOutputRes.success) {
     return { success: false, err: signOutputRes.err };
   }
@@ -39,13 +39,13 @@ export async function makeEthereumTxSignature(
 }
 
 export async function makeEthereumArbitraryMessageSignature(
-  hostOrigin: string,
+  storageKey: string,
   message: SignableMessage,
   getIsAborted: () => boolean,
 ): Promise<Result<Hex, MakeSigError>> {
   const msgHash = hashEthereumMessage(message);
 
-  const signOutputRes = await makeSignature(hostOrigin, msgHash, getIsAborted);
+  const signOutputRes = await makeSignature(storageKey, msgHash, getIsAborted);
   if (!signOutputRes.success) {
     return { success: false, err: signOutputRes.err };
   }
@@ -58,7 +58,7 @@ export async function makeEthereumArbitraryMessageSignature(
 }
 
 export async function makeEthereumEip712Signature(
-  hostOrigin: string,
+  storageKey: string,
   serializedTypedData: string,
   getIsAborted: () => boolean,
 ): Promise<Result<Hex, MakeSigError>> {
@@ -66,7 +66,7 @@ export async function makeEthereumEip712Signature(
 
   const msgHash = hashEthereumTypedData(typedData);
 
-  const signOutputRes = await makeSignature(hostOrigin, msgHash, getIsAborted);
+  const signOutputRes = await makeSignature(storageKey, msgHash, getIsAborted);
   if (!signOutputRes.success) {
     return { success: false, err: signOutputRes.err };
   }

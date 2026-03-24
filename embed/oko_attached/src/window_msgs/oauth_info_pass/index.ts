@@ -56,6 +56,11 @@ export async function handleOAuthInfoPass(
   const { port } = ctx;
   const appState = useAppState.getState();
   const hostOrigin = message.payload.target_origin;
+  const storageKey = useMemoryState.getState().storageKey;
+  if (!storageKey) {
+    await bail(message, { type: "wallet_not_initialized" });
+    return;
+  }
 
   let hasSignedIn = false;
   let isNewUser = false;
@@ -69,7 +74,7 @@ export async function handleOAuthInfoPass(
       return;
     }
 
-    if (!appState.getHostOriginList().includes(hostOrigin)) {
+    if (!appState.getStorageKeyList().includes(storageKey)) {
       await bail(message, { type: "origin_not_registered" });
       return;
     }
@@ -79,13 +84,13 @@ export async function handleOAuthInfoPass(
       await bail(message, { type: "api_key_missing" });
       return;
     }
-    appState.setApiKey(hostOrigin, apiKey);
+    appState.setApiKey(storageKey, apiKey);
 
     const authType: AuthType = message.payload.auth_type;
 
     const validateOauthRes = await getCredentialsFromPayload(
       message.payload,
-      hostOrigin,
+      storageKey,
     );
 
     if (!validateOauthRes.success) {
@@ -134,9 +139,9 @@ export async function handleOAuthInfoPass(
     }
 
     const signInResult = handleUserSignInRes.data;
-    appState.setKeyshare_1(hostOrigin, signInResult.keyshare_1);
-    appState.setAuthToken(hostOrigin, signInResult.jwtToken);
-    appState.setWallet(hostOrigin, {
+    appState.setKeyshare_1(storageKey, signInResult.keyshare_1);
+    appState.setAuthToken(storageKey, signInResult.jwtToken);
+    appState.setWallet(storageKey, {
       authType,
       walletId: signInResult.walletId,
       publicKey: signInResult.publicKey,
@@ -159,7 +164,7 @@ export async function handleOAuthInfoPass(
     return;
   } finally {
     if (hasSignedIn) {
-      const wallet = appState.getWallet(hostOrigin);
+      const wallet = appState.getWallet(storageKey);
       if (wallet?.walletId) {
         setUserId(wallet.walletId);
         if (isNewUser) {
@@ -178,7 +183,7 @@ export async function handleOAuthInfoPass(
     };
 
     port.postMessage(infoPassAck);
-    appState.setNonce(hostOrigin, null);
+    appState.setNonce(storageKey, null);
   }
 }
 
@@ -250,6 +255,11 @@ export async function handleOAuthInfoPassV2(
   const { port } = ctx;
   const appState = useAppState.getState();
   const hostOrigin = message.payload.target_origin;
+  const storageKey = useMemoryState.getState().storageKey;
+  if (!storageKey) {
+    await bail(message, { type: "wallet_not_initialized" });
+    return;
+  }
 
   let hasSignedIn = false;
   let isNewUser = false;
@@ -272,7 +282,7 @@ export async function handleOAuthInfoPassV2(
       const authType: AuthType = message.payload.auth_type;
       const validateOauthRes = await getCredentialsFromPayload(
         message.payload,
-        hostOrigin,
+        storageKey,
       );
 
       if (!validateOauthRes.success) {
@@ -287,7 +297,7 @@ export async function handleOAuthInfoPassV2(
       return; // finally block handles ack + nonce cleanup
     }
 
-    if (!appState.getHostOriginList().includes(hostOrigin)) {
+    if (!appState.getStorageKeyList().includes(storageKey)) {
       await bail(message, { type: "origin_not_registered" });
       return;
     }
@@ -297,13 +307,13 @@ export async function handleOAuthInfoPassV2(
       await bail(message, { type: "api_key_missing" });
       return;
     }
-    appState.setApiKey(hostOrigin, apiKey);
+    appState.setApiKey(storageKey, apiKey);
 
     const authType: AuthType = message.payload.auth_type;
 
     const validateOauthRes = await getCredentialsFromPayload(
       message.payload,
-      hostOrigin,
+      storageKey,
     );
 
     if (!validateOauthRes.success) {
@@ -353,9 +363,9 @@ export async function handleOAuthInfoPassV2(
     }
 
     const signInResult = handleUserSignInRes.data;
-    appState.setKeyshare_1(hostOrigin, signInResult.keyshare1Secp256k1);
-    appState.setAuthToken(hostOrigin, signInResult.jwtToken);
-    appState.setWallet(hostOrigin, {
+    appState.setKeyshare_1(storageKey, signInResult.keyshare1Secp256k1);
+    appState.setAuthToken(storageKey, signInResult.jwtToken);
+    appState.setWallet(storageKey, {
       authType,
       walletId: signInResult.walletIdSecp256k1,
       publicKey: signInResult.publicKeySecp256k1,
@@ -364,16 +374,16 @@ export async function handleOAuthInfoPassV2(
     });
 
     // Store ed25519 key package (signing share) separately
-    appState.setKeyPackageEd25519(hostOrigin, signInResult.keyPackageEd25519);
+    appState.setKeyPackageEd25519(storageKey, signInResult.keyPackageEd25519);
 
     // Store combined ed25519 user seed share for export
     appState.setSeedEd25519(
-      hostOrigin,
+      storageKey,
       JSON.stringify(signInResult.seedEd25519),
     );
 
     // Store ed25519 wallet info (without signing share)
-    appState.setWalletEd25519(hostOrigin, {
+    appState.setWalletEd25519(storageKey, {
       authType,
       walletId: signInResult.walletIdEd25519,
       publicKeyPackage: signInResult.publicKeyPackageEd25519,
@@ -397,7 +407,7 @@ export async function handleOAuthInfoPassV2(
     return;
   } finally {
     if (hasSignedIn) {
-      const wallet = appState.getWallet(hostOrigin);
+      const wallet = appState.getWallet(storageKey);
       if (wallet?.walletId) {
         setUserId(wallet.walletId);
         if (isNewUser) {
@@ -416,7 +426,7 @@ export async function handleOAuthInfoPassV2(
     };
 
     port.postMessage(infoPassAck);
-    appState.setNonce(hostOrigin, null);
+    appState.setNonce(storageKey, null);
   }
 }
 

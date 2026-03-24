@@ -44,6 +44,10 @@
   }
 }
 
+.rawSurface {
+  max-height: 230px;
+}
+
 // Mobile app mode: enlarge toggle text
 :global(html[data-mobile]) .messageHeader .viewButtonTextRow p {
   font-size: var(--font-size-sm);

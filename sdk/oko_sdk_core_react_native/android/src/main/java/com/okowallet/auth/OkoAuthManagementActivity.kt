@@ -114,11 +114,22 @@ class OkoAuthManagementActivity : ComponentActivity() {
             } catch (_: Exception) {
                 // Fallback: legacy CustomTabsIntent — redirect fires external intent,
                 // caught by OkoAuthCallbackActivity which brings us back via CLEAR_TOP.
-                val customTab = CustomTabsIntent.Builder()
-                    .setShowTitle(true)
-                    .build()
-                customTab.launchUrl(this, uri)
-                usingAuthTab = false
+                if (isFinishing || isDestroyed) {
+                    OkoAuthBrowserModule.cancelIfPending()
+                    finish()
+                    return
+                }
+                try {
+                    val customTab = CustomTabsIntent.Builder()
+                        .setShowTitle(true)
+                        .build()
+                    customTab.launchUrl(this, uri)
+                    usingAuthTab = false
+                } catch (_: Exception) {
+                    OkoAuthBrowserModule.cancelIfPending()
+                    finish()
+                    return
+                }
             }
 
             authStarted = true

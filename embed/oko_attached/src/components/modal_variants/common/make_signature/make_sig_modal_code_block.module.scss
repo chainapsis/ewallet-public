@@ -2,12 +2,9 @@
   as *;
 
 .codeBlock {
-  min-height: 65px;
-  max-height: 230px;
-  padding: 0;
-  padding-right: 4px; // text-to-scrollbar gap
-  background: transparent;
-  border-radius: 0;
+  min-height: 0;
+  max-height: 100%;
+  min-width: 0;
 
   // Firefox
   scrollbar-width: thin;
@@ -32,4 +29,32 @@
     background-color: var(--bg-quaternary);
     border-radius: 9999px;
   }
+}
+
+.topLevel {
+  box-sizing: border-box;
+  padding-right: 4px;
+}
+
+.embedded {
+  box-sizing: border-box;
+}
+
+.content {
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.contentTopLevel {
+  padding-right: 0;
+}
+
+// App-only: preserve rail position while widening the perceived right-side
+// content whitespace inside the raw body via explicit content inset ownership.
+:global(html[data-mobile]) .contentTopLevel {
+  padding-right: 8px;
+}
+
+.contentEmbedded {
+  padding-right: 0;
 }

@@ -17,6 +17,7 @@ import {
 } from "@oko-wallet-attached/components/modal_variants/svm/siws_message";
 import { SignWithOkoBox } from "@oko-wallet-attached/components/sign_with_oko_box/sign_with_oko_box";
 import { hexToUint8Array } from "@oko-wallet-attached/crypto/keygen_ed25519";
+import { useMemoryState } from "@oko-wallet-attached/store/memory";
 
 export interface MakeMessageSigModalProps {
   getIsAborted: () => boolean;
@@ -39,9 +40,12 @@ export const MakeMessageSigModal: FC<MakeMessageSigModalProps> = ({
     }
   }, [data.payload.data.message]);
 
+  const isMobileNative = useMemoryState((state) => state.isMobileNative);
   const siwsMessage = getSiwsMessage(decodedMessage);
   const isValidSiwsMessage = siwsMessage
-    ? verifySiwsMessage(siwsMessage, data.payload.origin)
+    ? verifySiwsMessage(siwsMessage, data.payload.origin, {
+        skipOriginCheck: isMobileNative,
+      })
     : false;
   const [isSiwsRiskWarningChecked, setIsSiwsRiskWarningChecked] =
     useState(false);
@@ -128,7 +132,7 @@ export const MakeMessageSigModal: FC<MakeMessageSigModalProps> = ({
         <SignWithOkoBox theme={theme} />
       </CommonModal>
 
-      {isDemo && <DemoView />}
+      {isDemo && <DemoView hideOnMobile />}
     </div>
   );
 };

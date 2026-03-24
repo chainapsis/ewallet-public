@@ -77,10 +77,10 @@
 // ── Mobile app mode overrides ──
 
 :global(html[data-mobile]) .modalInnerContentContainer {
-  margin-left: -16px;
-  margin-right: -16px;
-  padding-left: 16px;
-  padding-right: 12px; // 12px + 4px scrollbar = 16px visual distance
+  margin-left: -20px;
+  margin-right: -20px;
+  padding-left: 20px;
+  padding-right: 20px; // overlay scrollbar on mobile app, no compensation needed
 }
 
 :global(html[data-mobile]) .container {
@@ -89,7 +89,7 @@
 
 :global(html[data-mobile]) .modal {
   max-height: 100dvh;
-  height: 100%;
+  flex: 1;
 }
 
 :global(html[data-mobile]) .closeButton {

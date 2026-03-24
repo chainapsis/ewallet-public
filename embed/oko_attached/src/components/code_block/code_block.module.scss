@@ -1,23 +1,21 @@
 .codeBlock {
   display: flex;
-  padding: 16px;
   flex-direction: column;
   justify-content: flex-start;
-  align-items: center;
+  align-items: stretch;
   align-self: stretch;
+  min-width: 0;
+  min-height: 0;
   overflow-y: auto;
-  border-radius: 12px;
-  background: var(--bg-secondary);
   width: 100%;
-  max-width: 360px;
-  max-height: 300px;
 
   pre {
     align-self: stretch;
+    margin: 0;
     font-family: var(--font-family-body, Inter, sans-serif);
     color: var(--text-tertiary);
     font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-regular);
+    font-weight: var(--font-weight-medium);
     line-height: var(--font-line-height-sm);
     white-space: pre-wrap;
     word-break: break-word;

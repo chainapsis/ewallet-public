@@ -12,6 +12,7 @@ import { Avatar } from "@oko-wallet-attached/components/avatar/avatar";
 import { SignerAddressOrEmail } from "@oko-wallet-attached/components/modal_variants/common/metadata_content/signer_address_or_email/signer_address_or_email";
 import { useMobileMode } from "@oko-wallet-attached/hooks/mobile_mode";
 import { getChainByChainId } from "@oko-wallet-attached/requests/chain_infos";
+import { useMemoryState } from "@oko-wallet-attached/store/memory";
 import type { ParsedTransaction } from "@oko-wallet-attached/tx-parsers/svm/types";
 import { getFaviconUrl } from "@oko-wallet-attached/utils/favicon";
 
@@ -29,6 +30,7 @@ export const SvmTxSignatureContent: FC<SvmTxSignatureContentProps> = ({
   isLoading,
 }) => {
   const { origin, signer, chain_id } = payload;
+  const appName = useMemoryState((state) => state.appName);
   const faviconUrl = getFaviconUrl(origin);
   const isMobile = useMobileMode();
   const headingSize = isMobile ? "display-xs" : "lg";
@@ -67,7 +69,7 @@ export const SvmTxSignatureContent: FC<SvmTxSignatureContentProps> = ({
             />
           )}
           <Typography size={headingSize} color="primary" weight="semibold">
-            {origin.replace(/^https?:\/\//, "")}
+            {appName}
           </Typography>
         </div>
 
@@ -99,11 +101,7 @@ export const SvmTxSignatureContent: FC<SvmTxSignatureContentProps> = ({
             </div>
           </div>
 
-          <SignerAddressOrEmail
-            signer={signer}
-            origin={origin}
-            initialViewType="Login Info"
-          />
+          <SignerAddressOrEmail signer={signer} initialViewType="Login Info" />
         </div>
       </div>
 

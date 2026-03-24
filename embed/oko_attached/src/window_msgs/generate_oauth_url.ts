@@ -96,14 +96,14 @@ async function buildOAuthUrl(
   provider: string,
   apiKey: string,
   targetOrigin: string,
-  hostOrigin: string,
+  storageKey: string,
   redirectScheme?: string | null,
   mobileOsBrowser?: boolean,
 ): Promise<string> {
   const appState = useAppState.getState();
 
   const rawTheme =
-    appState.getTheme(hostOrigin) ??
+    appState.getTheme(storageKey) ??
     new URLSearchParams(window.location.search).get("theme");
   const sdkTheme =
     rawTheme === "light" || rawTheme === "dark" ? rawTheme : null;
@@ -117,20 +117,20 @@ async function buildOAuthUrl(
     ...(sdkTheme && { theme: sdkTheme }),
   };
 
-  // Mobile OS browser: redirect back to proxy web (targetOrigin), not attached
+  // Mobile OS browser: redirect back to mobile host web (targetOrigin), not attached
   const redirectBaseOrigin = mobileOsBrowser
     ? targetOrigin
     : window.location.origin;
 
   if (provider === "google") {
     const nonce = generateNonce();
-    appState.setNonce(hostOrigin, nonce);
+    appState.setNonce(storageKey, nonce);
     return buildGoogleOAuthUrl(nonce, state, redirectBaseOrigin);
   }
 
   // X, Discord, GitHub use PKCE
   const { codeVerifier, codeChallenge } = await createPkcePair();
-  appState.setCodeVerifier(hostOrigin, codeVerifier);
+  appState.setCodeVerifier(storageKey, codeVerifier);
 
   switch (provider) {
     case "x":
@@ -148,7 +148,7 @@ export async function handleGenerateOAuthUrl(
   ctx: MsgEventContext,
   message: OkoWalletMsgGenerateOAuthUrl,
 ): Promise<void> {
-  const { port, hostOrigin } = ctx;
+  const { port, storageKey } = ctx;
 
   try {
     const payload = message.payload as typeof message.payload & {
@@ -161,7 +161,7 @@ export async function handleGenerateOAuthUrl(
       provider,
       apiKey,
       targetOrigin,
-      hostOrigin,
+      storageKey,
       redirectScheme,
       mobileOsBrowser,
     );

@@ -10,6 +10,7 @@ import { type FC, type ReactNode, useState } from "react";
 import styles from "./signer_address_or_email.module.scss";
 import { useMobileMode } from "@oko-wallet-attached/hooks/mobile_mode";
 import { useAppState } from "@oko-wallet-attached/store/app";
+import { useMemoryState } from "@oko-wallet-attached/store/memory";
 
 function renderAuthIcon(
   authType: AuthType | undefined,
@@ -31,13 +32,11 @@ function renderAuthIcon(
 
 interface SignerAddressOrEmailProps {
   signer: string;
-  origin: string;
   initialViewType: "View Address" | "Login Info" | null;
 }
 
 interface ViewProps {
   value: string;
-  origin: string;
   type: "address" | "email";
   prefix?: string;
 }
@@ -45,10 +44,10 @@ interface ViewProps {
 export const SignerAddressOrEmailView: FC<ViewProps> = ({
   value,
   type,
-  origin,
   prefix,
 }) => {
-  const wallet = useAppState((state) => state.getWallet(origin));
+  const storageKey = useMemoryState((state) => state.storageKey);
+  const wallet = useAppState((state) => state.getWallet(storageKey));
   const email = wallet?.email;
   const authType = wallet?.authType;
   const isMobile = useMobileMode();
@@ -58,7 +57,7 @@ export const SignerAddressOrEmailView: FC<ViewProps> = ({
 
   return (
     <>
-      {type === "email" && renderAuthIcon(authType, isMobile ? 24 : 16)}
+      {type === "email" && renderAuthIcon(authType, isMobile ? 20 : 16)}
       <Typography
         size={isMobile ? "md" : "sm"}
         color="brand-tertiary"
@@ -91,7 +90,6 @@ export const SignerAddressOrEmailChangeViewTypeButton: FC<
 
 export const SignerAddressOrEmail: FC<SignerAddressOrEmailProps> = ({
   signer,
-  origin,
   initialViewType,
 }) => {
   const [viewType, setViewType] = useState<
@@ -103,11 +101,7 @@ export const SignerAddressOrEmail: FC<SignerAddressOrEmailProps> = ({
     case "View Address":
       return (
         <div className={styles.wrapper}>
-          <SignerAddressOrEmailView
-            value={signer}
-            type="address"
-            origin={origin}
-          />
+          <SignerAddressOrEmailView value={signer} type="address" />
           <SignerAddressOrEmailChangeViewTypeButton
             viewType="Login Info"
             onClick={() => setViewType("Login Info")}
@@ -117,11 +111,7 @@ export const SignerAddressOrEmail: FC<SignerAddressOrEmailProps> = ({
     case "Login Info":
       return (
         <div className={styles.wrapper}>
-          <SignerAddressOrEmailView
-            value={signer}
-            type="email"
-            origin={origin}
-          />
+          <SignerAddressOrEmailView value={signer} type="email" />
           <SignerAddressOrEmailChangeViewTypeButton
             viewType="View Address"
             onClick={() => setViewType("View Address")}

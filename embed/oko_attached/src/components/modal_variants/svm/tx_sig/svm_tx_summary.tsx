@@ -6,6 +6,7 @@ import { type FC, type ReactNode, useMemo, useState } from "react";
 
 import styles from "../common/summary.module.scss";
 import { Instructions } from "./msg/instructions";
+import localStyles from "./svm_tx_summary.module.scss";
 import { MakeSignatureRawCodeBlock } from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_sig_modal_code_block";
 import { MakeSignatureRawCodeBlockContainer } from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_sig_modal_code_block_container";
 import { TxRow } from "@oko-wallet-attached/components/modal_variants/common/tx_row";
@@ -77,15 +78,14 @@ export const SvmTxSummary: FC<SvmTxSummaryProps> = ({
 
   if (isRawView) {
     content = (
-      <MakeSignatureRawCodeBlockContainer>
-        <MakeSignatureRawCodeBlock
-          className={styles.codeBlock}
-          code={rawData}
-        />
+      <MakeSignatureRawCodeBlockContainer className={styles.rawSurface}>
+        <MakeSignatureRawCodeBlock code={rawData} />
       </MakeSignatureRawCodeBlockContainer>
     );
   } else {
-    content = smartViewContent;
+    content = (
+      <div className={localStyles.smartViewContent}>{smartViewContent}</div>
+    );
   }
 
   return (

@@ -2,7 +2,7 @@ import { Buffer } from "buffer";
 import pako from "pako";
 
 /**
- * Generic RPC codec for app ↔ attached_proxy_web communication.
+ * Generic RPC codec for app ↔ attached_mobile_host_web communication.
  *
  * Handles types that can't be directly serialized to JSON:
  * - bigint  → { __oko_t: "bigint", value: "123" }
@@ -167,6 +167,7 @@ export function buildRpcUrl(
   apiKey: string,
   redirectScheme: string,
   expectedPublicKey?: string | null,
+  clientRandom?: string | null,
 ): { url: string; stats: RpcEncodingStats } {
   const url = new URL("/mobile/rpc", sdkEndpoint);
   url.searchParams.set("method", method);
@@ -176,11 +177,13 @@ export function buildRpcUrl(
   if (expectedPublicKey) {
     url.searchParams.set("expected_pk", expectedPublicKey);
   }
-
   const { encoded, stats } = encodeRpcPayloadWithStats(payload);
   const hashParams = new URLSearchParams();
   hashParams.set(RPC_VERSION_PARAM, RPC_CODEC_VERSION);
   hashParams.set(RPC_PAYLOAD_PARAM, encoded);
+  if (clientRandom) {
+    hashParams.set("client_random", clientRandom);
+  }
   url.hash = hashParams.toString();
 
   return { url: url.toString(), stats };

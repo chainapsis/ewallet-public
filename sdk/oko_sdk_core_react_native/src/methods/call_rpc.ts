@@ -17,8 +17,13 @@ export async function callRpc<T = unknown>(
   apiKey: string,
   redirectScheme: string,
   expectedPublicKey?: string | null,
+  clientRandom?: string | null,
+  androidCallbackScheme?: string,
 ): Promise<T> {
-  const serverScheme = getServerRedirectScheme(redirectScheme);
+  const serverScheme = getServerRedirectScheme(
+    redirectScheme,
+    androidCallbackScheme,
+  );
   const { url: rpcUrl } = buildRpcUrl(
     sdkEndpoint,
     method,
@@ -26,9 +31,14 @@ export async function callRpc<T = unknown>(
     apiKey,
     serverScheme,
     expectedPublicKey,
+    clientRandom,
   );
 
-  const result = await openAuthSession(rpcUrl, redirectScheme);
+  const result = await openAuthSession(
+    rpcUrl,
+    redirectScheme,
+    androidCallbackScheme,
+  );
 
   if (result.type === "cancel") {
     throw new Error(`RPC call "${method}" cancelled`);

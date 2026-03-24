@@ -12,7 +12,7 @@ import { useAppState } from "@oko-wallet-attached/store/app";
 import { makeSignature } from "@oko-wallet-attached/web3/sig";
 
 export async function makeCosmosSignature(
-  hostOrigin: string,
+  storageKey: string,
   signDoc: SignDoc | StdSignDoc,
   digestMethod: "sha256" | "keccak256",
   getIsAborted: () => boolean,
@@ -30,7 +30,7 @@ export async function makeCosmosSignature(
         : signDocBytes.slice();
 
   const signOutputRes = await makeSignature(
-    hostOrigin,
+    storageKey,
     hashedMessage,
     getIsAborted,
   );
@@ -40,7 +40,7 @@ export async function makeCosmosSignature(
 
   const signOutput = signOutputRes.data;
 
-  const wallet = useAppState.getState().getWallet(hostOrigin);
+  const wallet = useAppState.getState().getWallet(storageKey);
   if (!wallet) {
     return { success: false, err: { type: "wallet_not_found" } };
   }

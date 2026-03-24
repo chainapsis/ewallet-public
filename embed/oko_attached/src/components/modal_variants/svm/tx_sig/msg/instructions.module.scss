@@ -2,8 +2,7 @@
 
 .container {
   display: flex;
-  padding: 16px;
-  padding-right: 8px;
+  padding: 16px 8px;
   flex-direction: column;
   align-items: flex-start;
   overflow-y: auto;
@@ -19,6 +18,10 @@
     background: none;
     border-radius: 0;
   }
+}
+
+.unknownSurface {
+  max-height: 230px;
 }
 
 .tokenInfo {
@@ -73,8 +76,41 @@
 .instructionsContainer {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
   width: 100%;
+}
+
+.embeddedTransferRow {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.multiInstructionRow {
+  > :first-child svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background: var(--bg-secondary-hover);
+
+      > :first-child svg {
+        color: var(--fg-tertiary-hover);
+      }
+    }
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .multiInstructionRow:has(> :first-child:active) {
+    background: var(--bg-secondary-hover);
+
+    > :first-child svg {
+      color: var(--fg-tertiary-hover);
+    }
+  }
 }
 
 // When collapsible contains tokenAddressRow (unknown token),

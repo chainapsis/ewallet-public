@@ -3,6 +3,7 @@ import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import { type FC, Fragment } from "react";
 import { stringify, type TypedDataDefinition } from "viem";
 
+import styles from "./unknown.module.scss";
 import { MakeSignatureRawCodeBlock } from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_sig_modal_code_block";
 import { MakeSignatureRawCodeBlockContainer } from "@oko-wallet-attached/components/modal_variants/common/make_signature/make_sig_modal_code_block_container";
 
@@ -17,7 +18,7 @@ export const UnknownAction: FC<UnknownActionProps> = ({ typedData }) => {
         EIP-712 Typed Data
       </Typography>
       <Spacing height={8} />
-      <MakeSignatureRawCodeBlockContainer>
+      <MakeSignatureRawCodeBlockContainer className={styles.rawSurface}>
         <MakeSignatureRawCodeBlock code={stringify(typedData, null, 2)} />
       </MakeSignatureRawCodeBlockContainer>
     </Fragment>

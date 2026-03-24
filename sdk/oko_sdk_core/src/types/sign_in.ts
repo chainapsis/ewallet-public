@@ -32,6 +32,7 @@ export type OAuthSignInError =
   | { type: "invalid_msg_type"; msg_type: string }
   | { type: "vendor_token_verification_failed" }
   | { type: "api_key_missing" }
+  | { type: "wallet_not_initialized" }
   | { type: "insufficient_shares" }
   | {
       type: "unknown";

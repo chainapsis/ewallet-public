@@ -11,14 +11,14 @@ export function handleSetOAuthNonce(
   ctx: MsgEventContext,
   message: OkoWalletMsgSetOAuthNonce,
 ) {
-  const { port, hostOrigin } = ctx;
+  const { port, storageKey } = ctx;
 
   if (!message.payload) {
     throw new Error("Nonce is empty");
   }
 
   const appState = useAppState.getState();
-  appState.setNonce(hostOrigin, message.payload);
+  appState.setNonce(storageKey, message.payload);
 
   const ack: OkoWalletMsgSetOAuthNonceAck = {
     target: OKO_SDK_TARGET,

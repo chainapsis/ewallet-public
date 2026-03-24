@@ -23,6 +23,7 @@ import { handleSignOut } from "./sign_out";
 import { OKO_SDK_TARGET } from "./target";
 import type { MsgEventContext } from "./types";
 import { setColorScheme } from "@oko-wallet-attached/components/attached_initialized/color_scheme";
+import { MOBILE_NATIVE_ORIGIN } from "@oko-wallet-attached/requests/endpoints";
 import { useAppState } from "@oko-wallet-attached/store/app";
 import { useMemoryState } from "@oko-wallet-attached/store/memory";
 
@@ -41,7 +42,7 @@ export function makeMsgHandler() {
       data?.msg_type === "set_reauth_params"
     ) {
       // set_reauth_params is sent from the re-auth popup (same attached origin)
-      // or from the host parent window (cross-origin iframe, e.g. mobile proxy web)
+      // or from the host parent window (cross-origin iframe, e.g. mobile mobile host web)
       const registeredHostOrigin = useMemoryState.getState().hostOrigin;
       if (
         event.origin !== window.location.origin &&
@@ -56,7 +57,13 @@ export function makeMsgHandler() {
       const appState = useAppState.getState();
       // Use registeredHostOrigin as storage key when sent from the parent window,
       // so that the nonce is found by oauth_info_pass (which looks up by hostOrigin).
-      const storageOrigin = registeredHostOrigin ?? event.origin;
+      const storageOrigin = useMemoryState.getState().storageKey;
+      if (!storageOrigin) {
+        console.warn(
+          "[attached] storageKey not initialized, ignoring set_reauth_params",
+        );
+        return;
+      }
       const payload = data.payload as
         | { nonce?: string; code_verifier?: string }
         | undefined;
@@ -110,9 +117,40 @@ export function makeMsgHandler() {
       return;
     }
 
+    const memState = useMemoryState.getState();
+    // When the message comes from attached_mobile_host_web (mobile native host),
+    // keep the appName set during initialization (e.g. apiKey-derived name).
+    const isFromProxy =
+      MOBILE_NATIVE_ORIGIN && event.origin === MOBILE_NATIVE_ORIGIN;
+    const appName =
+      isFromProxy && memState.appName
+        ? memState.appName
+        : event.origin.replace(/^https?:\/\//, "");
+    if (!isFromProxy) {
+      memState.setAppName(appName);
+    }
+    const storageKey = memState.storageKey;
+    if (!storageKey) {
+      console.warn(
+        "[attached] storageKey not initialized, rejecting message:",
+        message.msg_type,
+      );
+      port.postMessage({
+        target: OKO_SDK_TARGET,
+        msg_type: `${message.msg_type}_ack`,
+        payload: {
+          success: false,
+          err: "wallet not initialized",
+        },
+      });
+      return;
+    }
+
     const ctx: MsgEventContext = {
       port,
       hostOrigin: event.origin,
+      appName,
+      storageKey,
     };
 
     switch (message.msg_type) {

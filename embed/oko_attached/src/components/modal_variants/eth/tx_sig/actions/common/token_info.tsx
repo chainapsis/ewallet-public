@@ -71,8 +71,8 @@ export const TokenInfo: FC<TokenInfoProps> = ({
         <Tooltip content={formatted.full} placement="bottom">
           <Typography
             color="tertiary"
-            size="sm"
-            weight="medium"
+            size={isMobile ? "display-xs" : "sm"}
+            weight={isMobile ? "semibold" : "medium"}
             className={styles.tokenAmount}
           >
             {formatted.display}
@@ -81,7 +81,7 @@ export const TokenInfo: FC<TokenInfoProps> = ({
       ) : (
         <Typography
           color="secondary"
-          size="lg"
+          size={isMobile ? "display-xs" : "lg"}
           weight="semibold"
           className={styles.tokenAmount}
         >

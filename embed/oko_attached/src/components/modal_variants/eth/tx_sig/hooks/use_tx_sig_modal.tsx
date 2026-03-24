@@ -48,10 +48,10 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
   const { closeModal, setError } = useMemoryState();
 
   const hostOrigin = data.payload.origin;
-  const appOrigin = (data.payload as Record<string, unknown>).app_origin as
-    | string
-    | undefined;
-  const theme = useAppState().getTheme(hostOrigin);
+  const storageKey = useMemoryState((state) => state.storageKey);
+  const isMobileNative = useMemoryState((state) => state.isMobileNative);
+  const mobileApiKey = useMemoryState((state) => state.apiKey);
+  const theme = useAppState().getTheme(storageKey);
 
   const [isLoading, setIsLoading] = useState(false);
   const [simulatedTransaction, setSimulatedTransaction] =
@@ -161,8 +161,7 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
     rpcTxRequest: originalTransaction,
     nonce: nonce,
     client: publicClient,
-    hostOrigin: payload.origin,
-    appOrigin,
+    hostOrigin,
     options: {
       enabled: isSupportedChain,
     },
@@ -209,7 +208,12 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
     getL1GasEstimationError !== null ||
     getFeeCurrencyBalanceError !== null;
 
-  const isDemo = !!hostOrigin && isDemoOrSandboxOrigin(hostOrigin, appOrigin);
+  const isDemo =
+    !!hostOrigin &&
+    isDemoOrSandboxOrigin(hostOrigin, {
+      isMobileNative,
+      apiKey: mobileApiKey,
+    });
 
   // Fee sponsorship flow for Base chain
   const {
@@ -559,7 +563,7 @@ export function useTxSigModal(args: UseEthereumSigModalArgs) {
       });
 
       const signedTransactionRes = await makeEthereumTxSignature(
-        hostOrigin,
+        storageKey,
         txSerializable,
         getIsAborted,
       );
