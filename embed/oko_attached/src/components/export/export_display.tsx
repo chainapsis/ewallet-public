@@ -283,8 +283,8 @@ export const ExportDisplay: FC = () => {
         onClick={handleCopy}
         className={styles.copyButton}
         iconSize={20}
-        defaultColor="#D5D7DA"
-        successColor="#D5D7DA"
+        defaultColor="var(--brand-300)"
+        successColor="var(--brand-300)"
       >
         Copy to Clipboard
       </CopyButton>
