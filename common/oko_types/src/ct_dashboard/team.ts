@@ -35,7 +35,6 @@ export interface InviteTeamMemberResponse {
 }
 
 export interface AcceptInvitationResponse {
-  token: string;
   email: string;
   customer_id: string;
 }

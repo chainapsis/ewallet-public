@@ -8,4 +8,5 @@ export const paths = {
   team: "/team",
   team_invite: "/team/invite",
   team_invite_invalid: "/team/invite/invalid",
+  team_invite_success: "/team/invite/success",
 };
