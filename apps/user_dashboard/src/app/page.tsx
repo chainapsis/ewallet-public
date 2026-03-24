@@ -6,6 +6,7 @@ import { DashboardHeader } from "@oko-wallet-user-dashboard/components/dashboard
 import { LeftBar } from "@oko-wallet-user-dashboard/components/left_bar/left_bar";
 import { MyAssets } from "@oko-wallet-user-dashboard/components/my_assets/my_assets";
 import { ToastContainer } from "@oko-wallet-user-dashboard/components/toast";
+import { TokenScan } from "@oko-wallet-user-dashboard/components/token_scan/token_scan";
 import { TotalBalance } from "@oko-wallet-user-dashboard/components/total_balance/total_balance";
 
 export default function Home() {
@@ -25,6 +26,7 @@ export default function Home() {
         </div>
       </div>
       <ToastContainer />
+      <TokenScan />
     </Authorized>
   );
 }
