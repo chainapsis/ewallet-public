@@ -11,6 +11,7 @@
   "dependencies": {
     "@hookform/resolvers": "5.2.2",
     "@oko-wallet/oko-sdk-eth": "^0.1.2-alpha.1",
+    "@oko-wallet/oko-sdk-react": "workspace:*",
     "@tanstack/react-query": "^5.90.12",
     "next": "^16.1.1",
     "react": "^19.2.1",

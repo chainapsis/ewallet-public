@@ -1,24 +1,25 @@
-import { useContext } from "react";
+import { useOko } from "@oko-wallet/oko-sdk-react";
+import { useOkoEth } from "@oko-wallet/oko-sdk-react/eth";
 import { createPublicClient, http } from "viem";
 import { sepolia } from "viem/chains";
 
-import { OkoContext } from "./OkoProvider";
-
 export default function useEvm() {
-  const ctx = useContext(OkoContext);
+  const { isReady, isSignedIn, signIn, signOut } = useOko();
+  const { ethWallet, isReady: isEthReady } = useOkoEth();
+
   const publicClient = createPublicClient({
     chain: sepolia,
     transport: http(),
   });
 
   return {
-    isReady: ctx.isReady,
-    isSignedIn: ctx.isSignedIn,
-    isSigningIn: ctx.isSigningIn,
-    address: ctx.address,
-    okoEth: ctx.okoEth,
-    signIn: ctx.signIn,
-    signOut: ctx.signOut,
+    isReady: isReady && isEthReady,
+    isSignedIn,
+    isSigningIn: false,
+    address: ethWallet?.state.address ?? null,
+    okoEth: ethWallet,
+    signIn,
+    signOut,
     publicClient,
   };
 }

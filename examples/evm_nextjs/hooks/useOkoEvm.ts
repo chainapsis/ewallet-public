@@ -1,18 +1,16 @@
-import { useContext } from "react";
-
-import { OkoEvmContext } from "@/components/OkoEvmProvider";
+import { useOko } from "@oko-wallet/oko-sdk-react";
+import { useOkoEth } from "@oko-wallet/oko-sdk-react/eth";
 
 export default function useOkoEvm() {
-  const { isReady, isSignedIn, isSigningIn, address, okoEth, signIn, signOut } =
-    useContext(OkoEvmContext);
+  const { isReady, isSignedIn, signIn, signOut } = useOko();
+  const { ethWallet, isReady: isEthReady } = useOkoEth();
 
   return {
-    isReady,
+    isReady: isReady && isEthReady,
     isSignedIn,
-    isSigningIn,
-    address,
-    okoEth,
     signIn,
     signOut,
+    address: ethWallet?.state.address ?? null,
+    okoEth: ethWallet,
   };
 }
