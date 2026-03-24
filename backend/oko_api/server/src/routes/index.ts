@@ -3,7 +3,6 @@ import { makeCustomerRouter } from "@oko-wallet/ct-dashboard-api";
 import { makeUserRouter } from "@oko-wallet/user-dashboard-api";
 import type { Express } from "express";
 
-import { makeAttachedV1Router } from "./attached_v1";
 import { getStatus } from "./get_status";
 import { makeLogRouterV1 } from "./log_v1";
 import { makeSocialLoginRouter } from "./social_login_v1";
@@ -13,8 +12,6 @@ import { makeTSSRouterV2 } from "./tss_v2";
 
 export function setRoutes(app: Express) {
   app.use("/customer_dashboard/v1", makeCustomerRouter());
-
-  app.use("/attached/v1", makeAttachedV1Router());
 
   app.use("/oko_admin/v1", makeOkoAdminRouter());
 

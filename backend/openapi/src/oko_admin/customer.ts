@@ -204,10 +204,6 @@ export const CreateCustomerWithDashboardUserRequestSchema = registry.register(
     url: z.string().optional().openapi({
       description: "Customer URL (optional)",
     }),
-    theme: z.enum(["light", "dark", "system"]).optional().openapi({
-      description: "Customer theme (optional). One of light, dark, system",
-      example: "system",
-    }),
     logo: z.any().optional().openapi({
       description: "Customer logo file (image)",
       format: "binary",

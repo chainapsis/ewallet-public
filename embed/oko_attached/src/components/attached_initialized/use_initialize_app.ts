@@ -208,11 +208,7 @@ export function useInitializeApp() {
           rawTheme === "light" || rawTheme === "dark" ? rawTheme : null;
 
         const oldTheme = getTheme(storageKey);
-        const themeResult = await determineTheme(
-          hostOrigin,
-          oldTheme,
-          sdkThemeParam,
-        );
+        const themeResult = await determineTheme(oldTheme, sdkThemeParam);
         const determinedThemeByCustomer = themeResult.theme;
 
         // Mobile: watch for system theme settling
