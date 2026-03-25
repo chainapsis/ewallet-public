@@ -202,26 +202,24 @@ export function useInitializeApp() {
           rawTheme === "light" || rawTheme === "dark" ? rawTheme : null;
 
         const themeResult = determineTheme(sdkThemeParam);
-        const determinedThemeByCustomer = themeResult.theme;
+        const determinedTheme = themeResult.theme;
 
         // Mobile: watch for system theme settling
         // (Chrome Custom Tab may report "light" initially then switch to "dark")
         if (isMobileNative && themeResult.usesSystemPreference) {
           const mq = window.matchMedia("(prefers-color-scheme: dark)");
           mq.addEventListener("change", () => {
-            const t: typeof determinedThemeByCustomer = mq.matches
-              ? "dark"
-              : "light";
+            const t: Theme = mq.matches ? "dark" : "light";
             setTheme(storageKey, t);
             setColorScheme(t);
             setResolvedTheme(t);
           });
         }
 
-        setTheme(storageKey, determinedThemeByCustomer);
-        setColorScheme(determinedThemeByCustomer);
+        setTheme(storageKey, determinedTheme);
+        setColorScheme(determinedTheme);
 
-        setResolvedTheme(determinedThemeByCustomer);
+        setResolvedTheme(determinedTheme);
 
         const wallet = getWallet(storageKey);
         const authType = wallet?.authType;
