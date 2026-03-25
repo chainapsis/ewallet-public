@@ -7,7 +7,7 @@ import { Input } from "@oko-wallet/oko-common-ui/input";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 
 import styles from "./page.module.scss";
 import { DashboardHeader } from "@oko-wallet-ct-dashboard/components/dashboard_header/dashboard_header";
@@ -30,7 +30,7 @@ interface InvitationInfo {
   team_name: string;
 }
 
-export default function InviteAcceptPage() {
+function InviteAcceptPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -246,5 +246,13 @@ export default function InviteAcceptPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function InviteAcceptPage() {
+  return (
+    <Suspense>
+      <InviteAcceptPageContent />
+    </Suspense>
   );
 }
