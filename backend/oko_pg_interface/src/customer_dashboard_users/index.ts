@@ -22,11 +22,11 @@ export async function insertCustomerDashboardUser(
   const query = `
 INSERT INTO customer_dashboard_users (
   user_id, customer_id, email, role,
-  status, is_email_verified, password_hash
+  status, is_email_verified, email_verified_at, password_hash
 )
 VALUES (
   $1, $2, $3, $4,
-  $5, $6, $7
+  $5, $6, $7, $8
 )
 RETURNING *
 `;
@@ -39,6 +39,8 @@ RETURNING *
       user.role,
       user.status,
       user.is_email_verified,
+      // Set email_verified_at when pre-verified (e.g. team invite accept) so inactive reminder can track them
+      user.is_email_verified ? new Date() : null,
       user.password_hash,
     ]);
 
