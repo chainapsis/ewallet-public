@@ -36,7 +36,9 @@ async function validateOAuthPayloadOfX(
     };
   }
 
-  const redirectUri = `${window.location.origin}/x/callback`;
+  const redirectOrigin =
+    appState.getOauthRedirectOrigin(storageKey) ?? window.location.origin;
+  const redirectUri = `${redirectOrigin}/x/callback`;
 
   const tokenRes = await getAccessTokenOfX(
     payload.code,
@@ -69,6 +71,7 @@ async function validateOAuthPayloadOfX(
   const tokenInfo = tokenRes.data;
 
   appState.setCodeVerifier(storageKey, null);
+  appState.setOauthRedirectOrigin(storageKey, null);
 
   return {
     success: true,
@@ -114,7 +117,9 @@ async function validateOAuthPayloadOfDiscord(
     };
   }
 
-  const redirectUri = `${window.location.origin}/discord/callback`;
+  const redirectOrigin =
+    appState.getOauthRedirectOrigin(storageKey) ?? window.location.origin;
+  const redirectUri = `${redirectOrigin}/discord/callback`;
 
   const tokenRes = await getAccessTokenOfDiscordWithPKCE(
     payload.code,
@@ -140,6 +145,7 @@ async function validateOAuthPayloadOfDiscord(
   const userInfo = verifyIdTokenRes.data;
 
   appState.setCodeVerifier(storageKey, null);
+  appState.setOauthRedirectOrigin(storageKey, null);
 
   return {
     success: true,
@@ -163,7 +169,9 @@ async function validateOAuthPayloadOfGithub(
     };
   }
 
-  const redirectUri = `${window.location.origin}/github/callback`;
+  const redirectOrigin =
+    appState.getOauthRedirectOrigin(storageKey) ?? window.location.origin;
+  const redirectUri = `${redirectOrigin}/github/callback`;
 
   const tokenRes = await getAccessTokenOfGithub(
     payload.code,
@@ -189,6 +197,7 @@ async function validateOAuthPayloadOfGithub(
   const userInfo = verifyIdTokenRes.data;
 
   appState.setCodeVerifier(storageKey, null);
+  appState.setOauthRedirectOrigin(storageKey, null);
 
   return {
     success: true,
