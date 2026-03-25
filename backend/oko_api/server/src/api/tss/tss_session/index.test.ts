@@ -467,7 +467,6 @@ describe("tss_session_test", () => {
         status: "ACTIVE",
         url: "https://test.com",
         logo_url: "https://test.com/logo.png",
-        theme: "system",
       });
       if (insertCustomerRes.success === false) {
         throw new Error(`Failed to insert customer: ${insertCustomerRes.err}`);

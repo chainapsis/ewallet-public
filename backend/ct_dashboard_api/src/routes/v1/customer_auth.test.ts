@@ -68,7 +68,6 @@ describe("Customer Auth API Integration Tests", () => {
       status: "ACTIVE",
       url: "",
       logo_url: "",
-      theme: "system",
     };
 
     testCustomerDashboardUser = {

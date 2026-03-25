@@ -703,7 +703,6 @@ describe("presign_test", () => {
       status: "ACTIVE",
       url: "https://test.com",
       logo_url: "https://test.com/logo.png",
-      theme: "system",
     });
 
     if (!customerIdRes.success) {
@@ -797,7 +796,6 @@ describe("presign_test", () => {
       status: "ACTIVE",
       url: "https://test.com",
       logo_url: "https://test.com/logo.png",
-      theme: "system",
     });
 
     if (!customerIdRes.success) {
@@ -891,7 +889,6 @@ describe("presign_test", () => {
       status: "ACTIVE",
       url: "https://test.com",
       logo_url: "https://test.com/logo.png",
-      theme: "system",
     });
     if (!customerIdRes.success) {
       throw new Error("customer id fail");
@@ -1049,7 +1046,6 @@ describe("presign_test", () => {
       status: "ACTIVE",
       url: "https://test.com",
       logo_url: "https://test.com/logo.png",
-      theme: "system",
     });
 
     if (!customerIdRes.success) {
@@ -1136,7 +1132,6 @@ describe("presign_test", () => {
       status: "ACTIVE",
       url: "https://test.com",
       logo_url: "https://test.com/logo.png",
-      theme: "system",
     });
 
     if (!customerIdRes.success) {
@@ -1275,7 +1270,6 @@ describe("presign_test", () => {
       status: "ACTIVE",
       url: "https://test.com",
       logo_url: "https://test.com/logo.png",
-      theme: "system",
     });
 
     if (!customerIdRes.success) {
@@ -1362,7 +1356,6 @@ describe("presign_test", () => {
       status: "ACTIVE",
       url: "https://test.com",
       logo_url: "https://test.com/logo.png",
-      theme: "system",
     });
 
     if (!customerIdRes.success) {

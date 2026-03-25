@@ -103,7 +103,6 @@ LIMIT 1
         label: r.label,
         url: r.url,
         logo_url: r.logo_url,
-        theme: r.theme,
       };
 
       return { success: true, data: ret };
@@ -156,7 +155,6 @@ LIMIT 1
         label: r.label,
         url: r.url,
         logo_url: r.logo_url,
-        theme: r.theme,
       };
 
       return { success: true, data: ret };
@@ -367,7 +365,6 @@ WHERE u.status = 'ACTIVE'
         status: row.user_status,
         is_email_verified: row.is_email_verified,
       },
-      theme: row.theme,
     }));
     return { success: true, data };
   } catch (error) {
@@ -423,7 +420,6 @@ WHERE u.status = 'ACTIVE'
         status: row.user_status,
         is_email_verified: row.is_email_verified,
       },
-      theme: row.theme,
     }));
     return { success: true, data };
   } catch (error) {
