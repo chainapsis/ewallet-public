@@ -41,6 +41,29 @@
   min-width: 180px;
 }
 
+.appItemClickable {
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  transition: background-color 180ms cubic-bezier(0.23, 1, 0.32, 1);
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background-color: var(--bg-tertiary);
+    }
+
+    &:hover .externalLinkIcon {
+      opacity: 1;
+      max-width: 14px;
+      margin-left: 0;
+      transition:
+        max-width 150ms var(--ease-in-out-quad),
+        margin-left 150ms var(--ease-in-out-quad),
+        opacity 180ms ease 50ms;
+    }
+  }
+}
+
 .appLogo {
   width: 48px;
   height: 48px;
@@ -54,6 +77,8 @@
   flex-direction: column;
   gap: 2px;
   overflow: hidden;
+  flex: 1;
+  min-width: 0;
 }
 
 .appName {
@@ -66,4 +91,16 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.externalLinkIcon {
+  flex-shrink: 0;
+  opacity: 0;
+  max-width: 0;
+  margin-left: -12px;
+  overflow: hidden;
+  transition:
+    opacity 180ms ease,
+    max-width 150ms var(--ease-in-out-quad) 100ms,
+    margin-left 150ms var(--ease-in-out-quad) 100ms;
 }
