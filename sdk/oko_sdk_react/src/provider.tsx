@@ -43,6 +43,7 @@ export const OkoProvider: FC<OkoProviderProps> = ({ config, children }) => {
     defaultChainCtxWithAddress,
   );
 
+  // Init SDK singleton (once only)
   useEffect(() => {
     if (initCalledRef.current) {
       return;
@@ -62,6 +63,23 @@ export const OkoProvider: FC<OkoProviderProps> = ({ config, children }) => {
 
     const wallet = coreResult.data;
     dispatch({ type: "INIT_SUCCESS", wallet });
+
+    wallet.waitUntilInitialized.then((res) => {
+      if (res.success) {
+        dispatch({ type: "READY", state: res.data });
+      }
+    });
+
+    initChainSDKs(config, setEthCtx, setCosmosCtx, setSvmCtx);
+  }, []);
+
+  // Subscribe to events (re-registers on every mount for Strict Mode compat)
+  useEffect(() => {
+    if (!state.wallet) {
+      return;
+    }
+
+    const wallet = state.wallet;
 
     const accountsChangedHandler = (payload: {
       authType: typeof state.authType;
@@ -83,27 +101,64 @@ export const OkoProvider: FC<OkoProviderProps> = ({ config, children }) => {
       handler: accountsChangedHandler,
     });
 
-    wallet.waitUntilInitialized.then((res) => {
-      if (res.success) {
-        dispatch({ type: "READY", state: res.data });
-      }
-    });
-
-    const cleanupChainSDKs = initChainSDKs(
-      config,
-      setEthCtx,
-      setCosmosCtx,
-      setSvmCtx,
-    );
-
     return () => {
       wallet.off({
         type: "CORE__accountsChanged",
         handler: accountsChangedHandler,
       });
-      cleanupChainSDKs.then((cleanup) => cleanup());
     };
-  }, []);
+  }, [state.wallet]);
+
+  // ETH address listener
+  useEffect(() => {
+    const ethWallet = ethCtx.instance;
+    if (!ethWallet) {
+      return;
+    }
+
+    let provider: Awaited<
+      ReturnType<typeof ethWallet.getEthereumProvider>
+    > | null = null;
+
+    const ethAccountsHandler = (accounts: string[]) => {
+      setEthCtx((prev) => ({
+        ...prev,
+        address: accounts[0] ?? null,
+      }));
+    };
+
+    ethWallet.getEthereumProvider().then((p) => {
+      provider = p;
+      provider.on("accountsChanged", ethAccountsHandler);
+    });
+
+    return () => {
+      if (provider) {
+        provider.removeListener("accountsChanged", ethAccountsHandler);
+      }
+    };
+  }, [ethCtx.instance]);
+
+  // SVM address listener
+  useEffect(() => {
+    const svmWallet = svmCtx.instance;
+    if (!svmWallet) {
+      return;
+    }
+
+    const svmAccountHandler = (publicKey: { toBase58(): string } | null) => {
+      setSvmCtx((prev) => ({
+        ...prev,
+        address: publicKey?.toBase58() ?? null,
+      }));
+    };
+
+    svmWallet.on("accountChanged", svmAccountHandler);
+
+    return () => {
+      svmWallet.off("accountChanged", svmAccountHandler);
+    };
+  }, [svmCtx.instance]);
 
   return (
     <OkoContext.Provider value={{ state, dispatch }}>
@@ -121,8 +176,7 @@ async function initChainSDKs(
   setEthCtx: React.Dispatch<React.SetStateAction<EthContextValue>>,
   setCosmosCtx: React.Dispatch<React.SetStateAction<CosmosContextValue>>,
   setSvmCtx: React.Dispatch<React.SetStateAction<SvmContextValue>>,
-): Promise<() => void> {
-  const cleanups: (() => void)[] = [];
+) {
   const initArgs = {
     api_key: config.apiKey,
     sdk_endpoint: config.sdkEndpoint,
@@ -140,25 +194,12 @@ async function initChainSDKs(
           isReady: false,
           address: null,
         });
-
-        const ethAccountsHandler = (accounts: string[]) => {
-          setEthCtx((prev) => ({
-            ...prev,
-            address: accounts[0] ?? null,
-          }));
-        };
-
-        ethWallet.waitUntilInitialized.then(async () => {
-          const provider = await ethWallet.getEthereumProvider();
+        ethWallet.waitUntilInitialized.then(() => {
           setEthCtx((prev) => ({
             ...prev,
             isReady: true,
             address: ethWallet.state.address ?? null,
           }));
-          provider.on("accountsChanged", ethAccountsHandler);
-          cleanups.push(() => {
-            provider.removeListener("accountsChanged", ethAccountsHandler);
-          });
         });
       }
     } catch {
@@ -204,14 +245,6 @@ async function initChainSDKs(
           isReady: false,
           address: null,
         });
-
-        const svmAccountHandler = (publicKey: any) => {
-          setSvmCtx((prev) => ({
-            ...prev,
-            address: publicKey?.toBase58() ?? null,
-          }));
-        };
-
         svmWallet.waitUntilInitialized.then(() => {
           setSvmCtx((prev) => ({
             ...prev,
@@ -219,19 +252,9 @@ async function initChainSDKs(
             address: svmWallet.state.publicKey?.toBase58() ?? null,
           }));
         });
-        svmWallet.on("accountChanged", svmAccountHandler);
-        cleanups.push(() => {
-          svmWallet.off("accountChanged", svmAccountHandler);
-        });
       }
     } catch {
       console.warn("[oko-react] @oko-wallet/oko-sdk-svm is not installed");
     }
   }
-
-  return () => {
-    for (const cleanup of cleanups) {
-      cleanup();
-    }
-  };
 }
