@@ -38,14 +38,8 @@ export function useInitializeApp() {
     setApiKey,
     setReferralInfo,
   } = useMemoryState();
-  const {
-    getAuthToken,
-    getWallet,
-    setAuthToken,
-    resetAll,
-    setTheme,
-    getTheme,
-  } = useAppState();
+  const { getAuthToken, getWallet, setAuthToken, resetAll, setTheme } =
+    useAppState();
   const [isHydrated, setIsHydrated] = useState(false);
   const [resolvedTheme, setResolvedTheme] = useState<Theme | null>(null);
 
@@ -207,8 +201,7 @@ export function useInitializeApp() {
         const sdkThemeParam: OkoWalletTheme | null =
           rawTheme === "light" || rawTheme === "dark" ? rawTheme : null;
 
-        const oldTheme = getTheme(storageKey);
-        const themeResult = await determineTheme(oldTheme, sdkThemeParam);
+        const themeResult = determineTheme(sdkThemeParam);
         const determinedThemeByCustomer = themeResult.theme;
 
         // Mobile: watch for system theme settling
