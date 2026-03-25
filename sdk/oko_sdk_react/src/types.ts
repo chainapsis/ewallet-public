@@ -15,7 +15,9 @@ export interface OkoProviderConfig {
 
 export type OkoEthConfig = Record<string, never>;
 
-export type OkoCosmosConfig = Record<string, never>;
+export interface OkoCosmosConfig {
+  chainId: string;
+}
 
 export interface OkoSvmConfig {
   chainId: string;

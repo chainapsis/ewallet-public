@@ -64,7 +64,6 @@ export const OkoProvider: FC<OkoProviderProps> = ({ config, children }) => {
           publicKey: payload.publicKey,
           name: payload.name,
         });
-        syncChainAddresses(setEthCtx, setSvmCtx);
       },
     });
 
@@ -88,20 +87,6 @@ export const OkoProvider: FC<OkoProviderProps> = ({ config, children }) => {
   );
 };
 
-function syncChainAddresses(
-  setEthCtx: React.Dispatch<React.SetStateAction<EthContextValue>>,
-  setSvmCtx: React.Dispatch<React.SetStateAction<SvmContextValue>>,
-) {
-  setEthCtx((prev) => ({
-    ...prev,
-    address: prev.instance?.state.address ?? null,
-  }));
-  setSvmCtx((prev) => ({
-    ...prev,
-    address: prev.instance?.state.publicKey?.toBase58() ?? null,
-  }));
-}
-
 async function initChainSDKs(
   config: OkoProviderConfig,
   setEthCtx: React.Dispatch<React.SetStateAction<EthContextValue>>,
@@ -118,18 +103,26 @@ async function initChainSDKs(
       const { OkoEthWallet } = await import("@oko-wallet/oko-sdk-eth");
       const res = OkoEthWallet.init(initArgs);
       if (res.success) {
+        const ethWallet = res.data;
         setEthCtx({
-          instance: res.data,
+          instance: ethWallet,
           isInitialized: true,
           isReady: false,
           address: null,
         });
-        res.data.waitUntilInitialized.then(() => {
+        ethWallet.waitUntilInitialized.then(async () => {
+          const provider = await ethWallet.getEthereumProvider();
           setEthCtx((prev) => ({
             ...prev,
             isReady: true,
-            address: prev.instance?.state.address ?? null,
+            address: ethWallet.state.address ?? null,
           }));
+          provider.on("accountsChanged", (accounts: string[]) => {
+            setEthCtx((prev) => ({
+              ...prev,
+              address: accounts[0] ?? null,
+            }));
+          });
         });
       }
     } catch {
@@ -138,17 +131,45 @@ async function initChainSDKs(
   }
 
   if (config.cosmos) {
+    const cosmosChainId =
+      typeof config.cosmos === "object" ? config.cosmos.chainId : null;
     try {
       const { OkoCosmosWallet } = await import("@oko-wallet/oko-sdk-cosmos");
       const res = OkoCosmosWallet.init(initArgs);
       if (res.success) {
+        const cosmosWallet = res.data;
         setCosmosCtx({
-          instance: res.data,
+          instance: cosmosWallet,
           isInitialized: true,
           isReady: false,
+          address: null,
         });
-        res.data.waitUntilInitialized.then(() => {
+
+        const resolveCosmosAddress = async () => {
+          if (!cosmosChainId) {
+            return;
+          }
+          try {
+            const key = await cosmosWallet.getKey(cosmosChainId);
+            setCosmosCtx((prev) => ({
+              ...prev,
+              address: key.bech32Address ?? null,
+            }));
+          } catch {
+            setCosmosCtx((prev) => ({ ...prev, address: null }));
+          }
+        };
+
+        cosmosWallet.waitUntilInitialized.then(async () => {
           setCosmosCtx((prev) => ({ ...prev, isReady: true }));
+          await resolveCosmosAddress();
+        });
+
+        cosmosWallet.on({
+          type: "accountsChanged",
+          handler: () => {
+            resolveCosmosAddress();
+          },
         });
       }
     } catch {
@@ -168,17 +189,24 @@ async function initChainSDKs(
         chain_id: svmConfig.chainId,
       });
       if (res.success) {
+        const svmWallet = res.data;
         setSvmCtx({
-          instance: res.data,
+          instance: svmWallet,
           isInitialized: true,
           isReady: false,
           address: null,
         });
-        res.data.waitUntilInitialized.then(() => {
+        svmWallet.waitUntilInitialized.then(() => {
           setSvmCtx((prev) => ({
             ...prev,
             isReady: true,
-            address: prev.instance?.state.publicKey?.toBase58() ?? null,
+            address: svmWallet.state.publicKey?.toBase58() ?? null,
+          }));
+        });
+        svmWallet.on("accountChanged", (publicKey) => {
+          setSvmCtx((prev) => ({
+            ...prev,
+            address: publicKey?.toBase58() ?? null,
           }));
         });
       }
