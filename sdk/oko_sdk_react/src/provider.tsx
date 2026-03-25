@@ -116,6 +116,7 @@ export const OkoProvider: FC<OkoProviderProps> = ({ config, children }) => {
       return;
     }
 
+    let cancelled = false;
     let provider: Awaited<
       ReturnType<typeof ethWallet.getEthereumProvider>
     > | null = null;
@@ -128,11 +129,15 @@ export const OkoProvider: FC<OkoProviderProps> = ({ config, children }) => {
     };
 
     ethWallet.getEthereumProvider().then((p) => {
+      if (cancelled) {
+        return;
+      }
       provider = p;
       provider.on("accountsChanged", ethAccountsHandler);
     });
 
     return () => {
+      cancelled = true;
       if (provider) {
         provider.removeListener("accountsChanged", ethAccountsHandler);
       }
