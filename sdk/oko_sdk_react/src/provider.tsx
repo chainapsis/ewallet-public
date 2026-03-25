@@ -62,17 +62,24 @@ export const OkoProvider: FC<OkoProviderProps> = ({ config, children }) => {
     const wallet = coreResult.data;
     dispatch({ type: "INIT_SUCCESS", wallet });
 
+    const accountsChangedHandler = (payload: {
+      authType: typeof state.authType;
+      email: string | null;
+      publicKey: string | null;
+      name: string | null;
+    }) => {
+      dispatch({
+        type: "ACCOUNTS_CHANGED",
+        authType: payload.authType,
+        email: payload.email,
+        publicKey: payload.publicKey,
+        name: payload.name,
+      });
+    };
+
     wallet.on({
       type: "CORE__accountsChanged",
-      handler: (payload) => {
-        dispatch({
-          type: "ACCOUNTS_CHANGED",
-          authType: payload.authType,
-          email: payload.email,
-          publicKey: payload.publicKey,
-          name: payload.name,
-        });
-      },
+      handler: accountsChangedHandler,
     });
 
     wallet.waitUntilInitialized.then((res) => {
@@ -81,7 +88,20 @@ export const OkoProvider: FC<OkoProviderProps> = ({ config, children }) => {
       }
     });
 
-    initChainSDKs(config, setEthCtx, setCosmosCtx, setSvmCtx);
+    const cleanupChainSDKs = initChainSDKs(
+      config,
+      setEthCtx,
+      setCosmosCtx,
+      setSvmCtx,
+    );
+
+    return () => {
+      wallet.off({
+        type: "CORE__accountsChanged",
+        handler: accountsChangedHandler,
+      });
+      cleanupChainSDKs.then((cleanup) => cleanup());
+    };
   }, []);
 
   return (
@@ -100,7 +120,8 @@ async function initChainSDKs(
   setEthCtx: React.Dispatch<React.SetStateAction<EthContextValue>>,
   setCosmosCtx: React.Dispatch<React.SetStateAction<CosmosContextValue>>,
   setSvmCtx: React.Dispatch<React.SetStateAction<SvmContextValue>>,
-) {
+): Promise<() => void> {
+  const cleanups: (() => void)[] = [];
   const initArgs = {
     api_key: config.apiKey,
     sdk_endpoint: config.sdkEndpoint,
@@ -118,6 +139,14 @@ async function initChainSDKs(
           isReady: false,
           address: null,
         });
+
+        const ethAccountsHandler = (accounts: string[]) => {
+          setEthCtx((prev) => ({
+            ...prev,
+            address: accounts[0] ?? null,
+          }));
+        };
+
         ethWallet.waitUntilInitialized.then(async () => {
           const provider = await ethWallet.getEthereumProvider();
           setEthCtx((prev) => ({
@@ -125,11 +154,9 @@ async function initChainSDKs(
             isReady: true,
             address: ethWallet.state.address ?? null,
           }));
-          provider.on("accountsChanged", (accounts: string[]) => {
-            setEthCtx((prev) => ({
-              ...prev,
-              address: accounts[0] ?? null,
-            }));
+          provider.on("accountsChanged", ethAccountsHandler);
+          cleanups.push(() => {
+            provider.removeListener("accountsChanged", ethAccountsHandler);
           });
         });
       }
@@ -176,6 +203,14 @@ async function initChainSDKs(
           isReady: false,
           address: null,
         });
+
+        const svmAccountHandler = (publicKey: any) => {
+          setSvmCtx((prev) => ({
+            ...prev,
+            address: publicKey?.toBase58() ?? null,
+          }));
+        };
+
         svmWallet.waitUntilInitialized.then(() => {
           setSvmCtx((prev) => ({
             ...prev,
@@ -183,15 +218,19 @@ async function initChainSDKs(
             address: svmWallet.state.publicKey?.toBase58() ?? null,
           }));
         });
-        svmWallet.on("accountChanged", (publicKey) => {
-          setSvmCtx((prev) => ({
-            ...prev,
-            address: publicKey?.toBase58() ?? null,
-          }));
+        svmWallet.on("accountChanged", svmAccountHandler);
+        cleanups.push(() => {
+          svmWallet.off("accountChanged", svmAccountHandler);
         });
       }
     } catch {
       console.warn("[oko-react] @oko-wallet/oko-sdk-svm is not installed");
     }
   }
+
+  return () => {
+    for (const cleanup of cleanups) {
+      cleanup();
+    }
+  };
 }

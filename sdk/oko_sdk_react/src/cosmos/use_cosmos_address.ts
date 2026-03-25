@@ -49,13 +49,11 @@ export function useCosmosAddress(chainId: string): UseCosmosAddressReturn {
       return;
     }
 
-    const handler = () => {
-      if (!ctx.instance) {
-        return;
-      }
+    const instance = ctx.instance;
 
+    const handler = () => {
       setIsLoading(true);
-      ctx.instance
+      instance
         .getKey(chainId)
         .then((key) => {
           setAddress(key.bech32Address ?? null);
@@ -68,10 +66,17 @@ export function useCosmosAddress(chainId: string): UseCosmosAddressReturn {
         });
     };
 
-    ctx.instance.on({
+    instance.on({
       type: "accountsChanged",
       handler,
     });
+
+    return () => {
+      instance.eventEmitter.off({
+        type: "accountsChanged",
+        handler,
+      });
+    };
   }, [ctx.instance, chainId]);
 
   return { address, isLoading };
