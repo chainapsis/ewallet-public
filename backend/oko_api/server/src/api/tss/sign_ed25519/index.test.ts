@@ -89,7 +89,6 @@ async function setUpEd25519Wallet(pool: Pool): Promise<TestSetupResult> {
     status: "ACTIVE",
     url: null,
     logo_url: null,
-    theme: "dark",
   });
   if (insertCustomerRes.success === false) {
     throw new Error(`Failed to create customer: ${insertCustomerRes.err}`);

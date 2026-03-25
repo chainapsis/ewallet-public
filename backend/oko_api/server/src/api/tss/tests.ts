@@ -6,5 +6,4 @@ export const TEST_CUSTOMER: Customer = {
   status: "ACTIVE",
   url: "https://test.com",
   logo_url: "https://test.com/logo.png",
-  theme: "system",
 };
