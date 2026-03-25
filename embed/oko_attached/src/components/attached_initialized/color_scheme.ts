@@ -37,19 +37,11 @@ export interface ThemeResult {
   usesSystemPreference: boolean;
 }
 
-export async function determineTheme(
-  oldTheme: Theme | null,
+export function determineTheme(
   sdkThemeOverride?: OkoWalletTheme | null,
-): Promise<ThemeResult> {
-  const usesSystemFallback = oldTheme === null;
-  const fallbackTheme: Theme = oldTheme ?? getSystemTheme();
-
+): ThemeResult {
   if (sdkThemeOverride) {
-    return {
-      theme: sdkThemeOverride,
-      usesSystemPreference: false,
-    };
+    return { theme: sdkThemeOverride, usesSystemPreference: false };
   }
-
-  return { theme: fallbackTheme, usesSystemPreference: usesSystemFallback };
+  return { theme: getSystemTheme(), usesSystemPreference: true };
 }
