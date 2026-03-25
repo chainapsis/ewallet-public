@@ -131,8 +131,8 @@ When connecting, users can select their preferred login provider from a modal:
 - Google OAuth
 - Email/passwordless
 - X (Twitter) OAuth
-- Telegram OAuth
 - Discord OAuth
+- Telegram OAuth (coming soon)
 
 ## Next Steps
 
