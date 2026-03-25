@@ -220,7 +220,6 @@ export function useInitializeApp() {
               ? "dark"
               : "light";
             setColorScheme(t);
-            setTheme(storageKey, t);
             setResolvedTheme(t);
           });
         }
