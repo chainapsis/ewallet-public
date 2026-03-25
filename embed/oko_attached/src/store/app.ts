@@ -33,6 +33,7 @@ interface PerOriginState {
   seedEd25519: string | null;
   nonce: string | null;
   codeVerifier: string | null;
+  oauthRedirectOrigin: string | null;
   authToken: string | null;
   wallet: WalletState | null;
   ed25519Wallet: Ed25519WalletState | null;
@@ -49,6 +50,9 @@ interface AppActions {
 
   getCodeVerifier: (storageKey: string) => string | null;
   setCodeVerifier: (storageKey: string, codeVerifier: string | null) => void;
+
+  getOauthRedirectOrigin: (storageKey: string) => string | null;
+  setOauthRedirectOrigin: (storageKey: string, origin: string | null) => void;
 
   getWallet: (storageKey: string) => WalletState | null;
   setWallet: (storageKey: string, wallet: WalletState | null) => void;
@@ -166,6 +170,7 @@ export const useAppState = create(
               seedEd25519: null,
               nonce: null,
               codeVerifier: null,
+              oauthRedirectOrigin: null,
               authToken: null,
               wallet: null,
               ed25519Wallet: null,
@@ -210,6 +215,23 @@ export const useAppState = create(
       },
       getCodeVerifier: (storageKey: string) => {
         return get().perOrigin[storageKey]?.codeVerifier;
+      },
+      setOauthRedirectOrigin: (
+        storageKey: string,
+        oauthRedirectOrigin: string | null,
+      ) => {
+        set({
+          perOrigin: {
+            ...get().perOrigin,
+            [storageKey]: {
+              ...get().perOrigin[storageKey],
+              oauthRedirectOrigin,
+            },
+          },
+        });
+      },
+      getOauthRedirectOrigin: (storageKey: string) => {
+        return get().perOrigin[storageKey]?.oauthRedirectOrigin ?? null;
       },
       getKeyshare_1: (storageKey: string) => {
         return get().perOrigin[storageKey]?.keyshare_1;

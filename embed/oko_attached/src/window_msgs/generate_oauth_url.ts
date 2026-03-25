@@ -131,6 +131,7 @@ async function buildOAuthUrl(
   // X, Discord, GitHub use PKCE
   const { codeVerifier, codeChallenge } = await createPkcePair();
   appState.setCodeVerifier(storageKey, codeVerifier);
+  appState.setOauthRedirectOrigin(storageKey, redirectBaseOrigin);
 
   switch (provider) {
     case "x":
