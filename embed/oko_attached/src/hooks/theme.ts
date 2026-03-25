@@ -68,9 +68,7 @@ export function useSetThemeInCallback(providerType: AuthType) {
       const storageKey = useMemoryState.getState().storageKey || hostOrigin;
       const themeResult = determineTheme(sdkThemeOverride);
 
-      if (!themeResult.usesSystemPreference) {
-        setTheme(storageKey, themeResult.theme);
-      }
+      setTheme(storageKey, themeResult.theme);
       setColorScheme(themeResult.theme);
       _setTheme(themeResult.theme);
     }
