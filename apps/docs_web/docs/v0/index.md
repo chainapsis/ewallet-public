@@ -120,7 +120,7 @@ dashboards.
 - GitHub
 - Discord
 - X (Twitter)
-- Telegram
+- Telegram (coming soon)
 
 **Oko SDK**
 

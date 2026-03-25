@@ -169,7 +169,7 @@ AsyncStorage state is restored.
 ### Sign In
 
 ```typescript
-// type: "google" | "email" | "discord" | "github" | "x" | "telegram"
+// type: "google" | "email" | "discord" | "github" | "x"
 await wallet.signIn("google");
 ```
 
@@ -182,7 +182,8 @@ await wallet.signIn("google");
 | `"discord"` | Discord OAuth     |
 | `"github"`  | GitHub OAuth      |
 | `"x"`       | X (Twitter) OAuth |
-| `"telegram"`| Telegram OAuth    |
+
+> Telegram sign-in support is coming soon.
 
 Calling `signIn()` opens the OS browser for the OAuth flow. On iOS and Android
 fallback flows, the browser returns via your configured `redirectScheme`. On
@@ -199,7 +200,7 @@ function SignInButtons() {
   const wallet = useOkoWallet();
 
   const handleSignIn = async (
-    type: "google" | "email" | "discord" | "github" | "x" | "telegram",
+    type: "google" | "email" | "discord" | "github" | "x",
   ) => {
     try {
       await wallet.signIn(type);
@@ -229,10 +230,6 @@ function SignInButtons() {
         onPress={() => handleSignIn("github")}
       />
       <Button title="Sign in with X" onPress={() => handleSignIn("x")} />
-      <Button
-        title="Sign in with Telegram"
-        onPress={() => handleSignIn("telegram")}
-      />
     </View>
   );
 }
