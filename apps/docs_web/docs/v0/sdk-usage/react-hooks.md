@@ -104,14 +104,20 @@ instance and initialization status.
 import { useOkoEth } from "@oko-wallet/oko-sdk-react/eth";
 
 function EthPanel() {
-  const { ethWallet, isReady } = useOkoEth();
+  const { ethWallet, isReady, address } = useOkoEth();
 
   if (!isReady || !ethWallet) return null;
 
-  const address = await ethWallet.getAddress();
-  const provider = ethWallet.getEthereumProvider();
+  return <p>ETH Address: {address}</p>;
 }
 ```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `ethWallet` | `OkoEthWalletInterface \| null` | ETH SDK instance |
+| `isInitialized` | `boolean` | `init()` succeeded |
+| `isReady` | `boolean` | Fully initialized and usable |
+| `address` | `string \| null` | EVM address (`0x...`), same across all EVM chains |
 
 ### `useOkoCosmos`
 
@@ -123,10 +129,37 @@ function CosmosPanel() {
 
   if (!isReady || !cosmosWallet) return null;
 
-  const key = await cosmosWallet.getKey("cosmoshub-4");
-  const signer = cosmosWallet.getOfflineSigner();
+  const signer = cosmosWallet.getOfflineSigner("cosmoshub-4");
 }
 ```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `cosmosWallet` | `OkoCosmosWalletInterface \| null` | Cosmos SDK instance |
+| `isInitialized` | `boolean` | `init()` succeeded |
+| `isReady` | `boolean` | Fully initialized and usable |
+
+### `useCosmosAddress`
+
+Cosmos addresses vary by chain (different bech32 prefixes), so use this hook
+with a specific chain ID.
+
+```tsx
+import { useCosmosAddress } from "@oko-wallet/oko-sdk-react/cosmos";
+
+function CosmosAddress() {
+  const { address, isLoading } = useCosmosAddress("cosmoshub-4");
+
+  if (isLoading) return <p>Loading...</p>;
+
+  return <p>Cosmos Address: {address}</p>;
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `address` | `string \| null` | Bech32 address for the given chain (e.g. `cosmos1...`, `osmo1...`) |
+| `isLoading` | `boolean` | Address is being resolved |
 
 ### `useOkoSvm`
 
@@ -134,38 +167,34 @@ function CosmosPanel() {
 import { useOkoSvm } from "@oko-wallet/oko-sdk-react/svm";
 
 function SolanaPanel() {
-  const { svmWallet, isReady } = useOkoSvm();
+  const { svmWallet, isReady, address } = useOkoSvm();
 
   if (!isReady || !svmWallet) return null;
 
-  await svmWallet.connect();
-  const publicKey = svmWallet.publicKey;
+  return <p>Solana Address: {address}</p>;
 }
 ```
 
-### Chain Hook Return Values
-
-All chain hooks return the same shape:
-
 | Property | Type | Description |
 |----------|------|-------------|
-| `ethWallet` / `cosmosWallet` / `svmWallet` | `Interface \| null` | Chain SDK instance |
+| `svmWallet` | `OkoSvmWalletInterface \| null` | SVM SDK instance |
 | `isInitialized` | `boolean` | `init()` succeeded |
 | `isReady` | `boolean` | Fully initialized and usable |
+| `address` | `string \| null` | Solana base58 address, same across all Solana clusters |
 
 ## Full Example
 
 ```tsx
 import { OkoProvider, useOko } from "@oko-wallet/oko-sdk-react";
 import { useOkoEth } from "@oko-wallet/oko-sdk-react/eth";
-import { useOkoCosmos } from "@oko-wallet/oko-sdk-react/cosmos";
+import { useCosmosAddress } from "@oko-wallet/oko-sdk-react/cosmos";
 import { useOkoSvm } from "@oko-wallet/oko-sdk-react/svm";
 
 function Wallet() {
   const { isReady, isSignedIn, signOut, openSignInModal, walletInfo } = useOko();
-  const { ethWallet } = useOkoEth();
-  const { cosmosWallet } = useOkoCosmos();
-  const { svmWallet } = useOkoSvm();
+  const { address: ethAddress } = useOkoEth();
+  const { address: cosmosAddress } = useCosmosAddress("cosmoshub-4");
+  const { address: svmAddress } = useOkoSvm();
 
   if (!isReady) return <p>Initializing...</p>;
 
@@ -176,7 +205,9 @@ function Wallet() {
   return (
     <div>
       <p>Welcome, {walletInfo.name || walletInfo.email}</p>
-      <p>Auth: {walletInfo.authType}</p>
+      <p>ETH: {ethAddress}</p>
+      <p>Cosmos: {cosmosAddress}</p>
+      <p>Solana: {svmAddress}</p>
       <button onClick={signOut}>Sign Out</button>
     </div>
   );
