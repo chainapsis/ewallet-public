@@ -1,5 +1,6 @@
 "use client";
 
+import { ExternalLinkOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/external_link_outlined";
 import { ImageWithAlt } from "@oko-wallet/oko-common-ui/image_with_alt";
 import { Skeleton } from "@oko-wallet/oko-common-ui/skeleton";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
@@ -48,7 +49,13 @@ export const ConnectedApps: FC = () => {
       {!isLoading && isSuccess && !isEmpty && (
         <div className={styles.appsList}>
           {apps.map((app) => (
-            <div key={app.customer_id} className={styles.appItem}>
+            <a
+              key={app.customer_id}
+              href={app.url ?? ""}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${styles.appItem} ${styles.appItemClickable}`}
+            >
               {app.logo_url ? (
                 <img
                   src={app.logo_url}
@@ -80,10 +87,15 @@ export const ConnectedApps: FC = () => {
                   color="tertiary"
                   className={styles.appUrl}
                 >
-                  {app.url ?? "—"}
+                  {app.url}
                 </Typography>
               </div>
-            </div>
+              <ExternalLinkOutlinedIcon
+                className={styles.externalLinkIcon}
+                color="var(--fg-tertiary-hover)"
+                size={14}
+              />
+            </a>
           ))}
         </div>
       )}
