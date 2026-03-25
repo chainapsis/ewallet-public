@@ -21,10 +21,10 @@ Native** — pass the RN wallet instance to their constructors:
 ```typescript
 import { useOkoWallet } from "@oko-wallet/oko-sdk-core-react-native";
 import { OkoEthWallet } from "@oko-wallet/oko-sdk-eth";
-import type { OkoWalletInterface } from "@oko-wallet/oko-sdk-core";
+
 
 const wallet = useOkoWallet();
-const eth = new OkoEthWallet(wallet as OkoWalletInterface);
+const eth = new OkoEthWallet(wallet);
 ```
 
 :::
@@ -285,12 +285,12 @@ handle all OS-browser transport automatically.
 import { useMemo } from "react";
 import { useOkoWallet } from "@oko-wallet/oko-sdk-core-react-native";
 import { OkoEthWallet } from "@oko-wallet/oko-sdk-eth";
-import type { OkoWalletInterface } from "@oko-wallet/oko-sdk-core";
+
 
 function EthExample() {
   const wallet = useOkoWallet();
   const eth = useMemo(
-    () => new OkoEthWallet(wallet as OkoWalletInterface),
+    () => new OkoEthWallet(wallet),
     [wallet],
   );
 
@@ -311,12 +311,12 @@ For full EVM API (transactions, typed data, EIP-1193 provider):
 import { useMemo } from "react";
 import { useOkoWallet } from "@oko-wallet/oko-sdk-core-react-native";
 import { OkoCosmosWallet } from "@oko-wallet/oko-sdk-cosmos";
-import type { OkoWalletInterface } from "@oko-wallet/oko-sdk-core";
+
 
 function CosmosExample() {
   const wallet = useOkoWallet();
   const cosmos = useMemo(
-    () => new OkoCosmosWallet(wallet as OkoWalletInterface),
+    () => new OkoCosmosWallet(wallet),
     [wallet],
   );
 
@@ -336,13 +336,13 @@ For full Cosmos API (signDirect, signAmino, signArbitrary, sendTx):
 import { useMemo } from "react";
 import { useOkoWallet } from "@oko-wallet/oko-sdk-core-react-native";
 import { OkoSvmWallet } from "@oko-wallet/oko-sdk-svm";
-import type { OkoWalletInterface } from "@oko-wallet/oko-sdk-core";
+
 
 function SolanaExample() {
   const wallet = useOkoWallet();
   const svm = useMemo(
     () =>
-      new OkoSvmWallet(wallet as OkoWalletInterface, {
+      new OkoSvmWallet(wallet, {
         chain_id: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
       }),
     [wallet],

@@ -48,6 +48,7 @@ step by email.
 | [@oko-wallet/oko-sdk-cosmos](sdk/oko_sdk_cosmos) | [![npm version](https://img.shields.io/npm/v/@oko-wallet/oko-sdk-cosmos.svg)](https://www.npmjs.com/package/@oko-wallet/oko-sdk-cosmos) |
 | [@oko-wallet/oko-sdk-eth](sdk/oko_sdk_eth)       | [![npm version](https://img.shields.io/npm/v/@oko-wallet/oko-sdk-eth.svg)](https://www.npmjs.com/package/@oko-wallet/oko-sdk-eth)       |
 | [@oko-wallet/oko-sdk-svm](sdk/oko_sdk_svm)       | [![npm version](https://img.shields.io/npm/v/@oko-wallet/oko-sdk-svm.svg)](https://www.npmjs.com/package/@oko-wallet/oko-sdk-svm)       |
+| [@oko-wallet/oko-sdk-core-react-native](sdk/oko_sdk_core_react_native) | [![npm version](https://img.shields.io/npm/v/@oko-wallet/oko-sdk-core-react-native.svg)](https://www.npmjs.com/package/@oko-wallet/oko-sdk-core-react-native) |
 
 ## How it works
 

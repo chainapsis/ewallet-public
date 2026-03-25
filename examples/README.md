@@ -20,3 +20,8 @@ by following the instructions in the README.
   RainbowKit with Oko
 - **[Multi-Ecosystem React Example](multi_ecosystem_react)** — React + Vite with
   Oko for both Cosmos and EVM
+
+## React Native
+
+For React Native integration, see the
+**[React Native Integration Guide](https://docs.oko.app/docs/v0/sdk-usage/mobile/react-native-integration)**.
