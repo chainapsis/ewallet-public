@@ -212,14 +212,13 @@ export function useInitializeApp() {
             const t: typeof determinedThemeByCustomer = mq.matches
               ? "dark"
               : "light";
+            setTheme(storageKey, t);
             setColorScheme(t);
             setResolvedTheme(t);
           });
         }
 
-        if (!themeResult.usesSystemPreference) {
-          setTheme(storageKey, determinedThemeByCustomer);
-        }
+        setTheme(storageKey, determinedThemeByCustomer);
         setColorScheme(determinedThemeByCustomer);
 
         setResolvedTheme(determinedThemeByCustomer);
