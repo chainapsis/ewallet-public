@@ -1,5 +1,6 @@
 import { useOkoCosmos } from "@oko-wallet/oko-sdk-react/cosmos";
 import { useOkoSvm } from "@oko-wallet/oko-sdk-react/svm";
+import type { AuthType } from "@oko-wallet/oko-types/auth";
 import { useEffect } from "react";
 
 import { useUserInfoState } from "@oko-wallet-demo-web/state/user_info";
@@ -27,7 +28,7 @@ export function useSDKListeners() {
       publicKey,
       name,
     }: {
-      authType: unknown;
+      authType: AuthType | null;
       email: string | null;
       publicKey: Uint8Array | null;
       name: string | null;
