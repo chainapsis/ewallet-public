@@ -7,6 +7,7 @@ const VALID_APPS: Record<string, Env[]> = {
   ct_dashboard: ["develop", "release"],
   admin_web: ["develop", "release"],
   attached: ["develop", "release"],
+  attached_mobile_host_web: ["develop", "release"],
   docs_web: ["release"],
 };
 

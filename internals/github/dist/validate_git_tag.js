@@ -4,6 +4,7 @@ const VALID_APPS = {
     ct_dashboard: ["develop", "release"],
     admin_web: ["develop", "release"],
     attached: ["develop", "release"],
+    attached_mobile_host_web: ["develop", "release"],
     docs_web: ["release"],
 };
 const APP_TAG_PATTERN = /^([a-z_]+)\/(develop|release)\/v\d+\.\d+\.\d+$/;
