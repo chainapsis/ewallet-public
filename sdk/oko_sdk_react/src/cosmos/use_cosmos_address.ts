@@ -72,7 +72,7 @@ export function useCosmosAddress(chainId: string): UseCosmosAddressReturn {
     });
 
     return () => {
-      instance.eventEmitter.off({
+      instance.off({
         type: "accountsChanged",
         handler,
       });
