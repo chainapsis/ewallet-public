@@ -27,6 +27,9 @@ const APP_CONFIGS = {
   "oko-user-dashboard": {
     path: path.join(paths.root, "apps/user_dashboard"),
   },
+  "oko-attached-mobile-host-web": {
+    path: paths.attached_mobile_host_web,
+  },
   "oko-sandbox-evm": {
     path: path.join(paths.root, "sandbox/sandbox_evm"),
   },
