@@ -52,6 +52,7 @@ export const OkoProvider: FC<OkoProviderProps> = ({ config, children }) => {
     const coreResult = OkoWallet.init({
       api_key: config.apiKey,
       sdk_endpoint: config.sdkEndpoint,
+      theme: config.theme,
     });
 
     if (!coreResult.success) {

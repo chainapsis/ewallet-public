@@ -1,6 +1,7 @@
 import type {
   OkoWalletInterface,
   OkoWalletState,
+  OkoWalletTheme,
   SignInType,
 } from "@oko-wallet/oko-sdk-core";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
@@ -8,6 +9,7 @@ import type { AuthType } from "@oko-wallet/oko-types/auth";
 export interface OkoProviderConfig {
   apiKey: string;
   sdkEndpoint?: string;
+  theme?: OkoWalletTheme;
   eth?: OkoEthConfig | boolean;
   cosmos?: OkoCosmosConfig | boolean;
   svm?: OkoSvmConfig | boolean;
@@ -56,7 +58,14 @@ export interface UseOkoReturn {
   signIn: (type: SignInType) => Promise<void>;
   signOut: () => Promise<void>;
   openSignInModal: () => Promise<void>;
+  setTheme: (theme: OkoWalletTheme) => Promise<void>;
   walletInfo: WalletInfo;
 }
 
-export type { AuthType, SignInType, OkoWalletInterface, OkoWalletState };
+export type {
+  AuthType,
+  SignInType,
+  OkoWalletInterface,
+  OkoWalletState,
+  OkoWalletTheme,
+};

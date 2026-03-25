@@ -1,7 +1,7 @@
 import { useCallback, useContext, useMemo } from "react";
 
 import { OkoContext } from "../context";
-import type { SignInType, UseOkoReturn } from "../types";
+import type { OkoWalletTheme, SignInType, UseOkoReturn } from "../types";
 
 export function useOko(): UseOkoReturn {
   const { state } = useContext(OkoContext);
@@ -32,6 +32,16 @@ export function useOko(): UseOkoReturn {
     await state.wallet.openSignInModal();
   }, [state.wallet]);
 
+  const setTheme = useCallback(
+    async (theme: OkoWalletTheme) => {
+      if (!state.wallet) {
+        throw new Error("[oko-react] Cannot setTheme: wallet not initialized");
+      }
+      await state.wallet.setTheme(theme);
+    },
+    [state.wallet],
+  );
+
   const walletInfo = useMemo(
     () => ({
       authType: state.authType,
@@ -49,6 +59,7 @@ export function useOko(): UseOkoReturn {
     signIn,
     signOut,
     openSignInModal,
+    setTheme,
     walletInfo,
   };
 }
