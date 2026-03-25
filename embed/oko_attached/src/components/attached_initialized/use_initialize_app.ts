@@ -225,7 +225,9 @@ export function useInitializeApp() {
           });
         }
 
-        setTheme(storageKey, determinedThemeByCustomer);
+        if (!themeResult.usesSystemPreference) {
+          setTheme(storageKey, determinedThemeByCustomer);
+        }
         setColorScheme(determinedThemeByCustomer);
 
         setResolvedTheme(determinedThemeByCustomer);
