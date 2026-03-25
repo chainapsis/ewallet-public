@@ -19,6 +19,10 @@ const defaultChainCtx = {
   instance: null,
   isInitialized: false,
   isReady: false,
+};
+
+const defaultChainCtxWithAddress = {
+  ...defaultChainCtx,
   address: null,
 };
 
@@ -30,10 +34,14 @@ export const OkoProvider: FC<OkoProviderProps> = ({ config, children }) => {
   const [state, dispatch] = useReducer(coreReducer, initialCoreState);
   const initCalledRef = useRef(false);
 
-  const [ethCtx, setEthCtx] = useState<EthContextValue>(defaultChainCtx);
+  const [ethCtx, setEthCtx] = useState<EthContextValue>(
+    defaultChainCtxWithAddress,
+  );
   const [cosmosCtx, setCosmosCtx] =
     useState<CosmosContextValue>(defaultChainCtx);
-  const [svmCtx, setSvmCtx] = useState<SvmContextValue>(defaultChainCtx);
+  const [svmCtx, setSvmCtx] = useState<SvmContextValue>(
+    defaultChainCtxWithAddress,
+  );
 
   useEffect(() => {
     if (initCalledRef.current) {
@@ -131,45 +139,17 @@ async function initChainSDKs(
   }
 
   if (config.cosmos) {
-    const cosmosChainId =
-      typeof config.cosmos === "object" ? config.cosmos.chainId : null;
     try {
       const { OkoCosmosWallet } = await import("@oko-wallet/oko-sdk-cosmos");
       const res = OkoCosmosWallet.init(initArgs);
       if (res.success) {
-        const cosmosWallet = res.data;
         setCosmosCtx({
-          instance: cosmosWallet,
+          instance: res.data,
           isInitialized: true,
           isReady: false,
-          address: null,
         });
-
-        const resolveCosmosAddress = async () => {
-          if (!cosmosChainId) {
-            return;
-          }
-          try {
-            const key = await cosmosWallet.getKey(cosmosChainId);
-            setCosmosCtx((prev) => ({
-              ...prev,
-              address: key.bech32Address ?? null,
-            }));
-          } catch {
-            setCosmosCtx((prev) => ({ ...prev, address: null }));
-          }
-        };
-
-        cosmosWallet.waitUntilInitialized.then(async () => {
+        res.data.waitUntilInitialized.then(() => {
           setCosmosCtx((prev) => ({ ...prev, isReady: true }));
-          await resolveCosmosAddress();
-        });
-
-        cosmosWallet.on({
-          type: "accountsChanged",
-          handler: () => {
-            resolveCosmosAddress();
-          },
         });
       }
     } catch {

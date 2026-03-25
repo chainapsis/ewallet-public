@@ -6,14 +6,14 @@ const connection = new Connection(clusterApiUrl("devnet"));
 
 export default function useSvm() {
   const { isReady, isSignedIn, signIn, signOut } = useOko();
-  const { svmWallet, isReady: isSvmReady } = useOkoSvm();
+  const { svmWallet, isReady: isSvmReady, address } = useOkoSvm();
 
   return {
     isReady: isReady && isSvmReady,
     isSignedIn,
     isSigningIn: false,
     okoSvm: svmWallet,
-    svmAddress: svmWallet?.publicKey?.toBase58() ?? null,
+    svmAddress: address,
     signIn,
     signOut,
     connection,

@@ -3,14 +3,14 @@ import { useOkoEth } from "@oko-wallet/oko-sdk-react/eth";
 
 export default function useOkoEvm() {
   const { isReady, isSignedIn, signIn, signOut } = useOko();
-  const { ethWallet, isReady: isEthReady } = useOkoEth();
+  const { ethWallet, isReady: isEthReady, address } = useOkoEth();
 
   return {
     isReady: isReady && isEthReady,
     isSignedIn,
     signIn,
     signOut,
-    address: ethWallet?.state.address ?? null,
+    address,
     okoEth: ethWallet,
   };
 }

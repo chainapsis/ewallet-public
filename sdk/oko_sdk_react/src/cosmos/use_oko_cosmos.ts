@@ -7,7 +7,6 @@ export interface UseOkoCosmosReturn {
   cosmosWallet: OkoCosmosWalletInterface | null;
   isInitialized: boolean;
   isReady: boolean;
-  address: string | null;
 }
 
 export function useOkoCosmos(): UseOkoCosmosReturn {
@@ -17,6 +16,5 @@ export function useOkoCosmos(): UseOkoCosmosReturn {
     cosmosWallet: ctx.instance,
     isInitialized: ctx.isInitialized,
     isReady: ctx.isReady,
-    address: ctx.address,
   };
 }

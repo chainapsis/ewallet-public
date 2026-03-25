@@ -5,7 +5,7 @@ import { sepolia } from "viem/chains";
 
 export default function useEvm() {
   const { isReady, isSignedIn, signIn, signOut } = useOko();
-  const { ethWallet, isReady: isEthReady } = useOkoEth();
+  const { ethWallet, isReady: isEthReady, address } = useOkoEth();
 
   const publicClient = createPublicClient({
     chain: sepolia,
@@ -16,7 +16,7 @@ export default function useEvm() {
     isReady: isReady && isEthReady,
     isSignedIn,
     isSigningIn: false,
-    address: ethWallet?.state.address ?? null,
+    address,
     okoEth: ethWallet,
     signIn,
     signOut,

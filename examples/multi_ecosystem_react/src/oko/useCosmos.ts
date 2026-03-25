@@ -1,7 +1,9 @@
 import type { ChainInfo } from "@keplr-wallet/types";
-import { getBech32Address, getCosmosAddress } from "@oko-wallet/oko-sdk-cosmos";
 import { useOko } from "@oko-wallet/oko-sdk-react";
-import { useOkoCosmos } from "@oko-wallet/oko-sdk-react/cosmos";
+import {
+  useCosmosAddress,
+  useOkoCosmos,
+} from "@oko-wallet/oko-sdk-react/cosmos";
 import { useMemo } from "react";
 
 const chainInfo: ChainInfo = {
@@ -58,19 +60,9 @@ const chainInfo: ChainInfo = {
 };
 
 export default function useCosmos() {
-  const { isReady, isSignedIn, signIn, signOut, walletInfo } = useOko();
+  const { isReady, isSignedIn, signIn, signOut } = useOko();
   const { cosmosWallet, isReady: isCosmosReady } = useOkoCosmos();
-
-  const bech32Address = useMemo(() => {
-    if (!walletInfo.publicKey) {
-      return null;
-    }
-    const publicKeyBytes = Buffer.from(walletInfo.publicKey, "base64");
-    return getBech32Address(
-      getCosmosAddress(publicKeyBytes),
-      chainInfo.bech32Config?.bech32PrefixAccAddr ?? "",
-    );
-  }, [walletInfo.publicKey]);
+  const { address: bech32Address } = useCosmosAddress(chainInfo.chainId);
 
   const offlineSigner = useMemo(() => {
     if (!cosmosWallet) {
