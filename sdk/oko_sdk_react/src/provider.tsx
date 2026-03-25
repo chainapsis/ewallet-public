@@ -199,7 +199,11 @@ async function initChainSDKs(
           isReady: false,
           address: null,
         });
-        ethWallet.waitUntilInitialized.then(() => {
+        ethWallet.waitUntilInitialized.then((initRes) => {
+          if (!initRes.success) {
+            console.error("[oko-react] ETH lazy init failed:", initRes.err);
+            return;
+          }
           setEthCtx((prev) => ({
             ...prev,
             isReady: true,
@@ -222,7 +226,11 @@ async function initChainSDKs(
           isInitialized: true,
           isReady: false,
         });
-        res.data.waitUntilInitialized.then(() => {
+        res.data.waitUntilInitialized.then((initRes) => {
+          if (!initRes.success) {
+            console.error("[oko-react] Cosmos lazy init failed:", initRes.err);
+            return;
+          }
           setCosmosCtx((prev) => ({ ...prev, isReady: true }));
         });
       }
@@ -250,7 +258,11 @@ async function initChainSDKs(
           isReady: false,
           address: null,
         });
-        svmWallet.waitUntilInitialized.then(() => {
+        svmWallet.waitUntilInitialized.then((initRes) => {
+          if (!initRes.success) {
+            console.error("[oko-react] SVM lazy init failed:", initRes.err);
+            return;
+          }
           setSvmCtx((prev) => ({
             ...prev,
             isReady: true,
