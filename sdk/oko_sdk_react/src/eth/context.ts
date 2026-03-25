@@ -5,10 +5,12 @@ export interface EthContextValue {
   instance: OkoEthWalletInterface | null;
   isInitialized: boolean;
   isReady: boolean;
+  address: string | null;
 }
 
 export const EthContext = createContext<EthContextValue>({
   instance: null,
   isInitialized: false,
   isReady: false,
+  address: null,
 });

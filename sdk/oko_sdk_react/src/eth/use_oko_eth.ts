@@ -7,6 +7,7 @@ export interface UseOkoEthReturn {
   ethWallet: OkoEthWalletInterface | null;
   isInitialized: boolean;
   isReady: boolean;
+  address: string | null;
 }
 
 export function useOkoEth(): UseOkoEthReturn {
@@ -16,5 +17,6 @@ export function useOkoEth(): UseOkoEthReturn {
     ethWallet: ctx.instance,
     isInitialized: ctx.isInitialized,
     isReady: ctx.isReady,
+    address: ctx.address,
   };
 }

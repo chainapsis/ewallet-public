@@ -19,6 +19,7 @@ const defaultChainCtx = {
   instance: null,
   isInitialized: false,
   isReady: false,
+  address: null,
 };
 
 interface OkoProviderProps extends PropsWithChildren {
@@ -63,6 +64,7 @@ export const OkoProvider: FC<OkoProviderProps> = ({ config, children }) => {
           publicKey: payload.publicKey,
           name: payload.name,
         });
+        syncChainAddresses(setEthCtx, setSvmCtx);
       },
     });
 
@@ -86,6 +88,20 @@ export const OkoProvider: FC<OkoProviderProps> = ({ config, children }) => {
   );
 };
 
+function syncChainAddresses(
+  setEthCtx: React.Dispatch<React.SetStateAction<EthContextValue>>,
+  setSvmCtx: React.Dispatch<React.SetStateAction<SvmContextValue>>,
+) {
+  setEthCtx((prev) => ({
+    ...prev,
+    address: prev.instance?.state.address ?? null,
+  }));
+  setSvmCtx((prev) => ({
+    ...prev,
+    address: prev.instance?.state.publicKey?.toBase58() ?? null,
+  }));
+}
+
 async function initChainSDKs(
   config: OkoProviderConfig,
   setEthCtx: React.Dispatch<React.SetStateAction<EthContextValue>>,
@@ -102,9 +118,18 @@ async function initChainSDKs(
       const { OkoEthWallet } = await import("@oko-wallet/oko-sdk-eth");
       const res = OkoEthWallet.init(initArgs);
       if (res.success) {
-        setEthCtx({ instance: res.data, isInitialized: true, isReady: false });
+        setEthCtx({
+          instance: res.data,
+          isInitialized: true,
+          isReady: false,
+          address: null,
+        });
         res.data.waitUntilInitialized.then(() => {
-          setEthCtx((prev) => ({ ...prev, isReady: true }));
+          setEthCtx((prev) => ({
+            ...prev,
+            isReady: true,
+            address: prev.instance?.state.address ?? null,
+          }));
         });
       }
     } catch {
@@ -143,9 +168,18 @@ async function initChainSDKs(
         chain_id: svmConfig.chainId,
       });
       if (res.success) {
-        setSvmCtx({ instance: res.data, isInitialized: true, isReady: false });
+        setSvmCtx({
+          instance: res.data,
+          isInitialized: true,
+          isReady: false,
+          address: null,
+        });
         res.data.waitUntilInitialized.then(() => {
-          setSvmCtx((prev) => ({ ...prev, isReady: true }));
+          setSvmCtx((prev) => ({
+            ...prev,
+            isReady: true,
+            address: prev.instance?.state.publicKey?.toBase58() ?? null,
+          }));
         });
       }
     } catch {

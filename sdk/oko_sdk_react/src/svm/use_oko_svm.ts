@@ -7,6 +7,7 @@ export interface UseOkoSvmReturn {
   svmWallet: OkoSvmWalletInterface | null;
   isInitialized: boolean;
   isReady: boolean;
+  address: string | null;
 }
 
 export function useOkoSvm(): UseOkoSvmReturn {
@@ -16,5 +17,6 @@ export function useOkoSvm(): UseOkoSvmReturn {
     svmWallet: ctx.instance,
     isInitialized: ctx.isInitialized,
     isReady: ctx.isReady,
+    address: ctx.address,
   };
 }

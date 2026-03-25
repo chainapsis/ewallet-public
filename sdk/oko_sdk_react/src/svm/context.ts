@@ -5,10 +5,12 @@ export interface SvmContextValue {
   instance: OkoSvmWalletInterface | null;
   isInitialized: boolean;
   isReady: boolean;
+  address: string | null;
 }
 
 export const SvmContext = createContext<SvmContextValue>({
   instance: null,
   isInitialized: false,
   isReady: false,
+  address: null,
 });
