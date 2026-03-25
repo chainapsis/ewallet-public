@@ -50,19 +50,26 @@ export function useCosmosAddress(chainId: string): UseCosmosAddressReturn {
     }
 
     const instance = ctx.instance;
+    let cancelled = false;
 
     const handler = () => {
       setIsLoading(true);
       instance
         .getKey(chainId)
         .then((key) => {
-          setAddress(key.bech32Address ?? null);
+          if (!cancelled) {
+            setAddress(key.bech32Address ?? null);
+          }
         })
         .catch(() => {
-          setAddress(null);
+          if (!cancelled) {
+            setAddress(null);
+          }
         })
         .finally(() => {
-          setIsLoading(false);
+          if (!cancelled) {
+            setIsLoading(false);
+          }
         });
     };
 
@@ -72,6 +79,7 @@ export function useCosmosAddress(chainId: string): UseCosmosAddressReturn {
     });
 
     return () => {
+      cancelled = true;
       instance.off({
         type: "accountsChanged",
         handler,
