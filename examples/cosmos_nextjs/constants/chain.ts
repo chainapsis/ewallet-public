@@ -1,12 +1,6 @@
 import type { ChainInfo } from "@keplr-wallet/types";
-import { useOko } from "@oko-wallet/oko-sdk-react";
-import {
-  useCosmosAddress,
-  useOkoCosmos as useOkoCosmosSDK,
-} from "@oko-wallet/oko-sdk-react/cosmos";
-import { useMemo } from "react";
 
-const chainInfo: ChainInfo = {
+export const chainInfo: ChainInfo = {
   rpc: "https://rpc.testnet.osmosis.zone",
   rest: "https://lcd.testnet.osmosis.zone",
   chainId: "osmo-test-5",
@@ -58,26 +52,3 @@ const chainInfo: ChainInfo = {
   features: [],
   isTestnet: true,
 };
-
-export default function useOkoCosmos() {
-  const { isReady, isSignedIn, signIn, signOut } = useOko();
-  const { cosmosWallet, isReady: isCosmosReady } = useOkoCosmosSDK();
-  const { address: bech32Address } = useCosmosAddress(chainInfo.chainId);
-
-  const offlineSigner = useMemo(() => {
-    if (!cosmosWallet) {
-      return null;
-    }
-    return cosmosWallet.getOfflineSigner(chainInfo.chainId);
-  }, [cosmosWallet]);
-
-  return {
-    isReady: isReady && isCosmosReady,
-    isSignedIn,
-    signIn,
-    signOut,
-    bech32Address,
-    offlineSigner,
-    chainInfo,
-  };
-}

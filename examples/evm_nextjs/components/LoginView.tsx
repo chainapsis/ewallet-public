@@ -1,13 +1,15 @@
 "use client";
 
+import { useOko } from "@oko-wallet/oko-sdk-react";
+import { useOkoEth } from "@oko-wallet/oko-sdk-react/eth";
 import Image from "next/image";
 import { useState } from "react";
 
-import useOkoEvm from "@/hooks/useOkoEvm";
 import Button from "./Button";
 
 export default function LoginView() {
-  const { isReady, signIn } = useOkoEvm();
+  const { signIn } = useOko();
+  const { isReady } = useOkoEth();
   const [isSigningIn, setIsSigningIn] = useState(false);
 
   async function handleSignIn() {

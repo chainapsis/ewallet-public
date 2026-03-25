@@ -1,12 +1,9 @@
 import type { ChainInfo } from "@keplr-wallet/types";
-import { useOko } from "@oko-wallet/oko-sdk-react";
-import {
-  useCosmosAddress,
-  useOkoCosmos,
-} from "@oko-wallet/oko-sdk-react/cosmos";
-import { useMemo } from "react";
+import { Connection, clusterApiUrl } from "@solana/web3.js";
+import { createPublicClient, http } from "viem";
+import { sepolia } from "viem/chains";
 
-const chainInfo: ChainInfo = {
+export const cosmosChainInfo: ChainInfo = {
   rpc: "https://rpc.testnet.osmosis.zone",
   rest: "https://lcd.testnet.osmosis.zone",
   chainId: "osmo-test-5",
@@ -59,26 +56,9 @@ const chainInfo: ChainInfo = {
   isTestnet: true,
 };
 
-export default function useCosmos() {
-  const { isReady, isSignedIn, signIn, signOut } = useOko();
-  const { cosmosWallet, isReady: isCosmosReady } = useOkoCosmos();
-  const { address: bech32Address } = useCosmosAddress(chainInfo.chainId);
+export const evmPublicClient = createPublicClient({
+  chain: sepolia,
+  transport: http(),
+});
 
-  const offlineSigner = useMemo(() => {
-    if (!cosmosWallet) {
-      return null;
-    }
-    return cosmosWallet.getOfflineSigner(chainInfo.chainId);
-  }, [cosmosWallet]);
-
-  return {
-    isReady: isReady && isCosmosReady,
-    isSignedIn,
-    isSigningIn: false,
-    signIn,
-    signOut,
-    bech32Address,
-    offlineSigner,
-    chainInfo,
-  };
-}
+export const svmConnection = new Connection(clusterApiUrl("devnet"));

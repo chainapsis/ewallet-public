@@ -1,10 +1,12 @@
+import { useOkoEth } from "@oko-wallet/oko-sdk-react/eth";
 import { useQuery } from "@tanstack/react-query";
 import { formatEther } from "viem";
 
-import useEvm from "@/oko/useEvm";
+import { evmPublicClient } from "@/constants/chains";
 
 export default function EvmBalance() {
-  const { address, publicClient } = useEvm();
+  const { address } = useOkoEth();
+  const publicClient = evmPublicClient;
 
   const { data, isLoading } = useQuery({
     queryKey: ["evm-balance", address],

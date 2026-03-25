@@ -1,13 +1,15 @@
 "use client";
 
+import { useOko } from "@oko-wallet/oko-sdk-react";
+import { useOkoCosmos } from "@oko-wallet/oko-sdk-react/cosmos";
 import Image from "next/image";
 import { useState } from "react";
 
-import useOkoCosmos from "@/hooks/useOkoCosmos";
 import Button from "./Button";
 
 export default function LoginView() {
-  const { isReady, signIn } = useOkoCosmos();
+  const { signIn } = useOko();
+  const { isReady } = useOkoCosmos();
   const [isSigningIn, setIsSigningIn] = useState(false);
 
   async function handleSignIn() {
