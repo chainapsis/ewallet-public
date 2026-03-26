@@ -6,10 +6,7 @@ import {
   SendVerificationSuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/ct_dashboard";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
-import type {
-  SendVerificationRequest,
-  SendVerificationResponse,
-} from "@oko-wallet/oko-types/ct_dashboard";
+import type { SendVerificationResponse } from "@oko-wallet/oko-types/ct_dashboard";
 import type { Request, Response } from "express";
 
 import { sendEmailVerificationCode } from "@oko-wallet-usrd-api/email/send";
@@ -71,49 +68,25 @@ export async function sendVerificationCodeRoute(
   req: Request,
   res: Response<OkoApiResponse<SendVerificationResponse>>,
 ) {
-  try {
-    const state = req.app.locals;
-    const request: SendVerificationRequest = {
-      email: req.body.email,
-      email_verification_expiration_minutes:
-        state.email_verification_expiration_minutes,
-      from_email: state.from_email,
-      smtp_config: {
-        smtp_host: state.smtp_host,
-        smtp_port: state.smtp_port,
-        smtp_user: state.smtp_user,
-        smtp_pass: state.smtp_pass,
-      },
-    };
-    const sendEmailVerificationCodeRes = await sendEmailVerificationCode(
-      state.db,
-      request,
-    );
+  const state = req.app.locals;
 
-    if (sendEmailVerificationCodeRes.success === false) {
-      res.status(ErrorCodeMap[sendEmailVerificationCodeRes.code]).json({
-        success: false,
-        code: sendEmailVerificationCodeRes.code,
-        msg: sendEmailVerificationCodeRes.msg,
-      });
-      return;
-    }
+  const result = await sendEmailVerificationCode(state.db, {
+    email: req.body.email,
+    email_verification_expiration_minutes:
+      state.email_verification_expiration_minutes,
+    from_email: state.from_email,
+    smtp_config: {
+      smtp_host: state.smtp_host,
+      smtp_port: state.smtp_port,
+      smtp_user: state.smtp_user,
+      smtp_pass: state.smtp_pass,
+    },
+  });
 
-    res.status(200).json({
-      success: true,
-      data: {
-        message: sendEmailVerificationCodeRes.data.message,
-        expires_at: sendEmailVerificationCodeRes.data.expires_at,
-      },
-    });
-    return;
-  } catch (error) {
-    console.error("Send verification code route error:", error);
-    res.status(500).json({
-      success: false,
-      code: "UNKNOWN_ERROR",
-      msg: `Internal server error: ${error instanceof Error ? error.message : String(error)}`,
-    });
+  if (!result.success) {
+    res.status(ErrorCodeMap[result.code] ?? 500).json(result);
     return;
   }
+
+  res.status(200).json(result);
 }
