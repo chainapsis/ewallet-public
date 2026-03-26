@@ -134,8 +134,8 @@ export const TransferAdminModal: FC<TransferAdminModalProps> = ({
                 Are you sure you want to leave?
               </Typography>
               <Typography size="sm" weight="regular" color="tertiary">
-                The admin role will be transferred to this user immediately and
-                you will leave the team.
+                Your admin rights will be transferred to the selected user, and
+                you will immediately lose access to this team.
               </Typography>
             </div>
           </div>
