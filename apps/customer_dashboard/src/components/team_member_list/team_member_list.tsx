@@ -703,6 +703,7 @@ export const TeamMemberList: FC = () => {
       {showLeaveModal && (
         <LeaveTeamModal
           isSoleMember={isSoleMember}
+          hasPendingInvitations={pendingCount > 0}
           onLeave={handleLeave}
           onClose={() => setShowLeaveModal(false)}
         />
