@@ -80,34 +80,19 @@ const MemberActions: FC<{
 }> = ({ member, onLeave, onEditRole, onRemove, onResend, onCancelInvite }) => {
   if (member.is_current_user) {
     return (
-      <>
-        <Tooltip
-          title="Edit role"
-          placement="top"
-          hideFloatingArrow
-          className={styles.tooltipWrapper}
-        >
-          <IconButton
-            hierarchy="tertiary"
-            size="xs"
-            icon={<UserEditIcon />}
-            onClick={onEditRole}
-          />
-        </Tooltip>
-        <Tooltip
-          title="Leave Team"
-          placement="top"
-          hideFloatingArrow
-          className={styles.tooltipWrapper}
-        >
-          <IconButton
-            hierarchy="tertiary"
-            size="xs"
-            icon={<DoorOutlinedIcon />}
-            onClick={onLeave}
-          />
-        </Tooltip>
-      </>
+      <Tooltip
+        title="Leave Team"
+        placement="top"
+        hideFloatingArrow
+        className={styles.tooltipWrapper}
+      >
+        <IconButton
+          hierarchy="tertiary"
+          size="xs"
+          icon={<DoorOutlinedIcon />}
+          onClick={onLeave}
+        />
+      </Tooltip>
     );
   }
 
