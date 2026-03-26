@@ -5,7 +5,6 @@ import { useOkoSvm } from "@oko-wallet/oko-sdk-react/svm";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 
-import { useUserInfoState } from "@oko-wallet-user-dashboard/state/user_info";
 import { resetSDKStates } from "@oko-wallet-user-dashboard/utils/sdk";
 
 export function useSignOut() {
@@ -13,7 +12,6 @@ export function useSignOut() {
   const { ethWallet } = useOkoEth();
   const { cosmosWallet } = useOkoCosmos();
   const { svmWallet } = useOkoSvm();
-  const clearUserInfo = useUserInfoState((state) => state.clearUserInfo);
   const queryClient = useQueryClient();
 
   const signOut = useCallback(async () => {
@@ -27,9 +25,8 @@ export function useSignOut() {
     } finally {
       resetSDKStates(ethWallet, cosmosWallet, svmWallet);
       queryClient.clear();
-      clearUserInfo();
     }
-  }, [wallet, ethWallet, cosmosWallet, svmWallet, queryClient, clearUserInfo]);
+  }, [wallet, ethWallet, cosmosWallet, svmWallet, queryClient]);
 
   return signOut;
 }

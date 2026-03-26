@@ -44,22 +44,18 @@ export type OkoCoreAction =
     }
   | { type: "SIGNED_OUT" };
 
-export interface WalletInfo {
-  authType: AuthType | null;
-  email: string | null;
-  name: string | null;
-  publicKey: string | null;
-}
-
 export interface UseOkoReturn {
   wallet: OkoWalletInterface | null;
   isReady: boolean;
   isSignedIn: boolean;
+  authType: AuthType | null;
+  email: string | null;
+  name: string | null;
+  publicKey: string | null;
   signIn: (type: SignInType) => Promise<void>;
   signOut: () => Promise<void>;
   openSignInModal: () => Promise<void>;
   setTheme: (theme: OkoWalletTheme) => Promise<void>;
-  walletInfo: WalletInfo;
 }
 
 export type {

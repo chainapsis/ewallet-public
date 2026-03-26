@@ -12,7 +12,6 @@ import styles from "./account_widget.module.scss";
 import { AuthProgressWidget } from "./auth_progress_widget";
 import { Spinner } from "@oko-wallet-user-dashboard/components/spinner/spinner";
 import { paths } from "@oko-wallet-user-dashboard/paths";
-import { useUserInfoState } from "@oko-wallet-user-dashboard/state/user_info";
 import { refreshSvmEd25519Key } from "@oko-wallet-user-dashboard/utils/sdk";
 
 type SigningInState =
@@ -21,15 +20,13 @@ type SigningInState =
   | { status: "failed"; error: string };
 
 export const AccountWidget: FC<AccountWidgetProps> = () => {
-  const { wallet: okoWallet } = useOko();
+  const { wallet: okoWallet, isSignedIn } = useOko();
   const { svmWallet } = useOkoSvm();
   const queryClient = useQueryClient();
   const [signingInState, setSigningInState] = useState<SigningInState>({
     status: "ready",
   });
   const router = useRouter();
-  const isSignedIn = useUserInfoState((state) => state.isSignedIn);
-  const setAuthType = useUserInfoState((state) => state.setAuthType);
 
   // TODO: add other login methods, and update the type accordingly
   const [loginMethod, setLoginMethod] = useState<AuthType>("google");
@@ -58,18 +55,6 @@ export const AccountWidget: FC<AccountWidgetProps> = () => {
       setSigningInState({ status: "signing-in" });
       await okoWallet.signIn(method === "auth0" ? "email" : method);
 
-      // Hydrate user info directly from wallet state so isSignedIn updates
-      // immediately, without depending on the Cosmos accountsChanged listener
-      // (which may not be ready yet if chain SDKs are still initializing).
-      const walletState = okoWallet.state;
-      if (walletState.publicKey) {
-        useUserInfoState.getState().setUserInfo({
-          email: walletState.email || null,
-          name: walletState.name || null,
-          publicKey: walletState.publicKey,
-        });
-      }
-
       // After sign-in, Ed25519 key is now available in the iframe.
       // Re-fetch it for SVM SDK (may have been null during initial lazy init).
       const refreshed = svmWallet
@@ -79,11 +64,9 @@ export const AccountWidget: FC<AccountWidgetProps> = () => {
         await queryClient.invalidateQueries({ queryKey: ["address", "svm"] });
       }
 
-      setAuthType(method);
       setSigningInState({ status: "ready" });
     } catch (error: any) {
       console.error("sign in fail, err: %s", error);
-      setAuthType(null);
 
       const errorMessage =
         error instanceof Error ? error.message : "Login failed";

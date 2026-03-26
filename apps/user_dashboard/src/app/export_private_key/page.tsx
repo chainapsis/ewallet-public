@@ -34,7 +34,6 @@ import {
 import styles from "./page.module.scss";
 import { Spinner } from "@oko-wallet-user-dashboard/components/spinner/spinner";
 import { displayToast } from "@oko-wallet-user-dashboard/components/toast";
-import { useUserInfoState } from "@oko-wallet-user-dashboard/state/user_info";
 
 const getAuthProviderInfo = (
   authType: AuthType | null,

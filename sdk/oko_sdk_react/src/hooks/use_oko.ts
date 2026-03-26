@@ -1,4 +1,4 @@
-import { useCallback, useContext, useMemo } from "react";
+import { useCallback, useContext } from "react";
 
 import { OkoContext } from "../context";
 import type { OkoWalletTheme, SignInType, UseOkoReturn } from "../types";
@@ -42,24 +42,17 @@ export function useOko(): UseOkoReturn {
     [state.wallet],
   );
 
-  const walletInfo = useMemo(
-    () => ({
-      authType: state.authType,
-      email: state.email,
-      name: state.name,
-      publicKey: state.publicKey,
-    }),
-    [state.authType, state.email, state.name, state.publicKey],
-  );
-
   return {
     wallet: state.wallet,
     isReady: state.isReady,
     isSignedIn: state.publicKey !== null,
+    authType: state.authType,
+    email: state.email,
+    name: state.name,
+    publicKey: state.publicKey,
     signIn,
     signOut,
     openSignInModal,
     setTheme,
-    walletInfo,
   };
 }

@@ -11,5 +11,4 @@ export type {
   OkoWalletState,
   SignInType,
   UseOkoReturn,
-  WalletInfo,
 } from "./types";

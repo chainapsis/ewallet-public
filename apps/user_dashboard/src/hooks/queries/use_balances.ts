@@ -1,3 +1,4 @@
+import { useOko } from "@oko-wallet/oko-sdk-react";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { useQueries } from "@tanstack/react-query";
 
@@ -21,7 +22,6 @@ import { fetchFactoryTokenMeta } from "@oko-wallet-user-dashboard/fetch/factory_
 import { fetchOsmosisAssetList } from "@oko-wallet-user-dashboard/fetch/osmosis_asset_list";
 import { fetchSplTokenBalances } from "@oko-wallet-user-dashboard/fetch/spl_token_balances";
 import { DEFAULT_ENABLED_CHAINS } from "@oko-wallet-user-dashboard/state/chains";
-import { useUserInfoState } from "@oko-wallet-user-dashboard/state/user_info";
 import { useAssetMetaStore } from "@oko-wallet-user-dashboard/store/asset_meta";
 import type {
   Currency,
@@ -716,7 +716,7 @@ export function useAllBalances() {
   const { address: svmAddress, isLoading: svmLoading } = useSVMAddress();
   const { addresses: cosmosAddresses, isLoading: addressesLoading } =
     useCosmosAddresses();
-  const publicKey = useUserInfoState((state) => state.publicKey);
+  const { publicKey } = useOko();
 
   const balanceQueries = useQueries({
     queries: enabledChains.map((chain) => {
