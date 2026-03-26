@@ -6,7 +6,7 @@ import { ChevronLeftIcon } from "@oko-wallet/oko-common-ui/icons/chevron_left";
 import { ChevronRightIcon } from "@oko-wallet/oko-common-ui/icons/chevron_right";
 import { DoorOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/door_outlined";
 import { SearchIcon } from "@oko-wallet/oko-common-ui/icons/search";
-import { UsersIcon } from "@oko-wallet/oko-common-ui/icons/users";
+import { UserPlusIcon } from "@oko-wallet/oko-common-ui/icons/user_plus";
 import {
   Table,
   TableBody,
@@ -320,6 +320,19 @@ export const TeamMemberList: FC = () => {
     if (!token) {
       return;
     }
+    const existing = allItems.find(
+      (m) => m.email.toLowerCase() === email.trim().toLowerCase(),
+    );
+    if (existing) {
+      displayToast({
+        variant: "error",
+        title:
+          existing.status === "Invitation Pending"
+            ? "An invitation has already been sent to this user"
+            : "The user already exists",
+      });
+      return;
+    }
     const res = await requestInviteTeamMember({
       token,
       email,
@@ -474,7 +487,7 @@ export const TeamMemberList: FC = () => {
             className={styles.inviteButton}
             onClick={() => setShowInviteModal(true)}
           >
-            <UsersIcon color="currentColor" size={20} />
+            <UserPlusIcon color="var(--brand-300)" size={20} />
             Invite
           </button>
         ) : (
@@ -492,7 +505,7 @@ export const TeamMemberList: FC = () => {
 
       <div className={styles.countAndSearch}>
         <Typography size="lg" weight="semibold" color="primary">
-          {allItems.length} Users
+          {allItems.length} {allItems.length === 1 ? "User" : "Users"}
         </Typography>
 
         <div className={styles.searchWrapper}>
@@ -502,6 +515,7 @@ export const TeamMemberList: FC = () => {
             type="text"
             className={styles.searchInput}
             placeholder={isAdmin ? "Search by email" : "Search email"}
+            autoComplete="off"
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
@@ -513,25 +527,23 @@ export const TeamMemberList: FC = () => {
       </div>
 
       <div>
-        {!isAdmin && (
-          <div className={styles.filterTabs}>
-            {FILTERS.map((filter) => (
-              <button
-                key={filter.key}
-                type="button"
-                className={cn(styles.filterTab, {
-                  [styles.filterTabActive]: activeFilter === filter.key,
-                })}
-                onClick={() => handleFilterChange(filter.key)}
-              >
-                {filter.label}
-                {filter.key === "pending" && pendingCount > 0 && (
-                  <Badge color="gray" label={String(pendingCount)} size="sm" />
-                )}
-              </button>
-            ))}
-          </div>
-        )}
+        <div className={styles.filterTabs}>
+          {FILTERS.map((filter) => (
+            <button
+              key={filter.key}
+              type="button"
+              className={cn(styles.filterTab, {
+                [styles.filterTabActive]: activeFilter === filter.key,
+              })}
+              onClick={() => handleFilterChange(filter.key)}
+            >
+              {filter.label}
+              {filter.key === "pending" && pendingCount > 0 && (
+                <Badge color="gray" label={String(pendingCount)} size="sm" />
+              )}
+            </button>
+          ))}
+        </div>
 
         {filteredMembers.length === 0 ? (
           <div className={styles.emptyState}>
@@ -590,7 +602,14 @@ export const TeamMemberList: FC = () => {
                 No users found
               </Typography>
               <Typography size="sm" weight="regular" color="tertiary">
-                Your search &ldquo;{searchQuery}&rdquo; did not match any users.
+                {searchQuery ? (
+                  <>
+                    Your search &ldquo;{searchQuery}&rdquo; did not match any
+                    users.
+                  </>
+                ) : (
+                  "No users match the selected filter."
+                )}
               </Typography>
             </div>
           </div>

@@ -103,7 +103,7 @@ export const ResendInviteModal: FC<ResendInviteModalProps> = ({
           </div>
           <div className={styles.textContent}>
             <Typography size="md" weight="semibold" color="primary">
-              Re-send the invitation
+              Resend the invitation
             </Typography>
             <Typography size="sm" weight="regular" color="tertiary">
               Resend available every 5 minutes.

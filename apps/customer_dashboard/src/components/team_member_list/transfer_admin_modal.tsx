@@ -2,8 +2,8 @@
 
 import { Button } from "@oko-wallet/oko-common-ui/button";
 import { ChevronDownIcon } from "@oko-wallet/oko-common-ui/icons/chevron_down";
-import { DoorOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/door_outlined";
 import { SearchIcon } from "@oko-wallet/oko-common-ui/icons/search";
+import { UserRightIcon } from "@oko-wallet/oko-common-ui/icons/user_right";
 import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import cn from "classnames";
@@ -24,7 +24,7 @@ interface TransferAdminModalProps {
 const TransferIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
     <path
-      d="M19 21L16 18M16 18L19 15M16 18H22M12 15.5H7.5C6.10444 15.5 5.40665 15.5 4.83886 15.6722C3.56045 16.06 2.56004 17.0605 2.17224 18.3389C2 18.9067 2 19.6044 2 21M14.5 7.5C14.5 9.98528 12.4853 12 10 12C7.51472 12 5.5 9.98528 5.5 7.5C5.5 5.01472 7.51472 3 10 3C12.4853 3 14.5 5.01472 14.5 7.5Z"
+      d="M9 11.5004L11 13.5004L15.5 9.00036M20 12.0004C20 16.9088 14.646 20.4788 12.698 21.6152C12.4766 21.7444 12.3659 21.809 12.2097 21.8425C12.0884 21.8685 11.9116 21.8685 11.7903 21.8425C11.6341 21.809 11.5234 21.7444 11.302 21.6152C9.35396 20.4788 4 16.9088 4 12.0004V7.21796C4 6.41845 4 6.01869 4.13076 5.67506C4.24627 5.3715 4.43398 5.10064 4.67766 4.88589C4.9535 4.6428 5.3278 4.50243 6.0764 4.22171L11.4382 2.21103C11.6461 2.13307 11.75 2.09409 11.857 2.07864C11.9518 2.06493 12.0482 2.06493 12.143 2.07864C12.25 2.09409 12.3539 2.13307 12.5618 2.21103L17.9236 4.22171C18.6722 4.50243 19.0465 4.6428 19.3223 4.88589C19.566 5.10064 19.7537 5.3715 19.8692 5.67506C20 6.01869 20 6.41845 20 7.21796V12.0004Z"
       stroke="var(--fg-primary)"
       strokeWidth="2"
       strokeLinecap="round"
@@ -126,7 +126,7 @@ export const TransferAdminModal: FC<TransferAdminModalProps> = ({
             <div className={styles.iconContainer}>
               <IconPattern className={styles.iconPattern} />
               <div className={styles.iconWrapper}>
-                <DoorOutlinedIcon color="var(--fg-primary)" />
+                <UserRightIcon color="var(--fg-primary)" size={24} />
               </div>
             </div>
             <div className={styles.textContent}>
@@ -134,8 +134,8 @@ export const TransferAdminModal: FC<TransferAdminModalProps> = ({
                 Are you sure you want to leave?
               </Typography>
               <Typography size="sm" weight="regular" color="tertiary">
-                The admin role will be transferred to this user immediately and
-                you will leave the team.
+                Your admin rights will be transferred to the selected user, and
+                you will immediately lose access to this team.
               </Typography>
             </div>
           </div>

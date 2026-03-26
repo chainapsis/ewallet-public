@@ -1,8 +1,7 @@
 "use client";
 
 import { IconButton } from "@oko-wallet/oko-common-ui/icon_button";
-import { DoorOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/door_outlined";
-import { TrashIcon } from "@oko-wallet/oko-common-ui/icons/trash";
+import { UserRightIcon } from "@oko-wallet/oko-common-ui/icons/user_right";
 import { TableCell, TableRow } from "@oko-wallet/oko-common-ui/table";
 import { Tooltip } from "@oko-wallet/oko-common-ui/tooltip";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
@@ -46,12 +45,24 @@ const UserEditIcon = () => (
   </svg>
 );
 
+const TrashIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <path
+      d="M6 2H10M2 4H14M12.6667 4L12.1991 11.0129C12.129 12.065 12.0939 12.5911 11.8667 12.99C11.6666 13.3412 11.3648 13.6235 11.0011 13.7998C10.588 14 10.0607 14 9.00623 14H6.99377C5.93927 14 5.41202 14 4.99889 13.7998C4.63517 13.6235 4.33339 13.3412 4.13332 12.99C3.90607 12.5911 3.871 12.065 3.80086 11.0129L3.33333 4M6.66667 7V10.3333M9.33333 7V10.3333"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 const SendIcon = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
     <path
-      d="M7 9L14 2M7.14286 9.28571L9.14286 14.2857C9.28066 14.614 9.34957 14.7781 9.44843 14.8219C9.53467 14.8601 9.63429 14.8577 9.71857 14.8152C9.81486 14.7668 9.87657 14.5997 10 14.2657L14.3714 3.41429C14.4829 3.13714 14.5386 2.99857 14.5114 2.90857C14.488 2.83 14.4343 2.76571 14.3614 2.72943C14.2771 2.68857 14.1371 2.72571 13.8571 2.8L2.73429 6.55714C2.39543 6.66714 2.226 6.72214 2.17657 6.81571C2.13371 6.89714 2.13143 6.99429 2.17 7.07771C2.21429 7.17429 2.38029 7.23714 2.71229 7.36286L7.14286 9.28571Z"
+      d="M6.99964 9.00005L13.9996 2.00005M7.08469 9.21876L8.83677 13.7241C8.99112 14.121 9.06829 14.3194 9.17949 14.3774C9.27589 14.4276 9.39073 14.4277 9.48719 14.3776C9.59846 14.3198 9.67586 14.1214 9.83068 13.7247L14.2242 2.46619C14.364 2.10807 14.4339 1.92901 14.3956 1.81459C14.3625 1.71522 14.2845 1.63724 14.1851 1.60405C14.0707 1.56582 13.8916 1.6357 13.5335 1.77545L2.27501 6.16902C1.8783 6.32383 1.67994 6.40124 1.62213 6.51251C1.57202 6.60897 1.57209 6.7238 1.62231 6.8202C1.68025 6.9314 1.8787 7.00858 2.27559 7.16293L6.78093 8.915C6.8615 8.94633 6.90178 8.962 6.9357 8.98619C6.96576 9.00764 6.99206 9.03393 7.0135 9.06399C7.0377 9.09792 7.05336 9.1382 7.08469 9.21876Z"
       stroke="currentColor"
-      strokeWidth="1.33"
+      strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
@@ -89,7 +100,7 @@ const MemberActions: FC<{
         <IconButton
           hierarchy="tertiary"
           size="xs"
-          icon={<DoorOutlinedIcon />}
+          icon={<UserRightIcon />}
           onClick={onLeave}
         />
       </Tooltip>
@@ -153,7 +164,7 @@ const MemberActions: FC<{
         <IconButton
           hierarchy="tertiary"
           size="xs"
-          icon={<TrashIcon color="currentColor" size={16} />}
+          icon={<TrashIcon />}
           onClick={onRemove}
         />
       </Tooltip>
@@ -230,7 +241,7 @@ export const TeamMemberRow: FC<TeamMemberRowProps> = ({
               <IconButton
                 hierarchy="tertiary"
                 size="xs"
-                icon={<DoorOutlinedIcon />}
+                icon={<UserRightIcon />}
                 onClick={onLeave}
               />
             </Tooltip>
