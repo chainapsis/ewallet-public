@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useOkoSvm } from "@oko-wallet/oko-sdk-react/svm";
 import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
@@ -9,7 +10,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import useConnection from "@/hooks/useConnection";
-import useOkoSvm from "@/hooks/useOkoSvm";
 import Button from "./Button";
 
 interface TransactionFormProps {
@@ -52,7 +52,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export default function TransactionForm({ className }: TransactionFormProps) {
-  const { address, okoSvm } = useOkoSvm();
+  const { address, svmWallet: okoSvm } = useOkoSvm();
   const connection = useConnection();
   const queryClient = useQueryClient();
 

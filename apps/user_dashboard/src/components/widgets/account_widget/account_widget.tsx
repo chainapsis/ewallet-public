@@ -1,5 +1,7 @@
 "use client";
 
+import { useOko } from "@oko-wallet/oko-sdk-react";
+import { useOkoSvm } from "@oko-wallet/oko-sdk-react/svm";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -10,11 +12,7 @@ import styles from "./account_widget.module.scss";
 import { AuthProgressWidget } from "./auth_progress_widget";
 import { Spinner } from "@oko-wallet-user-dashboard/components/spinner/spinner";
 import { paths } from "@oko-wallet-user-dashboard/paths";
-import {
-  selectCosmosSDK,
-  useSDKState,
-} from "@oko-wallet-user-dashboard/state/sdk";
-import { useUserInfoState } from "@oko-wallet-user-dashboard/state/user_info";
+import { refreshSvmEd25519Key } from "@oko-wallet-user-dashboard/utils/sdk";
 
 type SigningInState =
   | { status: "ready" }
@@ -22,17 +20,13 @@ type SigningInState =
   | { status: "failed"; error: string };
 
 export const AccountWidget: FC<AccountWidgetProps> = () => {
-  const okoWallet = useSDKState(selectCosmosSDK)?.okoWallet;
-  const refreshSvmEd25519Key = useSDKState(
-    (state) => state.refreshSvmEd25519Key,
-  );
+  const { wallet: okoWallet, isSignedIn } = useOko();
+  const { svmWallet } = useOkoSvm();
   const queryClient = useQueryClient();
   const [signingInState, setSigningInState] = useState<SigningInState>({
     status: "ready",
   });
   const router = useRouter();
-  const isSignedIn = useUserInfoState((state) => state.isSignedIn);
-  const setAuthType = useUserInfoState((state) => state.setAuthType);
 
   // TODO: add other login methods, and update the type accordingly
   const [loginMethod, setLoginMethod] = useState<AuthType>("google");
@@ -63,16 +57,16 @@ export const AccountWidget: FC<AccountWidgetProps> = () => {
 
       // After sign-in, Ed25519 key is now available in the iframe.
       // Re-fetch it for SVM SDK (may have been null during initial lazy init).
-      const refreshed = await refreshSvmEd25519Key();
+      const refreshed = svmWallet
+        ? await refreshSvmEd25519Key(svmWallet)
+        : false;
       if (refreshed) {
         await queryClient.invalidateQueries({ queryKey: ["address", "svm"] });
       }
 
-      setAuthType(method);
       setSigningInState({ status: "ready" });
     } catch (error: any) {
       console.error("sign in fail, err: %s", error);
-      setAuthType(null);
 
       const errorMessage =
         error instanceof Error ? error.message : "Login failed";

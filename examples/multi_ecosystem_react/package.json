@@ -17,6 +17,7 @@
     "@keplr-wallet/unit": "0.12.297",
     "@oko-wallet/oko-sdk-cosmos": "^0.1.2-alpha.1",
     "@oko-wallet/oko-sdk-eth": "^0.1.2-alpha.1",
+    "@oko-wallet/oko-sdk-react": "workspace:*",
     "@oko-wallet/oko-sdk-svm": "^0.1.2-alpha.1",
     "@solana/web3.js": "^1.98.0",
     "@tanstack/react-query": "^5.90.12",

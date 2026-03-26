@@ -1,7 +1,7 @@
-import useCosmos from "@/oko/useCosmos";
+import { useOko } from "@oko-wallet/oko-sdk-react";
 
 function Header() {
-  const { isReady, isSigningIn, isSignedIn, signIn, signOut } = useCosmos();
+  const { isReady, isSignedIn, openSignInModal, signOut } = useOko();
 
   return (
     <div className="flex items-center justify-between gap-3 mb-5">
@@ -12,8 +12,8 @@ function Header() {
       <div className="flex gap-2">
         <button
           type="button"
-          onClick={signIn}
-          disabled={!isReady || isSigningIn || isSignedIn}
+          onClick={openSignInModal}
+          disabled={!isReady || isSignedIn}
         >
           Sign In
         </button>

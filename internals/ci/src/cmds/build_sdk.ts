@@ -14,7 +14,7 @@ export async function doBuildSDK() {
       paths.sdk_svm,
       paths.sdk_core_react_native,
     ],
-    [paths.sdk_cosmos_kit],
+    [paths.sdk_cosmos_kit, paths.sdk_react],
   ];
 
   await buildInStages(stages, 4);

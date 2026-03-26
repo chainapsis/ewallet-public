@@ -1,11 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useOkoEth } from "@oko-wallet/oko-sdk-react/eth";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { type Hex, isAddress, toHex } from "viem";
 import { z } from "zod";
 
-import useEvm from "@/oko/useEvm";
+import { evmPublicClient } from "@/constants/chains";
 import TxForm from "./TxForm";
 import TxResult from "./TxResult";
 import TxTracking from "./TxTracking";
@@ -25,7 +26,8 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export default function EvmTransactionForm() {
-  const { address, okoEth, publicClient } = useEvm();
+  const { address, ethWallet: okoEth } = useOkoEth();
+  const publicClient = evmPublicClient;
   const queryClient = useQueryClient();
 
   const {

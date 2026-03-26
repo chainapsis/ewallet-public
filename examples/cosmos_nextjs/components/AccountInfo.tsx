@@ -2,11 +2,13 @@
 
 import { StargateClient } from "@cosmjs/stargate";
 import { CoinPretty } from "@keplr-wallet/unit";
+import { useOko } from "@oko-wallet/oko-sdk-react";
+import { useCosmosAddress } from "@oko-wallet/oko-sdk-react/cosmos";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
 
-import useOkoCosmos from "@/hooks/useOkoCosmos";
+import { chainInfo } from "@/constants/chain";
 import Button from "./Button";
 
 interface AccountInfoProps {
@@ -14,7 +16,8 @@ interface AccountInfoProps {
 }
 
 export default function AccountInfo({ className }: AccountInfoProps) {
-  const { bech32Address, chainInfo, signOut } = useOkoCosmos();
+  const { signOut } = useOko();
+  const { address: bech32Address } = useCosmosAddress(chainInfo.chainId);
 
   const { data: balance } = useQuery({
     queryKey: ["balance", bech32Address],

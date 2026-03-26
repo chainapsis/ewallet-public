@@ -1,11 +1,11 @@
 import { SolanaIcon } from "@oko-wallet/oko-common-ui/icons/solana_icon";
+import { useOkoSvm } from "@oko-wallet/oko-sdk-react/svm";
 
 // import styles from "../sign_widget/sign_widget.module.scss";
 import { SignWidget } from "@oko-wallet-demo-web/components/widgets/sign_widget/sign_widget";
-import { useSDKState } from "@oko-wallet-demo-web/state/sdk";
 
 export const SolanaOffchainSignWidget = () => {
-  const okoSvm = useSDKState((state) => state.oko_svm);
+  const { svmWallet: okoSvm } = useOkoSvm();
 
   const handleClickSolOffchainSign = async () => {
     if (okoSvm === null) {

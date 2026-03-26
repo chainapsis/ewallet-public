@@ -3,19 +3,13 @@
  * Replaces the side-effect based address fetching in state/addresses.ts
  */
 
+import { useOkoCosmos } from "@oko-wallet/oko-sdk-react/cosmos";
+import { useOkoEth } from "@oko-wallet/oko-sdk-react/eth";
+import { useOkoSvm } from "@oko-wallet/oko-sdk-react/svm";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 import { useEnabledChains } from "./use_chains";
-import {
-  selectCosmosInitialized,
-  selectCosmosSDK,
-  selectEthInitialized,
-  selectEthSDK,
-  selectSolInitialized,
-  selectSolSDK,
-  useSDKState,
-} from "@oko-wallet-user-dashboard/state/sdk";
 import type { ModularChainInfo } from "@oko-wallet-user-dashboard/types/chain";
 import { isEvmOnlyChain } from "@oko-wallet-user-dashboard/utils/chain";
 
@@ -23,8 +17,7 @@ import { isEvmOnlyChain } from "@oko-wallet-user-dashboard/utils/chain";
  * Hook to get ETH address
  */
 export function useEthAddress() {
-  const okoEth = useSDKState(selectEthSDK);
-  const isInitialized = useSDKState(selectEthInitialized);
+  const { ethWallet: okoEth, isReady: isInitialized } = useOkoEth();
 
   const query = useQuery({
     queryKey: ["address", "eth"],
@@ -47,8 +40,7 @@ export function useEthAddress() {
 }
 
 export function useSVMAddress() {
-  const okoSvm = useSDKState(selectSolSDK);
-  const isInitialized = useSDKState(selectSolInitialized);
+  const { svmWallet: okoSvm, isReady: isInitialized } = useOkoSvm();
 
   const query = useQuery({
     queryKey: ["address", "svm"],
@@ -74,8 +66,7 @@ export function useSVMAddress() {
  * Hook to get a single Cosmos chain address (works for non-enabled chains)
  */
 export function useCosmosAddress(chainId: string | undefined) {
-  const okoCosmos = useSDKState(selectCosmosSDK);
-  const isInitialized = useSDKState(selectCosmosInitialized);
+  const { cosmosWallet: okoCosmos, isReady: isInitialized } = useOkoCosmos();
 
   const query = useQuery({
     queryKey: ["address", "cosmos", chainId],
@@ -131,8 +122,7 @@ export function useChainAddress(chainInfo: ModularChainInfo | undefined) {
  * Hook to fetch Cosmos addresses for all enabled Cosmos chains
  */
 export function useCosmosAddresses() {
-  const okoCosmos = useSDKState(selectCosmosSDK);
-  const isInitialized = useSDKState(selectCosmosInitialized);
+  const { cosmosWallet: okoCosmos, isReady: isInitialized } = useOkoCosmos();
   const { chains: enabledChains } = useEnabledChains();
 
   const cosmosChainIds = useMemo(

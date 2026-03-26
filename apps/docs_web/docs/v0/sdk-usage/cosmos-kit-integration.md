@@ -1,6 +1,6 @@
 ---
 title: Cosmos Kit Integration
-sidebar_position: 8
+sidebar_position: 9
 ---
 
 # Cosmos Kit Integration

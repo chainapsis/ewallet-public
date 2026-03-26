@@ -1,6 +1,6 @@
 ---
 title: Interchain Kit Integration
-sidebar_position: 9
+sidebar_position: 10
 ---
 
 # Interchain Kit Integration

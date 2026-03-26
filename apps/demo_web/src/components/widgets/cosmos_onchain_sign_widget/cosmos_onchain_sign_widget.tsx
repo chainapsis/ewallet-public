@@ -8,16 +8,16 @@ import {
   TxBody,
 } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import { CosmosIcon } from "@oko-wallet/oko-common-ui/icons/cosmos_icon";
+import { useOkoCosmos } from "@oko-wallet/oko-sdk-react/cosmos";
 import { useCallback } from "react";
 
 import { SignWidget } from "@oko-wallet-demo-web/components/widgets/sign_widget/sign_widget";
 import { COSMOS_CHAIN_ID } from "@oko-wallet-demo-web/constants/cosmos";
-import { useSDKState } from "@oko-wallet-demo-web/state/sdk";
 
 const TOKEN_MINIMAL_DENOM = "uatom";
 
 export const CosmosOnchainSignWidget = () => {
-  const okoCosmos = useSDKState((state) => state.oko_cosmos);
+  const { cosmosWallet: okoCosmos } = useOkoCosmos();
 
   const handleClickCosmosSignDirect = useCallback(async () => {
     console.log("handleClickCosmosSignDirect()");

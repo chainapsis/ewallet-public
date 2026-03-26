@@ -1,11 +1,12 @@
 "use client";
 
+import { useOko } from "@oko-wallet/oko-sdk-react";
+import { useOkoEth } from "@oko-wallet/oko-sdk-react/eth";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
 import { formatEther } from "viem";
 
-import useOkoEvm from "@/hooks/useOkoEvm";
 import usePublicClient from "@/hooks/usePublicClient";
 import Button from "./Button";
 
@@ -14,7 +15,8 @@ interface AccountInfoProps {
 }
 
 export default function AccountInfo({ className }: AccountInfoProps) {
-  const { address, signOut } = useOkoEvm();
+  const { signOut } = useOko();
+  const { address } = useOkoEth();
   const publicClient = usePublicClient();
 
   const { data: balance } = useQuery({

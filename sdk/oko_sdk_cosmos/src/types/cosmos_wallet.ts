@@ -58,6 +58,7 @@ export interface OkoCosmosWalletInterface {
 
   enable: (_chainId: string) => Promise<void>;
   on: (handlerDef: OkoCosmosWalletEventHandler2) => void;
+  off: (handlerDef: OkoCosmosWalletEventHandler2) => void;
   getPublicKey: () => Promise<Uint8Array | null>;
   getCosmosChainInfo: () => Promise<ChainInfo[]>;
   experimentalSuggestChain: (_chainInfo: ChainInfo) => Promise<void>;

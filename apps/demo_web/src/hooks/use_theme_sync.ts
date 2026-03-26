@@ -1,14 +1,13 @@
+import { useOko } from "@oko-wallet/oko-sdk-react";
 import { useEffect } from "react";
 
-import { useSDKState } from "@oko-wallet-demo-web/state/sdk";
 import { useThemeState } from "@oko-wallet-demo-web/state/theme";
 
 export const useThemeSync = () => {
   const { initialize, setTheme } = useThemeState();
   const theme = useThemeState((s) => s.theme);
   const preference = useThemeState((s) => s.preference);
-  const okoCosmos = useSDKState((s) => s.oko_cosmos);
-  const isIframeReady = useSDKState((s) => s.isCosmosLazyInitialized);
+  const { isReady, setTheme: setOkoTheme } = useOko();
 
   useEffect(() => {
     if (useThemeState.persist.hasHydrated()) {
@@ -35,10 +34,10 @@ export const useThemeSync = () => {
   }, [preference, setTheme]);
 
   useEffect(() => {
-    if (!isIframeReady || !okoCosmos) {
+    if (!isReady) {
       return;
     }
 
-    okoCosmos.okoWallet.setTheme(theme);
-  }, [theme, isIframeReady, okoCosmos]);
+    setOkoTheme(theme);
+  }, [theme, isReady, setOkoTheme]);
 };
