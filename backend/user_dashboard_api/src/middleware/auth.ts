@@ -1,3 +1,4 @@
+import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
 import type { NextFunction, Request, Response } from "express";
 
 import {
@@ -21,9 +22,11 @@ export async function userJwtMiddleware(
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    res
-      .status(401)
-      .json({ error: "Authorization header with Bearer token required" });
+    res.status(ErrorCodeMap.UNAUTHORIZED).json({
+      success: false,
+      code: "UNAUTHORIZED",
+      msg: "Authorization header with Bearer token required",
+    });
     return;
   }
 
@@ -40,15 +43,21 @@ export async function userJwtMiddleware(
     });
 
     if (!verifyTokenRes.success) {
-      res.status(401).json({ error: verifyTokenRes.err });
+      res.status(ErrorCodeMap.INVALID_AUTH_TOKEN).json({
+        success: false,
+        code: "INVALID_AUTH_TOKEN",
+        msg: verifyTokenRes.err,
+      });
       return;
     }
 
     const payload = verifyTokenRes.data;
 
     if (!payload.wallet_id_secp256k1 || !payload.wallet_id_ed25519) {
-      res.status(401).json({
-        error: "Unauthorized: Invalid token",
+      res.status(ErrorCodeMap.INVALID_AUTH_TOKEN).json({
+        success: false,
+        code: "INVALID_AUTH_TOKEN",
+        msg: "Unauthorized: Invalid token",
       });
       return;
     }
@@ -62,8 +71,10 @@ export async function userJwtMiddleware(
     next();
     return;
   } catch (error) {
-    res.status(500).json({
-      error: `Token validation failed: ${error instanceof Error ? error.message : String(error)}`,
+    res.status(ErrorCodeMap.UNKNOWN_ERROR).json({
+      success: false,
+      code: "UNKNOWN_ERROR",
+      msg: `Token validation failed: ${error instanceof Error ? error.message : String(error)}`,
     });
     return;
   }
@@ -77,9 +88,11 @@ export async function customerJwtMiddleware(
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    res
-      .status(401)
-      .json({ error: "Authorization header with Bearer token required" });
+    res.status(ErrorCodeMap.UNAUTHORIZED).json({
+      success: false,
+      code: "UNAUTHORIZED",
+      msg: "Authorization header with Bearer token required",
+    });
     return;
   }
 
@@ -96,15 +109,19 @@ export async function customerJwtMiddleware(
     });
 
     if (!result.success) {
-      res
-        .status(401)
-        .json({ error: `Token verification failed: ${result.error}` });
+      res.status(ErrorCodeMap.INVALID_AUTH_TOKEN).json({
+        success: false,
+        code: "INVALID_AUTH_TOKEN",
+        msg: `Token verification failed: ${result.error}`,
+      });
       return;
     }
 
     if (!result.payload) {
-      res.status(500).json({
-        error: "Internal server error: Token payload missing after validation",
+      res.status(ErrorCodeMap.UNKNOWN_ERROR).json({
+        success: false,
+        code: "UNKNOWN_ERROR",
+        msg: "Internal server error: Token payload missing after validation",
       });
       return;
     }
@@ -114,7 +131,11 @@ export async function customerJwtMiddleware(
       typeof result.payload.sub !== "string" ||
       result.payload.type !== "customer"
     ) {
-      res.status(401).json({ error: "Invalid token" });
+      res.status(ErrorCodeMap.INVALID_AUTH_TOKEN).json({
+        success: false,
+        code: "INVALID_AUTH_TOKEN",
+        msg: "Invalid token",
+      });
       return;
     }
 
@@ -123,8 +144,10 @@ export async function customerJwtMiddleware(
     next();
     return;
   } catch (error) {
-    res.status(500).json({
-      error: `Token validation failed: ${error instanceof Error ? error.message : String(error)}`,
+    res.status(ErrorCodeMap.UNKNOWN_ERROR).json({
+      success: false,
+      code: "UNKNOWN_ERROR",
+      msg: `Token validation failed: ${error instanceof Error ? error.message : String(error)}`,
     });
     return;
   }
