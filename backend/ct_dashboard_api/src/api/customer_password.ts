@@ -77,7 +77,7 @@ export async function forgotPasswordRequest(
     if (!email) {
       return {
         success: false,
-        code: "CUSTOMER_ACCOUNT_NOT_FOUND",
+        code: "INVALID_REQUEST",
         msg: "email is required",
       };
     }
@@ -175,7 +175,7 @@ export async function changeCustomerPassword(
     if (!body.email || !body.new_password) {
       return {
         success: false,
-        code: "CUSTOMER_ACCOUNT_NOT_FOUND",
+        code: "INVALID_REQUEST",
         msg: "email and new_password are required",
       };
     }

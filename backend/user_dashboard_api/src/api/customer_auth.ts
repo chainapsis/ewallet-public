@@ -158,7 +158,7 @@ export async function verifyEmailAndLoginRequest(
     if (!body.email || !body.verification_code) {
       return {
         success: false,
-        code: "CUSTOMER_ACCOUNT_NOT_FOUND",
+        code: "INVALID_REQUEST",
         msg: "email and verification_code are required",
       };
     }
@@ -279,7 +279,7 @@ export async function changeCustomerPasswordRequest(
     if (!body.email || !body.new_password) {
       return {
         success: false,
-        code: "CUSTOMER_ACCOUNT_NOT_FOUND",
+        code: "INVALID_REQUEST",
         msg: "email and new_password are required",
       };
     }

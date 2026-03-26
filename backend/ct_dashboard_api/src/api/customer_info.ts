@@ -141,7 +141,7 @@ export async function updateCustomerInfoRequest(
         if (metadata.width !== 128 || metadata.height !== 128) {
           return {
             success: false,
-            code: "IMAGE_UPLOAD_FAILED",
+            code: "INVALID_IMAGE",
             msg: "Image must be exactly 128×128 pixels.",
           };
         }
@@ -154,7 +154,7 @@ export async function updateCustomerInfoRequest(
       } catch (_error) {
         return {
           success: false,
-          code: "IMAGE_UPLOAD_FAILED",
+          code: "INVALID_IMAGE",
           msg: "Invalid image file.",
         };
       }
