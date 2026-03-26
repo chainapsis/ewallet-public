@@ -166,6 +166,7 @@ export const InviteModal: FC<InviteModalProps> = ({ onInvite, onClose }) => {
                 type="email"
                 className={styles.emailField}
                 placeholder="email@email.com"
+                autoComplete="email"
                 value={email}
                 onChange={(e) => handleChange(e.target.value)}
                 onBlur={handleBlur}

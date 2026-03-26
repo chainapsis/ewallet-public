@@ -502,6 +502,7 @@ export const TeamMemberList: FC = () => {
             type="text"
             className={styles.searchInput}
             placeholder={isAdmin ? "Search by email" : "Search email"}
+            autoComplete="off"
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
