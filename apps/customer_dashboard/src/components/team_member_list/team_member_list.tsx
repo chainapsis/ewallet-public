@@ -320,6 +320,19 @@ export const TeamMemberList: FC = () => {
     if (!token) {
       return;
     }
+    const existing = allItems.find(
+      (m) => m.email.toLowerCase() === email.trim().toLowerCase(),
+    );
+    if (existing) {
+      displayToast({
+        variant: "error",
+        title:
+          existing.status === "Invitation Pending"
+            ? "An invitation has already been sent to this user"
+            : "The user already exists",
+      });
+      return;
+    }
     const res = await requestInviteTeamMember({
       token,
       email,
