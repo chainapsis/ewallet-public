@@ -134,6 +134,17 @@ export const OkoProvider: FC<OkoProviderProps> = ({ config, children }) => {
       }
       provider = p;
       provider.on("accountsChanged", ethAccountsHandler);
+
+      // Read current address after subscribing to guard against state set
+      // before the listener was attached (e.g. already-signed-in page load).
+      const currentAddress = ethWallet.state.address;
+      if (currentAddress !== null) {
+        setEthCtx((prev) =>
+          prev.address === currentAddress
+            ? prev
+            : { ...prev, address: currentAddress },
+        );
+      }
     });
 
     return () => {
