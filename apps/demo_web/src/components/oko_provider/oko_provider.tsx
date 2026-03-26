@@ -3,7 +3,6 @@
 import { OkoProvider as OkoSDKProvider } from "@oko-wallet/oko-sdk-react";
 import type { FC, PropsWithChildren } from "react";
 
-import { useSDKListeners } from "@oko-wallet-demo-web/hooks/use_sdk_listeners";
 import { useThemeSync } from "@oko-wallet-demo-web/hooks/use_theme_sync";
 
 const okoConfig = {
@@ -15,7 +14,6 @@ const okoConfig = {
 };
 
 const InnerProvider: FC<PropsWithChildren> = ({ children }) => {
-  useSDKListeners();
   useThemeSync();
 
   return <>{children}</>;

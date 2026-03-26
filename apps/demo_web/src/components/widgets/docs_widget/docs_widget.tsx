@@ -2,14 +2,14 @@ import { Button } from "@oko-wallet/oko-common-ui/button";
 import { ArrowRightOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/arrow_right_outlined";
 import { BookOpenIcon } from "@oko-wallet/oko-common-ui/icons/book_open";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import { useOko } from "@oko-wallet/oko-sdk-react";
 import type { FC } from "react";
 
 import { Widget } from "../widget_components";
 import styles from "./docs_widget.module.scss";
-import { useUserInfoState } from "@oko-wallet-demo-web/state/user_info";
 
 export const DocsWidget: FC = () => {
-  const isSignedIn = useUserInfoState((state) => state.isSignedIn);
+  const { isSignedIn } = useOko();
 
   const handleOpenDocs = () => {
     window.open(process.env.NEXT_PUBLIC_OKO_DOCS_ENDPOINT, "_blank");

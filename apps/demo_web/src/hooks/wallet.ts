@@ -1,3 +1,4 @@
+import { useOko } from "@oko-wallet/oko-sdk-react";
 import { useOkoCosmos } from "@oko-wallet/oko-sdk-react/cosmos";
 import { useOkoEth } from "@oko-wallet/oko-sdk-react/eth";
 import { useOkoSvm } from "@oko-wallet/oko-sdk-react/svm";
@@ -6,13 +7,12 @@ import type { Result } from "@oko-wallet/stdlib-js";
 import { useEffect, useRef, useState } from "react";
 
 import { COSMOS_CHAIN_ID } from "@oko-wallet-demo-web/constants/cosmos";
-import { useUserInfoState } from "@oko-wallet-demo-web/state/user_info";
 
 export function useAddresses() {
   const { cosmosWallet: okoCosmos } = useOkoCosmos();
   const { ethWallet: okoEth } = useOkoEth();
   const { svmWallet: okoSvm } = useOkoSvm();
-  const isSignedIn = useUserInfoState((state) => state.isSignedIn);
+  const { isSignedIn } = useOko();
   const isSignedRef = useRef(isSignedIn);
   isSignedRef.current = isSignedIn;
 

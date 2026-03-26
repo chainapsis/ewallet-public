@@ -4,6 +4,7 @@ import { ContractEditIcon } from "@oko-wallet/oko-common-ui/icons/contract_edit"
 import { Skeleton } from "@oko-wallet/oko-common-ui/skeleton";
 import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import { useOko } from "@oko-wallet/oko-sdk-react";
 import { useOkoCosmos } from "@oko-wallet/oko-sdk-react/cosmos";
 import { useOkoEth } from "@oko-wallet/oko-sdk-react/eth";
 import { useOkoSvm } from "@oko-wallet/oko-sdk-react/svm";
@@ -23,7 +24,6 @@ import { SignInfoBox } from "@oko-wallet-demo-web/components/widgets/sign_info_b
 import { SolanaOffchainSignWidget } from "@oko-wallet-demo-web/components/widgets/solana_offchain_sign_widget/solana_offchain_sign_widget";
 import { SolanaOnchainSignWidget } from "@oko-wallet-demo-web/components/widgets/solana_onchain_sign_widget/solana_onchain_sign_widget";
 import { Widget } from "@oko-wallet-demo-web/components/widgets/widget_components";
-import { useUserInfoState } from "@oko-wallet-demo-web/state/user_info";
 
 export const PreviewPanel: FC = () => {
   const { isReady: isCosmosReady } = useOkoCosmos();
@@ -31,7 +31,7 @@ export const PreviewPanel: FC = () => {
   const { isReady: isSvmReady } = useOkoSvm();
   const isLazyInitialized = isCosmosReady && isEthReady && isSvmReady;
 
-  const isSignedIn = useUserInfoState((state) => state.isSignedIn);
+  const { isSignedIn } = useOko();
 
   return (
     <div className={styles.wrapper}>
