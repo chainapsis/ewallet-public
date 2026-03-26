@@ -1,14 +1,15 @@
+import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
 import { registry } from "@oko-wallet/oko-api-openapi";
 import { ErrorResponseSchema } from "@oko-wallet/oko-api-openapi/common";
 import {
   CustomerAuthHeaderSchema,
   GetCustomerInfoSuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/ct_dashboard";
-import { getCustomerByUserId } from "@oko-wallet/oko-pg-interface/customers";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type { Customer } from "@oko-wallet/oko-types/customers";
 import type { Response } from "express";
 
+import { getCustomerInfoRequest } from "@oko-wallet-usrd-api/api/customer_info";
 import type { CustomerAuthenticatedRequest } from "@oko-wallet-usrd-api/middleware/auth";
 
 registry.registerPath({
@@ -61,41 +62,14 @@ export async function getCustomerInfo(
   req: CustomerAuthenticatedRequest,
   res: Response<OkoApiResponse<Customer>>,
 ) {
-  try {
-    const state = req.app.locals;
+  const state = req.app.locals;
 
-    const customerRes = await getCustomerByUserId(state.db, res.locals.user_id);
+  const result = await getCustomerInfoRequest(state.db, res.locals.user_id);
 
-    if (!customerRes.success) {
-      res.status(500).json({
-        success: false,
-        code: "UNKNOWN_ERROR",
-        msg: customerRes.err,
-      });
-      return;
-    }
-
-    if (customerRes.data === null) {
-      res.status(404).json({
-        success: false,
-        code: "CUSTOMER_NOT_FOUND",
-        msg: "Customer not found",
-      });
-      return;
-    }
-
-    res.status(200).json({
-      success: true,
-      data: customerRes.data,
-    });
-    return;
-  } catch (error) {
-    console.error("Get customer info error:", error);
-    res.status(500).json({
-      success: false,
-      code: "UNKNOWN_ERROR",
-      msg: "Internal server error",
-    });
+  if (!result.success) {
+    res.status(ErrorCodeMap[result.code] ?? 500).json(result);
     return;
   }
+
+  res.status(200).json(result);
 }

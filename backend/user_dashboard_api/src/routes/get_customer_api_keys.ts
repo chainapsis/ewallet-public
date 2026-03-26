@@ -1,3 +1,4 @@
+import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
 import { registry } from "@oko-wallet/oko-api-openapi";
 import { ErrorResponseSchema } from "@oko-wallet/oko-api-openapi/common";
 import {
@@ -5,11 +6,11 @@ import {
   GetCustomerApiKeysRequestSchema,
   GetCustomerApiKeysSuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/ct_dashboard";
-import { getAPIKeysByCustomerId } from "@oko-wallet/oko-pg-interface/api_keys";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type { APIKey } from "@oko-wallet/oko-types/ct_dashboard";
 import type { Response } from "express";
 
+import { getCustomerApiKeysRequest } from "@oko-wallet-usrd-api/api/customer_info";
 import type { CustomerAuthenticatedRequest } from "@oko-wallet-usrd-api/middleware/auth";
 
 registry.registerPath({
@@ -70,42 +71,17 @@ export async function getCustomerApiKeys(
   req: CustomerAuthenticatedRequest<{ customer_id: string }>,
   res: Response<OkoApiResponse<APIKey[]>>,
 ) {
-  try {
-    const state = req.app.locals;
+  const state = req.app.locals;
 
-    const apiKeys = await getAPIKeysByCustomerId(
-      state.db,
-      req.body.customer_id,
-    );
+  const result = await getCustomerApiKeysRequest(
+    state.db,
+    req.body.customer_id,
+  );
 
-    if (!apiKeys.success) {
-      res.status(500).json({
-        success: false,
-        code: "UNKNOWN_ERROR",
-        msg: apiKeys.err,
-      });
-      return;
-    }
-
-    if (apiKeys.data.length === 0) {
-      res.status(404).json({
-        success: false,
-        code: "API_KEYS_NOT_FOUND",
-        msg: "No API keys found",
-      });
-      return;
-    }
-
-    res.status(200).json({
-      success: true,
-      data: apiKeys.data,
-    });
-  } catch (error) {
-    console.error("Get API keys error:", error);
-    res.status(500).json({
-      success: false,
-      code: "UNKNOWN_ERROR",
-      msg: "Internal server error",
-    });
+  if (!result.success) {
+    res.status(ErrorCodeMap[result.code] ?? 500).json(result);
+    return;
   }
+
+  res.status(200).json(result);
 }
