@@ -492,7 +492,7 @@ export const TeamMemberList: FC = () => {
 
       <div className={styles.countAndSearch}>
         <Typography size="lg" weight="semibold" color="primary">
-          {allItems.length} Users
+          {allItems.length} {allItems.length === 1 ? "User" : "Users"}
         </Typography>
 
         <div className={styles.searchWrapper}>
