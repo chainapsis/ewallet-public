@@ -34,7 +34,10 @@ export function useConnectedApps(): UseConnectedAppsResult {
   >({
     queryKey: ["connectedApps"],
     queryFn: async () => {
-      const res = await cosmosWallet!.okoWallet.sendMsgToIframe({
+      if (!cosmosWallet) {
+        throw new Error("cosmosWallet not available");
+      }
+      const res = await cosmosWallet.okoWallet.sendMsgToIframe({
         target: "oko_attached",
         msg_type: "__get_connected_apps__",
         payload: null,

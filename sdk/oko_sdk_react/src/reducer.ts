@@ -39,15 +39,6 @@ export function coreReducer(
         name: action.name,
       };
 
-    case "SIGNED_OUT":
-      return {
-        ...state,
-        authType: null,
-        email: null,
-        publicKey: null,
-        name: null,
-      };
-
     default:
       return state;
   }

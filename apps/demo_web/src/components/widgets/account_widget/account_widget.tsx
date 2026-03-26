@@ -32,7 +32,7 @@ export const AccountWidget: FC<AccountWidgetProps> = () => {
     authType,
     publicKey: publicKeySecp256k1,
   } = useOko();
-  const { address: publicKeyEd25519 } = useOkoSvm();
+  const { address: svmPublicKey } = useOkoSvm();
   const [signingInState, setSigningInState] = useState<SigningInState>({
     status: "ready",
   });
@@ -122,7 +122,7 @@ export const AccountWidget: FC<AccountWidgetProps> = () => {
         type={displayLoginMethod}
         email={email || ""}
         publicKeySecp256k1={publicKeySecp256k1 || ""}
-        publicKeyEd25519={publicKeyEd25519}
+        publicKeyEd25519={svmPublicKey}
         name={name}
         onSignOut={handleSignOut}
       />

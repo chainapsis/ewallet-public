@@ -41,8 +41,7 @@ export type OkoCoreAction =
       email: string | null;
       publicKey: string | null;
       name: string | null;
-    }
-  | { type: "SIGNED_OUT" };
+    };
 
 export interface UseOkoReturn {
   wallet: OkoWalletInterface | null;

@@ -81,6 +81,7 @@ function ConnectButton() {
 | `signIn` | `(type: SignInType) => Promise<void>` | Start sign-in flow |
 | `signOut` | `() => Promise<void>` | Sign out current user |
 | `openSignInModal` | `() => Promise<void>` | Open built-in provider picker UI |
+| `setTheme` | `(theme: OkoWalletTheme) => Promise<void>` | Update the wallet theme |
 
 ### `SignInType`
 

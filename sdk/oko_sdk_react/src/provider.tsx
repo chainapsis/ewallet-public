@@ -67,6 +67,8 @@ export const OkoProvider: FC<OkoProviderProps> = ({ config, children }) => {
     wallet.waitUntilInitialized.then((res) => {
       if (res.success) {
         dispatch({ type: "READY", state: res.data });
+      } else {
+        console.error("[oko-react] core wallet init failed:", res.err);
       }
     });
 
