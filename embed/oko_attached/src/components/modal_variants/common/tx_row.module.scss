@@ -11,9 +11,6 @@
 
 // Mobile app mode: enlarge label text
 :global(html[data-mobile]) .txRow > p:first-child {
-  font-size: var(--tx-row-mobile-label-font-size, var(--font-size-sm));
-  line-height: var(
-    --tx-row-mobile-label-line-height,
-    var(--font-line-height-sm)
-  );
+  font-size: var(--font-size-sm);
+  line-height: var(--font-line-height-sm);
 }
