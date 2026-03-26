@@ -8,7 +8,10 @@ import {
   createEmailVerification,
   verifyEmailCode,
 } from "@oko-wallet/oko-pg-interface/email_verifications";
-import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
+import type {
+  OkoApiErrorResponse,
+  OkoApiResponse,
+} from "@oko-wallet/oko-types/api_response";
 import type {
   ChangePasswordRequest,
   ChangePasswordResponse,
@@ -31,7 +34,7 @@ interface SmtpConfig {
   smtp_pass: string;
 }
 
-function validatePassword(password: string): OkoApiResponse<null> | null {
+function validatePassword(password: string): OkoApiErrorResponse | null {
   if (password.length < CHANGED_PASSWORD_MIN_LENGTH) {
     return {
       success: false,
