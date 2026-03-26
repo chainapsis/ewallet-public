@@ -1,5 +1,4 @@
 export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-export const PASSWORD_MIN_LENGTH = 4;
 export const CHANGED_PASSWORD_MIN_LENGTH = 8;
 
 export const SIX_DIGITS_REGEX = /^\d{6}$/;

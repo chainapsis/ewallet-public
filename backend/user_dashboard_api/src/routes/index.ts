@@ -14,8 +14,6 @@ import {
 } from "@oko-wallet-usrd-api/middleware/auth";
 import { multerMiddleware } from "@oko-wallet-usrd-api/middleware/multer";
 import { rateLimitMiddleware } from "@oko-wallet-usrd-api/middleware/rate_limit";
-// import { setUserRoutes } from "@oko-wallet-usrd-api/routes/user";
-// import { setUserAuthRoutes } from "@oko-wallet-usrd-api/routes/user_auth";
 
 export function makeUserRouter() {
   const router = express.Router() as IRouter;
