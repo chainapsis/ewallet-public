@@ -648,7 +648,6 @@ export const TeamMemberList: FC = () => {
                   key={member.id}
                   member={member}
                   isAdmin={isAdmin}
-                  isSoleAdmin={isSoleAdmin}
                   onLeave={() => {
                     if (isSoleMember) {
                       setShowLeaveModal(true);

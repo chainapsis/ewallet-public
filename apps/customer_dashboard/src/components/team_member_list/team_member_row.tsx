@@ -13,7 +13,6 @@ import type { TeamListItem } from "./types";
 interface TeamMemberRowProps {
   member: TeamListItem;
   isAdmin: boolean;
-  isSoleAdmin: boolean;
   onLeave: () => void;
   onEditRole: (member: TeamListItem) => void;
   onRemove: (member: TeamListItem) => void;
@@ -84,39 +83,28 @@ const XCircleIcon = () => (
 
 const MemberActions: FC<{
   member: TeamListItem;
-  isSoleAdmin: boolean;
   onLeave: () => void;
   onEditRole: () => void;
   onRemove: () => void;
   onResend: () => void;
   onCancelInvite: () => void;
-}> = ({
-  member,
-  isSoleAdmin,
-  onLeave,
-  onEditRole,
-  onRemove,
-  onResend,
-  onCancelInvite,
-}) => {
+}> = ({ member, onLeave, onEditRole, onRemove, onResend, onCancelInvite }) => {
   if (member.is_current_user) {
     return (
       <>
-        {!isSoleAdmin && (
-          <Tooltip
-            title="Edit role"
-            placement="top"
-            hideFloatingArrow
-            className={styles.tooltipWrapper}
-          >
-            <IconButton
-              hierarchy="tertiary"
-              size="xs"
-              icon={<UserEditIcon />}
-              onClick={onEditRole}
-            />
-          </Tooltip>
-        )}
+        <Tooltip
+          title="Edit role"
+          placement="top"
+          hideFloatingArrow
+          className={styles.tooltipWrapper}
+        >
+          <IconButton
+            hierarchy="tertiary"
+            size="xs"
+            icon={<UserEditIcon />}
+            onClick={onEditRole}
+          />
+        </Tooltip>
         <Tooltip
           title="Leave Team"
           placement="top"
@@ -202,7 +190,6 @@ const MemberActions: FC<{
 export const TeamMemberRow: FC<TeamMemberRowProps> = ({
   member,
   isAdmin,
-  isSoleAdmin,
   onLeave,
   onEditRole,
   onRemove,
@@ -251,7 +238,6 @@ export const TeamMemberRow: FC<TeamMemberRowProps> = ({
           <div className={styles.adminActions}>
             <MemberActions
               member={member}
-              isSoleAdmin={isSoleAdmin}
               onLeave={onLeave}
               onEditRole={() => onEditRole(member)}
               onRemove={() => onRemove(member)}
