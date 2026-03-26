@@ -527,25 +527,23 @@ export const TeamMemberList: FC = () => {
       </div>
 
       <div>
-        {!isAdmin && (
-          <div className={styles.filterTabs}>
-            {FILTERS.map((filter) => (
-              <button
-                key={filter.key}
-                type="button"
-                className={cn(styles.filterTab, {
-                  [styles.filterTabActive]: activeFilter === filter.key,
-                })}
-                onClick={() => handleFilterChange(filter.key)}
-              >
-                {filter.label}
-                {filter.key === "pending" && pendingCount > 0 && (
-                  <Badge color="gray" label={String(pendingCount)} size="sm" />
-                )}
-              </button>
-            ))}
-          </div>
-        )}
+        <div className={styles.filterTabs}>
+          {FILTERS.map((filter) => (
+            <button
+              key={filter.key}
+              type="button"
+              className={cn(styles.filterTab, {
+                [styles.filterTabActive]: activeFilter === filter.key,
+              })}
+              onClick={() => handleFilterChange(filter.key)}
+            >
+              {filter.label}
+              {filter.key === "pending" && pendingCount > 0 && (
+                <Badge color="gray" label={String(pendingCount)} size="sm" />
+              )}
+            </button>
+          ))}
+        </div>
 
         {filteredMembers.length === 0 ? (
           <div className={styles.emptyState}>
@@ -603,9 +601,12 @@ export const TeamMemberList: FC = () => {
               <Typography size="md" weight="semibold" color="primary">
                 No users found
               </Typography>
-              <Typography size="sm" weight="regular" color="tertiary">
-                Your search &ldquo;{searchQuery}&rdquo; did not match any users.
-              </Typography>
+              {searchQuery && (
+                <Typography size="sm" weight="regular" color="tertiary">
+                  Your search &ldquo;{searchQuery}&rdquo; did not match any
+                  users.
+                </Typography>
+              )}
             </div>
           </div>
         ) : (
