@@ -128,24 +128,31 @@ export const OkoProvider: FC<OkoProviderProps> = ({ config, children }) => {
       }));
     };
 
-    ethWallet.getEthereumProvider().then((p) => {
-      if (cancelled) {
-        return;
-      }
-      provider = p;
-      provider.on("accountsChanged", ethAccountsHandler);
+    ethWallet
+      .getEthereumProvider()
+      .then((p) => {
+        if (cancelled) {
+          return;
+        }
+        provider = p;
+        provider.on("accountsChanged", ethAccountsHandler);
 
-      // Read current address after subscribing to guard against state set
-      // before the listener was attached (e.g. already-signed-in page load).
-      const currentAddress = ethWallet.state.address;
-      if (currentAddress !== null) {
-        setEthCtx((prev) =>
-          prev.address === currentAddress
-            ? prev
-            : { ...prev, address: currentAddress },
-        );
-      }
-    });
+        // Read current address after subscribing to guard against state set
+        // before the listener was attached (e.g. already-signed-in page load).
+        const currentAddress = ethWallet.state.address;
+        if (currentAddress !== null) {
+          setEthCtx((prev) =>
+            prev.address === currentAddress
+              ? prev
+              : { ...prev, address: currentAddress },
+          );
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          console.error("[oko-react] ETH provider init failed:", err);
+        }
+      });
 
     return () => {
       cancelled = true;
