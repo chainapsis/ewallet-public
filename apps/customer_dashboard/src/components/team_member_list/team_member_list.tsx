@@ -601,12 +601,16 @@ export const TeamMemberList: FC = () => {
               <Typography size="md" weight="semibold" color="primary">
                 No users found
               </Typography>
-              {searchQuery && (
-                <Typography size="sm" weight="regular" color="tertiary">
-                  Your search &ldquo;{searchQuery}&rdquo; did not match any
-                  users.
-                </Typography>
-              )}
+              <Typography size="sm" weight="regular" color="tertiary">
+                {searchQuery ? (
+                  <>
+                    Your search &ldquo;{searchQuery}&rdquo; did not match any
+                    users.
+                  </>
+                ) : (
+                  "No users match the selected filter."
+                )}
+              </Typography>
             </div>
           </div>
         ) : (
