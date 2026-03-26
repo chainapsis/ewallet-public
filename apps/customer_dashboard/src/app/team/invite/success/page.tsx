@@ -24,8 +24,8 @@ const InviteSuccessPage: FC = () => {
           <img
             src={ILLUSTRATION_URL}
             alt="Password set illustration"
-            width={270}
-            height={200}
+            width={320}
+            height={240}
           />
 
           <Typography size="display-sm" weight="semibold" color="primary">

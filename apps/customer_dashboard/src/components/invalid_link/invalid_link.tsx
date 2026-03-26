@@ -36,8 +36,8 @@ export const InvalidLink: FC<InvalidLinkProps> = ({
         <img
           src={ILLUSTRATION_URL}
           alt="Invalid link illustration"
-          width={317}
-          height={234}
+          width={320}
+          height={240}
         />
         <div className={styles.textContent}>
           <Typography size="display-xs" weight="semibold" color="primary">
