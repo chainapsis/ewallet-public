@@ -20,9 +20,12 @@ export function useSignOut() {
       return;
     }
 
-    await wallet.signOut();
-    resetSDKStates(ethWallet, cosmosWallet, svmWallet);
-    queryClient.clear();
+    try {
+      await wallet.signOut();
+    } finally {
+      resetSDKStates(ethWallet, cosmosWallet, svmWallet);
+      queryClient.clear();
+    }
   }, [wallet, ethWallet, cosmosWallet, svmWallet, queryClient]);
 
   return signOut;
