@@ -21,19 +21,24 @@ export interface SvmTransferPrettyProps {
   lamports: bigint | number;
   to?: string;
   embedded?: boolean;
+  mobileNativeExpanded?: boolean;
 }
 
 export const SvmTransferPretty: FC<SvmTransferPrettyProps> = ({
   lamports,
   to,
   embedded = false,
+  mobileNativeExpanded = false,
 }) => {
   const isMobile = useMobileMode();
+  const rowClassName = embedded ? styles.embeddedTransferRow : undefined;
+
   return (
     <div className={styles.container}>
       <TxRow
         label="Send"
-        className={embedded ? styles.embeddedTransferRow : undefined}
+        labelSize={mobileNativeExpanded ? "md" : undefined}
+        className={rowClassName}
       >
         <div className={styles.tokenInfo}>
           <Avatar
@@ -55,7 +60,8 @@ export const SvmTransferPretty: FC<SvmTransferPrettyProps> = ({
       {to && (
         <TxRow
           label="to"
-          className={embedded ? styles.embeddedTransferRow : undefined}
+          labelSize={mobileNativeExpanded ? "md" : undefined}
+          className={rowClassName}
         >
           <Typography
             color="secondary"

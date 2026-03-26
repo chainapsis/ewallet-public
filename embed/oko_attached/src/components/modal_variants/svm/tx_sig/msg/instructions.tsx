@@ -61,6 +61,7 @@ function renderInstruction(
 ): ReactNode {
   const { programId, instructionName, data, accounts } = instruction;
   const embeddedTokenTransfer = embedded && isMobileNative;
+  const mobileNativeExpandedSolTransfer = embedded && isMobileNative;
 
   // Staking instruction (check first, includes System Program createAccount for Stake)
   if (extractStakingData(instruction) !== null) {
@@ -86,6 +87,7 @@ function renderInstruction(
           lamports={lamports}
           to={to}
           embedded={embedded}
+          mobileNativeExpanded={mobileNativeExpandedSolTransfer}
         />
       );
     }
