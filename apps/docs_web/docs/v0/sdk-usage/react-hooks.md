@@ -48,7 +48,7 @@ Core hook for authentication and wallet state.
 import { useOko } from "@oko-wallet/oko-sdk-react";
 
 function ConnectButton() {
-  const { isReady, isSignedIn, signOut, openSignInModal, walletInfo } = useOko();
+  const { isReady, isSignedIn, signOut, openSignInModal, email, name } = useOko();
 
   if (!isReady) {
     return <p>Loading...</p>;
@@ -57,7 +57,7 @@ function ConnectButton() {
   if (isSignedIn) {
     return (
       <div>
-        <p>Signed in as {walletInfo.email}</p>
+        <p>Signed in as {email}</p>
         <button onClick={signOut}>Sign Out</button>
       </div>
     );
@@ -74,19 +74,13 @@ function ConnectButton() {
 | `wallet` | `OkoWalletInterface \| null` | Raw SDK instance for advanced usage |
 | `isReady` | `boolean` | SDK fully initialized and usable |
 | `isSignedIn` | `boolean` | User is authenticated |
-| `signIn` | `(type: SignInType) => Promise<void>` | Start sign-in flow |
-| `signOut` | `() => Promise<void>` | Sign out current user |
-| `openSignInModal` | `() => Promise<void>` | Open built-in provider picker UI |
-| `walletInfo` | `WalletInfo` | User profile data (see below) |
-
-### `WalletInfo`
-
-| Property | Type | Description |
-|----------|------|-------------|
 | `authType` | `AuthType \| null` | Auth provider (`"google"`, `"x"`, `"discord"`, etc.) |
 | `email` | `string \| null` | User email |
 | `name` | `string \| null` | User display name |
 | `publicKey` | `string \| null` | secp256k1 public key |
+| `signIn` | `(type: SignInType) => Promise<void>` | Start sign-in flow |
+| `signOut` | `() => Promise<void>` | Sign out current user |
+| `openSignInModal` | `() => Promise<void>` | Open built-in provider picker UI |
 
 ### `SignInType`
 
@@ -191,7 +185,7 @@ import { useCosmosAddress } from "@oko-wallet/oko-sdk-react/cosmos";
 import { useOkoSvm } from "@oko-wallet/oko-sdk-react/svm";
 
 function Wallet() {
-  const { isReady, isSignedIn, signOut, openSignInModal, walletInfo } = useOko();
+  const { isReady, isSignedIn, signOut, openSignInModal, email, name } = useOko();
   const { address: ethAddress } = useOkoEth();
   const { address: cosmosAddress } = useCosmosAddress("cosmoshub-4");
   const { address: svmAddress } = useOkoSvm();
@@ -204,7 +198,7 @@ function Wallet() {
 
   return (
     <div>
-      <p>Welcome, {walletInfo.name || walletInfo.email}</p>
+      <p>Welcome, {name || email}</p>
       <p>ETH: {ethAddress}</p>
       <p>Cosmos: {cosmosAddress}</p>
       <p>Solana: {svmAddress}</p>
