@@ -13,12 +13,14 @@ interface LeaveTeamModalProps {
   onLeave: () => void;
   onClose: () => void;
   isSoleMember?: boolean;
+  hasPendingInvitations?: boolean;
 }
 
 export const LeaveTeamModal: FC<LeaveTeamModalProps> = ({
   onLeave,
   onClose,
   isSoleMember = false,
+  hasPendingInvitations = false,
 }) => {
   const mouseDownOnOverlay = useRef(false);
 
@@ -57,9 +59,11 @@ export const LeaveTeamModal: FC<LeaveTeamModalProps> = ({
               Are you sure you want to leave?
             </Typography>
             <Typography size="sm" weight="regular" color="tertiary">
-              {isSoleMember
-                ? "You're the only member of this team. Leaving will delete the team."
-                : "Once you leave, you won't be able to access this team anymore. You'll need a new invite from an admin to rejoin."}
+              {isSoleMember && hasPendingInvitations
+                ? "There are still members who haven't accepted the invitation yet. If you leave now, the team space will be permanently deleted."
+                : isSoleMember
+                  ? "You're the only member of this team. Leaving will delete the team."
+                  : "Once you leave, you won't be able to access this team anymore. You'll need a new invite from an admin to rejoin."}
             </Typography>
           </div>
         </div>
