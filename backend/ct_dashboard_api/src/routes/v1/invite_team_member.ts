@@ -104,7 +104,7 @@ export async function inviteTeamMember(
       res.status(ErrorCodeMap.DUPLICATE_TEAM_MEMBER).json({
         success: false,
         code: "DUPLICATE_TEAM_MEMBER",
-        msg: "This email is already associated with another team",
+        msg: "The user already exists",
       });
       return;
     }
