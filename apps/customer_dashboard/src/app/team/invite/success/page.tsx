@@ -11,7 +11,7 @@ import { DashboardHeader } from "@oko-wallet-ct-dashboard/components/dashboard_h
 import { paths } from "@oko-wallet-ct-dashboard/paths";
 
 const ILLUSTRATION_URL =
-  "https://oko-wallet.s3.ap-northeast-2.amazonaws.com/assets/set_password.png";
+  "https://oko-wallet.s3.ap-northeast-2.amazonaws.com/assets/invite_success.png";
 
 const InviteSuccessPage: FC = () => {
   const router = useRouter();
