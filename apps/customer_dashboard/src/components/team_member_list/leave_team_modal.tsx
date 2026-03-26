@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@oko-wallet/oko-common-ui/button";
-import { DoorOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/door_outlined";
+import { LogOut04Icon } from "@oko-wallet/oko-common-ui/icons/log_out_04";
 import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import { type FC, useRef } from "react";
@@ -51,7 +51,7 @@ export const LeaveTeamModal: FC<LeaveTeamModalProps> = ({
           <div className={styles.iconContainer}>
             <IconPattern className={styles.iconPattern} />
             <div className={styles.iconWrapper}>
-              <DoorOutlinedIcon color="var(--fg-primary)" />
+              <LogOut04Icon color="var(--fg-secondary)" />
             </div>
           </div>
           <div className={styles.textContent}>
