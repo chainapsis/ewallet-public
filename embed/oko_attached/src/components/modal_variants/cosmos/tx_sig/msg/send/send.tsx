@@ -58,7 +58,7 @@ const TokenInfo: FC<{
           />
           <Typography
             color="secondary"
-            size="lg"
+            size={isMobile ? "display-xs" : "lg"}
             weight="semibold"
             className={styles.tokenAmount}
           >
