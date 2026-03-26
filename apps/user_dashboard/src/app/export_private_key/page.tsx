@@ -456,9 +456,7 @@ const getExportErrorDescription = (errorType: string): string => {
 };
 
 const Page = () => {
-  const email = useUserInfoState((state) => state.email);
-  const name = useUserInfoState((state) => state.name);
-  const authType = useUserInfoState((state) => state.authType);
+  const { email, name, authType } = useOko();
   const authInfo = getAuthProviderInfo(authType);
   const usesName =
     authType === "discord" ||
