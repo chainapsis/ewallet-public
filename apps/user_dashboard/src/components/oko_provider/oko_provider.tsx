@@ -14,8 +14,12 @@ import { useChains } from "@oko-wallet-user-dashboard/hooks/queries";
 import { useChainStore } from "@oko-wallet-user-dashboard/state/chains";
 import { SOLANA_MAINNET_CHAIN_ID } from "@oko-wallet-user-dashboard/utils/chain";
 
+if (!OKO_SDK_API_KEY) {
+  throw new Error("OKO_SDK_API_KEY is not set");
+}
+
 const okoConfig = {
-  apiKey: OKO_SDK_API_KEY ?? "",
+  apiKey: OKO_SDK_API_KEY,
   sdkEndpoint: OKO_SDK_ENDPOINT,
   eth: true as const,
   cosmos: true as const,
