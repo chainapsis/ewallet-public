@@ -32,6 +32,7 @@ export interface TokenTransferPrettyProps {
   to?: string;
   chainId: string;
   embedded?: boolean;
+  mobileNative?: boolean;
 }
 
 export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
@@ -41,6 +42,7 @@ export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
   to,
   chainId,
   embedded = false,
+  mobileNative = false,
 }) => {
   const isMobile = useMobileMode();
   const { data: tokenMetadata, isLoading } = useGetSvmTokenMetadata({
@@ -58,6 +60,7 @@ export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
   const hasMetadata = !!symbol;
 
   const formattedAmount = formatTokenAmount(amount, decimals);
+  const amountSize = mobileNative ? "display-xs" : "lg";
 
   return (
     <div className={styles.container}>
@@ -81,7 +84,7 @@ export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
           ) : hasMetadata ? (
             <Typography
               color="secondary"
-              size="lg"
+              size={amountSize}
               weight="semibold"
               className={styles.tokenAmount}
             >
@@ -90,7 +93,7 @@ export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
           ) : mint ? (
             <Typography
               color="secondary"
-              size="lg"
+              size={amountSize}
               weight="semibold"
               className={styles.tokenAmount}
             >
@@ -99,7 +102,7 @@ export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
           ) : (
             <Typography
               color="secondary"
-              size="lg"
+              size={amountSize}
               weight="semibold"
               className={styles.tokenAmount}
             >

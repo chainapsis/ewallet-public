@@ -111,6 +111,7 @@ function renderInstruction(
             to={to}
             chainId={chainId}
             embedded={embeddedTokenTransfer}
+            mobileNative={isMobileNative}
           />
         );
       }
@@ -129,6 +130,7 @@ function renderInstruction(
             to={to}
             chainId={chainId}
             embedded={embeddedTokenTransfer}
+            mobileNative={isMobileNative}
           />
         );
       }
