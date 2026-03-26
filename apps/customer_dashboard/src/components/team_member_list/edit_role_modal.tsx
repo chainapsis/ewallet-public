@@ -57,8 +57,9 @@ export const EditRoleModal: FC<EditRoleModalProps> = ({
   onUpdate,
   onClose,
 }) => {
+  const currentRole = member.role === "admin" ? "Admin" : "Member";
   const [role, setRole] = useState<"Admin" | "Member">(
-    member.role === "admin" ? "Admin" : "Member",
+    currentRole === "Admin" ? "Member" : "Admin",
   );
   const mouseDownOnOverlay = useRef(false);
   const initial = member.email.charAt(0).toUpperCase();
@@ -116,8 +117,10 @@ export const EditRoleModal: FC<EditRoleModalProps> = ({
               type="button"
               className={cn(styles.radioItem, {
                 [styles.radioItemSelected]: role === "Admin",
+                [styles.radioItemDisabled]: currentRole === "Admin",
               })}
               onClick={() => setRole("Admin")}
+              disabled={currentRole === "Admin"}
             >
               <div className={styles.radioContent}>
                 <div className={styles.radioIcon}>
@@ -126,6 +129,7 @@ export const EditRoleModal: FC<EditRoleModalProps> = ({
                 <div className={styles.radioText}>
                   <Typography size="md" weight="medium" color="secondary">
                     Admin
+                    {currentRole === "Admin" && " (current role)"}
                   </Typography>
                   <Typography size="md" weight="regular" color="tertiary">
                     Full control over the Team
@@ -143,8 +147,10 @@ export const EditRoleModal: FC<EditRoleModalProps> = ({
               type="button"
               className={cn(styles.radioItem, {
                 [styles.radioItemSelected]: role === "Member",
+                [styles.radioItemDisabled]: currentRole === "Member",
               })}
               onClick={() => setRole("Member")}
+              disabled={currentRole === "Member"}
             >
               <div className={styles.radioContent}>
                 <div className={styles.radioIcon}>
@@ -153,6 +159,7 @@ export const EditRoleModal: FC<EditRoleModalProps> = ({
                 <div className={styles.radioText}>
                   <Typography size="md" weight="medium" color="secondary">
                     Member
+                    {currentRole === "Member" && " (current role)"}
                   </Typography>
                   <Typography size="md" weight="regular" color="tertiary">
                     Full access, but limited control
