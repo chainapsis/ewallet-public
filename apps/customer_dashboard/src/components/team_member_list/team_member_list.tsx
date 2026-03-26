@@ -4,9 +4,9 @@ import { Badge } from "@oko-wallet/oko-common-ui/badge";
 import { Button } from "@oko-wallet/oko-common-ui/button";
 import { ChevronLeftIcon } from "@oko-wallet/oko-common-ui/icons/chevron_left";
 import { ChevronRightIcon } from "@oko-wallet/oko-common-ui/icons/chevron_right";
-import { DoorOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/door_outlined";
 import { SearchIcon } from "@oko-wallet/oko-common-ui/icons/search";
 import { UserPlusIcon } from "@oko-wallet/oko-common-ui/icons/user_plus";
+import { UserRightIcon } from "@oko-wallet/oko-common-ui/icons/user_right";
 import {
   Table,
   TableBody,
@@ -497,7 +497,7 @@ export const TeamMemberList: FC = () => {
             className={styles.leaveTeamButton}
             onClick={() => setShowLeaveModal(true)}
           >
-            <DoorOutlinedIcon color="currentColor" />
+            <UserRightIcon color="var(--fg-quaternary)" size={20} />
             Leave Team
           </Button>
         )}
