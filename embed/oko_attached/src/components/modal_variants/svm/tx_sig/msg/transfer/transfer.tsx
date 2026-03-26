@@ -21,18 +21,18 @@ export interface SvmTransferPrettyProps {
   lamports: bigint | number;
   to?: string;
   embedded?: boolean;
-  mobileNativeEmbedded?: boolean;
+  mobileNative?: boolean;
 }
 
 export const SvmTransferPretty: FC<SvmTransferPrettyProps> = ({
   lamports,
   to,
   embedded = false,
-  mobileNativeEmbedded = false,
+  mobileNative = false,
 }) => {
   const isMobile = useMobileMode();
   const rowClassName = embedded ? styles.embeddedTransferRow : undefined;
-  const amountSize = mobileNativeEmbedded ? "display-xs" : "lg";
+  const amountSize = mobileNative ? "display-xs" : "lg";
 
   return (
     <div className={styles.container}>
