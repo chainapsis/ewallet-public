@@ -2,6 +2,7 @@
 
 import { Button } from "@oko-wallet/oko-common-ui/button";
 import { ErrorIcon } from "@oko-wallet/oko-common-ui/icons/error_icon";
+import { UserPlusIcon } from "@oko-wallet/oko-common-ui/icons/user_plus";
 import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import cn from "classnames";
@@ -47,18 +48,6 @@ const UserIcon = () => (
       d="M16.67 17.5c0-1.39 0-2.08-.27-2.63a2.5 2.5 0 0 0-1.09-1.1c-.55-.27-1.24-.27-2.63-.27H7.33c-1.39 0-2.08 0-2.63.27a2.5 2.5 0 0 0-1.1 1.1c-.27.55-.27 1.24-.27 2.63M13.33 6.25a3.33 3.33 0 1 1-6.66 0 3.33 3.33 0 0 1 6.66 0Z"
       stroke="var(--fg-primary)"
       strokeWidth="1.67"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-const UserPlusIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path
-      d="M12 15.5H7.5C6.10444 15.5 5.40665 15.5 4.83886 15.6722C3.56045 16.06 2.56004 17.0605 2.17224 18.3389C2 18.9067 2 19.6044 2 21M19 21V15M16 18H22M14.5 7.5C14.5 9.98528 12.4853 12 10 12C7.51472 12 5.5 9.98528 5.5 7.5C5.5 5.01472 7.51472 3 10 3C12.4853 3 14.5 5.01472 14.5 7.5Z"
-      stroke="var(--fg-primary)"
-      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
     />

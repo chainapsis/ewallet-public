@@ -6,7 +6,7 @@ import { ChevronLeftIcon } from "@oko-wallet/oko-common-ui/icons/chevron_left";
 import { ChevronRightIcon } from "@oko-wallet/oko-common-ui/icons/chevron_right";
 import { DoorOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/door_outlined";
 import { SearchIcon } from "@oko-wallet/oko-common-ui/icons/search";
-import { UsersIcon } from "@oko-wallet/oko-common-ui/icons/users";
+import { UserPlusIcon } from "@oko-wallet/oko-common-ui/icons/user_plus";
 import {
   Table,
   TableBody,
@@ -474,7 +474,7 @@ export const TeamMemberList: FC = () => {
             className={styles.inviteButton}
             onClick={() => setShowInviteModal(true)}
           >
-            <UsersIcon color="currentColor" size={20} />
+            <UserPlusIcon color="var(--brand-300)" size={20} />
             Invite
           </button>
         ) : (
