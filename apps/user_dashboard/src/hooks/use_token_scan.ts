@@ -33,7 +33,8 @@ import type {
 } from "@oko-wallet-user-dashboard/workers/token-scan-types";
 
 const STORAGE_KEY = "oko:user_dashboard:token_scan";
-const SCAN_TTL_MS = 3 * 60 * 60 * 1000; // 3 hours
+// const SCAN_TTL_MS = 3 * 60 * 60 * 1000; // 3 hours
+const SCAN_TTL_MS = 60 * 1000; // 3 hours
 const SCAN_RETRY_MS = 30 * 1000; // 30 seconds
 
 interface ScanData {
@@ -195,21 +196,35 @@ export function useTokenScan() {
 
   const scan = useCallback(async () => {
     if (isScanningRef.current) {
+      console.log("[TOKEN-SCAN] Scan already in progress, skipping");
       return;
     }
     if (!isReady || !okoCosmos || !ethAddress || !svmAddress || !userKey) {
+      console.log("[TOKEN-SCAN] Not ready, skipping scan", {
+        isReady,
+        hasOkoCosmos: !!okoCosmos,
+        ethAddress: !!ethAddress,
+        svmAddress: !!svmAddress,
+        userKey,
+      });
       return;
     }
     if (scanTargets.length === 0) {
+      console.log("[TOKEN-SCAN] No scan targets, skipping");
       return;
     }
+
+    console.log(`[TOKEN-SCAN] Starting scan for ${scanTargets.length} targets`);
     isScanningRef.current = true;
 
     try {
       const key = await okoCosmos.getKey("cosmoshub-4");
       if (!key?.pubKey) {
+        console.log("[TOKEN-SCAN] Failed to get cosmos public key");
         return;
       }
+      console.log("[TOKEN-SCAN] Sending request to worker...");
+      const sentAt = Date.now();
       const response = await request({
         type: "TOKEN_SCAN",
         cosmosPublicKey: key.pubKey,
@@ -217,23 +232,32 @@ export function useTokenScan() {
         svmAddress,
         chains: scanTargets,
       });
+      console.log(
+        `[TOKEN-SCAN] Scan complete in ${Date.now() - sentAt}ms, ${response.results.length} chain(s) with balances`,
+      );
       setScanData({
         results: response.results,
         completedAt: response.completedAt,
         isShowedAutoEnableToast: false,
       });
       writeScanResults(userKey, response.results, response.completedAt, false);
+      console.log(
+        `[TOKEN-SCAN] Results saved. completedAt: ${new Date(response.completedAt).toISOString()}`,
+      );
       hasRetriedRef.current = false;
-    } catch {
+    } catch (err) {
+      console.error("[TOKEN-SCAN] Scan failed:", err);
       // Stop after 1 retry
       if (!hasRetriedRef.current) {
         hasRetriedRef.current = true;
+        console.log(`[TOKEN-SCAN] Will retry in ${SCAN_RETRY_MS / 1000}s`);
         window.setTimeout(() => {
           isScanningRef.current = false;
           scan();
         }, SCAN_RETRY_MS);
         return;
       }
+      console.log("[TOKEN-SCAN] Already retried once, giving up");
     } finally {
       isScanningRef.current = false;
     }
@@ -249,24 +273,46 @@ export function useTokenScan() {
 
   useEffect(() => {
     if (!isReady || scanTargets.length === 0) {
+      console.log("[TOKEN-SCAN] Cache check: not ready or no targets", {
+        isReady,
+        targets: scanTargets.length,
+      });
       return;
     }
 
     if (!scanData?.completedAt) {
+      console.log("[TOKEN-SCAN] No cached results, triggering initial scan");
       scan();
       return;
     }
 
-    const cacheRemainingTime =
-      SCAN_TTL_MS - (Date.now() - scanData.completedAt);
+    const cacheAge = Date.now() - scanData.completedAt;
+    const cacheRemainingTime = SCAN_TTL_MS - cacheAge;
+
+    console.log(`[TOKEN-SCAN] Cache status:`, {
+      completedAt: new Date(scanData.completedAt).toISOString(),
+      cacheAgeMs: cacheAge,
+      cacheAgeSec: Math.round(cacheAge / 1000),
+      ttlMs: SCAN_TTL_MS,
+      ttlSec: Math.round(SCAN_TTL_MS / 1000),
+      remainingMs: cacheRemainingTime,
+      remainingSec: Math.round(cacheRemainingTime / 1000),
+      expired: cacheRemainingTime <= 0,
+    });
+
     if (cacheRemainingTime <= 0) {
+      console.log("[TOKEN-SCAN] Cache expired, triggering re-scan");
       scan();
       return;
     }
 
-    // In case the cache has expired and the page has not been refreshed,
-    // a re-scan is attempted
-    const timer = window.setTimeout(() => scan(), cacheRemainingTime);
+    console.log(
+      `[TOKEN-SCAN] Cache valid, next scan in ${Math.round(cacheRemainingTime / 1000)}s`,
+    );
+    const timer = window.setTimeout(() => {
+      console.log("[TOKEN-SCAN] Cache timer fired, triggering re-scan");
+      scan();
+    }, cacheRemainingTime);
     return () => window.clearTimeout(timer);
   }, [isReady, scanTargets, scanData?.completedAt, scan]);
 
