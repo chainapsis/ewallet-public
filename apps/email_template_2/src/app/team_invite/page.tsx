@@ -101,7 +101,7 @@ export default function TeamInvitePage() {
                   style={headerLogoStyle}
                 />
                 <p style={headerTitleStyle}>
-                  You are invited to join the {DAPP_NAME} Team
+                  You are invited to join the {DAPP_NAME} team
                 </p>
               </td>
             </tr>
