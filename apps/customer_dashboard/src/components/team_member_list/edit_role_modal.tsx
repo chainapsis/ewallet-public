@@ -99,7 +99,7 @@ export const EditRoleModal: FC<EditRoleModalProps> = ({
               Edit Role
             </Typography>
             <Typography size="sm" weight="regular" color="tertiary">
-              Update this member's role.
+              Update this user's role.
             </Typography>
           </div>
         </div>
