@@ -1,6 +1,6 @@
 ---
 title: RainbowKit Integration
-sidebar_position: 5
+sidebar_position: 6
 ---
 
 # RainbowKit Integration

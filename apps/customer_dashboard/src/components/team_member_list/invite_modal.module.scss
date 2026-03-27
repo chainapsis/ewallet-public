@@ -135,7 +135,7 @@
   color: var(--fg-primary);
 
   &::placeholder {
-    color: var(--fg-quinary);
+    color: var(--text-placeholder);
   }
 }
 
@@ -183,6 +183,24 @@
 .radioItemSelected {
   border: 2px solid var(--border-brand, #535862);
   padding: 15px;
+}
+
+.radioItemDisabled {
+  background: var(--bg-disabled-subtle);
+  border: 1px solid var(--border-disabled);
+  cursor: not-allowed;
+  pointer-events: none;
+
+  .radioIcon {
+    background: var(--bg-disabled-subtle);
+  }
+
+  .radio {
+    width: 16px;
+    height: 16px;
+    background: var(--bg-disabled-subtle);
+    border: 1px solid var(--border-disabled);
+  }
 }
 
 .radioContent {

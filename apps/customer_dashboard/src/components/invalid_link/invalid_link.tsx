@@ -6,7 +6,7 @@ import type { FC, ReactNode } from "react";
 import styles from "./invalid_link.module.scss";
 
 const ILLUSTRATION_URL =
-  "https://oko-wallet.s3.ap-northeast-2.amazonaws.com/assets/invalid_link.png";
+  "https://oko-wallet.s3.ap-northeast-2.amazonaws.com/assets/invite_invalid.png";
 
 interface InvalidLinkProps {
   title?: string;
@@ -36,8 +36,8 @@ export const InvalidLink: FC<InvalidLinkProps> = ({
         <img
           src={ILLUSTRATION_URL}
           alt="Invalid link illustration"
-          width={317}
-          height={234}
+          width={320}
+          height={240}
         />
         <div className={styles.textContent}>
           <Typography size="display-xs" weight="semibold" color="primary">

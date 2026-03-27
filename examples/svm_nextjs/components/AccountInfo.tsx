@@ -1,12 +1,13 @@
 "use client";
 
+import { useOko } from "@oko-wallet/oko-sdk-react";
+import { useOkoSvm } from "@oko-wallet/oko-sdk-react/svm";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
 
 import useConnection from "@/hooks/useConnection";
-import useOkoSvm from "@/hooks/useOkoSvm";
 import Button from "./Button";
 
 interface AccountInfoProps {
@@ -14,7 +15,8 @@ interface AccountInfoProps {
 }
 
 export default function AccountInfo({ className }: AccountInfoProps) {
-  const { address, signOut } = useOkoSvm();
+  const { signOut } = useOko();
+  const { address } = useOkoSvm();
   const connection = useConnection();
 
   const { data: balance } = useQuery({

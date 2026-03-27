@@ -1,0 +1,75 @@
+{
+  "name": "@oko-wallet/oko-sdk-react",
+  "version": "0.1.2-alpha.10",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./eth": {
+      "import": "./dist/eth/index.js",
+      "require": "./dist/eth/index.js",
+      "types": "./dist/eth/index.d.ts"
+    },
+    "./cosmos": {
+      "import": "./dist/cosmos/index.js",
+      "require": "./dist/cosmos/index.js",
+      "types": "./dist/cosmos/index.d.ts"
+    },
+    "./svm": {
+      "import": "./dist/svm/index.js",
+      "require": "./dist/svm/index.js",
+      "types": "./dist/svm/index.d.ts"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "oko",
+    "wallet",
+    "react",
+    "hooks",
+    "mpc"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chainapsis/oko.git",
+    "directory": "sdk/oko_sdk_react"
+  },
+  "scripts": {
+    "clean": "del-cli dist",
+    "build": "tsx ./scripts/build.ts",
+    "prepublishOnly": "yarn build"
+  },
+  "dependencies": {
+    "@oko-wallet/oko-sdk-core": "workspace:*",
+    "@oko-wallet/oko-sdk-cosmos": "workspace:*",
+    "@oko-wallet/oko-sdk-eth": "workspace:*",
+    "@oko-wallet/oko-sdk-svm": "workspace:*",
+    "@oko-wallet/oko-types": "workspace:*",
+    "@oko-wallet/stdlib-js": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.0",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^15.0.0",
+    "@rollup/plugin-typescript": "^11.0.0",
+    "@types/react": "~19.1.0",
+    "del-cli": "^6.0.0",
+    "rollup": "^4.0.0",
+    "tsc-alias": "^1.8.16",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}

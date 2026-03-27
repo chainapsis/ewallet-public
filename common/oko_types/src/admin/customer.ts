@@ -1,7 +1,4 @@
-import type {
-  CustomerStatus,
-  CustomerTheme,
-} from "@oko-wallet/oko-types/customers";
+import type { CustomerStatus } from "@oko-wallet/oko-types/customers";
 
 export interface CreateCustomerUserRequest {
   email: string;
@@ -12,7 +9,6 @@ export type CreateCustomerWithDashboardUserRequest =
     label: string;
     url?: string;
     logo_url?: string;
-    theme?: CustomerTheme;
   };
 
 export interface CreateCustomerResponse {

@@ -10,6 +10,7 @@ import { getOfflineSigner } from "@oko-wallet-sdk-cosmos/methods/get_offline_sig
 import { getOfflineSignerAuto } from "@oko-wallet-sdk-cosmos/methods/get_offline_signer_auto";
 import { getOfflineSignerOnlyAmino } from "@oko-wallet-sdk-cosmos/methods/get_offline_signer_only_amino";
 import { getPublicKey } from "@oko-wallet-sdk-cosmos/methods/get_public_key";
+import { off } from "@oko-wallet-sdk-cosmos/methods/off";
 import { on } from "@oko-wallet-sdk-cosmos/methods/on";
 import { openModal } from "@oko-wallet-sdk-cosmos/methods/open_modal";
 import { sendTx } from "@oko-wallet-sdk-cosmos/methods/send_tx";
@@ -25,6 +26,7 @@ const ptype: OkoCosmosWalletInterface = OkoCosmosWallet.prototype;
 
 ptype.enable = enable;
 ptype.on = on;
+ptype.off = off;
 ptype.getPublicKey = getPublicKey;
 ptype.getCosmosChainInfo = getCosmosChainInfo;
 ptype.experimentalSuggestChain = experimentalSuggestChain;

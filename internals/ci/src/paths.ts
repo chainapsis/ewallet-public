@@ -31,6 +31,8 @@ export const paths = (function () {
 
   const sdk_core = path.join(__dirname, "../../../sdk/oko_sdk_core/");
 
+  const sdk_react = path.join(__dirname, "../../../sdk/oko_sdk_react/");
+
   const sdk_core_react_native = path.join(
     __dirname,
     "../../../sdk/oko_sdk_core_react_native/",
@@ -170,6 +172,7 @@ export const paths = (function () {
     sdk_eth,
     sdk_cosmos_kit,
     sdk_cosmos,
+    sdk_react,
     sdk_svm,
     crypto_bytes,
     crypto_js,

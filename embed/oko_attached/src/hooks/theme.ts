@@ -14,16 +14,15 @@ import { useAppState } from "@oko-wallet-attached/store/app";
 import { useMemoryState } from "@oko-wallet-attached/store/memory";
 
 export function useSetThemeInCallback(providerType: AuthType) {
-  const { getTheme } = useAppState();
+  const { setTheme } = useAppState();
   const initialTheme = getSystemTheme();
   const [_theme, _setTheme] = useState<Theme>(initialTheme);
 
   useLayoutEffect(() => {
-    // Apply system theme synchronously before the async API call
-    // to prevent the white flash on dark-mode devices.
+    // Apply system theme immediately to prevent white flash on dark-mode devices.
     setColorScheme(initialTheme);
 
-    async function fn() {
+    function fn() {
       let hostOrigin: string | null = null;
       let sdkThemeOverride: OkoWalletTheme | null = null;
 
@@ -67,15 +66,11 @@ export function useSetThemeInCallback(providerType: AuthType) {
       }
 
       const storageKey = useMemoryState.getState().storageKey || hostOrigin;
-      const oldTheme = getTheme(storageKey);
-      const { theme } = await determineTheme(
-        hostOrigin,
-        oldTheme,
-        sdkThemeOverride,
-      );
+      const themeResult = determineTheme(sdkThemeOverride);
 
-      setColorScheme(theme);
-      _setTheme(theme);
+      setTheme(storageKey, themeResult.theme);
+      setColorScheme(themeResult.theme);
+      _setTheme(themeResult.theme);
     }
 
     fn();

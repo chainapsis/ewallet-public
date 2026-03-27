@@ -14,6 +14,7 @@ import { TelegramIcon } from "@oko-wallet/oko-common-ui/icons/telegram_icon";
 import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
 import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
+import { useOko } from "@oko-wallet/oko-sdk-react";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { Property } from "csstype";
 import { useRouter } from "next/navigation";
@@ -26,7 +27,6 @@ import {
 } from "@oko-wallet-user-dashboard/fetch";
 import { useSignOut } from "@oko-wallet-user-dashboard/hooks/use_sign_out";
 import { paths } from "@oko-wallet-user-dashboard/paths";
-import { useUserInfoState } from "@oko-wallet-user-dashboard/state/user_info";
 import { useViewState } from "@oko-wallet-user-dashboard/state/view";
 
 function getAuthProviderIcon(authType: AuthType | null, size = 16): ReactNode {
@@ -128,10 +128,7 @@ export const DashboardHeader: FC<{
   const isLeftBarOpen = useViewState((state) => state.isLeftBarOpen);
   const toggleLeftBarOpen = useViewState((state) => state.toggleLeftBarOpen);
 
-  const isSignedIn = useUserInfoState((state) => state.isSignedIn);
-  const email = useUserInfoState((state) => state.email);
-  const name = useUserInfoState((state) => state.name);
-  const authType = useUserInfoState((state) => state.authType);
+  const { isSignedIn, email, name, authType } = useOko();
   const usesName =
     authType === "discord" ||
     authType === "telegram" ||

@@ -1,11 +1,11 @@
+import { useOko } from "@oko-wallet/oko-sdk-react";
+import { useOkoSvm } from "@oko-wallet/oko-sdk-react/svm";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import { type FC, useState } from "react";
 
 import { LoginWidget } from "../login_widget/login_widget";
 import { AccountInfoWidget } from "./account_info_widget";
 import { AuthProgressWidget } from "./auth_progress_widget";
-import { useSDKState } from "@oko-wallet-demo-web/state/sdk";
-import { useUserInfoState } from "@oko-wallet-demo-web/state/user_info";
 import type { LoginMethod } from "@oko-wallet-demo-web/types/login";
 
 type SigningInState =
@@ -24,19 +24,18 @@ function authTypeToLoginMethod(authType: AuthType | null): LoginMethod {
 }
 
 export const AccountWidget: FC<AccountWidgetProps> = () => {
-  const okoWallet = useSDKState((state) => state.oko_cosmos)?.okoWallet;
+  const {
+    wallet: okoWallet,
+    isSignedIn,
+    email,
+    name,
+    authType,
+    publicKey: publicKeySecp256k1,
+  } = useOko();
+  const { address: svmPublicKey } = useOkoSvm();
   const [signingInState, setSigningInState] = useState<SigningInState>({
     status: "ready",
   });
-  const email = useUserInfoState((state) => state.email);
-  const publicKeySecp256k1 = useUserInfoState(
-    (state) => state.publicKeySecp256k1,
-  );
-  const publicKeyEd25519 = useUserInfoState((state) => state.publicKeyEd25519);
-  const name = useUserInfoState((state) => state.name);
-  const authType = useUserInfoState((state) => state.authType);
-  const isSignedIn = useUserInfoState((state) => state.isSignedIn);
-  const clearUserInfo = useUserInfoState((state) => state.clearUserInfo);
 
   const [loginMethod, setLoginMethod] = useState<LoginMethod>("google");
 
@@ -94,7 +93,6 @@ export const AccountWidget: FC<AccountWidgetProps> = () => {
     }
 
     await okoWallet.signOut();
-    clearUserInfo();
     setLoginMethod("google");
     setSigningInState({ status: "ready" });
   }
@@ -124,7 +122,7 @@ export const AccountWidget: FC<AccountWidgetProps> = () => {
         type={displayLoginMethod}
         email={email || ""}
         publicKeySecp256k1={publicKeySecp256k1 || ""}
-        publicKeyEd25519={publicKeyEd25519}
+        publicKeyEd25519={svmPublicKey}
         name={name}
         onSignOut={handleSignOut}
       />

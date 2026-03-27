@@ -1,12 +1,12 @@
 import { CosmosIcon } from "@oko-wallet/oko-common-ui/icons/cosmos_icon";
+import { useOkoCosmos } from "@oko-wallet/oko-sdk-react/cosmos";
 import { useCallback } from "react";
 
 import { SignWidget } from "@oko-wallet-demo-web/components/widgets/sign_widget/sign_widget";
 import { COSMOS_CHAIN_ID } from "@oko-wallet-demo-web/constants/cosmos";
-import { useSDKState } from "@oko-wallet-demo-web/state/sdk";
 
 export const CosmosOffChainSignWidget = () => {
-  const okoCosmos = useSDKState((state) => state.oko_cosmos);
+  const { cosmosWallet: okoCosmos } = useOkoCosmos();
 
   const handleClickCosmosArbitrarySign = useCallback(async () => {
     console.log("handleClickCosmosArbitrarySign()");

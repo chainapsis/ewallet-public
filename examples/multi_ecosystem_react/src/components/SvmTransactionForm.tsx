@@ -1,11 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useOkoSvm } from "@oko-wallet/oko-sdk-react/svm";
 import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import useSvm from "@/oko/useSvm";
+import { svmConnection } from "@/constants/chains";
 import TxForm from "./TxForm";
 import TxResult from "./TxResult";
 import TxTracking from "./TxTracking";
@@ -46,7 +47,8 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export default function SvmTransactionForm() {
-  const { svmAddress, okoSvm, connection } = useSvm();
+  const { address: svmAddress, svmWallet: okoSvm } = useOkoSvm();
+  const connection = svmConnection;
   const queryClient = useQueryClient();
 
   const {

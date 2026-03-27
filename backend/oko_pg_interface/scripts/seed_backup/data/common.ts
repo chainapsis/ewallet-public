@@ -49,7 +49,6 @@ export function createCustomer() {
     label: "demo_web",
     url: `http://localhost:3200`,
     logo_url: "",
-    theme: "system",
   };
 
   return customer;
@@ -102,7 +101,6 @@ export async function createDummyCustomerSets(): Promise<
         is_email_verified: true,
         password_hash: await hashPassword(`0000`),
       },
-      theme: "system",
     };
     ret.push(customer);
   }

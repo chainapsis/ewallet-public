@@ -1,12 +1,16 @@
 import { fromBech32 } from "@cosmjs/encoding";
 import { SigningStargateClient, StargateClient } from "@cosmjs/stargate";
 import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  useCosmosAddress,
+  useOkoCosmos,
+} from "@oko-wallet/oko-sdk-react/cosmos";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import useCosmos from "@/oko/useCosmos";
+import { cosmosChainInfo } from "@/constants/chains";
 import TxForm from "./TxForm";
 import TxResult from "./TxResult";
 import TxTracking from "./TxTracking";
@@ -45,7 +49,16 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export default function CosmosTransactionForm() {
-  const { bech32Address, offlineSigner, chainInfo } = useCosmos();
+  const { cosmosWallet } = useOkoCosmos();
+  const { address: bech32Address } = useCosmosAddress(cosmosChainInfo.chainId);
+  const chainInfo = cosmosChainInfo;
+
+  const offlineSigner = useMemo(() => {
+    if (!cosmosWallet) {
+      return null;
+    }
+    return cosmosWallet.getOfflineSigner(chainInfo.chainId);
+  }, [cosmosWallet]);
   const queryClient = useQueryClient();
 
   const {

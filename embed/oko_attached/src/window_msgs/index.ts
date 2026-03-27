@@ -129,6 +129,18 @@ export function makeMsgHandler() {
     if (!isFromProxy) {
       memState.setAppName(appName);
     }
+    // open_modal does not require storageKey — it only stores the modal
+    // request in MemoryState.  Handle it before the storageKey guard so
+    // that popup windows (where init is still in progress when the SDK
+    // sends open_modal right after popup_ready) are not rejected.
+    if (message.msg_type === "open_modal") {
+      handleOpenModal(
+        { port, hostOrigin: event.origin, appName, storageKey: "" },
+        message,
+      );
+      return;
+    }
+
     const storageKey = memState.storageKey;
     if (!storageKey) {
       console.warn(
@@ -195,11 +207,6 @@ export function makeMsgHandler() {
 
       case "get_auth_type": {
         await handleGetAuthType(ctx);
-        break;
-      }
-
-      case "open_modal": {
-        await handleOpenModal(ctx, message);
         break;
       }
 

@@ -1,6 +1,6 @@
 ---
 title: Solana Integration
-sidebar_position: 4
+sidebar_position: 5
 ---
 
 # Solana Integration

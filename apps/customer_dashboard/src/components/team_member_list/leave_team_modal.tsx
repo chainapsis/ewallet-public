@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@oko-wallet/oko-common-ui/button";
-import { DoorOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/door_outlined";
+import { LogOut04Icon } from "@oko-wallet/oko-common-ui/icons/log_out_04";
 import { XCloseIcon } from "@oko-wallet/oko-common-ui/icons/x_close";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import { type FC, useRef } from "react";
@@ -13,12 +13,14 @@ interface LeaveTeamModalProps {
   onLeave: () => void;
   onClose: () => void;
   isSoleMember?: boolean;
+  hasPendingInvitations?: boolean;
 }
 
 export const LeaveTeamModal: FC<LeaveTeamModalProps> = ({
   onLeave,
   onClose,
   isSoleMember = false,
+  hasPendingInvitations = false,
 }) => {
   const mouseDownOnOverlay = useRef(false);
 
@@ -49,7 +51,7 @@ export const LeaveTeamModal: FC<LeaveTeamModalProps> = ({
           <div className={styles.iconContainer}>
             <IconPattern className={styles.iconPattern} />
             <div className={styles.iconWrapper}>
-              <DoorOutlinedIcon color="var(--fg-primary)" />
+              <LogOut04Icon color="var(--fg-secondary)" />
             </div>
           </div>
           <div className={styles.textContent}>
@@ -57,9 +59,11 @@ export const LeaveTeamModal: FC<LeaveTeamModalProps> = ({
               Are you sure you want to leave?
             </Typography>
             <Typography size="sm" weight="regular" color="tertiary">
-              {isSoleMember
-                ? "You're the only member of this team. Leaving will delete the team."
-                : "Once you leave, you won't be able to access this team anymore. You'll need a new invite from an admin to rejoin."}
+              {isSoleMember && hasPendingInvitations
+                ? "There are still members who haven't accepted the invitation yet. If you leave now, the team space will be permanently deleted."
+                : isSoleMember
+                  ? "You're the only member of this team. Leaving will delete the team."
+                  : "Once you leave, you won't be able to access this team anymore. You'll need a new invite from an admin to rejoin."}
             </Typography>
           </div>
         </div>

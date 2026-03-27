@@ -1,4 +1,5 @@
 import { EthereumBlueIcon } from "@oko-wallet/oko-common-ui/icons/ethereum_blue_icon";
+import { useOkoEth } from "@oko-wallet/oko-sdk-react/eth";
 import {
   encodeFunctionData,
   isAddressEqual,
@@ -11,10 +12,9 @@ import {
 } from "viem";
 
 import { SignWidget } from "@oko-wallet-demo-web/components/widgets/sign_widget/sign_widget";
-import { useSDKState } from "@oko-wallet-demo-web/state/sdk";
 
 export const EthereumOnchainSignWidget = () => {
-  const okoEth = useSDKState((state) => state.oko_eth);
+  const { ethWallet: okoEth } = useOkoEth();
 
   const handleClickEthOnchainSign = async () => {
     if (okoEth === null) {

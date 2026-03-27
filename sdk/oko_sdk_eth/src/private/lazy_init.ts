@@ -21,9 +21,20 @@ export async function lazyInit(
 
   const okoEthWalletState = okoEthWalletRes.data;
 
+  // Derive ETH address synchronously so it is available as soon as
+  // waitUntilInitialized resolves.  The previous approach (fire-and-forget
+  // handleAccountsChanged → getEthereumProvider().then()) left a window
+  // where state.address was still null.
   if (okoEthWalletState.publicKey) {
-    // ensure not missing initial state change
-    handleAccountsChanged.call(okoEthWallet, okoEthWalletState.publicKey);
+    const publicKeyNormalized = normalizeKey(okoEthWalletState.publicKey);
+    if (publicKeyNormalized !== null) {
+      const publicKeyHex: Hex = `0x${publicKeyNormalized}`;
+      okoEthWallet.state = {
+        publicKeyRaw: okoEthWalletState.publicKey,
+        publicKey: publicKeyHex,
+        address: publicKeyToEthereumAddress(publicKeyHex),
+      };
+    }
   }
 
   setUpEventHandlers.call(okoEthWallet);

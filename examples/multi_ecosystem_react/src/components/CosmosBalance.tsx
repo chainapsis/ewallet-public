@@ -1,11 +1,13 @@
 import { StargateClient } from "@cosmjs/stargate";
 import { CoinPretty } from "@keplr-wallet/unit";
+import { useCosmosAddress } from "@oko-wallet/oko-sdk-react/cosmos";
 import { useQuery } from "@tanstack/react-query";
 
-import useCosmos from "@/oko/useCosmos";
+import { cosmosChainInfo } from "@/constants/chains";
 
 export default function CosmosBalance() {
-  const { bech32Address, chainInfo } = useCosmos();
+  const { address: bech32Address } = useCosmosAddress(cosmosChainInfo.chainId);
+  const chainInfo = cosmosChainInfo;
 
   const { data, isLoading } = useQuery({
     queryKey: ["cosmos-balance", bech32Address],

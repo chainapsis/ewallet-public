@@ -2,7 +2,6 @@ import type { Theme } from "@oko-wallet/oko-common-ui/theme";
 import type { OkoWalletTheme } from "@oko-wallet/oko-sdk-core";
 
 import { getSystemTheme } from "@oko-wallet-attached/components/google_callback/theme";
-import { getThemeByHostOrigin } from "@oko-wallet-attached/requests/theme";
 
 export function setColorScheme(theme: Theme) {
   const root = window.document.documentElement;
@@ -33,47 +32,16 @@ export function setColorScheme(theme: Theme) {
   }
 }
 
-function resolveTheme(theme: Theme): Theme | null {
-  if (theme === "light" || theme === "dark") {
-    return theme;
-  }
-  if (theme === "system") {
-    return getSystemTheme();
-  }
-  return null;
-}
-
 export interface ThemeResult {
   theme: Theme;
   usesSystemPreference: boolean;
 }
 
-export async function determineTheme(
-  hostOrigin: string,
-  oldTheme: Theme | null,
+export function determineTheme(
   sdkThemeOverride?: OkoWalletTheme | null,
-): Promise<ThemeResult> {
-  const usesSystemFallback = oldTheme === null;
-  const fallbackTheme: Theme = oldTheme ?? getSystemTheme();
-
+): ThemeResult {
   if (sdkThemeOverride) {
-    return {
-      theme: sdkThemeOverride,
-      usesSystemPreference: false,
-    };
+    return { theme: sdkThemeOverride, usesSystemPreference: false };
   }
-
-  const themeRes = await getThemeByHostOrigin(hostOrigin);
-
-  if (themeRes.success) {
-    const isSystem = themeRes.data === "system";
-    const resolvedTheme = resolveTheme(themeRes.data);
-    return {
-      theme: resolvedTheme ?? fallbackTheme,
-      usesSystemPreference:
-        isSystem || (resolvedTheme === null && usesSystemFallback),
-    };
-  }
-
-  return { theme: fallbackTheme, usesSystemPreference: usesSystemFallback };
+  return { theme: getSystemTheme(), usesSystemPreference: true };
 }

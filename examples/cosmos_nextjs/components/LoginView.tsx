@@ -1,12 +1,25 @@
 "use client";
 
+import { useOko } from "@oko-wallet/oko-sdk-react";
+import { useOkoCosmos } from "@oko-wallet/oko-sdk-react/cosmos";
 import Image from "next/image";
+import { useState } from "react";
 
-import useOkoCosmos from "@/hooks/useOkoCosmos";
 import Button from "./Button";
 
 export default function LoginView() {
-  const { isReady, isSigningIn, signIn } = useOkoCosmos();
+  const { signIn } = useOko();
+  const { isReady } = useOkoCosmos();
+  const [isSigningIn, setIsSigningIn] = useState(false);
+
+  async function handleSignIn() {
+    setIsSigningIn(true);
+    try {
+      await signIn("google");
+    } finally {
+      setIsSigningIn(false);
+    }
+  }
 
   return (
     <div className="text-center max-w-md mx-auto flex flex-col gap-6">
@@ -22,7 +35,7 @@ export default function LoginView() {
         </div>
       </div>
       <Button
-        onClick={signIn}
+        onClick={handleSignIn}
         fullWidth
         size="lg"
         disabled={!isReady || isSigningIn}

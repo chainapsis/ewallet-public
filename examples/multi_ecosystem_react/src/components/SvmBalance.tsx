@@ -1,10 +1,12 @@
+import { useOkoSvm } from "@oko-wallet/oko-sdk-react/svm";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { useQuery } from "@tanstack/react-query";
 
-import useSvm from "@/oko/useSvm";
+import { svmConnection } from "@/constants/chains";
 
 export default function SvmBalance() {
-  const { svmAddress, connection } = useSvm();
+  const { address: svmAddress } = useOkoSvm();
+  const connection = svmConnection;
 
   const { data, isLoading } = useQuery({
     queryKey: ["svm-balance", svmAddress],

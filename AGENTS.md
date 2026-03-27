@@ -34,6 +34,7 @@ Chain-specific SDKs extend it:
 - `oko_sdk_eth` — EVM provider via `viem`
 - `oko_sdk_cosmos` — Keplr-compatible Cosmos interface via `@cosmjs`
 - `oko_sdk_svm` — Solana Wallet Standard via `@solana/web3.js`
+- `oko_sdk_react` — React hooks (`useOko`, `useOkoEth`, `useOkoCosmos`, `useOkoSvm`)
 - `oko_sdk_core_react_native` — React Native adaptation
 - `oko_cosmos_kit`, `oko_interchain_kit` — Ecosystem adapters
 

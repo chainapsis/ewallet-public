@@ -1,15 +1,17 @@
-import useCosmos from "@/oko/useCosmos";
-import useEvm from "@/oko/useEvm";
-import useSvm from "@/oko/useSvm";
+import { useCosmosAddress } from "@oko-wallet/oko-sdk-react/cosmos";
+import { useOkoEth } from "@oko-wallet/oko-sdk-react/eth";
+import { useOkoSvm } from "@oko-wallet/oko-sdk-react/svm";
+
+import { cosmosChainInfo } from "@/constants/chains";
 import CopyableAddress from "./CopyableAddress";
 import CosmosBalance from "./CosmosBalance";
 import EvmBalance from "./EvmBalance";
 import SvmBalance from "./SvmBalance";
 
 function StatusBar() {
-  const { bech32Address } = useCosmos();
-  const { address } = useEvm();
-  const { svmAddress } = useSvm();
+  const { address: bech32Address } = useCosmosAddress(cosmosChainInfo.chainId);
+  const { address } = useOkoEth();
+  const { address: svmAddress } = useOkoSvm();
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
