@@ -56,6 +56,9 @@ export interface CosmosChainInfo {
     readonly rpc: string;
     readonly websocket?: string;
   };
+  readonly explorers?: {
+    readonly txPage: string;
+  };
 }
 
 // EVM-only chain info
@@ -86,6 +89,9 @@ export interface ModularChainInfo {
   readonly cosmos?: CosmosChainInfo;
   readonly evm?: EVMChainInfo;
   readonly svm?: SVMChainInfo;
+  readonly explorers?: {
+    readonly txPage: string;
+  };
 }
 
 // Chain info with UI state

@@ -30,6 +30,7 @@ export function transformKeplrChain(chain: CosmosChainInfo): ModularChainInfo {
     chainName: chain.chainName,
     chainSymbolImageUrl: chain.chainSymbolImageUrl,
     isTestnet: chain.isTestnet,
+    ...(chain.explorers && { explorers: chain.explorers }),
   };
 
   if (isSVM) {

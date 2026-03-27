@@ -64,36 +64,28 @@ export function isAmountValid(
 
 /**
  * Build a block explorer URL for the given chain and tx hash.
+ * Uses the explorer template from chain data API (explorers.txPage).
+ * Template format: "https://etherscan.io/tx/0x{txHash}" with optional
+ * modifiers like {txHash:uppercase} or {txHash:lowercase}.
  */
 export function getExplorerTxUrl(
   chainInfo: ModularChainInfo,
   txHash: string,
 ): string | null {
-  if (chainInfo.evm) {
-    const chainId = chainInfo.evm.chainId;
-    const explorers: Record<number, string> = {
-      1: "https://etherscan.io/tx/",
-      8453: "https://basescan.org/tx/",
-      42161: "https://arbiscan.io/tx/",
-      10: "https://optimistic.etherscan.io/tx/",
-      137: "https://polygonscan.com/tx/",
-    };
-    const base = explorers[chainId];
-    if (base) {
-      return `${base}${txHash}`;
-    }
+  const template = chainInfo.explorers?.txPage;
+  if (!template) {
     return null;
   }
 
-  if (chainInfo.cosmos) {
-    return `https://www.mintscan.io/${chainInfo.chainName.toLowerCase()}/tx/${txHash}`;
-  }
-
-  if (chainInfo.svm) {
-    return `https://solscan.io/tx/${txHash}`;
-  }
-
-  return null;
+  return template.replace(/\{txHash(?::(\w+))?\}/g, (_, modifier) => {
+    if (modifier === "uppercase") {
+      return txHash.toUpperCase();
+    }
+    if (modifier === "lowercase") {
+      return txHash.toLowerCase();
+    }
+    return txHash;
+  });
 }
 
 /**
