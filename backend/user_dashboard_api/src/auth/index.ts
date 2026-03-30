@@ -11,11 +11,13 @@ import {
 } from "../constants";
 
 export type UserTokenJWTPayloadV2 = UserTokenPayloadV2 & jwt.JwtPayload;
+
 export type VerifyUserTokenResult =
   | { type: "invalid_token"; msg: string }
-  | { type: "expired"; payload: UserTokenJWTPayloadV2 }
+  | { type: "expired"; payload: UserTokenJWTPayloadV2; msg: string }
   | { type: "expired_beyond_renewal"; msg: string }
   | { type: "unknown_error"; msg: string };
+
 export interface VerifyUserTokenArgs {
   token: string;
   jwt_config: {
@@ -63,7 +65,7 @@ export function verifyUserTokenV2(
     if (isOrWillSoonBeExpired) {
       return {
         success: false,
-        err: { type: "expired", payload },
+        err: { type: "expired", payload, msg: "Token expired" },
       };
     }
 

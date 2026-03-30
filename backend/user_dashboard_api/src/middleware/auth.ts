@@ -39,7 +39,7 @@ export async function userJwtMiddleware(
       res.status(ErrorCodeMap.INVALID_AUTH_TOKEN).json({
         success: false,
         code: "INVALID_AUTH_TOKEN",
-        msg: verifyTokenRes.err,
+        msg: verifyTokenRes.err.msg,
       });
       return;
     }

@@ -136,7 +136,7 @@ export function verifyUserToken(
     if (isOrWillSoonBeExpired) {
       return {
         success: false,
-        err: { type: "expired", payload },
+        err: { type: "expired", payload, msg: "Token expired" },
       };
     }
 
@@ -206,7 +206,7 @@ export function verifyUserTokenV2(
     if (isOrWillSoonBeExpired) {
       return {
         success: false,
-        err: { type: "expired", payload },
+        err: { type: "expired", payload, msg: "Token expired" },
       };
     }
 

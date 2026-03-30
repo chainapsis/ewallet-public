@@ -1,3 +1,4 @@
+import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { NextFunction, Request, Response } from "express";
 
@@ -16,9 +17,11 @@ export async function githubAuthMiddleware(
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    res
-      .status(401)
-      .json({ error: "Authorization header with Bearer token required" });
+    res.status(ErrorCodeMap.UNAUTHORIZED).json({
+      success: false,
+      code: "UNAUTHORIZED",
+      msg: "Authorization header with Bearer token required",
+    });
     return;
   }
 
@@ -28,20 +31,26 @@ export async function githubAuthMiddleware(
     const result = await validateAccessTokenOfGithub(accessToken);
 
     if (!result.success) {
-      res.status(401).json({ error: result.err });
+      res
+        .status(ErrorCodeMap.INVALID_AUTH_TOKEN)
+        .json({ success: false, code: "INVALID_AUTH_TOKEN", msg: result.err });
       return;
     }
 
     if (!result.data) {
-      res.status(500).json({
-        error: "Internal server error: Token info missing after validation",
+      res.status(ErrorCodeMap.UNKNOWN_ERROR).json({
+        success: false,
+        code: "UNKNOWN_ERROR",
+        msg: "Internal server error: Token info missing after validation",
       });
       return;
     }
 
     if (result.data.id == null) {
-      res.status(401).json({
-        error: "Can't get id from GitHub token",
+      res.status(ErrorCodeMap.INVALID_AUTH_TOKEN).json({
+        success: false,
+        code: "INVALID_AUTH_TOKEN",
+        msg: "Can't get id from GitHub token",
       });
       return;
     }
@@ -57,8 +66,10 @@ export async function githubAuthMiddleware(
     next();
     return;
   } catch (err: unknown) {
-    res.status(500).json({
-      error: `Token validation failed: ${err instanceof Error ? err.message : String(err)}`,
+    res.status(ErrorCodeMap.UNKNOWN_ERROR).json({
+      success: false,
+      code: "UNKNOWN_ERROR",
+      msg: `Token validation failed: ${err instanceof Error ? err.message : String(err)}`,
     });
     return;
   }
