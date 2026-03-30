@@ -1,0 +1,87 @@
+import type { Result } from "@oko-wallet/stdlib-js";
+import jwt, { type JwtHeader, type JwtPayload } from "jsonwebtoken";
+
+import type { TelegramUserInfo } from "./validate";
+import {
+  createJwksCache,
+  jwkToPem,
+} from "@oko-wallet-api/middleware/auth/jwks_cache";
+
+const TELEGRAM_OIDC_ISSUER = "https://oauth.telegram.org";
+const TELEGRAM_JWKS_URL = "https://oauth.telegram.org/.well-known/jwks.json";
+
+const telegramJwksCache = createJwksCache(TELEGRAM_JWKS_URL, "Telegram");
+
+interface TelegramIdTokenPayload extends JwtPayload {
+  id?: number;
+  preferred_username?: string;
+  name?: string;
+  picture?: string;
+}
+
+export async function validateTelegramJwt(
+  idToken: string,
+  telegramClientId: string,
+): Promise<Result<TelegramUserInfo, string>> {
+  try {
+    const decoded = jwt.decode(idToken, { complete: true });
+
+    if (!decoded || typeof decoded === "string") {
+      return {
+        success: false,
+        err: "Invalid token format",
+      };
+    }
+
+    const header = decoded.header as JwtHeader;
+
+    if (!header.kid) {
+      return {
+        success: false,
+        err: "Missing key id in token header",
+      };
+    }
+
+    const jwk = await telegramJwksCache.getSigningKey(header.kid);
+
+    if (!jwk) {
+      return {
+        success: false,
+        err: "Unable to find signing key for token",
+      };
+    }
+
+    const pem = jwkToPem(jwk);
+
+    const payload = jwt.verify(idToken, pem, {
+      algorithms: ["RS256"],
+      issuer: TELEGRAM_OIDC_ISSUER,
+      audience: telegramClientId,
+    }) as TelegramIdTokenPayload;
+
+    const userId =
+      payload.sub ?? (payload.id != null ? String(payload.id) : undefined);
+
+    if (!userId) {
+      return {
+        success: false,
+        err: "Missing user ID (sub) in token",
+      };
+    }
+
+    return {
+      success: true,
+      data: {
+        id: userId,
+        username: payload.preferred_username,
+      },
+    };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "JWT validation failed";
+    return {
+      success: false,
+      err: message,
+    };
+  }
+}

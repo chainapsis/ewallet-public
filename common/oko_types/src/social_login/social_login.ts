@@ -40,3 +40,13 @@ export type SocialLoginGithubVerifyUserResponse = {
   email: string | null;
   avatar_url: string;
 };
+
+export type SocialLoginTelegramBody = {
+  code: string;
+  code_verifier: string;
+  redirect_uri: string;
+};
+
+export type SocialLoginTelegramResponse = {
+  id_token: string;
+};

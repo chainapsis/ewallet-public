@@ -1,6 +1,7 @@
 import express from "express";
 
 import { getGithubToken } from "./get_github_token";
+import { getTelegramToken } from "./get_telegram_token";
 import { getXToken } from "./get_x_token";
 import { referralCivitia } from "./referral_civitia";
 import { saveReferral } from "./save_referral";
@@ -21,6 +22,12 @@ export function makeSocialLoginRouter() {
     "/github/get-token",
     rateLimitMiddleware({ windowSeconds: 60, maxRequests: 10 }),
     getGithubToken,
+  );
+
+  router.post(
+    "/telegram/get-token",
+    rateLimitMiddleware({ windowSeconds: 60, maxRequests: 10 }),
+    getTelegramToken,
   );
 
   router.get(

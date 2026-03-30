@@ -3,6 +3,8 @@ import crypto from "crypto";
 
 import type { OAuthValidationFail } from "../types";
 
+export { validateTelegramJwt } from "./validate_jwt";
+
 export interface TelegramUserData {
   id: string;
   first_name: string;

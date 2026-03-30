@@ -178,6 +178,7 @@ describe("key_share_v2_commit_reveal_e2e_test", () => {
       encryptionSecret: TEST_ENC_SECRET,
       serverKeypair: mockServerKeypair,
       telegram_bot_token: "temp_telegram_bot_token",
+      telegram_client_id: "test_telegram_client_id",
       is_db_backup_checked: false,
       launch_time: dayjs().toISOString(),
       git_hash: "",

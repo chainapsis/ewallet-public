@@ -160,6 +160,7 @@ describe("commit_reveal_middleware_test", () => {
       encryptionSecret: "temp_enc_secret",
       serverKeypair: mockServerKeypair,
       telegram_bot_token: "temp_telegram_bot_token",
+      telegram_client_id: "test_telegram_client_id",
       is_db_backup_checked: false,
       launch_time: dayjs().toISOString(),
       git_hash: "",
