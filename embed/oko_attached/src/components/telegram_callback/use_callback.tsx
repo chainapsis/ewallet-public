@@ -72,10 +72,10 @@ export async function handleTelegramCallback(): Promise<
   }
 
   const code = urlParams.get("code");
-  const stateParam = urlParams.get(RedirectUriSearchParamsKey.STATE) || "{}";
+  const stateParam = urlParams.get(RedirectUriSearchParamsKey.STATE);
 
   // Mobile: OS-browser flow or sessionStorage fallback
-  if (stateParam !== "{}") {
+  if (stateParam) {
     try {
       const oauthState = JSON.parse(atob(stateParam));
       const mobileRedirected = handleMobileRedirect({
@@ -92,17 +92,10 @@ export async function handleTelegramCallback(): Promise<
     }
   }
 
-  if (!code) {
+  if (!code || !stateParam) {
     return {
       success: false,
-      err: { type: "login_canceled_by_user" },
-    };
-  }
-
-  if (!stateParam) {
-    return {
-      success: false,
-      err: { type: "params_not_sufficient" },
+      err: { type: !code ? "login_canceled_by_user" : "params_not_sufficient" },
     };
   }
 

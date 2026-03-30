@@ -41,8 +41,8 @@ export const envSchema = z.object({
   TYPEFORM_WEBHOOK_SECRET: z.string(),
 
   TELEGRAM_BOT_TOKEN: z.string(),
-  TELEGRAM_CLIENT_ID: z.string(),
-  TELEGRAM_CLIENT_SECRET: z.string(),
+  TELEGRAM_CLIENT_ID: z.string().optional(),
+  TELEGRAM_CLIENT_SECRET: z.string().optional(),
 
   SLACK_WEBHOOK_URL: z.string().optional(),
   KS_NODE_REPORT_PASSWORD: z.string(),

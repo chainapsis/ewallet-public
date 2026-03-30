@@ -74,11 +74,24 @@ export async function getTelegramToken(
   }
 
   try {
+    const clientId: string | undefined = req.app.locals.telegram_client_id;
+    const clientSecret: string | undefined =
+      req.app.locals.telegram_client_secret;
+
+    if (!clientId || !clientSecret) {
+      res.status(500).json({
+        success: false,
+        code: "UNKNOWN_ERROR",
+        msg: "Telegram OIDC not configured (TELEGRAM_CLIENT_ID or TELEGRAM_CLIENT_SECRET missing)",
+      });
+      return;
+    }
+
     const reqBody = new URLSearchParams({
       code: body.code,
       grant_type: "authorization_code",
-      client_id: req.app.locals.telegram_client_id,
-      client_secret: req.app.locals.telegram_client_secret,
+      client_id: clientId,
+      client_secret: clientSecret,
       redirect_uri: body.redirect_uri,
       code_verifier: body.code_verifier,
     });
