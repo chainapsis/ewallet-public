@@ -21,20 +21,22 @@ export interface SvmTransferPrettyProps {
   lamports: bigint | number;
   to?: string;
   embedded?: boolean;
+  mobileNative?: boolean;
 }
 
 export const SvmTransferPretty: FC<SvmTransferPrettyProps> = ({
   lamports,
   to,
   embedded = false,
+  mobileNative = false,
 }) => {
   const isMobile = useMobileMode();
+  const rowClassName = embedded ? styles.embeddedTransferRow : undefined;
+  const amountSize = mobileNative ? "display-xs" : "lg";
+
   return (
     <div className={styles.container}>
-      <TxRow
-        label="Send"
-        className={embedded ? styles.embeddedTransferRow : undefined}
-      >
+      <TxRow label="Send" className={rowClassName}>
         <div className={styles.tokenInfo}>
           <Avatar
             src={SOLANA_LOGO_URL}
@@ -44,7 +46,7 @@ export const SvmTransferPretty: FC<SvmTransferPrettyProps> = ({
           />
           <Typography
             color="secondary"
-            size="lg"
+            size={amountSize}
             weight="semibold"
             className={styles.tokenAmount}
           >
@@ -53,10 +55,7 @@ export const SvmTransferPretty: FC<SvmTransferPrettyProps> = ({
         </div>
       </TxRow>
       {to && (
-        <TxRow
-          label="to"
-          className={embedded ? styles.embeddedTransferRow : undefined}
-        >
+        <TxRow label="to" className={rowClassName}>
           <Typography
             color="secondary"
             size={isMobile ? "md" : "sm"}

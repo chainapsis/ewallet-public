@@ -31,6 +31,8 @@ export interface TokenTransferPrettyProps {
   mint?: string;
   to?: string;
   chainId: string;
+  embedded?: boolean;
+  mobileNative?: boolean;
 }
 
 export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
@@ -39,12 +41,17 @@ export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
   mint,
   to,
   chainId,
+  embedded = false,
+  mobileNative = false,
 }) => {
   const isMobile = useMobileMode();
   const { data: tokenMetadata, isLoading } = useGetSvmTokenMetadata({
     mintAddress: mint,
     chainId,
   });
+  const embeddedTransferRowClassName = embedded
+    ? styles.embeddedTransferRow
+    : undefined;
 
   const decimals = tokenMetadata?.decimals ?? providedDecimals ?? 0;
   const symbol = tokenMetadata?.symbol;
@@ -53,10 +60,11 @@ export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
   const hasMetadata = !!symbol;
 
   const formattedAmount = formatTokenAmount(amount, decimals);
+  const amountSize = mobileNative ? "display-xs" : "lg";
 
   return (
     <div className={styles.container}>
-      <TxRow label="Send">
+      <TxRow label="Send" className={embeddedTransferRowClassName}>
         <div className={styles.tokenInfo}>
           {isLoading ? (
             <Skeleton width={24} height={24} borderRadius="50%" />
@@ -76,7 +84,7 @@ export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
           ) : hasMetadata ? (
             <Typography
               color="secondary"
-              size="lg"
+              size={amountSize}
               weight="semibold"
               className={styles.tokenAmount}
             >
@@ -85,7 +93,7 @@ export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
           ) : mint ? (
             <Typography
               color="secondary"
-              size="lg"
+              size={amountSize}
               weight="semibold"
               className={styles.tokenAmount}
             >
@@ -94,7 +102,7 @@ export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
           ) : (
             <Typography
               color="secondary"
-              size="lg"
+              size={amountSize}
               weight="semibold"
               className={styles.tokenAmount}
             >
@@ -130,7 +138,7 @@ export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
         </div>
       )}
       {hasMetadata && name && (
-        <TxRow label="Token">
+        <TxRow label="Token" className={embeddedTransferRowClassName}>
           <Typography
             color="secondary"
             size={isMobile ? "md" : "sm"}
@@ -142,7 +150,7 @@ export const TokenTransferPretty: FC<TokenTransferPrettyProps> = ({
         </TxRow>
       )}
       {to && (
-        <TxRow label="to">
+        <TxRow label="to" className={embeddedTransferRowClassName}>
           <Typography
             color="secondary"
             size={isMobile ? "md" : "sm"}

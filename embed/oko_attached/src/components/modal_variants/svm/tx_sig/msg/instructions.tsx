@@ -15,6 +15,7 @@ import { TokenTransferPretty } from "./transfer/token_transfer";
 import { SvmTransferPretty } from "./transfer/transfer";
 import { UnknownInstruction } from "./unknown/unknown";
 import { Collapsible } from "@oko-wallet-attached/components/collapsible/collapsible";
+import { useMemoryState } from "@oko-wallet-attached/store/memory";
 import {
   type ParsedInstruction,
   SYSTEM_PROGRAM_ID,
@@ -41,13 +42,11 @@ function getInstructionTitle(instruction: ParsedInstruction): string {
     return "Token Transfer";
   }
 
-  if (isTokenProgram(programId)) {
-    if (
-      instructionName === "transferChecked" ||
-      instructionName === "transfer"
-    ) {
-      return "Token Transfer";
-    }
+  if (
+    isTokenProgram(programId) &&
+    (instructionName === "transferChecked" || instructionName === "transfer")
+  ) {
+    return "Token Transfer";
   }
 
   return instructionName || "Unknown";
@@ -57,9 +56,11 @@ function renderInstruction(
   instruction: ParsedInstruction,
   index: number,
   chainId: string,
+  isMobileNative: boolean,
   embedded = false,
 ): ReactNode {
   const { programId, instructionName, data, accounts } = instruction;
+  const embeddedTokenTransfer = embedded && isMobileNative;
 
   // Staking instruction (check first, includes System Program createAccount for Stake)
   if (extractStakingData(instruction) !== null) {
@@ -85,6 +86,7 @@ function renderInstruction(
           lamports={lamports}
           to={to}
           embedded={embedded}
+          mobileNative={isMobileNative}
         />
       );
     }
@@ -108,6 +110,8 @@ function renderInstruction(
             mint={mint}
             to={to}
             chainId={chainId}
+            embedded={embeddedTokenTransfer}
+            mobileNative={isMobileNative}
           />
         );
       }
@@ -125,18 +129,12 @@ function renderInstruction(
             amount={amount}
             to={to}
             chainId={chainId}
+            embedded={embeddedTokenTransfer}
+            mobileNative={isMobileNative}
           />
         );
       }
     }
-
-    return (
-      <UnknownInstruction
-        key={index}
-        instruction={instruction}
-        embedded={embedded}
-      />
-    );
   }
 
   // Default: Unknown instruction
@@ -160,6 +158,8 @@ export const Instructions: FC<InstructionsProps> = ({
   chainId,
   isLoading,
 }) => {
+  const isMobileNative = useMemoryState((state) => state.isMobileNative);
+
   if (isLoading) {
     return <Skeleton width="100%" height="32px" />;
   }
@@ -184,7 +184,13 @@ export const Instructions: FC<InstructionsProps> = ({
   if (validInstructions.length === 1) {
     return (
       <div className={styles.instructionsContainer}>
-        {renderInstruction(validInstructions[0], 0, chainId, false)}
+        {renderInstruction(
+          validInstructions[0],
+          0,
+          chainId,
+          isMobileNative,
+          false,
+        )}
       </div>
     );
   }
@@ -200,7 +206,7 @@ export const Instructions: FC<InstructionsProps> = ({
           defaultExpanded={false}
           className={styles.multiInstructionRow}
         >
-          {renderInstruction(instruction, index, chainId, true)}
+          {renderInstruction(instruction, index, chainId, isMobileNative, true)}
         </Collapsible>
       ))}
     </div>
