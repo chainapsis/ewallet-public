@@ -169,21 +169,20 @@ AsyncStorage state is restored.
 ### Sign In
 
 ```typescript
-// type: "google" | "email" | "discord" | "github" | "x"
+// type: "google" | "email" | "discord" | "github" | "x" | "telegram"
 await wallet.signIn("google");
 ```
 
 **Supported sign-in types:**
 
-| Type        | Provider          |
-| ----------- | ----------------- |
-| `"google"`  | Google OAuth      |
-| `"email"`   | Email sign-in     |
-| `"discord"` | Discord OAuth     |
-| `"github"`  | GitHub OAuth      |
-| `"x"`       | X (Twitter) OAuth |
-
-> Telegram sign-in support is coming soon.
+| Type          | Provider           |
+| ------------- | ------------------ |
+| `"google"`    | Google OAuth       |
+| `"email"`     | Email sign-in      |
+| `"discord"`   | Discord OAuth      |
+| `"github"`    | GitHub OAuth       |
+| `"x"`         | X (Twitter) OAuth  |
+| `"telegram"`  | Telegram OIDC      |
 
 Calling `signIn()` opens the OS browser for the OAuth flow. On iOS and Android
 fallback flows, the browser returns via your configured `redirectScheme`. On

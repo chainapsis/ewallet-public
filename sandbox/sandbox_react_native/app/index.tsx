@@ -117,7 +117,9 @@ function LoginSection({ wallet }: { wallet: OkoWalletRN }) {
   const [loading, setLoading] = useState<string | null>(null);
 
   const handleSignIn = useCallback(
-    async (type: "google" | "x" | "discord" | "github" | "email") => {
+    async (
+      type: "google" | "x" | "discord" | "github" | "email" | "telegram",
+    ) => {
       setLoading(type);
       try {
         await wallet.signIn(type);
@@ -165,6 +167,11 @@ function LoginSection({ wallet }: { wallet: OkoWalletRN }) {
           title="GitHub"
           onPress={() => handleSignIn("github")}
           loading={loading === "github"}
+        />
+        <Btn
+          title="Telegram"
+          onPress={() => handleSignIn("telegram")}
+          loading={loading === "telegram"}
         />
         <Btn
           title="Email"
