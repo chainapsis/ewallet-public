@@ -12,95 +12,61 @@ Complete guide for integrating Oko into React applications.
 Prefer a ready-to-run example? Try the **[Cosmos + EVM + SVM (React) starter template](https://github.com/chainapsis/oko/tree/main/examples/multi_ecosystem_react)**.
 :::
 
-## Context Provider
+## Provider Setup
+
+`@oko-wallet/oko-sdk-react` ships a ready-made `OkoProvider` that initializes
+the core wallet and every chain SDK you enable. Wrap your app with it instead of
+managing state manually:
 
 ```typescript
-// contexts/OkoProvider.tsx
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { OkoCosmosWallet } from '@oko-wallet/oko-sdk-cosmos';
-import { OkoEthWallet } from '@oko-wallet/oko-sdk-eth';
-import { OkoSvmWallet } from '@oko-wallet/oko-sdk-svm';
+import { OkoProvider } from "@oko-wallet/oko-sdk-react";
 
-const OkoContext = createContext(null);
-
-export const OkoProvider = ({ children }) => {
-  const [cosmosWallet, setCosmosWallet] = useState(null);
-  const [ethWallet, setEthWallet] = useState(null);
-  const [svmWallet, setSvmWallet] = useState(null);
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  function signIn() {
-    const okoWallet = cosmosWallet.okoWallet || ethWallet.okoWallet;
-    if (!okoWallet) {
-      throw new Error('Core is not initialized');
-    }
-
-    await okoWallet.signIn('google');
-  }
-
-  function signOut() {
-    const okoWallet = cosmosWallet.okoWallet || ethWallet.okoWallet;
-    if (!okoWallet) {
-      throw new Error('Core is not initialized');
-    }
-
-    await okoWallet.signOut();
-  }
-
-  useEffect(() => {
-    const initWallet = () => {
-      try {
-        const cosmosInitRes = OkoCosmosWallet.init({
-          api_key: process.env.REACT_APP_OKO_API_KEY,
-          theme: "dark",
-        });
-        if (!cosmosInitRes.success) {
-          return;
-        }
-
-        const ethInitRes = OkoEthWallet.init({
-          api_key: process.env.REACT_APP_OKO_API_KEY,
-        });
-        if (!ethInitRes.success) {
-          return;
-        }
-
-        const svmInitRes = OkoSvmWallet.init({
-          api_key: process.env.REACT_APP_OKO_API_KEY,
-          chain_id: 'solana:mainnet',
-        });
-        if (!svmInitRes.success) {
-          return;
-        }
-
-        setCosmosWallet(cosmosInitRes.data);
-        setEthWallet(ethInitRes.data);
-        setSvmWallet(svmInitRes.data);
-        setIsInitialized(true);
-      } catch (error) {
-        console.error('Failed to initialize wallet:', error);
-      }
-    };
-
-    initWallet();
-  }, []);
-
-  return (
-    <OkoContext.Provider
-      value={{ cosmosWallet, ethWallet, svmWallet, isInitialized, signIn, signOut }}
-    >
-      {children}
-    </OkoContext.Provider>
-  );
+// Enable only the ecosystems you need.
+// Each chain SDK is lazily imported — unused ones are never bundled.
+const okoConfig = {
+  apiKey: "YOUR_API_KEY",
+  theme: "dark" as const,
+  eth: true,
+  cosmos: true,
+  svm: { chainId: "solana:mainnet" },
 };
 
-export const useOko = () => {
-  const context = useContext(OkoContext);
-  if (!context) {
-    throw new Error('useOko must be used within a OkoProvider');
-  }
-  return context;
-};
+export default function App({ children }: { children: React.ReactNode }) {
+  return <OkoProvider config={okoConfig}>{children}</OkoProvider>;
+}
+```
+
+### `OkoProviderConfig`
+
+| Property      | Type                         | Required | Description                                                     |
+| ------------- | ---------------------------- | -------- | --------------------------------------------------------------- |
+| `apiKey`      | `string`                     | Yes      | Your Oko API key                                                |
+| `sdkEndpoint` | `string`                     | No       | Custom SDK endpoint URL                                         |
+| `theme`       | `"light" \| "dark"`          | No       | Initial theme for the wallet UI                                 |
+| `eth`         | `boolean \| OkoEthConfig`    | No       | Enable Ethereum/EVM chain support                               |
+| `cosmos`      | `boolean \| OkoCosmosConfig` | No       | Enable Cosmos chain support                                     |
+| `svm`         | `boolean \| OkoSvmConfig`    | No       | Enable Solana/SVM support (`true` defaults to `solana:mainnet`) |
+
+### `useOko` Hook
+
+Access core wallet state and actions from any component inside `OkoProvider`:
+
+```typescript
+import { useOko } from "@oko-wallet/oko-sdk-react";
+
+const {
+  wallet,          // OkoWalletInterface | null
+  isReady,         // true once the core SDK is fully initialized
+  isSignedIn,      // true when a user session is active
+  authType,        // current auth provider (e.g. "google", "email")
+  email,           // signed-in user's email
+  name,            // signed-in user's display name
+  publicKey,       // signed-in user's public key
+  signIn,          // (type: SignInType) => Promise<void>
+  signOut,         // () => Promise<void>
+  openSignInModal, // () => Promise<void>  — opens the Oko sign-in UI
+  setTheme,        // (theme: "light" | "dark") => Promise<void>
+} = useOko();
 ```
 
 ## Components
@@ -109,22 +75,28 @@ export const useOko = () => {
 
 ```typescript
 // components/ConnectWalletButton.tsx
-import React from 'react';
-
-import { useOko } from '../contexts/OkoProvider';
+import { useOko } from "@oko-wallet/oko-sdk-react";
 
 export const ConnectWalletButton = () => {
-  const { isInitialized, signIn } = useOko();
+  const { isReady, isSignedIn, openSignInModal, signOut } = useOko();
 
-  if (isInitialized) {
+  if (!isReady) {
+    return null;
+  }
+
+  if (isSignedIn) {
     return (
-      <button onClick={signIn} className="px-4 py-2 bg-red-500 text-white rounded">
-        Connect
+      <button onClick={signOut} className="px-4 py-2 bg-gray-500 text-white rounded">
+        Disconnect
       </button>
     );
   }
 
-  return null;
+  return (
+    <button onClick={openSignInModal} className="px-4 py-2 bg-red-500 text-white rounded">
+      Connect
+    </button>
+  );
 };
 ```
 
@@ -132,20 +104,18 @@ export const ConnectWalletButton = () => {
 
 ```typescript
 // components/TransactionWidget.tsx
-import React, { useState } from 'react';
-import { parseEther } from 'viem';
-
-import { useOko } from '../contexts/OkoProvider';
+import { useState } from "react";
+import { useOkoEth } from "@oko-wallet/oko-sdk-react/eth";
 
 export const TransactionWidget = () => {
-  const { ethWallet } = useOko();
-  const [recipient, setRecipient] = useState('');
-  const [amount, setAmount] = useState('');
+  const { ethWallet, isReady } = useOkoEth();
+  const [recipient, setRecipient] = useState("");
+  const [amount, setAmount] = useState("");
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!ethWallet) {
+    if (!ethWallet || !isReady) {
       return;
     }
 
@@ -153,17 +123,17 @@ export const TransactionWidget = () => {
       const provider = await ethWallet.getEthereumProvider();
 
       await provider.request({
-        method: 'eth_sendTransaction',
+        method: "eth_sendTransaction",
         params: [{
           to: recipient,
           value: `0x${parseInt(amount).toString(16)}`,
-          gas: '0x5208',
+          gas: "0x5208",
         }],
       });
-      setRecipient('');
-      setAmount('');
+      setRecipient("");
+      setAmount("");
     } catch (err) {
-      console.error('Transaction failed:', err);
+      console.error("Transaction failed:", err);
     }
   };
 
@@ -201,14 +171,19 @@ export const TransactionWidget = () => {
 
 ```typescript
 // App.tsx
-import React from 'react';
-import { OkoProvider } from './contexts/OkoProvider';
-import { ConnectWalletButton } from './components/ConnectWalletButton';
-import { TransactionWidget } from './components/TransactionWidget';
+import { OkoProvider } from "@oko-wallet/oko-sdk-react";
+import { ConnectWalletButton } from "./components/ConnectWalletButton";
+import { TransactionWidget } from "./components/TransactionWidget";
+
+const okoConfig = {
+  apiKey: "YOUR_API_KEY",
+  theme: "dark" as const,
+  eth: true,
+};
 
 function App() {
   return (
-    <OkoProvider>
+    <OkoProvider config={okoConfig}>
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-4xl mx-auto px-4">
           <h1 className="text-3xl font-bold text-center mb-8">
@@ -237,21 +212,21 @@ export default App;
 
 ## Runtime Theme Switching
 
-If your app supports dark mode, sync the theme with Oko at runtime using
-`setTheme()`:
+If your app supports dark mode, sync the theme with Oko at runtime using the
+`setTheme` function from the `useOko` hook:
 
 ```typescript
 // hooks/useThemeSync.ts
 import { useEffect } from "react";
-import { useOko } from "../contexts/OkoProvider";
+import { useOko } from "@oko-wallet/oko-sdk-react";
 
 export function useThemeSync(theme: "light" | "dark") {
-  const { cosmosWallet, isInitialized } = useOko();
+  const { isReady, setTheme } = useOko();
 
   useEffect(() => {
-    if (!isInitialized || !cosmosWallet) return;
-    cosmosWallet.okoWallet.setTheme(theme);
-  }, [theme, isInitialized, cosmosWallet]);
+    if (!isReady) return;
+    setTheme(theme);
+  }, [theme, isReady, setTheme]);
 }
 ```
 
