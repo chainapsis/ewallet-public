@@ -1,3 +1,4 @@
+import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
 import { getAPIKeyByHashedKey } from "@oko-wallet/oko-pg-interface/api_keys";
 import type { NextFunction, Request, Response } from "express";
 
@@ -13,7 +14,11 @@ export async function apiKeyMiddleware(
   const apiKey = req.headers["x-api-key"];
 
   if (!apiKey) {
-    res.status(401).json({ error: "API key is required" });
+    res.status(ErrorCodeMap.UNAUTHORIZED).json({
+      success: false,
+      code: "UNAUTHORIZED",
+      msg: "API key is required",
+    });
     return;
   }
 
@@ -23,20 +28,30 @@ export async function apiKeyMiddleware(
       apiKey as string,
     );
     if (!getApiKeyRes.success) {
-      res
-        .status(500)
-        .json({ error: `getAPIKeyByHashedKey error: ${getApiKeyRes.err}` });
+      res.status(ErrorCodeMap.UNKNOWN_ERROR).json({
+        success: false,
+        code: "UNKNOWN_ERROR",
+        msg: `getAPIKeyByHashedKey error: ${getApiKeyRes.err}`,
+      });
       return;
     }
 
     const apiKeyData = getApiKeyRes.data;
     if (apiKeyData === null) {
-      res.status(401).json({ error: "Invalid API key" });
+      res.status(ErrorCodeMap.INVALID_AUTH_TOKEN).json({
+        success: false,
+        code: "INVALID_AUTH_TOKEN",
+        msg: "Invalid API key",
+      });
       return;
     }
 
     if (!apiKeyData.is_active) {
-      res.status(401).json({ error: "API key is not active" });
+      res.status(ErrorCodeMap.INVALID_AUTH_TOKEN).json({
+        success: false,
+        code: "INVALID_AUTH_TOKEN",
+        msg: "API key is not active",
+      });
       return;
     }
 
@@ -44,8 +59,10 @@ export async function apiKeyMiddleware(
     next();
     return;
   } catch (error) {
-    res.status(500).json({
-      error: `Internal server error: ${error instanceof Error ? error.message : String(error)}`,
+    res.status(ErrorCodeMap.UNKNOWN_ERROR).json({
+      success: false,
+      code: "UNKNOWN_ERROR",
+      msg: `Internal server error: ${error instanceof Error ? error.message : String(error)}`,
     });
     return;
   }

@@ -68,7 +68,9 @@ export async function oauthMiddleware(
       return githubAuthMiddleware(req as GithubAuthenticatedRequest, res, next);
     default:
       res.status(400).json({
-        error: `Invalid auth_type: ${authType}. Must be 'google', 'auth0', 'x', 'telegram', 'discord', or 'github'`,
+        success: false,
+        code: "INVALID_REQUEST",
+        msg: `Invalid auth_type: ${authType}. Must be 'google', 'auth0', 'x', 'telegram', 'discord', or 'github'`,
       });
       return;
   }

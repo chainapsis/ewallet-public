@@ -1,3 +1,4 @@
+import type { NextFunction, Request, Response } from "express";
 import multer from "multer";
 
 const upload = multer({
@@ -23,7 +24,11 @@ const upload = multer({
   },
 });
 
-export const customerLogoUploadMiddleware = (req: any, res: any, next: any) => {
+export const customerLogoUploadMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   upload.single("logo")(req, res, (err) => {
     if (err instanceof multer.MulterError) {
       if (err.code === "LIMIT_FILE_SIZE") {

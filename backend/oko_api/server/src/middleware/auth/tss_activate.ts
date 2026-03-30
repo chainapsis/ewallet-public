@@ -1,3 +1,4 @@
+import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
 import { getTssActivationSetting } from "@oko-wallet/oko-pg-interface/tss_activate";
 import type { NextFunction, Request, Response } from "express";
 
@@ -12,22 +13,28 @@ export async function tssActivateMiddleware(
     const result = await getTssActivationSetting(state.db, "tss_all");
 
     if (!result.success) {
-      res.status(500).json({
-        error: `getTssActivationSetting error: ${result.err}`,
+      res.status(ErrorCodeMap.UNKNOWN_ERROR).json({
+        success: false,
+        code: "UNKNOWN_ERROR",
+        msg: `getTssActivationSetting error: ${result.err}`,
       });
       return;
     }
 
     if (!result.data) {
-      res.status(500).json({
-        error: "TSS activation setting not found",
+      res.status(ErrorCodeMap.TSS_ACTIVATION_SETTING_NOT_FOUND).json({
+        success: false,
+        code: "TSS_ACTIVATION_SETTING_NOT_FOUND",
+        msg: "TSS activation setting not found",
       });
       return;
     }
 
     if (!result.data.is_enabled) {
-      res.status(200).json({
-        error: "Server is not working",
+      res.status(ErrorCodeMap.SERVICE_UNAVAILABLE).json({
+        success: false,
+        code: "SERVICE_UNAVAILABLE",
+        msg: "Server is not working",
       });
       return;
     }
@@ -35,8 +42,10 @@ export async function tssActivateMiddleware(
     next();
     return;
   } catch (error) {
-    res.status(500).json({
-      error: `Internal server error: ${error}`,
+    res.status(ErrorCodeMap.UNKNOWN_ERROR).json({
+      success: false,
+      code: "UNKNOWN_ERROR",
+      msg: `Internal server error: ${error instanceof Error ? error.message : String(error)}`,
     });
     return;
   }

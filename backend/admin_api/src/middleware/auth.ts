@@ -1,3 +1,4 @@
+import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
 import type { NextFunction, Request, Response } from "express";
 
 import { verifyAdminToken } from "@oko-wallet-admin-api/auth";
@@ -14,9 +15,10 @@ export function adminAuthMiddleware(
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    res.status(401).json({
+    res.status(ErrorCodeMap.UNAUTHORIZED).json({
       success: false,
-      error: "Authorization header with Bearer token required",
+      code: "UNAUTHORIZED",
+      msg: "Authorization header with Bearer token required",
     });
     return;
   }
@@ -32,10 +34,10 @@ export function adminAuthMiddleware(
   });
 
   if (!verifyResult.success) {
-    res.status(401).json({
+    res.status(ErrorCodeMap.INVALID_AUTH_TOKEN).json({
       success: false,
-      code: "INVALID_TOKEN",
-      error: verifyResult.err || "Invalid token",
+      code: "INVALID_AUTH_TOKEN",
+      msg: verifyResult.err || "Invalid token",
     });
     return;
   }
