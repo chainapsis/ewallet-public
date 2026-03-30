@@ -1,16 +1,15 @@
+import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
 import { registry } from "@oko-wallet/oko-api-openapi";
 import {
   ErrorResponseSchema,
   SuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/common";
 import { CustomerAuthHeaderSchema } from "@oko-wallet/oko-api-openapi/ct_dashboard";
-import { getWalletById } from "@oko-wallet/oko-pg-interface/oko_wallets";
-import { getConnectionsByUserId } from "@oko-wallet/oko-pg-interface/user_customer_connections";
+import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type { ConnectedApp } from "@oko-wallet/oko-types/user_dashboard";
 import type { Response } from "express";
-import type { Pool } from "pg";
 
-import type { OkoApiResponse } from "@oko-wallet-types/api_response";
+import { getConnectedAppsRequest } from "@oko-wallet-usrd-api/api/user";
 import type { UserAuthenticatedRequest } from "@oko-wallet-usrd-api/middleware/auth";
 
 registry.registerPath({
@@ -56,66 +55,19 @@ export async function getConnectedApps(
   req: UserAuthenticatedRequest,
   res: Response<OkoApiResponse<ConnectedApp[]>>,
 ) {
-  try {
-    const state = req.app.locals as { db: Pool };
-    const { wallet_id_secp256k1 } = res.locals.user as {
-      email: string;
-      wallet_id_secp256k1: string;
-      wallet_id_ed25519: string;
-    };
+  const state = req.app.locals;
+  const { wallet_id_secp256k1 } = res.locals.user as {
+    email: string;
+    wallet_id_secp256k1: string;
+    wallet_id_ed25519: string;
+  };
 
-    const walletRes = await getWalletById(state.db, wallet_id_secp256k1);
-    if (!walletRes.success) {
-      res.status(500).json({
-        success: false,
-        code: "UNKNOWN_ERROR",
-        msg: walletRes.err,
-      });
-      return;
-    }
+  const result = await getConnectedAppsRequest(state.db, wallet_id_secp256k1);
 
-    if (!walletRes.data) {
-      res.status(404).json({
-        success: false,
-        code: "WALLET_NOT_FOUND",
-        msg: "Wallet not found",
-      });
-      return;
-    }
-
-    const userId = walletRes.data.user_id;
-
-    const connectionsRes = await getConnectionsByUserId(state.db, userId);
-    if (!connectionsRes.success) {
-      res.status(500).json({
-        success: false,
-        code: "UNKNOWN_ERROR",
-        msg: connectionsRes.err,
-      });
-      return;
-    }
-
-    const apps: ConnectedApp[] = connectionsRes.data.map((connection) => ({
-      customer_id: connection.customer_id,
-      label: connection.label,
-      logo_url: connection.logo_url,
-      url: connection.url,
-      connected_at: connection.created_at.toISOString(),
-      state: connection.state,
-    }));
-
-    res.status(200).json({
-      success: true,
-      data: apps,
-    });
-    return;
-  } catch (error) {
-    console.error("Get connected apps error:", error);
-    res.status(500).json({
-      success: false,
-      code: "UNKNOWN_ERROR",
-      msg: "Internal server error",
-    });
+  if (!result.success) {
+    res.status(ErrorCodeMap[result.code] ?? 500).json(result);
     return;
   }
+
+  res.status(200).json(result);
 }

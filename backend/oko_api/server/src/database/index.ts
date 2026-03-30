@@ -20,6 +20,8 @@ export async function createPgDatabase(
           rejectUnauthorized: false,
         }
       : undefined,
+    max: 20,
+    connectionTimeoutMillis: 10000,
   };
 
   try {

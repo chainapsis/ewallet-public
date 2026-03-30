@@ -9,8 +9,8 @@ import {
   DeleteKSNodeSuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/oko_admin";
 import type {
-  DeactivateKSNodeRequest,
-  DeactivateKSNodeResponse,
+  DeleteKSNodeRequest,
+  DeleteKSNodeResponse,
 } from "@oko-wallet/oko-types/admin";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
 import type { Response } from "express";
@@ -73,8 +73,8 @@ registry.registerPath({
 });
 
 export async function delete_ks_node(
-  req: AuthenticatedAdminRequest<DeactivateKSNodeRequest>,
-  res: Response<OkoApiResponse<DeactivateKSNodeResponse>>,
+  req: AuthenticatedAdminRequest<DeleteKSNodeRequest>,
+  res: Response<OkoApiResponse<DeleteKSNodeResponse>>,
 ) {
   const state = req.app.locals;
 

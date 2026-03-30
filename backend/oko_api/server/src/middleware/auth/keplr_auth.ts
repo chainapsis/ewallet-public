@@ -1,3 +1,4 @@
+import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
 import type { NextFunction, Request, Response } from "express";
 
 import {
@@ -17,9 +18,11 @@ export async function userJwtMiddleware(
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    res
-      .status(401)
-      .json({ error: "Authorization header with Bearer token required" });
+    res.status(ErrorCodeMap.UNAUTHORIZED).json({
+      success: false,
+      code: "UNAUTHORIZED",
+      msg: "Authorization header with Bearer token required",
+    });
     return;
   }
 
@@ -36,15 +39,21 @@ export async function userJwtMiddleware(
     });
 
     if (!verifyTokenRes.success) {
-      res.status(401).json({ error: verifyTokenRes.err });
+      res.status(ErrorCodeMap.INVALID_AUTH_TOKEN).json({
+        success: false,
+        code: "INVALID_AUTH_TOKEN",
+        msg: verifyTokenRes.err.msg,
+      });
       return;
     }
 
     const payload = verifyTokenRes.data;
 
     if (!payload.email || !payload.wallet_id) {
-      res.status(401).json({
-        error: "Unauthorized: Invalid token",
+      res.status(ErrorCodeMap.INVALID_AUTH_TOKEN).json({
+        success: false,
+        code: "INVALID_AUTH_TOKEN",
+        msg: "Unauthorized: Invalid token",
       });
       return;
     }
@@ -57,8 +66,10 @@ export async function userJwtMiddleware(
     next();
     return;
   } catch (error) {
-    res.status(500).json({
-      error: `Token validation failed: ${error instanceof Error ? error.message : String(error)}`,
+    res.status(ErrorCodeMap.UNKNOWN_ERROR).json({
+      success: false,
+      code: "UNKNOWN_ERROR",
+      msg: `Token validation failed: ${error instanceof Error ? error.message : String(error)}`,
     });
     return;
   }
@@ -90,7 +101,11 @@ function verifyJwtV2AndSetLocals(
       const payload = v2Result.data;
 
       if (!payload.email || !payload.wallet_id_secp256k1) {
-        res.status(401).json({ error: "Unauthorized: Invalid token" });
+        res.status(ErrorCodeMap.INVALID_AUTH_TOKEN).json({
+          success: false,
+          code: "INVALID_AUTH_TOKEN",
+          msg: "Unauthorized: Invalid token",
+        });
         return;
       }
 
@@ -111,7 +126,11 @@ function verifyJwtV2AndSetLocals(
       const payload = v1Result.data;
 
       if (!payload.email || !payload.wallet_id) {
-        res.status(401).json({ error: "Unauthorized: Invalid token" });
+        res.status(ErrorCodeMap.INVALID_AUTH_TOKEN).json({
+          success: false,
+          code: "INVALID_AUTH_TOKEN",
+          msg: "Unauthorized: Invalid token",
+        });
         return;
       }
 
@@ -125,10 +144,16 @@ function verifyJwtV2AndSetLocals(
       return;
     }
 
-    res.status(401).json({ error: v2Result.err });
+    res.status(ErrorCodeMap.INVALID_AUTH_TOKEN).json({
+      success: false,
+      code: "INVALID_AUTH_TOKEN",
+      msg: v2Result.err.msg,
+    });
   } catch (error) {
-    res.status(500).json({
-      error: `Token validation failed: ${error instanceof Error ? error.message : String(error)}`,
+    res.status(ErrorCodeMap.UNKNOWN_ERROR).json({
+      success: false,
+      code: "UNKNOWN_ERROR",
+      msg: `Token validation failed: ${error instanceof Error ? error.message : String(error)}`,
     });
   }
 }
@@ -141,9 +166,11 @@ export async function userJwtMiddlewareV2(
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    res
-      .status(401)
-      .json({ error: "Authorization header with Bearer token required" });
+    res.status(ErrorCodeMap.UNAUTHORIZED).json({
+      success: false,
+      code: "UNAUTHORIZED",
+      msg: "Authorization header with Bearer token required",
+    });
     return;
   }
 
@@ -163,9 +190,11 @@ export async function userJwtFromBodyMiddleware(
   const firstLoginJwt = req.body?.first_login_jwt;
 
   if (!firstLoginJwt || typeof firstLoginJwt !== "string") {
-    res
-      .status(401)
-      .json({ error: "first_login_jwt is required in request body" });
+    res.status(ErrorCodeMap.UNAUTHORIZED).json({
+      success: false,
+      code: "UNAUTHORIZED",
+      msg: "first_login_jwt is required in request body",
+    });
     return;
   }
 

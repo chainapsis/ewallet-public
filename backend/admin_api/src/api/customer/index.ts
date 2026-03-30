@@ -118,7 +118,7 @@ export async function createCustomer(
       } catch (_err) {
         return {
           success: false,
-          code: "IMAGE_UPLOAD_FAILED",
+          code: "INVALID_IMAGE",
           msg: "Invalid image file",
         };
       }
@@ -126,7 +126,7 @@ export async function createCustomer(
       if (!metadata.width || !metadata.height) {
         return {
           success: false,
-          code: "IMAGE_UPLOAD_FAILED",
+          code: "INVALID_IMAGE",
           msg: "Could not determine image dimensions",
         };
       }
@@ -134,7 +134,7 @@ export async function createCustomer(
       if (metadata.width !== 128 || metadata.height !== 128) {
         return {
           success: false,
-          code: "IMAGE_UPLOAD_FAILED",
+          code: "INVALID_IMAGE",
           msg: "Image must be exactly 128x128 pixels",
         };
       }
@@ -148,7 +148,7 @@ export async function createCustomer(
       } catch (_err) {
         return {
           success: false,
-          code: "IMAGE_UPLOAD_FAILED",
+          code: "INVALID_IMAGE",
           msg: "Failed to process image",
         };
       }

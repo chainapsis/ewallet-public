@@ -12,6 +12,7 @@ export type VerifyUserTokenResult =
   | {
       type: "expired";
       payload: UserTokenJWTPayload | UserTokenJWTPayloadV2;
+      msg: string;
     }
   | { type: "expired_beyond_renewal"; msg: string }
   | {

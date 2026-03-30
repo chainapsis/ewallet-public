@@ -26,7 +26,7 @@ export async function sendEmailVerificationCode(
   if (!request.email) {
     return {
       success: false,
-      code: "CUSTOMER_ACCOUNT_NOT_FOUND",
+      code: "INVALID_REQUEST",
       msg: "email is required",
     };
   }

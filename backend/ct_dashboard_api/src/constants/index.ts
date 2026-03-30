@@ -1,5 +1,4 @@
 export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-export const PASSWORD_MIN_LENGTH = 4;
 export const CHANGED_PASSWORD_MIN_LENGTH = 8;
 export const CHANGED_PASSWORD_MAX_LENGTH = 20;
 export const PASSWORD_CONTAINS_NUMBER_REGEX = /\d/;

@@ -1,5 +1,6 @@
 "use client";
 
+import { ExternalLinkOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/external_link_outlined";
 import { ImageWithAlt } from "@oko-wallet/oko-common-ui/image_with_alt";
 import { Skeleton } from "@oko-wallet/oko-common-ui/skeleton";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
@@ -47,44 +48,75 @@ export const ConnectedApps: FC = () => {
 
       {!isLoading && isSuccess && !isEmpty && (
         <div className={styles.appsList}>
-          {apps.map((app) => (
-            <div key={app.customer_id} className={styles.appItem}>
-              {app.logo_url ? (
-                <img
-                  src={app.logo_url}
-                  alt={app.label ?? "App logo"}
-                  className={styles.appLogo}
-                />
-              ) : (
-                <ImageWithAlt
-                  srcSet={PLACEHOLDER_IMAGE_URL}
-                  srcAlt={PLACEHOLDER_IMAGE_ALT}
-                  alt="App logo placeholder"
-                  className={styles.appLogo}
-                />
-              )}
-              <div className={styles.appInfo}>
-                <Typography
-                  tagType="p"
-                  size="md"
-                  weight="medium"
-                  color="primary"
-                  className={styles.appName}
+          {apps.map((app) => {
+            const content = (
+              <>
+                {app.logo_url ? (
+                  <img
+                    src={app.logo_url}
+                    alt={app.label ?? "App logo"}
+                    className={styles.appLogo}
+                  />
+                ) : (
+                  <ImageWithAlt
+                    srcSet={PLACEHOLDER_IMAGE_URL}
+                    srcAlt={PLACEHOLDER_IMAGE_ALT}
+                    alt="App logo placeholder"
+                    className={styles.appLogo}
+                  />
+                )}
+                <div className={styles.appInfo}>
+                  <Typography
+                    tagType="p"
+                    size="md"
+                    weight="medium"
+                    color="primary"
+                    className={styles.appName}
+                  >
+                    {app.label ?? "Unknown App"}
+                  </Typography>
+                  {app.url && (
+                    <Typography
+                      tagType="p"
+                      size="sm"
+                      weight="regular"
+                      color="tertiary"
+                      className={styles.appUrl}
+                    >
+                      {app.url}
+                    </Typography>
+                  )}
+                </div>
+                {app.url && (
+                  <ExternalLinkOutlinedIcon
+                    className={styles.externalLinkIcon}
+                    color="var(--fg-tertiary-hover)"
+                    size={14}
+                  />
+                )}
+              </>
+            );
+
+            if (app.url) {
+              return (
+                <a
+                  key={app.customer_id}
+                  href={app.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${styles.appItem} ${styles.appItemClickable}`}
                 >
-                  {app.label ?? "Unknown App"}
-                </Typography>
-                <Typography
-                  tagType="p"
-                  size="sm"
-                  weight="regular"
-                  color="tertiary"
-                  className={styles.appUrl}
-                >
-                  {app.url ?? "—"}
-                </Typography>
+                  {content}
+                </a>
+              );
+            }
+
+            return (
+              <div key={app.customer_id} className={styles.appItem}>
+                {content}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

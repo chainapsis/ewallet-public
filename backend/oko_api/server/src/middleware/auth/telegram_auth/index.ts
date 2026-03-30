@@ -1,3 +1,4 @@
+import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { NextFunction, Request, Response } from "express";
 
@@ -21,8 +22,10 @@ export async function telegramAuthMiddleware(
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    res.status(401).json({
-      error: "Authorization header with Bearer token required",
+    res.status(ErrorCodeMap.UNAUTHORIZED).json({
+      success: false,
+      code: "UNAUTHORIZED",
+      msg: "Authorization header with Bearer token required",
     });
     return;
   }
@@ -50,8 +53,10 @@ async function handleLegacyHmac(
   try {
     userData = JSON.parse(bearerToken) as TelegramUserData;
   } catch (_error) {
-    res.status(401).json({
-      error: "Invalid token format: Expected JSON string",
+    res.status(ErrorCodeMap.INVALID_AUTH_TOKEN).json({
+      success: false,
+      code: "INVALID_AUTH_TOKEN",
+      msg: "Invalid token format: Expected JSON string",
     });
     return;
   }
@@ -60,21 +65,27 @@ async function handleLegacyHmac(
     const telegramBotToken = req.app.locals.telegram_bot_token;
     const result = validateTelegramHash(userData, telegramBotToken);
     if (!result.success) {
-      res.status(401).json({ error: result.err });
+      res
+        .status(ErrorCodeMap.INVALID_AUTH_TOKEN)
+        .json({ success: false, code: "INVALID_AUTH_TOKEN", msg: result.err });
       return;
     }
 
     if (!result.data) {
-      res.status(500).json({
-        error: "Internal server error: User info missing after validation",
+      res.status(ErrorCodeMap.UNKNOWN_ERROR).json({
+        success: false,
+        code: "UNKNOWN_ERROR",
+        msg: "Internal server error: User info missing after validation",
       });
       return;
     }
 
     const userInfo: TelegramUserInfo = result.data;
     if (!userInfo.id) {
-      res.status(401).json({
-        error: "Can't get id from Telegram token",
+      res.status(ErrorCodeMap.INVALID_AUTH_TOKEN).json({
+        success: false,
+        code: "INVALID_AUTH_TOKEN",
+        msg: "Can't get id from Telegram token",
       });
       return;
     }
@@ -89,8 +100,10 @@ async function handleLegacyHmac(
     next();
     return;
   } catch (error) {
-    res.status(500).json({
-      error: `Hash validation failed: ${error instanceof Error ? error.message : String(error)}`,
+    res.status(ErrorCodeMap.UNKNOWN_ERROR).json({
+      success: false,
+      code: "UNKNOWN_ERROR",
+      msg: `Hash validation failed: ${error instanceof Error ? error.message : String(error)}`,
     });
     return;
   }

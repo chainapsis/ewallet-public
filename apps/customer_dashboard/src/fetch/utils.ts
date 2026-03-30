@@ -4,7 +4,7 @@ import { useAppState } from "@oko-wallet-ct-dashboard/state";
 
 function checkIsTokenInvalid(errorCode: string, status: number) {
   // TODO: we should return an appropriate error code if token is expired
-  return errorCode === "INVALID_TOKEN" || status === 401;
+  return errorCode === "INVALID_AUTH_TOKEN" || status === 401;
 }
 
 let resetTimeout: ReturnType<typeof setTimeout> | null = null;

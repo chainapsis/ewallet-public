@@ -1,3 +1,4 @@
+import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { NextFunction, Request, Response } from "express";
 
@@ -16,9 +17,11 @@ export async function auth0AuthMiddleware(
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    res
-      .status(401)
-      .json({ error: "Authorization header with Bearer token required" });
+    res.status(ErrorCodeMap.UNAUTHORIZED).json({
+      success: false,
+      code: "UNAUTHORIZED",
+      msg: "Authorization header with Bearer token required",
+    });
     return;
   }
 
@@ -30,20 +33,26 @@ export async function auth0AuthMiddleware(
     });
 
     if (!result.success) {
-      res.status(401).json({ error: result.err });
+      res
+        .status(ErrorCodeMap.INVALID_AUTH_TOKEN)
+        .json({ success: false, code: "INVALID_AUTH_TOKEN", msg: result.err });
       return;
     }
 
     if (!result.data) {
-      res.status(500).json({
-        error: "Internal server error: Token info missing after validation",
+      res.status(ErrorCodeMap.UNKNOWN_ERROR).json({
+        success: false,
+        code: "UNKNOWN_ERROR",
+        msg: "Internal server error: Token info missing after validation",
       });
       return;
     }
 
     if (!result.data.email || !result.data.sub) {
-      res.status(401).json({
-        error: "Unauthorized: Invalid token",
+      res.status(ErrorCodeMap.INVALID_AUTH_TOKEN).json({
+        success: false,
+        code: "INVALID_AUTH_TOKEN",
+        msg: "Unauthorized: Invalid token",
       });
       return;
     }
@@ -59,8 +68,10 @@ export async function auth0AuthMiddleware(
     next();
     return;
   } catch (error) {
-    res.status(500).json({
-      error: `Auth0 token validation failed: ${error instanceof Error ? error.message : String(error)}`,
+    res.status(ErrorCodeMap.UNKNOWN_ERROR).json({
+      success: false,
+      code: "UNKNOWN_ERROR",
+      msg: `Auth0 token validation failed: ${error instanceof Error ? error.message : String(error)}`,
     });
     return;
   }

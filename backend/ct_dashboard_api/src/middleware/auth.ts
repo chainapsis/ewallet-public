@@ -1,3 +1,4 @@
+import { ErrorCodeMap } from "@oko-wallet/oko-api-error-codes";
 import { getCTDUserByUserIdAndCustomerId } from "@oko-wallet/oko-pg-interface/customer_dashboard_users";
 import { getCustomerByUserId } from "@oko-wallet/oko-pg-interface/customers";
 import type { NextFunction, Request, Response } from "express";
@@ -16,9 +17,11 @@ export async function customerJwtMiddleware(
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    res
-      .status(401)
-      .json({ error: "Authorization header with Bearer token required" });
+    res.status(ErrorCodeMap.UNAUTHORIZED).json({
+      success: false,
+      code: "UNAUTHORIZED",
+      msg: "Authorization header with Bearer token required",
+    });
     return;
   }
 
@@ -34,15 +37,19 @@ export async function customerJwtMiddleware(
     });
 
     if (!result.success) {
-      res
-        .status(401)
-        .json({ error: `Token verification failed: ${result.error}` });
+      res.status(ErrorCodeMap.INVALID_AUTH_TOKEN).json({
+        success: false,
+        code: "INVALID_AUTH_TOKEN",
+        msg: `Token verification failed: ${result.error}`,
+      });
       return;
     }
 
     if (!result.payload) {
-      res.status(500).json({
-        error: "Internal server error: Token payload missing after validation",
+      res.status(ErrorCodeMap.UNKNOWN_ERROR).json({
+        success: false,
+        code: "UNKNOWN_ERROR",
+        msg: "Internal server error: Token payload missing after validation",
       });
       return;
     }
@@ -52,7 +59,11 @@ export async function customerJwtMiddleware(
       typeof result.payload.sub !== "string" ||
       result.payload.type !== "customer"
     ) {
-      res.status(401).json({ error: "Invalid token" });
+      res.status(ErrorCodeMap.INVALID_AUTH_TOKEN).json({
+        success: false,
+        code: "INVALID_AUTH_TOKEN",
+        msg: "Invalid token",
+      });
       return;
     }
 
@@ -61,8 +72,10 @@ export async function customerJwtMiddleware(
     next();
     return;
   } catch (error) {
-    res.status(500).json({
-      error: `Token validation failed: ${error instanceof Error ? error.message : String(error)}`,
+    res.status(ErrorCodeMap.UNKNOWN_ERROR).json({
+      success: false,
+      code: "UNKNOWN_ERROR",
+      msg: `Token validation failed: ${error instanceof Error ? error.message : String(error)}`,
     });
     return;
   }
@@ -90,7 +103,7 @@ export async function resolveTeamMember(
 
     const customerRes = await getCustomerByUserId(state.db, userId);
     if (!customerRes.success || customerRes.data === null) {
-      res.status(404).json({
+      res.status(ErrorCodeMap.CUSTOMER_NOT_FOUND).json({
         success: false,
         code: "CUSTOMER_NOT_FOUND",
         msg: "Customer not found",
@@ -106,7 +119,7 @@ export async function resolveTeamMember(
     );
 
     if (!memberRes.success || memberRes.data === null) {
-      res.status(404).json({
+      res.status(ErrorCodeMap.TEAM_MEMBER_NOT_FOUND).json({
         success: false,
         code: "TEAM_MEMBER_NOT_FOUND",
         msg: "Team member not found",
@@ -123,7 +136,7 @@ export async function resolveTeamMember(
     next();
     return;
   } catch (_error) {
-    res.status(500).json({
+    res.status(ErrorCodeMap.UNKNOWN_ERROR).json({
       success: false,
       code: "UNKNOWN_ERROR",
       msg: "Internal server error",
@@ -142,7 +155,7 @@ export async function requireAdmin(
   next: NextFunction,
 ) {
   if (res.locals.team?.role !== "admin") {
-    res.status(403).json({
+    res.status(ErrorCodeMap.FORBIDDEN).json({
       success: false,
       code: "FORBIDDEN",
       msg: "Admin role required",
