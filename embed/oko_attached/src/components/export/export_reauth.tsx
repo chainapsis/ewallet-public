@@ -3,7 +3,6 @@ import type { AuthType } from "@oko-wallet/oko-types/auth";
 import { useEffect, useLayoutEffect, useState } from "react";
 
 import { EmailReauth } from "./email_reauth";
-import { TelegramReauth } from "./telegram_reauth";
 import { useExportReauth } from "./use_export_reauth";
 import { setColorScheme } from "@oko-wallet-attached/components/attached_initialized/color_scheme";
 import { getSystemTheme } from "@oko-wallet-attached/components/google_callback/theme";
@@ -34,13 +33,11 @@ export const ExportReauth = () => {
       case "x":
       case "discord":
       case "github":
+      case "telegram":
         return <OAuthRedirect authType={authType} />;
 
       case "auth0":
         return <EmailReauth />;
-
-      case "telegram":
-        return <TelegramReauth />;
 
       default:
         return <div>Error: unsupported auth_type: {authType}</div>;
@@ -53,7 +50,7 @@ export const ExportReauth = () => {
 const OAuthRedirect = ({
   authType,
 }: {
-  authType: "google" | "x" | "discord" | "github";
+  authType: "google" | "x" | "discord" | "github" | "telegram";
 }) => {
   const [status, setStatus] = useState<ReauthStatus>("loading");
   const [error, setError] = useState<string | null>(null);

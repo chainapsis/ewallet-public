@@ -10,6 +10,10 @@ import {
   AUTH0_DOMAIN,
 } from "@oko-wallet-attached/config/auth0";
 import { GOOGLE_CLIENT_ID } from "@oko-wallet-attached/config/oauth";
+import {
+  TELEGRAM_CLIENT_ID,
+  TELEGRAM_OIDC_AUTH_URL,
+} from "@oko-wallet-attached/config/telegram";
 import type {
   Auth0TokenInfo,
   GoogleTokenInfo,
@@ -23,6 +27,10 @@ const googleJwks = createJwksVerifier(
 const auth0Jwks = createJwksVerifier(
   `https://${AUTH0_DOMAIN}/.well-known/jwks.json`,
   "Auth0",
+);
+const telegramJwks = createJwksVerifier(
+  "https://oauth.telegram.org/.well-known/jwks.json",
+  "Telegram",
 );
 
 export async function verifyIdToken(
@@ -134,6 +142,18 @@ export async function verifyIdToken(
       };
     }
 
+    if (authType === "telegram") {
+      const telegramTokenInfo = await verifyTelegramIdToken(idToken);
+
+      return {
+        success: true,
+        data: {
+          provider: "telegram",
+          user_identifier: `telegram_${telegramTokenInfo.sub}`,
+        },
+      };
+    }
+
     return {
       success: false,
       err: `Invalid authentication type: ${authType}`,
@@ -233,4 +253,48 @@ async function verifyAuth0IdToken(
   }
 
   return payload;
+}
+
+interface TelegramTokenInfo {
+  sub: string;
+  id?: number;
+  preferred_username?: string;
+  name?: string;
+  picture?: string;
+  iss?: string;
+  aud?: string;
+  exp?: number;
+}
+
+async function verifyTelegramIdToken(
+  idToken: string,
+): Promise<TelegramTokenInfo> {
+  await telegramJwks.verifySignature(idToken);
+
+  const payload = decodeJwtPayload<TelegramTokenInfo>(idToken, "Telegram");
+
+  if (payload.iss !== "https://oauth.telegram.org") {
+    throw new Error("Invalid Telegram token issuer");
+  }
+
+  if (payload.aud !== TELEGRAM_CLIENT_ID) {
+    throw new Error("Invalid Telegram token audience");
+  }
+
+  const exp = Number(payload.exp);
+  if (!Number.isFinite(exp) || exp <= 0) {
+    throw new Error("Telegram token missing or invalid exp claim");
+  }
+  if (Math.floor(Date.now() / 1000) >= exp) {
+    throw new Error("Telegram token has expired");
+  }
+
+  // Use sub, or fall back to id claim
+  const sub =
+    payload.sub ?? (payload.id != null ? String(payload.id) : undefined);
+  if (!sub) {
+    throw new Error("Telegram token sub not found");
+  }
+
+  return { ...payload, sub };
 }

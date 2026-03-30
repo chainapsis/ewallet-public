@@ -8,15 +8,8 @@ import { TelegramLoginPopup } from "@oko-wallet-attached/components/telegram/tel
 import { useMemoryState } from "@oko-wallet-attached/store/memory";
 
 export const TelegramLogin: FC = () => {
-  useNotifyPopupReady();
-
   const isInlineLayout = useInlinePopupLayout();
-  const modalRequest = useMemoryState((state) => state.modalRequest);
   const error = useMemoryState((state) => state.error);
-  const telegramModalPayload =
-    modalRequest?.msg.payload.modal_type === "auth/telegram_login"
-      ? modalRequest.msg.payload
-      : null;
 
   return (
     <AttachedInitialized>
@@ -25,10 +18,8 @@ export const TelegramLogin: FC = () => {
           {isInlineLayout ? (
             error ? (
               <LoginPopupErrorView error={error} />
-            ) : telegramModalPayload ? (
-              <TelegramLoginPopup />
             ) : (
-              <LoadingCard />
+              <TelegramLoginPopup />
             )
           ) : (
             <InlineOnlyNotice />

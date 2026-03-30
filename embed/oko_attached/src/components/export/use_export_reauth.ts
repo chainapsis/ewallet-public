@@ -8,8 +8,10 @@ import {
   GITHUB_CLIENT_ID,
   GOOGLE_CLIENT_ID,
   generateNonce,
+  TELEGRAM_CLIENT_ID,
   X_CLIENT_ID,
 } from "@oko-wallet-attached/config/oauth";
+import { TELEGRAM_OIDC_AUTH_URL } from "@oko-wallet-attached/config/telegram";
 
 export function findEmbeddedIframe(): Window | null {
   if (!window.opener) {
@@ -137,6 +139,31 @@ function buildDiscordOAuthUrl(codeChallenge: string): string {
   return authUrl.toString();
 }
 
+function buildTelegramOAuthUrl(codeChallenge: string): string {
+  const redirectUri = `${window.location.origin}/telegram/callback`;
+
+  const theme = getThemeParam();
+
+  const oauthState: OAuthState = {
+    apiKey: "export_key_reauth",
+    targetOrigin: getHostOrigin(),
+    provider: "telegram",
+    ...(theme && { theme }),
+  };
+  const oauthStateString = btoa(JSON.stringify(oauthState));
+
+  const authUrl = new URL(TELEGRAM_OIDC_AUTH_URL);
+  authUrl.searchParams.set("response_type", "code");
+  authUrl.searchParams.set("client_id", TELEGRAM_CLIENT_ID);
+  authUrl.searchParams.set("redirect_uri", redirectUri);
+  authUrl.searchParams.set("scope", "openid");
+  authUrl.searchParams.set("code_challenge", codeChallenge);
+  authUrl.searchParams.set("code_challenge_method", "S256");
+  authUrl.searchParams.set("state", oauthStateString);
+
+  return authUrl.toString();
+}
+
 function buildGithubOAuthUrl(codeChallenge: string): string {
   const redirectUri = `${window.location.origin}/github/callback`;
 
@@ -165,7 +192,7 @@ function buildGithubOAuthUrl(codeChallenge: string): string {
 export function useExportReauth() {
   const startReauth = useCallback(
     async (
-      authType: "google" | "x" | "discord" | "github",
+      authType: "google" | "x" | "discord" | "github" | "telegram",
     ): Promise<Result<void, string>> => {
       const iframe = findEmbeddedIframe();
       if (!iframe) {
@@ -190,6 +217,8 @@ export function useExportReauth() {
           oauthUrl = buildXOAuthUrl(codeChallenge);
         } else if (authType === "discord") {
           oauthUrl = buildDiscordOAuthUrl(codeChallenge);
+        } else if (authType === "telegram") {
+          oauthUrl = buildTelegramOAuthUrl(codeChallenge);
         } else {
           oauthUrl = buildGithubOAuthUrl(codeChallenge);
         }

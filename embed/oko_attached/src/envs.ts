@@ -13,6 +13,7 @@ export const envSchema = z.object({
   VITE_AMPLITUDE_API_KEY: z.string().optional().default(""),
   VITE_IPFS_GATEWAY_URL: z.string().optional().default(""),
   VITE_TELEGRAM_BOT_NAME: z.string(),
+  VITE_TELEGRAM_CLIENT_ID: z.string(),
   VITE_USER_DASHBOARD_ORIGINS: z.string(),
 
   VITE_MOBILE_NATIVE_ORIGIN: z

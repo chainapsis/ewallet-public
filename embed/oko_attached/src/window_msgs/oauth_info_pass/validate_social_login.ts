@@ -11,6 +11,7 @@ import type { Result } from "@oko-wallet/stdlib-js";
 
 import { getAccessTokenOfDiscordWithPKCE } from "./discord";
 import { getAccessTokenOfGithub } from "./github";
+import { getIdTokenOfTelegram } from "./telegram";
 import { verifyIdToken } from "./token";
 import { getAccessTokenOfX } from "./x";
 import { useAppState } from "@oko-wallet-attached/store/app";
@@ -84,22 +85,52 @@ async function validateOAuthPayloadOfX(
 
 async function validateOAuthPayloadOfTelegram(
   payload: OAuthTokenRequestPayloadOfTelegram,
+  storageKey: string,
 ): Promise<OAuthCredentialResult> {
-  if (!payload.telegram_data?.id) {
+  const appState = useAppState.getState();
+  const codeVerifierRegistered = appState.getCodeVerifier(storageKey);
+  if (!codeVerifierRegistered) {
     return {
       success: false,
-      err: {
-        type: "unknown",
-        error: "params_not_sufficient",
-      },
+      err: { type: "PKCE_missing" },
     };
   }
+
+  const redirectOrigin =
+    appState.getOauthRedirectOrigin(storageKey) ?? window.location.origin;
+  const redirectUri = `${redirectOrigin}/telegram/callback`;
+
+  const tokenRes = await getIdTokenOfTelegram(
+    payload.code,
+    codeVerifierRegistered,
+    redirectUri,
+  );
+
+  if (!tokenRes.success) {
+    return {
+      success: false,
+      err: { type: "unknown", error: tokenRes.err },
+    };
+  }
+
+  const verifyIdTokenRes = await verifyIdToken("telegram", tokenRes.data);
+  if (!verifyIdTokenRes.success) {
+    return {
+      success: false,
+      err: { type: "unknown", error: verifyIdTokenRes.err },
+    };
+  }
+
+  const userInfo = verifyIdTokenRes.data;
+
+  appState.setCodeVerifier(storageKey, null);
+  appState.setOauthRedirectOrigin(storageKey, null);
 
   return {
     success: true,
     data: {
-      idToken: JSON.stringify(payload.telegram_data),
-      userIdentifier: `telegram_${payload.telegram_data.id}`,
+      idToken: tokenRes.data,
+      userIdentifier: userInfo.user_identifier,
     },
   };
 }
@@ -254,7 +285,7 @@ export async function getCredentialsFromPayload(
       case "x":
         return validateOAuthPayloadOfX(payload, storageKey);
       case "telegram":
-        return validateOAuthPayloadOfTelegram(payload);
+        return validateOAuthPayloadOfTelegram(payload, storageKey);
       case "discord":
         return validateOAuthPayloadOfDiscord(payload, storageKey);
       case "github":

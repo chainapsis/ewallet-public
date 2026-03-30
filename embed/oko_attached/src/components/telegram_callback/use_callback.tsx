@@ -1,13 +1,12 @@
 import {
-  type OAuthState,
+  type OAuthTokenRequestPayload,
   RedirectUriSearchParamsKey,
-  type TelegramLoginModalApproveAckPayload,
-  type TelegramLoginModalErrorAckPayload,
 } from "@oko-wallet/oko-sdk-core";
 import type { Result } from "@oko-wallet/stdlib-js";
 import { useEffect, useState } from "react";
 
 import type { HandleTelegramCallbackError } from "./types";
+import { handleMobileRedirect } from "@oko-wallet-attached/components/oauth_callback/handle_mobile_redirect";
 import { sendOAuthPayloadToEmbeddedWindow } from "@oko-wallet-attached/components/oauth_callback/send_oauth_payload";
 import { errorToLog } from "@oko-wallet-attached/logging/error";
 import { postLog } from "@oko-wallet-attached/requests/logging";
@@ -22,11 +21,11 @@ export function useTelegramCallback() {
 
         if (cbRes.success) {
           const stateParam = new URLSearchParams(window.location.search).get(
-            RedirectUriSearchParamsKey.STATE,
+            "state",
           );
           if (stateParam) {
             try {
-              const oauthState = JSON.parse(stateParam);
+              const oauthState = JSON.parse(atob(stateParam));
               if (oauthState.apiKey === "export_key_reauth") {
                 window.close();
                 return;
@@ -37,6 +36,9 @@ export function useTelegramCallback() {
           }
           window.close();
         } else {
+          if (cbRes.err.type === "login_canceled_by_user") {
+            window.close();
+          }
           setError(cbRes.err.type);
         }
       } catch (err) {
@@ -60,9 +62,42 @@ export async function handleTelegramCallback(): Promise<
   Result<void, HandleTelegramCallbackError>
 > {
   const urlParams = new URLSearchParams(window.location.search);
+
+  // Telegram OIDC sends error param on denial
+  if (urlParams.get("error")) {
+    return {
+      success: false,
+      err: { type: "login_canceled_by_user" },
+    };
+  }
+
+  const code = urlParams.get("code");
   const stateParam = urlParams.get(RedirectUriSearchParamsKey.STATE) || "{}";
-  const modalIdFromQuery = urlParams.get("modal_id");
-  const hostOriginFromQuery = urlParams.get("host_origin");
+
+  // Mobile: OS-browser flow or sessionStorage fallback
+  if (stateParam !== "{}") {
+    try {
+      const oauthState = JSON.parse(atob(stateParam));
+      const mobileRedirected = handleMobileRedirect({
+        provider: "telegram",
+        authType: "telegram",
+        oauthState,
+        code,
+      });
+      if (mobileRedirected) {
+        return { success: true, data: void 0 };
+      }
+    } catch {
+      /* fall through to web flow */
+    }
+  }
+
+  if (!code) {
+    return {
+      success: false,
+      err: { type: "login_canceled_by_user" },
+    };
+  }
 
   if (!stateParam) {
     return {
@@ -71,16 +106,7 @@ export async function handleTelegramCallback(): Promise<
     };
   }
 
-  let oauthState: OAuthState;
-  try {
-    oauthState = JSON.parse(stateParam) as OAuthState;
-  } catch (_err) {
-    return {
-      success: false,
-      err: { type: "params_not_sufficient" },
-    };
-  }
-
+  const oauthState = JSON.parse(atob(stateParam));
   const apiKey: string = oauthState.apiKey;
   const targetOrigin: string = oauthState.targetOrigin;
 
@@ -91,97 +117,19 @@ export async function handleTelegramCallback(): Promise<
     };
   }
 
-  if (!oauthState.modalId && modalIdFromQuery) {
-    oauthState.modalId = modalIdFromQuery;
-  }
-  if (!oauthState.targetOrigin && hostOriginFromQuery) {
-    oauthState.targetOrigin = hostOriginFromQuery;
-  }
-
-  if (!oauthState.modalId) {
-    return {
-      success: false,
-      err: { type: "params_not_sufficient" },
-    };
-  }
-
-  const telegramData: Record<string, string> = {};
-  const excludedParams = [
-    RedirectUriSearchParamsKey.STATE,
-    "modal_id",
-    "host_origin",
-  ];
-  for (const [key, value] of urlParams.entries()) {
-    if (!excludedParams.includes(key) && value !== null) {
-      telegramData[key] = value;
-    }
-  }
-
-  if (!telegramData.id || !telegramData.auth_date || !telegramData.hash) {
-    return {
-      success: false,
-      err: { type: "params_not_sufficient" },
-    };
-  }
-
-  const payload = {
-    telegram_data: {
-      ...telegramData,
-    },
+  const payload: OAuthTokenRequestPayload = {
+    code,
     api_key: apiKey,
     target_origin: targetOrigin,
-    auth_type: "telegram" as const,
+    auth_type: "telegram",
   };
 
   const sendRes = await sendOAuthPayloadToEmbeddedWindow(payload);
 
   if (!sendRes.success) {
-    console.error(
-      "[attached] send telegram oauth result fail, err: %o",
-      sendRes.err,
-    );
-    const message =
-      "error" in sendRes.err
-        ? `${sendRes.err.type}: ${sendRes.err.error}`
-        : sendRes.err.type;
-    sendAckToSDK(oauthState, {
-      modal_type: "auth/telegram_login",
-      modal_id: oauthState.modalId!,
-      type: "error",
-      error: {
-        type: "unknown_error",
-        error: message,
-      },
-    });
+    console.error("[attached] send oauth result fail, err: %o", sendRes.err);
     return sendRes;
   }
 
-  sendAckToSDK(oauthState, {
-    modal_type: "auth/telegram_login",
-    modal_id: oauthState.modalId!,
-    type: "approve",
-    data: {},
-  });
-
   return { success: true, data: void 0 };
-}
-
-function sendAckToSDK(
-  oauthState: OAuthState,
-  payload:
-    | TelegramLoginModalApproveAckPayload
-    | TelegramLoginModalErrorAckPayload,
-) {
-  if (!window.opener || !oauthState.targetOrigin) {
-    return;
-  }
-
-  window.opener.postMessage(
-    {
-      target: "oko_sdk",
-      msg_type: "open_modal_ack",
-      payload,
-    },
-    oauthState.targetOrigin,
-  );
 }

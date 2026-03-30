@@ -4,6 +4,8 @@ export const X_CLIENT_ID = "eWJPdVNYNlV6dEpNSTM3T01GRGI6MTpjaQ";
 export const DISCORD_CLIENT_ID = "1445280712121913384";
 export const GITHUB_CLIENT_ID = "Iv23limwRjerP82VKFmp";
 
+export { TELEGRAM_CLIENT_ID } from "./telegram";
+
 export function generateNonce(length = 8): string {
   return Array.from(crypto.getRandomValues(new Uint8Array(length)))
     .map((b) => b.toString(16).padStart(2, "0"))

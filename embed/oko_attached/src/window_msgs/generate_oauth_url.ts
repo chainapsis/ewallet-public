@@ -13,8 +13,10 @@ import {
   GITHUB_CLIENT_ID,
   GOOGLE_CLIENT_ID,
   generateNonce,
+  TELEGRAM_CLIENT_ID,
   X_CLIENT_ID,
 } from "@oko-wallet-attached/config/oauth";
+import { TELEGRAM_OIDC_AUTH_URL } from "@oko-wallet-attached/config/telegram";
 import { useAppState } from "@oko-wallet-attached/store/app";
 
 function buildGoogleOAuthUrl(
@@ -92,6 +94,25 @@ function buildGithubOAuthUrl(
   return authUrl.toString();
 }
 
+function buildTelegramOAuthUrl(
+  codeChallenge: string,
+  state: OAuthState,
+  redirectBaseOrigin: string,
+): string {
+  const redirectUri = `${redirectBaseOrigin}/telegram/callback`;
+
+  const authUrl = new URL(TELEGRAM_OIDC_AUTH_URL);
+  authUrl.searchParams.set("response_type", "code");
+  authUrl.searchParams.set("client_id", TELEGRAM_CLIENT_ID);
+  authUrl.searchParams.set("redirect_uri", redirectUri);
+  authUrl.searchParams.set("scope", "openid");
+  authUrl.searchParams.set("code_challenge", codeChallenge);
+  authUrl.searchParams.set("code_challenge_method", "S256");
+  authUrl.searchParams.set("state", btoa(JSON.stringify(state)));
+
+  return authUrl.toString();
+}
+
 async function buildOAuthUrl(
   provider: string,
   apiKey: string,
@@ -140,6 +161,8 @@ async function buildOAuthUrl(
       return buildDiscordOAuthUrl(codeChallenge, state, redirectBaseOrigin);
     case "github":
       return buildGithubOAuthUrl(codeChallenge, state, redirectBaseOrigin);
+    case "telegram":
+      return buildTelegramOAuthUrl(codeChallenge, state, redirectBaseOrigin);
     default:
       throw new Error(`Unsupported OAuth provider: ${provider}`);
   }
