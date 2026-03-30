@@ -55,7 +55,7 @@ export interface OAuthTokenRequestPayloadOfDiscord {
 }
 
 export interface OAuthTokenRequestPayloadOfTelegram {
-  telegram_data: Record<string, string>;
+  code: string;
   api_key: string;
   target_origin: string;
   auth_type: "telegram";

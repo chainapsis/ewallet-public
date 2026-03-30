@@ -3,10 +3,6 @@ import type {
   EmailLoginModalErrorAckPayload,
   EmailLoginModalPayload,
   EmailLoginModalRejectAckPayload,
-  TelegramLoginModalApproveAckPayload,
-  TelegramLoginModalErrorAckPayload,
-  TelegramLoginModalPayload,
-  TelegramLoginModalRejectAckPayload,
 } from "./auth";
 import type {
   MakeSigModalApproveAckPayload,
@@ -29,8 +25,7 @@ export * from "./other";
 export type OpenModalPayload =
   | MakeSigModalPayload
   | OtherModalPayload
-  | EmailLoginModalPayload
-  | TelegramLoginModalPayload;
+  | EmailLoginModalPayload;
 
 export type OpenModalAckPayload =
   | MakeSigModalApproveAckPayload
@@ -41,7 +36,4 @@ export type OpenModalAckPayload =
   | OtherModalErrorAckPayload
   | EmailLoginModalApproveAckPayload
   | EmailLoginModalRejectAckPayload
-  | EmailLoginModalErrorAckPayload
-  | TelegramLoginModalApproveAckPayload
-  | TelegramLoginModalRejectAckPayload
-  | TelegramLoginModalErrorAckPayload;
+  | EmailLoginModalErrorAckPayload;

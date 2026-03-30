@@ -232,7 +232,7 @@ export type OkoWalletMsgImportPrivateKeyAck = {
   payload: Result<Bytes32, string>;
 };
 
-export type OAuthProvider = "google" | "x" | "discord" | "github";
+export type OAuthProvider = "google" | "x" | "discord" | "github" | "telegram";
 
 export type OkoWalletMsgGenerateOAuthUrl = {
   target: "oko_attached";

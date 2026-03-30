@@ -1,131 +1,119 @@
-import { v4 as uuidv4 } from "uuid";
-
 import type {
-  OAuthState,
   OkoWalletMsg,
   OkoWalletMsgOAuthSignInUpdate,
   OkoWalletMsgOAuthSignInUpdateAck,
-  OkoWalletMsgOpenModal,
   OkoWalletWebInterface,
 } from "@oko-wallet-sdk-core/types";
-import { OKO_ATTACHED_TARGET } from "@oko-wallet-sdk-core/window_msg/target";
 
 const FIVE_MINS_MS = 5 * 60 * 1000;
 
 export async function handleTelegramSignIn(okoWallet: OkoWalletWebInterface) {
-  const signInRes = await tryTelegramSignIn(okoWallet);
+  const signInRes = await tryTelegramSignIn(
+    okoWallet.apiKey,
+    okoWallet.sendMsgToIframe.bind(okoWallet),
+  );
 
   if (!signInRes.payload.success) {
-    throw new Error(
-      `sign in fail, err: ${signInRes.payload.err?.type ?? "unknown"}`,
-    );
+    throw new Error(`sign in fail, err: ${signInRes.payload.err}`);
   }
 }
 
+// Open popup immediately to avoid Safari popup blocker,
+// then request the OAuth URL from attached iframe.
 async function tryTelegramSignIn(
-  okoWallet: OkoWalletWebInterface,
+  apiKey: string,
+  sendMsgToIframe: (msg: OkoWalletMsg) => Promise<OkoWalletMsg>,
 ): Promise<OkoWalletMsgOAuthSignInUpdate> {
-  const modalId = uuidv4();
-
-  const oauthState: OAuthState = {
-    apiKey: okoWallet.apiKey,
-    targetOrigin: window.location.origin,
-    provider: "telegram",
-    modalId,
-  };
-  const oauthStateString = JSON.stringify(oauthState);
-
-  console.debug(
-    "[oko] Telegram login - oauthStateString: %s",
-    oauthStateString,
+  const popup = window.open(
+    "about:blank",
+    "telegram_oauth",
+    "width=1200,height=800",
   );
 
-  const modalMsg: OkoWalletMsgOpenModal = {
-    target: OKO_ATTACHED_TARGET,
-    msg_type: "open_modal",
+  if (!popup) {
+    throw new Error("Failed to open new window for Telegram oauth sign in");
+  }
+
+  const ack = await sendMsgToIframe({
+    target: "oko_attached",
+    msg_type: "generate_oauth_url",
     payload: {
-      modal_type: "auth/telegram_login",
-      modal_id: modalId,
-      data: {
-        state: oauthStateString,
-      },
+      provider: "telegram",
+      apiKey,
+      targetOrigin: window.location.origin,
     },
-  };
+  });
 
-  const oauthSignInUpdateWaiter = waitForOAuthSignInUpdate(okoWallet);
+  if (ack.msg_type !== "generate_oauth_url_ack" || !ack.payload.success) {
+    popup.close();
+    throw new Error("Failed to generate Telegram OAuth URL");
+  }
 
-  const result = await okoWallet.openModal(modalMsg);
-  console.log("[oko] Telegram login open modal result: %o", result);
-  if (!result.success) {
-    oauthSignInUpdateWaiter.cancel();
+  try {
+    popup.location.href = ack.payload.data.url;
+  } catch (error) {
+    popup.close();
     throw new Error(
-      `Telegram login open modal failed, err: ${result.err.type}`,
+      `Failed to redirect popup to auth URL: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
 
-  return await oauthSignInUpdateWaiter.promise;
-}
+  return new Promise<OkoWalletMsgOAuthSignInUpdate>((resolve, reject) => {
+    let popupTimeoutTimer: number;
+    let popupCloseCheckTimer: number;
 
-function waitForOAuthSignInUpdate(okoWallet: OkoWalletWebInterface) {
-  let cleanup: (() => void) | null = null;
-
-  const promise = new Promise<OkoWalletMsgOAuthSignInUpdate>(
-    (resolve, reject) => {
-      function onMessage(event: MessageEvent) {
-        if (event.ports.length < 1) {
-          return;
-        }
-
-        const port = event.ports[0];
-        const data = event.data as OkoWalletMsg;
-
-        if (data.msg_type === "oauth_sign_in_update") {
-          console.log(
-            "[oko] Telegram login - oauth_sign_in_update recv, %o",
-            data,
-          );
-
-          const msg: OkoWalletMsgOAuthSignInUpdateAck = {
-            target: "oko_attached",
-            msg_type: "oauth_sign_in_update_ack",
-            payload: null,
-          };
-
-          port.postMessage(msg);
-
-          if (data.payload.success) {
-            resolve(data);
-          } else {
-            reject(new Error(data.payload.err.type));
-          }
-
-          cleanup?.();
-          cleanup = null;
-        }
+    function onMessage(event: MessageEvent) {
+      if (event.ports.length < 1) {
+        return;
       }
 
-      window.addEventListener("message", onMessage);
+      const port = event.ports[0];
+      const data = event.data as OkoWalletMsg;
 
-      const timeout = window.setTimeout(() => {
-        cleanup?.();
-        cleanup = null;
-        reject(new Error("Timeout: no response within 5 minutes"));
-        okoWallet.closeModal();
-      }, FIVE_MINS_MS);
+      if (data.msg_type === "oauth_sign_in_update") {
+        const msg: OkoWalletMsgOAuthSignInUpdateAck = {
+          target: "oko_attached",
+          msg_type: "oauth_sign_in_update_ack",
+          payload: null,
+        };
 
-      cleanup = () => {
-        console.log("[oko] Telegram login - clean up oauth sign in listener");
-        window.clearTimeout(timeout);
-        window.removeEventListener("message", onMessage);
-      };
-    },
-  );
+        port.postMessage(msg);
 
-  return {
-    promise,
-    cancel: () => {
-      cleanup?.();
-      cleanup = null;
-    },
-  };
+        if (data.payload.success) {
+          resolve(data);
+        } else {
+          reject(new Error(data.payload.err.type));
+        }
+
+        cleanup();
+      }
+    }
+
+    window.addEventListener("message", onMessage);
+
+    popupCloseCheckTimer = window.setInterval(() => {
+      if (popup.closed) {
+        cleanup();
+        reject(new Error("Sign-in cancelled"));
+      }
+    }, 500);
+
+    popupTimeoutTimer = window.setTimeout(() => {
+      cleanup();
+      reject(new Error("Timeout: no response within 5 minutes"));
+      closePopup(popup);
+    }, FIVE_MINS_MS);
+
+    function cleanup() {
+      window.clearTimeout(popupTimeoutTimer);
+      window.clearInterval(popupCloseCheckTimer);
+      window.removeEventListener("message", onMessage);
+    }
+  });
+}
+
+function closePopup(popup: Window) {
+  if (popup && !popup.closed) {
+    popup.close();
+  }
 }
