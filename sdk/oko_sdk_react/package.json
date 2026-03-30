@@ -1,6 +1,6 @@
 {
   "name": "@oko-wallet/oko-sdk-react",
-  "version": "0.1.2-alpha.10",
+  "version": "0.1.2-alpha.13",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "type": "module",
@@ -50,12 +50,12 @@
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
-    "@oko-wallet/oko-sdk-core": "workspace:*",
-    "@oko-wallet/oko-sdk-cosmos": "workspace:*",
-    "@oko-wallet/oko-sdk-eth": "workspace:*",
-    "@oko-wallet/oko-sdk-svm": "workspace:*",
-    "@oko-wallet/oko-types": "workspace:*",
-    "@oko-wallet/stdlib-js": "workspace:*"
+    "@oko-wallet/oko-sdk-core": "^0.1.2-alpha.13",
+    "@oko-wallet/oko-sdk-cosmos": "^0.1.2-alpha.13",
+    "@oko-wallet/oko-sdk-eth": "^0.1.2-alpha.13",
+    "@oko-wallet/oko-sdk-svm": "^0.1.2-alpha.13",
+    "@oko-wallet/oko-types": "^0.1.2-alpha.13",
+    "@oko-wallet/stdlib-js": "^0.1.2-alpha.12"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0"
