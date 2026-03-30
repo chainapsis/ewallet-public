@@ -31,12 +31,7 @@ import {
   registerWalletStandard,
   type WalletStandardConfig,
 } from "@oko-wallet/oko-sdk-svm";
-import {
-  SOLANA_CHAINS,
-  SOLANA_MAINNET_CHAIN,
-  SOLANA_DEVNET_CHAIN,
-  SOLANA_TESTNET_CHAIN,
-} from "@solana/wallet-standard-chains";
+import { SOLANA_CHAINS } from "@solana/wallet-standard-chains";
 import {
   SolanaSignIn,
   SolanaSignMessage,
@@ -53,15 +48,15 @@ const SOLANA_CONFIG: WalletStandardConfig = {
     signAndSendTransaction: SolanaSignAndSendTransaction,
   },
   rpcEndpoints: {
-    [SOLANA_MAINNET_CHAIN]: "https://api.mainnet-beta.solana.com",
-    [SOLANA_DEVNET_CHAIN]: "https://api.devnet.solana.com",
-    [SOLANA_TESTNET_CHAIN]: "https://api.testnet.solana.com",
+    "solana:mainnet": "https://api.mainnet-beta.solana.com",
+    "solana:devnet": "https://api.devnet.solana.com",
+    "solana:testnet": "https://api.testnet.solana.com",
   },
 };
 
 const result = OkoSvmWallet.init({
   api_key: "your-api-key",
-  chain_id: SOLANA_DEVNET_CHAIN,
+  chain_id: "solana:devnet",
   theme: "dark",
 });
 
