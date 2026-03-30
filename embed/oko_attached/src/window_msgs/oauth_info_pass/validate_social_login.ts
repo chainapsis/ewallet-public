@@ -95,24 +95,10 @@ async function validateOAuthPayloadOfTelegram(
     };
   }
 
-  const { id, first_name, last_name, username, photo_url, auth_date, hash } =
-    payload.telegram_data;
-  const telegramOfficialData = Object.fromEntries(
-    Object.entries({
-      id,
-      first_name,
-      last_name,
-      username,
-      photo_url,
-      auth_date,
-      hash,
-    }).filter(([, v]) => v !== undefined),
-  );
-
   return {
     success: true,
     data: {
-      idToken: JSON.stringify(telegramOfficialData),
+      idToken: JSON.stringify(payload.telegram_data),
       userIdentifier: `telegram_${payload.telegram_data.id}`,
     },
   };
