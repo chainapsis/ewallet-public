@@ -110,6 +110,7 @@ export async function handleTelegramCallback(): Promise<
     RedirectUriSearchParamsKey.STATE,
     "modal_id",
     "host_origin",
+    "theme",
   ];
   for (const [key, value] of urlParams.entries()) {
     if (!excludedParams.includes(key) && value !== null) {
