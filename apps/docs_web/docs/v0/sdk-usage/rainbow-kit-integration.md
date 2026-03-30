@@ -80,7 +80,7 @@ function okoConnector(
       id: "oko",
       name: "Oko",
       type: "oko" as const,
-      icon: keplrIcon,
+      icon: okoIcon,
       setup: async () => {
         if (typeof window !== "undefined") {
           await initOkoEthOnce();
