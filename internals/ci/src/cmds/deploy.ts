@@ -45,7 +45,7 @@ function listDeployableApps(): void {
   });
 }
 
-type DeploymentEnv = "preview" | "develop" | "prod";
+type DeploymentEnv = "alpha" | "develop" | "prod";
 
 interface DeployOptions {
   app?: keyof typeof APP_CONFIGS;
@@ -53,7 +53,7 @@ interface DeployOptions {
 }
 
 export async function deploy(options: DeployOptions) {
-  const { app, env = "preview" } = options;
+  const { app, env = "alpha" } = options;
 
   if (!app) {
     listDeployableApps();
@@ -61,7 +61,7 @@ export async function deploy(options: DeployOptions) {
     process.exit(1);
   }
 
-  const validEnvs: DeploymentEnv[] = ["preview", "develop", "prod"];
+  const validEnvs: DeploymentEnv[] = ["alpha", "develop", "prod"];
   if (!validEnvs.includes(env)) {
     console.error(
       chalk.red(
@@ -108,6 +108,8 @@ export async function deploy(options: DeployOptions) {
     buildArgs.push("--prod");
   } else if (env === "develop") {
     buildArgs.push("--target=develop");
+  } else if (env === "alpha") {
+    buildArgs.push("--target=preview");
   }
 
   const buildRet = spawnSync("vercel", buildArgs, {
@@ -124,6 +126,8 @@ export async function deploy(options: DeployOptions) {
     deployArgs.push("--prod");
   } else if (env === "develop") {
     deployArgs.push("--target=develop");
+  } else if (env === "alpha") {
+    deployArgs.push("--target=preview");
   }
 
   const deployRet = spawnSync("vercel", deployArgs, {

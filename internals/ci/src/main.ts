@@ -86,8 +86,8 @@ async function main() {
     .option("--app <app>", "App to deploy")
     .option(
       "--env <env>",
-      "Deployment environment (preview|develop|prod). Default: preview",
-      "preview",
+      "Deployment environment (alpha|develop|prod). Default: alpha",
+      "alpha",
     )
     .action(deploy);
 
