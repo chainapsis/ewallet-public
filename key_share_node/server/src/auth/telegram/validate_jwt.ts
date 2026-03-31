@@ -11,7 +11,9 @@ const TELEGRAM_JWKS_URL = "https://oauth.telegram.org/.well-known/jwks.json";
 
 // oauth.telegram.org has AAAA records but IPv6 connectivity is unreliable.
 // Force IPv4 to prevent intermittent ETIMEDOUT from Happy Eyeballs.
-const telegramAgent = new Agent({ connect: { family: 4 } });
+const telegramAgent = new Agent({
+  connect: { family: 4 } as Record<string, unknown>,
+});
 
 interface TelegramJwk extends JsonWebKey {
   kid: string;

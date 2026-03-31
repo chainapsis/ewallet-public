@@ -13,7 +13,9 @@ const TELEGRAM_JWKS_URL = "https://oauth.telegram.org/.well-known/jwks.json";
 
 // oauth.telegram.org has AAAA records but IPv6 connectivity is unreliable.
 // Force IPv4 to prevent intermittent ETIMEDOUT from Happy Eyeballs.
-const telegramAgent = new Agent({ connect: { family: 4 } });
+const telegramAgent = new Agent({
+  connect: { family: 4 } as Record<string, unknown>,
+});
 const telegramJwksCache = createJwksCache(TELEGRAM_JWKS_URL, "Telegram", {
   // @ts-expect-error -- Node.js undici dispatcher, not in standard RequestInit
   dispatcher: telegramAgent,

@@ -16,7 +16,9 @@ const TELEGRAM_OIDC_TOKEN_URL = "https://oauth.telegram.org/token";
 
 // oauth.telegram.org has AAAA records but IPv6 connectivity is unreliable.
 // Force IPv4 to prevent intermittent ETIMEDOUT from Happy Eyeballs.
-const telegramAgent = new Agent({ connect: { family: 4 } });
+const telegramAgent = new Agent({
+  connect: { family: 4 } as Record<string, unknown>,
+});
 
 registry.registerPath({
   method: "post",
