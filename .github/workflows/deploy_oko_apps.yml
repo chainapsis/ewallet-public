@@ -12,7 +12,7 @@ on:
     inputs:
       git_tag:
         description: >
-          "Git tag (format: <app>/develop/v0.0.1 or <app>/release/v0.0.1).
+          "Git tag (format: <app>/alpha/v0.0.1, <app>/develop/v0.0.1, or <app>/release/v0.0.1).
           Apps: demo_web, user_dashboard, ct_dashboard, admin_web, docs_web, attached_mobile_host_web"
         required: true
         type: string
@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     environment:
-      name: ${{ contains(inputs.git_tag, '/release/') && 'Production' || 'Preview' }}
+      name: ${{ contains(inputs.git_tag, '/release/') && 'Production' || contains(inputs.git_tag, '/alpha/') && 'Alpha' || 'Develop' }}
     steps:
       - name: Checkout self repository
         uses: actions/checkout@v4

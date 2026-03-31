@@ -7,7 +7,7 @@ on:
     inputs:
       git_tag:
         description: >
-          "Git tag (format: attached/develop/v0.0.1 or attached/release/v0.0.1)"
+          "Git tag (format: attached/alpha/v0.0.1, attached/develop/v0.0.1, or attached/release/v0.0.1)"
         required: true
         type: string
 
@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     environment:
-      name: ${{ contains(inputs.git_tag, '/release/') && 'Production' || 'Preview' }}
+      name: ${{ contains(inputs.git_tag, '/release/') && 'Production' || contains(inputs.git_tag, '/alpha/') && 'Alpha' || 'Develop' }}
     steps:
       - name: Checkout self repository
         uses: actions/checkout@v4
