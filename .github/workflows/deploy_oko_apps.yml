@@ -129,4 +129,27 @@ jobs:
         run: vercel build --yes ${{ steps.deploy_env.outputs.vercel_build_flag }} --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt ${{ steps.deploy_env.outputs.vercel_deploy_flag }} --token=${{ secrets.VERCEL_TOKEN }}
+        id: vercel_deploy
+        run: |
+          URL=$(vercel deploy --prebuilt ${{ steps.deploy_env.outputs.vercel_deploy_flag }} --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: Alias deployment
+        if: contains(inputs.git_tag, '/alpha/')
+        env:
+          ALIAS_DEMO_WEB: ${{ secrets.VERCEL_ALIAS_DEMO_WEB_ALPHA }}
+          ALIAS_CT_DASHBOARD: ${{ secrets.VERCEL_ALIAS_CT_DASHBOARD_ALPHA }}
+          ALIAS_ADMIN_WEB: ${{ secrets.VERCEL_ALIAS_ADMIN_WEB_ALPHA }}
+          ALIAS_USER_DASHBOARD: ${{ secrets.VERCEL_ALIAS_USER_DASHBOARD_ALPHA }}
+        run: |
+          case "${{ steps.deploy_env.outputs.vercel_app }}" in
+            demo_web) ALIAS_DOMAIN="$ALIAS_DEMO_WEB" ;;
+            ct_dashboard) ALIAS_DOMAIN="$ALIAS_CT_DASHBOARD" ;;
+            admin_web) ALIAS_DOMAIN="$ALIAS_ADMIN_WEB" ;;
+            user_dashboard) ALIAS_DOMAIN="$ALIAS_USER_DASHBOARD" ;;
+            *) echo "No alias configured for this app"; exit 0 ;;
+          esac
+          if [ -n "$ALIAS_DOMAIN" ]; then
+            vercel alias set "${{ steps.vercel_deploy.outputs.url }}" "$ALIAS_DOMAIN" \
+              --scope=keplrwallet --token=${{ secrets.VERCEL_TOKEN }}
+          fi
