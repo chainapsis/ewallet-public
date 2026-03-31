@@ -29,6 +29,7 @@
     "sdk/oko_sdk_core_react_native",
     "sdk/oko_sdk_cosmos",
     "sdk/oko_sdk_eth",
+    "sdk/oko_sdk_react",
     "sdk/oko_sdk_svm",
     "crypto/bytes",
     "crypto/crypto_js",
@@ -45,6 +46,6 @@
     "ui/oko_common_ui"
   ],
   "npmClient": "yarn",
-  "version": "0.1.2-alpha.12",
+  "version": "0.1.2-alpha.13",
   "$schema": "node_modules/lerna/schemas/lerna-schema.json"
 }

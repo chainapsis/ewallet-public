@@ -165,12 +165,11 @@ const accounts = await okoCosmos.getAccounts();
 
 ```typescript
 import { OkoSvmWallet } from "@oko-wallet/oko-sdk-svm";
-import { SOLANA_MAINNET_CHAIN } from "@solana/wallet-standard-chains";
 
 // Initialize Oko SVM Wallet
 const okoSvmRes = OkoSvmWallet.init({
   api_key: "your-api-key",
-  chain_id: SOLANA_MAINNET_CHAIN,
+  chain_id: "solana:mainnet",
 });
 
 if (!okoSvmRes.success) {

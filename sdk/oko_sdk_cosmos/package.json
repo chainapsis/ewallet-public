@@ -1,6 +1,6 @@
 {
   "name": "@oko-wallet/oko-sdk-cosmos",
-  "version": "0.1.2-alpha.12",
+  "version": "0.1.2-alpha.13",
   "type": "module",
   "publishConfig": {
     "access": "public"
@@ -39,7 +39,7 @@
     "@keplr-wallet/types": "0.12.297",
     "@noble/curves": "1.9.7",
     "@noble/hashes": "^1.8.0",
-    "@oko-wallet/oko-sdk-core": "^0.1.2-alpha.12",
+    "@oko-wallet/oko-sdk-core": "^0.1.2-alpha.13",
     "@oko-wallet/stdlib-js": "^0.1.2-alpha.12",
     "bech32": "^2.0.0",
     "buffer": "^6.0.3",

@@ -22,12 +22,11 @@ npm install @oko-wallet/oko-sdk-svm @solana/web3.js
 
 ```typescript
 import { OkoSvmWallet } from "@oko-wallet/oko-sdk-svm";
-import { SOLANA_MAINNET_CHAIN } from "@solana/wallet-standard-chains";
 
 // Initialize Solana wallet
 const initRes = OkoSvmWallet.init({
   api_key: "your-api-key",
-  chain_id: SOLANA_MAINNET_CHAIN,
+  chain_id: "solana:mainnet",
   theme: "dark",
 });
 
@@ -145,11 +144,7 @@ import {
   registerWalletStandard,
   type WalletStandardConfig,
 } from "@oko-wallet/oko-sdk-svm";
-import {
-  SOLANA_CHAINS,
-  SOLANA_MAINNET_CHAIN,
-  SOLANA_DEVNET_CHAIN,
-} from "@solana/wallet-standard-chains";
+import { SOLANA_CHAINS } from "@solana/wallet-standard-chains";
 import {
   SolanaSignIn,
   SolanaSignMessage,
@@ -166,14 +161,14 @@ const SOLANA_CONFIG: WalletStandardConfig = {
     signAndSendTransaction: SolanaSignAndSendTransaction,
   },
   rpcEndpoints: {
-    [SOLANA_MAINNET_CHAIN]: "https://api.mainnet-beta.solana.com",
-    [SOLANA_DEVNET_CHAIN]: "https://api.devnet.solana.com",
+    "solana:mainnet": "https://api.mainnet-beta.solana.com",
+    "solana:devnet": "https://api.devnet.solana.com",
   },
 };
 
 const initRes = OkoSvmWallet.init({
   api_key: "your-api-key",
-  chain_id: SOLANA_MAINNET_CHAIN,
+  chain_id: "solana:mainnet",
   theme: "dark",
 });
 
