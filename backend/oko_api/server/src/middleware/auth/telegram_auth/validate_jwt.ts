@@ -1,5 +1,6 @@
 import type { Result } from "@oko-wallet/stdlib-js";
 import jwt, { type JwtHeader, type JwtPayload } from "jsonwebtoken";
+import { Agent } from "undici";
 
 import type { TelegramUserInfo } from "./validate";
 import {
@@ -10,7 +11,13 @@ import {
 const TELEGRAM_OIDC_ISSUER = "https://oauth.telegram.org";
 const TELEGRAM_JWKS_URL = "https://oauth.telegram.org/.well-known/jwks.json";
 
-const telegramJwksCache = createJwksCache(TELEGRAM_JWKS_URL, "Telegram");
+// oauth.telegram.org has AAAA records but IPv6 connectivity is unreliable.
+// Force IPv4 to prevent intermittent ETIMEDOUT from Happy Eyeballs.
+const telegramAgent = new Agent({ connect: { family: 4 } });
+const telegramJwksCache = createJwksCache(TELEGRAM_JWKS_URL, "Telegram", {
+  // @ts-expect-error -- Node.js undici dispatcher, not in standard RequestInit
+  dispatcher: telegramAgent,
+});
 
 interface TelegramIdTokenPayload extends JwtPayload {
   id?: number;
@@ -59,8 +66,10 @@ export async function validateTelegramJwt(
       audience: telegramClientId,
     }) as TelegramIdTokenPayload;
 
+    // Telegram OIDC sub is a pairwise identifier (differs per bot).
+    // Use the id claim (real Telegram user ID) for legacy compatibility.
     const userId =
-      payload.sub ?? (payload.id != null ? String(payload.id) : undefined);
+      (payload.id != null ? String(payload.id) : undefined) ?? payload.sub;
 
     if (!userId) {
       return {

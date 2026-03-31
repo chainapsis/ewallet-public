@@ -10,10 +10,7 @@ import {
   AUTH0_DOMAIN,
 } from "@oko-wallet-attached/config/auth0";
 import { GOOGLE_CLIENT_ID } from "@oko-wallet-attached/config/oauth";
-import {
-  TELEGRAM_CLIENT_ID,
-  TELEGRAM_OIDC_AUTH_URL,
-} from "@oko-wallet-attached/config/telegram";
+import { TELEGRAM_CLIENT_ID } from "@oko-wallet-attached/config/telegram";
 import type {
   Auth0TokenInfo,
   GoogleTokenInfo,
@@ -28,10 +25,9 @@ const auth0Jwks = createJwksVerifier(
   `https://${AUTH0_DOMAIN}/.well-known/jwks.json`,
   "Auth0",
 );
-const telegramJwks = createJwksVerifier(
-  "https://oauth.telegram.org/.well-known/jwks.json",
-  "Telegram",
-);
+// Telegram JWKS endpoint does not support CORS, so browser-side signature
+// verification is not possible. The server auth middleware verifies the JWT
+// signature instead, so client-side verification is safely skipped.
 
 export async function verifyIdToken(
   authType: AuthType,
@@ -269,8 +265,6 @@ interface TelegramTokenInfo {
 async function verifyTelegramIdToken(
   idToken: string,
 ): Promise<TelegramTokenInfo> {
-  await telegramJwks.verifySignature(idToken);
-
   const payload = decodeJwtPayload<TelegramTokenInfo>(idToken, "Telegram");
 
   if (payload.iss !== "https://oauth.telegram.org") {
@@ -289,9 +283,10 @@ async function verifyTelegramIdToken(
     throw new Error("Telegram token has expired");
   }
 
-  // Use sub, or fall back to id claim
+  // Telegram OIDC sub is a pairwise identifier (differs per bot).
+  // Use the id claim (real Telegram user ID) for legacy compatibility.
   const sub =
-    payload.sub ?? (payload.id != null ? String(payload.id) : undefined);
+    (payload.id != null ? String(payload.id) : undefined) ?? payload.sub;
   if (!sub) {
     throw new Error("Telegram token sub not found");
   }

@@ -11,7 +11,11 @@ interface CacheEntry {
 
 const JWKS_CACHE_TTL_MS = 10 * 60 * 1000;
 
-export function createJwksCache(jwksUrl: string, provider: string) {
+export function createJwksCache(
+  jwksUrl: string,
+  provider: string,
+  fetchInit?: RequestInit,
+) {
   const cache: CacheEntry = { fetchedAt: 0, keys: [] };
 
   async function getSigningKey(kid: string): Promise<JwkWithKid | null> {
@@ -35,7 +39,7 @@ export function createJwksCache(jwksUrl: string, provider: string) {
       return cache.keys;
     }
 
-    const response = await fetch(jwksUrl);
+    const response = await fetch(jwksUrl, fetchInit);
 
     if (!response.ok) {
       throw new Error(

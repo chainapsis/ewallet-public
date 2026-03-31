@@ -10,8 +10,13 @@ import type {
   SocialLoginTelegramResponse,
 } from "@oko-wallet/oko-types/social_login";
 import type { Request, Response } from "express";
+import { Agent } from "undici";
 
 const TELEGRAM_OIDC_TOKEN_URL = "https://oauth.telegram.org/token";
+
+// oauth.telegram.org has AAAA records but IPv6 connectivity is unreliable.
+// Force IPv4 to prevent intermittent ETIMEDOUT from Happy Eyeballs.
+const telegramAgent = new Agent({ connect: { family: 4 } });
 
 registry.registerPath({
   method: "post",
@@ -102,47 +107,40 @@ export async function getTelegramToken(
         "Content-Type": "application/x-www-form-urlencoded",
         Accept: "application/json",
       },
-      body: reqBody,
+      body: reqBody.toString(),
+      // @ts-expect-error -- Node.js undici dispatcher, not in standard RequestInit
+      dispatcher: telegramAgent,
     });
 
-    if (response.status === 200) {
-      const data: {
-        id_token?: string;
-        error?: string;
-        error_description?: string;
-      } = await response.json();
+    const data: {
+      id_token?: string;
+      error?: string;
+      error_description?: string;
+    } = await response.json();
 
-      if (data.error) {
-        res.status(400).json({
-          success: false,
-          code: "UNKNOWN_ERROR",
-          msg: `${data.error}: ${data.error_description}`,
-        });
-        return;
-      }
-
-      if (!data.id_token) {
-        res.status(400).json({
-          success: false,
-          code: "UNKNOWN_ERROR",
-          msg: "Telegram OIDC response missing id_token",
-        });
-        return;
-      }
-
-      res.status(200).json({
-        success: true,
-        data: {
-          id_token: data.id_token,
-        },
+    if (data.error) {
+      res.status(400).json({
+        success: false,
+        code: "UNKNOWN_ERROR",
+        msg: `${data.error}: ${data.error_description}`,
       });
       return;
     }
 
-    res.status(response.status).json({
-      success: false,
-      code: "UNKNOWN_ERROR",
-      msg: await response.text(),
+    if (!data.id_token) {
+      res.status(400).json({
+        success: false,
+        code: "UNKNOWN_ERROR",
+        msg: "Telegram OIDC response missing id_token",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        id_token: data.id_token,
+      },
     });
   } catch (err: unknown) {
     const message =
