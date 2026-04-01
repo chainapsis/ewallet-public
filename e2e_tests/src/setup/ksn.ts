@@ -33,7 +33,6 @@ export function createKsnApp(
     encryptionSecret,
     serverKeypair,
     telegram_bot_token: "test_telegram_token",
-    telegram_client_id: "test_telegram_client_id",
     is_db_backup_checked: false,
     launch_time: dayjs().toISOString(),
     git_hash: null,

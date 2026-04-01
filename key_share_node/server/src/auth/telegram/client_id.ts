@@ -1,0 +1,1 @@
+export const TELEGRAM_CLIENT_ID = "8799735298";

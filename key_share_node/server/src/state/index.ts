@@ -6,7 +6,6 @@ export interface ServerState {
   encryptionSecret: string;
   serverKeypair: EddsaKeypair;
   telegram_bot_token: string;
-  telegram_client_id?: string;
   is_db_backup_checked: boolean;
   launch_time: string;
   git_hash: string | null;
