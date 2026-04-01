@@ -52,7 +52,7 @@ export async function validateTelegramJwt(
       };
     }
 
-    const header = decoded.header as JwtHeader;
+    const header = decoded.header;
 
     if (!header.kid) {
       return {
