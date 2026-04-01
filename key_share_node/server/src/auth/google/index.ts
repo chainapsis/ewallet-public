@@ -23,7 +23,7 @@ interface GoogleJwk extends JsonWebKey {
 
 const GOOGLE_JWKS_URL = "https://www.googleapis.com/oauth2/v3/certs";
 
-const JWKS_CACHE_TTL_MS = 5 * 60 * 1000;
+const JWKS_CACHE_TTL_MS = 10 * 60 * 1000;
 const jwksCache = new Map<string, { fetchedAt: number; keys: GoogleJwk[] }>();
 
 export async function validateGoogleOAuthToken(
@@ -122,14 +122,28 @@ export async function validateGoogleOAuthToken(
 }
 
 async function getSigningKey(kid: string): Promise<GoogleJwk | null> {
+  const keys = await fetchJwks();
+  const match = keys.find((k) => k.kid === kid);
+  if (match) {
+    return match;
+  }
+
+  const freshKeys = await fetchJwks({ forceRefresh: true });
+  return freshKeys.find((k) => k.kid === kid) ?? null;
+}
+
+async function fetchJwks(
+  options: { forceRefresh?: boolean } = {},
+): Promise<GoogleJwk[]> {
   const cached = jwksCache.get(GOOGLE_JWKS_URL);
   const now = Date.now();
 
-  if (cached && now - cached.fetchedAt < JWKS_CACHE_TTL_MS) {
-    const match = cached.keys.find((k) => k.kid === kid);
-    if (match) {
-      return match;
-    }
+  if (
+    !options.forceRefresh &&
+    cached &&
+    now - cached.fetchedAt < JWKS_CACHE_TTL_MS
+  ) {
+    return cached.keys;
   }
 
   const response = await fetch(GOOGLE_JWKS_URL);
@@ -146,5 +160,5 @@ async function getSigningKey(kid: string): Promise<GoogleJwk | null> {
 
   jwksCache.set(GOOGLE_JWKS_URL, { fetchedAt: now, keys: body.keys });
 
-  return body.keys.find((k) => k.kid === kid) ?? null;
+  return body.keys;
 }
