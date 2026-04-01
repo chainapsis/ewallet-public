@@ -125,6 +125,7 @@ async function main() {
     encryptionSecret: loadEncSecretRes.data,
     serverKeypair,
     telegram_bot_token: process.env.TELEGRAM_BOT_TOKEN!,
+    telegram_client_id: process.env.TELEGRAM_CLIENT_ID,
     is_db_backup_checked: true,
     launch_time,
     git_hash,
