@@ -1,6 +1,6 @@
 import type { Result } from "@oko-wallet/stdlib-js";
 import { createPublicKey, type JsonWebKey } from "crypto";
-import jwt, { type JwtHeader, type JwtPayload } from "jsonwebtoken";
+import jwt, { type JwtPayload } from "jsonwebtoken";
 import { Agent } from "undici";
 
 import type { OAuthValidationFail } from "../types";
@@ -27,7 +27,7 @@ interface TelegramIdTokenPayload extends JwtPayload {
   picture?: string;
 }
 
-const JWKS_CACHE_TTL_MS = 5 * 60 * 1000;
+const JWKS_CACHE_TTL_MS = 10 * 60 * 1000;
 const jwksCache = new Map<
   string,
   {
