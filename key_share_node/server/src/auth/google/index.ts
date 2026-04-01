@@ -1,63 +1,92 @@
-import type { GoogleTokenInfo } from "@oko-wallet/ksn-interface/auth";
 import type { Result } from "@oko-wallet/stdlib-js";
+import { createPublicKey, type JsonWebKey } from "crypto";
+import jwt, { type JwtHeader, type JwtPayload } from "jsonwebtoken";
 
 import type { OAuthValidationFail } from "../types";
 import { GOOGLE_CLIENT_ID } from "./client_id";
 
-// @TODO: Replace tokeninfo endpoint with JWKS signature verification (RS256).
-// oko_attached and oko_api already use JWKS for both Google and Auth0.
+interface GoogleIdTokenPayload extends JwtPayload {
+  email?: string;
+  email_verified?: boolean;
+  name?: string;
+}
+
+export interface GoogleUserInfo {
+  email: string;
+  sub: string;
+  name?: string;
+}
+
+interface GoogleJwk extends JsonWebKey {
+  kid: string;
+}
+
+const GOOGLE_JWKS_URL = "https://www.googleapis.com/oauth2/v3/certs";
+
+const JWKS_CACHE_TTL_MS = 5 * 60 * 1000;
+const jwksCache = new Map<string, { fetchedAt: number; keys: GoogleJwk[] }>();
+
 export async function validateGoogleOAuthToken(
   idToken: string,
-): Promise<Result<GoogleTokenInfo, OAuthValidationFail>> {
+): Promise<Result<GoogleUserInfo, OAuthValidationFail>> {
   try {
-    const res = await fetch(
-      `https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${idToken}`,
-    );
-    if (!res.ok) {
+    const decoded = jwt.decode(idToken, { complete: true });
+
+    if (!decoded || typeof decoded === "string") {
+      return {
+        success: false,
+        err: { type: "invalid_token", message: "Invalid token format" },
+      };
+    }
+
+    const header = decoded.header as JwtHeader;
+
+    if (!header.kid) {
       return {
         success: false,
         err: {
           type: "invalid_token",
-          message: "Invalid or malformed token",
+          message: "Missing key id in token header",
         },
       };
     }
-    const tokenInfo = (await res.json()) as GoogleTokenInfo;
 
-    if (tokenInfo.aud !== GOOGLE_CLIENT_ID) {
+    const jwk = await getSigningKey(header.kid);
+
+    if (!jwk) {
       return {
         success: false,
         err: {
-          type: "client_id_not_same",
-          message: `Token client ID does not match. expected: ${GOOGLE_CLIENT_ID}, actual: ${tokenInfo.aud}`,
+          type: "invalid_token",
+          message: "Unable to find signing key for token",
         },
       };
     }
 
-    if (
-      tokenInfo.iss !== "https://accounts.google.com" &&
-      tokenInfo.iss !== "https://oauth2.googleapis.com"
-    ) {
+    const publicKey = createPublicKey({ key: jwk, format: "jwk" });
+    const pem = publicKey.export({ type: "spki", format: "pem" }) as string;
+
+    const payload = jwt.verify(idToken, pem, {
+      algorithms: ["RS256"],
+      audience: GOOGLE_CLIENT_ID,
+      issuer: ["https://accounts.google.com", "accounts.google.com"],
+    }) as GoogleIdTokenPayload;
+
+    if (!payload.sub) {
       return {
         success: false,
-        err: {
-          type: "invalid_issuer",
-          message: `Invalid token issuer: ${tokenInfo.iss}`,
-        },
+        err: { type: "invalid_token", message: "Token missing subject claim" },
       };
     }
 
-    if (tokenInfo.exp && Number(tokenInfo.exp) <= Date.now() / 1000) {
+    if (!payload.email) {
       return {
         success: false,
-        err: {
-          type: "token_expired",
-          message: "Token has expired",
-        },
+        err: { type: "invalid_token", message: "Token missing email claim" },
       };
     }
 
-    if (tokenInfo.email_verified !== "true") {
+    if (!payload.email_verified) {
       return {
         success: false,
         err: {
@@ -69,15 +98,53 @@ export async function validateGoogleOAuthToken(
 
     return {
       success: true,
-      data: tokenInfo,
-    };
-  } catch (error: any) {
-    return {
-      success: false,
-      err: {
-        type: "unknown",
-        message: `Token validation failed: ${error instanceof Error ? error.message : String(error)}`,
+      data: {
+        email: payload.email,
+        sub: payload.sub,
+        name: typeof payload.name === "string" ? payload.name : undefined,
       },
     };
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      return {
+        success: false,
+        err: { type: "token_expired", message: "Token has expired" },
+      };
+    }
+
+    const message =
+      error instanceof Error ? error.message : "Google token validation failed";
+    return {
+      success: false,
+      err: { type: "invalid_token", message },
+    };
   }
+}
+
+async function getSigningKey(kid: string): Promise<GoogleJwk | null> {
+  const cached = jwksCache.get(GOOGLE_JWKS_URL);
+  const now = Date.now();
+
+  if (cached && now - cached.fetchedAt < JWKS_CACHE_TTL_MS) {
+    const match = cached.keys.find((k) => k.kid === kid);
+    if (match) {
+      return match;
+    }
+  }
+
+  const response = await fetch(GOOGLE_JWKS_URL);
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch Google JWKS: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  const body = (await response.json()) as { keys?: GoogleJwk[] };
+  if (!body.keys || !Array.isArray(body.keys) || body.keys.length === 0) {
+    throw new Error("Google JWKS response missing keys");
+  }
+
+  jwksCache.set(GOOGLE_JWKS_URL, { fetchedAt: now, keys: body.keys });
+
+  return body.keys.find((k) => k.kid === kid) ?? null;
 }

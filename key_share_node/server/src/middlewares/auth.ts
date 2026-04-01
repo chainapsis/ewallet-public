@@ -1,7 +1,4 @@
-import type {
-  DiscordTokenInfo,
-  GoogleTokenInfo,
-} from "@oko-wallet/ksn-interface/auth";
+import type { DiscordTokenInfo } from "@oko-wallet/ksn-interface/auth";
 import type { KSNodeApiErrorResponse } from "@oko-wallet/ksn-interface/response";
 import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { Result } from "@oko-wallet/stdlib-js";
@@ -16,6 +13,7 @@ import {
 } from "@oko-wallet-ksn-server/auth";
 import type { Auth0TokenInfo } from "@oko-wallet-ksn-server/auth/auth0";
 import type { GithubUserInfo } from "@oko-wallet-ksn-server/auth/github";
+import type { GoogleUserInfo } from "@oko-wallet-ksn-server/auth/google";
 import type { TelegramUserInfo } from "@oko-wallet-ksn-server/auth/telegram";
 import type { OAuthValidationFail } from "@oko-wallet-ksn-server/auth/types";
 import type { XUserInfo } from "@oko-wallet-ksn-server/auth/x";
@@ -30,7 +28,7 @@ type OAuthBody = {
 type VerifyResult =
   | {
       auth_type: "google";
-      data: Result<GoogleTokenInfo, OAuthValidationFail>;
+      data: Result<GoogleUserInfo, OAuthValidationFail>;
     }
   | {
       auth_type: "auth0";
