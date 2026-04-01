@@ -5,12 +5,12 @@ use crate::{
     keyshare::CentralizedKeygenOutput,
     math::Polynomial,
     participants::ParticipantList,
-    protocol::{InitializationError, Participant, ProtocolError},
+    protocol::{Participant, ProtocolError},
     CSCurve, KeygenOutput,
 };
 
 pub fn keygen_centralized<C: CSCurve>(
-    participants: &Vec<Participant>,
+    participants: &[Participant],
     threshold: usize,
 ) -> Result<CentralizedKeygenOutput<C>, ProtocolError> {
     if threshold < 2 {
@@ -19,13 +19,18 @@ pub fn keygen_centralized<C: CSCurve>(
         ));
     }
 
-    let _participant_list = ParticipantList::new(&participants)
-        .ok_or_else(|| {
-            InitializationError::BadParameters(
+    if threshold > participants.len() {
+        return Err(ProtocolError::AssertionFailed(
+            "threshold must be <= number of participants".to_string(),
+        ));
+    }
+
+    let _participant_list =
+        ParticipantList::new(participants).ok_or_else(|| {
+            ProtocolError::AssertionFailed(
                 "participant list cannot contain duplicates".to_string(),
             )
-        })
-        .unwrap();
+        })?;
 
     let mut rng = OsRng;
     let f = Polynomial::<C>::random(&mut rng, threshold);
@@ -51,7 +56,7 @@ pub fn keygen_centralized<C: CSCurve>(
 
 pub fn keygen_import<C: CSCurve>(
     secret: [u8; 32],
-    participants: &Vec<Participant>,
+    participants: &[Participant],
     threshold: usize,
 ) -> Result<CentralizedKeygenOutput<C>, ProtocolError> {
     if threshold < 2 {
@@ -60,8 +65,21 @@ pub fn keygen_import<C: CSCurve>(
         ));
     }
 
+    if threshold > participants.len() {
+        return Err(ProtocolError::AssertionFailed(
+            "threshold must be <= number of participants".to_string(),
+        ));
+    }
+
+    let _participant_list =
+        ParticipantList::new(participants).ok_or_else(|| {
+            ProtocolError::AssertionFailed(
+                "participant list cannot contain duplicates".to_string(),
+            )
+        })?;
+
     let secret_scalar = ScalarPrimitive::<C>::from_slice(&secret)
-        .map_err(|err| ProtocolError::Other("Failed to convert secret to scalar".into()))?;
+        .map_err(|_| ProtocolError::Other("Failed to convert secret to scalar".into()))?;
     let constant = C::Scalar::from(secret_scalar);
 
     let mut rng = OsRng;
