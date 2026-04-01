@@ -45,6 +45,8 @@ criterion = "0.4"
 easy-parallel = "3.2.0"
 haisou-chan = { git = "https://github.com/cronokirby/haisou-chan", rev = "d28c46e51acfcb818236caae293f6e56dff41ad2" }
 structopt = "0.3.26"
+bip32 = { version = "0.5", features = ["secp256k1"] }
+bip39 = "2"
 
 [features]
 default = ["k256"]
