@@ -12,14 +12,11 @@ import {
   validateDiscordOAuthToken,
   validateGithubOAuthToken,
   validateGoogleOAuthToken,
-  validateTelegramHash,
+  validateTelegramToken,
 } from "@oko-wallet-ksn-server/auth";
 import type { Auth0TokenInfo } from "@oko-wallet-ksn-server/auth/auth0";
 import type { GithubUserInfo } from "@oko-wallet-ksn-server/auth/github";
-import type {
-  TelegramUserData,
-  TelegramUserInfo,
-} from "@oko-wallet-ksn-server/auth/telegram";
+import type { TelegramUserInfo } from "@oko-wallet-ksn-server/auth/telegram";
 import type { OAuthValidationFail } from "@oko-wallet-ksn-server/auth/types";
 import type { XUserInfo } from "@oko-wallet-ksn-server/auth/x";
 import { validateAccessTokenOfX } from "@oko-wallet-ksn-server/auth/x";
@@ -101,27 +98,15 @@ export async function bearerTokenMiddleware(
           data: await validateAccessTokenOfX(bearerToken),
         };
         break;
-      case "telegram": {
-        let userData: TelegramUserData;
-        try {
-          userData = JSON.parse(bearerToken) as TelegramUserData;
-        } catch (_error) {
-          const errorRes: KSNodeApiErrorResponse = {
-            success: false,
-            code: "UNAUTHORIZED",
-            msg: "Invalid token format: Expected JSON string",
-          };
-          res.status(ErrorCodeMap[errorRes.code]).json(errorRes);
-          return;
-        }
-
-        const telegramBotToken = req.app.locals.telegram_bot_token;
+      case "telegram":
         result = {
           auth_type: "telegram",
-          data: validateTelegramHash(userData, telegramBotToken),
+          data: await validateTelegramToken(
+            bearerToken,
+            req.app.locals.telegram_bot_token,
+          ),
         };
         break;
-      }
       case "discord":
         result = {
           auth_type: "discord",
