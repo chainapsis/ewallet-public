@@ -12,6 +12,8 @@ import type {
 import type { Request, Response } from "express";
 import { Agent } from "undici";
 
+import { TELEGRAM_CLIENT_ID } from "@oko-wallet-api/middleware/auth/telegram_auth/client_id";
+
 const TELEGRAM_OIDC_TOKEN_URL = "https://oauth.telegram.org/token";
 
 // oauth.telegram.org has AAAA records but IPv6 connectivity is unreliable.
@@ -81,15 +83,14 @@ export async function getTelegramToken(
   }
 
   try {
-    const clientId: string | undefined = req.app.locals.telegram_client_id;
     const clientSecret: string | undefined =
       req.app.locals.telegram_client_secret;
 
-    if (!clientId || !clientSecret) {
+    if (!clientSecret) {
       res.status(500).json({
         success: false,
         code: "UNKNOWN_ERROR",
-        msg: "Telegram OIDC not configured (TELEGRAM_CLIENT_ID or TELEGRAM_CLIENT_SECRET missing)",
+        msg: "Telegram OIDC not configured (TELEGRAM_CLIENT_SECRET missing)",
       });
       return;
     }
@@ -97,7 +98,7 @@ export async function getTelegramToken(
     const reqBody = new URLSearchParams({
       code: body.code,
       grant_type: "authorization_code",
-      client_id: clientId,
+      client_id: TELEGRAM_CLIENT_ID,
       client_secret: clientSecret,
       redirect_uri: body.redirect_uri,
       code_verifier: body.code_verifier,

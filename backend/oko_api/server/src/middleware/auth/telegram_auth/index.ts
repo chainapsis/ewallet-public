@@ -116,15 +116,7 @@ async function handleJwt(
   bearerToken: string,
 ) {
   try {
-    const telegramClientId: string | undefined =
-      req.app.locals.telegram_client_id;
-    if (!telegramClientId) {
-      res.status(500).json({
-        error: "Telegram OIDC not configured (TELEGRAM_CLIENT_ID missing)",
-      });
-      return;
-    }
-    const result = await validateTelegramJwt(bearerToken, telegramClientId);
+    const result = await validateTelegramJwt(bearerToken);
 
     if (!result.success) {
       res.status(401).json({ error: result.err });

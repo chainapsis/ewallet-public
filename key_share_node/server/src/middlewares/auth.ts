@@ -127,20 +127,9 @@ export async function bearerTokenMiddleware(
           };
         } else {
           // OIDC JWT path
-          const telegramClientId: string | undefined =
-            req.app.locals.telegram_client_id;
-          if (!telegramClientId) {
-            const errorRes: KSNodeApiErrorResponse = {
-              success: false,
-              code: "UNAUTHORIZED",
-              msg: "Telegram OIDC not configured (TELEGRAM_CLIENT_ID missing)",
-            };
-            res.status(ErrorCodeMap[errorRes.code]).json(errorRes);
-            return;
-          }
           result = {
             auth_type: "telegram",
-            data: await validateTelegramJwt(bearerToken, telegramClientId),
+            data: await validateTelegramJwt(bearerToken),
           };
         }
         break;

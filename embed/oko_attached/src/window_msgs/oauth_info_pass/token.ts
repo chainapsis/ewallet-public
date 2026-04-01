@@ -285,11 +285,9 @@ async function verifyTelegramIdToken(
 
   // Telegram OIDC sub is a pairwise identifier (differs per bot).
   // Use the id claim (real Telegram user ID) for legacy compatibility.
-  const sub =
-    (payload.id != null ? String(payload.id) : undefined) ?? payload.sub;
-  if (!sub) {
-    throw new Error("Telegram token sub not found");
+  if (payload.id == null) {
+    throw new Error("Telegram token missing id claim");
   }
 
-  return { ...payload, sub };
+  return { ...payload, sub: String(payload.id) };
 }

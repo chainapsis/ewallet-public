@@ -2,6 +2,7 @@ import type { Result } from "@oko-wallet/stdlib-js";
 import jwt, { type JwtHeader, type JwtPayload } from "jsonwebtoken";
 import { Agent } from "undici";
 
+import { TELEGRAM_CLIENT_ID } from "./client_id";
 import type { TelegramUserInfo } from "./validate";
 import {
   createJwksCache,
@@ -30,7 +31,6 @@ interface TelegramIdTokenPayload extends JwtPayload {
 
 export async function validateTelegramJwt(
   idToken: string,
-  telegramClientId: string,
 ): Promise<Result<TelegramUserInfo, string>> {
   try {
     const decoded = jwt.decode(idToken, { complete: true });
@@ -65,20 +65,19 @@ export async function validateTelegramJwt(
     const payload = jwt.verify(idToken, pem, {
       algorithms: ["RS256"],
       issuer: TELEGRAM_OIDC_ISSUER,
-      audience: telegramClientId,
+      audience: TELEGRAM_CLIENT_ID,
     }) as TelegramIdTokenPayload;
 
     // Telegram OIDC sub is a pairwise identifier (differs per bot).
     // Use the id claim (real Telegram user ID) for legacy compatibility.
-    const userId =
-      (payload.id != null ? String(payload.id) : undefined) ?? payload.sub;
-
-    if (!userId) {
+    if (payload.id == null) {
       return {
         success: false,
-        err: "Missing user ID (sub) in token",
+        err: "Missing Telegram user ID (id) in token",
       };
     }
+
+    const userId = String(payload.id);
 
     return {
       success: true,
