@@ -12,7 +12,7 @@ on:
     inputs:
       git_tag:
         description: >
-          "Git tag (format: <app>/develop/v0.0.1 or <app>/release/v0.0.1).
+          "Git tag (format: <app>/alpha/v0.0.1, <app>/develop/v0.0.1, or <app>/release/v0.0.1).
           Apps: demo_web, user_dashboard, ct_dashboard, admin_web, docs_web, attached_mobile_host_web"
         required: true
         type: string
@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     environment:
-      name: ${{ contains(inputs.git_tag, '/release/') && 'Production' || 'Preview' }}
+      name: ${{ contains(inputs.git_tag, '/release/') && 'Production' || contains(inputs.git_tag, '/alpha/') && 'Alpha' || 'Develop' }}
     steps:
       - name: Checkout self repository
         uses: actions/checkout@v4
@@ -129,4 +129,29 @@ jobs:
         run: vercel build --yes ${{ steps.deploy_env.outputs.vercel_build_flag }} --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt ${{ steps.deploy_env.outputs.vercel_deploy_flag }} --token=${{ secrets.VERCEL_TOKEN }}
+        id: vercel_deploy
+        run: |
+          URL=$(vercel deploy --prebuilt ${{ steps.deploy_env.outputs.vercel_deploy_flag }} --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: Alias deployment
+        if: contains(inputs.git_tag, '/alpha/')
+        env:
+          ALIAS_DEMO_WEB: ${{ secrets.VERCEL_ALIAS_DEMO_WEB_ALPHA }}
+          ALIAS_CT_DASHBOARD: ${{ secrets.VERCEL_ALIAS_CT_DASHBOARD_ALPHA }}
+          ALIAS_ADMIN_WEB: ${{ secrets.VERCEL_ALIAS_ADMIN_WEB_ALPHA }}
+          ALIAS_USER_DASHBOARD: ${{ secrets.VERCEL_ALIAS_USER_DASHBOARD_ALPHA }}
+          ALIAS_ATTACHED_MOBILE_HOST_WEB: ${{ secrets.VERCEL_ALIAS_ATTACHED_MOBILE_HOST_WEB_ALPHA }}
+        run: |
+          case "${{ steps.deploy_env.outputs.vercel_app }}" in
+            demo_web) ALIAS_DOMAIN="$ALIAS_DEMO_WEB" ;;
+            ct_dashboard) ALIAS_DOMAIN="$ALIAS_CT_DASHBOARD" ;;
+            admin_web) ALIAS_DOMAIN="$ALIAS_ADMIN_WEB" ;;
+            user_dashboard) ALIAS_DOMAIN="$ALIAS_USER_DASHBOARD" ;;
+            attached_mobile_host_web) ALIAS_DOMAIN="$ALIAS_ATTACHED_MOBILE_HOST_WEB" ;;
+            *) echo "No alias configured for this app"; exit 0 ;;
+          esac
+          if [ -n "$ALIAS_DOMAIN" ]; then
+            vercel alias set "${{ steps.vercel_deploy.outputs.url }}" "$ALIAS_DOMAIN" \
+              --scope=keplrwallet --token=${{ secrets.VERCEL_TOKEN }}
+          fi

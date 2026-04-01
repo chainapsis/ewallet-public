@@ -8,34 +8,18 @@ import { paths } from "@oko-wallet-ci/paths";
 
 const VERCEL_SCOPE = "keplrwallet";
 
-const APP_CONFIGS = {
-  "oko-demo-web": {
-    path: paths.demo_web,
-  },
-  "oko-attached": {
-    path: paths.oko_attached,
-  },
-  "oko-customer-dashboard": {
-    path: paths.ct_dashboard_web,
-  },
-  "oko-docs-web": {
-    path: path.join(paths.root, "apps/docs_web"),
-  },
-  "oko-admin-web": {
-    path: paths.oko_admin_web,
-  },
-  "oko-user-dashboard": {
-    path: path.join(paths.root, "apps/user_dashboard"),
-  },
-  "oko-attached-mobile-host-web": {
-    path: paths.attached_mobile_host_web,
-  },
-  "oko-sandbox-evm": {
-    path: path.join(paths.root, "sandbox/sandbox_evm"),
-  },
-  "oko-sandbox-sol": {
-    path: path.join(paths.root, "sandbox/sandbox_sol"),
-  },
+type DeploymentEnv = "alpha" | "develop" | "prod";
+
+const APP_CONFIGS: Record<string, { path: string }> = {
+  "oko-demo-web": { path: paths.demo_web },
+  "oko-attached": { path: paths.oko_attached },
+  "oko-customer-dashboard": { path: paths.ct_dashboard_web },
+  "oko-docs-web": { path: path.join(paths.root, "apps/docs_web") },
+  "oko-admin-web": { path: paths.oko_admin_web },
+  "oko-user-dashboard": { path: path.join(paths.root, "apps/user_dashboard") },
+  "oko-attached-mobile-host-web": { path: paths.attached_mobile_host_web },
+  "oko-sandbox-evm": { path: path.join(paths.root, "sandbox/sandbox_evm") },
+  "oko-sandbox-sol": { path: path.join(paths.root, "sandbox/sandbox_sol") },
 };
 
 function listDeployableApps(): void {
@@ -45,15 +29,13 @@ function listDeployableApps(): void {
   });
 }
 
-type DeploymentEnv = "preview" | "develop" | "prod";
-
 interface DeployOptions {
-  app?: keyof typeof APP_CONFIGS;
+  app?: string;
   env?: DeploymentEnv;
 }
 
 export async function deploy(options: DeployOptions) {
-  const { app, env = "preview" } = options;
+  const { app, env = "alpha" } = options;
 
   if (!app) {
     listDeployableApps();
@@ -61,7 +43,7 @@ export async function deploy(options: DeployOptions) {
     process.exit(1);
   }
 
-  const validEnvs: DeploymentEnv[] = ["preview", "develop", "prod"];
+  const validEnvs: DeploymentEnv[] = ["alpha", "develop", "prod"];
   if (!validEnvs.includes(env)) {
     console.error(
       chalk.red(
@@ -108,6 +90,8 @@ export async function deploy(options: DeployOptions) {
     buildArgs.push("--prod");
   } else if (env === "develop") {
     buildArgs.push("--target=develop");
+  } else if (env === "alpha") {
+    buildArgs.push("--target=preview");
   }
 
   const buildRet = spawnSync("vercel", buildArgs, {
@@ -124,12 +108,33 @@ export async function deploy(options: DeployOptions) {
     deployArgs.push("--prod");
   } else if (env === "develop") {
     deployArgs.push("--target=develop");
+  } else if (env === "alpha") {
+    deployArgs.push("--target=preview");
   }
 
   const deployRet = spawnSync("vercel", deployArgs, {
     cwd: paths.root,
-    stdio: "inherit",
+    stdio: ["inherit", "pipe", "inherit"],
+    encoding: "utf8",
   });
   expectSuccess(deployRet, "Vercel deployment failed");
-  console.log(chalk.bold.green("\n✓ Deployment completed successfully!"));
+  const deploymentUrl = deployRet.stdout.trim();
+  console.log(chalk.green(`✓ Deployed: ${deploymentUrl}\n`));
+  console.log(chalk.bold.green("✓ Deployment completed successfully!"));
+
+  // Step 4: Alias (if VERCEL_ALIAS_DOMAIN env var is set)
+  const aliasDomain = process.env.VERCEL_ALIAS_DOMAIN;
+  if (aliasDomain) {
+    console.log(chalk.blue("\nAliasing"), `${deploymentUrl} → ${aliasDomain}`);
+    const aliasRet = spawnSync(
+      "vercel",
+      ["alias", "set", deploymentUrl, aliasDomain, `--scope=${VERCEL_SCOPE}`],
+      {
+        cwd: paths.root,
+        stdio: "inherit",
+      },
+    );
+    expectSuccess(aliasRet, "Vercel alias failed");
+    console.log(chalk.bold.green(`✓ Aliased to ${aliasDomain}`));
+  }
 }

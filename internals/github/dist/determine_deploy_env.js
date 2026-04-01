@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 // App tag format: <app>/<env>/v<version>
 // e.g. demo_web/develop/v0.0.1, attached/release/v1.0.0
-const APP_TAG_PATTERN = /^([a-z_]+)\/(develop|release)\/v(\d+\.\d+\.\d+)$/;
+const APP_TAG_PATTERN = /^([a-z_]+)\/(alpha|develop|release)\/v(\d+\.\d+\.\d+)$/;
 function parseTag(tag) {
     const match = APP_TAG_PATTERN.exec(tag);
     if (!match) {
@@ -34,6 +34,11 @@ async function main() {
         vercelEnv = "production";
         vercelBuildFlag = "--prod";
         vercelDeployFlag = "--prod";
+    }
+    else if (parsed.env === "alpha") {
+        vercelEnv = "preview";
+        vercelBuildFlag = "--target=preview";
+        vercelDeployFlag = "--target=preview";
     }
     else {
         vercelEnv = "develop";

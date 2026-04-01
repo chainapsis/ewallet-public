@@ -1,13 +1,13 @@
 const VALID_APPS = {
-    demo_web: ["develop", "release"],
-    user_dashboard: ["develop", "release"],
-    ct_dashboard: ["develop", "release"],
-    admin_web: ["develop", "release"],
-    attached: ["develop", "release"],
-    attached_mobile_host_web: ["develop", "release"],
+    demo_web: ["alpha", "develop", "release"],
+    user_dashboard: ["alpha", "develop", "release"],
+    ct_dashboard: ["alpha", "develop", "release"],
+    admin_web: ["alpha", "develop", "release"],
+    attached: ["alpha", "develop", "release"],
+    attached_mobile_host_web: ["alpha", "develop", "release"],
     docs_web: ["release"],
 };
-const APP_TAG_PATTERN = /^([a-z_]+)\/(develop|release)\/v\d+\.\d+\.\d+$/;
+const APP_TAG_PATTERN = /^([a-z_]+)\/(alpha|develop|release)\/v\d+\.\d+\.\d+$/;
 async function main() {
     const tag = process.env.GIT_TAG;
     if (tag === undefined || tag.length < 1) {

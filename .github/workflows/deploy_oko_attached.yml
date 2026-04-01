@@ -7,7 +7,7 @@ on:
     inputs:
       git_tag:
         description: >
-          "Git tag (format: attached/develop/v0.0.1 or attached/release/v0.0.1)"
+          "Git tag (format: attached/alpha/v0.0.1, attached/develop/v0.0.1, or attached/release/v0.0.1)"
         required: true
         type: string
 
@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     environment:
-      name: ${{ contains(inputs.git_tag, '/release/') && 'Production' || 'Preview' }}
+      name: ${{ contains(inputs.git_tag, '/release/') && 'Production' || contains(inputs.git_tag, '/alpha/') && 'Alpha' || 'Develop' }}
     steps:
       - name: Checkout self repository
         uses: actions/checkout@v4
@@ -114,4 +114,14 @@ jobs:
         run: vercel build --yes ${{ steps.deploy_env.outputs.vercel_build_flag }} --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt ${{ steps.deploy_env.outputs.vercel_deploy_flag }} --token=${{ secrets.VERCEL_TOKEN }}
+        id: vercel_deploy
+        run: |
+          URL=$(vercel deploy --prebuilt ${{ steps.deploy_env.outputs.vercel_deploy_flag }} --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: Alias deployment
+        if: contains(inputs.git_tag, '/alpha/')
+        run: |
+          vercel alias set "${{ steps.vercel_deploy.outputs.url }}" \
+            "${{ secrets.VERCEL_ALIAS_ATTACHED_ALPHA }}" \
+            --scope=keplrwallet --token=${{ secrets.VERCEL_TOKEN }}
