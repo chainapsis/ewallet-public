@@ -21,7 +21,7 @@ interface Auth0Jwk extends JsonWebKey {
   kid: string;
 }
 
-const JWKS_CACHE_TTL_MS = 5 * 60 * 1000;
+const JWKS_CACHE_TTL_MS = 10 * 60 * 1000;
 const jwksCache = new Map<
   string,
   {
