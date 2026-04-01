@@ -5,7 +5,7 @@ import { Agent } from "undici";
 
 import type { OAuthValidationFail } from "../types";
 import { TELEGRAM_CLIENT_ID } from "./client_id";
-import type { TelegramUserInfo } from "./index";
+import type { TelegramUserInfo } from "./types";
 
 const TELEGRAM_OIDC_ISSUER = "https://oauth.telegram.org";
 const TELEGRAM_JWKS_URL = "https://oauth.telegram.org/.well-known/jwks.json";
@@ -35,37 +35,6 @@ const jwksCache = new Map<
     keys: TelegramJwk[];
   }
 >();
-
-async function getSigningKey(kid: string): Promise<TelegramJwk | null> {
-  const cached = jwksCache.get(TELEGRAM_JWKS_URL);
-  const now = Date.now();
-
-  if (cached && now - cached.fetchedAt < JWKS_CACHE_TTL_MS) {
-    const match = cached.keys.find((k) => k.kid === kid);
-    if (match) {
-      return match;
-    }
-  }
-
-  const response = await fetch(TELEGRAM_JWKS_URL, {
-    // @ts-expect-error -- Node.js undici dispatcher, not in standard RequestInit
-    dispatcher: telegramAgent,
-  });
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch Telegram JWKS: ${response.status} ${response.statusText}`,
-    );
-  }
-
-  const body = (await response.json()) as { keys?: TelegramJwk[] };
-  if (!body.keys || !Array.isArray(body.keys) || body.keys.length === 0) {
-    throw new Error("Telegram JWKS response missing keys");
-  }
-
-  jwksCache.set(TELEGRAM_JWKS_URL, { fetchedAt: now, keys: body.keys });
-
-  return body.keys.find((k) => k.kid === kid) ?? null;
-}
 
 export async function validateTelegramJwt(
   idToken: string,
@@ -165,4 +134,35 @@ export async function validateTelegramJwt(
       },
     };
   }
+}
+
+async function getSigningKey(kid: string): Promise<TelegramJwk | null> {
+  const cached = jwksCache.get(TELEGRAM_JWKS_URL);
+  const now = Date.now();
+
+  if (cached && now - cached.fetchedAt < JWKS_CACHE_TTL_MS) {
+    const match = cached.keys.find((k) => k.kid === kid);
+    if (match) {
+      return match;
+    }
+  }
+
+  const response = await fetch(TELEGRAM_JWKS_URL, {
+    // @ts-expect-error -- Node.js undici dispatcher, not in standard RequestInit
+    dispatcher: telegramAgent,
+  });
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch Telegram JWKS: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  const body = (await response.json()) as { keys?: TelegramJwk[] };
+  if (!body.keys || !Array.isArray(body.keys) || body.keys.length === 0) {
+    throw new Error("Telegram JWKS response missing keys");
+  }
+
+  jwksCache.set(TELEGRAM_JWKS_URL, { fetchedAt: now, keys: body.keys });
+
+  return body.keys.find((k) => k.kid === kid) ?? null;
 }

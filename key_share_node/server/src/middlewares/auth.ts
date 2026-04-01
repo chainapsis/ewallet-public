@@ -12,15 +12,11 @@ import {
   validateDiscordOAuthToken,
   validateGithubOAuthToken,
   validateGoogleOAuthToken,
-  validateTelegramHash,
+  validateTelegramToken,
 } from "@oko-wallet-ksn-server/auth";
 import type { Auth0TokenInfo } from "@oko-wallet-ksn-server/auth/auth0";
 import type { GithubUserInfo } from "@oko-wallet-ksn-server/auth/github";
-import type {
-  TelegramUserData,
-  TelegramUserInfo,
-} from "@oko-wallet-ksn-server/auth/telegram";
-import { validateTelegramJwt } from "@oko-wallet-ksn-server/auth/telegram";
+import type { TelegramUserInfo } from "@oko-wallet-ksn-server/auth/telegram";
 import type { OAuthValidationFail } from "@oko-wallet-ksn-server/auth/types";
 import type { XUserInfo } from "@oko-wallet-ksn-server/auth/x";
 import { validateAccessTokenOfX } from "@oko-wallet-ksn-server/auth/x";
@@ -102,38 +98,15 @@ export async function bearerTokenMiddleware(
           data: await validateAccessTokenOfX(bearerToken),
         };
         break;
-      case "telegram": {
-        // Dual-validation: detect legacy JSON vs OIDC JWT
-        // JSON-stringified objects always start with "{", JWTs never do (they start with "eyJ")
-        if (bearerToken.startsWith("{")) {
-          // Legacy HMAC path
-          let userData: TelegramUserData;
-          try {
-            userData = JSON.parse(bearerToken) as TelegramUserData;
-          } catch (_error) {
-            const errorRes: KSNodeApiErrorResponse = {
-              success: false,
-              code: "UNAUTHORIZED",
-              msg: "Invalid token format: Expected JSON string",
-            };
-            res.status(ErrorCodeMap[errorRes.code]).json(errorRes);
-            return;
-          }
-
-          const telegramBotToken = req.app.locals.telegram_bot_token;
-          result = {
-            auth_type: "telegram",
-            data: validateTelegramHash(userData, telegramBotToken),
-          };
-        } else {
-          // OIDC JWT path
-          result = {
-            auth_type: "telegram",
-            data: await validateTelegramJwt(bearerToken),
-          };
-        }
+      case "telegram":
+        result = {
+          auth_type: "telegram",
+          data: await validateTelegramToken(
+            bearerToken,
+            req.app.locals.telegram_bot_token,
+          ),
+        };
         break;
-      }
       case "discord":
         result = {
           auth_type: "discord",
