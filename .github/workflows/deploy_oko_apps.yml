@@ -141,12 +141,14 @@ jobs:
           ALIAS_CT_DASHBOARD: ${{ secrets.VERCEL_ALIAS_CT_DASHBOARD_ALPHA }}
           ALIAS_ADMIN_WEB: ${{ secrets.VERCEL_ALIAS_ADMIN_WEB_ALPHA }}
           ALIAS_USER_DASHBOARD: ${{ secrets.VERCEL_ALIAS_USER_DASHBOARD_ALPHA }}
+          ALIAS_ATTACHED_MOBILE_HOST_WEB: ${{ secrets.VERCEL_ALIAS_ATTACHED_MOBILE_HOST_WEB_ALPHA }}
         run: |
           case "${{ steps.deploy_env.outputs.vercel_app }}" in
             demo_web) ALIAS_DOMAIN="$ALIAS_DEMO_WEB" ;;
             ct_dashboard) ALIAS_DOMAIN="$ALIAS_CT_DASHBOARD" ;;
             admin_web) ALIAS_DOMAIN="$ALIAS_ADMIN_WEB" ;;
             user_dashboard) ALIAS_DOMAIN="$ALIAS_USER_DASHBOARD" ;;
+            attached_mobile_host_web) ALIAS_DOMAIN="$ALIAS_ATTACHED_MOBILE_HOST_WEB" ;;
             *) echo "No alias configured for this app"; exit 0 ;;
           esac
           if [ -n "$ALIAS_DOMAIN" ]; then
