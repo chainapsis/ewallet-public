@@ -87,17 +87,6 @@ export const SignInForm: FC = () => {
           Forgot password?
         </Typography>
       </Link>
-
-      <div className={styles.betaSection}>
-        <Typography
-          size="sm"
-          weight="medium"
-          color="tertiary"
-          className={styles.betaText}
-        >
-          Start your official integration to unlock all dashboard features!
-        </Typography>
-      </div>
     </Card>
   );
 };

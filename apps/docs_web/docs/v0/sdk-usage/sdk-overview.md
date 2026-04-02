@@ -109,6 +109,21 @@ function WalletScreen() {
 }
 ```
 
+## Self-Hosting Configuration
+
+When running your own infrastructure, set `sdk_endpoint` to your self-hosted
+`oko_attached` URL:
+
+```typescript
+const config = {
+  api_key: "your-api-key",
+  sdk_endpoint: "https://your-oko-attached.example.com",
+};
+```
+
+The default endpoint (`https://attached.oko.app`) is not available for
+self-hosted deployments.
+
 ## Next Steps
 
 - **[Cosmos Integration](./cosmos-integration)** - Complete Cosmos setup

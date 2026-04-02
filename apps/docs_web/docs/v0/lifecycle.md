@@ -36,9 +36,9 @@ if (!initRes.success) {
 const ethWallet = initRes.data;
 const provider = await ethWallet.getEthereumProvider();
 
-// This triggers Google OAuth authentication
-// User sees: "Sign in with Google" popup
-// User completes Google OAuth flow
+// This triggers social login authentication
+// User sees: login provider selection or sign-in popup
+// User completes the chosen provider's auth flow
 // Returns: JWT token for subsequent API calls
 ```
 
@@ -46,7 +46,7 @@ const provider = await ethWallet.getEthereumProvider();
 
 ```
 POST /tss/v1/user/signin
-Headers: Authorization: Bearer <Google ID Token>
+Headers: Authorization: Bearer <ID Token>  (token issued by the chosen auth provider)
 Response: {
   "success": true,
   "data": {
@@ -544,7 +544,7 @@ if (ethWallet && ethWallet.okoWallet) {
 3. **Standard interface**: Uses familiar Web3 methods (`eth_sendTransaction`,
    etc.)
 4. **No private keys**: Users never see or manage cryptographic material
-5. **Google OAuth**: Familiar authentication flow
+5. **Social login**: Familiar authentication flow (Google, email, GitHub, X, Discord, Telegram)
 6. **Cross-application**: Same wallet works across different dApps
 
 **Performance Characteristics:**

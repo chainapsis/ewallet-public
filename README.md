@@ -25,18 +25,10 @@ Everything is fully open source and Apache-2.0 licensed:
 - Modular Architecture: Orchestrator, adaptors, MPC services, and signing logic
   are self-hostable and auditable.
 
-## Integration and Support
+## Getting Started
 
-- Official Integration: Access enterprise-grade key share infrastructure,
-  dedicated monitoring and operational support, and comprehensive Dapp Dashboard
-  and User Dashboard interfaces.
-
-- Self-Host (Open Source): Utilize the Apache 2.0 components for complete
-  architectural control and customization.
-
-To accelerate Official Integration, submit
-[the form](https://form.typeform.com/to/MxrBGq9b) and you’ll receive the next
-step by email.
+All components are Apache 2.0 licensed and designed to be self-hosted, giving
+you complete architectural control and customization.
 
 [Demo](https://demo.oko.app) | [Docs](https://docs.oko.app)
 

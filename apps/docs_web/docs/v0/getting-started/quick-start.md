@@ -34,25 +34,6 @@ npm install @oko-wallet/oko-sdk-core
 npm install @oko-wallet/oko-sdk-core-react-native
 ```
 
-## API Key Setup
-
-Before using the SDK, you'll need your API key from the
-[Oko dApp Dashboard](https://dapp.oko.app):
-
-```typescript
-// Set your API key (from the dApp Dashboard)
-const OKO_API_KEY = "your-api-key-here";
-
-// Configure the SDK with your API key
-const config = {
-  api_key: OKO_API_KEY,
-  theme: "dark", // "light" | "dark" (optional)
-};
-```
-
-> **📋 Note:** Get your API key from the dApp Dashboard after completing the
-> partnership process described in the
-> [Integration Overview](./integration-overview.md).
 
 ## Cosmos Integration
 
@@ -168,7 +149,7 @@ const signature = await svmWallet.sendTransaction(transaction, connection);
 
 **The power of Oko:** Use familiar APIs for Ethereum, Cosmos, and SVM chains,
 while giving users **one account** that works across **all ecosystems**. Same
-Google login, consistent experience.
+login, consistent experience.
 
 ```typescript
 import { OkoCosmosWallet } from "@oko-wallet/oko-sdk-cosmos";
@@ -197,7 +178,7 @@ const ethWallet = ethInitRes.data;
 const svmWallet = svmInitRes.data;
 
 // Users can interact with all three ecosystems seamlessly
-// Same Google account, same user experience!
+// Same account, same user experience!
 ```
 
 ## React Native
@@ -244,7 +225,7 @@ Understanding how Oko works will help you integrate it effectively:
 **User Experience:**
 
 1. User clicks "Connect Wallet" in your dApp
-2. User signs in with Google (handled automatically by the SDK)
+2. User signs in with a supported method — Google, email, GitHub, X, Discord, or Telegram (handled automatically by the SDK)
 3. Cryptographic key shares are generated using threshold signatures
 4. User can now sign transactions - no browser extensions needed!
 
