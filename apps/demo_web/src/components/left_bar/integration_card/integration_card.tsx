@@ -4,8 +4,6 @@ import type { FC } from "react";
 
 import styles from "./integration_card.module.scss";
 
-const GET_STARTED_URL = "https://form.typeform.com/to/MxrBGq9b";
-
 interface IntegrationCardProps {
   onClose: () => void;
 }
@@ -41,20 +39,6 @@ export const IntegrationCard: FC<IntegrationCardProps> = ({ onClose }) => {
         className={styles.image}
         alt=""
       />
-
-      <div className={styles.getStartedButton}>
-        <Typography
-          tagType="a"
-          size="sm"
-          weight="semibold"
-          color="primary"
-          href={GET_STARTED_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Get Started →
-        </Typography>
-      </div>
     </div>
   );
 };
