@@ -27,8 +27,7 @@ accessible by any single party.
 
 Experience Oko in action:
 
-- **[Demo Application](https://demo.oko.app)** - Explore the Oko experience in a
-  live demo
+- **Demo Application** - Run `demo_web` locally to explore the Oko experience
 
 ## Why Oko
 
@@ -54,8 +53,7 @@ model.
 **Oko** solves this by providing an embedded onboarding flow that still
 preserves the interoperability of a global wallet address. Developers keep full
 control of the integration because everything from client to server is open
-source under Apache 2.0. Teams can run Oko entirely on their own infrastructure
-or use the hosted dashboards for quick setup.
+source under Apache 2.0. Teams can run Oko entirely on their own infrastructure.
 
 ### Key Advantages
 
@@ -71,7 +69,7 @@ or use the hosted dashboards for quick setup.
 
 - **No browser extensions** - embedded directly in your application
 - **No recovery phrases** - users don't need to manage complex private keys
-- **Social login (e.g. Google OAuth)** - familiar authentication flow
+- **Social login** - Google, email, GitHub, X, Discord, and Telegram
 - **Cross-device compatibility** - works on mobile, desktop, any browser
 - **Cross-application interoperability** - same, global wallet address across
   multiple Web3 apps
@@ -119,7 +117,7 @@ or use the hosted dashboards for quick setup.
 - GitHub
 - Discord
 - X (Twitter)
-- Telegram (coming soon)
+- Telegram
 
 **Oko SDK**
 
@@ -151,8 +149,7 @@ Ready to integrate Oko into your application?
 
 ### 📚 **API Reference**
 
-- **[Authentication](api-reference/api-overview.md#authentication)** - Google
-  OAuth and session management
+- **[Authentication](api-reference/api-overview.md#authentication)** - Social login and session management
 - **[Provider Methods](api-reference/api-overview.md)** - Complete API reference
 
 ---

@@ -124,7 +124,7 @@ When connecting, users can select their preferred login provider from a modal:
 - Email/passwordless
 - X (Twitter) OAuth
 - Discord OAuth
-- Telegram OAuth (coming soon)
+- Telegram OAuth
 
 ## Signing Transactions
 

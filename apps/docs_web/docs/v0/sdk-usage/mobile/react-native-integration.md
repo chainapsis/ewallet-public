@@ -137,6 +137,17 @@ export default function App() {
 | `redirectScheme` | No       | `"okowallet"`              | Your app's URL scheme. iOS and Android fallback flows use it directly; it should match the scheme configured in your native project (see [Platform Setup](./react-native-platform-setup)). |
 | `androidCallbackScheme` | No | `"oko.auth.callback"` | Android-only callback scheme for `OkoAuthCallbackActivity`. Must match `callbackScheme` in the Expo config plugin or your `AndroidManifest` intent-filter. Set a unique value per app to avoid collisions when multiple Oko-powered apps are installed on the same device. See [Platform Setup](./react-native-platform-setup). |
 
+For self-hosted deployments, pass your `attached_mobile_host_web` URL as `sdkEndpoint`:
+
+```typescript
+<OkoWalletProvider
+  apiKey="your-api-key"
+  sdkEndpoint="https://mobile.your-domain.com"
+>
+  <YourApp />
+</OkoWalletProvider>
+```
+
 ### Using the Hook
 
 ```typescript
@@ -183,7 +194,7 @@ await wallet.signIn("google");
 | `"github"`  | GitHub OAuth      |
 | `"x"`       | X (Twitter) OAuth |
 
-> Telegram sign-in support is coming soon.
+> Telegram sign-in is now supported.
 
 Calling `signIn()` opens the OS browser for the OAuth flow. On iOS and Android
 fallback flows, the browser returns via your configured `redirectScheme`. On

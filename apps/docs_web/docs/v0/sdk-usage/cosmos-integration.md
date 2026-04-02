@@ -26,6 +26,7 @@ import { OkoCosmosWallet } from "@oko-wallet/oko-sdk-cosmos";
 const initRes = OkoCosmosWallet.init({
   api_key: "your-api-key",
   theme: "dark",
+  sdk_endpoint: "https://your-oko-attached.example.com", // your self-hosted oko_attached URL
 });
 
 if (!initRes.success) {

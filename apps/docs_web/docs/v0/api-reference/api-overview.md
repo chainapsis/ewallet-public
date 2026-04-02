@@ -5,8 +5,7 @@ sidebar_position: 1
 
 # API Overview
 
-These APIs allow your dApp to check user existence and handle sign-in via Google
-with Oko.
+These APIs allow your dApp to check user existence and handle sign-in with Oko.
 
 ## Service Endpoints
 
@@ -20,15 +19,15 @@ and transaction signing:
 
 ### `POST /tss/v1/user/signin`
 
-Sign in a user via Google OAuth. This endpoint will return an authentication
+Sign in a user via a supported social login provider. This endpoint will return an authentication
 token and related metadata on success.
 
 #### Request
 
 - **Method**: `POST`
 - **Path**: `/tss/v1/user/signin`
-- **Headers**: `Authorization: Bearer <Google ID Token>` (The token should be
-  issued via Google Sign-In)
+- **Headers**: `Authorization: Bearer <ID Token>` (The token should be
+  issued by the chosen auth provider: Google, email, GitHub, X, Discord, or Telegram)
 
 #### Response
 
@@ -217,7 +216,7 @@ Update wallet key share nodes for resharing after unrecoverable data loss.
 
 - **Method**: `POST`
 - **Path**: `/tss/v1/user/reshare`
-- **Headers**: `Authorization: Bearer <Google ID Token>`
+- **Headers**: `Authorization: Bearer <ID Token>`
 - **Body**:
 
 ```json
@@ -280,7 +279,7 @@ Examples of signing transactions:
 
 ## Authentication
 
-### Google OAuth Flow
+### Social Login Flow
 
 From `backend/tss_api/src/routes/user.ts`:
 
@@ -288,9 +287,9 @@ From `backend/tss_api/src/routes/user.ts`:
 
 ```
 POST /tss/v1/user/signin
-- Initiates Google OAuth authentication
+- Initiates social login authentication
 - Returns JWT token and user information for subsequent API calls
-- Requires Google OAuth token in Authorization header
+- Requires ID token from the chosen auth provider in Authorization header
 ```
 
 **User verification:**
@@ -315,7 +314,7 @@ POST /tss/v1/user/signin_silently
 ```
 POST /tss/v1/user/reshare
 - Updates wallet key share nodes after unrecoverable data loss
-- Requires Google OAuth token and reshared key shares
+- Requires auth provider ID token and reshared key shares
 ```
 
 ### JWT Token Usage
@@ -342,7 +341,7 @@ From `backend/tss_api/src/routes/`:
 ```
 POST /tss/v1/keygen
 Content-Type: application/json
-Headers: Authorization: Bearer <Google ID Token>
+Headers: Authorization: Bearer <ID Token>
 
 Purpose: Create distributed key shares and wallet entities
 Implementation: Coordinates threshold key generation protocol
@@ -699,17 +698,17 @@ Example API testing commands:
 ```bash
 # Test TSS authentication
 curl -X POST http://localhost:4200/tss/v1/user/signin \
-  -H "Authorization: Bearer <google-oauth-token>"
+  -H "Authorization: Bearer <id-token>"
 
 # Test email check
 curl -X POST http://localhost:4200/tss/v1/user/check \
   -H "Content-Type: application/json" \
   -d '{"email": "user@example.com"}'
 
-# Test key generation (requires Google OAuth token)
+# Test key generation (requires ID token from auth provider)
 curl -X POST http://localhost:4200/tss/v1/keygen \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <google-oauth-token>" \
+  -H "Authorization: Bearer <id-token>" \
   -d '{...}'
 ```
 

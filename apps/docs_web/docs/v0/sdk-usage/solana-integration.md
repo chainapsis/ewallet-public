@@ -28,6 +28,7 @@ const initRes = OkoSvmWallet.init({
   api_key: "your-api-key",
   chain_id: "solana:mainnet",
   theme: "dark",
+  sdk_endpoint: "https://your-oko-attached.example.com", // your self-hosted oko_attached URL
 });
 
 if (!initRes.success) {

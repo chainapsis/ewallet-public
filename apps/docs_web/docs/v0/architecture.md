@@ -76,7 +76,7 @@ security, while eliminating the need to manage complex private keys themselves.
 ### 🚀 Better User Experience
 
 - **No browser extensions** - embedded directly in your application
-- **Google OAuth login** - familiar authentication flow for mainstream users
+- **Social login (Google, email, GitHub, X, Discord, Telegram)** - familiar authentication flow for mainstream users
 - **Cross-device compatibility** - works on mobile, desktop, any browser
 - **Seamless onboarding** - users don't need to learn about seed phrases or
   hardware wallets
@@ -189,7 +189,7 @@ console.log("Connected:", okoSvm.publicKey?.toBase58());
 
 - Wallet UI runs in secure iframe context
 - Key shares stored in separate, encrypted databases
-- Authentication handled through Google OAuth
+- Authentication handled through social login providers (Google, email, GitHub, X, Discord, Telegram)
 
 **Data Protection:**
 
