@@ -11,7 +11,6 @@ import type { FC } from "react";
 
 import styles from "./sign_in_form.module.scss";
 import { useSignInForm } from "./use_sign_in_form";
-import { GET_STARTED_URL } from "@oko-wallet-ct-dashboard/constants";
 import { AccountForm } from "@oko-wallet-ct-dashboard/ui";
 
 export const SignInForm: FC = () => {
@@ -89,28 +88,6 @@ export const SignInForm: FC = () => {
         </Typography>
       </Link>
 
-      <div className={styles.betaSection}>
-        <Typography
-          size="sm"
-          weight="medium"
-          color="tertiary"
-          className={styles.betaText}
-        >
-          Start your official integration to unlock all dashboard features!
-        </Typography>
-        <Typography
-          tagType="a"
-          href={GET_STARTED_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          size="sm"
-          weight="semibold"
-          color="tertiary"
-          className={styles.earlyAccessLink}
-        >
-          Get Started
-        </Typography>
-      </div>
     </Card>
   );
 };

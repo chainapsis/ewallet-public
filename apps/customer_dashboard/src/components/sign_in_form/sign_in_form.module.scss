@@ -67,25 +67,6 @@
   }
 }
 
-.betaSection {
-  background: var(--bg-secondary);
-  border-radius: 16px;
-  padding: 16px;
-  margin-top: 20px;
-  text-align: center;
-}
-
-.betaText {
-  margin: 0 0 12px 0;
-}
-
-.earlyAccessLink {
-  text-decoration: underline;
-
-  &:hover {
-    text-decoration: none;
-  }
-}
 
 @media (max-width: 480px) {
   .topHeader {

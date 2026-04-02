@@ -55,8 +55,7 @@ model.
 preserves the interoperability of a global wallet address. Developers keep full
 control of the integration because everything from client to server is open
 source under Apache 2.0. Teams can run Oko entirely on their own infrastructure
-or choose official integration to use enterprise grade key share nodes and
-dashboards.
+or use the hosted dashboards for quick setup.
 
 ### Key Advantages
 
