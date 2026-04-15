@@ -452,7 +452,13 @@ export default function ForgotPasswordPage() {
             <Button
               type="submit"
               fullWidth
-              disabled={!password || !confirmPassword || isLoading}
+              disabled={
+                !password ||
+                !confirmPassword ||
+                isLoading ||
+                password.length > PASSWORD_MAX_LENGTH ||
+                confirmPassword.length > PASSWORD_MAX_LENGTH
+              }
             >
               {isLoading ? "Updating..." : "Update"}
             </Button>
