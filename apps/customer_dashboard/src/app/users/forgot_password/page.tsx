@@ -364,12 +364,18 @@ export default function ForgotPasswordPage() {
             placeholder="Enter new password"
             value={password}
             onChange={(e) => {
-              setPassword(e.target.value);
-              resetError();
+              const value = e.target.value;
+              setPassword(value);
+              if (value.length > PASSWORD_MAX_LENGTH) {
+                setError(
+                  `Password must be at most ${PASSWORD_MAX_LENGTH} characters`,
+                );
+              } else {
+                resetError();
+              }
             }}
             fullWidth
             requiredSymbol
-            maxLength={PASSWORD_MAX_LENGTH}
             helpText={
               error
                 ? undefined
@@ -392,12 +398,18 @@ export default function ForgotPasswordPage() {
             placeholder="Confirm password"
             value={confirmPassword}
             onChange={(e) => {
-              setConfirmPassword(e.target.value);
-              resetError();
+              const value = e.target.value;
+              setConfirmPassword(value);
+              if (value.length > PASSWORD_MAX_LENGTH) {
+                setError(
+                  `Password must be at most ${PASSWORD_MAX_LENGTH} characters`,
+                );
+              } else {
+                resetError();
+              }
             }}
             fullWidth
             requiredSymbol
-            maxLength={PASSWORD_MAX_LENGTH}
             SideComponent={
               <button
                 type="button"
