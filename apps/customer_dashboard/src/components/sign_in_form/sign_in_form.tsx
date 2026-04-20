@@ -11,6 +11,7 @@ import type { FC } from "react";
 
 import styles from "./sign_in_form.module.scss";
 import { useSignInForm } from "./use_sign_in_form";
+import { PASSWORD_MAX_LENGTH } from "@oko-wallet-ct-dashboard/constants";
 import { AccountForm } from "@oko-wallet-ct-dashboard/ui";
 
 export const SignInForm: FC = () => {
@@ -54,6 +55,7 @@ export const SignInForm: FC = () => {
           type="password"
           placeholder="Password"
           fullWidth
+          maxLength={PASSWORD_MAX_LENGTH}
           error={errors.password?.message}
           resetError={() => resetErrors("password")}
           {...register("password")}

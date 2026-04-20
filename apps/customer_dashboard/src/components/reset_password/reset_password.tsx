@@ -69,7 +69,6 @@ export const ResetPassword: FC<ResetPasswordProps> = ({ isAfterLogin }) => {
           placeholder="Enter new password"
           requiredSymbol
           type={showNewPassword ? "text" : "password"}
-          maxLength={PASSWORD_MAX_LENGTH}
           helpText={
             errors.newPassword
               ? ""
@@ -96,7 +95,6 @@ export const ResetPassword: FC<ResetPasswordProps> = ({ isAfterLogin }) => {
           placeholder="Confirm password"
           requiredSymbol
           type={showConfirmPassword ? "text" : "password"}
-          maxLength={PASSWORD_MAX_LENGTH}
           error={errors.confirmPassword?.message}
           fullWidth
           SideComponent={
