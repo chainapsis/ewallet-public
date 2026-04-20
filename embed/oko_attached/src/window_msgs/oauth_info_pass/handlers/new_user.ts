@@ -209,6 +209,12 @@ export async function handleNewUserV2(
     apiKey,
   );
   if (reqKeygenV2Res.success === false) {
+    if (reqKeygenV2Res.code === "SIGNUP_DISABLED") {
+      return {
+        success: false,
+        err: { type: "signup_disabled" },
+      };
+    }
     return {
       success: false,
       err: { type: "sign_in_request_fail", error: reqKeygenV2Res.msg },

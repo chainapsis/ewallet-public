@@ -9,12 +9,13 @@ import {
   SignInSuccessResponseSchema,
 } from "@oko-wallet/oko-api-openapi/tss";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
-import type { AuthType } from "@oko-wallet/oko-types/auth";
+// Service shutdown: signups blocked. Imports below are unused while the handler body is commented out. Re-enable together if restoring.
+// import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { KeygenBody } from "@oko-wallet/oko-types/tss";
 import type { SignInResponse } from "@oko-wallet/oko-types/user";
 import type { Response, Router } from "express";
 
-import { runKeygen } from "@oko-wallet-api/api/tss/v1/keygen";
+// import { runKeygen } from "@oko-wallet-api/api/tss/v1/keygen";
 import { apiKeyMiddleware } from "@oko-wallet-api/middleware/auth/api_key_auth";
 import {
   type OAuthAuthenticatedRequest,
@@ -86,15 +87,24 @@ export function setKeygenV1Routes(router: Router) {
     oauthMiddleware,
     tssActivateMiddleware,
     async (
-      req: OAuthAuthenticatedRequest<KeygenBody>,
+      _req: OAuthAuthenticatedRequest<KeygenBody>,
       res: Response<OkoApiResponse<SignInResponse>, OAuthLocalsWithAPIKey>,
     ) => {
-      const state = req.app.locals;
+      // Service shutdown: signups permanently blocked. To restore, remove this response block and uncomment the block below.
+      res.status(ErrorCodeMap.SIGNUP_DISABLED).json({
+        success: false,
+        code: "SIGNUP_DISABLED",
+        msg: "New signups are disabled as the service is winding down.",
+      });
+      return;
+
+      /* === Disabled due to service shutdown. Uncomment to restore. ===
+      const state = _req.app.locals;
       const apiKey = res.locals.api_key;
       const oauthUser = res.locals.oauth_user;
       const auth_type = oauthUser.type as AuthType;
       const user_identifier = oauthUser.user_identifier;
-      const body = req.body;
+      const body = _req.body;
 
       if (!user_identifier) {
         res.status(401).json({
@@ -136,6 +146,7 @@ export function setKeygenV1Routes(router: Router) {
         data: runKeygenRes.data,
       });
       return;
+      */
     },
   );
 }

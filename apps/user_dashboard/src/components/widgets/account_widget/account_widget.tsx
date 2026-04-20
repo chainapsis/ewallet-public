@@ -17,7 +17,11 @@ import { refreshSvmEd25519Key } from "@oko-wallet-user-dashboard/utils/sdk";
 type SigningInState =
   | { status: "ready" }
   | { status: "signing-in" }
-  | { status: "failed"; error: string };
+  | {
+      status: "failed";
+      error: string;
+      errorKind: "signup_disabled" | "generic";
+    };
 
 export const AccountWidget: FC<AccountWidgetProps> = () => {
   const { wallet: okoWallet, isSignedIn } = useOko();
@@ -71,7 +75,14 @@ export const AccountWidget: FC<AccountWidgetProps> = () => {
       const errorMessage =
         error instanceof Error ? error.message : "Login failed";
 
-      setSigningInState({ status: "failed", error: errorMessage });
+      const errorKind =
+        errorMessage === "signup_disabled" ? "signup_disabled" : "generic";
+
+      setSigningInState({
+        status: "failed",
+        error: errorMessage,
+        errorKind,
+      });
     }
   }
 
@@ -99,11 +110,13 @@ export const AccountWidget: FC<AccountWidgetProps> = () => {
   }
 
   if (signingInState.status === "failed") {
+    const isSignupDisabled = signingInState.errorKind === "signup_disabled";
     return (
       <AuthProgressWidget
         method={loginMethod}
         status="failed"
-        onRetry={handleRetry}
+        errorKind={signingInState.errorKind}
+        onRetry={isSignupDisabled ? undefined : handleRetry}
       />
     );
   }

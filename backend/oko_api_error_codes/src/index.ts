@@ -63,5 +63,6 @@ export const ErrorCodeMap: Record<ErrorCode, number> = {
   TARGET_USER_NOT_FOUND: 404,
   INVALID_EMAIL_FORMAT: 400,
   SERVICE_UNAVAILABLE: 503,
+  SIGNUP_DISABLED: 403,
   UNKNOWN_ERROR: 500,
 };

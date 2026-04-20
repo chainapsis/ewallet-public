@@ -34,6 +34,7 @@ export type OAuthSignInError =
   | { type: "api_key_missing" }
   | { type: "wallet_not_initialized" }
   | { type: "insufficient_shares" }
+  | { type: "signup_disabled" }
   | {
       type: "unknown";
       error: string;

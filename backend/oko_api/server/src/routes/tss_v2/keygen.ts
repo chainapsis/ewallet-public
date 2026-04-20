@@ -9,12 +9,13 @@ import {
   SignInSuccessResponseV2Schema,
 } from "@oko-wallet/oko-api-openapi/tss";
 import type { OkoApiResponse } from "@oko-wallet/oko-types/api_response";
-import type { AuthType } from "@oko-wallet/oko-types/auth";
+// Service shutdown: signups blocked. Imports below are unused while the handler body is commented out. Re-enable together if restoring.
+// import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { KeygenBodyV2 } from "@oko-wallet/oko-types/tss";
 import type { SignInResponseV2 } from "@oko-wallet/oko-types/user";
 import type { Response } from "express";
 
-import { runKeygenV2 } from "@oko-wallet-api/api/tss/v2/keygen";
+// import { runKeygenV2 } from "@oko-wallet-api/api/tss/v2/keygen";
 import type { OAuthAuthenticatedRequest } from "@oko-wallet-api/middleware/auth/oauth";
 import type { OAuthLocalsWithAPIKey } from "@oko-wallet-api/middleware/auth/types";
 
@@ -77,14 +78,23 @@ registry.registerPath({
 });
 
 export async function keygenV2(
-  req: OAuthAuthenticatedRequest<KeygenBodyV2>,
+  _req: OAuthAuthenticatedRequest<KeygenBodyV2>,
   res: Response<OkoApiResponse<SignInResponseV2>, OAuthLocalsWithAPIKey>,
 ) {
-  const state = req.app.locals;
+  // Service shutdown: signups permanently blocked. To restore, remove this response block and uncomment the block below.
+  res.status(ErrorCodeMap.SIGNUP_DISABLED).json({
+    success: false,
+    code: "SIGNUP_DISABLED",
+    msg: "New signups are disabled as the service is winding down.",
+  });
+  return;
+
+  /* === Disabled due to service shutdown. Uncomment to restore. ===
+  const state = _req.app.locals;
   const oauthUser = res.locals.oauth_user;
   const auth_type = oauthUser.type as AuthType;
   const user_identifier = oauthUser.user_identifier;
-  const body = req.body;
+  const body = _req.body;
   const apiKey = res.locals.api_key;
 
   if (!user_identifier) {
@@ -129,4 +139,5 @@ export async function keygenV2(
     data: runKeygenRes.data,
   });
   return;
+  */
 }
