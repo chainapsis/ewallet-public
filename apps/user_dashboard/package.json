@@ -11,9 +11,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@cosmjs/proto-signing": "^0.33.1",
     "@floating-ui/dom": "^1.7.4",
     "@floating-ui/react": "^0.27.16",
     "@keplr-wallet/cosmos": "0.12.297",
+    "@keplr-wallet/proto-types": "^0.12.250",
     "@keplr-wallet/unit": "0.12.297",
     "@oko-wallet/dotenv": "^0.0.2-alpha.29",
     "@oko-wallet/oko-common-ui": "workspace:*",

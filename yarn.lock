@@ -12154,9 +12154,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@oko-wallet/user-dashboard@workspace:apps/user_dashboard"
   dependencies:
+    "@cosmjs/proto-signing": "npm:^0.33.1"
     "@floating-ui/dom": "npm:^1.7.4"
     "@floating-ui/react": "npm:^0.27.16"
     "@keplr-wallet/cosmos": "npm:0.12.297"
+    "@keplr-wallet/proto-types": "npm:^0.12.250"
     "@keplr-wallet/unit": "npm:0.12.297"
     "@oko-wallet/dotenv": "npm:^0.0.2-alpha.29"
     "@oko-wallet/oko-common-ui": "workspace:*"

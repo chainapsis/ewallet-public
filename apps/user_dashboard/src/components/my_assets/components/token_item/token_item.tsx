@@ -4,6 +4,7 @@ import { PricePretty } from "@keplr-wallet/unit";
 import { Badge } from "@oko-wallet/oko-common-ui/badge";
 import { IconTransition } from "@oko-wallet/oko-common-ui/icon_transition";
 import { AlertTriangleIcon } from "@oko-wallet/oko-common-ui/icons/alert_triangle_icon";
+import { ArrowUpRightIcon } from "@oko-wallet/oko-common-ui/icons/arrow_up_right";
 import { CheckThinIcon } from "@oko-wallet/oko-common-ui/icons/check_thin_icon";
 import { CopyOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/copy_outlined";
 import { EmptyStateIcon } from "@oko-wallet/oko-common-ui/icons/empty_state_icon";
@@ -16,6 +17,7 @@ import type { FC, MouseEvent } from "react";
 
 import styles from "./token_item.module.scss";
 import { AddressQrModal } from "@oko-wallet-user-dashboard/components/address_qr_modal/address_qr_modal";
+import { SendModal } from "@oko-wallet-user-dashboard/components/send_modal/send_modal";
 import { useCopyToClipboard } from "@oko-wallet-user-dashboard/hooks/use_copy_to_clipboard";
 import type { TokenBalance } from "@oko-wallet-user-dashboard/types/token";
 import {
@@ -55,6 +57,14 @@ export const TokenItem: FC<TokenItemProps> = ({
     : undefined;
 
   const isIBC = currency.coinMinimalDenom.startsWith("ibc/");
+  const isCW20 = currency.coinMinimalDenom.startsWith("cw20:");
+  const canSend =
+    !!tokenBalance.chainInfo.cosmos &&
+    !!address &&
+    !isIBC &&
+    !isCW20 &&
+    !isNotReady &&
+    !tokenBalance.error;
 
   const handleCopyAddress = (e: MouseEvent) => {
     e.stopPropagation();
@@ -197,6 +207,26 @@ export const TokenItem: FC<TokenItemProps> = ({
               chainInfo={tokenBalance.chainInfo}
               address={address}
             />
+
+            {canSend && (
+              <SendModal
+                tokenBalance={tokenBalance}
+                senderAddress={address}
+                renderTrigger={({ onOpen }) => (
+                  <button
+                    type="button"
+                    className={styles.copyButton}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onOpen();
+                    }}
+                    aria-label="Send token"
+                  >
+                    <ArrowUpRightIcon size={16} color="var(--fg-tertiary)" />
+                  </button>
+                )}
+              />
+            )}
           </>
         )}
       </div>
