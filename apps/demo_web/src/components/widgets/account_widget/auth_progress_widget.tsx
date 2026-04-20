@@ -55,11 +55,21 @@ export const AuthProgressWidget: FC<AuthProgressWidgetProps> = ({
         <Spacing height={9} />
         {isSignupDisabled ? (
           <>
-            <Typography size="md" weight="medium" color="primary">
+            <Typography
+              size="md"
+              weight="medium"
+              color="primary"
+              style={{ textAlign: "center" }}
+            >
               Signups are closed
             </Typography>
             <Spacing height={6} />
-            <Typography size="sm" weight="regular" color="secondary">
+            <Typography
+              size="sm"
+              weight="regular"
+              color="secondary"
+              style={{ textAlign: "center" }}
+            >
               Oko is winding down. Existing accounts can still sign in to
               withdraw assets,
               <br />
