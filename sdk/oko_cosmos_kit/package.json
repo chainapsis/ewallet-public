@@ -1,6 +1,6 @@
 {
   "name": "@oko-wallet/oko-cosmos-kit",
-  "version": "0.1.2-alpha.13",
+  "version": "0.1.2-alpha.14",
   "type": "module",
   "description": "cosmos-kit wallet connector for Oko Wallet",
   "author": "oko-wallet",
@@ -38,8 +38,8 @@
   "dependencies": {
     "@cosmos-kit/core": "^2.16.7",
     "@keplr-wallet/types": "0.12.297",
-    "@oko-wallet/oko-sdk-core": "^0.1.2-alpha.13",
-    "@oko-wallet/oko-sdk-cosmos": "^0.1.2-alpha.13"
+    "@oko-wallet/oko-sdk-core": "^0.1.2-alpha.14",
+    "@oko-wallet/oko-sdk-cosmos": "^0.1.2-alpha.14"
   },
   "peerDependencies": {
     "@cosmjs/amino": ">= 0.28",

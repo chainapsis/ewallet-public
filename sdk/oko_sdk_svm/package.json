@@ -1,6 +1,6 @@
 {
   "name": "@oko-wallet/oko-sdk-svm",
-  "version": "0.1.2-alpha.13",
+  "version": "0.1.2-alpha.14",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "type": "module",
@@ -36,7 +36,7 @@
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
-    "@oko-wallet/oko-sdk-core": "^0.1.2-alpha.13",
+    "@oko-wallet/oko-sdk-core": "^0.1.2-alpha.14",
     "@oko-wallet/stdlib-js": "^0.0.2-rc.42",
     "@solana/wallet-standard-features": "^1.3.0",
     "@solana/web3.js": "^1.98.0",
