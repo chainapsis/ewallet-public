@@ -82,8 +82,9 @@ export const AccountWidget: FC<AccountWidgetProps> = () => {
       const errorMessage =
         error instanceof Error ? error.message : "Login failed";
 
-      const errorKind =
-        errorMessage === "signup_disabled" ? "signup_disabled" : "generic";
+      const errorKind = errorMessage.includes("signup_disabled")
+        ? "signup_disabled"
+        : "generic";
 
       setSigningInState({
         status: "failed",
