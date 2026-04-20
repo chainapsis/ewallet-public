@@ -61,7 +61,6 @@ export const TokenItem: FC<TokenItemProps> = ({
   const canSend =
     !!tokenBalance.chainInfo.cosmos &&
     !!address &&
-    !isIBC &&
     !isCW20 &&
     !isNotReady &&
     !tokenBalance.error;
