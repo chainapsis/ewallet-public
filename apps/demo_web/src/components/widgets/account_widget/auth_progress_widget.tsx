@@ -61,7 +61,9 @@ export const AuthProgressWidget: FC<AuthProgressWidgetProps> = ({
             <Spacing height={6} />
             <Typography size="sm" weight="regular" color="secondary">
               Oko is winding down. Existing accounts can still sign in to
-              withdraw assets, but new signups are no longer accepted.
+              withdraw assets,
+              <br />
+              but new signups are no longer accepted.
             </Typography>
           </>
         ) : isFailed ? (
