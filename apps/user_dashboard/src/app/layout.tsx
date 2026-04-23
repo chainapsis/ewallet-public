@@ -8,6 +8,7 @@ import "@oko-wallet/oko-common-ui/styles/shadow.scss";
 import "@oko-wallet/oko-common-ui/styles/animation.scss";
 
 import { Providers } from "@oko-wallet-user-dashboard/components/providers/providers";
+import { ServiceShutdownModal } from "@oko-wallet-user-dashboard/components/service_shutdown_modal/service_shutdown_modal";
 
 import "./globals.scss";
 
@@ -62,7 +63,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${robotoMono.variable}`}
         suppressHydrationWarning
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <ServiceShutdownModal />
+        </Providers>
       </body>
     </html>
   );
