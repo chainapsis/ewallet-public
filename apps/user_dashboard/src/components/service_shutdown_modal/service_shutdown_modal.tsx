@@ -11,8 +11,6 @@ import { type FC, useState } from "react";
 
 import styles from "./service_shutdown_modal.module.scss";
 
-const SHUTDOWN_DATE_DISPLAY = "MM/DD";
-
 export const ServiceShutdownModal: FC = () => {
   const [isOpen, setIsOpen] = useState(true);
 
@@ -79,7 +77,7 @@ export const ServiceShutdownModal: FC = () => {
 
                 <div className={styles.body}>
                   <Typography size="sm" weight="medium" color="primary">
-                    Oko is shutting down its service.
+                    Oko is shutting down its service on June 1.
                   </Typography>
                 </div>
 
@@ -96,8 +94,8 @@ export const ServiceShutdownModal: FC = () => {
 
                 <div className={styles.body}>
                   <Typography size="sm" weight="medium" color="primary">
-                    After {SHUTDOWN_DATE_DISPLAY}, your Private Key will no
-                    longer be accessible.
+                    After this date, your Private Key will no longer be
+                    accessible.
                   </Typography>
                 </div>
 
