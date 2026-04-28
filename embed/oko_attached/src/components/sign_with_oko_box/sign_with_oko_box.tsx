@@ -5,7 +5,7 @@ import type { FC } from "react";
 import styles from "./sign_with_oko_box.module.scss";
 import { useMobileMode } from "@oko-wallet-attached/hooks/mobile_mode";
 import {
-  DEMO_WEB_ORIGIN,
+  isDemoOrSandboxOrigin,
   USER_DASHBOARD_ORIGINS,
 } from "@oko-wallet-attached/requests/endpoints";
 import { useMemoryState } from "@oko-wallet-attached/store/memory";
@@ -22,8 +22,8 @@ export const SignWithOkoBox: FC<SignWithOkoBoxProps> = ({
 }) => {
   const isMobile = useMobileMode();
   const hostOrigin = useMemoryState((s) => s.hostOrigin);
-  const isDemoWeb = hostOrigin === DEMO_WEB_ORIGIN;
-  const showBackupLink = !hideText && !isDemoWeb;
+  const isDemo = hostOrigin !== null && isDemoOrSandboxOrigin(hostOrigin);
+  const showBackupLink = !hideText && !isDemo;
 
   return (
     <div className={styles.container}>
