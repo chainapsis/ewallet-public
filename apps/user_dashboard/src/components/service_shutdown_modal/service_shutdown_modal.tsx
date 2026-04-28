@@ -77,7 +77,7 @@ export const ServiceShutdownModal: FC = () => {
 
                 <div className={styles.body}>
                   <Typography size="sm" weight="medium" color="primary">
-                    Oko is shutting down its service on June 1.
+                    Oko is shutting down its service on June 1, 2026.
                   </Typography>
                 </div>
 

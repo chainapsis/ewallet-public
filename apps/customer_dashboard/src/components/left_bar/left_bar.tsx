@@ -55,7 +55,7 @@ export const LeftBar: FC = () => {
           <span className={styles.shutdownNoticeTitle}>Important Notice</span>
         </div>
         <p className={styles.shutdownNoticeBody}>
-          Oko is shutting down on June 1, 2025. Please remove Oko from your dapp
+          Oko is shutting down on June 1, 2026. Please remove Oko from your dapp
           and inform your users to export their private keys.
         </p>
       </div>
