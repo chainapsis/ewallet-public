@@ -8,12 +8,6 @@ import { type FC, type FormEvent, useContext } from "react";
 
 import styles from "./email_login_popup.module.scss";
 import { useEmailLogin } from "./use_email_login";
-import { USER_DASHBOARD_ORIGINS } from "@oko-wallet-attached/requests/endpoints";
-
-const userDashboardOrigin = USER_DASHBOARD_ORIGINS?.split(",")?.[0]?.trim();
-const BACKUP_URL = userDashboardOrigin
-  ? `${userDashboardOrigin}/export_private_key`
-  : "https://home.oko.app/export_private_key";
 
 interface EmailLoginPopupProps {
   modalId: string;
@@ -53,19 +47,6 @@ export const EmailLoginPopup: FC<EmailLoginPopupProps> = ({
 
   return (
     <div className={styles.container}>
-      <div className={styles.shutdownNotice}>
-        <span className={styles.shutdownNoticeText}>
-          Oko shuts down Jun 1, 2026.
-        </span>
-        <a
-          href={BACKUP_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.shutdownNoticeLink}
-        >
-          Export your private key →
-        </a>
-      </div>
       <div className={styles.body}>
         {step === "enter_email" ? (
           <div className={styles.card}>
