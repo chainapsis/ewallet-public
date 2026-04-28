@@ -1,0 +1,110 @@
+.modalBackground {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.modal {
+  position: relative;
+  width: 100%;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+.modalCard {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 16px;
+  box-shadow: var(--shadow-xl);
+  width: 100%;
+  max-width: 400px;
+  box-sizing: border-box;
+  padding: 0;
+}
+
+.header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 20px 20px 0;
+}
+
+.closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 6px;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--fg-quaternary);
+
+  &:hover {
+    background: var(--bg-secondary);
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 20px 8px;
+}
+
+.logoWrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.title {
+  text-align: center;
+  width: 100%;
+}
+
+.body {
+  text-align: center;
+  width: 100%;
+}
+
+.warningBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  background: #fef0c7;
+  box-sizing: border-box;
+}
+
+.warningText {
+  flex: 1;
+  color: #dc6803;
+  font-family: Inter, sans-serif;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 20px;
+  text-align: center;
+}
+
+.footer {
+  display: flex;
+  width: 100%;
+  padding: 12px 24px 16px;
+  box-sizing: border-box;
+}
+
+.footerButton {
+  flex: 1;
+}
