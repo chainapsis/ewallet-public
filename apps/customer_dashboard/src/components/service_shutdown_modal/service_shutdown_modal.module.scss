@@ -1,3 +1,5 @@
+@use "../../styles/viewport.module.scss" as *;
+
 .modalBackground {
   position: fixed;
   top: 0;
@@ -16,6 +18,10 @@
   width: 100%;
   max-width: 90vw;
   max-height: 90vh;
+
+  @media (min-width: $desktop_min_width) {
+    width: auto;
+  }
 }
 
 .modalCard {
