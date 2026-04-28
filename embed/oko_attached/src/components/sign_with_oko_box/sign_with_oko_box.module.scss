@@ -5,10 +5,36 @@
   gap: 4px;
 }
 
+.containerWithBackup {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.signWithSection {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .logoContainer {
   display: flex;
   align-items: center;
   justify-content: center;
 
   padding: 1.1px;
+}
+
+.backupLink {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: #dc6803;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }

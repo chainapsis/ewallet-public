@@ -4,32 +4,54 @@ import type { FC } from "react";
 
 import styles from "./sign_with_oko_box.module.scss";
 import { useMobileMode } from "@oko-wallet-attached/hooks/mobile_mode";
+import { USER_DASHBOARD_ORIGINS } from "@oko-wallet-attached/requests/endpoints";
 import { OkoLogoWithNameIcon } from "@oko-wallet-common-ui/icons/oko_logo_with_name_icon";
+
+const userDashboardOrigin = USER_DASHBOARD_ORIGINS?.split(",")?.[0]?.trim();
+const BACKUP_URL = userDashboardOrigin
+  ? `${userDashboardOrigin}/export_private_key`
+  : "https://home.oko.app/export_private_key";
 
 export const SignWithOkoBox: FC<SignWithOkoBoxProps> = ({
   theme,
   hideText,
 }) => {
   const isMobile = useMobileMode();
+  const showBackupLink = !hideText;
 
   return (
-    <div className={styles.container}>
-      {!hideText && (
-        <Typography
-          size={isMobile ? "sm" : "xs"}
-          color="quaternary"
-          weight="medium"
-        >
-          Sign with
-        </Typography>
-      )}
-      <div className={styles.logoContainer}>
-        <OkoLogoWithNameIcon
-          width={isMobile ? 52 : 39}
-          height={isMobile ? 20 : 16}
-          theme={theme}
-        />
+    <div
+      className={showBackupLink ? styles.containerWithBackup : styles.container}
+    >
+      <div className={styles.signWithSection}>
+        {!hideText && (
+          <Typography
+            size={isMobile ? "sm" : "xs"}
+            color="quaternary"
+            weight="medium"
+          >
+            Sign with
+          </Typography>
+        )}
+        <div className={styles.logoContainer}>
+          <OkoLogoWithNameIcon
+            width={isMobile ? 52 : 39}
+            height={isMobile ? 20 : 16}
+            theme={theme}
+          />
+        </div>
       </div>
+
+      {showBackupLink && (
+        <a
+          href={BACKUP_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.backupLink}
+        >
+          계정 Backup하기 →
+        </a>
+      )}
     </div>
   );
 };
