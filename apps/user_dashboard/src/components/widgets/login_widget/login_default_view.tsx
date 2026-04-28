@@ -13,6 +13,7 @@ import type { AuthType } from "@oko-wallet/oko-types/auth";
 import type { FC } from "react";
 
 import styles from "./login_widget.module.scss";
+import { paths } from "@oko-wallet-user-dashboard/paths";
 
 export interface LoginDefaultViewProps {
   onSignIn: (method: AuthType) => void;
@@ -66,6 +67,18 @@ export const LoginDefaultView: FC<LoginDefaultViewProps> = ({
           </Typography>
           <ChevronRightIcon size={20} color={"var(--fg-quaternary)"} />
         </Button>
+      </div>
+
+      <div className={styles.shutdownNotice}>
+        <span className={styles.shutdownNoticeText}>
+          Oko shuts down Jun 1, 2026.
+        </span>
+        <a
+          href={paths.export_private_key}
+          className={styles.shutdownNoticeLink}
+        >
+          Export your private key →
+        </a>
       </div>
     </>
   );
