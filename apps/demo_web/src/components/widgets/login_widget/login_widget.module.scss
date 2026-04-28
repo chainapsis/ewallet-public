@@ -156,34 +156,6 @@
   border: none;
 }
 
-.shutdownNotice {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  margin: 16px 0;
-  width: 100%;
-}
-
-.shutdownNoticeText {
-  font-family: Inter, sans-serif;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--fg-quaternary);
-}
-
-.shutdownNoticeLink {
-  font-family: Inter, sans-serif;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  color: #dc6803;
-  text-decoration: none;
-
-  &:hover {
-    text-decoration: underline;
-  }
-}
-
 .statusMessage {
   align-self: stretch;
   margin-top: 8px;

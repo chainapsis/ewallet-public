@@ -9,6 +9,7 @@ import { OkoLogoColorIcon } from "@oko-wallet/oko-common-ui/icons/oko_logo_color
 import { OkoLogoIcon } from "@oko-wallet/oko-common-ui/icons/oko_logo_icon";
 import { TelegramIcon } from "@oko-wallet/oko-common-ui/icons/telegram_icon";
 import { XIcon } from "@oko-wallet/oko-common-ui/icons/x_icon";
+import { Spacing } from "@oko-wallet/oko-common-ui/spacing";
 import { Typography } from "@oko-wallet/oko-common-ui/typography";
 import { type FC, Fragment } from "react";
 
@@ -82,19 +83,7 @@ export const LoginDefaultView: FC<LoginDefaultViewProps> = ({
         </Button>
       </div>
 
-      <div className={styles.shutdownNotice}>
-        <span className={styles.shutdownNoticeText}>
-          Oko shuts down Jun 1, 2026.
-        </span>
-        <a
-          href="https://home.oko.app/export_private_key"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.shutdownNoticeLink}
-        >
-          Export your private key →
-        </a>
-      </div>
+      <Spacing height={28} />
 
       <div className={styles.getSupportRow}>
         <OkoLogoIcon width={47} height={18} theme={theme} />
