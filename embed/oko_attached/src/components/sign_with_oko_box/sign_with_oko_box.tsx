@@ -43,14 +43,19 @@ export const SignWithOkoBox: FC<SignWithOkoBoxProps> = ({
       </div>
 
       {showBackupLink && (
-        <a
-          href={BACKUP_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.backupLink}
-        >
-          계정 Backup하기 →
-        </a>
+        <div className={styles.backupSection}>
+          <span className={styles.shutdownNotice}>
+            Oko shuts down Jun 1, 2026.
+          </span>
+          <a
+            href={BACKUP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.backupLink}
+          >
+            Export your private key →
+          </a>
+        </div>
       )}
     </div>
   );
