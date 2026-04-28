@@ -66,7 +66,7 @@ export const ServiceShutdownModal: FC = () => {
 
             <div className={styles.body}>
               <Typography size="sm" weight="medium" color="primary">
-                Oko is shutting down its service on June 1.
+                Oko is shutting down its service on June 1, 2025.
               </Typography>
             </div>
 
@@ -74,8 +74,8 @@ export const ServiceShutdownModal: FC = () => {
 
             <div className={styles.warningBox}>
               <p className={styles.warningText}>
-                Please inform your users to export their private keys and
-                migrate to another wallet before the shutdown date.
+                Please remove Oko SDK and API integrations from your dapp before
+                the shutdown date.
               </p>
             </div>
 
@@ -83,7 +83,9 @@ export const ServiceShutdownModal: FC = () => {
 
             <div className={styles.body}>
               <Typography size="sm" weight="medium" color="primary">
-                After this date, Oko API and SDK will no longer be available.
+                Also, please inform your users to export their private keys and
+                migrate to another wallet. After June 1, Oko API and SDK will no
+                longer be available.
               </Typography>
             </div>
 

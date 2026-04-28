@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge } from "@oko-wallet/oko-common-ui/badge";
+import { AlertTriangleIcon } from "@oko-wallet/oko-common-ui/icons/alert_triangle_icon";
 import { HomeOutlinedIcon } from "@oko-wallet/oko-common-ui/icons/home_outlined";
 import { UsersIcon } from "@oko-wallet/oko-common-ui/icons/users";
 import { MenuItem } from "@oko-wallet/oko-common-ui/menu";
@@ -47,6 +48,17 @@ export const LeftBar: FC = () => {
           />
         </div>
       </ul>
+
+      <div className={styles.shutdownNotice}>
+        <div className={styles.shutdownNoticeHeader}>
+          <AlertTriangleIcon size={14} color="#dc6803" />
+          <span className={styles.shutdownNoticeTitle}>Important Notice</span>
+        </div>
+        <p className={styles.shutdownNoticeBody}>
+          Oko is shutting down on June 1, 2025. Please remove Oko from your dapp
+          and inform your users to export their private keys.
+        </p>
+      </div>
 
       <div className={styles.subMenu}>
         <AccountInfoWithSubMenu />
