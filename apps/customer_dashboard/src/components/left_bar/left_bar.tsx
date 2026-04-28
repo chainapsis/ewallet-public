@@ -49,18 +49,18 @@ export const LeftBar: FC = () => {
         </div>
       </ul>
 
-      <div className={styles.shutdownNotice}>
-        <div className={styles.shutdownNoticeHeader}>
-          <AlertTriangleIcon size={14} color="#dc6803" />
-          <span className={styles.shutdownNoticeTitle}>Important Notice</span>
-        </div>
-        <p className={styles.shutdownNoticeBody}>
-          Oko is shutting down on June 1, 2026. Please remove Oko from your dapp
-          and inform your users to export their private keys.
-        </p>
-      </div>
-
       <div className={styles.subMenu}>
+        <div className={styles.shutdownNotice}>
+          <div className={styles.shutdownNoticeHeader}>
+            <AlertTriangleIcon size={14} color="#dc6803" />
+            <span className={styles.shutdownNoticeTitle}>Important Notice</span>
+          </div>
+          <p className={styles.shutdownNoticeBody}>
+            Oko is shutting down on June 1, 2026. Please remove Oko from your
+            dapp and inform your users to export their private keys.
+          </p>
+        </div>
+
         <AccountInfoWithSubMenu />
 
         <div>
