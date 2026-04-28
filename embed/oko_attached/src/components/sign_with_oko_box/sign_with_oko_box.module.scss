@@ -1,14 +1,14 @@
 .container {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 4px;
+  gap: 2px;
 }
 
-.containerWithBackup {
+.signRow {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 8px;
 }
 
@@ -26,17 +26,9 @@
   padding: 1.1px;
 }
 
-.backupSection {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
-  flex-shrink: 0;
-}
-
 .shutdownNotice {
   font-family: Inter, sans-serif;
-  font-size: var(--font-size-xs);
+  font-size: calc(var(--font-size-xs) + 2px);
   font-weight: var(--font-weight-medium);
   color: var(--fg-quaternary);
   white-space: nowrap;

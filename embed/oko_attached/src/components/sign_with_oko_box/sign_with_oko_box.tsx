@@ -20,33 +20,33 @@ export const SignWithOkoBox: FC<SignWithOkoBoxProps> = ({
   const showBackupLink = !hideText;
 
   return (
-    <div
-      className={showBackupLink ? styles.containerWithBackup : styles.container}
-    >
-      <div className={styles.signWithSection}>
-        {!hideText && (
-          <Typography
-            size={isMobile ? "sm" : "xs"}
-            color="quaternary"
-            weight="medium"
-          >
-            Sign with
-          </Typography>
-        )}
-        <div className={styles.logoContainer}>
-          <OkoLogoWithNameIcon
-            width={isMobile ? 52 : 39}
-            height={isMobile ? 20 : 16}
-            theme={theme}
-          />
-        </div>
-      </div>
-
+    <div className={styles.container}>
       {showBackupLink && (
-        <div className={styles.backupSection}>
-          <span className={styles.shutdownNotice}>
-            Oko shuts down Jun 1, 2026.
-          </span>
+        <span className={styles.shutdownNotice}>
+          Oko shuts down Jun 1, 2026.
+        </span>
+      )}
+      <div className={styles.signRow}>
+        <div className={styles.signWithSection}>
+          {!hideText && (
+            <Typography
+              size={isMobile ? "sm" : "xs"}
+              color="quaternary"
+              weight="medium"
+            >
+              Sign with
+            </Typography>
+          )}
+          <div className={styles.logoContainer}>
+            <OkoLogoWithNameIcon
+              width={isMobile ? 52 : 39}
+              height={isMobile ? 20 : 16}
+              theme={theme}
+            />
+          </div>
+        </div>
+
+        {showBackupLink && (
           <a
             href={BACKUP_URL}
             target="_blank"
@@ -55,8 +55,8 @@ export const SignWithOkoBox: FC<SignWithOkoBoxProps> = ({
           >
             Export your private key →
           </a>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
