@@ -16,7 +16,14 @@ export const SignWithOkoBox: FC<SignWithOkoBoxProps> = ({
 }) => {
   const isMobile = useMobileMode();
   const hostOrigin = useMemoryState((s) => s.hostOrigin);
-  const isDemo = hostOrigin !== null && isDemoOrSandboxOrigin(hostOrigin);
+  const isMobileNative = useMemoryState((s) => s.isMobileNative);
+  const mobileApiKey = useMemoryState((s) => s.apiKey);
+  const isDemo =
+    hostOrigin !== null &&
+    isDemoOrSandboxOrigin(hostOrigin, {
+      isMobileNative,
+      apiKey: mobileApiKey,
+    });
   const showBackupLink = !hideText && !isDemo;
 
   return (
