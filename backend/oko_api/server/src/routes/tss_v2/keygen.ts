@@ -57,6 +57,14 @@ registry.registerPath({
         },
       },
     },
+    403: {
+      description: "Forbidden - New signups are disabled",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
     409: {
       description:
         "Conflict - Email already exists or public key already in use",
