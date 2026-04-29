@@ -4,17 +4,11 @@ import type { FC } from "react";
 
 import styles from "./sign_with_oko_box.module.scss";
 import { useMobileMode } from "@oko-wallet-attached/hooks/mobile_mode";
-import {
-  isDemoOrSandboxOrigin,
-  USER_DASHBOARD_ORIGINS,
-} from "@oko-wallet-attached/requests/endpoints";
+import { isDemoOrSandboxOrigin } from "@oko-wallet-attached/requests/endpoints";
 import { useMemoryState } from "@oko-wallet-attached/store/memory";
 import { OkoLogoWithNameIcon } from "@oko-wallet-common-ui/icons/oko_logo_with_name_icon";
 
-const userDashboardOrigin = USER_DASHBOARD_ORIGINS?.split(",")?.[0]?.trim();
-const BACKUP_URL = userDashboardOrigin
-  ? `${userDashboardOrigin}/export_private_key`
-  : "https://home.oko.app/export_private_key";
+const BACKUP_URL = "https://home.oko.app/export_private_key";
 
 export const SignWithOkoBox: FC<SignWithOkoBoxProps> = ({
   theme,
