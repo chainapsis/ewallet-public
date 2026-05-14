@@ -318,6 +318,11 @@ function formatOAuthSignInError(err: unknown): string {
 
   const type =
     "type" in err && typeof err.type === "string" ? err.type : "unknown";
+
+  if (type === "signup_disabled") {
+    return "New signups are disabled as the service is winding down.";
+  }
+
   const detail =
     "error" in err && typeof err.error === "string" ? err.error : null;
 

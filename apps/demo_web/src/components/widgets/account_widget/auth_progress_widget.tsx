@@ -18,15 +18,18 @@ import type { LoginMethod } from "@oko-wallet-demo-web/types/login";
 type AuthProgressWidgetProps = {
   method: LoginMethod;
   status?: "loading" | "failed";
+  errorKind?: "signup_disabled" | "generic";
   onRetry?: () => void;
 };
 
 export const AuthProgressWidget: FC<AuthProgressWidgetProps> = ({
   method,
   status = "loading",
+  errorKind = "generic",
   onRetry,
 }) => {
   const isFailed = status === "failed";
+  const isSignupDisabled = isFailed && errorKind === "signup_disabled";
 
   return (
     <Widget>
@@ -50,7 +53,30 @@ export const AuthProgressWidget: FC<AuthProgressWidgetProps> = ({
           />
         </div>
         <Spacing height={9} />
-        {isFailed ? (
+        {isSignupDisabled ? (
+          <>
+            <Typography
+              size="md"
+              weight="medium"
+              color="primary"
+              style={{ textAlign: "center" }}
+            >
+              Signups are closed
+            </Typography>
+            <Spacing height={6} />
+            <Typography
+              size="sm"
+              weight="regular"
+              color="secondary"
+              style={{ textAlign: "center" }}
+            >
+              Oko is winding down. Existing accounts can still sign in to
+              withdraw assets,
+              <br />
+              but new signups are no longer accepted.
+            </Typography>
+          </>
+        ) : isFailed ? (
           <>
             <Typography size="md" weight="medium" color="primary">
               Login failed

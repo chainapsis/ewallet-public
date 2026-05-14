@@ -263,6 +263,12 @@ export async function handleNewUser(
     apiKey,
   );
   if (reqKeygenRes.success === false) {
+    if (reqKeygenRes.code === "SIGNUP_DISABLED") {
+      return {
+        success: false,
+        err: { type: "signup_disabled" },
+      };
+    }
     return {
       success: false,
       err: { type: "sign_in_request_fail", error: reqKeygenRes.msg },
