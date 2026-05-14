@@ -3,6 +3,7 @@ import { Authorized } from "@oko-wallet-user-dashboard/components/authorized/aut
 import { ConnectedApps } from "@oko-wallet-user-dashboard/components/connected_apps/connected_apps";
 import { DashboardBody } from "@oko-wallet-user-dashboard/components/dashboard_body/dashboard_body";
 import { DashboardHeader } from "@oko-wallet-user-dashboard/components/dashboard_header/dashboard_header";
+import { KeyExportPromptModal } from "@oko-wallet-user-dashboard/components/key_export_prompt_modal/key_export_prompt_modal";
 import { LeftBar } from "@oko-wallet-user-dashboard/components/left_bar/left_bar";
 import { MyAssets } from "@oko-wallet-user-dashboard/components/my_assets/my_assets";
 import { ToastContainer } from "@oko-wallet-user-dashboard/components/toast";
@@ -25,6 +26,7 @@ export default function Home() {
         </div>
       </div>
       <ToastContainer />
+      <KeyExportPromptModal />
     </Authorized>
   );
 }

@@ -7,6 +7,7 @@ import { DashboardBody } from "@oko-wallet-ct-dashboard/components/dashboard_bod
 import { DashboardHeader } from "@oko-wallet-ct-dashboard/components/dashboard_header/dashboard_header";
 import { HomeBanner } from "@oko-wallet-ct-dashboard/components/home_banner/home_banner";
 import { LeftBar } from "@oko-wallet-ct-dashboard/components/left_bar/left_bar";
+import { ServiceShutdownModal } from "@oko-wallet-ct-dashboard/components/service_shutdown_modal/service_shutdown_modal";
 import { ToastContainer } from "@oko-wallet-ct-dashboard/components/toast";
 
 export default function Home() {
@@ -41,6 +42,7 @@ export default function Home() {
           </DashboardBody>
         </div>
       </div>
+      <ServiceShutdownModal />
     </Authorized>
   );
 }

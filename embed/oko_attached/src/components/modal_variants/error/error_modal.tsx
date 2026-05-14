@@ -76,15 +76,32 @@ export const ErrorModal: FC<ErrorModalProps> = ({ error }) => {
           <Spacing height={16} />
 
           <div className={styles.errorMessageContainer}>
-            {errorCode && (
-              <Typography size="sm" weight="semibold" color="warning-primary">
-                Error Code: {errorCode}
+            {errorCode === "SIGNUP_DISABLED" ? (
+              <Typography size="sm" weight="medium" color="primary">
+                Oko is shutting down on June 1, 2026. New wallet creation is no
+                longer available.
               </Typography>
-            )}
-            {errorMessage && (
-              <Typography size="sm" weight="semibold" color="warning-primary">
-                {errorMessage}
-              </Typography>
+            ) : (
+              <>
+                {errorCode && (
+                  <Typography
+                    size="sm"
+                    weight="semibold"
+                    color="warning-primary"
+                  >
+                    Error Code: {errorCode}
+                  </Typography>
+                )}
+                {errorMessage && (
+                  <Typography
+                    size="sm"
+                    weight="semibold"
+                    color="warning-primary"
+                  >
+                    {errorMessage}
+                  </Typography>
+                )}
+              </>
             )}
           </div>
 
