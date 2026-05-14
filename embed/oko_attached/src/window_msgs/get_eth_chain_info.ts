@@ -27,7 +27,14 @@ export async function handleGetEthChain(
     const chainId = message.payload.chain_id;
 
     const allChains = await getAllChainsCached();
-    const chainInfos = filterEthChains(allChains);
+    // SDK's OkoEIP1193Provider rejects the entire provider construction if any
+    // chain's native currency symbol is outside 1-8 chars. Drop registry
+    // entries that would trip that validator so a single bad chain doesn't
+    // block the whole EVM provider.
+    const chainInfos = filterEthChains(allChains).filter((c) => {
+      const symbol = c.currencies[0]?.coinDenom;
+      return symbol !== undefined && symbol.length >= 1 && symbol.length <= 8;
+    });
 
     let resultChains: ChainInfo[] = [];
 
